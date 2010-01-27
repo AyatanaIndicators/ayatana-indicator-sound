@@ -70,12 +70,16 @@ static void retrieve_complete_sink_list(pa_context *c, const pa_sink_info *sink,
             g_debug("Available sink is named %s", only_sink->name);
             g_debug("does Available sink have an active port: %i", only_sink->active_port != NULL);
             g_debug("sink_available = %i", sink_available);
-            return;
         }
-        sink_available = TRUE;
-        return;
+        else{
+            sink_available = TRUE;
+        }
+        // At this point we can be confident we know enough from PA to draw the UI
+        rebuild_sound_menu (root_menuitem, dbus_interface);
     }
-    g_ptr_array_add(sink_list, (gpointer)sink);
+    else{
+        g_ptr_array_add(sink_list, (gpointer)sink);
+    }
 }
 
 
@@ -245,7 +249,7 @@ main (int argc, char ** argv)
 	pa_context_set_state_callback(pulse_context, context_state_callback, NULL);
 	pa_context_connect(pulse_context, NULL, PA_CONTEXT_NOAUTOSPAWN, NULL);
 
-    rebuild_sound_menu (root_menuitem, dbus_interface);
+    //rebuild_sound_menu (root_menuitem, dbus_interface);
 
     // Run the loop
     mainloop = g_main_loop_new(NULL, FALSE);
