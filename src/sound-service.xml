@@ -1,0 +1,15 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node name="/org/ayatana/indicator/sound">
+  <interface name="org.ayatana.indicator.sound">
+<!--    <method name = "sink_volume">-->
+<!--        <arg type='i' name='index' direction="in"/>-->
+<!--        <arg type='i' name='volume' direction="out"/>-->
+<!--    </method>-->
+<!-- Triggered when a sink is muted but the input has been sent to that sink -->
+    <signal name="SinkInputWhileMuted">
+      <arg name="cur_value" type="i" direction="out"/>
+      <arg name="cur_value" type="b" direction="out"/>
+    </signal>
+  </interface>
+</node>
+

@@ -1,0 +1,8 @@
+[encoding: UTF-8]
+data/indicator-sound.schemas.in
+src/gtk-dialog/ck-pk-helper.c
+src/gtk-dialog/gconf-helper.c
+src/gtk-dialog/gtk-logout-helper.c
+src/gtk-dialog/logout-dialog.c
+src/indicator-sound.c
+
