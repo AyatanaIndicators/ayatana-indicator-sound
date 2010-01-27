@@ -74,12 +74,12 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
                                  &dbus_glib__sound_service_server_object_info);
   
     signals[SINK_INPUT_WHILE_MUTED] =  g_signal_new("sink-input-while-muted",
-                                            G_TYPE_FROM_CLASS (klass),
-                                            G_SIGNAL_RUN_LAST,
-                                            0,
-                                            NULL, NULL,
-                                            _sound_service_marshal_VOID__INT_BOOLEAN,
-                                            G_TYPE_NONE, 2, G_TYPE_INT, G_TYPE_BOOLEAN);
+                                                    G_TYPE_FROM_CLASS (klass),
+                                                    G_SIGNAL_RUN_LAST,
+                                                    0,
+                                                    NULL, NULL,
+                                                    _sound_service_marshal_VOID__INT_BOOLEAN,
+                                                    G_TYPE_NONE, 2, G_TYPE_INT, G_TYPE_BOOLEAN);
 }
 
 

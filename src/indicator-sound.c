@@ -71,18 +71,27 @@ INDICATOR_SET_TYPE(INDICATOR_SOUND_TYPE)
 static GtkLabel * get_label (IndicatorObject * io);
 static GtkImage * get_icon (IndicatorObject * io);
 static GtkMenu * get_menu (IndicatorObject * io);
-static GtkWidget *volume_item = NULL;
+static GtkWidget* get_slider();
+static GtkWidget *volume_slider = NULL;
 static GtkMenu* menu = NULL;
 
 static DBusGProxy * sound_dbus_proxy = NULL;
 
+/*/* Signals */
+/*enum {*/
+/*  VOLUME_CHANGE_ON_SINK*/
+/*  LAST_SIGNAL*/
+/*};*/
 
+/*static guint signals[LAST_SIGNAL] = { 0 };*/
+
+// Boiler plate
 static void indicator_sound_class_init (IndicatorSoundClass *klass);
 static void indicator_sound_init       (IndicatorSound *self);
 static void indicator_sound_dispose    (GObject *object);
 static void indicator_sound_finalize   (GObject *object);
-
 G_DEFINE_TYPE (IndicatorSound, indicator_sound, INDICATOR_OBJECT_TYPE);
+
 
 static void connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata);
 static void catch_signal(DBusGProxy * proxy, gint sink_index, gboolean value, gpointer userdata);
@@ -202,11 +211,29 @@ get_icon (IndicatorObject * io)
 static GtkMenu *
 get_menu (IndicatorObject * io)
 {
-    volume_item = ido_scale_menu_item_new_with_range ("Volume", 0, 100, 1);
     menu = GTK_MENU(dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT));
-    gtk_menu_shell_append (GTK_MENU_SHELL (menu), volume_item);
-    gtk_widget_show_all(volume_item);
+    gtk_menu_shell_append (GTK_MENU_SHELL (menu), get_slider());
+    gtk_widget_show_all(volume_slider);
+
+/*    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider); */
+/*    GtkRange* range = (GtkRange*)slider;*/
+/*    gdouble value = gtk_range_get_value(range);*/
+/*    g_debug("print out the range %d", (int)value);*/
     return menu;
+}
+
+
+static void slider_event_detected( GtkWidget     *item,
+                                   GtkUpdateType  policy )
+{
+    g_debug("slider event detected");
+}
+
+static GtkWidget* get_slider()
+{
+    volume_slider = ido_scale_menu_item_new_with_range ("Volume", 0, 100, 1);
+    g_signal_connect(G_OBJECT(volume_slider), "slider-event", G_CALLBACK(slider_event_detected), GINT_TO_POINTER (GTK_UPDATE_CONTINUOUS)); 
+    return volume_slider;
 }
 
 
