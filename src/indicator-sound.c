@@ -119,7 +119,6 @@ static void indicator_sound_init (IndicatorSound *self)
 
 	g_signal_connect(G_OBJECT(self->service), INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE, G_CALLBACK(connection_changed), self);
 
-
     return;
 }
 
@@ -206,6 +205,7 @@ get_menu (IndicatorObject * io)
     volume_item = ido_scale_menu_item_new_with_range ("Volume", 0, 100, 1);
     menu = GTK_MENU(dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT));
     gtk_menu_shell_append (GTK_MENU_SHELL (menu), volume_item);
+    gtk_widget_show_all(volume_item);
     return menu;
 }
 

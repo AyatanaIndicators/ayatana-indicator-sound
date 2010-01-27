@@ -150,8 +150,8 @@ static void context_state_callback(pa_context *c, void *userdata) {
 			g_debug("PA daemon is ready");
 			pa_context_set_subscribe_callback(c, subscribed_events_callback, userdata);		
 			pa_operation_unref(pa_context_get_sink_info_list(c, retrieve_complete_sink_list, NULL));
+			pa_operation_unref(pa_context_subscribe(c, PA_SUBSCRIPTION_MASK_SINK, NULL, NULL));
 			pa_operation_unref(pa_context_subscribe(c, PA_SUBSCRIPTION_MASK_SINK_INPUT, NULL, NULL));
-			//pa_operation_unref(pa_context_subscribe(c, PA_SUBSCRIPTION_MASK_SINK, NULL, NULL));
 			break;
     }
 }
