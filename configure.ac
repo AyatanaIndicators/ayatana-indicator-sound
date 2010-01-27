@@ -34,7 +34,8 @@ INDICATOR_DISPLAY_OBJECTS=0.1
 
 PKG_CHECK_MODULES(APPLET, gtk+-2.0 >= $GTK_REQUIRED_VERSION
                           indicator >= $INDICATOR_REQUIRED_VERSION
-						  dbusmenu-gtk >= $DBUSMENUGTK_REQUIRED_VERSION)
+						  dbusmenu-gtk >= $DBUSMENUGTK_REQUIRED_VERSION
+                          libido-0.1 >= $INDICATOR_DISPLAY_OBJECTS)
                           
 AC_SUBST(APPLET_CFLAGS)
 AC_SUBST(APPLET_LIBS)
@@ -43,7 +44,8 @@ DBUSMENUGLIB_REQUIRED_VERSION=0.1.1
 
 PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib >= $DBUSMENUGLIB_REQUIRED_VERSION
                                 indicator >= $INDICATOR_REQUIRED_VERSION
-                                libpulse-mainloop-glib >= $PULSE_AUDIO_REQUIRED_VERSION)
+                                libpulse-mainloop-glib >= $PULSE_AUDIO_REQUIRED_VERSION
+)
 
 AC_SUBST(SOUNDSERVICE_CFLAGS)
 AC_SUBST(SOUNDERVICE_LIBS)

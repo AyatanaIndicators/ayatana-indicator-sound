@@ -73,7 +73,7 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
     dbus_g_object_type_install_info(SOUND_SERVICE_DBUS_TYPE,
                                  &dbus_glib__sound_service_server_object_info);
   
-    signals[SINK_INPUT_WHILE_MUTED] =  g_signal_new(SIGNAL_SINK_INPUT_WHILE_MUTED,
+    signals[SINK_INPUT_WHILE_MUTED] =  g_signal_new("sink-input-while-muted",
                                             G_TYPE_FROM_CLASS (klass),
                                             G_SIGNAL_RUN_LAST,
                                             0,

@@ -25,7 +25,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib-object.h>
 #include <gtk/gtk.h>
 #include <libdbusmenu-gtk/menu.h>
-/*#include <idoscalemenuitem.h>*/
+#include <idoscalemenuitem.h>
 
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-bindings.h>
@@ -71,7 +71,9 @@ INDICATOR_SET_TYPE(INDICATOR_SOUND_TYPE)
 static GtkLabel * get_label (IndicatorObject * io);
 static GtkImage * get_icon (IndicatorObject * io);
 static GtkMenu * get_menu (IndicatorObject * io);
-//static GtkWidget *volume_item;
+static GtkWidget *volume_item = NULL;
+static GtkMenu* menu = NULL;
+
 static DBusGProxy * sound_dbus_proxy = NULL;
 
 
@@ -154,7 +156,7 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
 
 static void catch_signal (DBusGProxy * proxy, gint sink_index, gboolean value, gpointer userdata)
 {
-    g_debug("signal caught - i don't believe it !");
+    g_debug("signal caught - i don't believe it ! with index %i and value %i", sink_index, value);
 }
 
 
@@ -201,9 +203,10 @@ get_icon (IndicatorObject * io)
 static GtkMenu *
 get_menu (IndicatorObject * io)
 {
-    //volume_item = ido_scale_menu_item_new_with_range ("Volume", 0, 100, 1);
-    //gtk_menu_shell_append (GTK_MENU_SHELL (menu), volume_item);
-    return GTK_MENU(dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT));
+    volume_item = ido_scale_menu_item_new_with_range ("Volume", 0, 100, 1);
+    menu = GTK_MENU(dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT));
+    gtk_menu_shell_append (GTK_MENU_SHELL (menu), volume_item);
+    return menu;
 }
 
 

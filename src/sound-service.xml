@@ -7,8 +7,8 @@
 <!--    </method>-->
 <!-- Triggered when a sink is muted but the input has been sent to that sink -->
     <signal name="SinkInputWhileMuted">
-      <arg name="cur_value" type="i" direction="out"/>
-      <arg name="cur_value" type="b" direction="out"/>
+      <arg name="sink_index" type="i" direction="out"/>
+      <arg name="mute_value" type="b" direction="out"/>
     </signal>
   </interface>
 </node>

@@ -66,7 +66,7 @@ indicator_sound_service_LDADD = $(SOUNDSERVICE_LIBS) $(GCONF_LIBS)
 # Other Stuff
 ###############
 BUILT_SOURCES = \
-	sound-service-client.h \ 
+	sound-service-client.h \
     sound-service-server.h \
 	sound-service-marshal.h \
     sound-service-marshal.c

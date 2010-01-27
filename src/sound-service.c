@@ -50,6 +50,7 @@ static void context_success_callback(pa_context *c, int success, void *userdata)
     g_debug("Context Success Callback - result = %i", success);
 }
 
+// TODO we are not handling multiple sinks appropriately
 static void retrieve_complete_sink_list(pa_context *c, const pa_sink_info *sink, int eol, void *userdata){
     if(eol > 0){
         // TODO apparently never returns 0 sinks - Tested and it appears this assumption/prediction is correct.
@@ -63,6 +64,9 @@ static void retrieve_complete_sink_list(pa_context *c, const pa_sink_info *sink,
             int value = g_strcasecmp(only_sink->name, " auto_null ");
             g_debug("comparison outcome with auto_null is %i", value);
             sink_available = (value != 0 && only_sink->active_port != NULL);
+            // Strictly speaking all_muted should only be through if all sinks are muted
+            // It is more application specific
+            all_muted = (only_sink->mute == 1);
             g_debug("Available sink is named %s", only_sink->name);
             g_debug("does Available sink have an active port: %i", only_sink->active_port != NULL);
             g_debug("sink_available = %i", sink_available);

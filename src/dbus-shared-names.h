@@ -41,7 +41,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define INDICATOR_SOUND_DBUS_NAME  "org.ayatana.indicator.sound"
 #define INDICATOR_SOUND_DBUS_OBJECT "/org/ayatana/indicator/sound/menu"
 #define INDICATOR_SOUND_SERVICE_DBUS_OBJECT "/org/ayatana/indicator/sound/service"
-#define INDICATOR_SOUND_SERVICE_DBUS_INTERFACE "org.ayatana.indicator.sound.service"
+#define INDICATOR_SOUND_SERVICE_DBUS_INTERFACE "org.ayatana.indicator.sound"
 #define INDICATOR_SOUND_DBUS_VERSION  0
 
 #endif /* __DBUS_SHARED_NAMES_H__ */
