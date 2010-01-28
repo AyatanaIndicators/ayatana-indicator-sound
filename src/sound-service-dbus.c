@@ -25,7 +25,7 @@
 #include <dbus/dbus-glib.h>
 #include "dbus-shared-names.h"
 #include "sound-service-dbus.h"
-#include "sound-service-client.h"
+//#include "sound-service-client.h"
 #include "sound-service-server.h"
 #include "common-defs.h"
 #include "sound-service-marshal.h"
@@ -54,7 +54,7 @@ static void sound_service_dbus_class_init (SoundServiceDbusClass *klass);
 static void sound_service_dbus_init       (SoundServiceDbus *self);
 static void sound_service_dbus_dispose    (GObject *object);
 static void sound_service_dbus_finalize   (GObject *object);
-
+gboolean sound_service_dbus_set_sink_volume(SoundServiceDbus* service, const guint volume_percent, GError** gerror);
 
 /* GObject Boilerplate */
 G_DEFINE_TYPE (SoundServiceDbus, sound_service_dbus, G_TYPE_OBJECT);
@@ -82,11 +82,24 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
                                                     G_TYPE_NONE, 2, G_TYPE_INT, G_TYPE_BOOLEAN);
 }
 
+//void sound_service_dbus_sink_volume_changed (SoundServiceDbus* obj, gint volume);
+
+gboolean sound_service_dbus_set_sink_volume(SoundServiceDbus* service, const guint volume_percent, GError** gerror)
+{
+    g_debug("in the set sink volume method in the sound service dbus! Holy Fuck with volume_percent of %i", volume_percent);
+/*	if (!IS_SOUND_SERVICE_DBUS(service)) {*/
+/*		g_warning("NO BAD EVIL!");*/
+/*		return FALSE;*/
+/*	}*/
+	return TRUE;
+}
+
 
 /**
 Utility methods to emit signals from the service into the ether.
 **/
-void sound_service_dbus_sink_input_while_muted(SoundServiceDbus* obj, gint sink_index, gboolean value){
+void sound_service_dbus_sink_input_while_muted(SoundServiceDbus* obj, gint sink_index, gboolean value)
+{
 /*    g_assert((num < LAST_SIGNAL) && (num >= 0));*/
     g_debug("Emitting signal: SINK_INPUT_WHILE_MUTED, with sink_index %i and value %i", sink_index, value);
     g_signal_emit(obj,

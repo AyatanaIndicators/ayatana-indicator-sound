@@ -95,6 +95,8 @@ G_DEFINE_TYPE (IndicatorSound, indicator_sound, INDICATOR_OBJECT_TYPE);
 
 static void connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata);
 static void catch_signal(DBusGProxy * proxy, gint sink_index, gboolean value, gpointer userdata);
+static void slider_event_detected(GtkRange *range, gpointer user_data);
+static gboolean slider_value_changed_event_cb(GtkRange *range, GtkScrollType scroll, double  value, gpointer  user_data);  
 
 static void
 indicator_sound_class_init (IndicatorSoundClass *klass)
@@ -164,8 +166,10 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
 
 static void catch_signal (DBusGProxy * proxy, gint sink_index, gboolean value, gpointer userdata)
 {
-    g_debug("signal caught - i don't believe it ! with index %i and value %i", sink_index, value);
+    g_debug("signal caught - I don't believe it ! with index %i and value %i", sink_index, value);
 }
+
+
 
 
 static void
@@ -215,24 +219,29 @@ get_menu (IndicatorObject * io)
     gtk_menu_shell_append (GTK_MENU_SHELL (menu), get_slider());
     gtk_widget_show_all(volume_slider);
 
-/*    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider); */
-/*    GtkRange* range = (GtkRange*)slider;*/
-/*    gdouble value = gtk_range_get_value(range);*/
-/*    g_debug("print out the range %d", (int)value);*/
     return menu;
 }
 
 
-static void slider_event_detected( GtkWidget     *item,
-                                   GtkUpdateType  policy )
+static void slider_event_detected(GtkRange *range, gpointer user_data)
 {
     g_debug("slider event detected");
+}
+
+static gboolean slider_value_changed_event_cb(GtkRange *range, GtkScrollType scroll, double  value, gpointer  user_data)
+{
+    g_debug("slider_change_of_value - with value: %f", value);        
+    return FALSE;
 }
 
 static GtkWidget* get_slider()
 {
     volume_slider = ido_scale_menu_item_new_with_range ("Volume", 0, 100, 1);
-    g_signal_connect(G_OBJECT(volume_slider), "slider-event", G_CALLBACK(slider_event_detected), GINT_TO_POINTER (GTK_UPDATE_CONTINUOUS)); 
+    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
+    GtkRange* range = (GtkRange*)slider;
+    g_signal_connect(G_OBJECT(range), "value-changed", G_CALLBACK(slider_event_detected), NULL); 
+    g_signal_connect(G_OBJECT(range), "change-value", G_CALLBACK(slider_value_changed_event_cb), NULL); 
+
     return volume_slider;
 }
 

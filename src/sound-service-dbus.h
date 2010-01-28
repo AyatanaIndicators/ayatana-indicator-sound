@@ -59,10 +59,9 @@ struct _SoundServiceDbusClass {
 
 GType sound_service_dbus_get_type  (void) G_GNUC_CONST;
 
-// Utility methods to get the messages across the into the static function space of sound-service-dbus
+// Utility methods to get the messages across into the sound-service-dbus
 void sound_service_dbus_sink_input_while_muted (SoundServiceDbus* obj, gint sink_index, gboolean value);
 
-//void sound_service_dbus_sink_volume_changed (SoundServiceDbus* obj, gint volume);
 
 
 G_END_DECLS

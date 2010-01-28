@@ -30,6 +30,10 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 /**********************************************************************************************************************/
 static void context_get_sink_info_by_index_callback(pa_context *c, const pa_sink_info *sink, int eol, void *userdata){
     if (eol > 0) {
+        // TODO follow this pattern for all other async call-backs involving lists - safest/most accurate approach.
+        if (pa_context_errno(c) == PA_ERR_NOENTITY)
+            return;
+        g_debug(_("Sink info callback failure"));
         return;
     }
 	else{
@@ -51,6 +55,7 @@ static void context_success_callback(pa_context *c, int success, void *userdata)
 }
 
 // TODO we are not handling multiple sinks appropriately
+// Refactor with Colin and Lennarts' approaches in mind.
 static void retrieve_complete_sink_list(pa_context *c, const pa_sink_info *sink, int eol, void *userdata){
     if(eol > 0){
         // TODO apparently never returns 0 sinks - Tested and it appears this assumption/prediction is correct.
@@ -58,7 +63,7 @@ static void retrieve_complete_sink_list(pa_context *c, const pa_sink_info *sink,
         // Some fuzzy reasoning might be needed.
         if(sink_list->len == 1){
             pa_sink_info* only_sink = (pa_sink_info*)g_ptr_array_index(sink_list, 0);
-            //TODO: sink is not null but its module is the null-module-sink!
+            // TODO: sink is not null but its module is the null-module-sink!
             // For now taking the easy route string compare on the name and the active port
             // needs more testing
             int value = g_strcasecmp(only_sink->name, " auto_null ");
@@ -156,6 +161,12 @@ static void context_state_callback(pa_context *c, void *userdata) {
     }
 }
 
+/*static void set_volume(gint sink_index, gint volume_percent)*/
+/*{*/
+/*    g_debug("set_volume in the sound-service");*/
+/*}*/
+
+
 /**********************************************************************************************************************/
 //    Init functions (GTK and DBUS)
 /**********************************************************************************************************************/
@@ -202,10 +213,12 @@ service_shutdown (IndicatorService *service, gpointer user_data)
 /*		g_debug("Service shutdown");*/
 /*        if (pulse_context){*/
 /*    	    pa_context_unref(pulse_context);*/
+/*          pulse_context = NULL;*/
 /*    	}*/
 /*        g_ptr_array_free(sink_list, TRUE);*/
 /*        pa_glib_mainloop_free(pa_main_loop);*/
-/*		g_main_loop_quit(mainloop);*/
+/*        pa_main_loop = NULL;*/
+/*		  g_main_loop_quit(mainloop);*/
 	}
 	return;
 }
@@ -239,17 +252,15 @@ main (int argc, char ** argv)
     DbusmenuServer * server = dbusmenu_server_new(INDICATOR_SOUND_DBUS_OBJECT);
     dbusmenu_server_set_root(server, root_menuitem);
 
+    // TODO refactor into separate function
 	pa_main_loop = pa_glib_mainloop_new(g_main_context_default());
     g_assert(pa_main_loop);
 	pulse_context = pa_context_new(pa_glib_mainloop_get_api(pa_main_loop), "ayatana.indicator.sound");
 	g_assert(pulse_context);
 
-
     // Establish event callback registration
 	pa_context_set_state_callback(pulse_context, context_state_callback, NULL);
 	pa_context_connect(pulse_context, NULL, PA_CONTEXT_NOAUTOSPAWN, NULL);
-
-    //rebuild_sound_menu (root_menuitem, dbus_interface);
 
     // Run the loop
     mainloop = g_main_loop_new(NULL, FALSE);

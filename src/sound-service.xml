@@ -1,13 +1,15 @@
 <!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
 <node name="/org/ayatana/indicator/sound">
   <interface name="org.ayatana.indicator.sound">
-<!--    <method name = "sink_volume">-->
-<!--        <arg type='i' name='index' direction="in"/>-->
-<!--        <arg type='i' name='volume' direction="out"/>-->
+<!--    <method name = "SetSinkVolume">-->
+<!--        <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_set_sink_volume"/>-->
+<!--        <arg type='u' name='volume_percent' direction="in"/>-->
 <!--    </method>-->
+<!-- Will need to hook up another signal which monitors for volume change 
+Our respective UI element should listen to this and therefore will be updated with accurate setting-->
 <!-- Triggered when a sink is muted but the input has been sent to that sink -->
     <signal name="SinkInputWhileMuted">
-      <arg name="sink_index" type="i" direction="out"/>
+      <arg name="sink_index" type="x" direction="out"/>
       <arg name="mute_value" type="b" direction="out"/>
     </signal>
   </interface>

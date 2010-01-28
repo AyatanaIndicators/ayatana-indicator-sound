@@ -62,6 +62,18 @@ static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service
 
 static gboolean all_muted = FALSE;
 static void set_global_mute();
+//static void set_volume(gint sink_index, gint volume_percent);
+
+typedef struct {
+    gchar* name;
+    gchar* description;
+    gchar* icon_name;
+    gint index;
+    gint device_index;
+    pa_cvolume volume;
+    pa_channel_map channel_map;
+    gboolean mute;
+} device_info;
 
 // ENTRY AND EXIT POINTS
 void service_shutdown(IndicatorService * service, gpointer user_data);

@@ -29,13 +29,6 @@ sound-service-client.h: $(srcdir)/sound-service.xml
 		--output=sound-service-client.h \
 		$(srcdir)/sound-service.xml
 
-sound-service-server.h: $(srcdir)/sound-service.xml
-	dbus-binding-tool \
-		--prefix=_sound_service_server \
-		--mode=glib-server \
-		--output=sound-service-server.h \
-		$(srcdir)/sound-service.xml
-
 sound-service-marshal.h: $(srcdir)/sound-service.list
 	glib-genmarshal --header \
 		--prefix=_sound_service_marshal $(srcdir)/sound-service.list \
@@ -61,6 +54,13 @@ indicator_sound_service_SOURCES = \
     sound-service-marshal.h
 indicator_sound_service_CFLAGS = $(SOUNDSERVICE_CFLAGS) $(GCONF_CFLAGS) -DLIBEXECDIR=\"$(libexecdir)\" -Wall -Werror
 indicator_sound_service_LDADD = $(SOUNDSERVICE_LIBS) $(GCONF_LIBS)
+
+sound-service-server.h: $(srcdir)/sound-service.xml
+	dbus-binding-tool \
+		--prefix=_sound_service_server \
+		--mode=glib-server \
+		--output=sound-service-server.h \
+		$(srcdir)/sound-service.xml
 
 ###############
 # Other Stuff
