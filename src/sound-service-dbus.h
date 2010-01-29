@@ -53,7 +53,7 @@ struct _SoundServiceDbus {
 
 struct _SoundServiceDbusClass {
   GObjectClass parent_class;
-  /* Signals -> outward messages*/
+  /* Signals -> outward messages to the DBUS and beyond*/
   void (* sink_input_while_muted) (SoundServiceDbus *self, gint sink_index, gboolean is_muted, gpointer sound_data);
 };
 
@@ -61,6 +61,10 @@ GType sound_service_dbus_get_type  (void) G_GNUC_CONST;
 
 // Utility methods to get the messages across into the sound-service-dbus
 void sound_service_dbus_sink_input_while_muted (SoundServiceDbus* obj, gint sink_index, gboolean value);
+
+// DBUS METHODS
+gboolean sound_service_dbus_set_sink_volume(SoundServiceDbus* service, const guint volume_percent, GError** gerror);
+
 
 
 
