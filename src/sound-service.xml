@@ -5,6 +5,11 @@
         <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_set_sink_volume"/>
         <arg type='u' name='volume_percent' direction="in"/>
     </method>
+    <method name="GetSinkList">
+        <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_get_sink_list"/>
+      <arg name="sinks" direction="out" type="au"/>
+    </method>
+
 <!-- Will need to hook up another signal which monitors for volume change 
 Our respective UI element should listen to this and therefore will be updated with accurate setting-->
 <!-- Triggered when a sink is muted but the input has been sent to that sink -->

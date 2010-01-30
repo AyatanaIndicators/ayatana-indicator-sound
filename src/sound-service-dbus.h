@@ -40,10 +40,6 @@ typedef struct _SoundData             SoundData;
 
 struct _SoundData
 {
-  gchar   *client_name;
-  gint64   sink_index;
-  gboolean *muted;
-
   SoundServiceDbus *service;
 };
 
@@ -61,11 +57,11 @@ GType sound_service_dbus_get_type  (void) G_GNUC_CONST;
 
 // Utility methods to get the messages across into the sound-service-dbus
 void sound_service_dbus_sink_input_while_muted (SoundServiceDbus* obj, gint sink_index, gboolean value);
+void set_pa_sinks_hash(SoundServiceDbus *self, GHashTable *sinks);
 
 // DBUS METHODS
 gboolean sound_service_dbus_set_sink_volume(SoundServiceDbus* service, const guint volume_percent, GError** gerror);
-
-
+GList *sound_service_dbus_get_sink_list(SoundServiceDbus* service);
 
 
 G_END_DECLS

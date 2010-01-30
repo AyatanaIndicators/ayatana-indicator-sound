@@ -37,47 +37,13 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <libindicator/indicator-service.h>
 
-#include <pulse/pulseaudio.h>
-#include <pulse/glib-mainloop.h>
-#include <pulse/error.h>
-#include <pulse/gccmacro.h>
-
 #include "dbus-shared-names.h"
 
-// GTK + DBUS
-static GMainLoop * mainloop = NULL;
-static DbusmenuMenuitem * root_menuitem = NULL;
-static DbusmenuMenuitem * mute_all_menuitem = NULL;
-static SoundServiceDbus * dbus_interface = NULL;
-
-// PULSEAUDIO
-static pa_context *pulse_context = NULL;
-static pa_glib_mainloop *pa_main_loop = NULL;
-static GPtrArray* sink_list = NULL;
-static gboolean sink_available = TRUE;
-
-static void context_state_callback(pa_context *c, void *userdata);
-static gboolean idle_routine (gpointer data);
-static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service);
-
-static gboolean all_muted = FALSE;
-static void set_global_mute();
-//static void set_volume(gint sink_index, gint volume_percent);
-
-typedef struct {
-    gchar* name;
-    gchar* description;
-    gchar* icon_name;
-    gint index;
-    gint device_index;
-    pa_cvolume volume;
-    pa_channel_map channel_map;
-    gboolean mute;
-} device_info;
 
 // ENTRY AND EXIT POINTS
 void service_shutdown(IndicatorService * service, gpointer user_data);
 int main (int argc, char ** argv);
+void update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_muted);
 
 #endif
 

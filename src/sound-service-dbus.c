@@ -28,7 +28,7 @@
 #include "sound-service-server.h"
 #include "common-defs.h"
 #include "sound-service-marshal.h"
-
+#include "pulse-manager.h"
 
 typedef struct _SoundServiceDbusPrivate SoundServiceDbusPrivate;
 
@@ -36,13 +36,16 @@ struct _SoundServiceDbusPrivate
 {
     DBusGConnection *system_bus;
     DBusGConnection *connection;
+    GHashTable *sinks_hash;
 };
+
 
 /* Signals */
 enum {
   SINK_INPUT_WHILE_MUTED,  
   LAST_SIGNAL
 };
+
 
 static guint signals[LAST_SIGNAL] = { 0 };
 
@@ -85,12 +88,20 @@ DBUS Method Callbacks
 **/
 gboolean sound_service_dbus_set_sink_volume(SoundServiceDbus* service, const guint volume_percent, GError** gerror)
 {
-    g_debug("in the set sink volume method in the sound service dbus! Holy Fuck with volume_percent of %i", volume_percent);
+    g_debug("in the set sink volume method in the sound service dbus!, with volume_percent of %i", volume_percent);
 /*	if (!IS_SOUND_SERVICE_DBUS(service)) {*/
 /*		g_warning("NO BAD EVIL!");*/
 /*		return FALSE;*/
 /*	}*/
 	return TRUE;
+}
+
+GList *
+sound_service_dbus_get_sink_list (SoundServiceDbus *self)
+{
+  SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
+
+  return g_hash_table_get_keys (priv->sinks_hash);
 }
 
 
@@ -108,6 +119,11 @@ void sound_service_dbus_sink_input_while_muted(SoundServiceDbus* obj, gint sink_
                 value);
 }
 
+void set_pa_sinks_hash(SoundServiceDbus *self, GHashTable *sinks)
+{
+    SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
+    priv->sinks_hash = sinks;
+}
      
 static void
 sound_service_dbus_init (SoundServiceDbus *self)
