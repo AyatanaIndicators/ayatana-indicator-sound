@@ -70,7 +70,7 @@ static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service
 static void set_global_mute()
 {
     b_all_muted = !b_all_muted;
-    g_debug("Mute is now = %i", b_all_muted);
+    toggle_global_mute(b_all_muted); 
     dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, _(b_all_muted == FALSE ? "Mute All" : "Unmute"));
 }
 

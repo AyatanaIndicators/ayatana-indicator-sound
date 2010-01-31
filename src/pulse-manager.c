@@ -6,15 +6,16 @@
 #include "sound-service.h"
 
 
+static GHashTable *sink_hash = NULL;
+static SoundServiceDbus *dbus_service = NULL;
+static gint DEFAULT_SINK_INDEX = 0;
+// PA related
 static pa_context *pulse_context = NULL;
 static pa_glib_mainloop *pa_main_loop = NULL;
 static void context_state_callback(pa_context *c, void *userdata);
-static GHashTable *sink_hash = NULL;
-static SoundServiceDbus *dbus_service = NULL;
-
-static void context_state_callback(pa_context *c, void *userdata);
 static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink_info, int eol, void *userdata);
 static void context_success_callback(pa_context *c, int success, void *userdata);
+static void pulse_sink_input_info_callback(pa_context *c, const pa_sink_input_info *info, int eol, void *userdata);
 
 pa_context* get_context(void) 
 {
@@ -53,19 +54,15 @@ void close_pulse_activites()
 
 static void mute_each_sink(gpointer key, gpointer value, gpointer user_data)
 {
-//mute_value == TRUE ? 1 : 0,
     sink_info *info = (sink_info*)value;
     pa_operation_unref(pa_context_set_sink_mute_by_index(pulse_context, info->index, GPOINTER_TO_INT(user_data), context_success_callback,  NULL));
+    g_debug("in the pulse manager: mute each sink %i", GPOINTER_TO_INT(user_data));
 }
 
 void toggle_global_mute(gboolean mute_value)
 {
     g_hash_table_foreach(sink_hash, mute_each_sink, GINT_TO_POINTER(mute_value));
-}
-
-void set_volume(gint sink_index, gint volume_percent)
-{
-    g_debug("set_volume in the sound-service");
+    g_debug("in the pulse manager: toggle global mute value %i", mute_value);
 }
 
 
@@ -89,19 +86,34 @@ static gboolean sink_available()
     *key = 0;
     sink_info *s = g_hash_table_lookup(sink_hash, key);   
     //int value = g_strcasecmp(s->name, " auto_null ");
+    // TODO more testing is required for the case of having no available sink
     return ((g_strcasecmp(s->name, " auto_null ") != 0) && s->active_port == TRUE);
 }
 
 // We are assuming the device is 0 for now. 
-static gboolean chosen_sink_is_muted()
+// Would like to use default parameter values ? (C Question)
+static gboolean sink_is_muted(gint sink_index)
 {
+    if(sink_index < 0)
+        sink_index = DEFAULT_SINK_INDEX;
     if (g_hash_table_size(sink_hash) < 1)
         return FALSE;
     int *key;
     key = g_new(gint, 1);
-    *key = 0;
+    *key = sink_index;
+    // TODO ensure hash has a key with this value!
     sink_info *s = g_hash_table_lookup(sink_hash, key);   
     return s->mute;
+}
+
+static void check_sink_input_while_muted_event(gint sink_index)
+{
+    if (sink_is_muted(sink_index) == TRUE)
+    {
+        g_debug("SINKINPUTWHILEMUTED EVENT TO BE SENT FROM PA MANAGER");
+        sound_service_dbus_sink_input_while_muted (dbus_service, sink_index, TRUE);
+    }
+    return;
 }
 
 
@@ -132,12 +144,18 @@ static void context_success_callback(pa_context *c, int success, void *userdata)
     g_debug("Context Success Callback - result = %i", success);
 }
 
-
+/**
+On Service startup this callback will be called multiple times resulting our sinks_hash container to be filled with the
+available sinks.
+key -> index
+value -> sink_info
+For now this callback it assumes it only used at startup. It may be necessary to use if sinks become available after startup
+**/
 static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, int eol, void *userdata)
 {
     if (eol > 0) {
         test_hash();
-        update_pa_state(TRUE, sink_available(), chosen_sink_is_muted()); 
+        update_pa_state(TRUE, sink_available(), sink_is_muted(-1)); 
         
         // TODO follow this pattern for all other async call-backs involving lists - safest/most accurate approach.
         if (pa_context_errno(c) == PA_ERR_NOENTITY)
@@ -165,23 +183,24 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
 }
 
 
-/*static void context_get_sink_input_info_callback(pa_context *c, const pa_sink_input_info *info, int eol, void *userdata){*/
-/*    if (eol > 0) {*/
-/*        return;*/
-/*    }*/
-/*	else{*/
-/*        if (info == NULL)*/
-/*        {*/
-/*            // TODO: watch this carefully - PA async api should not be doing this . . .*/
-/*            g_debug("\n Sink input info callback : SINK INPUT INFO IS NULL BUT EOL was not POSITIVE!!!");*/
-/*            return;*/
-/*        }*/
-/*        g_debug("\n SINK INPUT INFO CALLBACK about to start asking questions...\n");*/
-/*		g_debug("\n SINK INPUT INFO Name : %s \n", info->name);*/
-/*		g_debug("\n SINK INPUT INFO sink index : %d \n", info->sink);*/
-/*		pa_operation_unref(pa_context_get_sink_info_by_index(c, info->sink, context_get_sink_info_by_index_callback, userdata));*/
-/*	}*/
-/*} */
+static void pulse_sink_input_info_callback(pa_context *c, const pa_sink_input_info *info, int eol, void *userdata){
+    if (eol > 0) {
+        if (pa_context_errno(c) == PA_ERR_NOENTITY)
+            return;
+        g_warning("Sink INPUT info callback failure");
+        return;
+    }
+	else{
+        if (info == NULL)
+        {
+            // TODO: watch this carefully - PA async api should not be doing this . . .
+            g_warning("\n Sink input info callback : SINK INPUT INFO IS NULL BUT EOL was not POSITIVE!!!");
+            return;
+        }
+		g_debug("\n SINK INPUT INFO sink index : %d \n", info->sink);
+        check_sink_input_while_muted_event(info->sink);
+	}
+} 
 
 static void subscribed_events_callback(pa_context *c, enum pa_subscription_event_type t, uint32_t index, void *userdata){
 	switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) {
@@ -193,8 +212,7 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
 			// If a playback client is paused and then resumed this will NOT trigger this event.
 			//g_debug("Subscribed_events_callback - type = sink input and index = %i", index);
             //g_debug("Sink input info query just about to happen");
-			//pa_operation_unref(pa_context_get_sink_input_info(c, index, context_get_sink_input_info_callback, userdata));
-            //g_debug("Sink input info query just happened");
+			pa_operation_unref(pa_context_get_sink_input_info(c, index, pulse_sink_input_info_callback, userdata));
 		    break;
 	}
 }
