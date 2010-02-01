@@ -40,7 +40,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "common-defs.h"
 #include "sound-service-marshal.h"
 
-
+// GObject Boiler plate
 #define INDICATOR_SOUND_TYPE            (indicator_sound_get_type ())
 #define INDICATOR_SOUND(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), INDICATOR_SOUND_TYPE, IndicatorSound))
 #define INDICATOR_SOUND_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), INDICATOR_SOUND_TYPE, IndicatorSoundClass))
@@ -51,52 +51,44 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 typedef struct _IndicatorSound      IndicatorSound;
 typedef struct _IndicatorSoundClass IndicatorSoundClass;
 
+//GObject class struct
 struct _IndicatorSoundClass {
 	IndicatorObjectClass parent_class;
 };
 
+//GObject instance struct
 struct _IndicatorSound {
 	IndicatorObject parent;
-	IndicatorServiceManager * service;
+	IndicatorServiceManager *service;
+    guint chosen_sink;
 };
-
+// GObject Boiler plate
 GType indicator_sound_get_type (void);
-
-
-/* Indicator stuff */
 INDICATOR_SET_VERSION
 INDICATOR_SET_TYPE(INDICATOR_SOUND_TYPE)
 
-/* Prototypes */
-static GtkLabel * get_label (IndicatorObject * io);
-static GtkImage * get_icon (IndicatorObject * io);
-static GtkMenu * get_menu (IndicatorObject * io);
-static GtkWidget* get_slider();
-static GtkWidget *volume_slider = NULL;
-static GtkMenu* menu = NULL;
-
-static DBusGProxy * sound_dbus_proxy = NULL;
-
-/*/* Signals */
-/*enum {*/
-/*  VOLUME_CHANGE_ON_SINK*/
-/*  LAST_SIGNAL*/
-/*};*/
-
-/*static guint signals[LAST_SIGNAL] = { 0 };*/
-
-// Boiler plate
+// GObject Boiler plate
 static void indicator_sound_class_init (IndicatorSoundClass *klass);
 static void indicator_sound_init       (IndicatorSound *self);
 static void indicator_sound_dispose    (GObject *object);
 static void indicator_sound_finalize   (GObject *object);
 G_DEFINE_TYPE (IndicatorSound, indicator_sound, INDICATOR_OBJECT_TYPE);
 
+//GTK+ items
+static GtkLabel * get_label (IndicatorObject * io);
+static GtkImage * get_icon (IndicatorObject * io);
+static GtkMenu * get_menu (IndicatorObject * io);
+static GtkWidget* get_slider(IndicatorObject * io);
 
+static GtkWidget *volume_slider = NULL;
+static GtkMenu *menu = NULL;
+
+static gboolean slider_value_changed_event_cb(GtkRange *range, GtkScrollType scroll, double  value, gpointer  user_data);
+
+// DBUS communication
+static DBusGProxy *sound_dbus_proxy = NULL;
 static void connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata);
 static void catch_signal(DBusGProxy * proxy, gint sink_index, gboolean value, gpointer userdata);
-static void slider_event_detected(GtkRange *range, gpointer user_data);
-static gboolean slider_value_changed_event_cb(GtkRange *range, GtkScrollType scroll, double  value, gpointer  user_data);  
 
 static void
 indicator_sound_class_init (IndicatorSoundClass *klass)
@@ -106,7 +98,7 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
 	object_class->dispose = indicator_sound_dispose;
 	object_class->finalize = indicator_sound_finalize;
 
-	IndicatorObjectClass * io_class = INDICATOR_OBJECT_CLASS(klass);
+	IndicatorObjectClass *io_class = INDICATOR_OBJECT_CLASS(klass);
 	io_class->get_label = get_label;
 	io_class->get_image = get_icon;
 	io_class->get_menu = get_menu;
@@ -116,7 +108,6 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
                                      G_TYPE_INT,
                                      G_TYPE_BOOLEAN,
                                      G_TYPE_INVALID);
-
 	return;
 }
 
@@ -124,7 +115,8 @@ static void indicator_sound_init (IndicatorSound *self)
 {
 	/* Set good defaults */
 	self->service = NULL;
-
+    /* For now we stick to 0 for defaults*/
+    self->chosen_sink = 0;
 	/* Now let's fire these guys up. */
 	self->service = indicator_service_manager_new_version(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_VERSION);
 
@@ -169,9 +161,6 @@ static void catch_signal (DBusGProxy * proxy, gint sink_index, gboolean value, g
     g_debug("signal caught - I don't believe it ! with index %i and value %i", sink_index, value);
 }
 
-
-
-
 static void
 indicator_sound_dispose (GObject *object)
 {
@@ -181,8 +170,6 @@ indicator_sound_dispose (GObject *object)
 		g_object_unref(G_OBJECT(self->service));
 		self->service = NULL;
 	}
-    
-
 	G_OBJECT_CLASS (indicator_sound_parent_class)->dispose (object);
 	return;
 }
@@ -216,33 +203,25 @@ static GtkMenu *
 get_menu (IndicatorObject * io)
 {
     menu = GTK_MENU(dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT));
-    gtk_menu_shell_append (GTK_MENU_SHELL (menu), get_slider());
+    gtk_menu_shell_append (GTK_MENU_SHELL (menu), get_slider(io));
     gtk_widget_show_all(volume_slider);
 
     return menu;
 }
 
-
-static void slider_event_detected(GtkRange *range, gpointer user_data)
+static GtkWidget* get_slider(IndicatorObject * io)
 {
-    g_debug("slider event detected");
+    volume_slider = ido_scale_menu_item_new_with_range ("Volume", 2, 98, 1);
+    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
+    GtkRange* range = (GtkRange*)slider;
+    //g_signal_connect(G_OBJECT(range), "value-changed", G_CALLBACK(slider_event_detected), NULL); 
+    g_signal_connect(G_OBJECT(range), "change-value", G_CALLBACK(slider_value_changed_event_cb), io); 
+    return volume_slider;
 }
 
 static gboolean slider_value_changed_event_cb(GtkRange *range, GtkScrollType scroll, double  value, gpointer  user_data)
 {
-    g_debug("slider_change_of_value - with value: %f", value);        
-    return FALSE;
-}
-
-static GtkWidget* get_slider()
-{
-    volume_slider = ido_scale_menu_item_new_with_range ("Volume", 0, 100, 1);
-    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
-    GtkRange* range = (GtkRange*)slider;
-    g_signal_connect(G_OBJECT(range), "value-changed", G_CALLBACK(slider_event_detected), NULL); 
-    g_signal_connect(G_OBJECT(range), "change-value", G_CALLBACK(slider_value_changed_event_cb), NULL); 
-
-    return volume_slider;
-}
-
-
+    IndicatorSound* sound = INDICATOR_SOUND(user_data);
+    org_ayatana_indicator_sound_set_sink_volume(sound_dbus_proxy, sound->chosen_sink, value, NULL);  
+    return FALSE;  
+}  

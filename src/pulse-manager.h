@@ -35,8 +35,8 @@ typedef struct {
     const gchar* icon_name;
     gint index;
     gint device_index;
-//    pa_cvolume volume;
-//    pa_channel_map channel_map;
+    pa_cvolume volume;
+    pa_channel_map channel_map;
     gboolean mute;
     gboolean active_port;
 } sink_info;

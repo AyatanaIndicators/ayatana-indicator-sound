@@ -86,9 +86,10 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
 /**
 DBUS Method Callbacks
 **/
-gboolean sound_service_dbus_set_sink_volume(SoundServiceDbus* service, const guint volume_percent, GError** gerror)
+gboolean sound_service_dbus_set_sink_volume(SoundServiceDbus* service, const guint sink_index, const guint volume_percent, GError** gerror)
 {
-    g_debug("in the set sink volume method in the sound service dbus!, with volume_percent of %i", volume_percent);
+    g_debug("in the set sink volume method in the sound service dbus!, with volume_percent of %i on sink %i", volume_percent, sink_index);
+
 /*	if (!IS_SOUND_SERVICE_DBUS(service)) {*/
 /*		g_warning("NO BAD EVIL!");*/
 /*		return FALSE;*/
