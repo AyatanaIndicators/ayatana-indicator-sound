@@ -60,7 +60,6 @@ struct _IndicatorSoundClass {
 struct _IndicatorSound {
 	IndicatorObject parent;
 	IndicatorServiceManager *service;
-    guint chosen_sink;
 };
 // GObject Boiler plate
 GType indicator_sound_get_type (void);
@@ -115,8 +114,6 @@ static void indicator_sound_init (IndicatorSound *self)
 {
 	/* Set good defaults */
 	self->service = NULL;
-    /* For now we stick to 0 for defaults*/
-    self->chosen_sink = 0;
 	/* Now let's fire these guys up. */
 	self->service = indicator_service_manager_new_version(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_VERSION);
 
@@ -221,7 +218,6 @@ static GtkWidget* get_slider(IndicatorObject * io)
 
 static gboolean slider_value_changed_event_cb(GtkRange *range, GtkScrollType scroll, double  value, gpointer  user_data)
 {
-    IndicatorSound* sound = INDICATOR_SOUND(user_data);
-    org_ayatana_indicator_sound_set_sink_volume(sound_dbus_proxy, sound->chosen_sink, value, NULL);  
+    org_ayatana_indicator_sound_set_sink_volume(sound_dbus_proxy, value, NULL);  
     return FALSE;  
 }  

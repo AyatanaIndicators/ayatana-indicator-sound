@@ -4,11 +4,6 @@
     <method name = "SetSinkVolume">
         <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_set_sink_volume"/>
         <arg type='u' name='volume_percent' direction="in"/>
-        <arg type='u' name='sink_to_set' direction="in"/>
-    </method>
-    <method name="GetSinkList">
-        <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_get_sink_list"/>
-      <arg name="sinks" direction="out" type="au"/>
     </method>
 
 <!-- Will need to hook up another signal which monitors for volume change 

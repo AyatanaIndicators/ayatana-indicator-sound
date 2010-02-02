@@ -8,7 +8,8 @@
 
 static GHashTable *sink_hash = NULL;
 static SoundServiceDbus *dbus_service = NULL;
-static gint DEFAULT_SINK_INDEX = 0;
+// Until we find a satisfactory default sink this index should remain < 0
+static gint DEFAULT_SINK_INDEX = -1;
 // PA related
 static pa_context *pulse_context = NULL;
 static pa_glib_mainloop *pa_main_loop = NULL;
@@ -16,15 +17,24 @@ static void context_state_callback(pa_context *c, void *userdata);
 static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink_info, int eol, void *userdata);
 static void context_success_callback(pa_context *c, int success, void *userdata);
 static void pulse_sink_input_info_callback(pa_context *c, const pa_sink_input_info *info, int eol, void *userdata);
+static void pulse_server_info_callback(pa_context *c, const pa_server_info *info, void *userdata);
+static void pulse_default_sink_set_volume_callback(pa_context *c, const pa_sink_info *info, int eol, void *userdata);
+static void destroy_sink_info(void *value);
 
-pa_context* get_context(void) 
-{
-  return pulse_context;
-}
 
-void set_sink_volume(gint sink_index, gint percent)
+void set_sink_volume(guint percent)
 {
-    g_debug("in the pulse manager:set_sink_volume with index %i and percent %i", sink_index, percent);
+    g_debug("in the pulse manager:set_sink_volume with percent %i", percent);
+    pa_volume_t new_volume = (pa_volume_t) ((percent * PA_VOLUME_NORM) / 100);
+    if(DEFAULT_SINK_INDEX < 0)
+    {
+        g_warning("We have no default sink !!! - returning after doing nothing");
+        return;
+    }
+    pa_context_get_sink_info_by_index(pulse_context, DEFAULT_SINK_INDEX, pulse_default_sink_set_volume_callback, &new_volume);
+/*    //pa&s->volume*/
+/*    pa_cvolume dev_vol = s->volume;*/
+/*    pa_cvolume_set(&dev_vol, s->volume.channels, volume);*/
 }
 
 void establish_pulse_activities(SoundServiceDbus *service)
@@ -34,7 +44,8 @@ void establish_pulse_activities(SoundServiceDbus *service)
     g_assert(pa_main_loop);
 	pulse_context = pa_context_new(pa_glib_mainloop_get_api(pa_main_loop), "ayatana.indicator.sound");
 	g_assert(pulse_context);
-    sink_hash = g_hash_table_new_full(g_int_hash, g_int_equal, g_free, g_free);
+    
+    sink_hash = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, destroy_sink_info);
     // Establish event callback registration
 	pa_context_set_state_callback(pulse_context, context_state_callback, NULL);
 	pa_context_connect(pulse_context, NULL, PA_CONTEXT_NOAUTOSPAWN, NULL);
@@ -65,27 +76,31 @@ void toggle_global_mute(gboolean mute_value)
     g_debug("in the pulse manager: toggle global mute value %i", mute_value);
 }
 
+static void destroy_sink_info(void *value)
+{
+    sink_info *sink = (sink_info*)value;
+    g_free(sink->name);
+    g_free(sink->description);        
+    g_free(sink->icon_name);  
+    g_free(sink);  
+}
 
 static void test_hash(){
     guint size = 0;
     size = g_hash_table_size(sink_hash);
     g_debug("Size of hash = %i", size);
-    gint *key;
-    key = g_new(gint, 1);
-    *key = 0;
-    sink_info *s = g_hash_table_lookup(sink_hash, key);   
+    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(2));   
     g_debug("and the name of our sink is %s", s->name); 
 }
 
+/**
+TODO do not ship with this method like this - assumes sink index"
+**/
 static gboolean sink_available()
 {
     if (g_hash_table_size(sink_hash) < 1)
         return FALSE;
-    int *key;
-    key = g_new(gint, 1);
-    *key = 0;
-    sink_info *s = g_hash_table_lookup(sink_hash, key);   
-    //int value = g_strcasecmp(s->name, " auto_null ");
+    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(2));   
     // TODO more testing is required for the case of having no available sink
     return ((g_strcasecmp(s->name, " auto_null ") != 0) && s->active_port == TRUE);
 }
@@ -98,11 +113,8 @@ static gboolean sink_is_muted(gint sink_index)
         sink_index = DEFAULT_SINK_INDEX;
     if (g_hash_table_size(sink_hash) < 1)
         return FALSE;
-    int *key;
-    key = g_new(gint, 1);
-    *key = sink_index;
     // TODO ensure hash has a key with this value!
-    sink_info *s = g_hash_table_lookup(sink_hash, key);   
+    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(sink_index));   
     return s->mute;
 }
 
@@ -125,17 +137,21 @@ static void check_sink_input_while_muted_event(gint sink_index)
 
 /*}*/
 
+//NOT quite sure if the first fails and second fail will there be a memory leak?
 static void gather_pulse_information(pa_context *c, void *userdata)
 {
     pa_operation *operation;
-
-    if (!(operation = pa_context_get_sink_info_list(c, pulse_sink_info_callback, NULL))) 
+    if(!(operation = pa_context_get_server_info(c, pulse_server_info_callback, userdata)))
     {
-        g_warning("pa_context_get_sink_info_list() failed");
-        return;
+        g_warning("pa_context_get_server_info failed");
+        if (!(operation = pa_context_get_sink_info_list(c, pulse_sink_info_callback, NULL))) 
+        {
+            g_warning("pa_context_get_sink_info_list() failed - cannot fetch server or sink info - leaving . . .");
+            return;
+        }
     }
     pa_operation_unref(operation);
-
+    return;
 }
 
 
@@ -155,8 +171,10 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
 {
     if (eol > 0) {
         test_hash();
+        DEFAULT_SINK_INDEX = (DEFAULT_SINK_INDEX < 0) ? 0 : DEFAULT_SINK_INDEX;
         update_pa_state(TRUE, sink_available(), sink_is_muted(-1)); 
-        
+        g_debug("default sink index : %d", DEFAULT_SINK_INDEX);
+
         // TODO follow this pattern for all other async call-backs involving lists - safest/most accurate approach.
         if (pa_context_errno(c) == PA_ERR_NOENTITY)
             return;
@@ -164,24 +182,46 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
         return;
     }
     else{
-        gint *key;
-        key = g_new(gint, 1);
-        *key = sink->index;
         sink_info *value;
-        value = g_new(sink_info, 1);
+        value = g_new0(sink_info, 1);
         value->index = value->device_index = sink->index;
-        value->name = sink->name;
-        value->description = sink->description;
-        value->icon_name = pa_proplist_gets(sink->proplist, PA_PROP_DEVICE_ICON_NAME);
+        value->name = g_strdup(sink->name);
+        value->description = g_strdup(sink->description);
+        value->icon_name = g_strdup(pa_proplist_gets(sink->proplist, PA_PROP_DEVICE_ICON_NAME));
         value->active_port = (sink->active_port != NULL);
         value->mute = !!sink->mute;
-        g_hash_table_insert(sink_hash, key, value);
-        // VOLUME focus tmrw.
-        //value->volume = sink->volume;
-        //value->channel_map = sink->channel_map;
+/*        value->volume = sink->volume;*/
+/*        value->channel_map = sink->channel_map;*/
+        g_hash_table_insert(sink_hash, GINT_TO_POINTER(sink->index), value);
     }
 }
+/**
+Will attempt to set the volume on the default sink - should not be called if there is no default sink
+**/
+static void pulse_default_sink_set_volume_callback(pa_context *c, const pa_sink_info *info, int eol, void *userdata)
+{
+    pa_volume_t *new_volume = (pa_volume_t*)userdata;
+    pa_cvolume dev_vol = info->volume;
+    g_debug("about to try and set the volume on the default sink");
+    pa_cvolume_set(&dev_vol, info->volume.channels, *new_volume);
+    g_debug("about to try and set the volume on the default sink");
+}
 
+static void pulse_default_sink_info_callback(pa_context *c, const pa_sink_info *info, int eol, void *userdata)
+{
+    g_debug("default sink info callback");
+    if (eol > 0) {        
+        if (pa_context_errno(c) == PA_ERR_NOENTITY)
+            return;
+        g_warning("Default Sink info callback failure");
+        return;
+    }
+    else{
+        DEFAULT_SINK_INDEX = info->index;
+        g_debug("Just set the default sink index to %i", DEFAULT_SINK_INDEX);    
+        pa_operation_unref(pa_context_get_sink_info_list(c, pulse_sink_info_callback, NULL)); 
+    }
+}
 
 static void pulse_sink_input_info_callback(pa_context *c, const pa_sink_input_info *info, int eol, void *userdata){
     if (eol > 0) {
@@ -202,6 +242,35 @@ static void pulse_sink_input_info_callback(pa_context *c, const pa_sink_input_in
 	}
 } 
 
+static void pulse_server_info_callback(pa_context *c, const pa_server_info *info, void *userdata)
+{
+    g_debug("server info callback");
+    pa_operation *operation;
+    if (info == NULL)
+    {
+        g_warning("No server - get the hell out of here");
+        return;    
+    }
+
+    if(info->default_sink_name != NULL)
+    {
+        if (!(operation = pa_context_get_sink_info_by_name(c, info->default_sink_name, pulse_default_sink_info_callback, userdata)))
+        {
+            g_warning("pa_context_get_sink_info_by_name() failed");
+        }
+        else{
+            pa_operation_unref(operation);
+            return;
+        }
+    }
+    if (!(operation = pa_context_get_sink_info_list(c, pulse_sink_info_callback, NULL))) 
+    {
+        g_warning("pa_context_get_sink_info_list() failed");
+        return;
+    }             
+    pa_operation_unref(operation);
+}
+
 static void subscribed_events_callback(pa_context *c, enum pa_subscription_event_type t, uint32_t index, void *userdata){
 	switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) {
         case PA_SUBSCRIPTION_EVENT_SINK:
@@ -210,9 +279,7 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
         case PA_SUBSCRIPTION_EVENT_SINK_INPUT:
 			// This will be triggered when the sink receives input from a new stream
 			// If a playback client is paused and then resumed this will NOT trigger this event.
-			//g_debug("Subscribed_events_callback - type = sink input and index = %i", index);
-            //g_debug("Sink input info query just about to happen");
-			pa_operation_unref(pa_context_get_sink_input_info(c, index, pulse_sink_input_info_callback, userdata));
+		    pa_operation_unref(pa_context_get_sink_input_info(c, index, pulse_sink_input_info_callback, userdata));
 		    break;
 	}
 }

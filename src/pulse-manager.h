@@ -30,13 +30,13 @@
 
 
 typedef struct {
-    const gchar* name;
-    const gchar* description;
-    const gchar* icon_name;
+    gchar* name;
+    gchar* description;
+    gchar* icon_name;
     gint index;
     gint device_index;
-    pa_cvolume volume;
-    pa_channel_map channel_map;
+//    pa_cvolume volume;
+//    pa_channel_map channel_map;
     gboolean mute;
     gboolean active_port;
 } sink_info;
@@ -45,7 +45,7 @@ typedef struct {
 //void set_volume(gint sink_index, gint volume_percent);
 pa_context* get_context(void);
 void establish_pulse_activities(SoundServiceDbus *service);
-void set_sink_volume(gint sink_index, gint percent);
+void set_sink_volume(guint percent);
 void toggle_global_mute(gboolean mute_value); 
 
 
