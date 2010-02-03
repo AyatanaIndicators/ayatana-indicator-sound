@@ -91,23 +91,18 @@ service_shutdown (IndicatorService *service, gpointer user_data)
 	return;
 }
 
-void update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_muted)
+void update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_muted, gdouble volume_percent)
 {
     b_sink_available = sink_available;
     b_all_muted = sink_muted;
     b_pulse_ready = pa_state;
-	g_debug("update pa state with %i, %i and %i", pa_state, sink_available, sink_muted);
+	g_debug("update pa state with state %i, availability of %i, mute value of %i and a volume percent is %f", pa_state, sink_available, sink_muted, volume_percent);
     rebuild_sound_menu(root_menuitem, dbus_interface);
 }
 
 /**
 Pulsemanager will call this once enough info has been gathered about the PA state
 **/
-/*void pa_init_state(GHashTable *sinks)*/
-/*{*/
-/*    sinks_hash = sinks;*/
-/*    rebuild_sound_menu(root_menuitem, dbus_interface);    */
-/*}*/
 
 
 /* Main, is well, main.  It brings everything up and throws

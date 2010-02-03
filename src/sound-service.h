@@ -43,7 +43,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 // ENTRY AND EXIT POINTS
 void service_shutdown(IndicatorService * service, gpointer user_data);
 int main (int argc, char ** argv);
-void update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_muted);
+void update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_muted, gdouble current_vol);
 
 #endif
 
