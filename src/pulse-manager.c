@@ -10,6 +10,7 @@ static GHashTable *sink_hash = NULL;
 static SoundServiceDbus *dbus_service = NULL;
 // Until we find a satisfactory default sink this index should remain < 0
 static gint DEFAULT_SINK_INDEX = -1;
+static gboolean pa_server_available = FALSE;
 // PA related
 static pa_context *pulse_context = NULL;
 static pa_glib_mainloop *pa_main_loop = NULL;
@@ -18,19 +19,32 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink_inf
 static void context_success_callback(pa_context *c, int success, void *userdata);
 static void pulse_sink_input_info_callback(pa_context *c, const pa_sink_input_info *info, int eol, void *userdata);
 static void pulse_server_info_callback(pa_context *c, const pa_server_info *info, void *userdata);
-static void pulse_default_sink_set_volume_callback(pa_context *c, const pa_sink_info *info, int eol, void *userdata);
 static void destroy_sink_info(void *value);
 
-
+/*
+Refine the resolution of the slider or binary scale it to achieve a more subtle volume control. 
+Use the base volume stored in the sink struct to calculate actual linear volumes. 
+*/
 void set_sink_volume(guint percent)
 {
     g_debug("in the pulse manager:set_sink_volume with percent %i", percent);
     if(DEFAULT_SINK_INDEX < 0)
     {
-        g_warning("We have no default sink !!! - returning after doing nothing");
+        g_warning("We have no default sink !!! - returning after not attempting to set any volume of any sink");
         return;
     }
-    pa_context_get_sink_info_by_index(pulse_context, DEFAULT_SINK_INDEX, pulse_default_sink_set_volume_callback, GINT_TO_POINTER(percent));
+    gdouble linear_input = (gdouble)(percent);
+    linear_input /= 100.0;
+    g_debug("linear double input = %f", linear_input);
+    pa_volume_t new_volume = pa_sw_volume_from_linear(linear_input); 
+    // Use this to achieve more accurate scaling using the base volume (in the sink struct already!)
+    //pa_volume_t new_volume = (pa_volume_t) ((GPOINTER_TO_INT(linear_input) * s->base_volume) / 100);
+    g_debug("about to try to set the sw volume to a linear volume of %f", pa_sw_volume_to_linear(new_volume));
+    g_debug("and an actual volume of %f", (gdouble)new_volume);
+    pa_cvolume dev_vol;
+    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
+    pa_cvolume_set(&dev_vol, s->volume.channels, new_volume);
+    pa_operation_unref(pa_context_set_sink_volume_by_index(pulse_context, DEFAULT_SINK_INDEX, &dev_vol, NULL, NULL));
 }
 
 void establish_pulse_activities(SoundServiceDbus *service)
@@ -84,27 +98,26 @@ static void test_hash(){
     guint size = 0;
     size = g_hash_table_size(sink_hash);
     g_debug("Size of hash = %i", size);
-    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(2));   
+    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
     g_debug("The name of our sink is %s", s->name); 
     g_debug("and the max volume is %f", (gdouble)s->base_volume); 
 
 }
 
-/**
-TODO do not ship with this method like this - assumes sink index"
-**/
 static gboolean sink_available()
 {
     if (g_hash_table_size(sink_hash) < 1)
         return FALSE;
-    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(2));   
+    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(0));   
     // TODO more testing is required for the case of having no available sink
+    // This will need to iterate through the sinks to find an available
+    // one as opposed to just picking the first
     return ((g_strcasecmp(s->name, " auto_null ") != 0) && s->active_port == TRUE);
 }
 
 //TODO do not ship with this method like this - LOGIC far too convoluted "
 // Would like to use default parameter values ? (C Question)
-static gboolean sink_is_muted()
+static gboolean default_sink_is_muted()
 {
     if(DEFAULT_SINK_INDEX < 0)
         return FALSE;
@@ -117,9 +130,9 @@ static gboolean sink_is_muted()
 
 static void check_sink_input_while_muted_event(gint sink_index)
 {
-    if (sink_is_muted(sink_index) == TRUE)
+    if (default_sink_is_muted(sink_index) == TRUE)
     {
-        g_debug("SINKINPUTWHILEMUTED EVENT TO BE SENT FROM PA MANAGER");
+        g_debug("SINKINPUTWHILEMUTED SIGNAL EVENT TO BE SENT FROM PA MANAGER");
         sound_service_dbus_sink_input_while_muted (dbus_service, sink_index, TRUE);
     }
     return;
@@ -140,12 +153,7 @@ static gdouble get_default_sink_volume()
 /**********************************************************************************************************************/
 //    Pulse-Audio asychronous call-backs
 /**********************************************************************************************************************/
-/*static void pulse_audio_server_info_callback(pa_context *c, const pa_server_info *server_info, void *userdata) */
-/*{*/
 
-/*}*/
-
-//NOT quite sure if the first fails and second fail will there be a memory leak?
 static void gather_pulse_information(pa_context *c, void *userdata)
 {
     pa_operation *operation;
@@ -178,16 +186,23 @@ For now this callback it assumes it only used at startup. It may be necessary to
 static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, int eol, void *userdata)
 {
     if (eol > 0) {
-        test_hash();
-        DEFAULT_SINK_INDEX = (DEFAULT_SINK_INDEX < 0) ? 0 : DEFAULT_SINK_INDEX;
-        update_pa_state(TRUE, sink_available(), sink_is_muted(), get_default_sink_volume()); 
-        g_debug("default sink index : %d", DEFAULT_SINK_INDEX);
+        gboolean device_available;
+        device_available = sink_available();
+        if(device_available == TRUE)
+        {
+            // Hopefully the PA server has set the default device if not default to 0
+            DEFAULT_SINK_INDEX = (DEFAULT_SINK_INDEX < 0) ? 0 : DEFAULT_SINK_INDEX;
+            test_hash();
+            update_pa_state(TRUE, device_available, default_sink_is_muted(), get_default_sink_volume()); 
+            g_debug("default sink index : %d", DEFAULT_SINK_INDEX);
+                        
+        }
+        else{
+            //Update the indicator to show PA either is not ready or has no available sink
+            g_warning("Cannot find a suitable default sink ...");
+            update_pa_state(FALSE, device_available, TRUE, 0); 
+        }
 
-        // TODO follow this pattern for all other async call-backs involving lists - safest/most accurate approach.
-        if (pa_context_errno(c) == PA_ERR_NOENTITY)
-            return;
-        g_warning("Sink info callback failure");
-        return;
     }
     else{
         sink_info *value;
@@ -203,26 +218,6 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
         value->channel_map = sink->channel_map;
         g_hash_table_insert(sink_hash, GINT_TO_POINTER(sink->index), value);
     }
-}
-/**
-Will attempt to set the volume on the default sink - should not be called if there is no default sink
-**/
-static void pulse_default_sink_set_volume_callback(pa_context *c, const pa_sink_info *info, int eol, void *userdata)
-{
-    g_debug("pulse_default_sink_set_volume_callback - percent = %i", GPOINTER_TO_INT(userdata)); 
-    gdouble linear_input = (gdouble)(GPOINTER_TO_INT(userdata));
-    linear_input /= 100.0;
-    g_debug("linear double input = %f", linear_input);
-    pa_volume_t new_volume = pa_sw_volume_from_linear(linear_input); 
-    //pa_volume_t new_volume = (pa_volume_t) ((GPOINTER_TO_INT(userdata) * PA_VOLUME_NORM) / 100);
-    g_debug("about to try to set the sw volume to a linear volume of %f", pa_sw_volume_to_linear(new_volume));
-    g_debug("and an actual volume of %f", (gdouble)new_volume);
-    pa_cvolume dev_vol;
-    g_debug("about to try and set the volume on the default sink");
-    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(2));   
-    pa_cvolume_set(&dev_vol, s->volume.channels, new_volume);
-    pa_operation_unref(pa_context_set_sink_volume_by_index(c, DEFAULT_SINK_INDEX, &dev_vol, NULL, NULL));
-    g_debug("after setting the volume on the default sink");
 }
 
 static void pulse_default_sink_info_callback(pa_context *c, const pa_sink_info *info, int eol, void *userdata)
@@ -267,9 +262,11 @@ static void pulse_server_info_callback(pa_context *c, const pa_server_info *info
     if (info == NULL)
     {
         g_warning("No server - get the hell out of here");
+        update_pa_state(FALSE, FALSE, TRUE, 0); 
+        pa_server_available = FALSE;
         return;    
     }
-
+    pa_server_available = TRUE;
     if(info->default_sink_name != NULL)
     {
         if (!(operation = pa_context_get_sink_info_by_name(c, info->default_sink_name, pulse_default_sink_info_callback, userdata)))
@@ -318,7 +315,9 @@ static void context_state_callback(pa_context *c, void *userdata) {
 			g_debug("context setting name");
 			break;
         case PA_CONTEXT_FAILED:
-			g_debug("FAILED to retrieve context");
+			g_warning("FAILED to retrieve context - Is PulseAudio Daemon running ?");
+            //Update the indicator to show PA either is not ready or has no available sink
+            update_pa_state(FALSE, FALSE, TRUE, 0); 
 			break;
         case PA_CONTEXT_TERMINATED:
 			g_debug("context terminated");
