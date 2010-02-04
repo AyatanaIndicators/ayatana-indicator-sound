@@ -89,7 +89,7 @@ static void change_speaker_image(gdouble volume_percent);
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
 static void connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata);
-static void catch_signal(DBusGProxy * proxy, gint sink_index, gboolean value, gpointer userdata);
+static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gint sink_index, gboolean value, gpointer userdata);
 
 static void
 indicator_sound_class_init (IndicatorSoundClass *klass)
@@ -143,7 +143,7 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
 			}
             g_debug("about to connect to the signals");
 			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_TYPE_INT, G_TYPE_BOOLEAN, G_TYPE_INVALID);
-			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_CALLBACK(catch_signal), NULL, NULL);
+			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_CALLBACK(catch_signal_sink_input_while_muted), NULL, NULL);
 		}
 
 	} else {
