@@ -108,15 +108,13 @@ static gboolean sink_available()
 {
     if (g_hash_table_size(sink_hash) < 1)
         return FALSE;
-    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(0));   
+    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
     // TODO more testing is required for the case of having no available sink
     // This will need to iterate through the sinks to find an available
     // one as opposed to just picking the first
     return ((g_strcasecmp(s->name, " auto_null ") != 0) && s->active_port == TRUE);
 }
 
-//TODO do not ship with this method like this - LOGIC far too convoluted "
-// Would like to use default parameter values ? (C Question)
 static gboolean default_sink_is_muted()
 {
     if(DEFAULT_SINK_INDEX < 0)
@@ -205,6 +203,7 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
 
     }
     else{
+        g_debug("About to add an item to our hash");    
         sink_info *value;
         value = g_new0(sink_info, 1);
         value->index = value->device_index = sink->index;
@@ -217,6 +216,7 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
         value->base_volume = sink->base_volume;
         value->channel_map = sink->channel_map;
         g_hash_table_insert(sink_hash, GINT_TO_POINTER(sink->index), value);
+        g_debug("After adding an item to our hash");    
     }
 }
 
@@ -296,6 +296,10 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
 			// If a playback client is paused and then resumed this will NOT trigger this event.
 		    pa_operation_unref(pa_context_get_sink_input_info(c, index, pulse_sink_input_info_callback, userdata));
 		    break;
+        case PA_SUBSCRIPTION_EVENT_SERVER:
+            if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_SINK ) {
+                g_debug("server change of some sink type ???");
+            }
 	}
 }
 

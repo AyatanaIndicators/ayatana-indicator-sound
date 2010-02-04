@@ -56,13 +56,6 @@ static void slider_menu_item_class_init (SliderMenuItemClass *klass)
 
     DbusmenuMenuitemClass * mclass = DBUSMENU_MENUITEM_CLASS(klass);
     mclass->handle_event = handle_event;
-/*	signals[VOLUME_CHANGED] =  g_signal_new(SLIDER_MENU_ITEM_SIGNAL_VOLUME_CHANGED,*/
-/*	                                      G_TYPE_FROM_CLASS(klass),*/
-/*	                                      G_SIGNAL_RUN_LAST,*/
-/*	                                      G_STRUCT_OFFSET (SliderMenuItemClass, volume_changed),*/
-/*	                                      NULL, NULL,*/
-/*	                                      g_cclosure_marshal_VOID__DOUBLE,*/
-/*	                                      G_TYPE_NONE, 1, G_TYPE_DOUBLE);*/
 	return;
 }
 
@@ -102,7 +95,7 @@ SliderMenuItem* slider_menu_item_new(gboolean sinks_available, gdouble start_vol
     dbusmenu_menuitem_property_set(DBUSMENU_MENUITEM(self), DBUSMENU_MENUITEM_PROP_TYPE, DBUSMENU_SLIDER_MENUITEM_TYPE);
     //TODO: If no valid sinks are found grey out the item(s)
     dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(self), DBUSMENU_MENUITEM_PROP_SENSITIVE, sinks_available);
-    g_debug("Sending the initial value of the slider over dbus = %f", start_volume * 100);
+    //g_debug("Sending the initial value of the slider over dbus = %f", start_volume * 100);
 	return self;
 }
 

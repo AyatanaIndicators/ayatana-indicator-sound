@@ -82,7 +82,7 @@ static gdouble input_value_from_across_the_dbus = 0.0;
 static GtkImage *speaker_image = NULL;
 
 static gboolean new_slider_item (DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
-static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value);
+static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget);
 static gboolean slider_value_changed_event_cb(GtkRange *range, GtkScrollType scroll, double  value, gpointer  user_data);
 static void change_speaker_image(gdouble volume_percent);
 
@@ -230,7 +230,7 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
 
     GtkMenuItem *menu_volume_slider = GTK_MENU_ITEM(volume_slider);
 	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_volume_slider, parent);
-	g_signal_connect(G_OBJECT(newitem), DBUSMENU_MENUITEM_SIGNAL_PROPERTY_CHANGED, G_CALLBACK(slider_prop_change_cb), NULL);
+	g_signal_connect(G_OBJECT(newitem), DBUSMENU_MENUITEM_SIGNAL_PROPERTY_CHANGED, G_CALLBACK(slider_prop_change_cb), volume_slider);
 
     GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
     GtkRange* range = (GtkRange*)slider;   
@@ -240,7 +240,7 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
 
 /* Whenever we have a property change on a DbusmenuMenuitem
    we need to be responsive to that. */
-static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value)
+static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget)
 {
     g_debug("slider_prop_change_cb ");
     g_debug("about to set the slider to %f", g_value_get_double(value));

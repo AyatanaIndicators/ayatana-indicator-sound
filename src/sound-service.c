@@ -117,7 +117,6 @@ void update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_m
     g_value_init(&value, G_TYPE_DOUBLE);
     g_value_set_double(&value, volume_percent * 100);
     dbusmenu_menuitem_property_set_value(DBUSMENU_MENUITEM(volume_slider_menuitem), DBUSMENU_SLIDER_MENUITEM_PROP_VOLUME, &value);
-
 }
 
 
