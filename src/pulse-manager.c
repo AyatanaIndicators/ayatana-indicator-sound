@@ -25,9 +25,9 @@ static void destroy_sink_info(void *value);
 Refine the resolution of the slider or binary scale it to achieve a more subtle volume control. 
 Use the base volume stored in the sink struct to calculate actual linear volumes. 
 */
-void set_sink_volume(guint percent)
+void set_sink_volume(gdouble percent)
 {
-    g_debug("in the pulse manager:set_sink_volume with percent %i", percent);
+    g_debug("in the pulse manager:set_sink_volume with percent %f", percent);
     if(DEFAULT_SINK_INDEX < 0)
     {
         g_warning("We have no default sink !!! - returning after not attempting to set any volume of any sink");

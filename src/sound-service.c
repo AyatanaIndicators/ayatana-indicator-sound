@@ -23,19 +23,22 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "sound-service.h"
 #include "sound-service-dbus.h" 
 #include "pulse-manager.h"
+#include "slider-menu-item.h"
 #include "common-defs.h"
 
-//TODO: Follow hungarian notation
+
 // GTK + DBUS
-static GMainLoop * mainloop = NULL;
-static DbusmenuMenuitem * root_menuitem = NULL;
-static DbusmenuMenuitem * mute_all_menuitem = NULL;
-static SoundServiceDbus * dbus_interface = NULL;
+static GMainLoop *mainloop = NULL;
+static DbusmenuMenuitem *root_menuitem = NULL;
+static DbusmenuMenuitem *mute_all_menuitem = NULL;
+static SliderMenuItem *volume_slider_menuitem = NULL;
+static SoundServiceDbus *dbus_interface = NULL;
 
 // PULSEAUDIO
 static gboolean b_sink_available = FALSE;
 static gboolean b_all_muted = FALSE;
 static gboolean b_pulse_ready = FALSE;
+static gdouble volume_percent = 0.0;
 
 static void set_global_mute();
 static gboolean idle_routine (gpointer data);
@@ -58,13 +61,17 @@ Build the DBus menu items. For now Mute all/Unmute is the only available option
 **/
 static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service)
 {
+    // Mute button
     mute_all_menuitem = dbusmenu_menuitem_new();
-
     dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, _(b_all_muted == FALSE ? "Mute All" : "Unmute"));
     g_signal_connect(G_OBJECT(mute_all_menuitem), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED, G_CALLBACK(set_global_mute), NULL);
     //TODO: If no valid sinks are found grey out the item(s)
     dbusmenu_menuitem_property_set_bool(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_SENSITIVE, b_sink_available);
+
+    // Slider
+    volume_slider_menuitem = slider_menu_item_new(b_sink_available, volume_percent);
     dbusmenu_menuitem_child_append(root, mute_all_menuitem);
+    dbusmenu_menuitem_child_append(root, DBUSMENU_MENUITEM(volume_slider_menuitem));
 }
 
 static void set_global_mute()
@@ -91,18 +98,15 @@ service_shutdown (IndicatorService *service, gpointer user_data)
 	return;
 }
 
-void update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_muted, gdouble volume_percent)
+void update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_muted, gdouble percent)
 {
     b_sink_available = sink_available;
     b_all_muted = sink_muted;
     b_pulse_ready = pa_state;
+    volume_percent = percent;
 	g_debug("update pa state with state %i, availability of %i, mute value of %i and a volume percent is %f", pa_state, sink_available, sink_muted, volume_percent);
     rebuild_sound_menu(root_menuitem, dbus_interface);
 }
-
-/**
-Pulsemanager will call this once enough info has been gathered about the PA state
-**/
 
 
 /* Main, is well, main.  It brings everything up and throws
