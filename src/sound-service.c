@@ -55,7 +55,17 @@ static gboolean idle_routine (gpointer data)
 {
     return FALSE;
 }
+ 
 
+static void show_sound_settings_dialog (DbusmenuMenuitem *mi, gpointer user_data) 
+{
+    GError * error = NULL;
+    if (!g_spawn_command_line_async("gnome-volume-control", &error)) 
+    {
+        g_warning("Unable to show dialog: %s", error->message);
+        g_error_free(error);
+    }
+}
 /**
 Build the DBus menu items. For now Mute all/Unmute is the only available option
 **/
@@ -72,6 +82,16 @@ static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service
     volume_slider_menuitem = slider_menu_item_new(b_sink_available, volume_percent);
     dbusmenu_menuitem_child_append(root, mute_all_menuitem);
     dbusmenu_menuitem_child_append(root, DBUSMENU_MENUITEM(volume_slider_menuitem));
+
+    DbusmenuMenuitem *separator = dbusmenu_menuitem_new();
+    dbusmenu_menuitem_property_set(separator, DBUSMENU_MENUITEM_PROP_TYPE, DBUSMENU_CLIENT_TYPES_SEPARATOR);
+    dbusmenu_menuitem_child_append(root, separator);
+    DbusmenuMenuitem *settings_mi = dbusmenu_menuitem_new();
+    dbusmenu_menuitem_property_set(settings_mi, DBUSMENU_MENUITEM_PROP_LABEL,
+                                                                   _("Sound Preferences..."));
+    dbusmenu_menuitem_child_append(root, settings_mi);
+    g_signal_connect(G_OBJECT(settings_mi), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED,
+                                         G_CALLBACK(show_sound_settings_dialog), NULL);
 }
 
 static void set_global_mute()
