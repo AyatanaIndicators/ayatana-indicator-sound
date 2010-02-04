@@ -153,8 +153,10 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
 	return;
 }
 
-static void catch_signal (DBusGProxy * proxy, gint sink_index, gboolean value, gpointer userdata)
+
+static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gint sink_index, gboolean value, gpointer userdata)
 {
+    //gtk_image_set_from_icon_name(speaker_image, "audio-volume-muted-blocking-symbolic", GTK_ICON_SIZE_MENU);
     g_debug("signal caught - I don't believe it ! with index %i and value %i", sink_index, value);
 }
 
@@ -204,7 +206,7 @@ static void change_speaker_image(gdouble volume_percent)
         gtk_image_set_from_icon_name(speaker_image, "audio-volume-high", GTK_ICON_SIZE_MENU);
     }
     else if(volume_percent <= 0.0){
-        gtk_image_set_from_icon_name(speaker_image, "audio-volume-muted", GTK_ICON_SIZE_MENU);
+        gtk_image_set_from_icon_name(speaker_image, "audio-volume-zero", GTK_ICON_SIZE_MENU);
     }
 }
 
