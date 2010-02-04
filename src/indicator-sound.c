@@ -78,10 +78,13 @@ static GtkLabel * get_label (IndicatorObject * io);
 static GtkImage * get_icon (IndicatorObject * io);
 static GtkMenu * get_menu (IndicatorObject * io);
 static GtkWidget *volume_slider = NULL;
+static gdouble input_value_from_across_the_dbus = 0.0;
+static GtkImage *speaker_image = NULL;
 
 static gboolean new_slider_item (DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value);
 static gboolean slider_value_changed_event_cb(GtkRange *range, GtkScrollType scroll, double  value, gpointer  user_data);
+static void change_speaker_image(gdouble volume_percent);
 
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
@@ -115,9 +118,7 @@ static void indicator_sound_init (IndicatorSound *self)
 	self->service = NULL;
 	/* Now let's fire these guys up. */
 	self->service = indicator_service_manager_new_version(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_VERSION);
-
 	g_signal_connect(G_OBJECT(self->service), INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE, G_CALLBACK(connection_changed), self);
-
     return;
 }
 
@@ -173,7 +174,6 @@ indicator_sound_dispose (GObject *object)
 static void
 indicator_sound_finalize (GObject *object)
 {
-
 	G_OBJECT_CLASS (indicator_sound_parent_class)->finalize (object);
 	return;
 }
@@ -187,9 +187,25 @@ get_label (IndicatorObject * io)
 static GtkImage *
 get_icon (IndicatorObject * io)
 {
-	GtkImage * status_image = GTK_IMAGE(gtk_image_new_from_icon_name("audio-volume-high", GTK_ICON_SIZE_MENU));
-	gtk_widget_show(GTK_WIDGET(status_image));
-	return status_image;
+	speaker_image = GTK_IMAGE(gtk_image_new_from_icon_name("audio-volume-high", GTK_ICON_SIZE_MENU));
+	gtk_widget_show(GTK_WIDGET(speaker_image));
+	return speaker_image;
+}
+
+static void change_speaker_image(gdouble volume_percent)
+{    
+    if (volume_percent < 30.0 && volume_percent > 0){
+        gtk_image_set_from_icon_name(speaker_image, "audio-volume-low", GTK_ICON_SIZE_MENU);
+    }
+    else if(volume_percent < 70.0 && volume_percent > 30.0){
+        gtk_image_set_from_icon_name(speaker_image, "audio-volume-medium", GTK_ICON_SIZE_MENU);
+    }
+    else if(volume_percent > 70.0){
+        gtk_image_set_from_icon_name(speaker_image, "audio-volume-high", GTK_ICON_SIZE_MENU);
+    }
+    else if(volume_percent <= 0.0){
+        gtk_image_set_from_icon_name(speaker_image, "audio-volume-muted", GTK_ICON_SIZE_MENU);
+    }
 }
 
 /* Indicator based function to get the menu for the whole
@@ -202,9 +218,6 @@ get_menu (IndicatorObject * io)
 	DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);	
     dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SLIDER_MENUITEM_TYPE, new_slider_item);
 
-    //gtk_menu_shell_append (GTK_MENU_SHELL (menu), get_slider(io));
-    //gtk_widget_show_all(volume_slider);
-
     return GTK_MENU(menu);
 }
 
@@ -213,7 +226,7 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
 	g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
 	g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
     
-    volume_slider = ido_scale_menu_item_new_with_range ("Volume", 2, 98, 1);
+    volume_slider = ido_scale_menu_item_new_with_range ("Volume", 0, 100, 0.5);
 
     GtkMenuItem *menu_volume_slider = GTK_MENU_ITEM(volume_slider);
 	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_volume_slider, parent);
@@ -230,36 +243,30 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
 static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value)
 {
     g_debug("slider_prop_change_cb ");
-	if (!g_strcmp0(prop, DBUSMENU_SLIDER_MENUITEM_PROP_VOLUME)) {
-		/* Set the slider value */
-        g_debug("about to set it");
-        GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
-        GtkRange* range = (GtkRange*)slider;   
-        gtk_range_set_value(range, (gdouble)g_value_get_double(value));  
-    }
+    g_debug("about to set the slider to %f", g_value_get_double(value));
+    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
+    GtkRange* range = (GtkRange*)slider;   
+    gdouble level;
+    level = gtk_range_get_fill_level(range);
+    input_value_from_across_the_dbus = level;
+    g_debug("the current level is %f", level);
+    
+    gtk_range_set_value(range, g_value_get_double(value));  
 	return;
 }
 
 static gboolean slider_value_changed_event_cb(GtkRange *range, GtkScrollType scroll, double  slider_value, gpointer  user_data)
 {
-    DbusmenuMenuitem *item = (DbusmenuMenuitem*)user_data;
-    GValue value = {0};
-    g_value_init(&value, G_TYPE_DOUBLE);
-    g_value_set_double(&value, slider_value);
-
-    dbusmenu_menuitem_handle_event (item, "slider_change", &value, 0);
+    if(slider_value != input_value_from_across_the_dbus)
+    {    
+        DbusmenuMenuitem *item = (DbusmenuMenuitem*)user_data;
+        GValue value = {0};
+        g_value_init(&value, G_TYPE_DOUBLE);
+        g_value_set_double(&value, slider_value);
+        dbusmenu_menuitem_handle_event (item, "slider_change", &value, 0);
+        change_speaker_image(slider_value);
+    }
     return FALSE;  
-}  
-
-/*  GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);*/
-/*static GtkWidget* get_slider(IndicatorObject * io)*/
-/*{*/
-/*    volume_slider = ido_scale_menu_item_new_with_range ("Volume", 2, 98, 1);*/
-/*    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);*/
-/*    GtkRange* range = (GtkRange*)slider;*/
-/*    //g_signal_connect(G_OBJECT(range), "value-changed", G_CALLBACK(slider_event_detected), NULL); */
-/*    g_signal_connect(G_OBJECT(range), "change-value", G_CALLBACK(slider_value_changed_event_cb), io); */
-/*    return volume_slider;*/
-/*}*/
+} 
 
 

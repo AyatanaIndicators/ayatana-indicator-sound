@@ -79,6 +79,12 @@ static void set_global_mute()
     b_all_muted = !b_all_muted;
     toggle_global_mute(b_all_muted); 
     dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, _(b_all_muted == FALSE ? "Mute All" : "Unmute"));
+
+/*    GValue value = {0};*/
+/*    g_value_init(&value, G_TYPE_DOUBLE);*/
+/*    g_value_set_double(&value, 100.0);*/
+/*    // Testing*/
+/*    dbusmenu_menuitem_property_set_value(DBUSMENU_MENUITEM(volume_slider_menuitem), DBUSMENU_SLIDER_MENUITEM_PROP_VOLUME, &value);*/
 }
 
 
@@ -106,6 +112,12 @@ void update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_m
     volume_percent = percent;
 	g_debug("update pa state with state %i, availability of %i, mute value of %i and a volume percent is %f", pa_state, sink_available, sink_muted, volume_percent);
     rebuild_sound_menu(root_menuitem, dbus_interface);
+    g_debug("About to send over the volume slider");
+    GValue value = {0};
+    g_value_init(&value, G_TYPE_DOUBLE);
+    g_value_set_double(&value, volume_percent * 100);
+    dbusmenu_menuitem_property_set_value(DBUSMENU_MENUITEM(volume_slider_menuitem), DBUSMENU_SLIDER_MENUITEM_PROP_VOLUME, &value);
+
 }
 
 
