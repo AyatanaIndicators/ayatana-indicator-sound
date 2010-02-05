@@ -21,6 +21,7 @@ pa_context* get_context(void);
 void establish_pulse_activities(SoundServiceDbus *service);
 void set_sink_volume(gdouble percent);
 void toggle_global_mute(gboolean mute_value); 
+void close_pulse_activites();
 
 
 
