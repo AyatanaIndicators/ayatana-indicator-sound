@@ -76,7 +76,7 @@ static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service
     dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, _(b_all_muted == FALSE ? "Mute All" : "Unmute"));
     g_signal_connect(G_OBJECT(mute_all_menuitem), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED, G_CALLBACK(set_global_mute), NULL);
     //TODO: If no valid sinks are found grey out the item(s)
-    dbusmenu_menuitem_property_set_bool(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_SENSITIVE, b_sink_available);
+    dbusmenu_menuitem_property_set_bool(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_ENABLED, b_sink_available);
 
     // Slider
     volume_slider_menuitem = slider_menu_item_new(b_sink_available, volume_percent);
