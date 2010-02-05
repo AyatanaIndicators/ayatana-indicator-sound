@@ -94,7 +94,7 @@ SliderMenuItem* slider_menu_item_new(gboolean sinks_available, gdouble start_vol
 	//SliderMenuItemPrivate * priv = SLIDER_MENU_ITEM_GET_PRIVATE(self);
     dbusmenu_menuitem_property_set(DBUSMENU_MENUITEM(self), DBUSMENU_MENUITEM_PROP_TYPE, DBUSMENU_SLIDER_MENUITEM_TYPE);
     //TODO: If no valid sinks are found grey out the item(s)
-    dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(self), DBUSMENU_MENUITEM_PROP_SENSITIVE, sinks_available);
+    dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(self), DBUSMENU_MENUITEM_PROP_ENABLED, sinks_available);
     //g_debug("Sending the initial value of the slider over dbus = %f", start_volume * 100);
 	return self;
 }
