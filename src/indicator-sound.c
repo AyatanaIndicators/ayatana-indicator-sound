@@ -25,7 +25,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib-object.h>
 #include <gtk/gtk.h>
 #include <libdbusmenu-gtk/menu.h>
-#include <idoscalemenuitem.h>
+#include <libido/idoscalemenuitem.h>
 
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-bindings.h>
