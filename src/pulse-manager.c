@@ -70,6 +70,7 @@ void close_pulse_activites()
     g_hash_table_destroy(sink_hash);
     pa_glib_mainloop_free(pa_main_loop);
     pa_main_loop = NULL;
+    g_debug("I just closed communication with Pulse");
 }
 
 static void mute_each_sink(gpointer key, gpointer value, gpointer user_data)
