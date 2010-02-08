@@ -19,6 +19,7 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink_inf
 static void context_success_callback(pa_context *c, int success, void *userdata);
 static void pulse_sink_input_info_callback(pa_context *c, const pa_sink_input_info *info, int eol, void *userdata);
 static void pulse_server_info_callback(pa_context *c, const pa_server_info *info, void *userdata);
+static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, void *userdata);
 static void destroy_sink_info(void *value);
 
 /*
@@ -204,7 +205,7 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
 
     }
     else{
-        g_debug("About to add an item to our hash");    
+        g_debug("About to add an item to our hash");
         sink_info *value;
         value = g_new0(sink_info, 1);
         value->index = value->device_index = sink->index;
@@ -217,7 +218,7 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
         value->base_volume = sink->base_volume;
         value->channel_map = sink->channel_map;
         g_hash_table_insert(sink_hash, GINT_TO_POINTER(sink->index), value);
-        g_debug("After adding an item to our hash");    
+        g_debug("After adding an item to our hash");
     }
 }
 
@@ -254,7 +255,54 @@ static void pulse_sink_input_info_callback(pa_context *c, const pa_sink_input_in
 		g_debug("\n SINK INPUT INFO sink index : %d \n", info->sink);
         check_sink_input_while_muted_event(info->sink);
 	}
-} 
+}
+
+static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, void *userdata)
+{
+    if (eol > 0) {
+        if (pa_context_errno(c) == PA_ERR_NOENTITY)
+            return;
+        g_warning("Sink INPUT info callback failure");
+        return;
+    }
+
+    GList *keys = g_hash_table_get_keys(sink_hash);
+    gint position =  g_list_index(keys, GINT_TO_POINTER(info->index));
+/*    gboolean update_ui_vol = FALSE;*/
+    if(position >= 0) // => index is within the keys of the hash.
+    {
+        // TODO : update sinks hash with new details and if default send over dbus the update. in reverse order.
+        //gint sink_index = GPOINTER_TO_INT(g_list_nth_data(keys, position));
+        sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(info->index));
+        g_debug("attempting to update sink with name %s", s->name);
+        s->name = g_strdup(info->name);
+        s->description = g_strdup(info->description);
+        s->icon_name = g_strdup(pa_proplist_gets(info->proplist, PA_PROP_DEVICE_ICON_NAME));
+        s->active_port = (info->active_port != NULL);
+        s->mute = !!info->mute;
+/*        int equal = pa_cvolume_equal(&s->volume, &info->volume);*/
+/*        update_ui_vol = (equal != 0); */
+/*        g_debug("Are the volumes the same %i", equal);            */
+        s->volume = info->volume;
+        s->base_volume = info->base_volume;
+        s->channel_map = info->channel_map;        
+        if(DEFAULT_SINK_INDEX == s->index/* && update_ui_vol == TRUE*/)
+        {
+            //update the UI
+            pa_volume_t vol = pa_cvolume_avg(&s->volume);
+            g_debug("about to update ui with linear volume of %f", pa_sw_volume_to_linear(vol));            
+            sound_service_dbus_update_sink_volume(dbus_service, vol * 100); 
+        }
+    }
+    else
+    {
+        g_debug("attempting to add new sink with name %s", info->name);
+        //sink_info *s;
+        //s = g_new0(sink_info, 1);                
+        //update the sinks hash with new sink.
+    }    
+}
+
 
 static void pulse_server_info_callback(pa_context *c, const pa_server_info *info, void *userdata)
 {
@@ -290,6 +338,11 @@ static void pulse_server_info_callback(pa_context *c, const pa_server_info *info
 static void subscribed_events_callback(pa_context *c, enum pa_subscription_event_type t, uint32_t index, void *userdata){
 	switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) {
         case PA_SUBSCRIPTION_EVENT_SINK:
+            if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
+                //TODO handle the remove event
+            } else {
+                pa_operation_unref(pa_context_get_sink_info_by_index(c, index, update_sink_info, userdata));
+            }            
             //g_debug("Event sink for %i", index);
             break;
         case PA_SUBSCRIPTION_EVENT_SINK_INPUT:

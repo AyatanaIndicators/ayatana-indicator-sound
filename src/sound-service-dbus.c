@@ -43,6 +43,7 @@ struct _SoundServiceDbusPrivate
 /* Signals */
 enum {
   SINK_INPUT_WHILE_MUTED,  
+  SINK_VOLUME_UPDATE,
   LAST_SIGNAL
 };
 
@@ -81,6 +82,14 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
                                                     NULL, NULL,
                                                     _sound_service_marshal_VOID__INT_BOOLEAN,
                                                     G_TYPE_NONE, 2, G_TYPE_INT, G_TYPE_BOOLEAN);
+
+    signals[SINK_VOLUME_UPDATE] =  g_signal_new("sink-volume-update",
+                                                    G_TYPE_FROM_CLASS (klass),
+                                                    G_SIGNAL_RUN_LAST,
+                                                    0,
+                                                    NULL, NULL,
+                                                    g_cclosure_marshal_VOID__INT,
+                                                    G_TYPE_NONE, 1, G_TYPE_INT);
 }
 
 /**
@@ -114,6 +123,15 @@ void sound_service_dbus_sink_input_while_muted(SoundServiceDbus* obj, gint sink_
                 0,
                 sink_index,
                 value);
+}
+
+void sound_service_dbus_update_sink_volume(SoundServiceDbus* obj, gint sink_volume)
+{
+    g_debug("Emitting signal: UPDATE_SINK_VOLUME, with sink_volme %i", sink_volume);
+    g_signal_emit(obj,
+                signals[SINK_VOLUME_UPDATE],
+                0,
+                sink_volume);
 }
 
 void set_pa_sinks_hash(SoundServiceDbus *self, GHashTable *sinks)

@@ -1,6 +1,6 @@
 /* constants used for signals on the dbus. This file is shared between client and server implementation */
 #define SIGNAL_SINK_INPUT_WHILE_MUTED "SinkInputWhileMuted"
-#define METHOD_SET_SINK_VOLUME "SetSinkVolume"
+#define SIGNAL_UPDATE_SINK_VOLUME "UpdateSinkVolume"
 
 // DBUS items
 #define DBUSMENU_SLIDER_MENUITEM_TYPE          "x-canonical-ido-slider-item"
