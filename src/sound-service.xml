@@ -17,6 +17,10 @@ Our respective UI element should listen to this and therefore will be updated wi
     <signal name="SinkVolumeUpdate">
       <arg name="volume_percent" type="u" direction="out"/>
     </signal>
+<!--    <signal name="SinkMuteUpdate">-->
+<!--      <arg name="current_mute_value" type="b" direction="out"/>-->
+<!--    </signal>-->
+
   </interface>
 </node>
 

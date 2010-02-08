@@ -5,7 +5,6 @@ Copyright 2010 Canonical Ltd.
 Authors:
     Conor Curran <conor.curran@canonical.com>
     Ted Gould <ted@canonical.com>
-    Christoph Korn <c_korn@gmx.de>
     Cody Russell <crussell@canonical.com>
 
 This program is free software: you can redistribute it and/or modify it 
@@ -40,7 +39,7 @@ static gboolean b_all_muted = FALSE;
 static gboolean b_pulse_ready = FALSE;
 static gdouble volume_percent = 0.0;
 
-static void set_global_mute();
+static void set_global_mute_from_ui();
 static gboolean idle_routine (gpointer data);
 static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service);
 
@@ -74,7 +73,7 @@ static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service
     // Mute button
     mute_all_menuitem = dbusmenu_menuitem_new();
     dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, _(b_all_muted == FALSE ? "Mute All" : "Unmute"));
-    g_signal_connect(G_OBJECT(mute_all_menuitem), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED, G_CALLBACK(set_global_mute), NULL);
+    g_signal_connect(G_OBJECT(mute_all_menuitem), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED, G_CALLBACK(set_global_mute_from_ui), NULL);
     //TODO: If no valid sinks are found grey out the item(s)
     dbusmenu_menuitem_property_set_bool(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_ENABLED, b_sink_available);
 
@@ -93,8 +92,14 @@ static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service
     g_signal_connect(G_OBJECT(settings_mi), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED,
                                          G_CALLBACK(show_sound_settings_dialog), NULL);
 }
+/* 'public' method allowing the server to update the mute UI*/
+void update_mute_ui(gboolean incoming_mute_value)
+{
+    b_all_muted = incoming_mute_value;
+    dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, _(b_all_muted == FALSE ? "Mute All" : "Unmute"));    
+}
 
-static void set_global_mute()
+static void set_global_mute_from_ui()
 {
     b_all_muted = !b_all_muted;
     toggle_global_mute(b_all_muted); 
@@ -118,6 +123,7 @@ service_shutdown (IndicatorService *service, gpointer user_data)
 	if (mainloop != NULL) {
 
 		g_debug("Service shutdown - but commented out for right now");
+        // TODO: uncomment for release
 /*        close_pulse_activites()*/
 /*		  g_main_loop_quit(mainloop);*/
 	}
@@ -132,10 +138,10 @@ void update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_m
     volume_percent = percent;
 	g_debug("update pa state with state %i, availability of %i, mute value of %i and a volume percent is %f", pa_state, sink_available, sink_muted, volume_percent);
     rebuild_sound_menu(root_menuitem, dbus_interface);
-    g_debug("About to send over the volume slider");
     GValue value = {0};
     g_value_init(&value, G_TYPE_DOUBLE);
     g_value_set_double(&value, volume_percent * 100);
+    g_debug("About to send over the volume slider initial value %f", (volume_percent * 100));
     dbusmenu_menuitem_property_set_value(DBUSMENU_MENUITEM(volume_slider_menuitem), DBUSMENU_SLIDER_MENUITEM_PROP_VOLUME, &value);
 }
 

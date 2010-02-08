@@ -46,6 +46,7 @@ struct _SliderMenuItem {
 };
 
 GType slider_menu_item_get_type (void);
+// TODO for now the volume percent param is not being used - remove once init mystery is solved
 SliderMenuItem* slider_menu_item_new(gboolean sinks_available, gdouble current_vol);
 
 G_END_DECLS

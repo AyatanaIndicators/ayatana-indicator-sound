@@ -44,6 +44,7 @@ struct _SoundServiceDbusPrivate
 enum {
   SINK_INPUT_WHILE_MUTED,  
   SINK_VOLUME_UPDATE,
+  SINK_MUTE_UPDATE,    
   LAST_SIGNAL
 };
 
@@ -90,11 +91,18 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
                                                     NULL, NULL,
                                                     g_cclosure_marshal_VOID__DOUBLE,
                                                     G_TYPE_NONE, 1, G_TYPE_DOUBLE);
+
+/*    signals[SINK_MUTE_UPDATE] =  g_signal_new("sink-mute-update",*/
+/*                                                    G_TYPE_FROM_CLASS (klass),*/
+/*                                                    G_SIGNAL_RUN_LAST,*/
+/*                                                    0,*/
+/*                                                    NULL, NULL,*/
+/*                                                    g_cclosure_marshal_VOID__BOOLEAN,*/
+/*                                                    G_TYPE_NONE, 1, G_TYPE_BOOLEAN);*/
 }
 
 /**
 DBUS Method Callbacks
-TODO do not see the point in this returning a boolean and also needing a sink index since the service needs to be ultimately aware of what sink is chosen. 
 **/
 void sound_service_dbus_set_sink_volume(SoundServiceDbus* service, const guint volume_percent, GError** gerror)
 {
@@ -102,6 +110,7 @@ void sound_service_dbus_set_sink_volume(SoundServiceDbus* service, const guint v
     set_sink_volume(volume_percent);
 }
 
+//TODO needed ?
 GList *
 sound_service_dbus_get_sink_list (SoundServiceDbus *self)
 {
@@ -135,6 +144,16 @@ void sound_service_dbus_update_sink_volume(SoundServiceDbus* obj, gdouble sink_v
                 sink_volume);
 }
 
+/*void sound_service_dbus_update_sink_mute(SoundServiceDbus* obj, gboolean sink_mute)*/
+/*{*/
+/*    g_debug("Emitting signal: SINK_MUTE_UPDATE, with sink mute %i", sink_mute);*/
+/*    g_signal_emit(obj,*/
+/*                signals[SINK_MUTE_UPDATE],*/
+/*                0,*/
+/*                sink_mute);*/
+/*}*/
+
+// TODO needed?
 void set_pa_sinks_hash(SoundServiceDbus *self, GHashTable *sinks)
 {
     SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);

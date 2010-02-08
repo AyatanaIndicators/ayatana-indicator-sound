@@ -291,10 +291,11 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
             //update the UI
             pa_volume_t vol = pa_cvolume_avg(&s->volume);
             // Use the base of the device to ensure maximum acceptable levels on the hardware
-            gint volume_percent = (vol/s->base_volume);
-            g_debug("When using base volume => volume = %i", volume_percent);
+            gdouble volume_percent = (vol/s->base_volume) * 100;
+            g_debug("When using base volume => volume = %f", volume_percent);
             g_debug("about to update ui with linear volume of %f", pa_sw_volume_to_linear(vol));            
             sound_service_dbus_update_sink_volume(dbus_service, pa_sw_volume_to_linear(vol) * 100); 
+            update_mute_ui(s->mute);
         }
     }
     else
