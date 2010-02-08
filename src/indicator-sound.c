@@ -82,7 +82,7 @@ static gdouble input_value_from_across_the_dbus = 0.0;
 
 static gboolean new_slider_item (DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget);
-static gboolean slider_value_changed_event_cb(GtkRange *range, gpointer  user_data);
+static gboolean slider_value_changed_event_cb(GtkRange *range, GtkScrollType scroll_type, gdouble input_value, gpointer  user_data);
 /*static void change_speaker_image(gdouble volume_percent);*/
 /*static void prepare_state_machine();*/
 
@@ -319,7 +319,7 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
 	g_signal_connect(G_OBJECT(newitem), DBUSMENU_MENUITEM_SIGNAL_PROPERTY_CHANGED, G_CALLBACK(slider_prop_change_cb), volume_slider);
     
     GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);  
-    g_signal_connect(slider, "value-changed", G_CALLBACK(slider_value_changed_event_cb), newitem);                      
+    g_signal_connect(slider, "change-value", G_CALLBACK(slider_value_changed_event_cb), newitem);                      
     gtk_widget_show_all(volume_slider);
 	return TRUE;
 }
@@ -341,16 +341,16 @@ static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue *
 	return;
 }
 
-static gboolean slider_value_changed_event_cb(GtkRange *range, gpointer  user_data)
+static gboolean slider_value_changed_event_cb(GtkRange *range, GtkScrollType scroll_type, gdouble input_value, gpointer  user_data)
 {
 /*    #if(slider_value != input_value_from_across_the_dbus)*/
 /*    #{    */
     DbusmenuMenuitem *item = (DbusmenuMenuitem*)user_data;
+    gdouble clamped_input = CLAMP(input_value, 0, 100);
     GValue value = {0};
-    gdouble input = gtk_range_get_value(range);
-    g_debug("CALLBACK for the range - input received = %f", input);
+    g_debug("User input Event listener for the range - input received = %f", clamped_input);
     g_value_init(&value, G_TYPE_DOUBLE);
-    g_value_set_double(&value, input);
+    g_value_set_double(&value, clamped_input);
     dbusmenu_menuitem_handle_event (item, "slider_change", &value, 0);
 /*    change_speaker_image(slider_value);*/
 /*    }*/

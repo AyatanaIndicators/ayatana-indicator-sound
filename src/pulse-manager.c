@@ -44,7 +44,8 @@ void set_sink_volume(gdouble percent)
     g_debug("and an actual volume of %f", (gdouble)new_volume);
     pa_cvolume dev_vol;
     sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
-    pa_cvolume_set(&dev_vol, s->volume.channels, new_volume);
+    pa_cvolume_set(&dev_vol, s->volume.channels, new_volume);   
+    // TODO - really this needs to be set in the success callback - if call fails then the ui will not be updated indefinitely!
     pa_operation_unref(pa_context_set_sink_volume_by_index(pulse_context, DEFAULT_SINK_INDEX, &dev_vol, NULL, NULL));
 }
 
@@ -194,15 +195,13 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
             DEFAULT_SINK_INDEX = (DEFAULT_SINK_INDEX < 0) ? 0 : DEFAULT_SINK_INDEX;
             test_hash();
             update_pa_state(TRUE, device_available, default_sink_is_muted(), get_default_sink_volume()); 
-            g_debug("default sink index : %d", DEFAULT_SINK_INDEX);
-                        
+            g_debug("default sink index : %d", DEFAULT_SINK_INDEX);                        
         }
         else{
             //Update the indicator to show PA either is not ready or has no available sink
             g_warning("Cannot find a suitable default sink ...");
             update_pa_state(FALSE, device_available, TRUE, 0); 
         }
-
     }
     else{
         g_debug("About to add an item to our hash");
@@ -285,8 +284,8 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
 /*        g_debug("Are the volumes the same %i", equal);            */
         s->volume = info->volume;
         s->base_volume = info->base_volume;
-        s->channel_map = info->channel_map;        
-        if(DEFAULT_SINK_INDEX == s->index/* && update_ui_vol == TRUE*/)
+        s->channel_map = info->channel_map; 
+        if(DEFAULT_SINK_INDEX == s->index)
         {
             //update the UI
             pa_volume_t vol = pa_cvolume_avg(&s->volume);
@@ -296,6 +295,11 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
             g_debug("about to update ui with linear volume of %f", pa_sw_volume_to_linear(vol));            
             sound_service_dbus_update_sink_volume(dbus_service, pa_sw_volume_to_linear(vol) * 100); 
             update_mute_ui(s->mute);
+        }
+        else{
+            // Reset the ui flag
+            // TODO: there must be a nicer way to do this - I suspect this pattern could introduce race conditions !!!
+            g_debug("SKIPPED UPDATING UI BECAUSE THE UI_NEEDS_UPDATE WAS FALSE!");
         }
     }
     else
@@ -343,7 +347,7 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
 	switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) {
         case PA_SUBSCRIPTION_EVENT_SINK:
             if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
-                //TODO handle the remove event
+                //TODO handle the remove event => if its our default sink - grey out the ui with update_pa_state
             } else {
                 pa_operation_unref(pa_context_get_sink_info_by_index(c, index, update_sink_info, userdata));
             }            
