@@ -90,7 +90,7 @@ static gboolean slider_value_changed_event_cb(GtkRange *range, gpointer  user_da
 static DBusGProxy *sound_dbus_proxy = NULL;
 static void connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata);
 static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gint sink_index, gboolean value, gpointer userdata);
-void catch_signal_sink_volume_update(DBusGProxy * proxy, gint sink_volume, gpointer userdata); 
+static void catch_signal_sink_volume_update(DBusGProxy * proxy, gdouble volume_percent, gpointer userdata); 
 
 /****Volume States 'members' ***/
 static const gint STATE_MUTED = 0;
@@ -193,8 +193,8 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
             g_debug("about to connect to the signals");
 			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_TYPE_INT, G_TYPE_BOOLEAN, G_TYPE_INVALID);
 			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_CALLBACK(catch_signal_sink_input_while_muted), NULL, NULL);
-			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_UPDATE_SINK_VOLUME, G_TYPE_INT, G_TYPE_INVALID);
-			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_UPDATE_SINK_VOLUME, G_CALLBACK(catch_signal_sink_volume_update), NULL, NULL);
+			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_VOLUME_UPDATE, G_TYPE_DOUBLE, G_TYPE_INVALID);
+			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_VOLUME_UPDATE, G_CALLBACK(catch_signal_sink_volume_update), NULL, NULL);
 
 		}
 
@@ -211,9 +211,12 @@ static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gint sink_in
     g_debug("signal caught - I don't believe it ! with index %i and value %i", sink_index, value);
 }
 
-void catch_signal_sink_volume_update(DBusGProxy * proxy, gint sink_volume, gpointer userdata)
+static void catch_signal_sink_volume_update(DBusGProxy * proxy, gdouble volume_percent, gpointer userdata)
 {
-    g_debug("signal caught - update sink volume with value : %i", sink_volume);
+    g_debug("signal caught - update sink volume with value : %f", volume_percent);
+    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
+    GtkRange* range = (GtkRange*)slider;   
+    gtk_range_set_value(range, volume_percent);  
 }
 
 static void

@@ -88,8 +88,8 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
                                                     G_SIGNAL_RUN_LAST,
                                                     0,
                                                     NULL, NULL,
-                                                    g_cclosure_marshal_VOID__INT,
-                                                    G_TYPE_NONE, 1, G_TYPE_INT);
+                                                    g_cclosure_marshal_VOID__DOUBLE,
+                                                    G_TYPE_NONE, 1, G_TYPE_DOUBLE);
 }
 
 /**
@@ -112,6 +112,7 @@ sound_service_dbus_get_sink_list (SoundServiceDbus *self)
 
 
 /**
+SIGNALS
 Utility methods to emit signals from the service into the ether.
 **/
 void sound_service_dbus_sink_input_while_muted(SoundServiceDbus* obj, gint sink_index, gboolean value)
@@ -125,9 +126,9 @@ void sound_service_dbus_sink_input_while_muted(SoundServiceDbus* obj, gint sink_
                 value);
 }
 
-void sound_service_dbus_update_sink_volume(SoundServiceDbus* obj, gint sink_volume)
+void sound_service_dbus_update_sink_volume(SoundServiceDbus* obj, gdouble sink_volume)
 {
-    g_debug("Emitting signal: UPDATE_SINK_VOLUME, with sink_volme %i", sink_volume);
+    g_debug("Emitting signal: SINK_VOLUME_UPDATE, with sink_volme %f", sink_volume);
     g_signal_emit(obj,
                 signals[SINK_VOLUME_UPDATE],
                 0,
