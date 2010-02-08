@@ -13,6 +13,7 @@ Our respective UI element should listen to this and therefore will be updated wi
       <arg name="sink_index" type="x" direction="out"/>
       <arg name="mute_value" type="b" direction="out"/>
     </signal>
+    
     <signal name="SinkVolumeUpdate">
       <arg name="volume_percent" type="u" direction="out"/>
     </signal>
