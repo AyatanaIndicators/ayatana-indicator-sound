@@ -25,10 +25,15 @@
 #include <dbus/dbus-glib.h>
 #include "dbus-shared-names.h"
 #include "sound-service-dbus.h"
-#include "sound-service-server.h"
 #include "common-defs.h"
 #include "sound-service-marshal.h"
 #include "pulse-manager.h"
+
+// DBUS methods - 
+// TODO - other should be static and moved from the header to here
+static gboolean sound_service_dbus_get_sink_volume(SoundServiceDbus* service, gdouble* volume_percent_input, GError** gerror);
+
+#include "sound-service-server.h"
 
 typedef struct _SoundServiceDbusPrivate SoundServiceDbusPrivate;
 
@@ -36,7 +41,7 @@ struct _SoundServiceDbusPrivate
 {
     DBusGConnection *system_bus;
     DBusGConnection *connection;
-    GHashTable *sinks_hash;
+    gdouble         volume_percent;
 };
 
 
@@ -44,7 +49,6 @@ struct _SoundServiceDbusPrivate
 enum {
   SINK_INPUT_WHILE_MUTED,  
   SINK_VOLUME_UPDATE,
-  SINK_MUTE_UPDATE,    
   LAST_SIGNAL
 };
 
@@ -53,11 +57,11 @@ static guint signals[LAST_SIGNAL] = { 0 };
 
 #define SOUND_SERVICE_DBUS_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), SOUND_SERVICE_DBUS_TYPE, SoundServiceDbusPrivate))
 
-
 static void sound_service_dbus_class_init (SoundServiceDbusClass *klass);
 static void sound_service_dbus_init       (SoundServiceDbus *self);
 static void sound_service_dbus_dispose    (GObject *object);
 static void sound_service_dbus_finalize   (GObject *object);
+
 
 /* GObject Boilerplate */
 G_DEFINE_TYPE (SoundServiceDbus, sound_service_dbus, G_TYPE_OBJECT);
@@ -92,14 +96,50 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
                                                     g_cclosure_marshal_VOID__DOUBLE,
                                                     G_TYPE_NONE, 1, G_TYPE_DOUBLE);
 
-/*    signals[SINK_MUTE_UPDATE] =  g_signal_new("sink-mute-update",*/
-/*                                                    G_TYPE_FROM_CLASS (klass),*/
-/*                                                    G_SIGNAL_RUN_LAST,*/
-/*                                                    0,*/
-/*                                                    NULL, NULL,*/
-/*                                                    g_cclosure_marshal_VOID__BOOLEAN,*/
-/*                                                    G_TYPE_NONE, 1, G_TYPE_BOOLEAN);*/
 }
+
+static void
+sound_service_dbus_init (SoundServiceDbus *self)
+{
+    GError *error = NULL;
+    SoundServiceDbusPrivate * priv = SOUND_SERVICE_DBUS_GET_PRIVATE(self);
+
+	priv->system_bus = NULL;
+	priv->connection = NULL;
+    priv->volume_percent = 0;
+
+    /* Get the system bus */
+    priv->system_bus = dbus_g_bus_get (DBUS_BUS_SYSTEM, &error);
+	/* Put the object on DBus */
+	priv->connection = dbus_g_bus_get(DBUS_BUS_SESSION, &error);
+
+	if (error != NULL) {
+		g_error("Unable to connect to the session bus when creating application indicator: %s", error->message);
+		g_error_free(error);
+		return;
+	}
+	dbus_g_connection_register_g_object(priv->connection,
+	                                    "/org/ayatana/indicator/sound/service",
+	                                    G_OBJECT(self));
+
+    return;
+}
+
+
+static void
+sound_service_dbus_dispose (GObject *object)
+{
+	G_OBJECT_CLASS (sound_service_dbus_parent_class)->dispose (object);
+	return;
+}
+
+static void
+sound_service_dbus_finalize (GObject *object)
+{
+	G_OBJECT_CLASS (sound_service_dbus_parent_class)->finalize (object);
+	return;
+}
+
 
 /**
 DBUS Method Callbacks
@@ -110,13 +150,12 @@ void sound_service_dbus_set_sink_volume(SoundServiceDbus* service, const guint v
     set_sink_volume(volume_percent);
 }
 
-//TODO needed ?
-GList *
-sound_service_dbus_get_sink_list (SoundServiceDbus *self)
+static gboolean sound_service_dbus_get_sink_volume (SoundServiceDbus *self, gdouble *volume_percent_input, GError** gerror)
 {
-  SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
-
-  return g_hash_table_get_keys (priv->sinks_hash);
+    SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
+    g_debug("Get sink volume method in the sound service dbus!, about to send over volume percent of  %f", priv->volume_percent);
+    *volume_percent_input = priv->volume_percent;
+    return TRUE;
 }
 
 
@@ -137,6 +176,9 @@ void sound_service_dbus_sink_input_while_muted(SoundServiceDbus* obj, gint sink_
 
 void sound_service_dbus_update_sink_volume(SoundServiceDbus* obj, gdouble sink_volume)
 {
+    SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (obj);
+    priv->volume_percent = sink_volume;            
+
     g_debug("Emitting signal: SINK_VOLUME_UPDATE, with sink_volme %f", sink_volume);
     g_signal_emit(obj,
                 signals[SINK_VOLUME_UPDATE],
@@ -153,50 +195,5 @@ void sound_service_dbus_update_sink_volume(SoundServiceDbus* obj, gdouble sink_v
 /*                sink_mute);*/
 /*}*/
 
-// TODO needed?
-void set_pa_sinks_hash(SoundServiceDbus *self, GHashTable *sinks)
-{
-    SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
-    priv->sinks_hash = sinks;
-}
      
-static void
-sound_service_dbus_init (SoundServiceDbus *self)
-{
-    GError *error = NULL;
-    SoundServiceDbusPrivate * priv = SOUND_SERVICE_DBUS_GET_PRIVATE(self);
-
-	priv->system_bus = NULL;
-	priv->connection = NULL;
-
-    /* Get the system bus */
-    priv->system_bus = dbus_g_bus_get (DBUS_BUS_SYSTEM, &error);
-	/* Put the object on DBus */
-	priv->connection = dbus_g_bus_get(DBUS_BUS_SESSION, &error);
-
-	if (error != NULL) {
-		g_error("Unable to connect to the session bus when creating application indicator: %s", error->message);
-		g_error_free(error);
-		return;
-	}
-	dbus_g_connection_register_g_object(priv->connection,
-	                                    "/org/ayatana/indicator/sound/service",
-	                                    G_OBJECT(self));
-
-    return;
-}
-
-static void
-sound_service_dbus_dispose (GObject *object)
-{
-	G_OBJECT_CLASS (sound_service_dbus_parent_class)->dispose (object);
-	return;
-}
-
-static void
-sound_service_dbus_finalize (GObject *object)
-{
-	G_OBJECT_CLASS (sound_service_dbus_parent_class)->finalize (object);
-	return;
-}
 

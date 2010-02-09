@@ -187,14 +187,14 @@ For now this callback it assumes it only used at startup. It may be necessary to
 static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, int eol, void *userdata)
 {
     if (eol > 0) {
-        gboolean device_available;
-        device_available = sink_available();
+        gboolean device_available = sink_available();
         if(device_available == TRUE)
         {
             // Hopefully the PA server has set the default device if not default to 0
             DEFAULT_SINK_INDEX = (DEFAULT_SINK_INDEX < 0) ? 0 : DEFAULT_SINK_INDEX;
             test_hash();
             update_pa_state(TRUE, device_available, default_sink_is_muted(), get_default_sink_volume()); 
+            sound_service_dbus_update_sink_volume(dbus_service, get_default_sink_volume()); 
             g_debug("default sink index : %d", DEFAULT_SINK_INDEX);                        
         }
         else{

@@ -107,8 +107,9 @@ static void set_global_mute_from_ui()
 
 /*    GValue value = {0};*/
 /*    g_value_init(&value, G_TYPE_DOUBLE);*/
-/*    g_value_set_double(&value, 100.0);*/
+/*    g_value_set_double(&value, 99.0);*/
 /*    // Testing*/
+/*    g_debug("BUGGY volume update");*/
 /*    dbusmenu_menuitem_property_set_value(DBUSMENU_MENUITEM(volume_slider_menuitem), DBUSMENU_SLIDER_MENUITEM_PROP_VOLUME, &value);*/
 }
 
@@ -121,7 +122,6 @@ service_shutdown (IndicatorService *service, gpointer user_data)
 {
 
 	if (mainloop != NULL) {
-
 		g_debug("Service shutdown - but commented out for right now");
         // TODO: uncomment for release
 /*        close_pulse_activites()*/
@@ -138,11 +138,6 @@ void update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_m
     volume_percent = percent;
 	g_debug("update pa state with state %i, availability of %i, mute value of %i and a volume percent is %f", pa_state, sink_available, sink_muted, volume_percent);
     rebuild_sound_menu(root_menuitem, dbus_interface);
-    GValue value = {0};
-    g_value_init(&value, G_TYPE_DOUBLE);
-    g_value_set_double(&value, volume_percent * 100);
-    g_debug("About to send over the volume slider initial value %f", (volume_percent * 100));
-    dbusmenu_menuitem_property_set_value(DBUSMENU_MENUITEM(volume_slider_menuitem), DBUSMENU_SLIDER_MENUITEM_PROP_VOLUME, &value);
 }
 
 
@@ -173,6 +168,13 @@ main (int argc, char ** argv)
     DbusmenuServer *server = dbusmenu_server_new(INDICATOR_SOUND_DBUS_OBJECT);
     dbusmenu_server_set_root(server, root_menuitem);
     establish_pulse_activities(dbus_interface);
+
+/*    // THIS DOES NOT WORK FROM HERE*/
+/*    GValue value = {0};*/
+/*    g_value_init(&value, G_TYPE_DOUBLE);*/
+/*    g_value_set_double(&value, volume_percent * 100);*/
+/*    g_debug("About to send over the volume slider initial value %f", (volume_percent * 100));*/
+/*    dbusmenu_menuitem_property_set_value(DBUSMENU_MENUITEM(volume_slider_menuitem), DBUSMENU_SLIDER_MENUITEM_PROP_VOLUME, &value);*/
 
     // Run the loop
     mainloop = g_main_loop_new(NULL, FALSE);
