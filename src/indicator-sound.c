@@ -82,8 +82,11 @@ static GtkWidget *volume_slider = NULL;
 static gboolean new_slider_item (DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget);
 static gboolean slider_value_changed_event_cb(GtkRange *range, GtkScrollType scroll_type, gdouble input_value, gpointer  user_data);
+
 /*static void change_speaker_image(gdouble volume_percent);*/
 static void prepare_state_machine();
+static void determine_state_from_volume(gdouble volume_percent);
+static void update_state(const gint state);
 
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
@@ -138,31 +141,31 @@ static void indicator_sound_init (IndicatorSound *self)
 }
 
 
-static void test_images_hash()
-{
-    g_debug("about to test the images hash");      
-    gchar* current_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
-    g_debug("start up current image name  = %s", current_name);       
-    gchar* previous_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(previous_state));
-    g_debug("start up previous image name  = %s", previous_name);       
-}
+/*static void test_images_hash()*/
+/*{*/
+/*    g_debug("about to test the images hash");      */
+/*    gchar* current_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));*/
+/*    g_debug("start up current image name  = %s", current_name);       */
+/*    gchar* previous_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(previous_state));*/
+/*    g_debug("start up previous image name  = %s", previous_name);       */
+/*}*/
 
 /*
 Prepare states Array.
 */
 static void prepare_state_machine()
 {
+    // TODO we need three more images
     volume_states = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
     g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MUTED), g_strdup("audio-volume-muted"));
-    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_ZERO), g_strdup("audio-volume-zero"));
+    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_ZERO), g_strdup(/*"audio-volume-zero"*/"audio-volume-muted"));
     g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_LOW), g_strdup("audio-volume-low"));
     g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MEDIUM), g_strdup("audio-volume-medium"));
     g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_HIGH), g_strdup("audio-volume-high"));
-    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT), g_strdup("audio-volume-muted-blocking"));
-    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_SINKS_NONE), g_strdup("audio-output-none"));
-    test_images_hash();
+    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT), g_strdup(/*"audio-volume-muted-blocking"*/"audio-volume-muted"));
+    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_SINKS_NONE), g_strdup(/*"audio-output-none"*/"audio-volume-muted"));
+    //test_images_hash();
 }
-
 
 static void
 connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata)
@@ -197,7 +200,9 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
                 g_free(volume_percent_input);
                 return;
 			}
-            initial_volume_percent = *volume_percent_input * 100;
+            initial_volume_percent = *volume_percent_input;
+            determine_state_from_volume(initial_volume_percent);
+            g_free(volume_percent_input);
             g_debug("at the indicator start up and the volume percent returned from dbus method is %f", initial_volume_percent);
 		}
 
@@ -218,7 +223,8 @@ static void catch_signal_sink_volume_update(DBusGProxy * proxy, gdouble volume_p
     g_debug("signal caught - update sink volume with value : %f", volume_percent);
     GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
     GtkRange* range = (GtkRange*)slider;   
-    gtk_range_set_value(range, volume_percent);  
+    gtk_range_set_value(range, volume_percent); 
+    determine_state_from_volume(volume_percent);
 }
 
 
@@ -252,41 +258,39 @@ get_label (IndicatorObject * io)
 static GtkImage *
 get_icon (IndicatorObject * io)
 {
-    //gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
-    //g_debug("At start-up attempting to set the image to %s", image_name);
-	speaker_image = GTK_IMAGE(gtk_image_new_from_icon_name("audio-volume-low", GTK_ICON_SIZE_MENU));
+    gchar* current_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
+    g_debug("At start-up attempting to set the image to %s", current_name);
+	speaker_image = GTK_IMAGE(gtk_image_new_from_icon_name(current_name, GTK_ICON_SIZE_MENU));
 	gtk_widget_show(GTK_WIDGET(speaker_image));
 	return speaker_image;
 }
 
-/*static void update_state(const gint state)*/
-/*{*/
-/*    previous_state = current_state;*/
-/*    current_state = state;*/
-/*    gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));*/
-/*    gtk_image_set_from_icon_name(speaker_image, image_name, GTK_ICON_SIZE_MENU);*/
-/*}*/
+static void update_state(const gint state)
+{
+    previous_state = current_state;
+    current_state = state;
+    gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
+    gtk_image_set_from_icon_name(speaker_image, image_name, GTK_ICON_SIZE_MENU);
+}
 
-/*static void determine_state(gdouble volume_percent)*/
-/*{*/
-/*    */
-/*}*/
+static void determine_state_from_volume(gdouble volume_percent)
+{
+    gint state = current_state;
+    if (volume_percent < 30.0 && volume_percent > 0){
+        state = STATE_LOW;
+    }
+    else if(volume_percent < 70.0 && volume_percent > 30.0){
+        state = STATE_MEDIUM;
+    }
+    else if(volume_percent > 70.0){
+        state = STATE_HIGH;
+    }
+    else if(volume_percent == 0.0){
+        state = STATE_ZERO;
+    }    
+    update_state(state);   
+}
  
-/*static void change_speaker_image(gdouble volume_percent)*/
-/*{    */
-/*    if (volume_percent < 30.0 && volume_percent > 0){*/
-/*        gtk_image_set_from_icon_name(speaker_image, "audio-volume-low", GTK_ICON_SIZE_MENU);*/
-/*    }*/
-/*    else if(volume_percent < 70.0 && volume_percent > 30.0){*/
-/*        gtk_image_set_from_icon_name(speaker_image, "audio-volume-medium", GTK_ICON_SIZE_MENU);*/
-/*    }*/
-/*    else if(volume_percent > 70.0){*/
-/*        gtk_image_set_from_icon_name(speaker_image, "audio-volume-high", GTK_ICON_SIZE_MENU);*/
-/*    }*/
-/*    else if(volume_percent <= 0.0){*/
-/*        gtk_image_set_from_icon_name(speaker_image, "audio-volume-zero", GTK_ICON_SIZE_MENU);*/
-/*    }*/
-/*}*/
 
 /* Indicator based function to get the menu for the whole
    applet.  This starts up asking for the parts of the menu
