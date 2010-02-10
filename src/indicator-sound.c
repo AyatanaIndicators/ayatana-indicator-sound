@@ -257,6 +257,12 @@ static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_pe
 {
     g_debug("signal caught - update sink volume with value : %f", volume_percent);
     GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
+    gboolean in_use = gtk_widget_has_grab(volume_slider);
+    if(in_use == TRUE)
+    {
+        g_debug("looks like the slider is the UI element in use therefore ignore this volume message => prevent circular semi feedback.");
+        return;
+    }
     GtkRange *range = (GtkRange*)slider;   
     gtk_range_set_value(range, volume_percent); 
     determine_state_from_volume(volume_percent);

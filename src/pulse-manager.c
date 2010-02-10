@@ -93,21 +93,20 @@ static gboolean default_sink_is_muted()
         return FALSE;
     if (g_hash_table_size(sink_hash) < 1)
         return FALSE;
-    // TODO ensure hash has a key with this value!
     sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
     return s->mute;
 }
 
 static void check_sink_input_while_muted_event(gint sink_index)
 {
+    g_debug("SINKINPUTWHILEMUTED SIGNAL EVENT TO BE SENT FROM PA MANAGER - check trace for value");
+
     if (default_sink_is_muted(sink_index) == TRUE)
     {
-        g_debug("SINKINPUTWHILEMUTED SIGNAL EVENT TO BE SENT FROM PA MANAGER");
         sound_service_dbus_sink_input_while_muted (dbus_service, TRUE);
     }
     else
     {
-        // TODO is this overkill - signal will be sent alot
         sound_service_dbus_sink_input_while_muted(dbus_service, FALSE);
     }
 }
@@ -160,6 +159,7 @@ void set_sink_volume(gdouble percent)
     pa_cvolume dev_vol;
     sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
     pa_cvolume_set(&dev_vol, s->volume.channels, new_volume);   
+    
     pa_operation_unref(pa_context_set_sink_volume_by_index(pulse_context, DEFAULT_SINK_INDEX, &dev_vol, NULL, NULL));
 }
 
@@ -361,7 +361,6 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
             } else {
                 pa_operation_unref(pa_context_get_sink_info_by_index(c, index, update_sink_info, userdata));
             }            
-            //g_debug("Event sink for %i", index);
             break;
         case PA_SUBSCRIPTION_EVENT_SINK_INPUT:
 			// This will be triggered when the sink receives input from a new stream

@@ -33,6 +33,7 @@
 // TODO - other should be static and moved from the header to here
 static gboolean sound_service_dbus_get_sink_volume(SoundServiceDbus* service, gdouble* volume_percent_input, GError** gerror);
 static gboolean sound_service_dbus_get_sink_mute(SoundServiceDbus* service, gboolean* mute_input, GError** gerror);
+static void sound_service_dbus_set_sink_volume(SoundServiceDbus* service, const guint volume_percent, GError** gerror);
 
 #include "sound-service-server.h"
 
@@ -155,7 +156,7 @@ sound_service_dbus_finalize (GObject *object)
 /**
 DBUS Method Callbacks
 **/
-void sound_service_dbus_set_sink_volume(SoundServiceDbus* service, const guint volume_percent, GError** gerror)
+static void sound_service_dbus_set_sink_volume(SoundServiceDbus* service, const guint volume_percent, GError** gerror)
 {
     g_debug("in the set sink volume method in the sound service dbus!, with volume_percent of %i", volume_percent);
     set_sink_volume(volume_percent);
