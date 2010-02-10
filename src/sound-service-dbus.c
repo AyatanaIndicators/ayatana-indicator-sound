@@ -32,6 +32,7 @@
 // DBUS methods - 
 // TODO - other should be static and moved from the header to here
 static gboolean sound_service_dbus_get_sink_volume(SoundServiceDbus* service, gdouble* volume_percent_input, GError** gerror);
+static gboolean sound_service_dbus_get_sink_mute(SoundServiceDbus* service, gboolean* mute_input, GError** gerror);
 
 #include "sound-service-server.h"
 
@@ -42,6 +43,7 @@ struct _SoundServiceDbusPrivate
     DBusGConnection *system_bus;
     DBusGConnection *connection;
     gdouble         volume_percent;
+    gboolean        mute;
 };
 
 
@@ -86,8 +88,8 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
                                                     G_SIGNAL_RUN_LAST,
                                                     0,
                                                     NULL, NULL,
-                                                    _sound_service_marshal_VOID__INT_BOOLEAN,
-                                                    G_TYPE_NONE, 2, G_TYPE_INT, G_TYPE_BOOLEAN);
+                                                    g_cclosure_marshal_VOID__BOOLEAN,
+                                                    G_TYPE_NONE, 1, G_TYPE_BOOLEAN);
 
     signals[SINK_VOLUME_UPDATE] =  g_signal_new("sink-volume-update",
                                                     G_TYPE_FROM_CLASS (klass),
@@ -167,20 +169,25 @@ static gboolean sound_service_dbus_get_sink_volume (SoundServiceDbus *self, gdou
     return TRUE;
 }
 
+static gboolean sound_service_dbus_get_sink_mute (SoundServiceDbus *self, gboolean *mute_input, GError** gerror)
+{
+    SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
+    g_debug("Get sink mute - sound service dbus!, about to send over mute_value of  %i", priv->mute);
+    *mute_input = priv->mute;
+    return TRUE;
+}
 
 /**
 SIGNALS
 Utility methods to emit signals from the service into the ether.
 **/
-void sound_service_dbus_sink_input_while_muted(SoundServiceDbus* obj, gint sink_index, gboolean value)
+void sound_service_dbus_sink_input_while_muted(SoundServiceDbus* obj,  gboolean block_value)
 {
-/*    g_assert((num < LAST_SIGNAL) && (num >= 0));*/
-    g_debug("Emitting signal: SINK_INPUT_WHILE_MUTED, with sink_index %i and value %i", sink_index, value);
+    g_debug("Emitting signal: SINK_INPUT_WHILE_MUTED, with  block_value: %i", block_value);
     g_signal_emit(obj,
                 signals[SINK_INPUT_WHILE_MUTED],
                 0,
-                sink_index,
-                value);
+                block_value);
 }
 
 void sound_service_dbus_update_sink_volume(SoundServiceDbus* obj, gdouble sink_volume)
@@ -198,10 +205,14 @@ void sound_service_dbus_update_sink_volume(SoundServiceDbus* obj, gdouble sink_v
 void sound_service_dbus_update_sink_mute(SoundServiceDbus* obj, gboolean sink_mute)
 {
     g_debug("Emitting signal: SINK_MUTE_UPDATE, with sink mute %i", sink_mute);
+
+    SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (obj);
+    priv->mute = sink_mute;            
+
     g_signal_emit(obj,
                 signals[SINK_MUTE_UPDATE],
                 0,
-                sink_mute);
+                priv->mute);
 }
 
      

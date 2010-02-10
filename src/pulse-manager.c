@@ -62,15 +62,15 @@ static void destroy_sink_info(void *value)
     g_free(sink);  
 }
 
-static void test_hash(){
-    guint size = 0;
-    size = g_hash_table_size(sink_hash);
-    g_debug("Size of hash = %i", size);
-    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
-    g_debug("The name of our sink is %s", s->name); 
-    g_debug("and the max volume is %f", (gdouble)s->base_volume); 
+/*static void test_hash(){*/
+/*    guint size = 0;*/
+/*    size = g_hash_table_size(sink_hash);*/
+/*    g_debug("Size of hash = %i", size);*/
+/*    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   */
+/*    g_debug("The name of our sink is %s", s->name); */
+/*    g_debug("and the max volume is %f", (gdouble)s->base_volume); */
 
-}
+/*}*/
 
 /*
 Controllers & Utilities
@@ -103,9 +103,13 @@ static void check_sink_input_while_muted_event(gint sink_index)
     if (default_sink_is_muted(sink_index) == TRUE)
     {
         g_debug("SINKINPUTWHILEMUTED SIGNAL EVENT TO BE SENT FROM PA MANAGER");
-        sound_service_dbus_sink_input_while_muted (dbus_service, sink_index, TRUE);
+        sound_service_dbus_sink_input_while_muted (dbus_service, TRUE);
     }
-    return;
+    else
+    {
+        // TODO is this overkill - signal will be sent alot
+        sound_service_dbus_sink_input_while_muted(dbus_service, FALSE);
+    }
 }
 
 static gdouble get_default_sink_volume()
@@ -189,9 +193,8 @@ static void context_success_callback(pa_context *c, int success, void *userdata)
 /**
 On Service startup this callback will be called multiple times resulting our sinks_hash container to be filled with the
 available sinks.
-key -> index
-value -> sink_info
-For now this callback it assumes it only used at startup. It may be necessary to use if sinks become available after startup
+For now this callback it assumes it only used at startup. It may be necessary to use if sinks become available after startup.
+Major candidate for refactoring.
 **/
 static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, int eol, void *userdata)
 {
@@ -201,9 +204,12 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
         {
             // Hopefully the PA server has set the default device if not default to 0
             DEFAULT_SINK_INDEX = (DEFAULT_SINK_INDEX < 0) ? 0 : DEFAULT_SINK_INDEX;
-            test_hash();
+            // TODO optimize
+            // Cache method returns! (unneccessary multiple utility calls)
+            // test_hash();
             update_pa_state(TRUE, device_available, default_sink_is_muted(), get_default_sink_volume()); 
             sound_service_dbus_update_sink_volume(dbus_service, get_default_sink_volume()); 
+            sound_service_dbus_update_sink_mute(dbus_service, default_sink_is_muted()); 
             g_debug("default sink index : %d", DEFAULT_SINK_INDEX);                        
         }
         else{
@@ -304,14 +310,10 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
             
             update_mute_ui(s->mute);
         }
-        else{
-            // Reset the ui flag
-            // TODO: there must be a nicer way to do this - I suspect this pattern could introduce race conditions !!!
-            g_debug("SKIPPED UPDATING UI BECAUSE THE UI_NEEDS_UPDATE WAS FALSE!");
-        }
     }
     else
     {
+        // TODO ADD new sink - part of big refactor
         g_debug("attempting to add new sink with name %s", info->name);
         //sink_info *s;
         //s = g_new0(sink_info, 1);                

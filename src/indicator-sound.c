@@ -83,16 +83,17 @@ static gboolean new_slider_item (DbusmenuMenuitem * newitem, DbusmenuMenuitem * 
 static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget);
 static gboolean slider_value_changed_event_cb(GtkRange *range, GtkScrollType scroll_type, gdouble input_value, gpointer  user_data);
 
-/*static void change_speaker_image(gdouble volume_percent);*/
 static void prepare_state_machine();
 static void determine_state_from_volume(gdouble volume_percent);
 static void update_state(const gint state);
-static void revert_state();
+static void fetch_volume_percent_from_dbus();
+static void fetch_mute_value_from_dbus();
+/*static void revert_state();*/
 
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
 static void connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata);
-static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gint sink_index, gboolean value, gpointer userdata);
+static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean value, gpointer userdata);
 static void catch_signal_sink_volume_update(DBusGProxy * proxy, gdouble volume_percent, gpointer userdata); 
 static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer userdata);
 
@@ -109,6 +110,7 @@ static GtkImage *speaker_image = NULL;
 static gint current_state = 0;
 static gint previous_state = 0;
 static gdouble initial_volume_percent = 0;
+static gboolean initial_mute = FALSE;
 
 static void
 indicator_sound_class_init (IndicatorSoundClass *klass)
@@ -189,26 +191,16 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
 				g_error_free(error);
 			}
             g_debug("about to connect to the signals");
-			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_TYPE_INT, G_TYPE_BOOLEAN, G_TYPE_INVALID);
+			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_TYPE_BOOLEAN, G_TYPE_INVALID);
 			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_CALLBACK(catch_signal_sink_input_while_muted), NULL, NULL);
 			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_VOLUME_UPDATE, G_TYPE_DOUBLE, G_TYPE_INVALID);
 			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_VOLUME_UPDATE, G_CALLBACK(catch_signal_sink_volume_update), NULL, NULL);
 			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_MUTE_UPDATE, G_TYPE_BOOLEAN, G_TYPE_INVALID);
 			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_MUTE_UPDATE, G_CALLBACK(catch_signal_sink_mute_update), NULL, NULL);
 
-            gdouble *volume_percent_input; 
-            volume_percent_input = g_new0(gdouble, 1);
-            org_ayatana_indicator_sound_get_sink_volume(sound_dbus_proxy, volume_percent_input, &error);
-			if (error != NULL) {
-				g_warning("Unable to fetch volume at indicator start up: %s", error->message);
-				g_error_free(error);
-                g_free(volume_percent_input);
-                return;
-			}
-            initial_volume_percent = *volume_percent_input;
-            determine_state_from_volume(initial_volume_percent);
-            g_free(volume_percent_input);
-            g_debug("at the indicator start up and the volume percent returned from dbus method is %f", initial_volume_percent);
+            // Ensure we are in a coherent state with the service at start up.
+            fetch_volume_percent_from_dbus();
+            fetch_mute_value_from_dbus();
 		}
 
 	} else {
@@ -218,9 +210,46 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
 	return;
 }
 
-static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gint sink_index, gboolean value, gpointer userdata)
+static void fetch_volume_percent_from_dbus()
 {
-    g_debug("signal caught - sink input while muted with index %i and value %i", sink_index, value);
+    GError * error = NULL;
+    gdouble *volume_percent_input; 
+    volume_percent_input = g_new0(gdouble, 1);
+    org_ayatana_indicator_sound_get_sink_volume(sound_dbus_proxy, volume_percent_input, &error);
+	if (error != NULL) {
+		g_warning("Unable to fetch VOLUME at indicator start up: %s", error->message);
+		g_error_free(error);
+        g_free(volume_percent_input);
+        return;
+	}
+    initial_volume_percent = *volume_percent_input;
+    determine_state_from_volume(initial_volume_percent);
+    g_free(volume_percent_input);
+    g_debug("at the indicator start up and the volume percent returned from dbus method is %f", initial_volume_percent);
+}
+
+static void fetch_mute_value_from_dbus()
+{
+    GError * error = NULL;
+    gboolean *mute_input; 
+    mute_input = g_new0(gboolean, 1);
+    org_ayatana_indicator_sound_get_sink_mute(sound_dbus_proxy, mute_input, &error);
+    if (error != NULL) {
+	    g_warning("Unable to fetch MUTE at indicator start up: %s", error->message);
+	    g_error_free(error);
+        g_free(mute_input);
+        return;
+    }
+    initial_mute = *mute_input;
+    if (initial_mute == TRUE)
+        update_state(STATE_MUTED);
+    g_free(mute_input);
+    g_debug("at the indicator start up and the MUTE returned from dbus method is %i", initial_mute);
+}
+
+static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean block_value, gpointer userdata)
+{
+    g_debug("signal caught - sink input while muted with value %i", block_value);
 }
 
 static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_percent, gpointer userdata)
@@ -235,16 +264,12 @@ static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_pe
 static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer userdata)
 {
     //We can be sure the service won't send a mute signal unless it has changed !
+    //UNMUTE's force a volume update therefore icon is updated appropriately => no need for unmute handling here.
     if(mute_value == TRUE)
     {
+        g_debug("signal caught - sink mute update - MUTE");
         update_state(STATE_MUTED);
     }
-    else
-    {
-        g_debug("signal caught - sink mute update - about to mute state");
-        revert_state();
-    }
-    g_debug("signal caught - sink mute update with mute_value %i", mute_value);
 }
 
 
@@ -287,24 +312,31 @@ get_icon (IndicatorObject * io)
 
 static void update_state(const gint state)
 {
+    g_debug("update state beginning - previous_state = %i", previous_state);
+
     previous_state = current_state;
+
+    g_debug("update state 3rd line - previous_state = %i", previous_state);
+
     current_state = state;
     gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
     gtk_image_set_from_icon_name(speaker_image, image_name, GTK_ICON_SIZE_MENU);
 }
 
-static void revert_state()
-{
+/*static void revert_state()*/
+/*{*/
 
-    current_state = previous_state;
-    gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
-    gtk_image_set_from_icon_name(speaker_image, image_name, GTK_ICON_SIZE_MENU);
-    g_debug("after reverting back to previous state of %i", current_state);
-}
+/*    g_debug("revert state beginning - previous_state = %i", previous_state);*/
+/*    current_state = previous_state;*/
+/*    gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));*/
+/*    gtk_image_set_from_icon_name(speaker_image, image_name, GTK_ICON_SIZE_MENU);*/
+/*    g_debug("after reverting back to previous state of %i", current_state);*/
+/*}*/
 
 static void determine_state_from_volume(gdouble volume_percent)
 {
-    gint state = 0;
+    g_debug("determine_state_from_volume - previous_state = %i", previous_state);
+    gint state = previous_state;
     if (volume_percent < 30.0 && volume_percent > 0){
         state = STATE_LOW;
     }
@@ -375,8 +407,6 @@ static gboolean slider_value_changed_event_cb(GtkRange *range, GtkScrollType scr
     g_value_init(&value, G_TYPE_DOUBLE);
     g_value_set_double(&value, clamped_input);
     dbusmenu_menuitem_handle_event (item, "slider_change", &value, 0);
-/*    change_speaker_image(slider_value);*/
-/*    }*/
     return FALSE;  
 } 
 
