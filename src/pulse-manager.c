@@ -22,33 +22,10 @@ static void pulse_server_info_callback(pa_context *c, const pa_server_info *info
 static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, void *userdata);
 static void destroy_sink_info(void *value);
 
-/*
-Refine the resolution of the slider or binary scale it to achieve a more subtle volume control. 
-Use the base volume stored in the sink struct to calculate actual linear volumes. 
-*/
-void set_sink_volume(gdouble percent)
-{
-    g_debug("in the pulse manager:set_sink_volume with percent %f", percent);
-    if(DEFAULT_SINK_INDEX < 0)
-    {
-        g_warning("We have no default sink !!! - returning after not attempting to set any volume of any sink");
-        return;
-    }
-    gdouble linear_input = (gdouble)(percent);
-    linear_input /= 100.0;
-    g_debug("linear double input = %f", linear_input);
-    pa_volume_t new_volume = pa_sw_volume_from_linear(linear_input); 
-    // Use this to achieve more accurate scaling using the base volume (in the sink struct already!)
-    //pa_volume_t new_volume = (pa_volume_t) ((GPOINTER_TO_INT(linear_input) * s->base_volume) / 100);
-    g_debug("about to try to set the sw volume to a linear volume of %f", pa_sw_volume_to_linear(new_volume));
-    g_debug("and an actual volume of %f", (gdouble)new_volume);
-    pa_cvolume dev_vol;
-    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
-    pa_cvolume_set(&dev_vol, s->volume.channels, new_volume);   
-    // TODO - really this needs to be set in the success callback - if call fails then the ui will not be updated indefinitely!
-    pa_operation_unref(pa_context_set_sink_volume_by_index(pulse_context, DEFAULT_SINK_INDEX, &dev_vol, NULL, NULL));
-}
 
+/*
+Entry point
+*/
 void establish_pulse_activities(SoundServiceDbus *service)
 {
     dbus_service = service;
@@ -75,18 +52,6 @@ void close_pulse_activites()
     g_debug("I just closed communication with Pulse");
 }
 
-static void mute_each_sink(gpointer key, gpointer value, gpointer user_data)
-{
-    sink_info *info = (sink_info*)value;
-    pa_operation_unref(pa_context_set_sink_mute_by_index(pulse_context, info->index, GPOINTER_TO_INT(user_data), context_success_callback,  NULL));
-    g_debug("in the pulse manager: mute each sink %i", GPOINTER_TO_INT(user_data));
-}
-
-void toggle_global_mute(gboolean mute_value)
-{
-    g_hash_table_foreach(sink_hash, mute_each_sink, GINT_TO_POINTER(mute_value));
-    g_debug("in the pulse manager: toggle global mute value %i", mute_value);
-}
 
 static void destroy_sink_info(void *value)
 {
@@ -106,6 +71,10 @@ static void test_hash(){
     g_debug("and the max volume is %f", (gdouble)s->base_volume); 
 
 }
+
+/*
+Controllers & Utilities
+*/
 
 static gboolean sink_available()
 {
@@ -148,6 +117,46 @@ static gdouble get_default_sink_volume()
     gdouble value = pa_sw_volume_to_linear(vol);
     g_debug("software volume = %f", value);
     return value;
+}
+
+static void mute_each_sink(gpointer key, gpointer value, gpointer user_data)
+{
+    sink_info *info = (sink_info*)value;
+    pa_operation_unref(pa_context_set_sink_mute_by_index(pulse_context, info->index, GPOINTER_TO_INT(user_data), context_success_callback,  NULL));
+    g_debug("in the pulse manager: mute each sink %i", GPOINTER_TO_INT(user_data));
+}
+
+void toggle_global_mute(gboolean mute_value)
+{
+    g_hash_table_foreach(sink_hash, mute_each_sink, GINT_TO_POINTER(mute_value));
+    g_debug("in the pulse manager: toggle global mute value %i", mute_value);
+}
+
+
+/*
+Refine the resolution of the slider or binary scale it to achieve a more subtle volume control. 
+Use the base volume stored in the sink struct to calculate actual linear volumes. 
+*/
+void set_sink_volume(gdouble percent)
+{
+    g_debug("in the pulse manager:set_sink_volume with percent %f", percent);
+    if(DEFAULT_SINK_INDEX < 0)
+    {
+        g_warning("We have no default sink !!! - returning after not attempting to set any volume of any sink");
+        return;
+    }
+    gdouble linear_input = (gdouble)(percent);
+    linear_input /= 100.0;
+    g_debug("linear double input = %f", linear_input);
+    pa_volume_t new_volume = pa_sw_volume_from_linear(linear_input); 
+    // Use this to achieve more accurate scaling using the base volume (in the sink struct already!)
+    //pa_volume_t new_volume = (pa_volume_t) ((GPOINTER_TO_INT(linear_input) * s->base_volume) / 100);
+    g_debug("about to try to set the sw volume to a linear volume of %f", pa_sw_volume_to_linear(new_volume));
+    g_debug("and an actual volume of %f", (gdouble)new_volume);
+    pa_cvolume dev_vol;
+    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
+    pa_cvolume_set(&dev_vol, s->volume.channels, new_volume);   
+    pa_operation_unref(pa_context_set_sink_volume_by_index(pulse_context, DEFAULT_SINK_INDEX, &dev_vol, NULL, NULL));
 }
 
 
@@ -293,7 +302,8 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
             gdouble volume_percent = (vol/s->base_volume) * 100;
             g_debug("When using base volume => volume = %f", volume_percent);
             g_debug("about to update ui with linear volume of %f", pa_sw_volume_to_linear(vol));            
-            sound_service_dbus_update_sink_volume(dbus_service, pa_sw_volume_to_linear(vol) * 100); 
+            sound_service_dbus_update_sink_volume(dbus_service, pa_sw_volume_to_linear(vol)); 
+
             update_mute_ui(s->mute);
         }
         else{

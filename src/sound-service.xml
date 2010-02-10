@@ -15,11 +15,15 @@ Our respective UI element should listen to this and therefore will be updated wi
 <!-- Triggered when a sink is muted but the input has been sent to that sink -->
     <signal name="SinkInputWhileMuted">
       <arg name="sink_index" type="x" direction="out"/>
-      <arg name="mute_value" type="b" direction="out"/>
+      <arg name="block_value" type="b" direction="out"/>
     </signal>
     
     <signal name="SinkVolumeUpdate">
       <arg name="volume_percent" type="u" direction="out"/>
+    </signal>
+
+    <signal name="SinkMuteUpdate">
+      <arg name="mute_value" type="b" direction="out"/>
     </signal>
 
   </interface>

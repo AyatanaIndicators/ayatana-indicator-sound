@@ -49,6 +49,7 @@ struct _SoundServiceDbusPrivate
 enum {
   SINK_INPUT_WHILE_MUTED,  
   SINK_VOLUME_UPDATE,
+  SINK_MUTE_UPDATE,
   LAST_SIGNAL
 };
 
@@ -95,6 +96,14 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
                                                     NULL, NULL,
                                                     g_cclosure_marshal_VOID__DOUBLE,
                                                     G_TYPE_NONE, 1, G_TYPE_DOUBLE);
+
+    signals[SINK_MUTE_UPDATE] =  g_signal_new("sink-mute-update",
+                                                    G_TYPE_FROM_CLASS (klass),
+                                                    G_SIGNAL_RUN_LAST,
+                                                    0,
+                                                    NULL, NULL,
+                                                    g_cclosure_marshal_VOID__BOOLEAN,
+                                                    G_TYPE_NONE, 1, G_TYPE_BOOLEAN);
 
 }
 
@@ -177,23 +186,23 @@ void sound_service_dbus_sink_input_while_muted(SoundServiceDbus* obj, gint sink_
 void sound_service_dbus_update_sink_volume(SoundServiceDbus* obj, gdouble sink_volume)
 {
     SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (obj);
-    priv->volume_percent = sink_volume;            
+    priv->volume_percent = sink_volume * 100;            
 
-    g_debug("Emitting signal: SINK_VOLUME_UPDATE, with sink_volme %f", sink_volume);
+    g_debug("Emitting signal: SINK_VOLUME_UPDATE, with sink_volme %f", priv->volume_percent);
     g_signal_emit(obj,
                 signals[SINK_VOLUME_UPDATE],
                 0,
-                sink_volume);
+                priv->volume_percent);
 }
 
-/*void sound_service_dbus_update_sink_mute(SoundServiceDbus* obj, gboolean sink_mute)*/
-/*{*/
-/*    g_debug("Emitting signal: SINK_MUTE_UPDATE, with sink mute %i", sink_mute);*/
-/*    g_signal_emit(obj,*/
-/*                signals[SINK_MUTE_UPDATE],*/
-/*                0,*/
-/*                sink_mute);*/
-/*}*/
+void sound_service_dbus_update_sink_mute(SoundServiceDbus* obj, gboolean sink_mute)
+{
+    g_debug("Emitting signal: SINK_MUTE_UPDATE, with sink mute %i", sink_mute);
+    g_signal_emit(obj,
+                signals[SINK_MUTE_UPDATE],
+                0,
+                sink_mute);
+}
 
      
 
