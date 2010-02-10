@@ -8,7 +8,6 @@ Copyright 2010 Canonical Ltd.
 Authors:
     Conor Curran <conor.curran@canonical.com>
     Ted Gould <ted@canonical.com>
-    Christoph Korn <c_korn@gmx.de>
     Cody Russell <crussell@canonical.com>
 
 This program is free software: you can redistribute it and/or modify it 
@@ -39,11 +38,10 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "dbus-shared-names.h"
 
-
 // ENTRY AND EXIT POINTS
 void service_shutdown(IndicatorService * service, gpointer user_data);
 int main (int argc, char ** argv);
 void update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_muted, gdouble current_vol);
-
+void update_mute_ui(gboolean incoming_mute_value);
 #endif
 

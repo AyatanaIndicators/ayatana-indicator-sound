@@ -24,4 +24,3 @@ void toggle_global_mute(gboolean mute_value);
 void close_pulse_activites();
 
 
-
