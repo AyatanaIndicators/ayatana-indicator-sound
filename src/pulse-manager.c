@@ -276,11 +276,8 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
 
     GList *keys = g_hash_table_get_keys(sink_hash);
     gint position =  g_list_index(keys, GINT_TO_POINTER(info->index));
-/*    gboolean update_ui_vol = FALSE;*/
     if(position >= 0) // => index is within the keys of the hash.
     {
-        // TODO : update sinks hash with new details and if default send over dbus the update. in reverse order.
-        //gint sink_index = GPOINTER_TO_INT(g_list_nth_data(keys, position));
         sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(info->index));
         g_debug("attempting to update sink with name %s", s->name);
         s->name = g_strdup(info->name);
@@ -288,9 +285,6 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
         s->icon_name = g_strdup(pa_proplist_gets(info->proplist, PA_PROP_DEVICE_ICON_NAME));
         s->active_port = (info->active_port != NULL);
         s->mute = !!info->mute;
-/*        int equal = pa_cvolume_equal(&s->volume, &info->volume);*/
-/*        update_ui_vol = (equal != 0); */
-/*        g_debug("Are the volumes the same %i", equal);            */
         s->volume = info->volume;
         s->base_volume = info->base_volume;
         s->channel_map = info->channel_map; 
@@ -303,7 +297,7 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
             g_debug("When using base volume => volume = %f", volume_percent);
             g_debug("about to update ui with linear volume of %f", pa_sw_volume_to_linear(vol));            
             sound_service_dbus_update_sink_volume(dbus_service, pa_sw_volume_to_linear(vol)); 
-
+            sound_service_dbus_update_sink_mute(dbus_service, s->mute);
             update_mute_ui(s->mute);
         }
         else{

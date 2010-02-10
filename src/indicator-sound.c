@@ -93,6 +93,7 @@ static DBusGProxy *sound_dbus_proxy = NULL;
 static void connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata);
 static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gint sink_index, gboolean value, gpointer userdata);
 static void catch_signal_sink_volume_update(DBusGProxy * proxy, gdouble volume_percent, gpointer userdata); 
+static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer userdata);
 
 /****Volume States 'members' ***/
 static const gint STATE_MUTED = 0;
@@ -191,6 +192,9 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
 			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_CALLBACK(catch_signal_sink_input_while_muted), NULL, NULL);
 			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_VOLUME_UPDATE, G_TYPE_DOUBLE, G_TYPE_INVALID);
 			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_VOLUME_UPDATE, G_CALLBACK(catch_signal_sink_volume_update), NULL, NULL);
+			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_MUTE_UPDATE, G_TYPE_BOOLEAN, G_TYPE_INVALID);
+			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_MUTE_UPDATE, G_CALLBACK(catch_signal_sink_mute_update), NULL, NULL);
+
             gdouble *volume_percent_input; 
             volume_percent_input = g_new0(gdouble, 1);
             org_ayatana_indicator_sound_get_sink_volume(sound_dbus_proxy, volume_percent_input, &error);
@@ -218,13 +222,18 @@ static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gint sink_in
     g_debug("signal caught - sink input while muted with index %i and value %i", sink_index, value);
 }
 
-static void catch_signal_sink_volume_update(DBusGProxy * proxy, gdouble volume_percent, gpointer userdata)
+static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_percent, gpointer userdata)
 {
     g_debug("signal caught - update sink volume with value : %f", volume_percent);
-    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
-    GtkRange* range = (GtkRange*)slider;   
+    GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
+    GtkRange *range = (GtkRange*)slider;   
     gtk_range_set_value(range, volume_percent); 
     determine_state_from_volume(volume_percent);
+}
+
+static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer userdata)
+{
+    g_debug("signal caught - sink mute update with mute_value %i", mute_value);
 }
 
 
