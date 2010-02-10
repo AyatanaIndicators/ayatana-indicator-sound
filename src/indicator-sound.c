@@ -77,28 +77,27 @@ G_DEFINE_TYPE (IndicatorSound, indicator_sound, INDICATOR_OBJECT_TYPE);
 static GtkLabel * get_label (IndicatorObject * io);
 static GtkImage * get_icon (IndicatorObject * io);
 static GtkMenu * get_menu (IndicatorObject * io);
+//Slider related
 static GtkWidget *volume_slider = NULL;
-
 static gboolean new_slider_item (DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget);
-static gboolean slider_value_changed_event_cb(GtkRange *range, GtkScrollType scroll_type, gdouble input_value, gpointer  user_data);
-
-static void prepare_state_machine();
-static void determine_state_from_volume(gdouble volume_percent);
-static void update_state(const gint state);
-static void fetch_volume_percent_from_dbus();
-static void fetch_mute_value_from_dbus();
-/*static void revert_state();*/
+static gboolean user_change_value_event_cb(GtkRange *range, GtkScrollType scroll_type, gdouble input_value, gpointer  user_data);
+static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data);
 
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
 static void connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata);
-
 static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean value, gpointer userdata);
 static void catch_signal_sink_volume_update(DBusGProxy * proxy, gdouble volume_percent, gpointer userdata); 
 static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer userdata);
+static void fetch_volume_percent_from_dbus();
+static void fetch_mute_value_from_dbus();
 
 /****Volume States 'members' ***/
+static void prepare_state_machine();
+static void determine_state_from_volume(gdouble volume_percent);
+static void update_state(const gint state);
+/*static void revert_state();*/
 static const gint STATE_MUTED = 0;
 static const gint STATE_ZERO = 1;
 static const gint STATE_LOW = 2;
@@ -108,6 +107,7 @@ static const gint STATE_MUTED_WHILE_INPUT = 5;
 static const gint STATE_SINKS_NONE = 5;
 static GHashTable *volume_states = NULL;
 static GtkImage *speaker_image = NULL;
+static GtkWidget* primary_image = NULL;
 static gint current_state = 0;
 static gint previous_state = 0;
 static gdouble initial_volume_percent = 0;
@@ -259,12 +259,6 @@ static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_pe
 {
     g_debug("signal caught - update sink volume with value : %f", volume_percent);
     GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
-    gboolean in_use = gtk_widget_has_grab(volume_slider);
-    if(in_use == TRUE)
-    {
-        g_debug("looks like the slider is the UI element in use therefore ignore this volume message => prevent circular semi feedback.");
-        return;
-    }
     GtkRange *range = (GtkRange*)slider;   
     gtk_range_set_value(range, volume_percent); 
     determine_state_from_volume(volume_percent);
@@ -380,16 +374,23 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
 	g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
 	g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
     
-    volume_slider = ido_scale_menu_item_new_with_range ("Volume", 0, 100, 0.5);
+    volume_slider = ido_scale_menu_item_new_with_range ("Volume", initial_volume_percent, 0, 100, 0.5);
 
     GtkMenuItem *menu_volume_slider = GTK_MENU_ITEM(volume_slider);
 	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_volume_slider, parent);
 	g_signal_connect(G_OBJECT(newitem), DBUSMENU_MENUITEM_SIGNAL_PROPERTY_CHANGED, G_CALLBACK(slider_prop_change_cb), volume_slider);
     
     GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);  
-    g_signal_connect(slider, "change-value", G_CALLBACK(slider_value_changed_event_cb), newitem);                      
-    GtkRange* range = (GtkRange*)slider;   
-    gtk_range_set_value(range, initial_volume_percent);  
+    g_signal_connect(slider, "change-value", G_CALLBACK(user_change_value_event_cb), newitem);     
+    g_signal_connect(slider, "value-changed", G_CALLBACK(value_changed_event_cb), newitem);     
+    
+    primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)volume_slider);    
+    gtk_image_set_from_icon_name(GTK_IMAGE(primary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_ZERO)), GTK_ICON_SIZE_MENU);
+    GtkWidget* secondary_image = ido_scale_menu_item_get_secondary_image((IdoScaleMenuItem*)volume_slider);                 
+    gtk_image_set_from_icon_name(GTK_IMAGE(secondary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_HIGH)), GTK_ICON_SIZE_MENU);
+
+/*    GtkRange* range = (GtkRange*)slider;   */
+/*    gtk_range_set_value(range, initial_volume_percent);  */
 
     gtk_widget_show_all(volume_slider);
 	return TRUE;
@@ -407,7 +408,27 @@ static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue *
 	return;
 }
 
-static gboolean slider_value_changed_event_cb(GtkRange *range, GtkScrollType scroll_type, gdouble input_value, gpointer  user_data)
+/**
+This callback will get triggered irregardless of whether its a user change or a programmatic change
+Our usecase for this particular callback is only interested if the slider is changed by the user hitting either icon
+which will result in a programmatic value change of 0 or 100 (work around).
+**/
+static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data)
+{
+    gdouble current_value = gtk_range_get_value(range);        
+    if(current_value == 0 || current_value == 100)
+    {
+        DbusmenuMenuitem *item = (DbusmenuMenuitem*)user_data;
+        GValue value = {0};
+        g_value_init(&value, G_TYPE_DOUBLE);
+        g_value_set_double(&value, current_value);
+        g_debug("Value changed listener - = %f", current_value);
+        dbusmenu_menuitem_handle_event (item, "slider_change", &value, 0);        
+    }
+    return FALSE;
+}
+
+static gboolean user_change_value_event_cb(GtkRange *range, GtkScrollType scroll_type, gdouble input_value, gpointer  user_data)
 {
     DbusmenuMenuitem *item = (DbusmenuMenuitem*)user_data;
     gdouble clamped_input = CLAMP(input_value, 0, 100);
