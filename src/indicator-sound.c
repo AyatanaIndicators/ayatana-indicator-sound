@@ -87,6 +87,7 @@ static gboolean slider_value_changed_event_cb(GtkRange *range, GtkScrollType scr
 static void prepare_state_machine();
 static void determine_state_from_volume(gdouble volume_percent);
 static void update_state(const gint state);
+static void revert_state();
 
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
@@ -233,6 +234,16 @@ static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_pe
 
 static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer userdata)
 {
+    //We can be sure the service won't send a mute signal unless it has changed !
+    if(mute_value == TRUE)
+    {
+        update_state(STATE_MUTED);
+    }
+    else
+    {
+        g_debug("signal caught - sink mute update - about to mute state");
+        revert_state();
+    }
     g_debug("signal caught - sink mute update with mute_value %i", mute_value);
 }
 
@@ -282,9 +293,18 @@ static void update_state(const gint state)
     gtk_image_set_from_icon_name(speaker_image, image_name, GTK_ICON_SIZE_MENU);
 }
 
+static void revert_state()
+{
+
+    current_state = previous_state;
+    gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
+    gtk_image_set_from_icon_name(speaker_image, image_name, GTK_ICON_SIZE_MENU);
+    g_debug("after reverting back to previous state of %i", current_state);
+}
+
 static void determine_state_from_volume(gdouble volume_percent)
 {
-    gint state = current_state;
+    gint state = 0;
     if (volume_percent < 30.0 && volume_percent > 0){
         state = STATE_LOW;
     }

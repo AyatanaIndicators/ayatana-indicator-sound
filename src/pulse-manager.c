@@ -279,11 +279,13 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
     if(position >= 0) // => index is within the keys of the hash.
     {
         sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(info->index));
-        g_debug("attempting to update sink with name %s", s->name);
+        //g_debug("attempting to update sink with name %s", s->name);
         s->name = g_strdup(info->name);
         s->description = g_strdup(info->description);
         s->icon_name = g_strdup(pa_proplist_gets(info->proplist, PA_PROP_DEVICE_ICON_NAME));
         s->active_port = (info->active_port != NULL);
+        // NASTY!!
+        gboolean mute_changed = s->mute != !!info->mute;
         s->mute = !!info->mute;
         s->volume = info->volume;
         s->base_volume = info->base_volume;
@@ -297,7 +299,9 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
             g_debug("When using base volume => volume = %f", volume_percent);
             g_debug("about to update ui with linear volume of %f", pa_sw_volume_to_linear(vol));            
             sound_service_dbus_update_sink_volume(dbus_service, pa_sw_volume_to_linear(vol)); 
-            sound_service_dbus_update_sink_mute(dbus_service, s->mute);
+            if (mute_changed == TRUE)     
+                sound_service_dbus_update_sink_mute(dbus_service, s->mute);
+            
             update_mute_ui(s->mute);
         }
         else{
