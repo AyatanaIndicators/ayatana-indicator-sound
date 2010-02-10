@@ -199,6 +199,7 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
 			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_MUTE_UPDATE, G_CALLBACK(catch_signal_sink_mute_update), NULL, NULL);
 
             // Ensure we are in a coherent state with the service at start up.
+            // Preserve ordering!
             fetch_volume_percent_from_dbus();
             fetch_mute_value_from_dbus();
 		}
