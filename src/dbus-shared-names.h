@@ -2,9 +2,10 @@
 A small wrapper utility to load indicators and put them as menu items
 into the gnome-panel using it's applet interface.
 
-Copyright 2009 Canonical Ltd.
+Copyright 2010 Canonical Ltd.
 
 Authors:
+    Conor Curran <conor.curran@canonical.com>
     Ted Gould <ted@canonical.com>
 
 This program is free software: you can redistribute it and/or modify it
