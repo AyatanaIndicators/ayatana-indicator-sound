@@ -101,13 +101,20 @@ Controllers & Utilities
 
 static gboolean sink_available()
 {
-    if (g_hash_table_size(sink_hash) < 1)
+    if (g_hash_table_size(sink_hash) < 1){
+        g_debug("Sink_available returning false because sinks_hash is empty !!!");    
         return FALSE;
+    }
     sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
     // TODO more testing is required for the case of having no available sink
     // This will need to iterate through the sinks to find an available
     // one as opposed to just picking the first
-    return ((g_strcasecmp(s->name, " auto_null ") != 0) && s->active_port == TRUE);
+
+    g_debug("About to test for to see if the available sink is null");
+    gboolean available = (g_strcasecmp(s->name, " auto_null ") != 0) && s->active_port == TRUE;
+    g_debug("sink_available (auto_null && !active_port) %i", available);
+    
+    return available;
 }
 
 static gboolean default_sink_is_muted()
