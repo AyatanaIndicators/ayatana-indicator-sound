@@ -1,4 +1,4 @@
-indicator-sound (0.1.0-0ubuntu1) UNRELEASED; urgency=low
+indicator-sound (0.1.0-0ubuntu1) lucid; urgency=low
 
   * Initial release
 
