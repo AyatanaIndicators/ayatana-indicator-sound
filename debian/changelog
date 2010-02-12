@@ -1,0 +1,5 @@
+indicator-sound (0.1.0-0ubuntu1) lucid; urgency=low
+
+  * Initial release
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 11 Feb 2010 17:34:49 -0500
