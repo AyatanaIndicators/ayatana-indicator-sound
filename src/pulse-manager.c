@@ -113,7 +113,6 @@ static gboolean sink_available()
     g_debug("About to test for to see if the available sink is null");
     gboolean available = (g_strcasecmp(s->name, " auto_null ") != 0) && s->active_port == TRUE;
     g_debug("sink_available (auto_null && !active_port) %i", available);
-    
     return available;
 }
 
