@@ -111,8 +111,8 @@ static gboolean sink_available()
     // one as opposed to just picking the first
 
     g_debug("About to test for to see if the available sink is null");
-    gboolean available = (g_strcasecmp(s->name, " auto_null ") != 0) && s->active_port == TRUE;
-    g_debug("sink_available (auto_null && !active_port) %i", available);
+    gboolean available = (g_ascii_strncasecmp(s->name, " auto_null ") != 0);
+    g_debug("sink_available: %i", available);
     return available;
 }
 
