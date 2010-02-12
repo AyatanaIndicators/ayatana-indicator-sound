@@ -1,7 +1,8 @@
 Source: indicator-sound
 Section: sound
 Priority: extra
-Maintainer: Conor Curran <conor.curran@canonical.com>
+Maintainer: Ubuntu Desktop Team <ubuntu-desktop@lists.ubuntu.com>
+XSBC-Original-Maintainer: Conor Curran <conor.curran@canonical.com>
 Build-Depends: debhelper (>= 7),
                cdbs (>= 0.4.41), 
                autotools-dev,
@@ -20,9 +21,9 @@ Homepage: https://launchpad.net/indicator-sound
 
 Package: indicator-sound
 Architecture: any
-Section: libs
 Depends: ${shlibs:Depends},
-         ${misc:Depends}
+         ${misc:Depends},
+         pulseaudio
 Description: A system sound indicator.
  A system sound indicator which provides easy control of the PulseAudio sound 
  daemon.
