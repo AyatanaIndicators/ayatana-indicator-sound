@@ -83,6 +83,7 @@ static gboolean new_slider_item (DbusmenuMenuitem * newitem, DbusmenuMenuitem * 
 static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget);
 static gboolean user_change_value_event_cb(GtkRange *range, GtkScrollType scroll_type, gdouble input_value, gpointer  user_data);
 static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data);
+static gint key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
 
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
@@ -315,11 +316,11 @@ get_icon (IndicatorObject * io)
 
 static void update_state(const gint state)
 {
-    g_debug("update state beginning - previous_state = %i", previous_state);
+/*    g_debug("update state beginning - previous_state = %i", previous_state);*/
 
     previous_state = current_state;
 
-    g_debug("update state 3rd line - previous_state = %i", previous_state);
+/*    g_debug("update state 3rd line - previous_state = %i", previous_state);*/
 
     current_state = state;
     gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
@@ -338,7 +339,7 @@ static void update_state(const gint state)
 
 static void determine_state_from_volume(gdouble volume_percent)
 {
-    g_debug("determine_state_from_volume - previous_state = %i", previous_state);
+/*    g_debug("determine_state_from_volume - previous_state = %i", previous_state);*/
     gint state = previous_state;
     if (volume_percent < 30.0 && volume_percent > 0){
         state = STATE_LOW;
@@ -382,6 +383,7 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
 	g_signal_connect(G_OBJECT(newitem), DBUSMENU_MENUITEM_SIGNAL_PROPERTY_CHANGED, G_CALLBACK(slider_prop_change_cb), volume_slider);
     
     GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);  
+    g_signal_connect(slider, "key_press_event", G_CALLBACK(key_press_cb), newitem);         
     g_signal_connect(slider, "change-value", G_CALLBACK(user_change_value_event_cb), newitem);     
     g_signal_connect(slider, "value-changed", G_CALLBACK(value_changed_event_cb), newitem);     
     
@@ -428,6 +430,16 @@ static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data)
     }
     return FALSE;
 }
+
+/**
+key_press_cb:
+**/
+static gint key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
+{
+    g_debug("In the key press call back function");
+    return -1;
+}
+
 
 static gboolean user_change_value_event_cb(GtkRange *range, GtkScrollType scroll_type, gdouble input_value, gpointer  user_data)
 {
