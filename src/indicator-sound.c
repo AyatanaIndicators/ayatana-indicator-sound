@@ -375,6 +375,7 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
 	g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
     
     volume_slider = ido_scale_menu_item_new_with_range ("Volume", initial_volume_percent, 0, 100, 0.5);
+	g_object_set(volume_slider, "reverse-scroll-events", TRUE, NULL);
 
     GtkMenuItem *menu_volume_slider = GTK_MENU_ITEM(volume_slider);
 	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_volume_slider, parent);
