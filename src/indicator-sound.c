@@ -382,20 +382,23 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
 	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_volume_slider, parent);
 	g_signal_connect(G_OBJECT(newitem), DBUSMENU_MENUITEM_SIGNAL_PROPERTY_CHANGED, G_CALLBACK(slider_prop_change_cb), volume_slider);
     
+    // register slider changes listening on the range
     GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);  
-    g_signal_connect(slider, "key_press_event", G_CALLBACK(key_press_cb), newitem);         
     g_signal_connect(slider, "change-value", G_CALLBACK(user_change_value_event_cb), newitem);     
     g_signal_connect(slider, "value-changed", G_CALLBACK(value_changed_event_cb), newitem);     
     
+    // Set images on the ido
     primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)volume_slider);    
     gtk_image_set_from_icon_name(GTK_IMAGE(primary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_ZERO)), GTK_ICON_SIZE_MENU);
     GtkWidget* secondary_image = ido_scale_menu_item_get_secondary_image((IdoScaleMenuItem*)volume_slider);                 
     gtk_image_set_from_icon_name(GTK_IMAGE(secondary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_HIGH)), GTK_ICON_SIZE_MENU);
 
-/*    GtkRange* range = (GtkRange*)slider;   */
-/*    gtk_range_set_value(range, initial_volume_percent);  */
+    // register Key-press listening on the widget
+    g_signal_connect(volume_slider, "key_press_event", G_CALLBACK(key_press_cb), newitem);         
+    gtk_widget_set_events (volume_slider, GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK);     
 
     gtk_widget_show_all(volume_slider);
+
 	return TRUE;
 }
 
