@@ -44,6 +44,7 @@ static void pulse_sink_input_info_callback(pa_context *c, const pa_sink_input_in
 static void pulse_server_info_callback(pa_context *c, const pa_server_info *info, void *userdata);
 static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, void *userdata);
 static void destroy_sink_info(void *value);
+static gboolean determine_sink_availability();
 
 
 /*
@@ -99,19 +100,30 @@ static void destroy_sink_info(void *value)
 Controllers & Utilities
 */
 
-static gboolean sink_available()
+static gboolean determine_sink_availability()
 {
+
+    // Firstly check to see if we have any sinks
+    // if not get the hell out of here !
     if (g_hash_table_size(sink_hash) < 1){
         g_debug("Sink_available returning false because sinks_hash is empty !!!");    
+        DEFAULT_SINK_INDEX = -1;    
         return FALSE;
     }
-    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
-    // TODO more testing is required for the case of having no available sink
-    // This will need to iterate through the sinks to find an available
-    // one as opposed to just picking the first
 
-    g_debug("About to test for to see if the available sink is null");
-    gboolean available = (g_ascii_strncasecmp(s->name, " auto_null ") != 0);
+    // Secondly, make sure the default sink index is set 
+    // If the default sink index has not been set (via the server) it will attempt to set it to the value of the first 
+    // index in the array of keys from the sink_hash.
+    GList *keys = g_hash_table_get_keys(sink_hash);
+    DEFAULT_SINK_INDEX = (DEFAULT_SINK_INDEX < 0) ? GPOINTER_TO_INT(g_list_first(keys)) : DEFAULT_SINK_INDEX;
+
+    // Thirdly ensure the default sink index does not have the name "auto_null"
+    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
+    // Up until now the most rebost method to test this is to manually remove the available sink device 
+    // kernel module and then reload (rmmod & modprobe).
+    // TODO: Edge case of dynamic loading and unloading of sinks should be handled also.
+    g_debug("About to test for to see if the available sink is null - s->name = %s", s->name);
+    gboolean available = g_ascii_strncasecmp("auto_null", s->name, 9) != 0;
     g_debug("sink_available: %i", available);
     return available;
 }
@@ -228,18 +240,14 @@ Major candidate for refactoring.
 static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, int eol, void *userdata)
 {
     if (eol > 0) {
-        gboolean device_available = sink_available();
+
+        gboolean device_available = determine_sink_availability();
         if(device_available == TRUE)
         {
-            // Hopefully the PA server has set the default device if not default to 0
-            DEFAULT_SINK_INDEX = (DEFAULT_SINK_INDEX < 0) ? 0 : DEFAULT_SINK_INDEX;
-            // TODO optimize
-            // Cache method returns! (unneccessary multiple utility calls)
-            // test_hash();
             update_pa_state(TRUE, device_available, default_sink_is_muted(), get_default_sink_volume()); 
             sound_service_dbus_update_sink_volume(dbus_service, get_default_sink_volume()); 
             sound_service_dbus_update_sink_mute(dbus_service, default_sink_is_muted()); 
-            g_debug("default sink index : %d", DEFAULT_SINK_INDEX);                        
+            g_debug("default sink index : %d", DEFAULT_SINK_INDEX);                    
         }
         else{
             //Update the indicator to show PA either is not ready or has no available sink
@@ -267,7 +275,6 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
 
 static void pulse_default_sink_info_callback(pa_context *c, const pa_sink_info *info, int eol, void *userdata)
 {
-    g_debug("default sink info callback");
     if (eol > 0) {        
         if (pa_context_errno(c) == PA_ERR_NOENTITY)
             return;
