@@ -24,6 +24,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib.h>
 #include <glib-object.h>
 #include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
 #include <libdbusmenu-gtk/menu.h>
 #include <libido/idoscalemenuitem.h>
 
@@ -83,7 +84,7 @@ static gboolean new_slider_item (DbusmenuMenuitem * newitem, DbusmenuMenuitem * 
 static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget);
 static gboolean user_change_value_event_cb(GtkRange *range, GtkScrollType scroll_type, gdouble input_value, gpointer  user_data);
 static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data);
-static gint key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
+static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
 
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
@@ -367,6 +368,9 @@ get_menu (IndicatorObject * io)
 	DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);	
     dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SLIDER_MENUITEM_TYPE, new_slider_item);
 
+    // register Key-press listening on the widget
+    g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), NULL);         
+
     return GTK_MENU(menu);
 }
 
@@ -379,6 +383,7 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
 	g_object_set(volume_slider, "reverse-scroll-events", TRUE, NULL);
 
     GtkMenuItem *menu_volume_slider = GTK_MENU_ITEM(volume_slider);
+
 	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_volume_slider, parent);
 	g_signal_connect(G_OBJECT(newitem), DBUSMENU_MENUITEM_SIGNAL_PROPERTY_CHANGED, G_CALLBACK(slider_prop_change_cb), volume_slider);
     
@@ -392,10 +397,6 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
     gtk_image_set_from_icon_name(GTK_IMAGE(primary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_ZERO)), GTK_ICON_SIZE_MENU);
     GtkWidget* secondary_image = ido_scale_menu_item_get_secondary_image((IdoScaleMenuItem*)volume_slider);                 
     gtk_image_set_from_icon_name(GTK_IMAGE(secondary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_HIGH)), GTK_ICON_SIZE_MENU);
-
-    // register Key-press listening on the widget
-    g_signal_connect(volume_slider, "key_press_event", G_CALLBACK(key_press_cb), newitem);         
-    gtk_widget_set_events (volume_slider, GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK);     
 
     gtk_widget_show_all(volume_slider);
 
@@ -437,10 +438,44 @@ static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data)
 /**
 key_press_cb:
 **/
-static gint key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
+static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
 {
-    g_debug("In the key press call back function");
-    return -1;
+
+    if(event->length > 0)
+        g_debug("The key event's string is '%s'\n", event->string);
+
+    switch(event->keyval)
+        {
+        case GDK_Right:
+            if(event->state & GDK_CONTROL_MASK)
+            {
+               g_debug("right key was pressed with ctrl- volume set to 100");                 
+            }
+            else
+            {
+               g_debug("right key was pressed - normal 5 percent increase");                
+            }
+            break;
+        case GDK_Left:
+            if(event->state & GDK_CONTROL_MASK)
+            {
+                g_debug("left key was pressed with ctrl- volume set to 0");                
+            }
+            else
+            {
+                g_debug("left key was pressed - normal 5 percent decrease");                
+            }
+            break;
+        case GDK_plus:
+            g_debug("Plus key was pressed");
+            break;
+        case GDK_minus:
+            g_debug("minus key was pressed");
+            break;
+        default:
+            break;
+        }    
+    return FALSE;
 }
 
 
