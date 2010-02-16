@@ -20,7 +20,7 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along 
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+#include <math.h>
 #include <glib.h>
 #include <glib-object.h>
 #include <gtk/gtk.h>
@@ -259,10 +259,20 @@ static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean blo
 
 static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_percent, gpointer userdata)
 {
-    g_debug("signal caught - update sink volume with value : %f", volume_percent);
     GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
     GtkRange *range = (GtkRange*)slider;   
-    gtk_range_set_value(range, volume_percent); 
+    
+    // DEBUG
+    gdouble current_value = gtk_range_get_value(range);
+    g_debug("SIGNAL- update sink volume - current_value : %f and new value : %f", current_value, volume_percent);
+
+    // Don't like this solution - too fuzzy
+    // Need the ability to detect if the slider is grabbed
+    if(floor(current_value) != floor(volume_percent))
+    {
+        g_debug("Going to update slider value");
+        gtk_range_set_value(range, volume_percent); 
+    }
     determine_state_from_volume(volume_percent);
 }
 
@@ -423,15 +433,15 @@ which will result in a programmatic value change of 0 or 100 (work around).
 static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data)
 {
     gdouble current_value = gtk_range_get_value(range);        
-    if(current_value == 0 || current_value == 100)
-    {
-        DbusmenuMenuitem *item = (DbusmenuMenuitem*)user_data;
-        GValue value = {0};
-        g_value_init(&value, G_TYPE_DOUBLE);
-        g_value_set_double(&value, current_value);
-        g_debug("Value changed listener - = %f", current_value);
-        dbusmenu_menuitem_handle_event (item, "slider_change", &value, 0);        
-    }
+/*    if(current_value == 0 || current_value == 100)*/
+/*    {*/
+    DbusmenuMenuitem *item = (DbusmenuMenuitem*)user_data;
+    GValue value = {0};
+    g_value_init(&value, G_TYPE_DOUBLE);
+    g_value_set_double(&value, current_value);
+    g_debug("Value changed callback - = %f", current_value);
+    dbusmenu_menuitem_handle_event (item, "slider_change", &value, 0);        
+/*    }*/
     return FALSE;
 }
 
@@ -444,41 +454,65 @@ static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer dat
     if(event->length > 0)
         g_debug("The key event's string is '%s'\n", event->string);
 
+    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
+    GtkRange* range = (GtkRange*)slider;       
+    gdouble current_value = gtk_range_get_value(range);  
+    gdouble new_value = current_value;
+    const gdouble five_percent = 5;
+
     switch(event->keyval)
         {
         case GDK_Right:
             if(event->state & GDK_CONTROL_MASK)
             {
-               g_debug("right key was pressed with ctrl- volume set to 100");                 
+/*                g_debug("right key was pressed with ctrl- volume set to 100");                 */
+                new_value = 100;
             }
             else
             {
-               g_debug("right key was pressed - normal 5 percent increase");                
+/*                g_debug("right key was pressed - normal 5 percent increase");                */
+                new_value = current_value + five_percent;
             }
             break;
         case GDK_Left:
             if(event->state & GDK_CONTROL_MASK)
             {
-                g_debug("left key was pressed with ctrl- volume set to 0");                
+/*                g_debug("left key was pressed with ctrl- volume set to 0");                */
+                new_value = 0;
             }
             else
             {
-                g_debug("left key was pressed - normal 5 percent decrease");                
+/*                g_debug("left key was pressed - normal 5 percent decrease");                */
+                new_value = current_value - five_percent;                
             }
             break;
         case GDK_plus:
-            g_debug("Plus key was pressed");
+/*                g_debug("Plus key was pressed");*/
+                new_value = current_value + five_percent;                
             break;
         case GDK_minus:
-            g_debug("minus key was pressed");
+/*            g_debug("minus key was pressed");*/
+                new_value = current_value - five_percent;                
             break;
         default:
             break;
         }    
+        
+/*        g_debug("new range value without being clamped  = %f", new_value);            */
+
+        new_value = CLAMP(new_value, 0, 100);
+        if(new_value != current_value)
+        {
+            g_debug("Attempting to set the range to %f", new_value);        
+            gtk_range_set_value(range, new_value);  
+        }
     return FALSE;
 }
 
-
+/**
+This callback should only be called when the user actually drags the slider.
+Turned off for now in favour of the non descriminating call back.
+**/
 static gboolean user_change_value_event_cb(GtkRange *range, GtkScrollType scroll_type, gdouble input_value, gpointer  user_data)
 {
     DbusmenuMenuitem *item = (DbusmenuMenuitem*)user_data;
