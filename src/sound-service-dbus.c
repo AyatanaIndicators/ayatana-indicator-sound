@@ -194,7 +194,7 @@ void sound_service_dbus_sink_input_while_muted(SoundServiceDbus* obj,  gboolean 
 void sound_service_dbus_update_sink_volume(SoundServiceDbus* obj, gdouble sink_volume)
 {
     SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (obj);
-    priv->volume_percent = sink_volume * 100;            
+    priv->volume_percent = sink_volume;            
 
     g_debug("Emitting signal: SINK_VOLUME_UPDATE, with sink_volme %f", priv->volume_percent);
     g_signal_emit(obj,
