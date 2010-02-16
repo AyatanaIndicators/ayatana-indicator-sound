@@ -164,14 +164,13 @@ static void prepare_state_machine()
 {
     // TODO we need three more images
     volume_states = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
-    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MUTED), g_strdup("audio-volume-muted"));
-    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_ZERO), g_strdup(/*"audio-volume-zero"*/"audio-volume-muted"));
-    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_LOW), g_strdup("audio-volume-low"));
-    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MEDIUM), g_strdup("audio-volume-medium"));
-    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_HIGH), g_strdup("audio-volume-high"));
-    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT), g_strdup(/*"audio-volume-muted-blocking"*/"audio-volume-muted"));
-    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_SINKS_NONE), g_strdup(/*"audio-output-none"*/"audio-volume-muted"));
-    //test_images_hash();
+    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MUTED), g_strdup("audio-volume-muted-panel"));
+    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_ZERO), g_strdup("audio-volume-zero-panel"));
+    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_LOW), g_strdup("audio-volume-low-panel"));
+    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MEDIUM), g_strdup("audio-volume-medium-panel"));
+    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_HIGH), g_strdup("audio-volume-high-panel"));
+    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT), g_strdup("audio-volume-muted-blocking-panel"));
+    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_SINKS_NONE), g_strdup("audio-output-none-panel"));
 }
 
 static void
