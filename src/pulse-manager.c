@@ -189,18 +189,15 @@ void set_sink_volume(gdouble percent)
         g_warning("We have no default sink !!! - returning after not attempting to set any volume of any sink");
         return;
     }
-    gdouble linear_input = (gdouble)(percent);
-    linear_input /= 100.0;
-    g_debug("linear double input = %f", linear_input);
-    pa_volume_t new_volume = pa_sw_volume_from_linear(linear_input); 
-    // Use this to achieve more accurate scaling using the base volume (in the sink struct already!)
-    //pa_volume_t new_volume = (pa_volume_t) ((GPOINTER_TO_INT(linear_input) * s->base_volume) / 100);
-    g_debug("about to try to set the sw volume to a linear volume of %f", pa_sw_volume_to_linear(new_volume));
-    g_debug("and an actual volume of %f", (gdouble)new_volume);
-    pa_cvolume dev_vol;
+
     sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
+
+    pa_volume_t new_volume = (pa_volume_t) ((percent * PA_VOLUME_NORM) / 100);
+    g_debug("new_volume double check :%f", pa_sw_volume_to_linear(new_volume));
+    g_debug("new volume calculated :%f", (gdouble)new_volume);
+    pa_cvolume dev_vol;
     pa_cvolume_set(&dev_vol, s->volume.channels, new_volume);   
-    
+    // TODO why don't you update the sink_info here with the appropriate pa_cvolume (&dev_vol)
     pa_operation_unref(pa_context_set_sink_volume_by_index(pulse_context, DEFAULT_SINK_INDEX, &dev_vol, NULL, NULL));
 }
 
@@ -321,7 +318,6 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
     if(position >= 0) // => index is within the keys of the hash.
     {
         sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(info->index));
-        //g_debug("attempting to update sink with name %s", s->name);
         s->name = g_strdup(info->name);
         s->description = g_strdup(info->description);
         s->icon_name = g_strdup(pa_proplist_gets(info->proplist, PA_PROP_DEVICE_ICON_NAME));
@@ -336,14 +332,11 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
         {
             //update the UI
             pa_volume_t vol = pa_cvolume_avg(&s->volume);
-            // Use the base of the device to ensure maximum acceptable levels on the hardware
-            gdouble volume_percent = (vol/s->base_volume) * 100;
-            g_debug("When using base volume => volume = %f", volume_percent);
-            g_debug("about to update ui with linear volume of %f", pa_sw_volume_to_linear(vol));            
-            sound_service_dbus_update_sink_volume(dbus_service, pa_sw_volume_to_linear(vol)); 
+            gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
+            g_debug("Updating volume from PA manager with volume = %f", volume_percent);
+            sound_service_dbus_update_sink_volume(dbus_service, volume_percent); 
             if (mute_changed == TRUE)     
                 sound_service_dbus_update_sink_mute(dbus_service, s->mute);
-            
             update_mute_ui(s->mute);
         }
     }
