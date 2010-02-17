@@ -20,10 +20,11 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along 
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+#include <math.h>
 #include <glib.h>
 #include <glib-object.h>
 #include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
 #include <libdbusmenu-gtk/menu.h>
 #include <libido/idoscalemenuitem.h>
 
@@ -83,6 +84,7 @@ static gboolean new_slider_item (DbusmenuMenuitem * newitem, DbusmenuMenuitem * 
 static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget);
 static gboolean user_change_value_event_cb(GtkRange *range, GtkScrollType scroll_type, gdouble input_value, gpointer  user_data);
 static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data);
+static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
 
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
@@ -162,14 +164,13 @@ static void prepare_state_machine()
 {
     // TODO we need three more images
     volume_states = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
-    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MUTED), g_strdup("audio-volume-muted"));
-    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_ZERO), g_strdup(/*"audio-volume-zero"*/"audio-volume-muted"));
-    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_LOW), g_strdup("audio-volume-low"));
-    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MEDIUM), g_strdup("audio-volume-medium"));
-    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_HIGH), g_strdup("audio-volume-high"));
-    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT), g_strdup(/*"audio-volume-muted-blocking"*/"audio-volume-muted"));
-    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_SINKS_NONE), g_strdup(/*"audio-output-none"*/"audio-volume-muted"));
-    //test_images_hash();
+    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MUTED), g_strdup("audio-volume-muted-panel"));
+    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_ZERO), g_strdup("audio-volume-zero-panel"));
+    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_LOW), g_strdup("audio-volume-low-panel"));
+    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MEDIUM), g_strdup("audio-volume-medium-panel"));
+    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_HIGH), g_strdup("audio-volume-high-panel"));
+    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT), g_strdup("audio-volume-muted-blocking-panel"));
+    g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_SINKS_NONE), g_strdup("audio-output-none-panel"));
 }
 
 static void
@@ -257,10 +258,20 @@ static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean blo
 
 static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_percent, gpointer userdata)
 {
-    g_debug("signal caught - update sink volume with value : %f", volume_percent);
     GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
     GtkRange *range = (GtkRange*)slider;   
-    gtk_range_set_value(range, volume_percent); 
+    
+    // DEBUG
+    gdouble current_value = gtk_range_get_value(range);
+    g_debug("SIGNAL- update sink volume - current_value : %f and new value : %f", current_value, volume_percent);
+
+    // Don't like this solution - too fuzzy
+    // Need the ability to detect if the slider is grabbed
+    if(floor(current_value) != floor(volume_percent))
+    {
+        g_debug("Going to update slider value");
+        gtk_range_set_value(range, volume_percent); 
+    }
     determine_state_from_volume(volume_percent);
 }
 
@@ -315,11 +326,11 @@ get_icon (IndicatorObject * io)
 
 static void update_state(const gint state)
 {
-    g_debug("update state beginning - previous_state = %i", previous_state);
+/*    g_debug("update state beginning - previous_state = %i", previous_state);*/
 
     previous_state = current_state;
 
-    g_debug("update state 3rd line - previous_state = %i", previous_state);
+/*    g_debug("update state 3rd line - previous_state = %i", previous_state);*/
 
     current_state = state;
     gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
@@ -338,7 +349,7 @@ static void update_state(const gint state)
 
 static void determine_state_from_volume(gdouble volume_percent)
 {
-    g_debug("determine_state_from_volume - previous_state = %i", previous_state);
+/*    g_debug("determine_state_from_volume - previous_state = %i", previous_state);*/
     gint state = previous_state;
     if (volume_percent < 30.0 && volume_percent > 0){
         state = STATE_LOW;
@@ -366,6 +377,9 @@ get_menu (IndicatorObject * io)
 	DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);	
     dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SLIDER_MENUITEM_TYPE, new_slider_item);
 
+    // register Key-press listening on the widget
+    g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), NULL);         
+
     return GTK_MENU(menu);
 }
 
@@ -378,22 +392,23 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
 	g_object_set(volume_slider, "reverse-scroll-events", TRUE, NULL);
 
     GtkMenuItem *menu_volume_slider = GTK_MENU_ITEM(volume_slider);
+
 	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_volume_slider, parent);
 	g_signal_connect(G_OBJECT(newitem), DBUSMENU_MENUITEM_SIGNAL_PROPERTY_CHANGED, G_CALLBACK(slider_prop_change_cb), volume_slider);
     
+    // register slider changes listening on the range
     GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);  
     g_signal_connect(slider, "change-value", G_CALLBACK(user_change_value_event_cb), newitem);     
     g_signal_connect(slider, "value-changed", G_CALLBACK(value_changed_event_cb), newitem);     
     
+    // Set images on the ido
     primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)volume_slider);    
     gtk_image_set_from_icon_name(GTK_IMAGE(primary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_ZERO)), GTK_ICON_SIZE_MENU);
     GtkWidget* secondary_image = ido_scale_menu_item_get_secondary_image((IdoScaleMenuItem*)volume_slider);                 
     gtk_image_set_from_icon_name(GTK_IMAGE(secondary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_HIGH)), GTK_ICON_SIZE_MENU);
 
-/*    GtkRange* range = (GtkRange*)slider;   */
-/*    gtk_range_set_value(range, initial_volume_percent);  */
-
     gtk_widget_show_all(volume_slider);
+
 	return TRUE;
 }
 
@@ -417,18 +432,86 @@ which will result in a programmatic value change of 0 or 100 (work around).
 static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data)
 {
     gdouble current_value = gtk_range_get_value(range);        
-    if(current_value == 0 || current_value == 100)
-    {
-        DbusmenuMenuitem *item = (DbusmenuMenuitem*)user_data;
-        GValue value = {0};
-        g_value_init(&value, G_TYPE_DOUBLE);
-        g_value_set_double(&value, current_value);
-        g_debug("Value changed listener - = %f", current_value);
-        dbusmenu_menuitem_handle_event (item, "slider_change", &value, 0);        
-    }
+/*    if(current_value == 0 || current_value == 100)*/
+/*    {*/
+    DbusmenuMenuitem *item = (DbusmenuMenuitem*)user_data;
+    GValue value = {0};
+    g_value_init(&value, G_TYPE_DOUBLE);
+    g_value_set_double(&value, current_value);
+    g_debug("Value changed callback - = %f", current_value);
+    dbusmenu_menuitem_handle_event (item, "slider_change", &value, 0);        
+/*    }*/
     return FALSE;
 }
 
+/**
+key_press_cb:
+**/
+static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
+{
+
+    if(event->length > 0)
+        g_debug("The key event's string is '%s'\n", event->string);
+
+    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
+    GtkRange* range = (GtkRange*)slider;       
+    gdouble current_value = gtk_range_get_value(range);  
+    gdouble new_value = current_value;
+    const gdouble five_percent = 5;
+
+    switch(event->keyval)
+        {
+        case GDK_Right:
+            if(event->state & GDK_CONTROL_MASK)
+            {
+/*                g_debug("right key was pressed with ctrl- volume set to 100");                 */
+                new_value = 100;
+            }
+            else
+            {
+/*                g_debug("right key was pressed - normal 5 percent increase");                */
+                new_value = current_value + five_percent;
+            }
+            break;
+        case GDK_Left:
+            if(event->state & GDK_CONTROL_MASK)
+            {
+/*                g_debug("left key was pressed with ctrl- volume set to 0");                */
+                new_value = 0;
+            }
+            else
+            {
+/*                g_debug("left key was pressed - normal 5 percent decrease");                */
+                new_value = current_value - five_percent;                
+            }
+            break;
+        case GDK_plus:
+/*                g_debug("Plus key was pressed");*/
+                new_value = current_value + five_percent;                
+            break;
+        case GDK_minus:
+/*            g_debug("minus key was pressed");*/
+                new_value = current_value - five_percent;                
+            break;
+        default:
+            break;
+        }    
+        
+/*        g_debug("new range value without being clamped  = %f", new_value);            */
+
+        new_value = CLAMP(new_value, 0, 100);
+        if(new_value != current_value)
+        {
+            g_debug("Attempting to set the range to %f", new_value);        
+            gtk_range_set_value(range, new_value);  
+        }
+    return FALSE;
+}
+
+/**
+This callback should only be called when the user actually drags the slider.
+Turned off for now in favour of the non descriminating call back.
+**/
 static gboolean user_change_value_event_cb(GtkRange *range, GtkScrollType scroll_type, gdouble input_value, gpointer  user_data)
 {
     DbusmenuMenuitem *item = (DbusmenuMenuitem*)user_data;
