@@ -97,6 +97,7 @@ void update_mute_ui(gboolean incoming_mute_value)
 {
     b_all_muted = incoming_mute_value;
     dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, _(b_all_muted == FALSE ? "Mute All" : "Unmute"));    
+    //dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem), DBUSMENU_MENUITEM_PROP_ENABLED, b_all_muted);
 }
 
 static void set_global_mute_from_ui()
@@ -104,13 +105,7 @@ static void set_global_mute_from_ui()
     b_all_muted = !b_all_muted;
     toggle_global_mute(b_all_muted); 
     dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, _(b_all_muted == FALSE ? "Mute All" : "Unmute"));
-
-/*    GValue value = {0};*/
-/*    g_value_init(&value, G_TYPE_DOUBLE);*/
-/*    g_value_set_double(&value, 99.0);*/
-/*    // Testing*/
-/*    g_debug("BUGGY volume update");*/
-/*    dbusmenu_menuitem_property_set_value(DBUSMENU_MENUITEM(volume_slider_menuitem), DBUSMENU_SLIDER_MENUITEM_PROP_VOLUME, &value);*/
+    //dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem), DBUSMENU_MENUITEM_PROP_ENABLED, b_all_muted);
 }
 
 
@@ -137,7 +132,12 @@ void update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_m
     b_pulse_ready = pa_state;
     volume_percent = percent;
 	g_debug("update pa state with state %i, availability of %i, mute value of %i and a volume percent is %f", pa_state, sink_available, sink_muted, volume_percent);
-    rebuild_sound_menu(root_menuitem, dbus_interface);
+    sound_service_dbus_update_sink_volume(dbus_interface, percent); 
+    sound_service_dbus_update_sink_mute(dbus_interface, sink_muted); 
+
+    // Only rebuild the menu on start up...
+    if(volume_slider_menuitem == NULL)
+        rebuild_sound_menu(root_menuitem, dbus_interface);
 }
 
 
@@ -169,7 +169,7 @@ main (int argc, char ** argv)
     dbusmenu_server_set_root(server, root_menuitem);
     establish_pulse_activities(dbus_interface);
 
-/*    // THIS DOES NOT WORK FROM HERE*/
+/*    // THIS DOES NOT WORK FROM HERE - race condition ?!?*/
 /*    GValue value = {0};*/
 /*    g_value_init(&value, G_TYPE_DOUBLE);*/
 /*    g_value_set_double(&value, volume_percent * 100);*/
