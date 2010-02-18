@@ -326,6 +326,7 @@ static void update_state(const gint state)
 static void determine_state_from_volume(gdouble volume_percent)
 {
 /*    g_debug("determine_state_from_volume - previous_state = %i", previous_state);*/
+
     gint state = previous_state;
     if (volume_percent < 30.0 && volume_percent > 0){
         state = STATE_LOW;
@@ -431,6 +432,8 @@ key_press_cb:
 **/
 static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
 {
+    if (current_state == STATE_MUTED)
+        return FALSE;
 
     GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
     GtkRange* range = (GtkRange*)slider;       
