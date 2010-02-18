@@ -342,7 +342,7 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
         if(DEFAULT_SINK_INDEX == s->index)
         {
             //update the UI
-            if (volume_changed == TRUE)
+            if (volume_changed == TRUE && s->mute == FALSE)
             {
                 pa_volume_t vol = pa_cvolume_avg(&s->volume);
                 gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
