@@ -432,8 +432,7 @@ key_press_cb:
 **/
 static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
 {
-    if (current_state == STATE_MUTED)
-        return FALSE;
+    gboolean digested = FALSE;
 
     GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
     GtkRange* range = (GtkRange*)slider;       
@@ -444,6 +443,7 @@ static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer dat
     switch(event->keyval)
         {
         case GDK_Right:
+            digested = TRUE;
             if(event->state & GDK_CONTROL_MASK)
             {
                 new_value = 100;
@@ -454,6 +454,7 @@ static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer dat
             }
             break;
         case GDK_Left:
+            digested = TRUE;
             if(event->state & GDK_CONTROL_MASK)
             {
                 new_value = 0;
@@ -464,22 +465,24 @@ static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer dat
             }
             break;
         case GDK_plus:
-                new_value = current_value + five_percent;                
+            digested = TRUE;
+            new_value = current_value + five_percent;                
             break;
         case GDK_minus:
-                new_value = current_value - five_percent;                
+            digested = TRUE;
+            new_value = current_value - five_percent;                
             break;
         default:
             break;
         }    
         
         new_value = CLAMP(new_value, 0, 100);
-        if(new_value != current_value)
+        if(new_value != current_value && current_state != STATE_MUTED)
         {
             g_debug("Attempting to set the range from the key listener to %f", new_value);        
             gtk_range_set_value(range, new_value);  
         }
-    return FALSE;
+    return digested;
 }
 
 /**
