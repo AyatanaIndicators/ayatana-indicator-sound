@@ -1,3 +1,9 @@
+indicator-sound (0.1.1-0ubuntu2) lucid; urgency=low
+
+  * Backporting trunk commit to fix keyboard controls (lp: #521088)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 18 Feb 2010 19:13:03 +0100
+
 indicator-sound (0.1.1-0ubuntu1) lucid; urgency=low
 
   * New upstream version
