@@ -43,9 +43,15 @@ static void context_success_callback(pa_context *c, int success, void *userdata)
 static void pulse_sink_input_info_callback(pa_context *c, const pa_sink_input_info *info, int eol, void *userdata);
 static void pulse_server_info_callback(pa_context *c, const pa_server_info *info, void *userdata);
 static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, void *userdata);
+static void pulse_source_info_callback(pa_context *c, const pa_source_info *i, int eol, void *userdata); 
 static void destroy_sink_info(void *value);
 static gboolean determine_sink_availability();
 
+
+/**
+Refactoring notes
+Push all UI updates out through update PA state in the service. 
+**/
 
 /*
 Entry point
@@ -85,16 +91,6 @@ static void destroy_sink_info(void *value)
     g_free(sink->icon_name);  
     g_free(sink);  
 }
-
-/*static void test_hash(){*/
-/*    guint size = 0;*/
-/*    size = g_hash_table_size(sink_hash);*/
-/*    g_debug("Size of hash = %i", size);*/
-/*    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   */
-/*    g_debug("The name of our sink is %s", s->name); */
-/*    g_debug("and the max volume is %f", (gdouble)s->base_volume); */
-
-/*}*/
 
 /*
 Controllers & Utilities
@@ -158,15 +154,22 @@ static gdouble get_default_sink_volume()
         return 0;
     sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));
     pa_volume_t vol = pa_cvolume_avg(&s->volume);
-    gdouble value = pa_sw_volume_to_linear(vol);
-    g_debug("software volume = %f", value);
-    return value;
+    gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
+    g_debug("software volume = %f", volume_percent);
+    return volume_percent;
 }
 
 static void mute_each_sink(gpointer key, gpointer value, gpointer user_data)
 {
     sink_info *info = (sink_info*)value;
     pa_operation_unref(pa_context_set_sink_mute_by_index(pulse_context, info->index, GPOINTER_TO_INT(user_data), context_success_callback,  NULL));
+    if(GPOINTER_TO_INT(user_data) == 1){
+        sound_service_dbus_update_sink_mute(dbus_service, TRUE);
+    }
+    else{
+        sound_service_dbus_update_sink_volume(dbus_service, get_default_sink_volume());
+    }
+
     g_debug("in the pulse manager: mute each sink %i", GPOINTER_TO_INT(user_data));
 }
 
@@ -189,19 +192,17 @@ void set_sink_volume(gdouble percent)
         g_warning("We have no default sink !!! - returning after not attempting to set any volume of any sink");
         return;
     }
-    gdouble linear_input = (gdouble)(percent);
-    linear_input /= 100.0;
-    g_debug("linear double input = %f", linear_input);
-    pa_volume_t new_volume = pa_sw_volume_from_linear(linear_input); 
-    // Use this to achieve more accurate scaling using the base volume (in the sink struct already!)
-    //pa_volume_t new_volume = (pa_volume_t) ((GPOINTER_TO_INT(linear_input) * s->base_volume) / 100);
-    g_debug("about to try to set the sw volume to a linear volume of %f", pa_sw_volume_to_linear(new_volume));
-    g_debug("and an actual volume of %f", (gdouble)new_volume);
-    pa_cvolume dev_vol;
+
     sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
+
+    pa_volume_t new_volume = (pa_volume_t) ((percent * PA_VOLUME_NORM) / 100);
+    g_debug("new_volume double check :%f", pa_sw_volume_to_linear(new_volume));
+    g_debug("new volume calculated :%f", (gdouble)new_volume);
+    pa_cvolume dev_vol;
     pa_cvolume_set(&dev_vol, s->volume.channels, new_volume);   
-    
+    s->volume = dev_vol;
     pa_operation_unref(pa_context_set_sink_volume_by_index(pulse_context, DEFAULT_SINK_INDEX, &dev_vol, NULL, NULL));
+    
 }
 
 
@@ -245,9 +246,6 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
         if(device_available == TRUE)
         {
             update_pa_state(TRUE, device_available, default_sink_is_muted(), get_default_sink_volume()); 
-            sound_service_dbus_update_sink_volume(dbus_service, get_default_sink_volume()); 
-            sound_service_dbus_update_sink_mute(dbus_service, default_sink_is_muted()); 
-            g_debug("default sink index : %d", DEFAULT_SINK_INDEX);                    
         }
         else{
             //Update the indicator to show PA either is not ready or has no available sink
@@ -284,7 +282,17 @@ static void pulse_default_sink_info_callback(pa_context *c, const pa_sink_info *
     else{
         DEFAULT_SINK_INDEX = info->index;
         g_debug("Just set the default sink index to %i", DEFAULT_SINK_INDEX);    
-        pa_operation_unref(pa_context_get_sink_info_list(c, pulse_sink_info_callback, NULL)); 
+        GList *keys = g_hash_table_get_keys(sink_hash);
+        gint position =  g_list_index(keys, GINT_TO_POINTER(info->index));
+        // Only update sink-list if the index is not in our already fetched list.
+        if(position < 0)
+        {
+            pa_operation_unref(pa_context_get_sink_info_list(c, pulse_sink_info_callback, NULL)); 
+        }
+        else
+        {
+            update_pa_state(TRUE, determine_sink_availability(), default_sink_is_muted(), get_default_sink_volume());             
+        }    
     }
 }
 
@@ -321,30 +329,39 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
     if(position >= 0) // => index is within the keys of the hash.
     {
         sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(info->index));
-        //g_debug("attempting to update sink with name %s", s->name);
         s->name = g_strdup(info->name);
         s->description = g_strdup(info->description);
         s->icon_name = g_strdup(pa_proplist_gets(info->proplist, PA_PROP_DEVICE_ICON_NAME));
         s->active_port = (info->active_port != NULL);
-        // NASTY!!
         gboolean mute_changed = s->mute != !!info->mute;
         s->mute = !!info->mute;
+        gboolean volume_changed = (pa_cvolume_equal(&info->volume, &s->volume) == 0);
         s->volume = info->volume;
         s->base_volume = info->base_volume;
         s->channel_map = info->channel_map; 
         if(DEFAULT_SINK_INDEX == s->index)
         {
             //update the UI
-            pa_volume_t vol = pa_cvolume_avg(&s->volume);
-            // Use the base of the device to ensure maximum acceptable levels on the hardware
-            gdouble volume_percent = (vol/s->base_volume) * 100;
-            g_debug("When using base volume => volume = %f", volume_percent);
-            g_debug("about to update ui with linear volume of %f", pa_sw_volume_to_linear(vol));            
-            sound_service_dbus_update_sink_volume(dbus_service, pa_sw_volume_to_linear(vol)); 
-            if (mute_changed == TRUE)     
-                sound_service_dbus_update_sink_mute(dbus_service, s->mute);
+            if (volume_changed == TRUE && s->mute == FALSE)
+            {
+                pa_volume_t vol = pa_cvolume_avg(&s->volume);
+                gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
+                g_debug("Updating volume from PA manager with volume = %f", volume_percent);
+                sound_service_dbus_update_sink_volume(dbus_service, volume_percent); 
+            }
             
-            update_mute_ui(s->mute);
+            if (mute_changed == TRUE)
+            {     
+                g_debug("Updating Mute from PA manager with mute = %i", s->mute);
+                sound_service_dbus_update_sink_mute(dbus_service, s->mute);
+                update_mute_ui(s->mute);
+                if(s->mute == FALSE){
+                    pa_volume_t vol = pa_cvolume_avg(&s->volume);
+                    gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
+                    g_debug("Updating volume from PA manager with volume = %f", volume_percent);
+                    sound_service_dbus_update_sink_volume(dbus_service, volume_percent);
+                }
+            }
         }
     }
     else
@@ -389,24 +406,64 @@ static void pulse_server_info_callback(pa_context *c, const pa_server_info *info
     pa_operation_unref(operation);
 }
 
-static void subscribed_events_callback(pa_context *c, enum pa_subscription_event_type t, uint32_t index, void *userdata){
-	switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) {
+static void pulse_source_info_callback(pa_context *c, const pa_source_info *i, int eol, void *userdata) 
+{
+    g_debug("pulse source info callback");
+}
+
+
+static void subscribed_events_callback(pa_context *c, enum pa_subscription_event_type t, uint32_t index, void *userdata)
+{
+	switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) 
+    {
         case PA_SUBSCRIPTION_EVENT_SINK:
-            if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
-                //TODO handle the remove event => if its our default sink - grey out the ui with update_pa_state
-            } else {
+			g_debug("PA_SUBSCRIPTION_EVENT_SINK event triggered");            
+            if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) 
+            {
+                //TODO handle the remove event => if its our default sink - update date pa state
+            } else 
+            {
                 pa_operation_unref(pa_context_get_sink_info_by_index(c, index, update_sink_info, userdata));
             }            
             break;
         case PA_SUBSCRIPTION_EVENT_SINK_INPUT:
-			// This will be triggered when the sink receives input from a new stream
-			// If a playback client is paused and then resumed this will NOT trigger this event.
-		    pa_operation_unref(pa_context_get_sink_input_info(c, index, pulse_sink_input_info_callback, userdata));
-		    break;
-        case PA_SUBSCRIPTION_EVENT_SERVER:
-            if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_SINK ) {
-                g_debug("server change of some sink type ???");
+			g_debug("PA_SUBSCRIPTION_EVENT_SINK_INPUT event triggered!!");
+            if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE)
+            {
+                //TODO handle the remove event
+            }            
+            else 
+            {			
+    		    pa_operation_unref(pa_context_get_sink_input_info(c, index, pulse_sink_input_info_callback, userdata));
+    		}
+    	    break;
+        case PA_SUBSCRIPTION_EVENT_SOURCE:
+            g_debug("PA_SUBSCRIPTION_EVENT_SOURCE of some description ???");
+
+            if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE)
+            {
+                //TODO handle the remove event
             }
+            else 
+            {
+                pa_operation *o;
+                if (!(o = pa_context_get_source_info_by_index(c, index, pulse_source_info_callback, userdata))) {
+                    g_warning("pa_context_get_source_info_by_index() failed");
+                    return;
+                }
+                pa_operation_unref(o);
+            }
+            break;
+        case PA_SUBSCRIPTION_EVENT_SERVER:
+            g_debug("PA_SUBSCRIPTION_EVENT_SERVER change of some description ???");
+            pa_operation *o;
+            if(!(o = pa_context_get_server_info(c, pulse_server_info_callback, userdata)))
+            {
+                g_warning("pa_context_get_server_info() failed");
+                return;
+            }
+            pa_operation_unref(o);
+            break;
 	}
 }
 

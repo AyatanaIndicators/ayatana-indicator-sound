@@ -1,3 +1,17 @@
+indicator-sound (0.1.1-0ubuntu1) lucid; urgency=low
+
+  * New upstream version
+    - resolve the UI keyboard controls which were lacking (lp: #521088)
+    - the volume control should now be far smoother
+    - included is the ability to dynamically swap output devices 
+      using gnome volume control
+    - use of new icons from the new humanity theme.
+    - update volume slider in the right direction on mouse scroll (lp: #521090)
+  * debian/control:
+    - updated ido requirement
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 18 Feb 2010 17:46:11 +0100
+
 indicator-sound (0.1.0-0ubuntu2) lucid; urgency=low
 
   * Backport trunk change to fix audiosink detection and volume controls 
