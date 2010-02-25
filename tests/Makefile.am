@@ -15,7 +15,7 @@ test_indicator_sound_CFLAGS = \
 	$(APPLET_CFLAGS) \
 	-Wall -Werror \
 	-I$(srcdir) \
-	-DBUILD_DIR="\"$(INDICATORDIR)"\"
+	-DTOP_BUILD_DIR="\"${abs_top_builddir}\""
 
 test_indicator_sound_LDADD = \
 	$(APPLET_LIBS) \

@@ -23,14 +23,14 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 void test_libindicator_sound_init()
 {
-	IndicatorObject * sound_menu = indicator_object_new_from_file(BUILD_DIR "/.libs/libsoundmenu.so");
+	IndicatorObject * sound_menu = indicator_object_new_from_file(TOP_BUILD_DIR "/src/.libs/libsoundmenu.so");
 	g_assert(sound_menu != NULL);
 	g_object_unref(G_OBJECT(sound_menu));
 }
 
 void test_libindicator_determine_state()
 {
-	IndicatorObject * sound_menu = indicator_object_new_from_file(BUILD_DIR "/.libs/libsoundmenu.so");
+	IndicatorObject * sound_menu = indicator_object_new_from_file(TOP_BUILD_DIR "/src/.libs/libsoundmenu.so");
     get_icon(sound_menu);
 
     determine_state_from_volume(40);
