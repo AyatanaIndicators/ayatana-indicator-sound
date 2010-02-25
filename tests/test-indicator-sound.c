@@ -17,35 +17,20 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*#include <math.h>*/
-/*#include <glib.h>*/
-/*#include <glib-object.h>*/
-/*#include <gtk/gtk.h>*/
-/*#include <gdk/gdkkeysyms.h>*/
-/*#include <libdbusmenu-gtk/menu.h>*/
-/*#include <libido/idoscalemenuitem.h>*/
-
-/*#include <dbus/dbus-glib.h>*/
-/*#include <dbus/dbus-glib-bindings.h>*/
-
-/*#include <libindicator/indicator.h>*/
-/*#include <libindicator/indicator-object.h>*/
-/*#include <libindicator/indicator-service-manager.h>*/
-
 #include <string.h>
 #include "../src/indicator-sound.c"
 
 
 void test_libindicator_sound_init()
 {
-	IndicatorObject * sound_menu = indicator_object_new_from_file("/home/ronoc/canonical/repos/branches/indicator-sound/tests-indicator-sound/indicator-sound/src/.libs/libsoundmenu.so");
+	IndicatorObject * sound_menu = indicator_object_new_from_file(BUILD_DIR "/.libs/libsoundmenu.so");
 	g_assert(sound_menu != NULL);
 	g_object_unref(G_OBJECT(sound_menu));
 }
 
 void test_libindicator_determine_state()
 {
-	IndicatorObject * sound_menu = indicator_object_new_from_file("/home/ronoc/canonical/repos/branches/indicator-sound/tests-indicator-sound/indicator-sound/src/.libs/libsoundmenu.so");
+	IndicatorObject * sound_menu = indicator_object_new_from_file(BUILD_DIR "/.libs/libsoundmenu.so");
     get_icon(sound_menu);
 
     determine_state_from_volume(40);
