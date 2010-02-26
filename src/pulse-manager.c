@@ -397,12 +397,20 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
     }
     else
     {
-        // TODO ADD new sink - part of big refactor
-        g_debug("attempting to add new sink with name %s", info->name);
-        //sink_info *s;
-        //s = g_new0(sink_info, 1);                
-        //update the sinks hash with new sink.
-    }    
+        sink_info *value;
+        value = g_new0(sink_info, 1);
+        value->index = value->device_index = info->index;
+        value->name = g_strdup(info->name);
+        value->description = g_strdup(info->description);
+        value->icon_name = g_strdup(pa_proplist_gets(info->proplist, PA_PROP_DEVICE_ICON_NAME));
+        value->active_port = (info->active_port != NULL);
+        value->mute = !!info->mute;
+        value->volume = info->volume;
+        value->base_volume = info->base_volume;
+        value->channel_map = info->channel_map;
+        g_hash_table_insert(sink_hash, GINT_TO_POINTER(value->index), value);
+        g_debug("pulse-manager:update_sink_info -> After adding a new sink to our hash");
+   }    
 }
 
 

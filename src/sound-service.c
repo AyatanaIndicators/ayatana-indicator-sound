@@ -67,11 +67,11 @@ static void show_sound_settings_dialog (DbusmenuMenuitem *mi, gpointer user_data
     }
 }
 /**
-Build the DBus menu items. For now Mute all/Unmute is the only available option
+rebuild_sound_menu:
+Build the DBus menu items, mute/unmute, slider, separator and sound preferences 'link'
 **/
 static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service)
 {
-    g_debug("rebuilding the sound menu - should i be doing this - it only should happen once !");
     // Mute button
     mute_all_menuitem = dbusmenu_menuitem_new();
     dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, _(b_all_muted == FALSE ? "Mute All" : "Unmute"));
@@ -82,14 +82,12 @@ static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service
     volume_slider_menuitem = slider_menu_item_new(b_sink_available, volume_percent);
     dbusmenu_menuitem_child_append(root, mute_all_menuitem);
     dbusmenu_menuitem_child_append(root, DBUSMENU_MENUITEM(volume_slider_menuitem));
-    // Enable/Disable, show/hide slider depending on sink availability
     dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem),
                                         DBUSMENU_MENUITEM_PROP_ENABLED,
-                                        b_sink_available);   
+                                        b_sink_available);       
     dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem),
-                                                          DBUSMENU_MENUITEM_PROP_VISIBLE,
-                                                          b_sink_available);
-    
+                                        DBUSMENU_MENUITEM_PROP_VISIBLE,
+                                        b_sink_available);   
     // Separator
     DbusmenuMenuitem *separator = dbusmenu_menuitem_new();
     dbusmenu_menuitem_property_set(separator, DBUSMENU_MENUITEM_PROP_TYPE, DBUSMENU_CLIENT_TYPES_SEPARATOR);
@@ -168,6 +166,7 @@ void update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_m
 
 static void refresh_menu()
 {
+    g_debug("in the refresh menu method");
     if(b_sink_available == FALSE || b_pulse_ready == FALSE)
     {
 
@@ -183,6 +182,10 @@ static void refresh_menu()
 
     }
     else if(b_sink_available == TRUE  && b_pulse_ready == TRUE){
+
+        dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem), 
+                                            DBUSMENU_MENUITEM_PROP_ENABLED,
+                                            TRUE);   
         dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem), 
                                             DBUSMENU_MENUITEM_PROP_VISIBLE,
                                             TRUE);   
