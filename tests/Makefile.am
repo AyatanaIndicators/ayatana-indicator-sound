@@ -1,6 +1,8 @@
 
 check_PROGRAMS = \
 	test-indicator-sound
+	test-indicator-sound-dbus-client \
+	test-indicator-sound-dbus-server 
 
 TESTS =
 DISTCLEANFILES = $(TESTS)
@@ -21,35 +23,72 @@ test_indicator_sound_LDADD = \
 	$(APPLET_LIBS) \
 	$(INDICATORDIR)/libsoundmenu.la
 
-#DBUS_RUNNER=dbus-test-runner --dbus-config /usr/share/dbus-test-runner/session.conf
+#########################################
+##  test-indicator-sound-dbus-client
+#########################################
 
-#test-indicator-sound-dbus: test-indicator-sound-dbus-client test-indicator-sound-dbus-server Makefile.am
-#	@echo "#!/bin/sh" > test-indicator-sound-dbus
-#	@echo $(DBUS_RUNNER) --task ./test-indicator-sound-dbus-client --task-name Client --task ./test-indicator-sound-dbus-server --task-name Server --ignore-return >> test-indicator-sound-dbus
-#	@chmod +x test-libappindicator-dbus
+test_indicator_sound_dbus_client_SOURCES = \
+	test-defines.h \
+	test-indicator-sound-dbus-client.c
 
-#TESTS += test-libappindicator-dbus
+test_indicator_sound_dbus_client_CFLAGS = \
+	$(SOUNDSERVICE_CFLAGS) \
+	-Wall -Werror \
+	-I$(srcdir) \
+    -I$(SOUNDSERVICE_CFLAGS)
 
-XVFB_RUN=". $(srcdir)/run-xvfb.sh"
+test_indicator_sound_dbus_client_LDADD = \
+	$(SOUNDSERVICE_LIBS) \
+	$(INDICATORDIR)/libsoundmenu.la
 
-EXTRA_DIST = run-xvfb.sh
+#########################################
+##  test-indicator-sound-dbus-server
+#########################################
+test_indicator_sound_dbus_server_SOURCES = \
+	test-defines.h \
+	test-indicator-sound-dbus-server.c
+
+test_indicator_sound_dbus_server_CFLAGS = \
+	$(APPLET_CFLAGS) \
+	-Wall -Werror \
+	-I$(srcdir) 
+
+test_libappindicator_dbus_server_LDADD = \
+	$(SOUNDSERVICE_LIBS) \
+	$(INDICATORDIR)/libsoundmenu.la
 
 
-#############################
-# Test stuff
-#############################
+#########################################
+##  Actual tests
+#########################################
 
-#XML_REPORT  = loader-check-results.xml
-#HTML_REPORT = loader-check-results.html
+#XML_REPORT   = indicator-sound-check-results.xml
+#HTML_REPORT  = indicator-sound-check-results.html
 
-#loader-tester: test-loader libsoundmenu.la Makefile
-#	@echo "#!/bin/bash" > loader-tester
-#	@echo $(XVFB_RUN) >> $@
-#	@echo gtester -k --verbose -o=$(XML_REPORT) ./test-loader >> loader-tester
-#	@chmod +x loader-tester
+#indicator-sound-tests: indicator-sound-tests-gtester Makefile.am
+#	@echo "#!/bin/sh" > $@
+#	@echo $(DBUS_RUNNER) --task ./indicator-sound-tests-gtester >> $@
+#	@chmod +x $@
 
-#TESTS += loader-tester
-#DISTCLEANFILES += loader-tester
+indicator-sound-tests-gtester: test-indicator-sound Makefile.am
+	@echo "#!/bin/sh" > $@
+	@echo gtester -k --verbose -o=$(XML_REPORT) ./test-indicator-sound >> $@
+	@chmod +x $@
 
-#DISTCLEANFILES += $(XML_REPORT) $(HTML_REPORT)
+TESTS += indicator-sound-tests
+
+DISTCLEANFILES += $(XML_REPORT) $(HTML_REPORT) indicator-sound-tests-gtester
+
+DBUS_RUNNER=dbus-test-runner --dbus-config /usr/share/dbus-test-runner/session.conf
+
+test-indicator-sound-dbus: test-indicator-sound-dbus-client test-indicator-sound-dbus-server Makefile.am
+	@echo "#!/bin/sh" > test-indicator-sound-dbus
+	@echo $(DBUS_RUNNER) --task ./test-indicator-sound-dbus-client --task-name Client --task ./test-indicator-sound-dbus-server --task-name Server --ignore-return >> test-indicator-sound-dbus
+	@chmod +x test-indicator-sound-dbus
+
+TESTS += test-indicator-sound-dbus
+
+
+
+
 
