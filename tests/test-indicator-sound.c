@@ -18,7 +18,8 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <string.h>
-#include "../src/indicator-sound.c"
+#include <gtk/gtk.h>
+#include <libindicator/indicator-object.h>
 
 
 void test_libindicator_sound_init()
