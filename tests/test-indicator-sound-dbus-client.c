@@ -44,7 +44,7 @@ fetch_mute_cb (DBusGProxy * proxy, DBusGProxyCall * call, void * data)
 		return;
 	}
 
-	if (TEST_MUTE != g_value_get_boolean(&value))) {
+	if (TEST_MUTE != g_value_get_boolean(&value)) {
 		g_debug("Mute vale Returned: FAILED");
 		passed = FALSE;
 	} else {

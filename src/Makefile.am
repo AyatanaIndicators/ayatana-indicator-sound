@@ -8,6 +8,7 @@ soundmenulibdir = $(INDICATORDIR)
 soundmenulib_LTLIBRARIES = libsoundmenu.la
 libsoundmenu_la_SOURCES = \
     common-defs.h \
+	indicator-sound.h \
 	indicator-sound.c \
 	dbus-shared-names.h \
     sound-service-client.h \

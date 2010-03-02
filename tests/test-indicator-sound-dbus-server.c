@@ -29,11 +29,13 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "test-defines.h"
 
 static GMainLoop * mainloop = NULL;
+static SoundServiceDbus *dbus_interface = NULL;
 
 gboolean
 kill_func (gpointer userdata)
 {
 	g_main_loop_quit(mainloop);
+    // TODO free the dbus interface !!
 	return FALSE;
 }
 

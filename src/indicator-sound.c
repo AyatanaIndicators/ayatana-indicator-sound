@@ -35,7 +35,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <libindicator/indicator-object.h>
 #include <libindicator/indicator-service-manager.h>
 
-
+#include "indicator-sound.h"
 #include "dbus-shared-names.h"
 #include "sound-service-client.h"
 #include "common-defs.h"
@@ -90,15 +90,13 @@ static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer dat
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
 static void connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata);
-static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean value, gpointer userdata);
+/*static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean value, gpointer userdata);*/
 static void catch_signal_sink_volume_update(DBusGProxy * proxy, gdouble volume_percent, gpointer userdata); 
 static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer userdata);
 static void fetch_volume_percent_from_dbus();
 static void fetch_mute_value_from_dbus();
 
 /****Volume States 'members' ***/
-static void prepare_state_machine();
-static void determine_state_from_volume(gdouble volume_percent);
 static void update_state(const gint state);
 
 static const gint STATE_MUTED = 0;
@@ -131,11 +129,11 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
 	io_class->get_image = get_icon;
 	io_class->get_menu = get_menu;
 
-    dbus_g_object_register_marshaller (_sound_service_marshal_VOID__INT_BOOLEAN,
-                                     G_TYPE_NONE,
-                                     G_TYPE_INT,
-                                     G_TYPE_BOOLEAN,
-                                     G_TYPE_INVALID);
+/*    dbus_g_object_register_marshaller (_sound_service_marshal_VOID__INT_BOOLEAN,*/
+/*                                     G_TYPE_NONE,*/
+/*                                     G_TYPE_INT,*/
+/*                                     G_TYPE_BOOLEAN,*/
+/*                                     G_TYPE_INVALID);*/
 	return;
 }
 
@@ -259,7 +257,7 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
             g_debug("about to connect to the signals");
 			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_TYPE_BOOLEAN, G_TYPE_INVALID);
 
-			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_CALLBACK(catch_signal_sink_input_while_muted), NULL, NULL);
+/*			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_CALLBACK(catch_signal_sink_input_while_muted), NULL, NULL);*/
 			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_VOLUME_UPDATE, G_TYPE_DOUBLE, G_TYPE_INVALID);
 			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_VOLUME_UPDATE, G_CALLBACK(catch_signal_sink_volume_update), NULL, NULL);
 			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_MUTE_UPDATE, G_TYPE_BOOLEAN, G_TYPE_INVALID);
@@ -284,7 +282,7 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
 /*
 Prepare states Array.
 */
-static void prepare_state_machine()
+void prepare_state_machine()
 {
     // TODO we need three more images
     volume_states = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
@@ -297,7 +295,15 @@ static void prepare_state_machine()
     g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_SINKS_NONE), g_strdup("audio-output-none-panel"));
 }
 
+gint get_state()
+{
+    return current_state;
+}
 
+void prepare_for_tests(IndicatorObject *io)
+{
+    get_icon(io);
+}
 
 static void update_state(const gint state)
 {
@@ -313,7 +319,7 @@ static void update_state(const gint state)
 }
 
 
-static void determine_state_from_volume(gdouble volume_percent)
+void determine_state_from_volume(gdouble volume_percent)
 {
 /*    g_debug("determine_state_from_volume - previous_state = %i", previous_state);*/
 
@@ -372,10 +378,10 @@ static void fetch_mute_value_from_dbus()
     g_debug("at the indicator start up and the MUTE returned from dbus method is %i", initial_mute);
 }
 
-static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean block_value, gpointer userdata)
-{
-    g_debug("signal caught - sink input while muted with value %i", block_value);
-}
+/*static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean block_value, gpointer userdata)*/
+/*{*/
+/*    g_debug("signal caught - sink input while muted with value %i", block_value);*/
+/*}*/
 
 static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_percent, gpointer userdata)
 {

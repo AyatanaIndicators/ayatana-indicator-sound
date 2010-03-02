@@ -1,6 +1,6 @@
 
 check_PROGRAMS = \
-	test-indicator-sound
+	test-indicator-sound \
 	test-indicator-sound-dbus-client \
 	test-indicator-sound-dbus-server 
 
@@ -21,7 +21,8 @@ test_indicator_sound_CFLAGS = \
 
 test_indicator_sound_LDADD = \
 	$(APPLET_LIBS) \
-	$(INDICATORDIR)/libsoundmenu.la
+	$(top_builddir)/src/libsoundmenu_la-indicator-sound.o 
+
 
 #########################################
 ##  test-indicator-sound-dbus-client
@@ -38,8 +39,7 @@ test_indicator_sound_dbus_client_CFLAGS = \
     -I$(SOUNDSERVICE_CFLAGS)
 
 test_indicator_sound_dbus_client_LDADD = \
-	$(SOUNDSERVICE_LIBS) \
-	$(INDICATORDIR)/libsoundmenu.la
+	$(SOUNDSERVICE_LIBS)
 
 #########################################
 ##  test-indicator-sound-dbus-server
@@ -51,11 +51,15 @@ test_indicator_sound_dbus_server_SOURCES = \
 test_indicator_sound_dbus_server_CFLAGS = \
 	$(APPLET_CFLAGS) \
 	-Wall -Werror \
-	-I$(srcdir) 
+	-I$(srcdir) \
+    -I$(SOUNDSERVICE_CFLAGS)
 
-test_libappindicator_dbus_server_LDADD = \
+test_indicator_sound_dbus_server_LDADD = \
 	$(SOUNDSERVICE_LIBS) \
-	$(INDICATORDIR)/libsoundmenu.la
+	$(top_builddir)/src/libsoundmenu.la 
+
+
+
 
 
 #########################################
