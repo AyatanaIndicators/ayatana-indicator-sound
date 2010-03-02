@@ -57,34 +57,33 @@ void test_libindicator_determine_state()
 	g_object_unref(G_OBJECT(sound_menu));
 }
 
-/*void test_libindicator_image_names()*/
-/*{*/
-/*    prepare_state_machine();*/
+void test_libindicator_image_names()
+{
+    prepare_state_machine();
 
-/*    gchar* muted_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED));        */
-/*    g_assert(g_ascii_strncasecmp("audio-volume-muted-panel", muted_name, strlen("audio-volume-muted-panel")) == 0);*/
+    gchar* muted_name = get_state_image_name(STATE_MUTED);        
+    g_assert(g_ascii_strncasecmp("audio-volume-muted-panel", muted_name, strlen("audio-volume-muted-panel")) == 0);
 
-/*    gchar* zero_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_ZERO));        */
-/*    g_assert(g_ascii_strncasecmp("audio-volume-low-zero-panel", zero_name, strlen("audio-volume-low-zero-panel")) == 0);*/
+    gchar* zero_name = get_state_image_name(STATE_ZERO);        
+    g_assert(g_ascii_strncasecmp("audio-volume-low-zero-panel", zero_name, strlen("audio-volume-low-zero-panel")) == 0);
 
-/*    gchar* low_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_LOW));        */
-/*    g_assert(g_ascii_strncasecmp("audio-volume-low-panel", low_name, strlen("audio-volume-low-panel")) == 0);*/
+    gchar* low_name = get_state_image_name(STATE_LOW);        
+    g_assert(g_ascii_strncasecmp("audio-volume-low-panel", low_name, strlen("audio-volume-low-panel")) == 0);
 
-/*    gchar* medium_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MEDIUM));        */
-/*    g_assert(g_ascii_strncasecmp("audio-volume-medium-panel", medium_name, strlen("audio-volume-medium-panel")) == 0);*/
+    gchar* medium_name = get_state_image_name(STATE_MEDIUM);        
+    g_assert(g_ascii_strncasecmp("audio-volume-medium-panel", medium_name, strlen("audio-volume-medium-panel")) == 0);
 
-/*    gchar* high_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_HIGH));        */
-/*    g_assert(g_ascii_strncasecmp("audio-volume-high-panel", high_name, strlen("audio-volume-high-panel")) == 0);*/
+    gchar* high_name = get_state_image_name(STATE_HIGH);        
+    g_assert(g_ascii_strncasecmp("audio-volume-high-panel", high_name, strlen("audio-volume-high-panel")) == 0);
 
-/*    gchar* blocked_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));        */
-/*    g_assert(g_ascii_strncasecmp("audio-volume-muted-blocking-panel", blocked_name, strlen("audio-volume-muted-blocking-panel")) == 0);*/
+    gchar* blocked_name = get_state_image_name(STATE_MUTED_WHILE_INPUT);        
+    g_assert(g_ascii_strncasecmp("audio-volume-muted-blocking-panel", blocked_name, strlen("audio-volume-muted-blocking-panel")) == 0);
 
-/*    gchar* none_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_SINKS_NONE));        */
-/*    g_assert(g_ascii_strncasecmp("audio-output-none-panel", none_name, strlen("audio-output-none-panel")) == 0);*/
-
-/*    // tidy up*/
-/*    g_hash_table_destroy(volume_states);*/
-/*}*/
+    gchar* none_name = get_state_image_name(STATE_SINKS_NONE);        
+    g_assert(g_ascii_strncasecmp("audio-output-none-panel", none_name, strlen("audio-output-none-panel")) == 0);
+    
+    tidy_up_hash();
+}
 
 
 
@@ -95,7 +94,7 @@ gint main (gint argc, gchar * argv[])
 
     g_test_add_func("/indicator-sound/indicator-sound/init", test_libindicator_sound_init);
     g_test_add_func("/indicator-sound/indicator-sound/state_machine", test_libindicator_determine_state);
-    //g_test_add_func("/indicator-sound/indicator-sound/image_names", test_libindicator_image_names);
+    g_test_add_func("/indicator-sound/indicator-sound/image_names", test_libindicator_image_names);
 
 	return g_test_run ();
 }

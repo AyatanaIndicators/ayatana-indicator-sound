@@ -300,9 +300,20 @@ gint get_state()
     return current_state;
 }
 
+gchar* get_state_image_name(gint state)
+{
+    return g_hash_table_lookup(volume_states, GINT_TO_POINTER(state));
+}
+
 void prepare_for_tests(IndicatorObject *io)
 {
+    prepare_state_machine();
     get_icon(io);
+}
+
+void tidy_up_hash()
+{
+    g_hash_table_destroy(volume_states);
 }
 
 static void update_state(const gint state)

@@ -21,9 +21,10 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
+// Essentially these are all exported to faciltiate testing
 void prepare_state_machine();
 void determine_state_from_volume(gdouble volume_percent);
 gint get_state();
-// Not nice
+gchar* get_state_image_name(gint state);
 void prepare_for_tests(IndicatorObject * io);
+void tidy_up_hash();

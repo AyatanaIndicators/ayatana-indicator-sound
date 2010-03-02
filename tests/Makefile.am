@@ -1,8 +1,8 @@
 
 check_PROGRAMS = \
 	test-indicator-sound \
-	test-indicator-sound-dbus-client \
-	test-indicator-sound-dbus-server 
+	test-indicator-sound-dbus-client 
+#	test-indicator-sound-dbus-server 
 
 TESTS =
 DISTCLEANFILES = $(TESTS)
@@ -44,20 +44,21 @@ test_indicator_sound_dbus_client_LDADD = \
 #########################################
 ##  test-indicator-sound-dbus-server
 #########################################
-test_indicator_sound_dbus_server_SOURCES = \
-	test-defines.h \
-	test-indicator-sound-dbus-server.c
+#test_indicator_sound_dbus_server_SOURCES = \
+#	test-defines.h 
 
-test_indicator_sound_dbus_server_CFLAGS = \
-	$(APPLET_CFLAGS) \
-	-Wall -Werror \
-	-I$(srcdir) \
-    -I$(SOUNDSERVICE_CFLAGS)
+#test_indicator_sound_dbus_server_CFLAGS = \
+#    $(SOUNDSERVICE_CFLAGS) \
+#	-Wall -Werror \
+#	-I$(srcdir) \
+#    -I$(SOUNDSERVICE_CFLAGS)
 
-test_indicator_sound_dbus_server_LDADD = \
-	$(SOUNDSERVICE_LIBS) \
-	$(top_builddir)/src/libsoundmenu.la 
-
+#test_indicator_sound_dbus_server_LDADD = \
+#	$(SOUNDSERVICE_LIBS) \
+#	$(top_builddir)/src/indicator_sound_service-sound-service.o \
+#	$(top_builddir)/src/indicator_sound_service-pulse-manager.o \
+#    $(top_builddir)/src/indicator_sound_service-slider-menu-item.o \
+#	$(top_builddir)/src/indicator_sound_service-sound-service-dbus.o 
 
 
 
@@ -83,14 +84,14 @@ TESTS += indicator-sound-tests
 
 DISTCLEANFILES += $(XML_REPORT) $(HTML_REPORT) indicator-sound-tests-gtester
 
-DBUS_RUNNER=dbus-test-runner --dbus-config /usr/share/dbus-test-runner/session.conf
+#DBUS_RUNNER=dbus-test-runner --dbus-config /usr/share/dbus-test-runner/session.conf
 
-test-indicator-sound-dbus: test-indicator-sound-dbus-client test-indicator-sound-dbus-server Makefile.am
-	@echo "#!/bin/sh" > test-indicator-sound-dbus
-	@echo $(DBUS_RUNNER) --task ./test-indicator-sound-dbus-client --task-name Client --task ./test-indicator-sound-dbus-server --task-name Server --ignore-return >> test-indicator-sound-dbus
-	@chmod +x test-indicator-sound-dbus
+#test-indicator-sound-dbus: test-indicator-sound-dbus-client test-indicator-sound-dbus-server Makefile.am
+#	@echo "#!/bin/sh" > test-indicator-sound-dbus
+#	@echo $(DBUS_RUNNER) --task ./test-indicator-sound-dbus-client --task-name Client --task ./test-indicator-sound-dbus-server --task-name Server --ignore-return >> test-indicator-sound-dbus
+#	@chmod +x test-indicator-sound-dbus
 
-TESTS += test-indicator-sound-dbus
+#TESTS += test-indicator-sound-dbus
 
 
 
