@@ -37,12 +37,13 @@ static SoundServiceDbus *dbus_interface = NULL;
 static gboolean b_sink_available = FALSE;
 static gboolean b_all_muted = FALSE;
 static gboolean b_pulse_ready = FALSE;
+static gboolean b_startup = TRUE;
 static gdouble volume_percent = 0.0;
 
 static void set_global_mute_from_ui();
 static gboolean idle_routine (gpointer data);
 static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service);
-
+static void refresh_menu();
 
 /**********************************************************************************************************************/
 //    Init functions (GTK and DBUS)
@@ -66,7 +67,8 @@ static void show_sound_settings_dialog (DbusmenuMenuitem *mi, gpointer user_data
     }
 }
 /**
-Build the DBus menu items. For now Mute all/Unmute is the only available option
+rebuild_sound_menu:
+Build the DBus menu items, mute/unmute, slider, separator and sound preferences 'link'
 **/
 static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service)
 {
@@ -80,10 +82,18 @@ static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service
     volume_slider_menuitem = slider_menu_item_new(b_sink_available, volume_percent);
     dbusmenu_menuitem_child_append(root, mute_all_menuitem);
     dbusmenu_menuitem_child_append(root, DBUSMENU_MENUITEM(volume_slider_menuitem));
-
+    dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem),
+                                        DBUSMENU_MENUITEM_PROP_ENABLED,
+                                        b_sink_available);       
+    dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem),
+                                        DBUSMENU_MENUITEM_PROP_VISIBLE,
+                                        b_sink_available);   
+    // Separator
     DbusmenuMenuitem *separator = dbusmenu_menuitem_new();
     dbusmenu_menuitem_property_set(separator, DBUSMENU_MENUITEM_PROP_TYPE, DBUSMENU_CLIENT_TYPES_SEPARATOR);
     dbusmenu_menuitem_child_append(root, separator);
+
+    // Sound preferences dialog
     DbusmenuMenuitem *settings_mi = dbusmenu_menuitem_new();
     dbusmenu_menuitem_property_set(settings_mi, DBUSMENU_MENUITEM_PROP_LABEL,
                                                                    _("Sound Preferences..."));
@@ -127,8 +137,8 @@ service_shutdown (IndicatorService *service, gpointer user_data)
 	if (mainloop != NULL) {
 		g_debug("Service shutdown !");
         // TODO: uncomment for release !!
-        close_pulse_activites();
-        g_main_loop_quit(mainloop);
+/*        close_pulse_activites();*/
+/*        g_main_loop_quit(mainloop);*/
 	}
 	return;
 }
@@ -140,12 +150,49 @@ void update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_m
     b_pulse_ready = pa_state;
     volume_percent = percent;
 	g_debug("update pa state with state %i, availability of %i, mute value of %i and a volume percent is %f", pa_state, sink_available, sink_muted, volume_percent);
+    // Only rebuild the menu on start up...
+    if(b_startup == TRUE){
+        rebuild_sound_menu(root_menuitem, dbus_interface);
+        b_startup = FALSE;
+    }
+    else{
+        refresh_menu();
+    }
+    // Emit the signals after the menus are setup/torn down
     sound_service_dbus_update_sink_volume(dbus_interface, percent); 
     sound_service_dbus_update_sink_mute(dbus_interface, sink_muted); 
 
-    // Only rebuild the menu on start up...
-    if(volume_slider_menuitem == NULL)
-        rebuild_sound_menu(root_menuitem, dbus_interface);
+}
+
+static void refresh_menu()
+{
+    g_debug("in the refresh menu method");
+    if(b_sink_available == FALSE || b_pulse_ready == FALSE)
+    {
+
+        dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem), 
+                                            DBUSMENU_MENUITEM_PROP_ENABLED,
+                                            FALSE);   
+        dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem), 
+                                            DBUSMENU_MENUITEM_PROP_VISIBLE,
+                                            FALSE);   
+        dbusmenu_menuitem_property_set_bool(mute_all_menuitem, 
+                                            DBUSMENU_MENUITEM_PROP_ENABLED,
+                                            FALSE);
+
+    }
+    else if(b_sink_available == TRUE  && b_pulse_ready == TRUE){
+
+        dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem), 
+                                            DBUSMENU_MENUITEM_PROP_ENABLED,
+                                            TRUE);   
+        dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem), 
+                                            DBUSMENU_MENUITEM_PROP_VISIBLE,
+                                            TRUE);   
+        dbusmenu_menuitem_property_set_bool(mute_all_menuitem, 
+                                            DBUSMENU_MENUITEM_PROP_ENABLED,
+                                            TRUE);        
+    }
 }
 
 
