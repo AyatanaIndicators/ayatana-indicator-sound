@@ -48,6 +48,8 @@ indicator_sound_service_SOURCES = \
     common-defs.h \
     sound-service.h \
     sound-service.c \
+    dbus-menu-manager.c \
+    dbus-menu-manager.h \
     pulse-manager.h \
     pulse-manager.c \
     sound-service-dbus.h \

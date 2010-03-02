@@ -1,3 +1,6 @@
+#ifndef __INCLUDE_INDICATOR_SOUND_H__
+#define __INCLUDE_INDICATOR_SOUND_H__
+
 /*
 A small wrapper utility to load indicators and put them as menu items
 into the gnome-panel using it's applet interface.
@@ -28,3 +31,5 @@ gint get_state();
 gchar* get_state_image_name(gint state);
 void prepare_for_tests(IndicatorObject * io);
 void tidy_up_hash();
+
+#endif

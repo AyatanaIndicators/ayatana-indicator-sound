@@ -11,7 +11,8 @@ DISTCLEANFILES = $(TESTS)
 ##  test-indicator-sound
 #########################################
 test_indicator_sound_SOURCES = \
-	test-indicator-sound.c
+	test-indicator-sound.c \
+    $(top_builddir)/src/indicator-sound.c
     
 test_indicator_sound_CFLAGS = \
 	$(APPLET_CFLAGS) \
@@ -20,8 +21,7 @@ test_indicator_sound_CFLAGS = \
 	-DTOP_BUILD_DIR="\"${abs_top_builddir}\""
 
 test_indicator_sound_LDADD = \
-	$(APPLET_LIBS) \
-	$(top_builddir)/src/libsoundmenu_la-indicator-sound.o 
+	$(APPLET_LIBS) 
 
 
 #########################################
