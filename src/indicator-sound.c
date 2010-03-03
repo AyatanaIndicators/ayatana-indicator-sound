@@ -439,6 +439,10 @@ static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer dat
     gdouble current_value = gtk_range_get_value(range);  
     gdouble new_value = current_value;
     const gdouble five_percent = 5;
+    GtkWidget *menuitem;
+
+    menuitem = gtk_menu_get_active (GTK_MENU (widget));
+    g_print (g_type_name (menuitem));
 
     switch(event->keyval)
         {
