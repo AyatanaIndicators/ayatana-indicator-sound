@@ -48,7 +48,7 @@ struct _SoundServiceDbusPrivate
 
 /* Signals */
 enum {
-  SINK_INPUT_WHILE_MUTED,  
+  SINK_INPUT_WHILE_MUTED,
   SINK_VOLUME_UPDATE,
   SINK_MUTE_UPDATE,
   LAST_SIGNAL
@@ -121,7 +121,7 @@ sound_service_dbus_init (SoundServiceDbus *self)
 	priv->connection = dbus_g_bus_get(DBUS_BUS_SESSION, &error);
 
 	if (error != NULL) {
-		g_error("Unable to connect to the session bus when creating application indicator: %s", error->message);
+		g_error("sound-service-dbus:Unable to connect to the session bus when creating indicator sound service : %s", error->message);
 		g_error_free(error);
 		return;
 	}
