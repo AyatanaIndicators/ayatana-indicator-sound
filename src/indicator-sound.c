@@ -439,49 +439,54 @@ static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer dat
     gdouble current_value = gtk_range_get_value(range);  
     gdouble new_value = current_value;
     const gdouble five_percent = 5;
+    GtkWidget *menuitem;
 
-    switch(event->keyval)
-        {
-        case GDK_Right:
-            digested = TRUE;
-            if(event->state & GDK_CONTROL_MASK)
+    menuitem = GTK_MENU_SHELL (widget)->active_menu_item;
+    if(IDO_IS_SCALE_MENU_ITEM(menuitem) == TRUE)
+    {
+        switch(event->keyval)
             {
-                new_value = 100;
-            }
-            else
-            {
-                new_value = current_value + five_percent;
-            }
-            break;
-        case GDK_Left:
-            digested = TRUE;
-            if(event->state & GDK_CONTROL_MASK)
-            {
-                new_value = 0;
-            }
-            else
-            {
+            case GDK_Right:
+                digested = TRUE;
+                if(event->state & GDK_CONTROL_MASK)
+                {
+                    new_value = 100;
+                }
+                else
+                {
+                    new_value = current_value + five_percent;
+                }
+                break;
+            case GDK_Left:
+                digested = TRUE;
+                if(event->state & GDK_CONTROL_MASK)
+                {
+                    new_value = 0;
+                }
+                else
+                {
+                    new_value = current_value - five_percent;                
+                }
+                break;
+            case GDK_plus:
+                digested = TRUE;
+                new_value = current_value + five_percent;                
+                break;
+            case GDK_minus:
+                digested = TRUE;
                 new_value = current_value - five_percent;                
+                break;
+            default:
+                break;
+            }    
+            
+            new_value = CLAMP(new_value, 0, 100);
+            if(new_value != current_value && current_state != STATE_MUTED)
+            {
+                g_debug("Attempting to set the range from the key listener to %f", new_value);        
+                gtk_range_set_value(range, new_value);  
             }
-            break;
-        case GDK_plus:
-            digested = TRUE;
-            new_value = current_value + five_percent;                
-            break;
-        case GDK_minus:
-            digested = TRUE;
-            new_value = current_value - five_percent;                
-            break;
-        default:
-            break;
-        }    
-        
-        new_value = CLAMP(new_value, 0, 100);
-        if(new_value != current_value && current_state != STATE_MUTED)
-        {
-            g_debug("Attempting to set the range from the key listener to %f", new_value);        
-            gtk_range_set_value(range, new_value);  
-        }
+    }
     return digested;
 }
 
