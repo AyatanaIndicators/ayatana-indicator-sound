@@ -113,7 +113,6 @@ void dbus_menu_manager_update_mute_ui(gboolean incoming_mute_value)
     dbusmenu_menuitem_property_set(mute_all_menuitem,
                                     DBUSMENU_MENUITEM_PROP_LABEL, 
                                     (b_all_muted == FALSE ? "Mute All" : "Unmute"));
-    //dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, (b_all_muted == FALSE ? _("Mute All") : _("Unmute")));
 }
 
 

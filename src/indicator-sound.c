@@ -238,6 +238,7 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
 static void
 connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata)
 {
+    // TODO: This could be safer.
 	if (connected) {
 		if (sound_dbus_proxy == NULL) {
 			GError * error = NULL;
