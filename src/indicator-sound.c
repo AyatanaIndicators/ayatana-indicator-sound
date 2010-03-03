@@ -442,7 +442,6 @@ static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer dat
     GtkWidget *menuitem;
 
     menuitem = GTK_MENU_SHELL (widget)->active_menu_item;
-/*    g_print ("object (%p) name should be %s", menuitem, G_OBJECT_TYPE_NAME(menuitem));*/
     if(IDO_IS_SCALE_MENU_ITEM(menuitem) == TRUE)
     {
         switch(event->keyval)
