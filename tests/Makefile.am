@@ -80,7 +80,7 @@ indicator-sound-tests-gtester: test-indicator-sound Makefile.am
 	@echo gtester -k --verbose -o=$(XML_REPORT) ./test-indicator-sound >> $@
 	@chmod +x $@
 
-TESTS += indicator-sound-tests
+# TESTS += indicator-sound-tests
 
 DISTCLEANFILES += $(XML_REPORT) $(HTML_REPORT) indicator-sound-tests-gtester
 
