@@ -78,14 +78,14 @@ G_DEFINE_TYPE (IndicatorSound, indicator_sound, INDICATOR_OBJECT_TYPE);
 static GtkLabel * get_label (IndicatorObject * io);
 static GtkImage * get_icon (IndicatorObject * io);
 static GtkMenu * get_menu (IndicatorObject * io);
+
 //Slider related
 static GtkWidget *volume_slider = NULL;
 static gboolean new_slider_item (DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget);
-// Alternative callback mechanism, may use this again once ido is updated.
-/*static gboolean user_change_value_event_cb(GtkRange *range, GtkScrollType scroll_type, gdouble input_value, gpointer  user_data);*/
 static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data);
 static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
+static void slider_size_allocate(GtkWidget  *widget, GtkAllocation *allocation, gpointer user_data);
 
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
@@ -95,6 +95,7 @@ static void catch_signal_sink_volume_update(DBusGProxy * proxy, gdouble volume_p
 static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer userdata);
 static void fetch_volume_percent_from_dbus();
 static void fetch_mute_value_from_dbus();
+
 
 /****Volume States 'members' ***/
 static void update_state(const gint state);
@@ -201,6 +202,7 @@ get_menu (IndicatorObject * io)
     return GTK_MENU(menu);
 }
 
+
 /**
 new_slider_item:
 Create a new dBusMenu Slider item.
@@ -220,10 +222,9 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
     
     // register slider changes listening on the range
     GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);  
+
     g_signal_connect(slider, "value-changed", G_CALLBACK(value_changed_event_cb), newitem);     
-    // alternative callback mechanism which i could use again at some point.
-/*    g_signal_connect(slider, "change-value", G_CALLBACK(user_change_value_event_cb), newitem);     */
-    
+    g_signal_connect(slider, "size-allocate", G_CALLBACK(slider_size_allocate), NULL);            
     // Set images on the ido
     primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)volume_slider);    
     gtk_image_set_from_icon_name(GTK_IMAGE(primary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_ZERO)), GTK_ICON_SIZE_MENU);
@@ -276,9 +277,6 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
 
 	return;
 }
-
-
-
 
 /*
 Prepare states Array.
@@ -452,6 +450,21 @@ static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data)
 }
 
 /**
+slider_size_allocate:
+Callback on the size-allocate event on the slider item.
+**/
+static void slider_size_allocate(GtkWidget  *widget,
+                                 GtkAllocation *allocation, 
+                                 gpointer user_data)
+{
+    g_print("size allocate on slider (%dx%d)\n", allocation->width, allocation->height);
+    if(allocation->width < 200)
+    {
+        gtk_widget_set_size_request(widget, 200, -1);
+    }
+}
+
+/**
 key_press_cb:
 **/
 static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
@@ -513,23 +526,5 @@ static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer dat
     }
     return digested;
 }
-
-/**
-This callback should only be called when the user actually drags the slider.
-Turned off for now in favour of the non descriminating value-changed call back.
-Once the grabbing listener is implemented on the slider may revert to using this.
-Its another tool for filtering unwanted volume change updates.
-**/
-/*static gboolean user_change_value_event_cb(GtkRange *range, GtkScrollType scroll_type, gdouble input_value, gpointer  user_data)*/
-/*{*/
-/*    DbusmenuMenuitem *item = (DbusmenuMenuitem*)user_data;*/
-/*    gdouble clamped_input = CLAMP(input_value, 0, 100);*/
-/*    GValue value = {0};*/
-/*    g_debug("User input on SLIDER - = %f", clamped_input);*/
-/*    g_value_init(&value, G_TYPE_DOUBLE);*/
-/*    g_value_set_double(&value, clamped_input);*/
-/*    dbusmenu_menuitem_handle_event (item, "slider_change", &value, 0);*/
-/*    return FALSE;  */
-/*} */
 
 
