@@ -116,6 +116,9 @@ static gint previous_state = 0;
 static gdouble initial_volume_percent = 0;
 static gboolean initial_mute = FALSE;
 
+#define DESIGN_TEAM_SIZE  design_team_size
+static GtkIconSize design_team_size;
+
 // Construction
 static void
 indicator_sound_class_init (IndicatorSoundClass *klass)
@@ -129,6 +132,8 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
 	io_class->get_label = get_label;
 	io_class->get_image = get_icon;
 	io_class->get_menu = get_menu;
+    
+    design_team_size = gtk_icon_size_register("design-team-size", 22, 22);
 
 /*    dbus_g_object_register_marshaller (_sound_service_marshal_VOID__INT_BOOLEAN,*/
 /*                                     G_TYPE_NONE,*/
@@ -181,7 +186,7 @@ get_icon (IndicatorObject * io)
 {
     gchar* current_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
     //g_debug("At start-up attempting to set the image to %s", current_name);
-	speaker_image = GTK_IMAGE(gtk_image_new_from_icon_name(current_name, GTK_ICON_SIZE_MENU));
+	speaker_image = GTK_IMAGE(gtk_image_new_from_icon_name(current_name, DESIGN_TEAM_SIZE));
 	gtk_widget_show(GTK_WIDGET(speaker_image));
 	return speaker_image;
 }
@@ -227,9 +232,9 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
     g_signal_connect(slider, "size-allocate", G_CALLBACK(slider_size_allocate), NULL);            
     // Set images on the ido
     primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)volume_slider);    
-    gtk_image_set_from_icon_name(GTK_IMAGE(primary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_ZERO)), GTK_ICON_SIZE_MENU);
+    gtk_image_set_from_icon_name(GTK_IMAGE(primary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_ZERO)), DESIGN_TEAM_SIZE);
     GtkWidget* secondary_image = ido_scale_menu_item_get_secondary_image((IdoScaleMenuItem*)volume_slider);                 
-    gtk_image_set_from_icon_name(GTK_IMAGE(secondary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_HIGH)), GTK_ICON_SIZE_MENU);
+    gtk_image_set_from_icon_name(GTK_IMAGE(secondary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_HIGH)), DESIGN_TEAM_SIZE);
 
     gtk_widget_show_all(volume_slider);
 
@@ -325,7 +330,7 @@ static void update_state(const gint state)
 
     current_state = state;
     gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
-    gtk_image_set_from_icon_name(speaker_image, image_name, GTK_ICON_SIZE_MENU);
+    gtk_image_set_from_icon_name(speaker_image, image_name, DESIGN_TEAM_SIZE);
 }
 
 
