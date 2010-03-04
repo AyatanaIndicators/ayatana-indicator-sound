@@ -18,6 +18,10 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
+#include <unistd.h>
+#include <glib/gi18n.h>
+
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-bindings.h>
 
@@ -112,7 +116,7 @@ void dbus_menu_manager_update_mute_ui(gboolean incoming_mute_value)
     b_all_muted = incoming_mute_value;
     dbusmenu_menuitem_property_set(mute_all_menuitem,
                                     DBUSMENU_MENUITEM_PROP_LABEL, 
-                                    (b_all_muted == FALSE ? "Mute All" : "Unmute"));
+                                    _(b_all_muted == FALSE ? "Mute All" : "Unmute"));
 }
 
 
@@ -185,7 +189,7 @@ static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service
 {
     // Mute button
     mute_all_menuitem = dbusmenu_menuitem_new();
-    dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, (b_all_muted == FALSE ? "Mute All" : "Unmute"));
+    dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, _(b_all_muted == FALSE ? "Mute All" : "Unmute"));
     g_signal_connect(G_OBJECT(mute_all_menuitem), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED, G_CALLBACK(set_global_mute_from_ui), NULL);
     dbusmenu_menuitem_property_set_bool(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_ENABLED, b_sink_available);
 
@@ -207,7 +211,7 @@ static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service
     // Sound preferences dialog
     DbusmenuMenuitem *settings_mi = dbusmenu_menuitem_new();
     dbusmenu_menuitem_property_set(settings_mi, DBUSMENU_MENUITEM_PROP_LABEL,
-                                                                   ("Sound Preferences..."));
+                                                                   _("Sound Preferences..."));
     dbusmenu_menuitem_child_append(root, settings_mi);
     g_signal_connect(G_OBJECT(settings_mi), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED,
                                          G_CALLBACK(show_sound_settings_dialog), NULL);
@@ -223,7 +227,7 @@ static void set_global_mute_from_ui()
     toggle_global_mute(b_all_muted); 
     dbusmenu_menuitem_property_set(mute_all_menuitem,
                                    DBUSMENU_MENUITEM_PROP_LABEL,
-                                   (b_all_muted == FALSE ? "Mute All" : "Unmute"));
+                                   _(b_all_muted == FALSE ? "Mute All" : "Unmute"));
 }
 
 
