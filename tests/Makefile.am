@@ -1,0 +1,95 @@
+
+check_PROGRAMS = \
+	test-indicator-sound \
+	test-indicator-sound-dbus-client \
+	test-indicator-sound-dbus-server 
+
+TESTS =
+DISTCLEANFILES = $(TESTS)
+
+#########################################
+##  test-indicator-sound
+#########################################
+test_indicator_sound_SOURCES = \
+	test-indicator-sound.c \
+    $(top_builddir)/src/indicator-sound.c
+    
+test_indicator_sound_CFLAGS = \
+	$(APPLET_CFLAGS) \
+	-Wall -Werror \
+	-I$(srcdir) \
+	-DTOP_BUILD_DIR="\"${abs_top_builddir}\""
+
+test_indicator_sound_LDADD = \
+	$(APPLET_LIBS) 
+
+
+#########################################
+##  test-indicator-sound-dbus-client
+#########################################
+test_indicator_sound_dbus_client_SOURCES = \
+	test-defines.h \
+	test-indicator-sound-dbus-client.c 
+
+test_indicator_sound_dbus_client_CFLAGS = \
+	$(SOUNDSERVICE_CFLAGS) \
+	-Wall -Werror \
+	-I$(srcdir) 
+
+test_indicator_sound_dbus_client_LDADD = \
+	$(SOUNDSERVICE_LIBS)
+
+########################################
+#  test-indicator-sound-dbus-server
+########################################
+test_indicator_sound_dbus_server_SOURCES = \
+	test-defines.h \
+    test-indicator-sound-dbus-server.c \
+    $(top_builddir)/src/sound-service-dbus.c \
+    $(top_builddir)/src/pulse-manager.c \
+    $(top_builddir)/src/slider-menu-item.c \
+    $(top_builddir)/src/dbus-menu-manager.c
+
+test_indicator_sound_dbus_server_CFLAGS = \
+    $(SOUNDSERVICE_CFLAGS) \
+	-Wall -Werror \
+	-I$(srcdir) 
+
+test_indicator_sound_dbus_server_LDADD = \
+	$(SOUNDSERVICE_LIBS) 
+
+
+#########################################
+##  Actual tests
+#########################################
+
+XML_REPORT   = indicator-sound-check-results.xml
+HTML_REPORT  = indicator-sound-check-results.html
+
+indicator-sound-tests: indicator-sound-tests-gtester Makefile.am
+	@echo "#!/bin/sh" > $@
+	@echo $(DBUS_RUNNER) --task ./indicator-sound-tests-gtester >> $@
+	@chmod +x $@
+
+indicator-sound-tests-gtester: test-indicator-sound Makefile.am
+	@echo "#!/bin/sh" > $@
+	@echo gtester -k --verbose -o=$(XML_REPORT) ./test-indicator-sound >> $@
+	@chmod +x $@
+
+TESTS += indicator-sound-tests
+
+DISTCLEANFILES += $(XML_REPORT) $(HTML_REPORT) indicator-sound-tests-gtester
+
+DBUS_RUNNER=dbus-test-runner --dbus-config /usr/share/dbus-test-runner/session.conf
+
+test-indicator-sound-dbus: test-indicator-sound-dbus-client test-indicator-sound-dbus-server Makefile.am
+	@echo "#!/bin/sh" > test-indicator-sound-dbus
+	@echo $(DBUS_RUNNER) --task ./test-indicator-sound-dbus-client --task-name Client --task ./test-indicator-sound-dbus-server --task-name Server --ignore-return >> test-indicator-sound-dbus
+	@chmod +x test-indicator-sound-dbus
+
+TESTS += test-indicator-sound-dbus
+
+
+
+
+

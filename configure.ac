@@ -1,5 +1,5 @@
 
-AC_INIT(src/indicator-sound.c)
+AC_INIT(indicator-sound, 0.1.2, conor.curran@canonical.com)
 
 AC_PREREQ(2.53)
 
@@ -127,6 +127,7 @@ AC_OUTPUT([
 Makefile
 src/Makefile
 data/Makefile
+tests/Makefile
 po/Makefile.in
 ])
 

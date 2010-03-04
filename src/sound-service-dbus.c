@@ -29,8 +29,7 @@
 #include "sound-service-marshal.h"
 #include "pulse-manager.h"
 
-// DBUS methods - 
-// TODO - other should be static and moved from the header to here
+// DBUS methods 
 static gboolean sound_service_dbus_get_sink_volume(SoundServiceDbus* service, gdouble* volume_percent_input, GError** gerror);
 static gboolean sound_service_dbus_get_sink_mute(SoundServiceDbus* service, gboolean* mute_input, GError** gerror);
 static void sound_service_dbus_set_sink_volume(SoundServiceDbus* service, const guint volume_percent, GError** gerror);
@@ -41,7 +40,6 @@ typedef struct _SoundServiceDbusPrivate SoundServiceDbusPrivate;
 
 struct _SoundServiceDbusPrivate
 {
-    DBusGConnection *system_bus;
     DBusGConnection *connection;
     gdouble         volume_percent;
     gboolean        mute;
@@ -50,7 +48,7 @@ struct _SoundServiceDbusPrivate
 
 /* Signals */
 enum {
-  SINK_INPUT_WHILE_MUTED,  
+  SINK_INPUT_WHILE_MUTED,
   SINK_VOLUME_UPDATE,
   SINK_MUTE_UPDATE,
   LAST_SIGNAL
@@ -116,20 +114,18 @@ sound_service_dbus_init (SoundServiceDbus *self)
     GError *error = NULL;
     SoundServiceDbusPrivate * priv = SOUND_SERVICE_DBUS_GET_PRIVATE(self);
 
-	priv->system_bus = NULL;
 	priv->connection = NULL;
     priv->volume_percent = 0;
 
-    /* Get the system bus */
-    priv->system_bus = dbus_g_bus_get (DBUS_BUS_SYSTEM, &error);
-	/* Put the object on DBus */
+	/* Fetch the session bus */
 	priv->connection = dbus_g_bus_get(DBUS_BUS_SESSION, &error);
 
 	if (error != NULL) {
-		g_error("Unable to connect to the session bus when creating application indicator: %s", error->message);
+		g_error("sound-service-dbus:Unable to connect to the session bus when creating indicator sound service : %s", error->message);
 		g_error_free(error);
 		return;
 	}
+    /* register the service on it */
 	dbus_g_connection_register_g_object(priv->connection,
 	                                    "/org/ayatana/indicator/sound/service",
 	                                    G_OBJECT(self));

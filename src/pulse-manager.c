@@ -26,8 +26,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <pulse/gccmacro.h>
 
 #include "pulse-manager.h"
-#include "sound-service.h"
-
+#include "dbus-menu-manager.h"
 
 static GHashTable *sink_hash = NULL;
 static SoundServiceDbus *dbus_service = NULL;
@@ -69,8 +68,7 @@ void establish_pulse_activities(SoundServiceDbus *service)
     // Establish event callback registration
 	pa_context_set_state_callback(pulse_context, context_state_callback, NULL);
     // BUILD MENU ANYWHO - it will be updated
-    update_pa_state(FALSE, FALSE, FALSE, 0);
-
+    dbus_menu_manager_update_pa_state(FALSE, FALSE, FALSE, 0);
 	pa_context_connect(pulse_context, NULL, PA_CONTEXT_NOFAIL, NULL);    
 }
 
@@ -108,7 +106,7 @@ static void reconnect_to_pulse()
     sink_hash = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, destroy_sink_info);
     // Establish event callback registration
 	pa_context_set_state_callback(pulse_context, context_state_callback, NULL);
-    update_pa_state(FALSE, FALSE, FALSE, 0);
+    dbus_menu_manager_update_pa_state(FALSE, FALSE, FALSE, 0);
 	pa_context_connect(pulse_context, NULL, PA_CONTEXT_NOFAIL, NULL);        
 }
 
@@ -276,12 +274,15 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
         gboolean device_available = determine_sink_availability();
         if(device_available == TRUE)
         {
-            update_pa_state(TRUE, device_available, default_sink_is_muted(), get_default_sink_volume()); 
+            dbus_menu_manager_update_pa_state(TRUE, 
+                                              device_available,
+                                              default_sink_is_muted(),
+                                              get_default_sink_volume()); 
         }
         else{
             //Update the indicator to show PA either is not ready or has no available sink
             g_warning("Cannot find a suitable default sink ...");
-            update_pa_state(FALSE, device_available, TRUE, 0); 
+            dbus_menu_manager_update_pa_state(FALSE, device_available, TRUE, 0); 
         }
     }
     else{
@@ -322,7 +323,7 @@ static void pulse_default_sink_info_callback(pa_context *c, const pa_sink_info *
         }
         else
         {
-            update_pa_state(TRUE, determine_sink_availability(), default_sink_is_muted(), get_default_sink_volume());             
+            dbus_menu_manager_update_pa_state(TRUE, determine_sink_availability(), default_sink_is_muted(), get_default_sink_volume());             
         }    
     }
 }
@@ -385,7 +386,7 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
             {     
                 g_debug("Updating Mute from PA manager with mute = %i", s->mute);
                 sound_service_dbus_update_sink_mute(dbus_service, s->mute);
-                update_mute_ui(s->mute);
+                dbus_menu_manager_update_mute_ui(s->mute);
                 if(s->mute == FALSE){
                     pa_volume_t vol = pa_cvolume_avg(&s->volume);
                     gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
@@ -421,7 +422,7 @@ static void pulse_server_info_callback(pa_context *c, const pa_server_info *info
     if (info == NULL)
     {
         g_warning("No server - get the hell out of here");
-        update_pa_state(FALSE, FALSE, TRUE, 0); 
+        dbus_menu_manager_update_pa_state(FALSE, FALSE, TRUE, 0); 
         pa_server_available = FALSE;
         return;    
     }
