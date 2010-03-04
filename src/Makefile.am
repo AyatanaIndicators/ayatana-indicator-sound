@@ -59,8 +59,8 @@ indicator_sound_service_SOURCES = \
     sound-service-marshal.h \
     slider-menu-item.h \
     slider-menu-item.c
-indicator_sound_service_CFLAGS = $(SOUNDSERVICE_CFLAGS) $(GCONF_CFLAGS) -DLIBEXECDIR=\"$(libexecdir)\" -Wall -Werror
-indicator_sound_service_LDADD = $(SOUNDSERVICE_LIBS) $(GCONF_LIBS)
+indicator_sound_service_CFLAGS = $(PULSEAUDIO_CFLAGS) $(SOUNDSERVICE_CFLAGS) $(GCONF_CFLAGS) -DLIBEXECDIR=\"$(libexecdir)\" -Wall -Werror
+indicator_sound_service_LDADD = $(PULSEAUDIO_LIBS) $(SOUNDSERVICE_LIBS) $(GCONF_LIBS)
 
 sound-service-server.h: $(srcdir)/sound-service.xml
 	dbus-binding-tool \

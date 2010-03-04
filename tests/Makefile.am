@@ -4,8 +4,13 @@ check_PROGRAMS = \
 	test-indicator-sound-dbus-client 
 #	test-indicator-sound-dbus-server 
 
-TESTS =
+TESTS = test-indicator-sound
 DISTCLEANFILES = $(TESTS)
+
+noinst_LTLIBRARIES        = libmockpulse.la
+libmockpulse_la_SOURCES = mockpulse.c
+libmockpulse_la_CFLAGS = $(PULSEAUDIO_CFLAGS)
+
 
 #########################################
 ##  test-indicator-sound
@@ -15,12 +20,15 @@ test_indicator_sound_SOURCES = \
     $(top_builddir)/src/indicator-sound.c
     
 test_indicator_sound_CFLAGS = \
+	$(PULSEAUDIO_CFLAGS) \
 	$(APPLET_CFLAGS) \
 	-Wall -Werror \
 	-I$(srcdir) \
 	-DTOP_BUILD_DIR="\"${abs_top_builddir}\""
 
 test_indicator_sound_LDADD = \
+	libmockpulse.la \
+	$(PULSEAUDIO_LIBS) \
 	$(APPLET_LIBS) 
 
 
@@ -33,12 +41,15 @@ test_indicator_sound_dbus_client_SOURCES = \
 	test-indicator-sound-dbus-client.c
 
 test_indicator_sound_dbus_client_CFLAGS = \
+	$(PULSEAUDIO_CFLAGS) \
 	$(SOUNDSERVICE_CFLAGS) \
 	-Wall -Werror \
 	-I$(srcdir) \
     -I$(SOUNDSERVICE_CFLAGS)
 
 test_indicator_sound_dbus_client_LDADD = \
+	libmockpulse.la \
+	$(PULSEAUDIO_LIBS) \
 	$(SOUNDSERVICE_LIBS)
 
 #########################################
@@ -48,12 +59,15 @@ test_indicator_sound_dbus_client_LDADD = \
 #	test-defines.h 
 
 #test_indicator_sound_dbus_server_CFLAGS = \
+#	$(PULSEAUDIO_CFLAGS) \
 #    $(SOUNDSERVICE_CFLAGS) \
 #	-Wall -Werror \
 #	-I$(srcdir) \
 #    -I$(SOUNDSERVICE_CFLAGS)
 
 #test_indicator_sound_dbus_server_LDADD = \
+#	libmockpulse.la \
+#	$(PULSEAUDIO_LIBS) \
 #	$(SOUNDSERVICE_LIBS) \
 #	$(top_builddir)/src/indicator_sound_service-sound-service.o \
 #	$(top_builddir)/src/indicator_sound_service-pulse-manager.o \
@@ -77,10 +91,10 @@ test_indicator_sound_dbus_client_LDADD = \
 
 indicator-sound-tests-gtester: test-indicator-sound Makefile.am
 	@echo "#!/bin/sh" > $@
-	@echo gtester -k --verbose -o=$(XML_REPORT) ./test-indicator-sound >> $@
+	@echo gtester -k --verbose -o=indicator-sound-check-results.xml ./test-indicator-sound >> $@
 	@chmod +x $@
 
-# TESTS += indicator-sound-tests
+ TESTS += indicator-sound-tests-gtester
 
 DISTCLEANFILES += $(XML_REPORT) $(HTML_REPORT) indicator-sound-tests-gtester
 

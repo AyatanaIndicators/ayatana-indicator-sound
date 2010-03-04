@@ -20,6 +20,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <gtk/gtk.h>
 #include <libindicator/indicator-object.h>
+#include <pulse/glib-mainloop.h>
 #include "../src/indicator-sound.h"
 
 static const gint STATE_MUTED = 0;
@@ -85,6 +86,10 @@ void test_libindicator_image_names()
     tidy_up_hash();
 }
 
+void test_libindicator_pa_mocked()
+{    g_assert(pa_glib_mainloop_new(NULL) == NULL);
+}
+
 
 
 gint main (gint argc, gchar * argv[])
@@ -95,6 +100,7 @@ gint main (gint argc, gchar * argv[])
     g_test_add_func("/indicator-sound/indicator-sound/init", test_libindicator_sound_init);
     g_test_add_func("/indicator-sound/indicator-sound/state_machine", test_libindicator_determine_state);
     g_test_add_func("/indicator-sound/indicator-sound/image_names", test_libindicator_image_names);
+    g_test_add_func("/indicator-sound/indicator-sound/pa_is_mocked", test_libindicator_pa_mocked);
 
 	return g_test_run ();
 }
