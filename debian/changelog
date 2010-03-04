@@ -1,3 +1,14 @@
+indicator-sound (0.1.2-0ubuntu1) lucid; urgency=low
+
+  * New upstream version:
+    - Stability of the service should now be much improved. The backend sound 
+      service should now be able to handle Pulseaudio not being up or flapping.
+      (lp: #529324)
+    - Arrow keys should be working properly allowing users to move between 
+      indicators. (lp: #525733)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 04 Mar 2010 13:32:10 +0100
+
 indicator-sound (0.1.1-0ubuntu2) lucid; urgency=low
 
   * Backporting trunk commit to fix keyboard controls (lp: #521088)

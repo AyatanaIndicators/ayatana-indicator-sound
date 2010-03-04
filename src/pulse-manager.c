@@ -31,7 +31,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 static GHashTable *sink_hash = NULL;
 static SoundServiceDbus *dbus_service = NULL;
-// Until we find a satisfactory default sink this index should remain < 0
 static gint DEFAULT_SINK_INDEX = -1;
 static gboolean pa_server_available = FALSE;
 // PA related
@@ -46,6 +45,7 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
 static void pulse_source_info_callback(pa_context *c, const pa_source_info *i, int eol, void *userdata); 
 static void destroy_sink_info(void *value);
 static gboolean determine_sink_availability();
+static void reconnect_to_pulse();
 
 
 /**
@@ -65,14 +65,19 @@ void establish_pulse_activities(SoundServiceDbus *service)
 	g_assert(pulse_context);
     
     sink_hash = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, destroy_sink_info);
+
     // Establish event callback registration
 	pa_context_set_state_callback(pulse_context, context_state_callback, NULL);
-	pa_context_connect(pulse_context, NULL, PA_CONTEXT_NOAUTOSPAWN, NULL);    
+    // BUILD MENU ANYWHO - it will be updated
+    update_pa_state(FALSE, FALSE, FALSE, 0);
+
+	pa_context_connect(pulse_context, NULL, PA_CONTEXT_NOFAIL, NULL);    
 }
 
 void close_pulse_activites()
 {
-    if (pulse_context){
+    if (pulse_context != NULL){
+        g_debug("freeing the pulse context");
  	    pa_context_unref(pulse_context);
         pulse_context = NULL;
    	}
@@ -82,6 +87,30 @@ void close_pulse_activites()
     g_debug("I just closed communication with Pulse");
 }
 
+/** 
+reconnect_to_pulse()
+In the event of Pulseaudio flapping in the wind handle gracefully without
+memory leaks !
+*/
+static void reconnect_to_pulse()
+{
+    // reset
+    if (pulse_context != NULL){
+        g_debug("freeing the pulse context");
+ 	    pa_context_unref(pulse_context);
+        pulse_context = NULL;
+   	}
+    g_hash_table_destroy(sink_hash);
+
+    // reconnect
+	pulse_context = pa_context_new(pa_glib_mainloop_get_api(pa_main_loop), "ayatana.indicator.sound");
+	g_assert(pulse_context);   
+    sink_hash = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, destroy_sink_info);
+    // Establish event callback registration
+	pa_context_set_state_callback(pulse_context, context_state_callback, NULL);
+    update_pa_state(FALSE, FALSE, FALSE, 0);
+	pa_context_connect(pulse_context, NULL, PA_CONTEXT_NOFAIL, NULL);        
+}
 
 static void destroy_sink_info(void *value)
 {
@@ -186,6 +215,8 @@ Use the base volume stored in the sink struct to calculate actual linear volumes
 */
 void set_sink_volume(gdouble percent)
 {
+    if(pa_server_available == FALSE)
+        return;   
     g_debug("in the pulse manager:set_sink_volume with percent %f", percent);
     if(DEFAULT_SINK_INDEX < 0)
     {
@@ -366,12 +397,20 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
     }
     else
     {
-        // TODO ADD new sink - part of big refactor
-        g_debug("attempting to add new sink with name %s", info->name);
-        //sink_info *s;
-        //s = g_new0(sink_info, 1);                
-        //update the sinks hash with new sink.
-    }    
+        sink_info *value;
+        value = g_new0(sink_info, 1);
+        value->index = value->device_index = info->index;
+        value->name = g_strdup(info->name);
+        value->description = g_strdup(info->description);
+        value->icon_name = g_strdup(pa_proplist_gets(info->proplist, PA_PROP_DEVICE_ICON_NAME));
+        value->active_port = (info->active_port != NULL);
+        value->mute = !!info->mute;
+        value->volume = info->volume;
+        value->base_volume = info->base_volume;
+        value->channel_map = info->channel_map;
+        g_hash_table_insert(sink_hash, GINT_TO_POINTER(value->index), value);
+        g_debug("pulse-manager:update_sink_info -> After adding a new sink to our hash");
+   }    
 }
 
 
@@ -474,7 +513,7 @@ static void context_state_callback(pa_context *c, void *userdata) {
 			g_debug("unconnected");
 			break;
         case PA_CONTEXT_CONNECTING:
-			g_debug("connecting");
+			g_debug("connecting - waiting for the server to become available");
 			break;
         case PA_CONTEXT_AUTHORIZING:
 			g_debug("authorizing");
@@ -484,8 +523,8 @@ static void context_state_callback(pa_context *c, void *userdata) {
 			break;
         case PA_CONTEXT_FAILED:
 			g_warning("FAILED to retrieve context - Is PulseAudio Daemon running ?");
-            //Update the indicator to show PA either is not ready or has no available sink
-            update_pa_state(FALSE, FALSE, TRUE, 0); 
+            pa_server_available = FALSE;
+            reconnect_to_pulse();
 			break;
         case PA_CONTEXT_TERMINATED:
 			g_debug("context terminated");
