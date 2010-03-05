@@ -49,10 +49,6 @@ struct _SoundServiceDbus {
 
 struct _SoundServiceDbusClass {
   GObjectClass parent_class;
-  /* Signals -> outward messages to the DBUS and beyond*/
-  // TODO - ARE THESE NECESSARY ?
-  //void (* sink_input_while_muted) (SoundServiceDbus *self, gboolean block_value, gpointer sound_data);
-  //void (* sink_volume_update) (SoundServiceDbus *self, gdouble sink_volume, gpointer sound_data);
 }; 
 GType sound_service_dbus_get_type  (void) G_GNUC_CONST;
 

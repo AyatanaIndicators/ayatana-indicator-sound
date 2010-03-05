@@ -90,7 +90,7 @@ static void slider_size_allocate(GtkWidget  *widget, GtkAllocation *allocation, 
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
 static void connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata);
-/*static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean value, gpointer userdata);*/
+static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean value, gpointer userdata);
 static void catch_signal_sink_volume_update(DBusGProxy * proxy, gdouble volume_percent, gpointer userdata); 
 static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer userdata);
 static void fetch_volume_percent_from_dbus();
@@ -135,11 +135,6 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
     
     design_team_size = gtk_icon_size_register("design-team-size", 22, 22);
 
-/*    dbus_g_object_register_marshaller (_sound_service_marshal_VOID__INT_BOOLEAN,*/
-/*                                     G_TYPE_NONE,*/
-/*                                     G_TYPE_INT,*/
-/*                                     G_TYPE_BOOLEAN,*/
-/*                                     G_TYPE_INVALID);*/
 	return;
 }
 
@@ -264,7 +259,7 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
             g_debug("about to connect to the signals");
 			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_TYPE_BOOLEAN, G_TYPE_INVALID);
 
-/*			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_CALLBACK(catch_signal_sink_input_while_muted), NULL, NULL);*/
+			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_CALLBACK(catch_signal_sink_input_while_muted), NULL, NULL);
 			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_VOLUME_UPDATE, G_TYPE_DOUBLE, G_TYPE_INVALID);
 			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_VOLUME_UPDATE, G_CALLBACK(catch_signal_sink_volume_update), NULL, NULL);
 			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_MUTE_UPDATE, G_TYPE_BOOLEAN, G_TYPE_INVALID);
@@ -393,10 +388,10 @@ static void fetch_mute_value_from_dbus()
     g_debug("at the indicator start up and the MUTE returned from dbus method is %i", initial_mute);
 }
 
-/*static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean block_value, gpointer userdata)*/
-/*{*/
-/*    g_debug("signal caught - sink input while muted with value %i", block_value);*/
-/*}*/
+static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean block_value, gpointer userdata)
+{
+    g_debug("signal caught - sink input while muted with value %i", block_value);
+}
 
 static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_percent, gpointer userdata)
 {

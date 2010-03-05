@@ -157,7 +157,8 @@ static void refresh_menu()
 
 
 /**
-
+idle_routine:
+Something for glip mainloop to do when idle
 **/
 static gboolean idle_routine (gpointer data)
 {
