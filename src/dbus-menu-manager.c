@@ -101,6 +101,8 @@ void dbus_menu_manager_update_pa_state(gboolean pa_state, gboolean sink_availabl
         refresh_menu();
     }
     // Emit the signals after the menus are setup/torn down
+    // preserve ordering !
+    sound_service_dbus_update_sink_availability(dbus_interface, sink_available); 
     sound_service_dbus_update_sink_volume(dbus_interface, percent); 
     sound_service_dbus_update_sink_mute(dbus_interface, sink_muted); 
     dbus_menu_manager_update_mute_ui(b_all_muted);
@@ -199,7 +201,8 @@ static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service
     dbusmenu_menuitem_child_append(root, DBUSMENU_MENUITEM(volume_slider_menuitem));
     dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem),
                                         DBUSMENU_MENUITEM_PROP_ENABLED,
-                                        b_sink_available);       
+                                        b_sink_available && !b_all_muted);       
+    g_debug("!!!!!!**in the rebuild sound menu - slider active = %i", b_sink_available && !b_all_muted);
     dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem),
                                         DBUSMENU_MENUITEM_PROP_VISIBLE,
                                         b_sink_available);   

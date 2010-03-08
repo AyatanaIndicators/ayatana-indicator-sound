@@ -93,8 +93,10 @@ static void connection_changed (IndicatorServiceManager * sm, gboolean connected
 static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean value, gpointer userdata);
 static void catch_signal_sink_volume_update(DBusGProxy * proxy, gdouble volume_percent, gpointer userdata); 
 static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer userdata);
+static void catch_signal_sink_availability_update(DBusGProxy *proxy, gboolean available_value, gpointer userdata);
 static void fetch_volume_percent_from_dbus();
 static void fetch_mute_value_from_dbus();
+static void fetch_sink_availability_from_dbus();
 
 
 /****Volume States 'members' ***/
@@ -110,11 +112,13 @@ static const gint STATE_SINKS_NONE = 6;
 
 static GHashTable *volume_states = NULL;
 static GtkImage *speaker_image = NULL;
+static GtkImage *blocking_image = NULL;
 static GtkWidget* primary_image = NULL;
 static gint current_state = 0;
 static gint previous_state = 0;
 static gdouble initial_volume_percent = 0;
 static gboolean initial_mute = FALSE;
+static gboolean device_available = TRUE;
 
 #define DESIGN_TEAM_SIZE  design_team_size
 static GtkIconSize design_team_size;
@@ -182,6 +186,8 @@ get_icon (IndicatorObject * io)
     gchar* current_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
     //g_debug("At start-up attempting to set the image to %s", current_name);
 	speaker_image = GTK_IMAGE(gtk_image_new_from_icon_name(current_name, DESIGN_TEAM_SIZE));
+    gchar* blocking_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
+    blocking_image = GTK_IMAGE(gtk_image_new_from_icon_name(blocking_name, DESIGN_TEAM_SIZE));
 	gtk_widget_show(GTK_WIDGET(speaker_image));
 	return speaker_image;
 }
@@ -264,11 +270,14 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
 			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_VOLUME_UPDATE, G_CALLBACK(catch_signal_sink_volume_update), NULL, NULL);
 			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_MUTE_UPDATE, G_TYPE_BOOLEAN, G_TYPE_INVALID);
 			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_MUTE_UPDATE, G_CALLBACK(catch_signal_sink_mute_update), NULL, NULL);
+			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_AVAILABLE_UPDATE, G_TYPE_BOOLEAN, G_TYPE_INVALID);
+			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_AVAILABLE_UPDATE, G_CALLBACK(catch_signal_sink_availability_update), NULL, NULL);
 
             // Ensure we are in a coherent state with the service at start up.
             // Preserve ordering!
             fetch_volume_percent_from_dbus();
             fetch_mute_value_from_dbus();
+            fetch_sink_availability_from_dbus();
 		}
 
 	} else {
@@ -332,7 +341,8 @@ static void update_state(const gint state)
 void determine_state_from_volume(gdouble volume_percent)
 {
 /*    g_debug("determine_state_from_volume - previous_state = %i", previous_state);*/
-
+    if (device_available == FALSE)
+        return;
     gint state = previous_state;
     if (volume_percent < 30.0 && volume_percent > 0){
         state = STATE_LOW;
@@ -350,6 +360,25 @@ void determine_state_from_volume(gdouble volume_percent)
 }
  
 
+static void fetch_sink_availability_from_dbus()
+{
+    GError * error = NULL;
+    gboolean *available_input; 
+    available_input = g_new0(gboolean, 1);
+    org_ayatana_indicator_sound_get_sink_availability(sound_dbus_proxy, available_input, &error);
+    if (error != NULL) {
+	    g_warning("Unable to fetch AVAILABILITY at indicator start up: %s", error->message);
+	    g_error_free(error);
+        g_free(available_input);
+        return;
+    }
+    device_available = *available_input;
+    if (device_available == FALSE)
+        update_state(STATE_SINKS_NONE);
+    g_free(available_input);
+    g_debug("IndicatorSound::fetch_sink_availability_from_dbus -> AVAILABILTY returned from dbus method is %i", device_available);
+
+}
 
 static void fetch_volume_percent_from_dbus()
 {
@@ -391,6 +420,38 @@ static void fetch_mute_value_from_dbus()
 static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean block_value, gpointer userdata)
 {
     g_debug("signal caught - sink input while muted with value %i", block_value);
+    if (block_value == 1) {
+        GError* error= NULL;
+        // We can assume we are in the muted state !
+        GtkIconTheme* theme = gtk_icon_theme_get_default();        
+        GdkPixbuf* mute_buf = gtk_icon_theme_load_icon(theme, 
+                                                       g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT)),
+                                                       22,
+                                                       GTK_ICON_LOOKUP_GENERIC_FALLBACK,
+                                                       &error);
+        if(error != NULL){
+		    g_error("indicator-sound : catch_signal_sink_input_while_muted - %s", error->message);
+		    g_error_free(error);
+		    return;
+        }        
+        gchar* blocked_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
+        GdkPixbuf* blocked_buf = gtk_icon_theme_load_icon(theme, blocked_name,
+                                                          22,
+                                                          GTK_ICON_LOOKUP_GENERIC_FALLBACK,
+                                                          &error);
+        if(error != NULL){
+		    g_error("indicator-sound : catch_signal_sink_input_while_muted - %s", error->message);
+		    g_error_free(error);
+		    return;
+        }        
+        g_debug("gdk_pixbuf_get_width returns %i", gdk_pixbuf_get_width(blocked_buf));
+        gdk_pixbuf_composite(mute_buf, blocked_buf, 0, 0,
+                             gdk_pixbuf_get_width(blocked_buf),
+                             gdk_pixbuf_get_height(blocked_buf), 
+                             0, 0, 1, 1, GDK_INTERP_BILINEAR, 128);
+        //gtk_image_set_from_icon_name(speaker_image, blocked_name, DESIGN_TEAM_SIZE);
+        //gtk_image_set_from_pixbuf(speaker_image, blocked_buf);
+    }    
 }
 
 static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_percent, gpointer userdata)
@@ -409,13 +470,23 @@ static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value
 {
     //We can be sure the service won't send a mute signal unless it has changed !
     //UNMUTE's force a volume update therefore icon is updated appropriately => no need for unmute handling here.
-    if(mute_value == TRUE)
+    if(mute_value == TRUE && device_available != FALSE)
     {
         update_state(STATE_MUTED);
     }
     g_debug("signal caught - sink mute update with mute value: %i", mute_value);
     gtk_widget_set_sensitive(volume_slider, !mute_value);
 }
+
+static void catch_signal_sink_availability_update(DBusGProxy *proxy, gboolean available_value, gpointer userdata)
+{
+    device_available  = available_value;
+    if (device_available == FALSE){
+        update_state(STATE_SINKS_NONE);
+    }
+    g_debug("signal caught - sink availability update with  value: %i", available_value);
+}
+
 /**
 slider_prop_change_cb:
 Whenever we have a property change on a DbusmenuMenuitem this will be called. 
