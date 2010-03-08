@@ -4,11 +4,13 @@ check_PROGRAMS = \
 	test-indicator-sound-dbus-client \
 	test-indicator-sound-dbus-server 
 
-TESTS = test-indicator-sound
+TESTS = \
+	test-indicator-sound \
+	test-pulse-manager
 DISTCLEANFILES = $(TESTS)
 
 noinst_LTLIBRARIES        = libmockpulse.la
-libmockpulse_la_SOURCES = mockpulse.c
+libmockpulse_la_SOURCES = mockpulse.c mockpulse.h
 libmockpulse_la_CFLAGS = $(PULSEAUDIO_CFLAGS)
 
 
@@ -45,10 +47,9 @@ test_indicator_sound_dbus_client_CFLAGS = \
 	$(SOUNDSERVICE_CFLAGS) \
 	-Wall -Werror \
 	-I$(srcdir) \
-    -I$(SOUNDSERVICE_CFLAGS)
+	-I$(SOUNDSERVICE_CFLAGS)
 
 test_indicator_sound_dbus_client_LDADD = \
-	libmockpulse.la \
 	$(PULSEAUDIO_LIBS) \
 	$(SOUNDSERVICE_LIBS)
 
@@ -69,8 +70,31 @@ test_indicator_sound_dbus_server_CFLAGS = \
 	-I$(srcdir) 
 
 test_indicator_sound_dbus_server_LDADD = \
-	$(SOUNDSERVICE_LIBS) \ 
+	$(SOUNDSERVICE_LIBS) \
 	$(PULSEAUDIO_LIBS) 
+
+#########################################
+##  test-pulse-manager
+#########################################
+
+check_PROGRAMS += test-pulse-manager
+
+test_pulse_manager_SOURCES = \
+	test-pulse-manager.c
+
+test_pulse_manager_CFLAGS = \
+	$(PULSEAUDIO_CFLAGS) \
+	$(SOUNDSERVICE_CFLAGS) \
+	$(GCONF_CFLAGS) \
+	-Wall -Werror \
+	-I$(srcdir) \
+	-I$(SOUNDSERVICE_CFLAGS)
+
+test_pulse_manager_LDADD = \
+	libmockpulse.la \
+	$(PULSEAUDIO_LIBS) \
+	$(SOUNDSERVICE_LIBS) \
+	$(GCONF_LIBS)
 
 
 #########################################
