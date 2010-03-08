@@ -4,7 +4,7 @@
 
 pa_context* context;
 
-static void pa_context_exit()
+static void test_pa_context_exit()
 {
     pa_context_set_state_callback(context, context_state_callback, NULL);
     // => call context_state_callback(context, NULL);
