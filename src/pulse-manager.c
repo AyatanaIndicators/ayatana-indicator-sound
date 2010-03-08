@@ -462,7 +462,8 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
             if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) 
             {
                 //TODO handle the remove event => if its our default sink - update date pa state
-            } else 
+            } 
+            else 
             {
                 pa_operation_unref(pa_context_get_sink_info_by_index(c, index, update_sink_info, userdata));
             }            
