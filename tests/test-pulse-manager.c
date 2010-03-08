@@ -37,12 +37,25 @@ static void test_sink_insert()
     sink_info *value;
     value = g_new0(sink_info, 1);
     value->index = 8;
-    value->name = "mock_sink";"
-    value->description = "mock description"
-    value->mute = FALSE
-    value->volume = 30000; // almost full
+    value->name = "mock_sink";
+    value->description = "mock description";
+    value->mute = FALSE;
+    pa_cvolume volume; // nearly full volume:
+    pa_cvolume_set(&volume, 1, 30000);
+    value->volume = volume;
     // update_sink_info is a static method in pulse-manager.c ?
-    pa_context_get_sink_info_by_index(context, value->index, update_sink_info);
+    pa_context_get_sink_info_by_index(context, value->index, update_sink_info, NULL);
     // the mockinkg lib should then return this mocked up sink_info to the method update_sink_info which tests could be wrote against to make sure everthing is populated correctly. 
 }
 
+
+gint main (gint argc, gchar * argv[])
+{
+  g_type_init();
+  g_test_init(&argc, &argv, NULL);
+  
+  g_test_add_func("/indicator-sound/pulse-manager/sink-insert", test_sink_insert);
+  g_test_add_func("/indicator-sound/pulse-manager/pa-context-exit", test_pa_context_exit);
+  
+  return g_test_run ();
+}

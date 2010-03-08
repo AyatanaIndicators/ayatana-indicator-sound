@@ -94,7 +94,8 @@ test_pulse_manager_LDADD = \
 	libmockpulse.la \
 	$(PULSEAUDIO_LIBS) \
 	$(SOUNDSERVICE_LIBS) \
-	$(GCONF_LIBS)
+	$(GCONF_LIBS) \
+	$(APPLET_LIBS) 
 
 
 #########################################
