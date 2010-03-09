@@ -5,7 +5,7 @@ into the gnome-panel using it's applet interface.
 Copyright 2010 Canonical Ltd.
 
 Authors:
-    Conor Curran <conor.curra@canonical.com>
+    Conor Curran <conor.curran@canonical.com>
     Ted Gould <ted@canonical.com>
 
 This program is free software: you can redistribute it and/or modify it 
@@ -82,10 +82,12 @@ static GtkMenu * get_menu (IndicatorObject * io);
 //Slider related
 static GtkWidget *volume_slider = NULL;
 static gboolean new_slider_item (DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
-static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget);
+/*static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget);*/
 static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data);
 static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
 static void slider_size_allocate(GtkWidget  *widget, GtkAllocation *allocation, gpointer user_data);
+static void slider_grabbed(GtkWidget *widget, gpointer user_data);
+static void slider_released(GtkWidget *widget, gpointer user_data);
 
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
@@ -97,7 +99,6 @@ static void catch_signal_sink_availability_update(DBusGProxy *proxy, gboolean av
 static void fetch_volume_percent_from_dbus();
 static void fetch_mute_value_from_dbus();
 static void fetch_sink_availability_from_dbus();
-
 
 /****Volume States 'members' ***/
 static void update_state(const gint state);
@@ -112,13 +113,13 @@ static const gint STATE_SINKS_NONE = 6;
 
 static GHashTable *volume_states = NULL;
 static GtkImage *speaker_image = NULL;
-static GtkImage *blocking_image = NULL;
-static GtkWidget* primary_image = NULL;
 static gint current_state = 0;
 static gint previous_state = 0;
+
 static gdouble initial_volume_percent = 0;
 static gboolean initial_mute = FALSE;
 static gboolean device_available = TRUE;
+static gboolean slider_in_direct_use = FALSE;
 
 #define DESIGN_TEAM_SIZE  design_team_size
 static GtkIconSize design_team_size;
@@ -184,10 +185,8 @@ static GtkImage *
 get_icon (IndicatorObject * io)
 {
     gchar* current_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
-    //g_debug("At start-up attempting to set the image to %s", current_name);
+    g_debug("At start-up attempting to set the image to %s", current_name);
 	speaker_image = GTK_IMAGE(gtk_image_new_from_icon_name(current_name, DESIGN_TEAM_SIZE));
-    gchar* blocking_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
-    blocking_image = GTK_IMAGE(gtk_image_new_from_icon_name(blocking_name, DESIGN_TEAM_SIZE));
 	gtk_widget_show(GTK_WIDGET(speaker_image));
 	return speaker_image;
 }
@@ -204,7 +203,6 @@ get_menu (IndicatorObject * io)
 
     // register Key-press listening on the menu widget as the slider does not allow this.
     g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), NULL);         
-
     return GTK_MENU(menu);
 }
 
@@ -224,15 +222,16 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
     GtkMenuItem *menu_volume_slider = GTK_MENU_ITEM(volume_slider);
 
 	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_volume_slider, parent);
-	g_signal_connect(G_OBJECT(newitem), DBUSMENU_MENUITEM_SIGNAL_PROPERTY_CHANGED, G_CALLBACK(slider_prop_change_cb), volume_slider);
+/*	g_signal_connect(G_OBJECT(newitem), DBUSMENU_MENUITEM_SIGNAL_PROPERTY_CHANGED, G_CALLBACK(slider_prop_change_cb), volume_slider);*/
     
     // register slider changes listening on the range
     GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);  
-
-    g_signal_connect(slider, "value-changed", G_CALLBACK(value_changed_event_cb), newitem);     
-    g_signal_connect(slider, "size-allocate", G_CALLBACK(slider_size_allocate), NULL);            
+    g_signal_connect(slider, "value-changed", G_CALLBACK(value_changed_event_cb), newitem);
+    g_signal_connect(volume_slider, "slider-grabbed", G_CALLBACK(slider_grabbed), NULL);
+    g_signal_connect(volume_slider, "slider-released", G_CALLBACK(slider_released), NULL);    
+    g_signal_connect(slider, "size-allocate", G_CALLBACK(slider_size_allocate), NULL);
     // Set images on the ido
-    primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)volume_slider);    
+    GtkWidget* primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)volume_slider);    
     gtk_image_set_from_icon_name(GTK_IMAGE(primary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_ZERO)), DESIGN_TEAM_SIZE);
     GtkWidget* secondary_image = ido_scale_menu_item_get_secondary_image((IdoScaleMenuItem*)volume_slider);                 
     gtk_image_set_from_icon_name(GTK_IMAGE(secondary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_HIGH)), DESIGN_TEAM_SIZE);
@@ -413,6 +412,9 @@ static void fetch_mute_value_from_dbus()
     initial_mute = *mute_input;
     if (initial_mute == TRUE)
         update_state(STATE_MUTED);
+//    TODO bug down below - VIRTUALLY IMPOSSIBLE TO SETUP SLIDER WITH ANY ALTERNATIVE STARTUP STATE
+/*    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);*/
+/*    gtk_widget_set_sensitive(slider, !initial_mute);*/
     g_free(mute_input);
     g_debug("at the indicator start up and the MUTE returned from dbus method is %i", initial_mute);
 }
@@ -423,18 +425,25 @@ static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean blo
     if (block_value == 1) {
         GError* error= NULL;
         // We can assume we are in the muted state !
+        gchar* blocked_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
         GtkIconTheme* theme = gtk_icon_theme_get_default();        
-        GdkPixbuf* mute_buf = gtk_icon_theme_load_icon(theme, 
-                                                       g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT)),
-                                                       22,
-                                                       GTK_ICON_LOOKUP_GENERIC_FALLBACK,
-                                                       &error);
+        g_debug("DOES the ICON THEME Have the Blocked image = %i", gtk_icon_theme_has_icon(theme, blocked_name));
+/*        GdkPixbuf* mute_buf = gtk_icon_theme_load_icon(theme, */
+/*                                                        blocked_name,*/
+/*                                                        22,*/
+/*                                                        GTK_ICON_LOOKUP_GENERIC_FALLBACK,*/
+/*                                                        &error);*/
         if(error != NULL){
 		    g_error("indicator-sound : catch_signal_sink_input_while_muted - %s", error->message);
 		    g_error_free(error);
 		    return;
         }        
-        gchar* blocked_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
+
+        GtkIconInfo* buffer_icon_info = gtk_icon_theme_lookup_icon(theme, blocked_name,
+                                                                   22,
+                                                                   GTK_ICON_LOOKUP_GENERIC_FALLBACK);
+        g_debug("The icon name of the buffer icon %s", gtk_icon_info_get_filename(buffer_icon_info));
+
         GdkPixbuf* blocked_buf = gtk_icon_theme_load_icon(theme, blocked_name,
                                                           22,
                                                           GTK_ICON_LOOKUP_GENERIC_FALLBACK,
@@ -445,25 +454,34 @@ static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean blo
 		    return;
         }        
         g_debug("gdk_pixbuf_get_width returns %i", gdk_pixbuf_get_width(blocked_buf));
-        gdk_pixbuf_composite(mute_buf, blocked_buf, 0, 0,
-                             gdk_pixbuf_get_width(blocked_buf),
-                             gdk_pixbuf_get_height(blocked_buf), 
-                             0, 0, 1, 1, GDK_INTERP_BILINEAR, 128);
+/*        gdk_pixbuf_composite(mute_buf, blocked_buf, 0, 0,*/
+/*                             gdk_pixbuf_get_width(blocked_buf),*/
+/*                             gdk_pixbuf_get_height(blocked_buf), */
+/*                             0, 0, 1, 1, GDK_INTERP_BILINEAR, 128);*/
         //gtk_image_set_from_icon_name(speaker_image, blocked_name, DESIGN_TEAM_SIZE);
-        //gtk_image_set_from_pixbuf(speaker_image, blocked_buf);
+        
+        g_debug("DOES the ICON THEME Have the Blocked image = %i", gtk_icon_theme_has_icon(theme, blocked_name));
+        gchar ** theme_path;         
+        gint nelements = 1;
+
+        gtk_icon_theme_get_search_path(theme, &theme_path, &nelements);
+        g_debug("icon theme path is %s ", *theme_path);
+        gtk_image_set_from_pixbuf(speaker_image, blocked_buf);
     }    
 }
 
 static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_percent, gpointer userdata)
 {
-    GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
-    GtkRange *range = (GtkRange*)slider;   
-    
-    // DEBUG
-    gdouble current_value = gtk_range_get_value(range);
-    g_debug("SIGNAL- update sink volume - current_value : %f and new value : %f", current_value, volume_percent);
-    gtk_range_set_value(range, volume_percent); 
-    determine_state_from_volume(volume_percent);
+    if (slider_in_direct_use != TRUE){
+        GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
+        GtkRange *range = (GtkRange*)slider;   
+        
+        // DEBUG
+        gdouble current_value = gtk_range_get_value(range);
+        g_debug("SIGNAL- update sink volume - current_value : %f and new value : %f", current_value, volume_percent);
+        gtk_range_set_value(range, volume_percent); 
+        determine_state_from_volume(volume_percent);
+    }
 }
 
 static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer userdata)
@@ -491,15 +509,15 @@ static void catch_signal_sink_availability_update(DBusGProxy *proxy, gboolean av
 slider_prop_change_cb:
 Whenever we have a property change on a DbusmenuMenuitem this will be called. 
 **/
-static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget)
-{
-    g_debug("slider_prop_change_cb - dodgy updater ");
-    g_debug("about to set the slider to %f", g_value_get_double(value));
-    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
-    GtkRange* range = (GtkRange*)slider;       
-    gtk_range_set_value(range, g_value_get_double(value));  
-	return;
-}
+/*static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget)*/
+/*{*/
+/*    g_debug("slider_prop_change_cb - dodgy updater ");*/
+/*    g_debug("about to set the slider to %f", g_value_get_double(value));*/
+/*    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);*/
+/*    GtkRange* range = (GtkRange*)slider;       */
+/*    gtk_range_set_value(range, g_value_get_double(value));  */
+/*	return;*/
+/*}*/
 
 /**
 value_changed_event_cb:
@@ -520,6 +538,20 @@ static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data)
     return FALSE;
 }
 
+
+static void slider_grabbed (GtkWidget *widget, gpointer user_data)
+{
+    slider_in_direct_use = TRUE;
+    g_debug ("!!!!!!  grabbed\n");
+}
+
+static void slider_released (GtkWidget *widget, gpointer user_data)
+{
+    slider_in_direct_use = FALSE;
+    g_debug ("!!!!!! released\n");
+}
+
+
 /**
 slider_size_allocate:
 Callback on the size-allocate event on the slider item.
@@ -528,10 +560,10 @@ static void slider_size_allocate(GtkWidget  *widget,
                                  GtkAllocation *allocation, 
                                  gpointer user_data)
 {
-    g_print("size allocate on slider (%dx%d)\n", allocation->width, allocation->height);
-    if(allocation->width < 200)
-    {
-        gtk_widget_set_size_request(widget, 200, -1);
+    g_print("Size allocate on slider (%dx%d)\n", allocation->width, allocation->height);
+    if(allocation->width < 200){
+        g_print("Attempting to resize the slider");
+        gtk_widget_set_size_request(widget, 200, -1);    
     }
 }
 
