@@ -23,3 +23,4 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <pulse/glib-mainloop.h>
 
 void set_pa_context_get_state_result(pa_context *, pa_context_state_t state);
+void set_pa_context_get_sink_info(pa_sink_info *info);

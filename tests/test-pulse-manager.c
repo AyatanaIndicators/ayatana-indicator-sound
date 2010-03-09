@@ -40,20 +40,31 @@ static void test_pa_context_exit()
 
 static void test_sink_insert()
 {
-    sink_info *value;
+    sink_info *sink_details;
     pa_context* context = pa_context_new(NULL, "foo");
-    value = g_new0(sink_info, 1);
-    value->index = 8;
-    value->name = "mock_sink";
-    value->description = "mock description";
-    value->mute = FALSE;
+    sink_details = g_new0(sink_info, 1);
+    sink_details->index = 8;
+    sink_details->name = "mock_sink";
+    sink_details->description = "mock description";
+    sink_details->mute = FALSE;
     pa_cvolume volume; // nearly full volume:
     pa_cvolume_set(&volume, 1, 30000);
-    value->volume = volume;
+    sink_details->volume = volume;
+    pa_sink_info *expected = g_new0(pa_sink_info, 1);
+    expected->name = g_strdup("foo");
+    expected->index = 8;
+    expected->description = g_strdup("more details");
+    // fill it out here more.
+    // hook into our pa_context_get_sink_info_by_index to pass exppected to
+    // update_sink_info
+    set_pa_context_get_sink_info(expected);
     // update_sink_info is a static method in pulse-manager.c ?
-    pa_context_get_sink_info_by_index(context, value->index, update_sink_info, NULL);
-    // the mockinkg lib should then return this mocked up sink_info to the method update_sink_info which tests could be wrote against to make sure everthing is populated correctly. 
+    pa_context_get_sink_info_by_index(context, sink_details->index, update_sink_info, NULL);
+    // the mockinkg lib should then return this mocked up sink_info to the
+    // method update_sink_info which tests could be wrote against to make sure
+    // everthing is populated correctly. 
     pa_context_unref(context);
+    g_free(expected);
 }
 
 

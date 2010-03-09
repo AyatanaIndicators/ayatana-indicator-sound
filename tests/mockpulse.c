@@ -20,6 +20,9 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <pulse/glib-mainloop.h>
 #include <pulse/context.h>
+#include <pulse/operation.h>
+#include <pulse/introspect.h>
+#include "mockpulse.h"
 
 struct pa_context {
   int refcount;
@@ -64,4 +67,33 @@ pa_context_state_t
 pa_context_get_state(pa_context *c)
 {
   return c->state;
+}
+
+struct pa_operation {
+  int refcount;
+};
+
+/* Can be made into a list if we need multiple callbacks */
+static pa_sink_info *next_sink_info;
+
+void
+set_pa_context_get_sink_info(pa_sink_info *info) {
+  next_sink_info = info;
+}
+
+pa_operation *
+pa_context_get_sink_info_by_index(pa_context *c, uint32_t idx, pa_sink_info_cb_t cb, void * userdata)
+{
+  pa_operation *result = g_new(pa_operation, 1);
+  result->refcount = 1;
+  cb(c, next_sink_info, 0, userdata);
+  return result;
+}
+
+void
+pa_operation_unref(pa_operation * foo)
+{
+  foo->refcount--;
+  if (!foo->refcount)
+    g_free(foo);
 }
