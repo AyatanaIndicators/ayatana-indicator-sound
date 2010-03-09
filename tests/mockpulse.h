@@ -22,3 +22,4 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <pulse/glib-mainloop.h>
 
+void set_pa_context_get_state_result(pa_context *, pa_context_state_t state);
