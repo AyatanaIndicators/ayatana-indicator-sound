@@ -235,6 +235,9 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
     gtk_image_set_from_icon_name(GTK_IMAGE(primary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_ZERO)), DESIGN_TEAM_SIZE);
     GtkWidget* secondary_image = ido_scale_menu_item_get_secondary_image((IdoScaleMenuItem*)volume_slider);                 
     gtk_image_set_from_icon_name(GTK_IMAGE(secondary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_HIGH)), DESIGN_TEAM_SIZE);
+    
+    // the race conditions at start up are like a west waterford greyhound dart. god knows who wins, who breaks a leg.
+    gtk_widget_set_sensitive(volume_slider, !initial_mute);
 
     gtk_widget_show_all(volume_slider);
 
@@ -412,9 +415,6 @@ static void fetch_mute_value_from_dbus()
     initial_mute = *mute_input;
     if (initial_mute == TRUE)
         update_state(STATE_MUTED);
-//    TODO bug down below - VIRTUALLY IMPOSSIBLE TO SETUP SLIDER WITH ANY ALTERNATIVE STARTUP STATE
-/*    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);*/
-/*    gtk_widget_set_sensitive(slider, !initial_mute);*/
     g_free(mute_input);
     g_debug("at the indicator start up and the MUTE returned from dbus method is %i", initial_mute);
 }
