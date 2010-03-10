@@ -123,6 +123,13 @@ static gboolean slider_in_direct_use = FALSE;
 
 #define DESIGN_TEAM_SIZE  design_team_size
 static GtkIconSize design_team_size;
+static gint timeout_id;
+static gint animation_id;
+static GList * blocked_animation_list = NULL;
+static GList * blocked_iter = NULL;
+static void prepare_blocked_animation();
+static gboolean fade_back_to_mute_image();
+static gboolean commence_animation();
 
 // Construction
 static void
@@ -151,6 +158,9 @@ static void indicator_sound_init (IndicatorSound *self)
 	self->service = indicator_service_manager_new_version(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_VERSION);
 	g_signal_connect(G_OBJECT(self->service), INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE, G_CALLBACK(connection_changed), self);
     prepare_state_machine();
+    prepare_blocked_animation();
+    timeout_id = 0;
+    animation_id = 0;
     return;
 }
 
@@ -164,6 +174,8 @@ indicator_sound_dispose (GObject *object)
 		self->service = NULL;
 	}
     g_hash_table_destroy(volume_states);
+    // TODO delete all pointers in the list;
+    g_list_free(blocked_animation_list);
 	G_OBJECT_CLASS (indicator_sound_parent_class)->dispose (object);
 	return;
 }
@@ -305,6 +317,51 @@ void prepare_state_machine()
     g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_SINKS_NONE), g_strdup("audio-output-none-panel"));
 }
 
+/*
+prepare_blocked_animation:
+Prepares the array of images to be used in the blocked animation.
+Only called at startup.
+*/
+static void prepare_blocked_animation()
+{
+    GError* error= NULL;
+    int i;
+
+    gchar* blocked_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
+    gchar* muted_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED));
+    GtkIconTheme* theme = gtk_icon_theme_get_default();        
+    GdkPixbuf* mute_buf = gtk_icon_theme_load_icon(theme, 
+                                                    muted_name,
+                                                    22,
+                                                    GTK_ICON_LOOKUP_GENERIC_FALLBACK,
+                                                    &error);
+    if(error != NULL){
+	    g_error("indicator-sound : prepare_blocked_animation - %s", error->message);
+	    g_error_free(error);
+	    return;
+    }        
+
+    GdkPixbuf* blocked_buf = gtk_icon_theme_load_icon(theme, blocked_name,
+                                                      22,
+                                                      GTK_ICON_LOOKUP_GENERIC_FALLBACK,
+                                                      &error);
+    if(error != NULL){
+	    g_error("indicator-sound : prepare_blocked_animation - %s", error->message);
+	    g_error_free(error);
+	    return;
+    }      
+
+    for(i = 0; i < 256; i++)
+    {        
+        gdk_pixbuf_composite(mute_buf, blocked_buf, 0, 0,
+                             gdk_pixbuf_get_width(mute_buf),
+                             gdk_pixbuf_get_height(mute_buf), 
+                             0, 0, 1, 1, GDK_INTERP_BILINEAR, i);
+        g_debug("creating animation - alpha value = %i", i);
+        blocked_animation_list = g_list_append(blocked_animation_list, gdk_pixbuf_copy(blocked_buf));
+    }   
+}
+
 gint get_state()
 {
     return current_state;
@@ -365,7 +422,7 @@ void determine_state_from_volume(gdouble volume_percent)
 static void fetch_sink_availability_from_dbus()
 {
     GError * error = NULL;
-    gboolean *available_input; 
+    gboolean * available_input; 
     available_input = g_new0(gboolean, 1);
     org_ayatana_indicator_sound_get_sink_availability(sound_dbus_proxy, available_input, &error);
     if (error != NULL) {
@@ -422,53 +479,75 @@ static void fetch_mute_value_from_dbus()
 static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean block_value, gpointer userdata)
 {
     g_debug("signal caught - sink input while muted with value %i", block_value);
-    if (block_value == 1) {
-        GError* error= NULL;
+    if (block_value == 1 && timeout_id == 0 ) {
         // We can assume we are in the muted state !
-        gchar* blocked_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
-        GtkIconTheme* theme = gtk_icon_theme_get_default();        
-        g_debug("DOES the ICON THEME Have the Blocked image = %i", gtk_icon_theme_has_icon(theme, blocked_name));
-/*        GdkPixbuf* mute_buf = gtk_icon_theme_load_icon(theme, */
-/*                                                        blocked_name,*/
-/*                                                        22,*/
-/*                                                        GTK_ICON_LOOKUP_GENERIC_FALLBACK,*/
-/*                                                        &error);*/
-        if(error != NULL){
-		    g_error("indicator-sound : catch_signal_sink_input_while_muted - %s", error->message);
-		    g_error_free(error);
-		    return;
-        }        
-
-        GtkIconInfo* buffer_icon_info = gtk_icon_theme_lookup_icon(theme, blocked_name,
-                                                                   22,
-                                                                   GTK_ICON_LOOKUP_GENERIC_FALLBACK);
-        g_debug("The icon name of the buffer icon %s", gtk_icon_info_get_filename(buffer_icon_info));
-
-        GdkPixbuf* blocked_buf = gtk_icon_theme_load_icon(theme, blocked_name,
-                                                          22,
-                                                          GTK_ICON_LOOKUP_GENERIC_FALLBACK,
-                                                          &error);
-        if(error != NULL){
-		    g_error("indicator-sound : catch_signal_sink_input_while_muted - %s", error->message);
-		    g_error_free(error);
-		    return;
-        }        
-        g_debug("gdk_pixbuf_get_width returns %i", gdk_pixbuf_get_width(blocked_buf));
-/*        gdk_pixbuf_composite(mute_buf, blocked_buf, 0, 0,*/
-/*                             gdk_pixbuf_get_width(blocked_buf),*/
-/*                             gdk_pixbuf_get_height(blocked_buf), */
-/*                             0, 0, 1, 1, GDK_INTERP_BILINEAR, 128);*/
-        //gtk_image_set_from_icon_name(speaker_image, blocked_name, DESIGN_TEAM_SIZE);
-        
-        g_debug("DOES the ICON THEME Have the Blocked image = %i", gtk_icon_theme_has_icon(theme, blocked_name));
-        gchar ** theme_path;         
-        gint nelements = 1;
-
-        gtk_icon_theme_get_search_path(theme, &theme_path, &nelements);
-        g_debug("icon theme path is %s ", *theme_path);
-        gtk_image_set_from_pixbuf(speaker_image, blocked_buf);
-    }    
+        gtk_image_set_from_icon_name(speaker_image,
+                                    g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT)),
+                                    DESIGN_TEAM_SIZE);
+        blocked_iter = blocked_animation_list;
+        timeout_id = g_timeout_add_seconds(3, commence_animation, NULL);
+    }  
 }
+
+static gboolean commence_animation()
+{
+    animation_id = g_timeout_add_seconds(1, fade_back_to_mute_image, NULL);
+    timeout_id = 0;
+    g_debug("out of there\n");
+    return FALSE;
+}
+     
+static gboolean fade_back_to_mute_image()
+{
+    g_debug("fade me entry\n");
+    if(blocked_iter != NULL)
+    {
+        g_debug("in there\n");
+        gtk_image_set_from_pixbuf(speaker_image, blocked_iter->data);
+        blocked_iter = blocked_iter->next;                  
+        return TRUE;
+    }
+    else{
+        animation_id = 0;
+        g_debug("out of there\n");
+        return FALSE;
+    }
+}
+/*    int i;*/
+/*    GList * anim_iter;*/
+/*    anim_iter = blocked_animation_list;*/
+/*    for(i=0; i < 2560000; i++)*/
+/*    {   */
+/*        if(i % 100000 == 0)*/
+/*        {*/
+/*            if (anim_iter != NULL)*/
+/*            {*/
+/*                gtk_image_set_from_pixbuf(speaker_image, anim_iter->data);         */
+/*                anim_iter = anim_iter->next;  */
+/*                g_debug("should now be setting each image");*/
+/*            }*/
+/*        }*/
+/*    }*/
+/*    gtk_image_set_from_icon_name(speaker_image,*/
+/*                                 g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED)),*/
+/*                                 DESIGN_TEAM_SIZE);*/
+    //fade_id = g_timeout_add_seconds(0.2, fade_each_frame, NULL); 
+ 
+
+   
+
+/*        g_debug("DOES the ICON THEME Have the Blocked image = %i", gtk_icon_theme_has_icon(theme, blocked_name));*/
+/*        GtkIconInfo* buffer_icon_info = gtk_icon_theme_lookup_icon(theme, blocked_name,*/
+/*                                                                   22,*/
+/*                                                                   GTK_ICON_LOOKUP_GENERIC_FALLBACK);*/
+/*        g_debug("The icon name of the buffer icon %s", gtk_icon_info_get_filename(buffer_icon_info));*/
+/*        g_debug("gdk_pixbuf_get_width returns %i", gdk_pixbuf_get_width(blocked_buf));*/
+/*        g_debug("DOES the ICON THEME Have the Blocked image = %i", gtk_icon_theme_has_icon(theme, blocked_name));*/
+/*        gchar ** theme_path;         */
+/*        gint nelements = 1;*/
+/*        gtk_icon_theme_get_search_path(theme, &theme_path, &nelements);*/
+/*        gtk_image_set_from_icon_name(speaker_image, blocked_name, DESIGN_TEAM_SIZE);*/
+/*        g_debug("icon theme path is %s ", *theme_path);*/
 
 static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_percent, gpointer userdata)
 {
@@ -491,6 +570,18 @@ static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value
     if(mute_value == TRUE && device_available != FALSE)
     {
         update_state(STATE_MUTED);
+    }
+    else{
+        if(timeout_id != 0){
+            g_debug("about to remove the timeout_id callback from the mainloop!!**");
+            g_source_remove(timeout_id);
+            timeout_id = 0;
+        }
+        if(animation_id != 0){
+            g_debug("about to remove the animation_id callback from the mainloop!!**");
+            g_source_remove(animation_id);
+            animation_id = 0;
+        }
     }
     g_debug("signal caught - sink mute update with mute value: %i", mute_value);
     gtk_widget_set_sensitive(volume_slider, !mute_value);
