@@ -34,6 +34,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <libindicator/indicator.h>
 #include <libindicator/indicator-object.h>
 #include <libindicator/indicator-service-manager.h>
+#include <libindicator/indicator-image-helper.h>
 
 #include "indicator-sound.h"
 #include "dbus-shared-names.h"
@@ -85,7 +86,7 @@ static gboolean new_slider_item (DbusmenuMenuitem * newitem, DbusmenuMenuitem * 
 /*static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget);*/
 static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data);
 static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
-static void slider_size_allocate(GtkWidget  *widget, GtkAllocation *allocation, gpointer user_data);
+/*static void slider_size_allocate(GtkWidget  *widget, GtkAllocation *allocation, gpointer user_data);*/
 static void slider_grabbed(GtkWidget *widget, gpointer user_data);
 static void slider_released(GtkWidget *widget, gpointer user_data);
 
@@ -169,7 +170,7 @@ indicator_sound_dispose (GObject *object)
 		self->service = NULL;
 	}
     g_hash_table_destroy(volume_states);
-    // TODO delete all pointers in the list;
+    g_list_foreach (blocked_animation_list, (GFunc)g_object_unref, NULL);
     g_list_free(blocked_animation_list);
 	G_OBJECT_CLASS (indicator_sound_parent_class)->dispose (object);
 	return;
@@ -192,8 +193,8 @@ static GtkImage *
 get_icon (IndicatorObject * io)
 {
     gchar* current_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
-    g_debug("At start-up attempting to set the image to %s", current_name);
-	speaker_image = GTK_IMAGE(gtk_image_new_from_icon_name(current_name, DESIGN_TEAM_SIZE));
+    //g_debug("At start-up attempting to set the image to %s", current_name);
+	speaker_image = indicator_image_helper(current_name);
 	gtk_widget_show(GTK_WIDGET(speaker_image));
 	return speaker_image;
 }
@@ -232,19 +233,24 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
     
     // register slider changes listening on the range
     GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);  
+
     g_signal_connect(slider, "value-changed", G_CALLBACK(value_changed_event_cb), newitem);
     g_signal_connect(volume_slider, "slider-grabbed", G_CALLBACK(slider_grabbed), NULL);
     g_signal_connect(volume_slider, "slider-released", G_CALLBACK(slider_released), NULL);    
-    g_signal_connect(slider, "size-allocate", G_CALLBACK(slider_size_allocate), NULL);
-    // Set images on the ido
-    GtkWidget* primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)volume_slider);    
-    gtk_image_set_from_icon_name(GTK_IMAGE(primary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_ZERO)), DESIGN_TEAM_SIZE);
-    GtkWidget* secondary_image = ido_scale_menu_item_get_secondary_image((IdoScaleMenuItem*)volume_slider);                 
-    gtk_image_set_from_icon_name(GTK_IMAGE(secondary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_HIGH)), DESIGN_TEAM_SIZE);
-    
-    // the race conditions at start up are like a west waterford greyhound dart. god knows who wins, who breaks a leg.
-    gtk_widget_set_sensitive(volume_slider, !initial_mute);
+/*    g_signal_connect(slider, "size-allocate", G_CALLBACK(slider_size_allocate), NULL);*/
 
+    // Set images on the ido
+    GtkWidget* primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)volume_slider);        
+	GIcon * primary_gicon = g_themed_icon_new_with_default_fallbacks(g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_ZERO)));
+    gtk_image_set_from_gicon(GTK_IMAGE(primary_image), primary_gicon, GTK_ICON_SIZE_MENU);
+	g_object_unref(primary_gicon);
+
+    GtkWidget* secondary_image = ido_scale_menu_item_get_secondary_image((IdoScaleMenuItem*)volume_slider);                     
+	GIcon * secondary_gicon = g_themed_icon_new_with_default_fallbacks(g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_HIGH)));
+    gtk_image_set_from_gicon(GTK_IMAGE(secondary_image), secondary_gicon, GTK_ICON_SIZE_MENU);
+	g_object_unref(secondary_gicon);
+
+    gtk_widget_set_sensitive(volume_slider, !initial_mute);
     gtk_widget_show_all(volume_slider);
 
 	return TRUE;
@@ -355,6 +361,7 @@ static void prepare_blocked_animation()
     }   
 }
 
+
 gint get_state()
 {
     return current_state;
@@ -386,7 +393,9 @@ static void update_state(const gint state)
 
     current_state = state;
     gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
-    gtk_image_set_from_icon_name(speaker_image, image_name, DESIGN_TEAM_SIZE);
+	GtkImage * tempimage = indicator_image_helper(image_name);
+    gtk_image_set_from_pixbuf(speaker_image, gtk_image_get_pixbuf(tempimage));
+	g_object_ref_sink(tempimage);
 }
 
 
@@ -474,9 +483,11 @@ static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean blo
     g_debug("signal caught - sink input while muted with value %i", block_value);
     if (block_value == 1 && animation_id == 0 ) {
         // We can assume we are in the muted state !
-        gtk_image_set_from_icon_name(speaker_image,
-                                    g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT)),
-                                    DESIGN_TEAM_SIZE);
+        gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
+    	GtkImage * tempimage = indicator_image_helper(image_name);
+        gtk_image_set_from_pixbuf(speaker_image, gtk_image_get_pixbuf(tempimage));
+	    g_object_ref_sink(tempimage);
+
         blocked_iter = blocked_animation_list;
         animation_id = g_timeout_add_seconds(1, fade_back_to_mute_image, NULL);
     }  
@@ -578,16 +589,16 @@ static void slider_released (GtkWidget *widget, gpointer user_data)
 slider_size_allocate:
 Callback on the size-allocate event on the slider item.
 **/
-static void slider_size_allocate(GtkWidget  *widget,
-                                 GtkAllocation *allocation, 
-                                 gpointer user_data)
-{
-    g_print("Size allocate on slider (%dx%d)\n", allocation->width, allocation->height);
-    if(allocation->width < 200){
-        g_print("Attempting to resize the slider");
-        gtk_widget_set_size_request(widget, 200, -1);    
-    }
-}
+/*static void slider_size_allocate(GtkWidget  *widget,*/
+/*                                 GtkAllocation *allocation, */
+/*                                 gpointer user_data)*/
+/*{*/
+/*    g_print("Size allocate on slider (%dx%d)\n", allocation->width, allocation->height);*/
+/*    if(allocation->width < 200){*/
+/*        g_print("Attempting to resize the slider");*/
+/*        gtk_widget_set_size_request(widget, 200, -1);    */
+/*    }*/
+/*}*/
 
 /**
 key_press_cb:
