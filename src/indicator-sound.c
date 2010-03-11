@@ -225,12 +225,23 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
     // alternative callback mechanism which i could use again at some point.
 /*    g_signal_connect(slider, "change-value", G_CALLBACK(user_change_value_event_cb), newitem);     */
     
-    // Set images on the ido
+	/* Get the primary Image */
     primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)volume_slider);    
-    gtk_image_set_from_icon_name(GTK_IMAGE(primary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_ZERO)), GTK_ICON_SIZE_MENU);
-    GtkWidget* secondary_image = ido_scale_menu_item_get_secondary_image((IdoScaleMenuItem*)volume_slider);                 
-    gtk_image_set_from_icon_name(GTK_IMAGE(secondary_image), g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_HIGH)), GTK_ICON_SIZE_MENU);
 
+	/* Build a GIcon for the theme fallbacks */
+	GIcon * primary_gicon = g_themed_icon_new_with_default_fallbacks(g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_ZERO)));
+    gtk_image_set_from_gicon(GTK_IMAGE(primary_image), primary_gicon, GTK_ICON_SIZE_MENU);
+	g_object_unref(primary_gicon);
+
+	/* Get the secondary image */
+    GtkWidget* secondary_image = ido_scale_menu_item_get_secondary_image((IdoScaleMenuItem*)volume_slider);                 
+
+	/* Build a GIcon for fallbacks */
+	GIcon * secondary_gicon = g_themed_icon_new_with_default_fallbacks(g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_HIGH)));
+    gtk_image_set_from_gicon(GTK_IMAGE(secondary_image), secondary_gicon, GTK_ICON_SIZE_MENU);
+	g_object_unref(secondary_gicon);
+
+	/* Make the widget visible to users */
     gtk_widget_show_all(volume_slider);
 
 	return TRUE;
