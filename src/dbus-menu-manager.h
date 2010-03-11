@@ -1,14 +1,12 @@
-#ifndef __INCLUDE_SOUND_SERVICE_H__
-#define __INCLUDE_SOUND_SERVICE_H__
+#ifndef __INCLUDE_DBUS_MENU_MANAGER_H__
+#define __INCLUDE_DBUS_MENU_MANAGER_H__
 
 /*
-This service primarily controls PulseAudio and is driven by the sound indicator menu on the panel.
+This handles the management of the dbusmeneu items.
 Copyright 2010 Canonical Ltd.
 
 Authors:
     Conor Curran <conor.curran@canonical.com>
-    Ted Gould <ted@canonical.com>
-    Cody Russell <crussell@canonical.com>
 
 This program is free software: you can redistribute it and/or modify it 
 under the terms of the GNU General Public License version 3, as published 
@@ -23,16 +21,11 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <config.h>
-#include <unistd.h>
-#include <glib/gi18n.h>
-
-#include <libindicator/indicator-service.h>
-
-#include "dbus-shared-names.h"
-
-// ENTRY AND EXIT POINTS
-void service_shutdown(IndicatorService * service, gpointer user_data);
-int main (int argc, char ** argv);
+void dbus_menu_manager_setup();
+void dbus_menu_manager_teardown();
+void dbus_menu_manager_update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_muted, gdouble current_vol);
+// TODO update pa_state should incorporate the method below !
+void dbus_menu_manager_update_mute_ui(gboolean incoming_mute_value);
 
 #endif
+

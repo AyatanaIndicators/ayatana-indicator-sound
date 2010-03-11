@@ -156,14 +156,15 @@ static const DBusGMethodInfo dbus_glib__sound_service_server_methods[] = {
   { (GCallback) sound_service_dbus_set_sink_volume, dbus_glib_marshal__sound_service_server_BOOLEAN__UINT_POINTER, 0 },
   { (GCallback) sound_service_dbus_get_sink_volume, dbus_glib_marshal__sound_service_server_BOOLEAN__POINTER_POINTER, 64 },
   { (GCallback) sound_service_dbus_get_sink_mute, dbus_glib_marshal__sound_service_server_BOOLEAN__POINTER_POINTER, 138 },
+  { (GCallback) sound_service_dbus_get_sink_availability, dbus_glib_marshal__sound_service_server_BOOLEAN__POINTER_POINTER, 200 },
 };
 
 const DBusGObjectInfo dbus_glib__sound_service_server_object_info = {
   0,
   dbus_glib__sound_service_server_methods,
-  3,
-"org.ayatana.indicator.sound\0SetSinkVolume\0S\0volume_percent\0I\0u\0\0org.ayatana.indicator.sound\0GetSinkVolume\0S\0volume_percent_input\0O\0F\0N\0d\0\0org.ayatana.indicator.sound\0GetSinkMute\0S\0mute_input\0O\0F\0N\0b\0\0\0",
-"org.ayatana.indicator.sound\0SinkInputWhileMuted\0org.ayatana.indicator.sound\0SinkVolumeUpdate\0org.ayatana.indicator.sound\0SinkMuteUpdate\0\0",
+  4,
+"org.ayatana.indicator.sound\0SetSinkVolume\0S\0volume_percent\0I\0u\0\0org.ayatana.indicator.sound\0GetSinkVolume\0S\0volume_percent_input\0O\0F\0N\0d\0\0org.ayatana.indicator.sound\0GetSinkMute\0S\0mute_input\0O\0F\0N\0b\0\0org.ayatana.indicator.sound\0GetSinkAvailability\0S\0availability_input\0O\0F\0N\0b\0\0\0",
+"org.ayatana.indicator.sound\0SinkInputWhileMuted\0org.ayatana.indicator.sound\0SinkVolumeUpdate\0org.ayatana.indicator.sound\0SinkMuteUpdate\0org.ayatana.indicator.sound\0SinkAvailableUpdate\0\0",
 "\0"
 };
 

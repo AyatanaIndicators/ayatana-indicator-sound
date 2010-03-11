@@ -1,3 +1,5 @@
+#ifndef __INCLUDE_PULSE_MANAGER_H__
+#define __INCLUDE_PULSE_MANAGER_H__
 /*
 A small wrapper utility to load indicators and put them as menu items
 into the gnome-panel using it's applet interface.
@@ -19,7 +21,6 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 
 
 #include <pulse/pulseaudio.h>
@@ -47,4 +48,5 @@ void set_sink_volume(gdouble percent);
 void toggle_global_mute(gboolean mute_value); 
 void close_pulse_activites();
 
+#endif
 

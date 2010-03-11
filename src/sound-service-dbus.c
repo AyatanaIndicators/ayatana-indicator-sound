@@ -29,10 +29,10 @@
 #include "sound-service-marshal.h"
 #include "pulse-manager.h"
 
-// DBUS methods - 
-// TODO - other should be static and moved from the header to here
+// DBUS methods 
 static gboolean sound_service_dbus_get_sink_volume(SoundServiceDbus* service, gdouble* volume_percent_input, GError** gerror);
 static gboolean sound_service_dbus_get_sink_mute(SoundServiceDbus* service, gboolean* mute_input, GError** gerror);
+static gboolean sound_service_dbus_get_sink_availability(SoundServiceDbus* service, gboolean* availability_input, GError** gerror);
 static void sound_service_dbus_set_sink_volume(SoundServiceDbus* service, const guint volume_percent, GError** gerror);
 
 #include "sound-service-server.h"
@@ -41,18 +41,19 @@ typedef struct _SoundServiceDbusPrivate SoundServiceDbusPrivate;
 
 struct _SoundServiceDbusPrivate
 {
-    DBusGConnection *system_bus;
     DBusGConnection *connection;
     gdouble         volume_percent;
     gboolean        mute;
+    gboolean        sink_availability;
 };
 
 
 /* Signals */
 enum {
-  SINK_INPUT_WHILE_MUTED,  
+  SINK_INPUT_WHILE_MUTED,
   SINK_VOLUME_UPDATE,
   SINK_MUTE_UPDATE,
+  SINK_AVAILABLE_UPDATE,
   LAST_SIGNAL
 };
 
@@ -107,6 +108,15 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
                                                     NULL, NULL,
                                                     g_cclosure_marshal_VOID__BOOLEAN,
                                                     G_TYPE_NONE, 1, G_TYPE_BOOLEAN);
+    signals[SINK_AVAILABLE_UPDATE] =  g_signal_new("sink-available-update",
+                                                    G_TYPE_FROM_CLASS (klass),
+                                                    G_SIGNAL_RUN_LAST,
+                                                    0,
+                                                    NULL, NULL,
+                                                    g_cclosure_marshal_VOID__BOOLEAN,
+                                                    G_TYPE_NONE, 1, G_TYPE_BOOLEAN);
+
+
 
 }
 
@@ -116,25 +126,23 @@ sound_service_dbus_init (SoundServiceDbus *self)
     GError *error = NULL;
     SoundServiceDbusPrivate * priv = SOUND_SERVICE_DBUS_GET_PRIVATE(self);
 
-	priv->system_bus = NULL;
 	priv->connection = NULL;
     priv->volume_percent = 0;
+    priv->mute = FALSE;
+    priv->sink_availability = FALSE;
 
-    /* Get the system bus */
-    priv->system_bus = dbus_g_bus_get (DBUS_BUS_SYSTEM, &error);
-	/* Put the object on DBus */
+	/* Fetch the session bus */
 	priv->connection = dbus_g_bus_get(DBUS_BUS_SESSION, &error);
 
 	if (error != NULL) {
-		g_error("Unable to connect to the session bus when creating application indicator: %s", error->message);
+		g_error("sound-service-dbus:Unable to connect to the session bus when creating indicator sound service : %s", error->message);
 		g_error_free(error);
 		return;
 	}
+    /* register the service on it */
 	dbus_g_connection_register_g_object(priv->connection,
 	                                    "/org/ayatana/indicator/sound/service",
 	                                    G_OBJECT(self));
-
-    return;
 }
 
 
@@ -178,6 +186,14 @@ static gboolean sound_service_dbus_get_sink_mute (SoundServiceDbus *self, gboole
     return TRUE;
 }
 
+static gboolean sound_service_dbus_get_sink_availability (SoundServiceDbus *self, gboolean *availability_input, GError** gerror)
+{
+    SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
+    g_debug("Get sink availability - sound service dbus!, about to send over availability_value of  %i", priv->sink_availability);
+    *availability_input = priv->sink_availability;
+    return TRUE;
+}
+
 /**
 SIGNALS
 Utility methods to emit signals from the service into the ether.
@@ -214,6 +230,19 @@ void sound_service_dbus_update_sink_mute(SoundServiceDbus* obj, gboolean sink_mu
                 signals[SINK_MUTE_UPDATE],
                 0,
                 priv->mute);
+}
+
+void sound_service_dbus_update_sink_availability(SoundServiceDbus* obj, gboolean sink_availability)
+{
+    g_debug("Emitting signal: SINK_AVAILABILITY_UPDATE, with value %i", sink_availability);
+
+    SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (obj);
+    priv->sink_availability = sink_availability;            
+
+    g_signal_emit(obj,
+                signals[SINK_AVAILABLE_UPDATE],
+                0,
+                priv->sink_availability);
 }
 
      
