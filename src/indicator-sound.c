@@ -34,6 +34,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <libindicator/indicator.h>
 #include <libindicator/indicator-object.h>
 #include <libindicator/indicator-service-manager.h>
+#include <libindicator/indicator-image-helper.h>
 
 #include "indicator-sound.h"
 #include "dbus-shared-names.h"
@@ -180,7 +181,7 @@ get_icon (IndicatorObject * io)
 {
     gchar* current_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
     //g_debug("At start-up attempting to set the image to %s", current_name);
-	speaker_image = GTK_IMAGE(gtk_image_new_from_icon_name(current_name, GTK_ICON_SIZE_MENU));
+	speaker_image = indicator_image_helper(current_name);
 	gtk_widget_show(GTK_WIDGET(speaker_image));
 	return speaker_image;
 }
@@ -327,7 +328,9 @@ static void update_state(const gint state)
 
     current_state = state;
     gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
-    gtk_image_set_from_icon_name(speaker_image, image_name, GTK_ICON_SIZE_MENU);
+	GtkImage * tempimage = indicator_image_helper(image_name);
+    gtk_image_set_from_pixbuf(speaker_image, gtk_image_get_pixbuf(tempimage));
+	g_object_ref_sink(tempimage);
 }
 
 
