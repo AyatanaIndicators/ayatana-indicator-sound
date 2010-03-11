@@ -8,16 +8,16 @@ Authors:
     Conor Curran <conor.curran@canonical.com>
     Ted Gould <ted@canonical.com>
 
-This program is free software: you can redistribute it and/or modify it 
-under the terms of the GNU General Public License version 3, as published 
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License version 3, as published
 by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful, but 
-WITHOUT ANY WARRANTY; without even the implied warranties of 
-MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR 
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranties of
+MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR
 PURPOSE.  See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along 
+You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <math.h>
@@ -94,7 +94,7 @@ static void slider_released(GtkWidget *widget, gpointer user_data);
 static DBusGProxy *sound_dbus_proxy = NULL;
 static void connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata);
 static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean value, gpointer userdata);
-static void catch_signal_sink_volume_update(DBusGProxy * proxy, gdouble volume_percent, gpointer userdata); 
+static void catch_signal_sink_volume_update(DBusGProxy * proxy, gdouble volume_percent, gpointer userdata);
 static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer userdata);
 static void catch_signal_sink_availability_update(DBusGProxy *proxy, gboolean available_value, gpointer userdata);
 static void fetch_volume_percent_from_dbus();
@@ -143,7 +143,7 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
 	io_class->get_label = get_label;
 	io_class->get_image = get_icon;
 	io_class->get_menu = get_menu;
-    
+
     design_team_size = gtk_icon_size_register("design-team-size", 22, 22);
 
 	return;
@@ -205,15 +205,21 @@ get_icon (IndicatorObject * io)
 static GtkMenu *
 get_menu (IndicatorObject * io)
 {
-    DbusmenuGtkMenu *menu = dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT);    
-	DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);	
+    DbusmenuGtkMenu *menu = dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT);
+	DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);
     dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SLIDER_MENUITEM_TYPE, new_slider_item);
 
     // register Key-press listening on the menu widget as the slider does not allow this.
-    g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), NULL);         
+    g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), NULL);
     return GTK_MENU(menu);
 }
 
+static void
+slider_parent_changed (GtkWidget *widget,
+                       gpointer   user_data)
+{
+  gtk_widget_set_size_request (widget, 200, -1);
+}
 
 /**
 new_slider_item:
@@ -221,39 +227,43 @@ Create a new dBusMenu Slider item.
 **/
 static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
-	g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
-	g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
-    
+    g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
+    g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
+
     volume_slider = ido_scale_menu_item_new_with_range ("Volume", initial_volume_percent, 0, 100, 0.5);
-	g_object_set(volume_slider, "reverse-scroll-events", TRUE, NULL);
+    g_object_set(volume_slider, "reverse-scroll-events", TRUE, NULL);
+
+    g_signal_connect (volume_slider,
+                      "notify::parent", G_CALLBACK (slider_parent_changed),
+                      NULL);
 
     GtkMenuItem *menu_volume_slider = GTK_MENU_ITEM(volume_slider);
 
-	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_volume_slider, parent);
-    
+    dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_volume_slider, parent);
+
     // register slider changes listening on the range
-    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);  
+    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
 
     g_signal_connect(slider, "value-changed", G_CALLBACK(value_changed_event_cb), newitem);
     g_signal_connect(volume_slider, "slider-grabbed", G_CALLBACK(slider_grabbed), NULL);
-    g_signal_connect(volume_slider, "slider-released", G_CALLBACK(slider_released), NULL);    
+    g_signal_connect(volume_slider, "slider-released", G_CALLBACK(slider_released), NULL);
 /*    g_signal_connect(slider, "size-allocate", G_CALLBACK(slider_size_allocate), NULL);*/
 
     // Set images on the ido
-    GtkWidget* primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)volume_slider);        
-	GIcon * primary_gicon = g_themed_icon_new_with_default_fallbacks(g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_ZERO)));
+    GtkWidget* primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)volume_slider);
+    GIcon * primary_gicon = g_themed_icon_new_with_default_fallbacks(g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_ZERO)));
     gtk_image_set_from_gicon(GTK_IMAGE(primary_image), primary_gicon, GTK_ICON_SIZE_MENU);
-	g_object_unref(primary_gicon);
+    g_object_unref(primary_gicon);
 
-    GtkWidget* secondary_image = ido_scale_menu_item_get_secondary_image((IdoScaleMenuItem*)volume_slider);                     
-	GIcon * secondary_gicon = g_themed_icon_new_with_default_fallbacks(g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_HIGH)));
+    GtkWidget* secondary_image = ido_scale_menu_item_get_secondary_image((IdoScaleMenuItem*)volume_slider);
+    GIcon * secondary_gicon = g_themed_icon_new_with_default_fallbacks(g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_HIGH)));
     gtk_image_set_from_gicon(GTK_IMAGE(secondary_image), secondary_gicon, GTK_ICON_SIZE_MENU);
-	g_object_unref(secondary_gicon);
+    g_object_unref(secondary_gicon);
 
     gtk_widget_set_sensitive(volume_slider, !initial_mute);
     gtk_widget_show_all(volume_slider);
 
-	return TRUE;
+    return TRUE;
 }
 
 static void
@@ -328,8 +338,8 @@ static void prepare_blocked_animation()
 
     gchar* blocked_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
     gchar* muted_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED));
-    GtkIconTheme* theme = gtk_icon_theme_get_default();        
-    GdkPixbuf* mute_buf = gtk_icon_theme_load_icon(theme, 
+    GtkIconTheme* theme = gtk_icon_theme_get_default();
+    GdkPixbuf* mute_buf = gtk_icon_theme_load_icon(theme,
                                                     muted_name,
                                                     22,
                                                     GTK_ICON_LOOKUP_GENERIC_FALLBACK,
@@ -338,7 +348,7 @@ static void prepare_blocked_animation()
 	    g_error("indicator-sound : prepare_blocked_animation - %s", error->message);
 	    g_error_free(error);
 	    return;
-    }        
+    }
 
     GdkPixbuf* blocked_buf = gtk_icon_theme_load_icon(theme, blocked_name,
                                                       22,
@@ -348,17 +358,17 @@ static void prepare_blocked_animation()
 	    g_error("indicator-sound : prepare_blocked_animation - %s", error->message);
 	    g_error_free(error);
 	    return;
-    }      
+    }
     // sample 22 snapshots - range : 0-256
     for(i = 0; i < 23; i++)
-    {        
+    {
         gdk_pixbuf_composite(mute_buf, blocked_buf, 0, 0,
                              gdk_pixbuf_get_width(mute_buf),
-                             gdk_pixbuf_get_height(mute_buf), 
+                             gdk_pixbuf_get_height(mute_buf),
                              0, 0, 1, 1, GDK_INTERP_BILINEAR, MIN(255, i * 11));
         g_debug("creating blocking animation - alpha value = %i", MIN(255, i * 11));
         blocked_animation_list = g_list_append(blocked_animation_list, gdk_pixbuf_copy(blocked_buf));
-    }   
+    }
 }
 
 
@@ -416,15 +426,15 @@ void determine_state_from_volume(gdouble volume_percent)
     }
     else if(volume_percent == 0.0){
         state = STATE_ZERO;
-    }    
-    update_state(state);   
+    }
+    update_state(state);
 }
- 
+
 
 static void fetch_sink_availability_from_dbus()
 {
     GError * error = NULL;
-    gboolean * available_input; 
+    gboolean * available_input;
     available_input = g_new0(gboolean, 1);
     org_ayatana_indicator_sound_get_sink_availability(sound_dbus_proxy, available_input, &error);
     if (error != NULL) {
@@ -444,7 +454,7 @@ static void fetch_sink_availability_from_dbus()
 static void fetch_volume_percent_from_dbus()
 {
     GError * error = NULL;
-    gdouble *volume_percent_input; 
+    gdouble *volume_percent_input;
     volume_percent_input = g_new0(gdouble, 1);
     org_ayatana_indicator_sound_get_sink_volume(sound_dbus_proxy, volume_percent_input, &error);
 	if (error != NULL) {
@@ -462,7 +472,7 @@ static void fetch_volume_percent_from_dbus()
 static void fetch_mute_value_from_dbus()
 {
     GError * error = NULL;
-    gboolean *mute_input; 
+    gboolean *mute_input;
     mute_input = g_new0(gboolean, 1);
     org_ayatana_indicator_sound_get_sink_mute(sound_dbus_proxy, mute_input, &error);
     if (error != NULL) {
@@ -490,16 +500,16 @@ static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean blo
 
         blocked_iter = blocked_animation_list;
         animation_id = g_timeout_add_seconds(1, fade_back_to_mute_image, NULL);
-    }  
+    }
 }
-     
+
 static gboolean fade_back_to_mute_image()
 {
     if(blocked_iter != NULL)
     {
         g_debug("in animation 'loop'\n");
         gtk_image_set_from_pixbuf(speaker_image, blocked_iter->data);
-        blocked_iter = blocked_iter->next;                  
+        blocked_iter = blocked_iter->next;
         return TRUE;
     }
     else{
@@ -513,12 +523,12 @@ static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_pe
 {
     if (slider_in_direct_use != TRUE){
         GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
-        GtkRange *range = (GtkRange*)slider;   
-        
+        GtkRange *range = (GtkRange*)slider;
+
         // DEBUG
         gdouble current_value = gtk_range_get_value(range);
         g_debug("SIGNAL- update sink volume - current_value : %f and new value : %f", current_value, volume_percent);
-        gtk_range_set_value(range, volume_percent); 
+        gtk_range_set_value(range, volume_percent);
         determine_state_from_volume(volume_percent);
     }
 }
@@ -558,13 +568,13 @@ This callback will get triggered irregardless of whether its a user change or a 
 **/
 static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data)
 {
-    gdouble current_value =  CLAMP(gtk_range_get_value(range), 0, 100);        
+    gdouble current_value =  CLAMP(gtk_range_get_value(range), 0, 100);
     DbusmenuMenuitem *item = (DbusmenuMenuitem*)user_data;
     GValue value = {0};
     g_value_init(&value, G_TYPE_DOUBLE);
     g_value_set_double(&value, current_value);
     g_debug("Value changed callback - = %f", current_value);
-    dbusmenu_menuitem_handle_event (item, "slider_change", &value, 0);  
+    dbusmenu_menuitem_handle_event (item, "slider_change", &value, 0);
     // This is not ideal in that the icon ui will update on ui actions and not on actual service feedback.
     // but necessary for now as the server does not send volume update information if the source of change was this ui.
     determine_state_from_volume(current_value);
@@ -608,8 +618,8 @@ static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer dat
     gboolean digested = FALSE;
 
     GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
-    GtkRange* range = (GtkRange*)slider;       
-    gdouble current_value = gtk_range_get_value(range);  
+    GtkRange* range = (GtkRange*)slider;
+    gdouble current_value = gtk_range_get_value(range);
     gdouble new_value = current_value;
     const gdouble five_percent = 5;
     GtkWidget *menuitem;
@@ -638,26 +648,26 @@ static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer dat
                 }
                 else
                 {
-                    new_value = current_value - five_percent;                
+                    new_value = current_value - five_percent;
                 }
                 break;
             case GDK_plus:
                 digested = TRUE;
-                new_value = current_value + five_percent;                
+                new_value = current_value + five_percent;
                 break;
             case GDK_minus:
                 digested = TRUE;
-                new_value = current_value - five_percent;                
+                new_value = current_value - five_percent;
                 break;
             default:
                 break;
-            }    
-            
+            }
+
             new_value = CLAMP(new_value, 0, 100);
             if(new_value != current_value && current_state != STATE_MUTED)
             {
-                g_debug("Attempting to set the range from the key listener to %f", new_value);        
-                gtk_range_set_value(range, new_value);  
+                g_debug("Attempting to set the range from the key listener to %f", new_value);
+                gtk_range_set_value(range, new_value);
             }
     }
     return digested;
