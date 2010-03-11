@@ -123,13 +123,11 @@ static gboolean slider_in_direct_use = FALSE;
 
 #define DESIGN_TEAM_SIZE  design_team_size
 static GtkIconSize design_team_size;
-static gint timeout_id;
 static gint animation_id;
 static GList * blocked_animation_list = NULL;
 static GList * blocked_iter = NULL;
 static void prepare_blocked_animation();
 static gboolean fade_back_to_mute_image();
-static gboolean commence_animation();
 
 // Construction
 static void
@@ -152,14 +150,11 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
 
 static void indicator_sound_init (IndicatorSound *self)
 {
-	/* Set good defaults */
 	self->service = NULL;
-	/* Now let's fire these guys up. */
 	self->service = indicator_service_manager_new_version(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_VERSION);
 	g_signal_connect(G_OBJECT(self->service), INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE, G_CALLBACK(connection_changed), self);
     prepare_state_machine();
     prepare_blocked_animation();
-    timeout_id = 0;
     animation_id = 0;
     return;
 }
@@ -234,7 +229,6 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
     GtkMenuItem *menu_volume_slider = GTK_MENU_ITEM(volume_slider);
 
 	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_volume_slider, parent);
-/*	g_signal_connect(G_OBJECT(newitem), DBUSMENU_MENUITEM_SIGNAL_PROPERTY_CHANGED, G_CALLBACK(slider_prop_change_cb), volume_slider);*/
     
     // register slider changes listening on the range
     GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);  
@@ -306,7 +300,6 @@ Prepare states Array.
 */
 void prepare_state_machine()
 {
-    // TODO we need three more images
     volume_states = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
     g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MUTED), g_strdup("audio-volume-muted-panel"));
     g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_ZERO), g_strdup("audio-volume-low-zero-panel"));
@@ -350,14 +343,14 @@ static void prepare_blocked_animation()
 	    g_error_free(error);
 	    return;
     }      
-
-    for(i = 0; i < 256; i++)
+    // sample 22 snapshots - range : 0-256
+    for(i = 0; i < 23; i++)
     {        
         gdk_pixbuf_composite(mute_buf, blocked_buf, 0, 0,
                              gdk_pixbuf_get_width(mute_buf),
                              gdk_pixbuf_get_height(mute_buf), 
-                             0, 0, 1, 1, GDK_INTERP_BILINEAR, i);
-        g_debug("creating animation - alpha value = %i", i);
+                             0, 0, 1, 1, GDK_INTERP_BILINEAR, MIN(255, i * 11));
+        g_debug("creating blocking animation - alpha value = %i", MIN(255, i * 11));
         blocked_animation_list = g_list_append(blocked_animation_list, gdk_pixbuf_copy(blocked_buf));
     }   
 }
@@ -479,75 +472,31 @@ static void fetch_mute_value_from_dbus()
 static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean block_value, gpointer userdata)
 {
     g_debug("signal caught - sink input while muted with value %i", block_value);
-    if (block_value == 1 && timeout_id == 0 ) {
+    if (block_value == 1 && animation_id == 0 ) {
         // We can assume we are in the muted state !
         gtk_image_set_from_icon_name(speaker_image,
                                     g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT)),
                                     DESIGN_TEAM_SIZE);
         blocked_iter = blocked_animation_list;
-        timeout_id = g_timeout_add_seconds(3, commence_animation, NULL);
+        animation_id = g_timeout_add_seconds(1, fade_back_to_mute_image, NULL);
     }  
-}
-
-static gboolean commence_animation()
-{
-    animation_id = g_timeout_add_seconds(1, fade_back_to_mute_image, NULL);
-    timeout_id = 0;
-    g_debug("out of there\n");
-    return FALSE;
 }
      
 static gboolean fade_back_to_mute_image()
 {
-    g_debug("fade me entry\n");
     if(blocked_iter != NULL)
     {
-        g_debug("in there\n");
+        g_debug("in animation 'loop'\n");
         gtk_image_set_from_pixbuf(speaker_image, blocked_iter->data);
         blocked_iter = blocked_iter->next;                  
         return TRUE;
     }
     else{
         animation_id = 0;
-        g_debug("out of there\n");
+        g_debug("exit from animation\n");
         return FALSE;
     }
 }
-/*    int i;*/
-/*    GList * anim_iter;*/
-/*    anim_iter = blocked_animation_list;*/
-/*    for(i=0; i < 2560000; i++)*/
-/*    {   */
-/*        if(i % 100000 == 0)*/
-/*        {*/
-/*            if (anim_iter != NULL)*/
-/*            {*/
-/*                gtk_image_set_from_pixbuf(speaker_image, anim_iter->data);         */
-/*                anim_iter = anim_iter->next;  */
-/*                g_debug("should now be setting each image");*/
-/*            }*/
-/*        }*/
-/*    }*/
-/*    gtk_image_set_from_icon_name(speaker_image,*/
-/*                                 g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED)),*/
-/*                                 DESIGN_TEAM_SIZE);*/
-    //fade_id = g_timeout_add_seconds(0.2, fade_each_frame, NULL); 
- 
-
-   
-
-/*        g_debug("DOES the ICON THEME Have the Blocked image = %i", gtk_icon_theme_has_icon(theme, blocked_name));*/
-/*        GtkIconInfo* buffer_icon_info = gtk_icon_theme_lookup_icon(theme, blocked_name,*/
-/*                                                                   22,*/
-/*                                                                   GTK_ICON_LOOKUP_GENERIC_FALLBACK);*/
-/*        g_debug("The icon name of the buffer icon %s", gtk_icon_info_get_filename(buffer_icon_info));*/
-/*        g_debug("gdk_pixbuf_get_width returns %i", gdk_pixbuf_get_width(blocked_buf));*/
-/*        g_debug("DOES the ICON THEME Have the Blocked image = %i", gtk_icon_theme_has_icon(theme, blocked_name));*/
-/*        gchar ** theme_path;         */
-/*        gint nelements = 1;*/
-/*        gtk_icon_theme_get_search_path(theme, &theme_path, &nelements);*/
-/*        gtk_image_set_from_icon_name(speaker_image, blocked_name, DESIGN_TEAM_SIZE);*/
-/*        g_debug("icon theme path is %s ", *theme_path);*/
 
 static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_percent, gpointer userdata)
 {
@@ -572,11 +521,6 @@ static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value
         update_state(STATE_MUTED);
     }
     else{
-        if(timeout_id != 0){
-            g_debug("about to remove the timeout_id callback from the mainloop!!**");
-            g_source_remove(timeout_id);
-            timeout_id = 0;
-        }
         if(animation_id != 0){
             g_debug("about to remove the animation_id callback from the mainloop!!**");
             g_source_remove(animation_id);
@@ -596,19 +540,6 @@ static void catch_signal_sink_availability_update(DBusGProxy *proxy, gboolean av
     g_debug("signal caught - sink availability update with  value: %i", available_value);
 }
 
-/**
-slider_prop_change_cb:
-Whenever we have a property change on a DbusmenuMenuitem this will be called. 
-**/
-/*static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget)*/
-/*{*/
-/*    g_debug("slider_prop_change_cb - dodgy updater ");*/
-/*    g_debug("about to set the slider to %f", g_value_get_double(value));*/
-/*    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);*/
-/*    GtkRange* range = (GtkRange*)slider;       */
-/*    gtk_range_set_value(range, g_value_get_double(value));  */
-/*	return;*/
-/*}*/
 
 /**
 value_changed_event_cb:
