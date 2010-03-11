@@ -8,11 +8,10 @@ soundmenulibdir = $(INDICATORDIR)
 soundmenulib_LTLIBRARIES = libsoundmenu.la
 libsoundmenu_la_SOURCES = \
     common-defs.h \
+	indicator-sound.h \
 	indicator-sound.c \
 	dbus-shared-names.h \
-    sound-service-client.h \
-    sound-service-marshal.c \
-    sound-service-marshal.h
+    sound-service-client.h 
 
 libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -Werror
 libsoundmenu_la_LIBADD = $(APPLET_LIBS)
@@ -29,16 +28,6 @@ sound-service-client.h: $(srcdir)/sound-service.xml
 		--output=sound-service-client.h \
 		$(srcdir)/sound-service.xml
 
-sound-service-marshal.h: $(srcdir)/sound-service.list
-	glib-genmarshal --header \
-		--prefix=_sound_service_marshal $(srcdir)/sound-service.list \
-		> sound-service-marshal.h
-
-sound-service-marshal.c: $(srcdir)/sound-service.list
-	glib-genmarshal --body \
-		--prefix=_sound_service_marshal $(srcdir)/sound-service.list \
-		> sound-service-marshal.c
-
 
 #################
 # Session Stuff
@@ -47,6 +36,8 @@ indicator_sound_service_SOURCES = \
     common-defs.h \
     sound-service.h \
     sound-service.c \
+    dbus-menu-manager.c \
+    dbus-menu-manager.h \
     pulse-manager.h \
     pulse-manager.c \
     sound-service-dbus.h \
@@ -71,9 +62,7 @@ sound-service-server.h: $(srcdir)/sound-service.xml
 ###############
 BUILT_SOURCES = \
 	sound-service-client.h \
-    sound-service-server.h \
-	sound-service-marshal.h \
-    sound-service-marshal.c
+    sound-service-server.h 
 
 EXTRA_DIST = \
     sound-service.xml \

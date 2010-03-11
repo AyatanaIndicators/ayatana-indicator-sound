@@ -1,14 +1,15 @@
-#ifndef __INCLUDE_SOUND_SERVICE_H__
-#define __INCLUDE_SOUND_SERVICE_H__
+#ifndef __INCLUDE_INDICATOR_SOUND_H__
+#define __INCLUDE_INDICATOR_SOUND_H__
 
 /*
-This service primarily controls PulseAudio and is driven by the sound indicator menu on the panel.
+A small wrapper utility to load indicators and put them as menu items
+into the gnome-panel using it's applet interface.
+
 Copyright 2010 Canonical Ltd.
 
 Authors:
-    Conor Curran <conor.curran@canonical.com>
+    Conor Curran <conor.curra@canonical.com>
     Ted Gould <ted@canonical.com>
-    Cody Russell <crussell@canonical.com>
 
 This program is free software: you can redistribute it and/or modify it 
 under the terms of the GNU General Public License version 3, as published 
@@ -23,16 +24,12 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <config.h>
-#include <unistd.h>
-#include <glib/gi18n.h>
-
-#include <libindicator/indicator-service.h>
-
-#include "dbus-shared-names.h"
-
-// ENTRY AND EXIT POINTS
-void service_shutdown(IndicatorService * service, gpointer user_data);
-int main (int argc, char ** argv);
+// Essentially these are all exported to faciltiate testing
+void prepare_state_machine();
+void determine_state_from_volume(gdouble volume_percent);
+gint get_state();
+gchar* get_state_image_name(gint state);
+void prepare_for_tests(IndicatorObject * io);
+void tidy_up_hash();
 
 #endif

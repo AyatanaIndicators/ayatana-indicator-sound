@@ -1,10 +1,10 @@
 
-AC_INIT(src/indicator-sound.c)
+AC_INIT(indicator-sound, 0.1.3, conor.curran@canonical.com)
 
 AC_PREREQ(2.53)
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(indicator-sound, 0.1.2)
+AM_INIT_AUTOMAKE(indicator-sound, 0.1.3)
 
 AM_MAINTAINER_MODE
 
@@ -127,6 +127,7 @@ AC_OUTPUT([
 Makefile
 src/Makefile
 data/Makefile
+tests/Makefile
 po/Makefile.in
 ])
 

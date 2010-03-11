@@ -5,6 +5,7 @@
         <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_set_sink_volume"/>
         <arg type='u' name='volume_percent' direction="in"/>
     </method>
+
     <method name = "GetSinkVolume">
         <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_get_sink_volume"/>
         <arg type='d' name='volume_percent_input' direction="out"/>
@@ -13,6 +14,11 @@
     <method name = "GetSinkMute">
         <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_get_sink_mute"/>
         <arg type='b' name='mute_input' direction="out"/>
+    </method>
+
+    <method name = "GetSinkAvailability">
+        <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_get_sink_availability"/>
+        <arg type='b' name='availability_input' direction="out"/>
     </method>
 
 <!-- Will need to hook up another signal which monitors for volume change 
@@ -28,6 +34,10 @@ Our respective UI element should listen to this and therefore will be updated wi
 
     <signal name="SinkMuteUpdate">
       <arg name="mute_value" type="b" direction="out"/>
+    </signal>
+
+    <signal name="SinkAvailableUpdate">
+      <arg name="available_value" type="b" direction="out"/>
     </signal>
 
   </interface>

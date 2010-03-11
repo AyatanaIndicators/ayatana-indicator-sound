@@ -1,3 +1,17 @@
+indicator-sound (0.1.3-0ubuntu1) lucid; urgency=low
+
+  * New upstream version:
+    - icon sizing fixed.
+    - correct icon names loaded with fallback mechanism
+    - no sink handling improved - now handles going from no sink to one sink 
+      back to no sink properly
+    - Mute blocking state implemented with animation on title image.
+    - smoother sliding due new signals emitted from the 0.1.4 of ido
+  * debian/control:
+    - updated libindicator requirement
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 11 Mar 2010 18:53:58 +0100
+
 indicator-sound (0.1.2-0ubuntu1) lucid; urgency=low
 
   * New upstream version:

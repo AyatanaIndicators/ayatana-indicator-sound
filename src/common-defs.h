@@ -22,6 +22,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define SIGNAL_SINK_INPUT_WHILE_MUTED "SinkInputWhileMuted"
 #define SIGNAL_SINK_VOLUME_UPDATE "SinkVolumeUpdate"
 #define SIGNAL_SINK_MUTE_UPDATE "SinkMuteUpdate"
+#define SIGNAL_SINK_AVAILABLE_UPDATE "SinkAvailableUpdate"
 
 // DBUS items
 #define DBUSMENU_SLIDER_MENUITEM_TYPE          "x-canonical-ido-slider-item"
