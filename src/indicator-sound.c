@@ -40,7 +40,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "dbus-shared-names.h"
 #include "sound-service-client.h"
 #include "common-defs.h"
-#include "sound-service-marshal.h"
 
 // GObject Boiler plate
 #define INDICATOR_SOUND_TYPE            (indicator_sound_get_type ())
@@ -323,32 +322,18 @@ Only called at startup.
 */
 static void prepare_blocked_animation()
 {
-    GError* error= NULL;
-    int i;
-
     gchar* blocked_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
     gchar* muted_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED));
-    GtkIconTheme* theme = gtk_icon_theme_get_default();        
-    GdkPixbuf* mute_buf = gtk_icon_theme_load_icon(theme, 
-                                                    muted_name,
-                                                    22,
-                                                    GTK_ICON_LOOKUP_GENERIC_FALLBACK,
-                                                    &error);
-    if(error != NULL){
-	    g_error("indicator-sound : prepare_blocked_animation - %s", error->message);
-	    g_error_free(error);
-	    return;
-    }        
+    
+    GtkImage* temp_image = indicator_image_helper(muted_name);       
+    GdkPixbuf* mute_buf = gtk_image_get_pixbuf(temp_image); 
 
-    GdkPixbuf* blocked_buf = gtk_icon_theme_load_icon(theme, blocked_name,
-                                                      22,
-                                                      GTK_ICON_LOOKUP_GENERIC_FALLBACK,
-                                                      &error);
-    if(error != NULL){
-	    g_error("indicator-sound : prepare_blocked_animation - %s", error->message);
-	    g_error_free(error);
-	    return;
-    }      
+    temp_image = indicator_image_helper(blocked_name);       
+
+    GdkPixbuf* blocked_buf = gtk_image_get_pixbuf(temp_image);
+
+    int i;
+    
     // sample 22 snapshots - range : 0-256
     for(i = 0; i < 23; i++)
     {        
@@ -356,7 +341,6 @@ static void prepare_blocked_animation()
                              gdk_pixbuf_get_width(mute_buf),
                              gdk_pixbuf_get_height(mute_buf), 
                              0, 0, 1, 1, GDK_INTERP_BILINEAR, MIN(255, i * 11));
-        g_debug("creating blocking animation - alpha value = %i", MIN(255, i * 11));
         blocked_animation_list = g_list_append(blocked_animation_list, gdk_pixbuf_copy(blocked_buf));
     }   
 }
