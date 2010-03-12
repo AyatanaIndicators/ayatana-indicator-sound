@@ -326,14 +326,13 @@ Only called at startup.
 */
 static void prepare_blocked_animation()
 {
-    //gchar* blocked_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
+    gchar* blocked_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
     gchar* muted_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED));
     
     GtkImage* temp_image = indicator_image_helper(muted_name);       
     GdkPixbuf* mute_buf = gtk_image_get_pixbuf(temp_image); 
 
-    temp_image = indicator_image_helper("wrong_name");       
-
+    temp_image = indicator_image_helper(blocked_name);       
     GdkPixbuf* blocked_buf = gtk_image_get_pixbuf(temp_image);
 
     int i;
