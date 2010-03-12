@@ -117,9 +117,9 @@ static gint current_state = 0;
 static gint previous_state = 0;
 
 static gdouble initial_volume_percent = 0;
-static gboolean initial_mute = FALSE;
-static gboolean device_available = TRUE;
-static gboolean slider_in_direct_use = FALSE;
+static gboolean initial_mute ;
+static gboolean device_available;
+static gboolean slider_in_direct_use;
 
 static GtkIconSize design_team_size;
 static gint animation_id;
@@ -151,10 +151,14 @@ static void indicator_sound_init (IndicatorSound *self)
 {
 	self->service = NULL;
 	self->service = indicator_service_manager_new_version(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_VERSION);
-	g_signal_connect(G_OBJECT(self->service), INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE, G_CALLBACK(connection_changed), self);
     prepare_state_machine();
     prepare_blocked_animation();
     animation_id = 0;
+    initial_mute = FALSE;
+    device_available = TRUE;
+    slider_in_direct_use = FALSE;
+
+	g_signal_connect(G_OBJECT(self->service), INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE, G_CALLBACK(connection_changed), self);
     return;
 }
 
@@ -195,7 +199,7 @@ static GtkImage *
 get_icon (IndicatorObject * io)
 {
     gchar* current_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
-    //g_debug("At start-up attempting to set the image to %s", current_name);
+    g_debug("At start-up attempting to set the image to %s", current_name);
 	speaker_image = indicator_image_helper(current_name);
 	gtk_widget_show(GTK_WIDGET(speaker_image));
 	return speaker_image;
@@ -221,6 +225,8 @@ slider_parent_changed (GtkWidget *widget,
                        gpointer   user_data)
 {
     gtk_widget_set_size_request (widget, 200, -1);
+    g_debug("slider parent changed");
+    //fetch_volume_percent_from_dbus();
 }
 
 /**
@@ -437,6 +443,9 @@ static void fetch_sink_availability_from_dbus()
     device_available = *available_input;
     if (device_available == FALSE)
         update_state(STATE_SINKS_NONE);
+        g_debug("NO DEVICE AVAILABLE");
+
+    gtk_widget_set_sensitive(volume_slider, device_available);
     g_free(available_input);
     g_debug("IndicatorSound::fetch_sink_availability_from_dbus -> AVAILABILTY returned from dbus method is %i", device_available);
 
@@ -511,7 +520,7 @@ static gboolean fade_back_to_mute_image()
 
 static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_percent, gpointer userdata)
 {
-    if (slider_in_direct_use != TRUE){
+    if (slider_in_direct_use == FALSE){
         GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
         GtkRange *range = (GtkRange*)slider;
 
@@ -527,7 +536,7 @@ static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value
 {
     //We can be sure the service won't send a mute signal unless it has changed !
     //UNMUTE's force a volume update therefore icon is updated appropriately => no need for unmute handling here.
-    if(mute_value == TRUE && device_available != FALSE)
+    if(mute_value == TRUE && device_available == TRUE)
     {
         update_state(STATE_MUTED);
     }
@@ -585,20 +594,6 @@ static void slider_released (GtkWidget *widget, gpointer user_data)
 }
 
 
-/**
-slider_size_allocate:
-Callback on the size-allocate event on the slider item.
-**/
-/*static void slider_size_allocate(GtkWidget  *widget,*/
-/*                                 GtkAllocation *allocation, */
-/*                                 gpointer user_data)*/
-/*{*/
-/*    g_print("Size allocate on slider (%dx%d)\n", allocation->width, allocation->height);*/
-/*    if(allocation->width < 200){*/
-/*        g_print("Attempting to resize the slider");*/
-/*        gtk_widget_set_size_request(widget, 200, -1);    */
-/*    }*/
-/*}*/
 
 /**
 key_press_cb:
