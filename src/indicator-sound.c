@@ -169,8 +169,12 @@ indicator_sound_dispose (GObject *object)
 		self->service = NULL;
 	}
     g_hash_table_destroy(volume_states);
-    g_list_foreach (blocked_animation_list, (GFunc)g_object_unref, NULL);
-    g_list_free(blocked_animation_list);
+    
+    if(blocked_animation_list != NULL){
+        g_list_foreach (blocked_animation_list, (GFunc)g_object_unref, NULL);
+        g_list_free(blocked_animation_list);
+    }
+
 	G_OBJECT_CLASS (indicator_sound_parent_class)->dispose (object);
 	return;
 }
@@ -322,18 +326,23 @@ Only called at startup.
 */
 static void prepare_blocked_animation()
 {
-    gchar* blocked_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
+    //gchar* blocked_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
     gchar* muted_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED));
     
     GtkImage* temp_image = indicator_image_helper(muted_name);       
     GdkPixbuf* mute_buf = gtk_image_get_pixbuf(temp_image); 
 
-    temp_image = indicator_image_helper(blocked_name);       
+    temp_image = indicator_image_helper("wrong_name");       
 
     GdkPixbuf* blocked_buf = gtk_image_get_pixbuf(temp_image);
 
     int i;
-    
+
+    if(mute_buf == NULL || blocked_buf == NULL){
+        g_debug("Don bother with the animation, the theme aint got the goods");
+        return;        
+    }
+
     // sample 22 snapshots - range : 0-256
     for(i = 0; i < 23; i++)
     {        
@@ -466,14 +475,16 @@ static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean blo
 {
     g_debug("signal caught - sink input while muted with value %i", block_value);
     if (block_value == 1 && animation_id == 0 ) {
-        // We can assume we are in the muted state !
-        gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
-    	GtkImage * tempimage = indicator_image_helper(image_name);
-        gtk_image_set_from_pixbuf(speaker_image, gtk_image_get_pixbuf(tempimage));
-	    g_object_ref_sink(tempimage);
+        if(blocked_animation_list != NULL)
+        {
+            gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
+        	GtkImage * tempimage = indicator_image_helper(image_name);
+            gtk_image_set_from_pixbuf(speaker_image, gtk_image_get_pixbuf(tempimage));
+	        g_object_ref_sink(tempimage);
 
-        blocked_iter = blocked_animation_list;
-        animation_id = g_timeout_add_seconds(1, fade_back_to_mute_image, NULL);
+            blocked_iter = blocked_animation_list;
+            animation_id = g_timeout_add_seconds(1, fade_back_to_mute_image, NULL);
+        }
     }  
 }
      
