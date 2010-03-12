@@ -90,7 +90,6 @@ am_indicator_sound_service_OBJECTS =  \
 	indicator_sound_service-dbus-menu-manager.$(OBJEXT) \
 	indicator_sound_service-pulse-manager.$(OBJEXT) \
 	indicator_sound_service-sound-service-dbus.$(OBJEXT) \
-	indicator_sound_service-sound-service-marshal.$(OBJEXT) \
 	indicator_sound_service-slider-menu-item.$(OBJEXT)
 indicator_sound_service_OBJECTS =  \
 	$(am_indicator_sound_service_OBJECTS)
@@ -315,8 +314,6 @@ indicator_sound_service_SOURCES = \
     sound-service-dbus.h \
     sound-service-dbus.c \
     sound-service-server.h \
-    sound-service-marshal.c \
-    sound-service-marshal.h \
     slider-menu-item.h \
     slider-menu-item.c
 
@@ -462,7 +459,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-pulse-manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-slider-menu-item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-sound-service-dbus.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-sound-service-marshal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-sound-service.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-indicator-sound.Plo@am__quote@
 
@@ -561,22 +557,6 @@ indicator_sound_service-sound-service-dbus.obj: sound-service-dbus.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sound-service-dbus.c' object='indicator_sound_service-sound-service-dbus.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-sound-service-dbus.obj `if test -f 'sound-service-dbus.c'; then $(CYGPATH_W) 'sound-service-dbus.c'; else $(CYGPATH_W) '$(srcdir)/sound-service-dbus.c'; fi`
-
-indicator_sound_service-sound-service-marshal.o: sound-service-marshal.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-sound-service-marshal.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-sound-service-marshal.Tpo -c -o indicator_sound_service-sound-service-marshal.o `test -f 'sound-service-marshal.c' || echo '$(srcdir)/'`sound-service-marshal.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-sound-service-marshal.Tpo $(DEPDIR)/indicator_sound_service-sound-service-marshal.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sound-service-marshal.c' object='indicator_sound_service-sound-service-marshal.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-sound-service-marshal.o `test -f 'sound-service-marshal.c' || echo '$(srcdir)/'`sound-service-marshal.c
-
-indicator_sound_service-sound-service-marshal.obj: sound-service-marshal.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-sound-service-marshal.obj -MD -MP -MF $(DEPDIR)/indicator_sound_service-sound-service-marshal.Tpo -c -o indicator_sound_service-sound-service-marshal.obj `if test -f 'sound-service-marshal.c'; then $(CYGPATH_W) 'sound-service-marshal.c'; else $(CYGPATH_W) '$(srcdir)/sound-service-marshal.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-sound-service-marshal.Tpo $(DEPDIR)/indicator_sound_service-sound-service-marshal.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sound-service-marshal.c' object='indicator_sound_service-sound-service-marshal.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-sound-service-marshal.obj `if test -f 'sound-service-marshal.c'; then $(CYGPATH_W) 'sound-service-marshal.c'; else $(CYGPATH_W) '$(srcdir)/sound-service-marshal.c'; fi`
 
 indicator_sound_service-slider-menu-item.o: slider-menu-item.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-slider-menu-item.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-slider-menu-item.Tpo -c -o indicator_sound_service-slider-menu-item.o `test -f 'slider-menu-item.c' || echo '$(srcdir)/'`slider-menu-item.c
