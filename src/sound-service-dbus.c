@@ -26,7 +26,6 @@
 #include "dbus-shared-names.h"
 #include "sound-service-dbus.h"
 #include "common-defs.h"
-#include "sound-service-marshal.h"
 #include "pulse-manager.h"
 
 // DBUS methods 
