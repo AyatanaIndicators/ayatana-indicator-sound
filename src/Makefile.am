@@ -43,8 +43,6 @@ indicator_sound_service_SOURCES = \
     sound-service-dbus.h \
     sound-service-dbus.c \
     sound-service-server.h \
-    sound-service-marshal.c \
-    sound-service-marshal.h \
     slider-menu-item.h \
     slider-menu-item.c
 indicator_sound_service_CFLAGS = $(SOUNDSERVICE_CFLAGS) $(GCONF_CFLAGS) -DLIBEXECDIR=\"$(libexecdir)\" -Wall -Werror

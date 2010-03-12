@@ -154,11 +154,6 @@ static void refresh_menu()
                                             DBUSMENU_MENUITEM_PROP_ENABLED,
                                             TRUE);        
     }
-/*    if(b_all_muted == TRUE){*/
-/*        dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem), */
-/*                                            DBUSMENU_MENUITEM_PROP_ENABLED,*/
-/*                                            FALSE);   */
-/*    }*/
 }
 
 

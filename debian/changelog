@@ -1,3 +1,11 @@
+indicator-sound (0.1.3.1-0ubuntu1) lucid; urgency=low
+
+  * New upstream version:
+    - clear looks seg fault fix (lp: #537891)
+    - slider resizing properly (lp: #533208)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 12 Mar 2010 20:29:25 +0100
+
 indicator-sound (0.1.3-0ubuntu1) lucid; urgency=low
 
   * New upstream version:
