@@ -400,9 +400,7 @@ static void update_state(const gint state)
 
     current_state = state;
     gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
-	GtkImage * tempimage = indicator_image_helper(image_name);
-    gtk_image_set_from_pixbuf(speaker_image, gtk_image_get_pixbuf(tempimage));
-	g_object_ref_sink(tempimage);
+    indicator_image_helper_update(speaker_image, image_name);
 }
 
 
@@ -493,9 +491,7 @@ static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean blo
     g_debug("signal caught - sink input while muted with value %i", block_value);
     if (block_value == 1 && animation_id == 0 && blocked_animation_list != NULL) {
         gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
-    	GtkImage * tempimage = indicator_image_helper(image_name);
-        gtk_image_set_from_pixbuf(speaker_image, gtk_image_get_pixbuf(tempimage));
-        g_object_ref_sink(tempimage);
+        indicator_image_helper_update(speaker_image, image_name);
 
         blocked_iter = blocked_animation_list;
         animation_id = g_timeout_add_seconds(1, fade_back_to_mute_image, NULL);
