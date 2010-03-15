@@ -1,3 +1,11 @@
+indicator-sound (0.1.3.1-0ubuntu2) lucid; urgency=low
+
+  * Backport upstream changes to fix those issues:
+    - "Wrong i18n for menu entries", thank Luca Ferretti (lp: #538704)
+    - "display a mute icon until volume is changed since update" (lp: #537977)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 15 Mar 2010 15:51:35 +0100
+
 indicator-sound (0.1.3.1-0ubuntu1) lucid; urgency=low
 
   * New upstream version:

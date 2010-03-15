@@ -117,7 +117,7 @@ void dbus_menu_manager_update_mute_ui(gboolean incoming_mute_value)
     b_all_muted = incoming_mute_value;
     dbusmenu_menuitem_property_set(mute_all_menuitem,
                                     DBUSMENU_MENUITEM_PROP_LABEL, 
-                                    _(b_all_muted == FALSE ? "Mute All" : "Unmute"));
+                                    b_all_muted == FALSE ? _("Mute All") : _("Unmute"));
 }
 
 
@@ -191,7 +191,7 @@ static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service
 {
     // Mute button
     mute_all_menuitem = dbusmenu_menuitem_new();
-    dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, _(b_all_muted == FALSE ? "Mute All" : "Unmute"));
+    dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, b_all_muted == FALSE ? _("Mute All") : _("Unmute"));
     g_signal_connect(G_OBJECT(mute_all_menuitem), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED, G_CALLBACK(set_global_mute_from_ui), NULL);
     dbusmenu_menuitem_property_set_bool(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_ENABLED, b_sink_available);
 
@@ -230,7 +230,7 @@ static void set_global_mute_from_ui()
     toggle_global_mute(b_all_muted); 
     dbusmenu_menuitem_property_set(mute_all_menuitem,
                                    DBUSMENU_MENUITEM_PROP_LABEL,
-                                   _(b_all_muted == FALSE ? "Mute All" : "Unmute"));
+                                   b_all_muted == FALSE ? _("Mute All") : _("Unmute"));
 }
 
 
