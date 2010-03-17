@@ -215,8 +215,6 @@ get_icon (IndicatorObject * io)
 static GtkMenu *
 get_menu (IndicatorObject * io)
 {
-  g_print ("get_menu(): %s\n", G_OBJECT_TYPE_NAME (io));
-
     DbusmenuGtkMenu *menu = dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT);
     DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);
 
@@ -250,8 +248,6 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
     g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
     io = g_object_get_data (G_OBJECT (client), "indicator");
-
-    g_print ("new_slider_item(): %s\n", G_OBJECT_TYPE_NAME (io));
 
     volume_slider = ido_scale_menu_item_new_with_range ("Volume", initial_volume_percent, 0, 100, 0.5);
     g_object_set(volume_slider, "reverse-scroll-events", TRUE, NULL);
@@ -686,6 +682,4 @@ scroll (IndicatorObject *io, gint delta, IndicatorScrollDirection direction)
 
   gtk_range_set_value (GTK_RANGE (sound->slider),
                        value);
-
-  g_print ("scroll %d!!\n", (gint)direction);
 }
