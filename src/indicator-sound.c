@@ -249,7 +249,7 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
 
     io = g_object_get_data (G_OBJECT (client), "indicator");
 
-    volume_slider = ido_scale_menu_item_new_with_range ("Volume", initial_volume_percent, 0, 100, 0.5);
+    volume_slider = ido_scale_menu_item_new_with_range ("Volume", initial_volume_percent, 0, 100, 1);
     g_object_set(volume_slider, "reverse-scroll-events", TRUE, NULL);
 
     g_signal_connect (volume_slider,
@@ -671,15 +671,18 @@ static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer dat
 static void
 scroll (IndicatorObject *io, gint delta, IndicatorScrollDirection direction)
 {
-  IndicatorSound *sound = INDICATOR_SOUND (io);
-  GtkAdjustment *adj = gtk_range_get_adjustment (GTK_RANGE (sound->slider));
-  gdouble value = gtk_range_get_value (GTK_RANGE (sound->slider));
+    if (device_available == FALSE || current_state == STATE_MUTED)
+        return;
 
-  if (direction == INDICATOR_OBJECT_SCROLL_UP)
+    IndicatorSound *sound = INDICATOR_SOUND (io);
+    GtkAdjustment *adj = gtk_range_get_adjustment (GTK_RANGE (sound->slider));
+    gdouble value = gtk_range_get_value (GTK_RANGE (sound->slider));
+
+    if (direction == INDICATOR_OBJECT_SCROLL_UP)
     value += adj->step_increment;
-  else
+    else
     value -= adj->step_increment;
 
-  gtk_range_set_value (GTK_RANGE (sound->slider),
+    gtk_range_set_value (GTK_RANGE (sound->slider),
                        value);
 }
