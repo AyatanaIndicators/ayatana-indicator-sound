@@ -33,9 +33,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-check_PROGRAMS = test-indicator-sound$(EXEEXT) \
-	test-indicator-sound-dbus-client$(EXEEXT) \
-	test-indicator-sound-dbus-server$(EXEEXT)
+check_PROGRAMS = test-indicator-sound$(EXEEXT)
+TESTS =
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -62,26 +61,6 @@ test_indicator_sound_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(test_indicator_sound_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am_test_indicator_sound_dbus_client_OBJECTS = test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.$(OBJEXT)
-test_indicator_sound_dbus_client_OBJECTS =  \
-	$(am_test_indicator_sound_dbus_client_OBJECTS)
-test_indicator_sound_dbus_client_DEPENDENCIES = $(am__DEPENDENCIES_1)
-test_indicator_sound_dbus_client_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(test_indicator_sound_dbus_client_CFLAGS) $(CFLAGS) \
-	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-am_test_indicator_sound_dbus_server_OBJECTS = test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.$(OBJEXT) \
-	test_indicator_sound_dbus_server-sound-service-dbus.$(OBJEXT) \
-	test_indicator_sound_dbus_server-pulse-manager.$(OBJEXT) \
-	test_indicator_sound_dbus_server-slider-menu-item.$(OBJEXT) \
-	test_indicator_sound_dbus_server-dbus-menu-manager.$(OBJEXT)
-test_indicator_sound_dbus_server_OBJECTS =  \
-	$(am_test_indicator_sound_dbus_server_OBJECTS)
-test_indicator_sound_dbus_server_DEPENDENCIES = $(am__DEPENDENCIES_1)
-test_indicator_sound_dbus_server_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) \
-	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -108,12 +87,8 @@ am__v_CCLD_0 = @echo "  CCLD  " $@;
 AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
-SOURCES = $(test_indicator_sound_SOURCES) \
-	$(test_indicator_sound_dbus_client_SOURCES) \
-	$(test_indicator_sound_dbus_server_SOURCES)
-DIST_SOURCES = $(test_indicator_sound_SOURCES) \
-	$(test_indicator_sound_dbus_client_SOURCES) \
-	$(test_indicator_sound_dbus_server_SOURCES)
+SOURCES = $(test_indicator_sound_SOURCES)
+DIST_SOURCES = $(test_indicator_sound_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -270,9 +245,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-TESTS = indicator-sound-tests test-indicator-sound-dbus
-DISTCLEANFILES = $(TESTS) $(XML_REPORT) $(HTML_REPORT) \
-	indicator-sound-tests-gtester
+DISTCLEANFILES = $(TESTS)
 
 #########################################
 #########################################
@@ -289,47 +262,6 @@ test_indicator_sound_CFLAGS = \
 test_indicator_sound_LDADD = \
 	$(APPLET_LIBS) 
 
-
-#########################################
-#########################################
-test_indicator_sound_dbus_client_SOURCES = \
-	test-defines.h \
-	test-indicator-sound-dbus-client.c 
-
-test_indicator_sound_dbus_client_CFLAGS = \
-	$(SOUNDSERVICE_CFLAGS) \
-	-Wall -Werror \
-	-I$(srcdir) 
-
-test_indicator_sound_dbus_client_LDADD = \
-	$(SOUNDSERVICE_LIBS)
-
-
-########################################
-#  test-indicator-sound-dbus-server
-########################################
-test_indicator_sound_dbus_server_SOURCES = \
-	test-defines.h \
-    test-indicator-sound-dbus-server.c \
-    $(top_builddir)/src/sound-service-dbus.c \
-    $(top_builddir)/src/pulse-manager.c \
-    $(top_builddir)/src/slider-menu-item.c \
-    $(top_builddir)/src/dbus-menu-manager.c
-
-test_indicator_sound_dbus_server_CFLAGS = \
-    $(SOUNDSERVICE_CFLAGS) \
-	-Wall -Werror \
-	-I$(srcdir) 
-
-test_indicator_sound_dbus_server_LDADD = \
-	$(SOUNDSERVICE_LIBS) 
-
-
-#########################################
-#########################################
-XML_REPORT = indicator-sound-check-results.xml
-HTML_REPORT = indicator-sound-check-results.html
-DBUS_RUNNER = dbus-test-runner --dbus-config /usr/share/dbus-test-runner/session.conf
 all: all-am
 
 .SUFFIXES:
@@ -376,12 +308,6 @@ clean-checkPROGRAMS:
 test-indicator-sound$(EXEEXT): $(test_indicator_sound_OBJECTS) $(test_indicator_sound_DEPENDENCIES) 
 	@rm -f test-indicator-sound$(EXEEXT)
 	$(AM_V_CCLD)$(test_indicator_sound_LINK) $(test_indicator_sound_OBJECTS) $(test_indicator_sound_LDADD) $(LIBS)
-test-indicator-sound-dbus-client$(EXEEXT): $(test_indicator_sound_dbus_client_OBJECTS) $(test_indicator_sound_dbus_client_DEPENDENCIES) 
-	@rm -f test-indicator-sound-dbus-client$(EXEEXT)
-	$(AM_V_CCLD)$(test_indicator_sound_dbus_client_LINK) $(test_indicator_sound_dbus_client_OBJECTS) $(test_indicator_sound_dbus_client_LDADD) $(LIBS)
-test-indicator-sound-dbus-server$(EXEEXT): $(test_indicator_sound_dbus_server_OBJECTS) $(test_indicator_sound_dbus_server_DEPENDENCIES) 
-	@rm -f test-indicator-sound-dbus-server$(EXEEXT)
-	$(AM_V_CCLD)$(test_indicator_sound_dbus_server_LINK) $(test_indicator_sound_dbus_server_OBJECTS) $(test_indicator_sound_dbus_server_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -391,12 +317,6 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_indicator_sound-indicator-sound.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_indicator_sound-test-indicator-sound.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_indicator_sound_dbus_server-dbus-menu-manager.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_indicator_sound_dbus_server-pulse-manager.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_indicator_sound_dbus_server-slider-menu-item.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_indicator_sound_dbus_server-sound-service-dbus.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -453,102 +373,6 @@ test_indicator_sound-indicator-sound.obj: $(top_builddir)/src/indicator-sound.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_builddir)/src/indicator-sound.c' object='test_indicator_sound-indicator-sound.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_CFLAGS) $(CFLAGS) -c -o test_indicator_sound-indicator-sound.obj `if test -f '$(top_builddir)/src/indicator-sound.c'; then $(CYGPATH_W) '$(top_builddir)/src/indicator-sound.c'; else $(CYGPATH_W) '$(srcdir)/$(top_builddir)/src/indicator-sound.c'; fi`
-
-test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.o: test-indicator-sound-dbus-client.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_client_CFLAGS) $(CFLAGS) -MT test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.o -MD -MP -MF $(DEPDIR)/test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.Tpo -c -o test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.o `test -f 'test-indicator-sound-dbus-client.c' || echo '$(srcdir)/'`test-indicator-sound-dbus-client.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.Tpo $(DEPDIR)/test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='test-indicator-sound-dbus-client.c' object='test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_client_CFLAGS) $(CFLAGS) -c -o test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.o `test -f 'test-indicator-sound-dbus-client.c' || echo '$(srcdir)/'`test-indicator-sound-dbus-client.c
-
-test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.obj: test-indicator-sound-dbus-client.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_client_CFLAGS) $(CFLAGS) -MT test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.obj -MD -MP -MF $(DEPDIR)/test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.Tpo -c -o test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.obj `if test -f 'test-indicator-sound-dbus-client.c'; then $(CYGPATH_W) 'test-indicator-sound-dbus-client.c'; else $(CYGPATH_W) '$(srcdir)/test-indicator-sound-dbus-client.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.Tpo $(DEPDIR)/test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='test-indicator-sound-dbus-client.c' object='test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_client_CFLAGS) $(CFLAGS) -c -o test_indicator_sound_dbus_client-test-indicator-sound-dbus-client.obj `if test -f 'test-indicator-sound-dbus-client.c'; then $(CYGPATH_W) 'test-indicator-sound-dbus-client.c'; else $(CYGPATH_W) '$(srcdir)/test-indicator-sound-dbus-client.c'; fi`
-
-test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.o: test-indicator-sound-dbus-server.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -MT test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.o -MD -MP -MF $(DEPDIR)/test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.Tpo -c -o test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.o `test -f 'test-indicator-sound-dbus-server.c' || echo '$(srcdir)/'`test-indicator-sound-dbus-server.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.Tpo $(DEPDIR)/test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='test-indicator-sound-dbus-server.c' object='test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -c -o test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.o `test -f 'test-indicator-sound-dbus-server.c' || echo '$(srcdir)/'`test-indicator-sound-dbus-server.c
-
-test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.obj: test-indicator-sound-dbus-server.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -MT test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.obj -MD -MP -MF $(DEPDIR)/test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.Tpo -c -o test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.obj `if test -f 'test-indicator-sound-dbus-server.c'; then $(CYGPATH_W) 'test-indicator-sound-dbus-server.c'; else $(CYGPATH_W) '$(srcdir)/test-indicator-sound-dbus-server.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.Tpo $(DEPDIR)/test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='test-indicator-sound-dbus-server.c' object='test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -c -o test_indicator_sound_dbus_server-test-indicator-sound-dbus-server.obj `if test -f 'test-indicator-sound-dbus-server.c'; then $(CYGPATH_W) 'test-indicator-sound-dbus-server.c'; else $(CYGPATH_W) '$(srcdir)/test-indicator-sound-dbus-server.c'; fi`
-
-test_indicator_sound_dbus_server-sound-service-dbus.o: $(top_builddir)/src/sound-service-dbus.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -MT test_indicator_sound_dbus_server-sound-service-dbus.o -MD -MP -MF $(DEPDIR)/test_indicator_sound_dbus_server-sound-service-dbus.Tpo -c -o test_indicator_sound_dbus_server-sound-service-dbus.o `test -f '$(top_builddir)/src/sound-service-dbus.c' || echo '$(srcdir)/'`$(top_builddir)/src/sound-service-dbus.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_indicator_sound_dbus_server-sound-service-dbus.Tpo $(DEPDIR)/test_indicator_sound_dbus_server-sound-service-dbus.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_builddir)/src/sound-service-dbus.c' object='test_indicator_sound_dbus_server-sound-service-dbus.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -c -o test_indicator_sound_dbus_server-sound-service-dbus.o `test -f '$(top_builddir)/src/sound-service-dbus.c' || echo '$(srcdir)/'`$(top_builddir)/src/sound-service-dbus.c
-
-test_indicator_sound_dbus_server-sound-service-dbus.obj: $(top_builddir)/src/sound-service-dbus.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -MT test_indicator_sound_dbus_server-sound-service-dbus.obj -MD -MP -MF $(DEPDIR)/test_indicator_sound_dbus_server-sound-service-dbus.Tpo -c -o test_indicator_sound_dbus_server-sound-service-dbus.obj `if test -f '$(top_builddir)/src/sound-service-dbus.c'; then $(CYGPATH_W) '$(top_builddir)/src/sound-service-dbus.c'; else $(CYGPATH_W) '$(srcdir)/$(top_builddir)/src/sound-service-dbus.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_indicator_sound_dbus_server-sound-service-dbus.Tpo $(DEPDIR)/test_indicator_sound_dbus_server-sound-service-dbus.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_builddir)/src/sound-service-dbus.c' object='test_indicator_sound_dbus_server-sound-service-dbus.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -c -o test_indicator_sound_dbus_server-sound-service-dbus.obj `if test -f '$(top_builddir)/src/sound-service-dbus.c'; then $(CYGPATH_W) '$(top_builddir)/src/sound-service-dbus.c'; else $(CYGPATH_W) '$(srcdir)/$(top_builddir)/src/sound-service-dbus.c'; fi`
-
-test_indicator_sound_dbus_server-pulse-manager.o: $(top_builddir)/src/pulse-manager.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -MT test_indicator_sound_dbus_server-pulse-manager.o -MD -MP -MF $(DEPDIR)/test_indicator_sound_dbus_server-pulse-manager.Tpo -c -o test_indicator_sound_dbus_server-pulse-manager.o `test -f '$(top_builddir)/src/pulse-manager.c' || echo '$(srcdir)/'`$(top_builddir)/src/pulse-manager.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_indicator_sound_dbus_server-pulse-manager.Tpo $(DEPDIR)/test_indicator_sound_dbus_server-pulse-manager.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_builddir)/src/pulse-manager.c' object='test_indicator_sound_dbus_server-pulse-manager.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -c -o test_indicator_sound_dbus_server-pulse-manager.o `test -f '$(top_builddir)/src/pulse-manager.c' || echo '$(srcdir)/'`$(top_builddir)/src/pulse-manager.c
-
-test_indicator_sound_dbus_server-pulse-manager.obj: $(top_builddir)/src/pulse-manager.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -MT test_indicator_sound_dbus_server-pulse-manager.obj -MD -MP -MF $(DEPDIR)/test_indicator_sound_dbus_server-pulse-manager.Tpo -c -o test_indicator_sound_dbus_server-pulse-manager.obj `if test -f '$(top_builddir)/src/pulse-manager.c'; then $(CYGPATH_W) '$(top_builddir)/src/pulse-manager.c'; else $(CYGPATH_W) '$(srcdir)/$(top_builddir)/src/pulse-manager.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_indicator_sound_dbus_server-pulse-manager.Tpo $(DEPDIR)/test_indicator_sound_dbus_server-pulse-manager.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_builddir)/src/pulse-manager.c' object='test_indicator_sound_dbus_server-pulse-manager.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -c -o test_indicator_sound_dbus_server-pulse-manager.obj `if test -f '$(top_builddir)/src/pulse-manager.c'; then $(CYGPATH_W) '$(top_builddir)/src/pulse-manager.c'; else $(CYGPATH_W) '$(srcdir)/$(top_builddir)/src/pulse-manager.c'; fi`
-
-test_indicator_sound_dbus_server-slider-menu-item.o: $(top_builddir)/src/slider-menu-item.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -MT test_indicator_sound_dbus_server-slider-menu-item.o -MD -MP -MF $(DEPDIR)/test_indicator_sound_dbus_server-slider-menu-item.Tpo -c -o test_indicator_sound_dbus_server-slider-menu-item.o `test -f '$(top_builddir)/src/slider-menu-item.c' || echo '$(srcdir)/'`$(top_builddir)/src/slider-menu-item.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_indicator_sound_dbus_server-slider-menu-item.Tpo $(DEPDIR)/test_indicator_sound_dbus_server-slider-menu-item.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_builddir)/src/slider-menu-item.c' object='test_indicator_sound_dbus_server-slider-menu-item.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -c -o test_indicator_sound_dbus_server-slider-menu-item.o `test -f '$(top_builddir)/src/slider-menu-item.c' || echo '$(srcdir)/'`$(top_builddir)/src/slider-menu-item.c
-
-test_indicator_sound_dbus_server-slider-menu-item.obj: $(top_builddir)/src/slider-menu-item.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -MT test_indicator_sound_dbus_server-slider-menu-item.obj -MD -MP -MF $(DEPDIR)/test_indicator_sound_dbus_server-slider-menu-item.Tpo -c -o test_indicator_sound_dbus_server-slider-menu-item.obj `if test -f '$(top_builddir)/src/slider-menu-item.c'; then $(CYGPATH_W) '$(top_builddir)/src/slider-menu-item.c'; else $(CYGPATH_W) '$(srcdir)/$(top_builddir)/src/slider-menu-item.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_indicator_sound_dbus_server-slider-menu-item.Tpo $(DEPDIR)/test_indicator_sound_dbus_server-slider-menu-item.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_builddir)/src/slider-menu-item.c' object='test_indicator_sound_dbus_server-slider-menu-item.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -c -o test_indicator_sound_dbus_server-slider-menu-item.obj `if test -f '$(top_builddir)/src/slider-menu-item.c'; then $(CYGPATH_W) '$(top_builddir)/src/slider-menu-item.c'; else $(CYGPATH_W) '$(srcdir)/$(top_builddir)/src/slider-menu-item.c'; fi`
-
-test_indicator_sound_dbus_server-dbus-menu-manager.o: $(top_builddir)/src/dbus-menu-manager.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -MT test_indicator_sound_dbus_server-dbus-menu-manager.o -MD -MP -MF $(DEPDIR)/test_indicator_sound_dbus_server-dbus-menu-manager.Tpo -c -o test_indicator_sound_dbus_server-dbus-menu-manager.o `test -f '$(top_builddir)/src/dbus-menu-manager.c' || echo '$(srcdir)/'`$(top_builddir)/src/dbus-menu-manager.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_indicator_sound_dbus_server-dbus-menu-manager.Tpo $(DEPDIR)/test_indicator_sound_dbus_server-dbus-menu-manager.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_builddir)/src/dbus-menu-manager.c' object='test_indicator_sound_dbus_server-dbus-menu-manager.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -c -o test_indicator_sound_dbus_server-dbus-menu-manager.o `test -f '$(top_builddir)/src/dbus-menu-manager.c' || echo '$(srcdir)/'`$(top_builddir)/src/dbus-menu-manager.c
-
-test_indicator_sound_dbus_server-dbus-menu-manager.obj: $(top_builddir)/src/dbus-menu-manager.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -MT test_indicator_sound_dbus_server-dbus-menu-manager.obj -MD -MP -MF $(DEPDIR)/test_indicator_sound_dbus_server-dbus-menu-manager.Tpo -c -o test_indicator_sound_dbus_server-dbus-menu-manager.obj `if test -f '$(top_builddir)/src/dbus-menu-manager.c'; then $(CYGPATH_W) '$(top_builddir)/src/dbus-menu-manager.c'; else $(CYGPATH_W) '$(srcdir)/$(top_builddir)/src/dbus-menu-manager.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_indicator_sound_dbus_server-dbus-menu-manager.Tpo $(DEPDIR)/test_indicator_sound_dbus_server-dbus-menu-manager.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_builddir)/src/dbus-menu-manager.c' object='test_indicator_sound_dbus_server-dbus-menu-manager.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_indicator_sound_dbus_server_CFLAGS) $(CFLAGS) -c -o test_indicator_sound_dbus_server-dbus-menu-manager.obj `if test -f '$(top_builddir)/src/dbus-menu-manager.c'; then $(CYGPATH_W) '$(top_builddir)/src/dbus-menu-manager.c'; else $(CYGPATH_W) '$(srcdir)/$(top_builddir)/src/dbus-menu-manager.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -850,20 +674,67 @@ uninstall-am:
 	tags uninstall uninstall-am
 
 
-indicator-sound-tests: indicator-sound-tests-gtester Makefile.am
-	@echo "#!/bin/sh" > $@
-	@echo $(DBUS_RUNNER) --task ./indicator-sound-tests-gtester >> $@
-	@chmod +x $@
+#########################################
+#########################################
+#test_indicator_sound_dbus_client_SOURCES = \
+#	test-defines.h \
+#	test-indicator-sound-dbus-client.c 
 
-indicator-sound-tests-gtester: test-indicator-sound Makefile.am
-	@echo "#!/bin/sh" > $@
-	@echo gtester -k --verbose -o=$(XML_REPORT) ./test-indicator-sound >> $@
-	@chmod +x $@
+#test_indicator_sound_dbus_client_CFLAGS = \
+#	$(SOUNDSERVICE_CFLAGS) \
+#	-Wall -Werror \
+#	-I$(srcdir) 
 
-test-indicator-sound-dbus: test-indicator-sound-dbus-client test-indicator-sound-dbus-server Makefile.am
-	@echo "#!/bin/sh" > test-indicator-sound-dbus
-	@echo $(DBUS_RUNNER) --task ./test-indicator-sound-dbus-client --task-name Client --task ./test-indicator-sound-dbus-server --task-name Server --ignore-return >> test-indicator-sound-dbus
-	@chmod +x test-indicator-sound-dbus
+#test_indicator_sound_dbus_client_LDADD = \
+#	$(SOUNDSERVICE_LIBS)
+
+########################################
+#  test-indicator-sound-dbus-server
+########################################
+#test_indicator_sound_dbus_server_SOURCES = \
+#	test-defines.h \
+#    test-indicator-sound-dbus-server.c \
+#    $(top_builddir)/src/sound-service-dbus.c \
+#    $(top_builddir)/src/pulse-manager.c \
+#    $(top_builddir)/src/slider-menu-item.c \
+#    $(top_builddir)/src/dbus-menu-manager.c
+
+#test_indicator_sound_dbus_server_CFLAGS = \
+#    $(SOUNDSERVICE_CFLAGS) \
+#	-Wall -Werror \
+#	-I$(srcdir) 
+
+#test_indicator_sound_dbus_server_LDADD = \
+#	$(SOUNDSERVICE_LIBS) 
+
+#########################################
+#########################################
+
+#XML_REPORT   = indicator-sound-check-results.xml
+#HTML_REPORT  = indicator-sound-check-results.html
+
+#indicator-sound-tests: indicator-sound-tests-gtester Makefile.am
+#	@echo "#!/bin/sh" > $@
+#	@echo $(DBUS_RUNNER) --task ./indicator-sound-tests-gtester >> $@
+#	@chmod +x $@
+
+#indicator-sound-tests-gtester: test-indicator-sound Makefile.am
+#	@echo "#!/bin/sh" > $@
+#	@echo gtester -k --verbose -o=$(XML_REPORT) ./test-indicator-sound >> $@
+#	@chmod +x $@
+
+#TESTS += indicator-sound-tests
+
+#DISTCLEANFILES += $(XML_REPORT) $(HTML_REPORT) indicator-sound-tests-gtester
+
+#DBUS_RUNNER=dbus-test-runner --dbus-config /usr/share/dbus-test-runner/session.conf
+
+#test-indicator-sound-dbus: test-indicator-sound-dbus-client test-indicator-sound-dbus-server Makefile.am
+#	@echo "#!/bin/sh" > test-indicator-sound-dbus
+#	@echo $(DBUS_RUNNER) --task ./test-indicator-sound-dbus-client --task-name Client --task ./test-indicator-sound-dbus-server --task-name Server --ignore-return >> test-indicator-sound-dbus
+#	@chmod +x test-indicator-sound-dbus
+
+#TESTS += test-indicator-sound-dbus
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

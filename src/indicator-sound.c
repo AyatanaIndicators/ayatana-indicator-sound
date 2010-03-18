@@ -7,6 +7,7 @@ Copyright 2010 Canonical Ltd.
 Authors:
     Conor Curran <conor.curran@canonical.com>
     Ted Gould <ted@canonical.com>
+    Cody Russell <cody.russell@canonical.com>
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License version 3, as published
@@ -60,6 +61,7 @@ struct _IndicatorSoundClass {
 //GObject instance struct
 struct _IndicatorSound {
 	IndicatorObject parent;
+        GtkWidget *slider;
 	IndicatorServiceManager *service;
 };
 // GObject Boiler plate
@@ -77,7 +79,8 @@ G_DEFINE_TYPE (IndicatorSound, indicator_sound, INDICATOR_OBJECT_TYPE);
 //GTK+ items
 static GtkLabel * get_label (IndicatorObject * io);
 static GtkImage * get_icon (IndicatorObject * io);
-static GtkMenu * get_menu (IndicatorObject * io);
+static GtkMenu *  get_menu (IndicatorObject * io);
+static void       scroll   (IndicatorObject*io, gint delta, IndicatorScrollDirection direction);
 
 //Slider related
 static GtkWidget *volume_slider = NULL;
@@ -140,9 +143,10 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
 	IndicatorObjectClass *io_class = INDICATOR_OBJECT_CLASS(klass);
 	io_class->get_label = get_label;
 	io_class->get_image = get_icon;
-	io_class->get_menu = get_menu;
+	io_class->get_menu  = get_menu;
+        io_class->scroll    = scroll;
 
-    design_team_size = gtk_icon_size_register("design-team-size", 22, 22);
+        design_team_size = gtk_icon_size_register("design-team-size", 22, 22);
 
 	return;
 }
@@ -172,7 +176,7 @@ indicator_sound_dispose (GObject *object)
 		self->service = NULL;
 	}
     g_hash_table_destroy(volume_states);
-    
+
     if(blocked_animation_list != NULL){
         g_list_foreach (blocked_animation_list, (GFunc)g_object_unref, NULL);
         g_list_free(blocked_animation_list);
@@ -212,7 +216,10 @@ static GtkMenu *
 get_menu (IndicatorObject * io)
 {
     DbusmenuGtkMenu *menu = dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT);
-	DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);
+    DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);
+
+    g_object_set_data (G_OBJECT (client),
+                       "indicator", io);
     dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SLIDER_MENUITEM_TYPE, new_slider_item);
 
     // register Key-press listening on the menu widget as the slider does not allow this.
@@ -235,10 +242,14 @@ Create a new dBusMenu Slider item.
 **/
 static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
+    IndicatorObject *io = NULL;
+
     g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
     g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
-    volume_slider = ido_scale_menu_item_new_with_range ("Volume", initial_volume_percent, 0, 100, 0.5);
+    io = g_object_get_data (G_OBJECT (client), "indicator");
+
+    volume_slider = ido_scale_menu_item_new_with_range ("Volume", initial_volume_percent, 0, 100, 1);
     g_object_set(volume_slider, "reverse-scroll-events", TRUE, NULL);
 
     g_signal_connect (volume_slider,
@@ -251,6 +262,8 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
 
     // register slider changes listening on the range
     GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
+
+    INDICATOR_SOUND (io)->slider = slider;
 
     g_signal_connect(slider, "value-changed", G_CALLBACK(value_changed_event_cb), newitem);
     g_signal_connect(volume_slider, "slider-grabbed", G_CALLBACK(slider_grabbed), NULL);
@@ -343,18 +356,18 @@ static void prepare_blocked_animation()
 {
     gchar* blocked_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
     gchar* muted_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED));
-    
-    GtkImage* temp_image = indicator_image_helper(muted_name);       
-    GdkPixbuf* mute_buf = gtk_image_get_pixbuf(temp_image); 
 
-    temp_image = indicator_image_helper(blocked_name);       
+    GtkImage* temp_image = indicator_image_helper(muted_name);
+    GdkPixbuf* mute_buf = gtk_image_get_pixbuf(temp_image);
+
+    temp_image = indicator_image_helper(blocked_name);
     GdkPixbuf* blocked_buf = gtk_image_get_pixbuf(temp_image);
 
     int i;
 
     if(mute_buf == NULL || blocked_buf == NULL){
         g_debug("Don bother with the animation, the theme aint got the goods");
-        return;        
+        return;
     }
 
     // sample 22 snapshots - range : 0-256
@@ -495,7 +508,7 @@ static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean blo
 
         blocked_iter = blocked_animation_list;
         animation_id = g_timeout_add_seconds(1, fade_back_to_mute_image, NULL);
-    }  
+    }
 }
 
 static gboolean fade_back_to_mute_image()
@@ -655,3 +668,21 @@ static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer dat
 }
 
 
+static void
+scroll (IndicatorObject *io, gint delta, IndicatorScrollDirection direction)
+{
+    if (device_available == FALSE || current_state == STATE_MUTED)
+        return;
+
+    IndicatorSound *sound = INDICATOR_SOUND (io);
+    GtkAdjustment *adj = gtk_range_get_adjustment (GTK_RANGE (sound->slider));
+    gdouble value = gtk_range_get_value (GTK_RANGE (sound->slider));
+
+    if (direction == INDICATOR_OBJECT_SCROLL_UP)
+    value += adj->step_increment;
+    else
+    value -= adj->step_increment;
+
+    gtk_range_set_value (GTK_RANGE (sound->slider),
+                       value);
+}
