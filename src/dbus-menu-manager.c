@@ -18,6 +18,9 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <unistd.h>
+#include <glib/gi18n.h>
+
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-bindings.h>
 
@@ -98,6 +101,8 @@ void dbus_menu_manager_update_pa_state(gboolean pa_state, gboolean sink_availabl
         refresh_menu();
     }
     // Emit the signals after the menus are setup/torn down
+    // preserve ordering !
+    sound_service_dbus_update_sink_availability(dbus_interface, sink_available); 
     sound_service_dbus_update_sink_volume(dbus_interface, percent); 
     sound_service_dbus_update_sink_mute(dbus_interface, sink_muted); 
     dbus_menu_manager_update_mute_ui(b_all_muted);
@@ -112,8 +117,7 @@ void dbus_menu_manager_update_mute_ui(gboolean incoming_mute_value)
     b_all_muted = incoming_mute_value;
     dbusmenu_menuitem_property_set(mute_all_menuitem,
                                     DBUSMENU_MENUITEM_PROP_LABEL, 
-                                    (b_all_muted == FALSE ? "Mute All" : "Unmute"));
-    //dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, (b_all_muted == FALSE ? _("Mute All") : _("Unmute")));
+                                    b_all_muted == FALSE ? _("Mute All") : _("Unmute"));
 }
 
 
@@ -155,7 +159,8 @@ static void refresh_menu()
 
 
 /**
-
+idle_routine:
+Something for glip mainloop to do when idle
 **/
 static gboolean idle_routine (gpointer data)
 {
@@ -186,7 +191,7 @@ static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service
 {
     // Mute button
     mute_all_menuitem = dbusmenu_menuitem_new();
-    dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, (b_all_muted == FALSE ? "Mute All" : "Unmute"));
+    dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, b_all_muted == FALSE ? _("Mute All") : _("Unmute"));
     g_signal_connect(G_OBJECT(mute_all_menuitem), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED, G_CALLBACK(set_global_mute_from_ui), NULL);
     dbusmenu_menuitem_property_set_bool(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_ENABLED, b_sink_available);
 
@@ -196,7 +201,8 @@ static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service
     dbusmenu_menuitem_child_append(root, DBUSMENU_MENUITEM(volume_slider_menuitem));
     dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem),
                                         DBUSMENU_MENUITEM_PROP_ENABLED,
-                                        b_sink_available);       
+                                        b_sink_available && !b_all_muted);       
+    g_debug("!!!!!!**in the rebuild sound menu - slider active = %i", b_sink_available && !b_all_muted);
     dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem),
                                         DBUSMENU_MENUITEM_PROP_VISIBLE,
                                         b_sink_available);   
@@ -207,8 +213,8 @@ static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service
 
     // Sound preferences dialog
     DbusmenuMenuitem *settings_mi = dbusmenu_menuitem_new();
-    dbusmenu_menuitem_property_set(settings_mi, DBUSMENU_MENUITEM_PROP_LABEL,
-                                                                   ("Sound Preferences..."));
+    dbusmenu_menuitem_property_set(settings_mi, DBUSMENU_MENUITEM_PROP_LABEL, _("Sound Preferences..."));
+//_("Sound Preferences..."));
     dbusmenu_menuitem_child_append(root, settings_mi);
     g_signal_connect(G_OBJECT(settings_mi), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED,
                                          G_CALLBACK(show_sound_settings_dialog), NULL);
@@ -224,7 +230,7 @@ static void set_global_mute_from_ui()
     toggle_global_mute(b_all_muted); 
     dbusmenu_menuitem_property_set(mute_all_menuitem,
                                    DBUSMENU_MENUITEM_PROP_LABEL,
-                                   (b_all_muted == FALSE ? "Mute All" : "Unmute"));
+                                   b_all_muted == FALSE ? _("Mute All") : _("Unmute"));
 }
 
 

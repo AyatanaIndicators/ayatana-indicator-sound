@@ -25,7 +25,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib.h>
 #include <dbus/dbus-glib.h>
 #include "../src/dbus-shared-names.h"
-/*#include "../src/indicator-sound.c"*/
 #include "test-defines.h"
 
 static GMainLoop * mainloop = NULL;
@@ -78,10 +77,14 @@ main (gint argc, gchar * argv[])
 	}
 
 	DBusGProxy * props = dbus_g_proxy_new_for_name_owner(session_bus,
-														 INDICATOR_SOUND_DBUS_NAME,
+                                                         INDICATOR_SOUND_DBUS_NAME,
 														 INDICATOR_SOUND_SERVICE_DBUS_OBJECT,
 														 INDICATOR_SOUND_SERVICE_DBUS_INTERFACE,
-	                                                     &error);
+                                                         &error);
+/*	                                                     ":1.0",*/
+/*	                                                     "/need/a/path",*/
+/*	                                                     DBUS_INTERFACE_PROPERTIES,*/
+/*	                                                     &error);*/
 	if (error != NULL) {
 		g_error("Unable to get property proxy: %s", error->message);
 		return 1;

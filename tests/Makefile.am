@@ -1,12 +1,12 @@
-
 check_PROGRAMS = \
-	test-indicator-sound \
-	test-indicator-sound-dbus-client \
-	test-indicator-sound-dbus-server 
+	test-indicator-sound 
+#	test-indicator-sound-dbus-client \
+#	test-indicator-sound-dbus-server 
 
 TESTS = \
 	test-indicator-sound \
 	test-pulse-manager
+
 DISTCLEANFILES = $(TESTS)
 
 noinst_LTLIBRARIES        = libmockpulse.la
@@ -37,7 +37,6 @@ test_indicator_sound_LDADD = \
 #########################################
 ##  test-indicator-sound-dbus-client
 #########################################
-
 test_indicator_sound_dbus_client_SOURCES = \
 	test-defines.h \
 	test-indicator-sound-dbus-client.c
@@ -80,7 +79,10 @@ test_indicator_sound_dbus_server_LDADD = \
 check_PROGRAMS += test-pulse-manager
 
 test_pulse_manager_SOURCES = \
-	test-pulse-manager.c
+	test-pulse-manager.c \
+    $(top_builddir)/src/dbus-menu-manager.c \
+    $(top_builddir)/src/sound-service-dbus.c \ 
+    $(top_builddir)/src/slider-menu-item.c 
 
 test_pulse_manager_CFLAGS = \
 	$(PULSEAUDIO_CFLAGS) \
@@ -96,7 +98,6 @@ test_pulse_manager_LDADD = \
 	$(SOUNDSERVICE_LIBS) \
 	$(GCONF_LIBS) \
 	$(APPLET_LIBS) 
-
 
 #########################################
 ##  Actual tests

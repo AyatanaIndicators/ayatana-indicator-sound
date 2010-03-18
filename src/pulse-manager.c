@@ -67,9 +67,8 @@ void establish_pulse_activities(SoundServiceDbus *service)
 
     // Establish event callback registration
 	pa_context_set_state_callback(pulse_context, context_state_callback, NULL);
-    // BUILD MENU ANYWHO - it will be updated
-    dbus_menu_manager_update_pa_state(FALSE, FALSE, FALSE, 0);
-
+    // Broadcast init state (assume we have a device - if not the signals will handle it)
+    dbus_menu_manager_update_pa_state(FALSE, TRUE, FALSE, 0);
 	pa_context_connect(pulse_context, NULL, PA_CONTEXT_NOFAIL, NULL);    
 }
 
@@ -283,7 +282,7 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
         else{
             //Update the indicator to show PA either is not ready or has no available sink
             g_warning("Cannot find a suitable default sink ...");
-            dbus_menu_manager_update_pa_state(FALSE, device_available, TRUE, 0); 
+            dbus_menu_manager_update_pa_state(FALSE, device_available, default_sink_is_muted(), get_default_sink_volume()); 
         }
     }
     else{
@@ -399,6 +398,7 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
     }
     else
     {
+
         sink_info *value;
         value = g_new0(sink_info, 1);
         value->index = value->device_index = info->index;
@@ -412,7 +412,8 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
         value->channel_map = info->channel_map;
         g_hash_table_insert(sink_hash, GINT_TO_POINTER(value->index), value);
         g_debug("pulse-manager:update_sink_info -> After adding a new sink to our hash");
-   }    
+        sound_service_dbus_update_sink_availability(dbus_service, TRUE);    
+   } 
 }
 
 
@@ -461,7 +462,9 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
 			g_debug("PA_SUBSCRIPTION_EVENT_SINK event triggered");            
             if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) 
             {
-                //TODO handle the remove event => if its our default sink - update date pa state
+                if(index == DEFAULT_SINK_INDEX)
+                    g_debug("PA_SUBSCRIPTION_EVENT_SINK REMOVAL event triggered - default sink has been removed !!");  
+                    sound_service_dbus_update_sink_availability(dbus_service, FALSE);    
             } 
             else 
             {
@@ -472,7 +475,7 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
 			g_debug("PA_SUBSCRIPTION_EVENT_SINK_INPUT event triggered!!");
             if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE)
             {
-                //TODO handle the remove event
+                //handle the remove event - not relevant for current design
             }            
             else 
             {			
