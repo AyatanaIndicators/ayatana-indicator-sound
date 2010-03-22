@@ -73,6 +73,12 @@ struct pa_operation {
   int refcount;
 };
 
+
+/*void pa_context_connect(pa_context* c, const char *server, pa_context_flags_t flags, const pa_spawn_api *api)*/
+/*{*/
+/*    set_pa_context_get_state_result(c, PA_CONTEXT_CONNECTING);*/
+/*}*/
+
 /* Can be made into a list if we need multiple callbacks */
 static pa_sink_info *next_sink_info;
 

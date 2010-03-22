@@ -72,6 +72,11 @@ void establish_pulse_activities(SoundServiceDbus *service)
 	pa_context_connect(pulse_context, NULL, PA_CONTEXT_NOFAIL, NULL);    
 }
 
+pa_context* get_context()
+{
+    return pulse_context;
+}
+
 void close_pulse_activites()
 {
     if (pulse_context != NULL){
@@ -98,7 +103,11 @@ static void reconnect_to_pulse()
  	    pa_context_unref(pulse_context);
         pulse_context = NULL;
    	}
-    g_hash_table_destroy(sink_hash);
+    
+    if(sink_hash != NULL){
+        g_hash_table_destroy(sink_hash);
+        sink_hash = NULL;
+    }
 
     // reconnect
 	pulse_context = pa_context_new(pa_glib_mainloop_get_api(pa_main_loop), "ayatana.indicator.sound");
@@ -115,7 +124,6 @@ static void destroy_sink_info(void *value)
     sink_info *sink = (sink_info*)value;
     g_free(sink->name);
     g_free(sink->description);        
-    g_free(sink->icon_name);  
     g_free(sink);  
 }
 
@@ -289,11 +297,9 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
         g_debug("About to add an item to our hash");
         sink_info *value;
         value = g_new0(sink_info, 1);
-        value->index = value->device_index = sink->index;
+        value->index = sink->index;
         value->name = g_strdup(sink->name);
         value->description = g_strdup(sink->description);
-        value->icon_name = g_strdup(pa_proplist_gets(sink->proplist, PA_PROP_DEVICE_ICON_NAME));
-        value->active_port = (sink->active_port != NULL);
         value->mute = !!sink->mute;
         value->volume = sink->volume;
         value->base_volume = sink->base_volume;
@@ -363,8 +369,6 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
         sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(info->index));
         s->name = g_strdup(info->name);
         s->description = g_strdup(info->description);
-        s->icon_name = g_strdup(pa_proplist_gets(info->proplist, PA_PROP_DEVICE_ICON_NAME));
-        s->active_port = (info->active_port != NULL);
         gboolean mute_changed = s->mute != !!info->mute;
         s->mute = !!info->mute;
         gboolean volume_changed = (pa_cvolume_equal(&info->volume, &s->volume) == 0);
@@ -398,14 +402,11 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
     }
     else
     {
-
         sink_info *value;
         value = g_new0(sink_info, 1);
-        value->index = value->device_index = info->index;
+        value->index = info->index;
         value->name = g_strdup(info->name);
         value->description = g_strdup(info->description);
-        value->icon_name = g_strdup(pa_proplist_gets(info->proplist, PA_PROP_DEVICE_ICON_NAME));
-        value->active_port = (info->active_port != NULL);
         value->mute = !!info->mute;
         value->volume = info->volume;
         value->base_volume = info->base_volume;
