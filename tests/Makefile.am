@@ -1,7 +1,8 @@
 check_PROGRAMS = \
-	test-indicator-sound 
-#	test-indicator-sound-dbus-client \
-#	test-indicator-sound-dbus-server 
+	test-indicator-sound \ 
+	test-pulse-manager \
+	test-indicator-sound-dbus-client \
+	test-indicator-sound-dbus-server 
 
 TESTS = \
 	test-indicator-sound \
@@ -10,8 +11,8 @@ TESTS = \
 DISTCLEANFILES = $(TESTS)
 
 noinst_LTLIBRARIES        = libmockpulse.la
-libmockpulse_la_SOURCES = mockpulse.c mockpulse.h
-libmockpulse_la_CFLAGS = $(PULSEAUDIO_CFLAGS)
+libmockpulse_la_SOURCES   = mockpulse.c mockpulse.h
+libmockpulse_la_CFLAGS    = $(PULSEAUDIO_CFLAGS)
 
 
 #########################################
@@ -33,6 +34,33 @@ test_indicator_sound_LDADD = \
 	$(PULSEAUDIO_LIBS) \
 	$(APPLET_LIBS) 
 
+
+#########################################
+##  test-pulse-manager
+#########################################
+
+check_PROGRAMS += test-pulse-manager
+
+test_pulse_manager_SOURCES = \
+	test-pulse-manager.c \
+    $(top_builddir)/src/dbus-menu-manager.c \
+    $(top_builddir)/src/sound-service-dbus.c \ 
+    $(top_builddir)/src/slider-menu-item.c 
+
+test_pulse_manager_CFLAGS = \
+	$(PULSEAUDIO_CFLAGS) \
+	$(SOUNDSERVICE_CFLAGS) \
+	$(GCONF_CFLAGS) \
+	-Wall -Werror \
+	-I$(srcdir) \
+	-I$(SOUNDSERVICE_CFLAGS)
+
+test_pulse_manager_LDADD = \
+	libmockpulse.la \
+	$(PULSEAUDIO_LIBS) \
+	$(SOUNDSERVICE_LIBS) \
+	$(GCONF_LIBS) \
+	$(APPLET_LIBS) 
 
 #########################################
 ##  test-indicator-sound-dbus-client
@@ -72,32 +100,6 @@ test_indicator_sound_dbus_server_LDADD = \
 	$(SOUNDSERVICE_LIBS) \
 	$(PULSEAUDIO_LIBS) 
 
-#########################################
-##  test-pulse-manager
-#########################################
-
-check_PROGRAMS += test-pulse-manager
-
-test_pulse_manager_SOURCES = \
-	test-pulse-manager.c \
-    $(top_builddir)/src/dbus-menu-manager.c \
-    $(top_builddir)/src/sound-service-dbus.c \ 
-    $(top_builddir)/src/slider-menu-item.c 
-
-test_pulse_manager_CFLAGS = \
-	$(PULSEAUDIO_CFLAGS) \
-	$(SOUNDSERVICE_CFLAGS) \
-	$(GCONF_CFLAGS) \
-	-Wall -Werror \
-	-I$(srcdir) \
-	-I$(SOUNDSERVICE_CFLAGS)
-
-test_pulse_manager_LDADD = \
-	libmockpulse.la \
-	$(PULSEAUDIO_LIBS) \
-	$(SOUNDSERVICE_LIBS) \
-	$(GCONF_LIBS) \
-	$(APPLET_LIBS) 
 
 #########################################
 ##  Actual tests
@@ -116,7 +118,14 @@ indicator-sound-tests-gtester: test-indicator-sound Makefile.am
 	@echo gtester -k --verbose -o=indicator-sound-check-results.xml ./test-indicator-sound >> $@
 	@chmod +x $@
 
- TESTS += indicator-sound-tests-gtester
+TESTS += indicator-sound-tests-gtester
+
+pulse-manager-tests-gtester: test-pulse-manager Makefile.am
+	@echo "#!/bin/sh" > $@
+	@echo gtester -k --verbose -o=pulse-manager-check-results.xml ./test-pulse-manager >> $@
+	@chmod +x $@
+
+TESTS += pulse-manager-tests-gtester
 
 DISTCLEANFILES += $(XML_REPORT) $(HTML_REPORT) indicator-sound-tests-gtester
 
@@ -124,7 +133,7 @@ DBUS_RUNNER=dbus-test-runner --dbus-config /usr/share/dbus-test-runner/session.c
 
 test-indicator-sound-dbus: test-indicator-sound-dbus-client test-indicator-sound-dbus-server Makefile.am
 	@echo "#!/bin/sh" > test-indicator-sound-dbus
-	@echo $(DBUS_RUNNER) --task ./test-indicator-sound-dbus-client --task-name Client --task ./test-indicator-sound-dbus-server --task-name Server --ignore-return >> test-indicator-sound-dbus
+	@echo $(DBUS_RUNNER) --task ./test-indicator-sound-dbus-server --task-name Server --ignore-return >> test-indicator-sound-dbus --task ./test-indicator-sound-dbus-client --task-name Client
 	@chmod +x test-indicator-sound-dbus
 
 TESTS += test-indicator-sound-dbus

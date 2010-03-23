@@ -20,5 +20,6 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define  TEST_MUTE                  FALSE
-
+#define     TEST_MUTE_VALUE                 TRUE
+#define     TEST_VOLUME_VALUE               77.77777
+#define     TEST_AVAILABLE_VALUE            TRUE
