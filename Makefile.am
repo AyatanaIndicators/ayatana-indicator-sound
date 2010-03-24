@@ -1,8 +1,8 @@
 
 SUBDIRS = \
 	src \
-    data \
-    tests \
+	data \
+	tests \
 	po
 
 EXTRA_DIST = autogen.sh

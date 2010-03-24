@@ -26,39 +26,68 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <dbus/dbus-glib.h>
 #include "../src/dbus-shared-names.h"
 #include "test-defines.h"
+#include "../src/sound-service-client.h"
 
 static GMainLoop * mainloop = NULL;
-static gboolean passed = TRUE;
+static DBusGProxy * proxy= NULL;
 
 static void
-fetch_mute_cb (DBusGProxy * proxy, DBusGProxyCall * call, void * data)
+test_fetch_mute(DBusGProxy * proxy)
+{
+    GError * error = NULL;
+    gboolean *fetched_mute_value;
+    fetched_mute_value = g_new0(gboolean, 1);
+    org_ayatana_indicator_sound_get_sink_mute(proxy, fetched_mute_value, &error);
+	if (error != NULL) {
+		g_warning("test-indicator-sound-dbus-client::test_fetch_mute - Unable to fetch mute: %s", error->message);
+		g_error_free(error);
+        g_free(fetched_mute_value);
+        return;
+	}
+    g_assert(TEST_MUTE_VALUE == *fetched_mute_value); 
+    g_free(fetched_mute_value);
+}
+
+static void
+test_fetch_volume(DBusGProxy * proxy)
 {
 	GError * error = NULL;
-	GValue value = {0};
-
-	if (!dbus_g_proxy_end_call(proxy, call, &error, G_TYPE_VALUE, &value, G_TYPE_INVALID)) {
-		g_warning("Getting mute failed: %s", error->message);
+    gdouble *volume_percent_input;
+    volume_percent_input = g_new0(gdouble, 1);
+    org_ayatana_indicator_sound_get_sink_volume(proxy, volume_percent_input, &error);
+	if (error != NULL) {
+		g_warning("test-indicator-sound-dbus-client::test_fetch_volume - Unable to fetch VOLUME: %s", error->message);
 		g_error_free(error);
-		passed = FALSE;
-		return;
+        g_free(volume_percent_input);
+        return;
 	}
+    g_assert(TEST_VOLUME_VALUE == *volume_percent_input); 
+    g_free(volume_percent_input);
+}
 
-	if (TEST_MUTE != g_value_get_boolean(&value)) {
-		g_debug("Mute vale Returned: FAILED");
-		passed = FALSE;
-	} else {
-		g_debug("Property ID Returned: PASSED");
-	}
-	return;
+static void 
+test_fetch_availability(DBusGProxy * proxy)
+{
+    GError * error = NULL;
+    gboolean * available_input;
+    available_input = g_new0(gboolean, 1);
+    org_ayatana_indicator_sound_get_sink_availability(proxy, available_input, &error);
+    if (error != NULL) {
+	    g_warning("test-indicator-sound-dbus-client::test_fetch_availability - unable to fetch availability %s", error->message);
+	    g_error_free(error);
+        g_free(available_input);
+        return;
+    }
+    g_assert(TEST_AVAILABLE_VALUE == *available_input);
+    g_free(available_input);
 }
 
 
 gboolean
 kill_func (gpointer userdata)
 {
+    g_free(proxy);
 	g_main_loop_quit(mainloop);
-	g_warning("Forced to Kill");
-	passed = FALSE;
 	return FALSE;
 }
 
@@ -66,6 +95,7 @@ gint
 main (gint argc, gchar * argv[])
 {
 	g_type_init();
+	g_test_init(&argc, &argv, NULL);
 
 	g_usleep(500000);
 
@@ -76,37 +106,30 @@ main (gint argc, gchar * argv[])
 		return 1;
 	}
 
-	DBusGProxy * props = dbus_g_proxy_new_for_name_owner(session_bus,
-                                                         INDICATOR_SOUND_DBUS_NAME,
-														 INDICATOR_SOUND_SERVICE_DBUS_OBJECT,
-														 INDICATOR_SOUND_SERVICE_DBUS_INTERFACE,
-                                                         &error);
-/*	                                                     ":1.0",*/
-/*	                                                     "/need/a/path",*/
-/*	                                                     DBUS_INTERFACE_PROPERTIES,*/
-/*	                                                     &error);*/
+	DBusGProxy * proxy = dbus_g_proxy_new_for_name_owner(session_bus,
+                                            ":1.0",
+											 INDICATOR_SOUND_SERVICE_DBUS_OBJECT,
+                                             INDICATOR_SOUND_SERVICE_DBUS_INTERFACE,
+                                             &error);
 	if (error != NULL) {
 		g_error("Unable to get property proxy: %s", error->message);
 		return 1;
 	}
 
-	dbus_g_proxy_begin_call (props,
-	                         "GetSinkMute",
-	                         fetch_mute_cb,
-	                         NULL, NULL,
-	                         G_TYPE_INVALID);
+/*    g_test_add_func("/test-indicator-sound-dbus/test-fetch-mute", test_fetch_mute);*/
+/*    g_test_add_func("/test-indicator-sound-dbus/test-fetch-volume", test_fetch_volume);*/
+/*    g_test_add_func("/test-indicator-sound-dbus/test-fetch-availability", test_fetch_availability);*/
+/*    g_test_queue_free(proxy);*/
+/*    return g_test_run();*/
+
+    test_fetch_mute(proxy);
+    test_fetch_volume(proxy);    
+    test_fetch_availability(proxy);    
 
 	g_timeout_add_seconds(2, kill_func, NULL);
 
 	mainloop = g_main_loop_new(NULL, FALSE);
 	g_main_loop_run(mainloop);
 
-	if (passed) {
-		g_debug("Quiting");
-		return 0;
-	} else {
-		g_debug("Quiting as we're a failure");
-		return 1;
-	}
 	return 0;
 }

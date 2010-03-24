@@ -144,9 +144,9 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
 	io_class->get_label = get_label;
 	io_class->get_image = get_icon;
 	io_class->get_menu  = get_menu;
-        io_class->scroll    = scroll;
+    io_class->scroll    = scroll;
 
-        design_team_size = gtk_icon_size_register("design-team-size", 22, 22);
+    design_team_size = gtk_icon_size_register("design-team-size", 22, 22);
 
 	return;
 }
