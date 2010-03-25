@@ -115,19 +115,21 @@ indicator-sound-tests: indicator-sound-tests-gtester Makefile.am
 
 indicator-sound-tests-gtester: test-indicator-sound Makefile.am
 	@echo "#!/bin/sh" > $@
-	@echo gtester -k --verbose -o=indicator-sound-check-results.xml ./test-indicator-sound >> $@
+	@echo gtester -k --verbose -o=$(XML_REPORT) ./test-indicator-sound >> $@
 	@chmod +x $@
 
 TESTS += indicator-sound-tests-gtester
 
+PULSE_XML_REPORT = pulse-manager-check-results.xml
+
 pulse-manager-tests-gtester: test-pulse-manager Makefile.am
 	@echo "#!/bin/sh" > $@
-	@echo gtester -k --verbose -o=pulse-manager-check-results.xml ./test-pulse-manager >> $@
+	@echo gtester -k --verbose -o=$(PULSE_XML_REPORT) ./test-pulse-manager >> $@
 	@chmod +x $@
 
 TESTS += pulse-manager-tests-gtester
 
-DISTCLEANFILES += $(XML_REPORT) $(HTML_REPORT) indicator-sound-tests-gtester
+DISTCLEANFILES += $(XML_REPORT) $(PULSE_XML_REPORT) $(HTML_REPORT) indicator-sound-tests-gtester
 
 DBUS_RUNNER=dbus-test-runner --dbus-config /usr/share/dbus-test-runner/session.conf
 
