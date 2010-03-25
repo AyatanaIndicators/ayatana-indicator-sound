@@ -68,7 +68,7 @@ void establish_pulse_activities(SoundServiceDbus *service)
     // Establish event callback registration
 	pa_context_set_state_callback(pulse_context, context_state_callback, NULL);
     // Broadcast init state (assume we have a device - if not the signals will handle it)
-    dbus_menu_manager_update_pa_state(FALSE, TRUE, FALSE, 0);
+    dbus_menu_manager_update_pa_state(FALSE, FALSE, FALSE, 0);
 	pa_context_connect(pulse_context, NULL, PA_CONTEXT_NOFAIL, NULL);    
 }
 
