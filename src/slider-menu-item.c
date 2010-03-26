@@ -77,12 +77,14 @@ slider_menu_item_finalize (GObject *object)
 }
 
 
-
 static void
 handle_event (DbusmenuMenuitem * mi, const gchar * name, const GValue * value, guint timestamp)
 {
 	g_debug("in the handle event method of slider_menu_item");
-    set_sink_volume((gdouble)g_value_get_double(value));
+    gdouble volume_input = 0;
+    volume_input = g_value_get_double(value);
+    if(value != NULL)
+        set_sink_volume(volume_input);
 }
 
 
