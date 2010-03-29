@@ -67,7 +67,6 @@ void establish_pulse_activities(SoundServiceDbus *service)
 
     // Establish event callback registration
 	pa_context_set_state_callback(pulse_context, context_state_callback, NULL);
-    // Broadcast init state (assume we have a device - if not the signals will handle it)
     dbus_menu_manager_update_pa_state(FALSE, FALSE, FALSE, 0);
 	pa_context_connect(pulse_context, NULL, PA_CONTEXT_NOFAIL, NULL);    
 }
@@ -359,9 +358,14 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
         g_warning("Sink INPUT info callback failure");
         return;
     }
-
+    gint position = -1;
     GList *keys = g_hash_table_get_keys(sink_hash);
-    gint position =  g_list_index(keys, GINT_TO_POINTER(info->index));
+
+    if(info == NULL)
+        return;
+    
+    position =  g_list_index(keys, GINT_TO_POINTER(info->index));
+
     if(position >= 0) // => index is within the keys of the hash.
     {
         sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(info->index));
@@ -459,11 +463,14 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
             {
                 if(index == DEFAULT_SINK_INDEX){
                     g_debug("PA_SUBSCRIPTION_EVENT_SINK REMOVAL event triggered - default sink has been removed !! \n updating UI to reflect the change");  
-                    sound_service_dbus_update_sink_availability(dbus_service, FALSE);    
+                    gboolean availability = determine_sink_availability();
+                    sound_service_dbus_update_sink_availability(dbus_service, availability);    
                 }
                 else{
                     g_debug("PA_SUBSCRIPTION_EVENT_SINK REMOVAL - some device other than the default - no panic");
                 }
+                g_debug("removing sink of index %i from our sink hash - keep the cache tidy !", index);
+                g_hash_table_remove(sink_hash, GINT_TO_POINTER(index)); 
             } 
             else 
             {
@@ -474,7 +481,7 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
 			g_debug("PA_SUBSCRIPTION_EVENT_SINK_INPUT event triggered!!");
             if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE)
             {
-                //handle the remove event - not relevant for current design
+                //handle the sink input remove event - not relevant for current design
             }            
             else 
             {			
