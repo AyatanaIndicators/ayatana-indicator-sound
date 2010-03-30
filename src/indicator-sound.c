@@ -85,10 +85,8 @@ static void       scroll   (IndicatorObject*io, gint delta, IndicatorScrollDirec
 //Slider related
 static GtkWidget *volume_slider = NULL;
 static gboolean new_slider_item (DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
-/*static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget);*/
 static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data);
 static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
-/*static void slider_size_allocate(GtkWidget  *widget, GtkAllocation *allocation, gpointer user_data);*/
 static void slider_grabbed(GtkWidget *widget, gpointer user_data);
 static void slider_released(GtkWidget *widget, gpointer user_data);
 
@@ -122,10 +120,10 @@ static gint previous_state = 0;
 static gdouble initial_volume_percent = 0;
 static gboolean initial_mute ;
 static gboolean device_available;
-static gboolean slider_in_direct_use;
+static gboolean slider_in_direct_use = FALSE;
 
 static GtkIconSize design_team_size;
-static gint animation_id;
+static gint animation_id = 0;
 static GList * blocked_animation_list = NULL;
 static GList * blocked_iter = NULL;
 static void prepare_blocked_animation();
@@ -268,7 +266,6 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
     g_signal_connect(slider, "value-changed", G_CALLBACK(value_changed_event_cb), newitem);
     g_signal_connect(volume_slider, "slider-grabbed", G_CALLBACK(slider_grabbed), NULL);
     g_signal_connect(volume_slider, "slider-released", G_CALLBACK(slider_released), NULL);
-/*    g_signal_connect(slider, "size-allocate", G_CALLBACK(slider_size_allocate), NULL);*/
 
     // Set images on the ido
     GtkWidget* primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)volume_slider);
@@ -282,6 +279,10 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
     g_object_unref(secondary_gicon);
 
     gtk_widget_set_sensitive(volume_slider, !initial_mute);
+
+    GtkAdjustment *adj = gtk_range_get_adjustment (GTK_RANGE (slider));
+    gtk_adjustment_set_step_increment(adj, 3);
+
     gtk_widget_show_all(volume_slider);
 
     return TRUE;
@@ -677,12 +678,15 @@ scroll (IndicatorObject *io, gint delta, IndicatorScrollDirection direction)
     IndicatorSound *sound = INDICATOR_SOUND (io);
     GtkAdjustment *adj = gtk_range_get_adjustment (GTK_RANGE (sound->slider));
     gdouble value = gtk_range_get_value (GTK_RANGE (sound->slider));
+    
+    //g_debug("the scroll step size = %f", adj->step_increment);
 
-    if (direction == INDICATOR_OBJECT_SCROLL_UP)
-    value += adj->step_increment;
-    else
-    value -= adj->step_increment;
-
+    if (direction == INDICATOR_OBJECT_SCROLL_UP){
+        value += adj->step_increment;
+    }
+    else{
+        value -= adj->step_increment;
+    }
     gtk_range_set_value (GTK_RANGE (sound->slider),
-                       value);
+                   value);
 }
