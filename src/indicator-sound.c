@@ -125,11 +125,13 @@ static gboolean device_available;
 static gboolean slider_in_direct_use;
 
 static GtkIconSize design_team_size;
+static gint blocked_id;
 static gint animation_id;
 static GList * blocked_animation_list = NULL;
 static GList * blocked_iter = NULL;
 static void prepare_blocked_animation();
 static gboolean fade_back_to_mute_image();
+static gboolean start_animation();
 
 // Construction
 static void
@@ -158,6 +160,7 @@ static void indicator_sound_init (IndicatorSound *self)
     prepare_state_machine();
     prepare_blocked_animation();
     animation_id = 0;
+    blocked_id = 0;
     initial_mute = FALSE;
     device_available = TRUE;
     slider_in_direct_use = FALSE;
@@ -370,13 +373,13 @@ static void prepare_blocked_animation()
         return;
     }
 
-    // sample 22 snapshots - range : 0-256
-    for(i = 0; i < 23; i++)
+    // sample 51 snapshots - range : 0-256
+    for(i = 0; i < 51; i++)
     {
         gdk_pixbuf_composite(mute_buf, blocked_buf, 0, 0,
                              gdk_pixbuf_get_width(mute_buf),
                              gdk_pixbuf_get_height(mute_buf),
-                             0, 0, 1, 1, GDK_INTERP_BILINEAR, MIN(255, i * 11));
+                             0, 0, 1, 1, GDK_INTERP_BILINEAR, MIN(255, i * 5));
         blocked_animation_list = g_list_append(blocked_animation_list, gdk_pixbuf_copy(blocked_buf));
     }
 }
@@ -502,13 +505,20 @@ static void fetch_mute_value_from_dbus()
 static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean block_value, gpointer userdata)
 {
     g_debug("signal caught - sink input while muted with value %i", block_value);
-    if (block_value == 1 && animation_id == 0 && blocked_animation_list != NULL) {
+    if (block_value == 1 && blocked_id == 0 && animation_id == 0 && blocked_animation_list != NULL) {
         gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
         indicator_image_helper_update(speaker_image, image_name);
-
-        blocked_iter = blocked_animation_list;
-        animation_id = g_timeout_add_seconds(1, fade_back_to_mute_image, NULL);
+        blocked_id = g_timeout_add_seconds(5, start_animation, NULL);
     }
+}
+
+static gboolean start_animation()
+{
+    blocked_iter = blocked_animation_list;
+    blocked_id = 0;
+    g_debug("exit from blocked hold start the animation\n");
+    animation_id = g_timeout_add(50, fade_back_to_mute_image, NULL);
+    return FALSE;
 }
 
 static gboolean fade_back_to_mute_image()
@@ -554,6 +564,11 @@ static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value
             g_debug("about to remove the animation_id callback from the mainloop!!**");
             g_source_remove(animation_id);
             animation_id = 0;
+        }
+        if(blocked_id != 0){
+            g_debug("about to remove the blocked_id callback from the mainloop!!**");
+            g_source_remove(blocked_id);
+            blocked_id = 0;            
         }
     }
     g_debug("signal caught - sink mute update with mute value: %i", mute_value);
