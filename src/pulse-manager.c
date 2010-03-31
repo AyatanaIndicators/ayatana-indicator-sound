@@ -128,10 +128,8 @@ static void destroy_sink_info(void *value)
 /*
 Controllers & Utilities
 */
-
 static gboolean determine_sink_availability()
 {
-
     // Firstly check to see if we have any sinks
     // if not get the hell out of here !
     if (g_hash_table_size(sink_hash) < 1){
@@ -139,21 +137,24 @@ static gboolean determine_sink_availability()
         DEFAULT_SINK_INDEX = -1;    
         return FALSE;
     }
-
     // Secondly, make sure the default sink index is set 
-    // If the default sink index has not been set (via the server) it will attempt to set it to the value of the first 
+    // If the default sink index has not been set
+    // (via the server or has been reset because default sink has been removed), 
+    // it will attempt to set it to the value of the first 
     // index in the array of keys from the sink_hash.
-    GList *keys = g_hash_table_get_keys(sink_hash);
-    DEFAULT_SINK_INDEX = (DEFAULT_SINK_INDEX < 0) ? GPOINTER_TO_INT(g_list_first(keys)) : DEFAULT_SINK_INDEX;
+    GList* keys = g_hash_table_get_keys(sink_hash);
+    GList* key = g_list_first(keys);
+
+    DEFAULT_SINK_INDEX = (DEFAULT_SINK_INDEX < 0) ? GPOINTER_TO_INT(key->data) : DEFAULT_SINK_INDEX;
 
     // Thirdly ensure the default sink index does not have the name "auto_null"
-    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
-    // Up until now the most rebost method to test this is to manually remove the available sink device 
+    sink_info* s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
+    // Up until now the most rebust method to test this is to manually remove the available sink device 
     // kernel module and then reload (rmmod & modprobe).
     // TODO: Edge case of dynamic loading and unloading of sinks should be handled also.
     g_debug("About to test for to see if the available sink is null - s->name = %s", s->name);
     gboolean available = g_ascii_strncasecmp("auto_null", s->name, 9) != 0;
-    g_debug("sink_available: %i", available);
+    g_debug("PA_Manager ->  determine_sink_availability: %i", available);
     return available;
 }
 
@@ -458,22 +459,24 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
 	switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) 
     {
         case PA_SUBSCRIPTION_EVENT_SINK:
-			g_debug("PA_SUBSCRIPTION_EVENT_SINK event triggered");            
             if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) 
             {
-                if(index == DEFAULT_SINK_INDEX){
-                    g_debug("PA_SUBSCRIPTION_EVENT_SINK REMOVAL event triggered - default sink has been removed !! \n updating UI to reflect the change");  
-                    gboolean availability = determine_sink_availability();
-                    sound_service_dbus_update_sink_availability(dbus_service, availability);    
-                }
-                else{
-                    g_debug("PA_SUBSCRIPTION_EVENT_SINK REMOVAL - some device other than the default - no panic");
-                }
-                g_debug("removing sink of index %i from our sink hash - keep the cache tidy !", index);
+                if(index == DEFAULT_SINK_INDEX)
+                    sound_service_dbus_update_sink_availability(dbus_service, FALSE);    
+
+                g_debug(" - removing sink of index %i from our sink hash - keep the cache tidy !", index);
                 g_hash_table_remove(sink_hash, GINT_TO_POINTER(index)); 
+
+                if(index == DEFAULT_SINK_INDEX){
+                    g_debug("PA_SUBSCRIPTION_EVENT_SINK REMOVAL: default sink %i has been removed.", DEFAULT_SINK_INDEX);  
+                    DEFAULT_SINK_INDEX = -1;    
+                    determine_sink_availability();
+                }
+                g_debug(" - Now what is our default sink : %i", DEFAULT_SINK_INDEX);    
             } 
             else 
             {
+			    g_debug("PA_SUBSCRIPTION_EVENT_SINK: a generic sink event - will trigger an update");            
                 pa_operation_unref(pa_context_get_sink_info_by_index(c, index, update_sink_info, userdata));
             }            
             break;

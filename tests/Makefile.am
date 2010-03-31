@@ -1,5 +1,5 @@
 check_PROGRAMS = \
-	test-indicator-sound \ 
+	test-indicator-sound \
 	test-pulse-manager \
 	test-indicator-sound-dbus-client \
 	test-indicator-sound-dbus-server 
@@ -44,7 +44,7 @@ check_PROGRAMS += test-pulse-manager
 test_pulse_manager_SOURCES = \
 	test-pulse-manager.c \
     $(top_builddir)/src/dbus-menu-manager.c \
-    $(top_builddir)/src/sound-service-dbus.c \ 
+    $(top_builddir)/src/sound-service-dbus.c \
     $(top_builddir)/src/slider-menu-item.c 
 
 test_pulse_manager_CFLAGS = \
