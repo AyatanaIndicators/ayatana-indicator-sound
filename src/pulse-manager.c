@@ -67,9 +67,13 @@ void establish_pulse_activities(SoundServiceDbus *service)
 
     // Establish event callback registration
 	pa_context_set_state_callback(pulse_context, context_state_callback, NULL);
-    // Broadcast init state (assume we have a device - if not the signals will handle it)
-    dbus_menu_manager_update_pa_state(FALSE, TRUE, FALSE, 0);
+    dbus_menu_manager_update_pa_state(FALSE, FALSE, FALSE, 0);
 	pa_context_connect(pulse_context, NULL, PA_CONTEXT_NOFAIL, NULL);    
+}
+
+pa_context* get_context()
+{
+    return pulse_context;
 }
 
 void close_pulse_activites()
@@ -98,7 +102,11 @@ static void reconnect_to_pulse()
  	    pa_context_unref(pulse_context);
         pulse_context = NULL;
    	}
-    g_hash_table_destroy(sink_hash);
+    
+    if(sink_hash != NULL){
+        g_hash_table_destroy(sink_hash);
+        sink_hash = NULL;
+    }
 
     // reconnect
 	pulse_context = pa_context_new(pa_glib_mainloop_get_api(pa_main_loop), "ayatana.indicator.sound");
@@ -114,18 +122,14 @@ static void destroy_sink_info(void *value)
 {
     sink_info *sink = (sink_info*)value;
     g_free(sink->name);
-    g_free(sink->description);        
-    g_free(sink->icon_name);  
     g_free(sink);  
 }
 
 /*
 Controllers & Utilities
 */
-
 static gboolean determine_sink_availability()
 {
-
     // Firstly check to see if we have any sinks
     // if not get the hell out of here !
     if (g_hash_table_size(sink_hash) < 1){
@@ -133,21 +137,24 @@ static gboolean determine_sink_availability()
         DEFAULT_SINK_INDEX = -1;    
         return FALSE;
     }
-
     // Secondly, make sure the default sink index is set 
-    // If the default sink index has not been set (via the server) it will attempt to set it to the value of the first 
+    // If the default sink index has not been set
+    // (via the server or has been reset because default sink has been removed), 
+    // it will attempt to set it to the value of the first 
     // index in the array of keys from the sink_hash.
-    GList *keys = g_hash_table_get_keys(sink_hash);
-    DEFAULT_SINK_INDEX = (DEFAULT_SINK_INDEX < 0) ? GPOINTER_TO_INT(g_list_first(keys)) : DEFAULT_SINK_INDEX;
+    GList* keys = g_hash_table_get_keys(sink_hash);
+    GList* key = g_list_first(keys);
+
+    DEFAULT_SINK_INDEX = (DEFAULT_SINK_INDEX < 0) ? GPOINTER_TO_INT(key->data) : DEFAULT_SINK_INDEX;
 
     // Thirdly ensure the default sink index does not have the name "auto_null"
-    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
-    // Up until now the most rebost method to test this is to manually remove the available sink device 
+    sink_info* s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
+    // Up until now the most rebust method to test this is to manually remove the available sink device 
     // kernel module and then reload (rmmod & modprobe).
     // TODO: Edge case of dynamic loading and unloading of sinks should be handled also.
     g_debug("About to test for to see if the available sink is null - s->name = %s", s->name);
     gboolean available = g_ascii_strncasecmp("auto_null", s->name, 9) != 0;
-    g_debug("sink_available: %i", available);
+    g_debug("PA_Manager ->  determine_sink_availability: %i", available);
     return available;
 }
 
@@ -289,11 +296,8 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
         g_debug("About to add an item to our hash");
         sink_info *value;
         value = g_new0(sink_info, 1);
-        value->index = value->device_index = sink->index;
+        value->index = sink->index;
         value->name = g_strdup(sink->name);
-        value->description = g_strdup(sink->description);
-        value->icon_name = g_strdup(pa_proplist_gets(sink->proplist, PA_PROP_DEVICE_ICON_NAME));
-        value->active_port = (sink->active_port != NULL);
         value->mute = !!sink->mute;
         value->volume = sink->volume;
         value->base_volume = sink->base_volume;
@@ -355,22 +359,23 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
         g_warning("Sink INPUT info callback failure");
         return;
     }
-
+    gint position = -1;
     GList *keys = g_hash_table_get_keys(sink_hash);
-    gint position =  g_list_index(keys, GINT_TO_POINTER(info->index));
+
+    if(info == NULL)
+        return;
+    
+    position =  g_list_index(keys, GINT_TO_POINTER(info->index));
+
     if(position >= 0) // => index is within the keys of the hash.
     {
         sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(info->index));
         s->name = g_strdup(info->name);
-        s->description = g_strdup(info->description);
-        s->icon_name = g_strdup(pa_proplist_gets(info->proplist, PA_PROP_DEVICE_ICON_NAME));
-        s->active_port = (info->active_port != NULL);
         gboolean mute_changed = s->mute != !!info->mute;
         s->mute = !!info->mute;
         gboolean volume_changed = (pa_cvolume_equal(&info->volume, &s->volume) == 0);
         s->volume = info->volume;
         s->base_volume = info->base_volume;
-        s->channel_map = info->channel_map; 
         if(DEFAULT_SINK_INDEX == s->index)
         {
             //update the UI
@@ -398,18 +403,13 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
     }
     else
     {
-
         sink_info *value;
         value = g_new0(sink_info, 1);
-        value->index = value->device_index = info->index;
+        value->index = info->index;
         value->name = g_strdup(info->name);
-        value->description = g_strdup(info->description);
-        value->icon_name = g_strdup(pa_proplist_gets(info->proplist, PA_PROP_DEVICE_ICON_NAME));
-        value->active_port = (info->active_port != NULL);
         value->mute = !!info->mute;
         value->volume = info->volume;
         value->base_volume = info->base_volume;
-        value->channel_map = info->channel_map;
         g_hash_table_insert(sink_hash, GINT_TO_POINTER(value->index), value);
         g_debug("pulse-manager:update_sink_info -> After adding a new sink to our hash");
         sound_service_dbus_update_sink_availability(dbus_service, TRUE);    
@@ -459,15 +459,24 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
 	switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) 
     {
         case PA_SUBSCRIPTION_EVENT_SINK:
-			g_debug("PA_SUBSCRIPTION_EVENT_SINK event triggered");            
             if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) 
             {
                 if(index == DEFAULT_SINK_INDEX)
-                    g_debug("PA_SUBSCRIPTION_EVENT_SINK REMOVAL event triggered");  
                     sound_service_dbus_update_sink_availability(dbus_service, FALSE);    
+
+                g_debug(" - removing sink of index %i from our sink hash - keep the cache tidy !", index);
+                g_hash_table_remove(sink_hash, GINT_TO_POINTER(index)); 
+
+                if(index == DEFAULT_SINK_INDEX){
+                    g_debug("PA_SUBSCRIPTION_EVENT_SINK REMOVAL: default sink %i has been removed.", DEFAULT_SINK_INDEX);  
+                    DEFAULT_SINK_INDEX = -1;    
+                    determine_sink_availability();
+                }
+                g_debug(" - Now what is our default sink : %i", DEFAULT_SINK_INDEX);    
             } 
             else 
             {
+			    g_debug("PA_SUBSCRIPTION_EVENT_SINK: a generic sink event - will trigger an update");            
                 pa_operation_unref(pa_context_get_sink_info_by_index(c, index, update_sink_info, userdata));
             }            
             break;
@@ -475,7 +484,7 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
 			g_debug("PA_SUBSCRIPTION_EVENT_SINK_INPUT event triggered!!");
             if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE)
             {
-                //handle the remove event - not relevant for current design
+                //handle the sink input remove event - not relevant for current design
             }            
             else 
             {			

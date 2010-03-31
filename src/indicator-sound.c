@@ -85,10 +85,8 @@ static void       scroll   (IndicatorObject*io, gint delta, IndicatorScrollDirec
 //Slider related
 static GtkWidget *volume_slider = NULL;
 static gboolean new_slider_item (DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
-/*static void slider_prop_change_cb (DbusmenuMenuitem * mi, gchar * prop, GValue * value, GtkWidget *widget);*/
 static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data);
 static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
-/*static void slider_size_allocate(GtkWidget  *widget, GtkAllocation *allocation, gpointer user_data);*/
 static void slider_grabbed(GtkWidget *widget, gpointer user_data);
 static void slider_released(GtkWidget *widget, gpointer user_data);
 
@@ -122,14 +120,17 @@ static gint previous_state = 0;
 static gdouble initial_volume_percent = 0;
 static gboolean initial_mute ;
 static gboolean device_available;
-static gboolean slider_in_direct_use;
+static gboolean slider_in_direct_use = FALSE;
 
 static GtkIconSize design_team_size;
+static gint blocked_id;
 static gint animation_id;
+
 static GList * blocked_animation_list = NULL;
 static GList * blocked_iter = NULL;
 static void prepare_blocked_animation();
 static gboolean fade_back_to_mute_image();
+static gboolean start_animation();
 
 // Construction
 static void
@@ -144,9 +145,9 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
 	io_class->get_label = get_label;
 	io_class->get_image = get_icon;
 	io_class->get_menu  = get_menu;
-        io_class->scroll    = scroll;
+    io_class->scroll    = scroll;
 
-        design_team_size = gtk_icon_size_register("design-team-size", 22, 22);
+    design_team_size = gtk_icon_size_register("design-team-size", 22, 22);
 
 	return;
 }
@@ -158,6 +159,7 @@ static void indicator_sound_init (IndicatorSound *self)
     prepare_state_machine();
     prepare_blocked_animation();
     animation_id = 0;
+    blocked_id = 0;
     initial_mute = FALSE;
     device_available = TRUE;
     slider_in_direct_use = FALSE;
@@ -268,7 +270,6 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
     g_signal_connect(slider, "value-changed", G_CALLBACK(value_changed_event_cb), newitem);
     g_signal_connect(volume_slider, "slider-grabbed", G_CALLBACK(slider_grabbed), NULL);
     g_signal_connect(volume_slider, "slider-released", G_CALLBACK(slider_released), NULL);
-/*    g_signal_connect(slider, "size-allocate", G_CALLBACK(slider_size_allocate), NULL);*/
 
     // Set images on the ido
     GtkWidget* primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)volume_slider);
@@ -282,6 +283,10 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
     g_object_unref(secondary_gicon);
 
     gtk_widget_set_sensitive(volume_slider, !initial_mute);
+
+    GtkAdjustment *adj = gtk_range_get_adjustment (GTK_RANGE (slider));
+    gtk_adjustment_set_step_increment(adj, 3);
+
     gtk_widget_show_all(volume_slider);
 
     return TRUE;
@@ -370,13 +375,13 @@ static void prepare_blocked_animation()
         return;
     }
 
-    // sample 22 snapshots - range : 0-256
-    for(i = 0; i < 23; i++)
+    // sample 51 snapshots - range : 0-256
+    for(i = 0; i < 51; i++)
     {
         gdk_pixbuf_composite(mute_buf, blocked_buf, 0, 0,
                              gdk_pixbuf_get_width(mute_buf),
                              gdk_pixbuf_get_height(mute_buf),
-                             0, 0, 1, 1, GDK_INTERP_BILINEAR, MIN(255, i * 11));
+                             0, 0, 1, 1, GDK_INTERP_BILINEAR, MIN(255, i * 5));
         blocked_animation_list = g_list_append(blocked_animation_list, gdk_pixbuf_copy(blocked_buf));
     }
 }
@@ -502,13 +507,20 @@ static void fetch_mute_value_from_dbus()
 static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean block_value, gpointer userdata)
 {
     g_debug("signal caught - sink input while muted with value %i", block_value);
-    if (block_value == 1 && animation_id == 0 && blocked_animation_list != NULL) {
+    if (block_value == 1 && blocked_id == 0 && animation_id == 0 && blocked_animation_list != NULL) {
         gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
         indicator_image_helper_update(speaker_image, image_name);
-
-        blocked_iter = blocked_animation_list;
-        animation_id = g_timeout_add_seconds(1, fade_back_to_mute_image, NULL);
+        blocked_id = g_timeout_add_seconds(5, start_animation, NULL);
     }
+}
+
+static gboolean start_animation()
+{
+    blocked_iter = blocked_animation_list;
+    blocked_id = 0;
+    g_debug("exit from blocked hold start the animation\n");
+    animation_id = g_timeout_add(50, fade_back_to_mute_image, NULL);
+    return FALSE;
 }
 
 static gboolean fade_back_to_mute_image()
@@ -554,6 +566,11 @@ static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value
             g_debug("about to remove the animation_id callback from the mainloop!!**");
             g_source_remove(animation_id);
             animation_id = 0;
+        }
+        if(blocked_id != 0){
+            g_debug("about to remove the blocked_id callback from the mainloop!!**");
+            g_source_remove(blocked_id);
+            blocked_id = 0;            
         }
     }
     g_debug("signal caught - sink mute update with mute value: %i", mute_value);
@@ -677,12 +694,15 @@ scroll (IndicatorObject *io, gint delta, IndicatorScrollDirection direction)
     IndicatorSound *sound = INDICATOR_SOUND (io);
     GtkAdjustment *adj = gtk_range_get_adjustment (GTK_RANGE (sound->slider));
     gdouble value = gtk_range_get_value (GTK_RANGE (sound->slider));
+    
+    //g_debug("the scroll step size = %f", adj->step_increment);
 
-    if (direction == INDICATOR_OBJECT_SCROLL_UP)
-    value += adj->step_increment;
-    else
-    value -= adj->step_increment;
-
+    if (direction == INDICATOR_OBJECT_SCROLL_UP){
+        value += adj->step_increment;
+    }
+    else{
+        value -= adj->step_increment;
+    }
     gtk_range_set_value (GTK_RANGE (sound->slider),
-                       value);
+                   value);
 }

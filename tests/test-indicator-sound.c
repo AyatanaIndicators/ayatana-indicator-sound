@@ -86,14 +86,13 @@ void test_libindicator_image_names()
 }
 
 
-
 gint main (gint argc, gchar * argv[])
 {
 	g_type_init();
 	g_test_init(&argc, &argv, NULL);
 
-    g_test_add_func("/indicator-sound/indicator-sound/init", test_libindicator_sound_init);
-    g_test_add_func("/indicator-sound/indicator-sound/state_machine", test_libindicator_determine_state);
+/*    g_test_add_func("/indicator-sound/indicator-sound/init", test_libindicator_sound_init);*/
+/*    g_test_add_func("/indicator-sound/indicator-sound/state_machine", test_libindicator_determine_state);*/
     g_test_add_func("/indicator-sound/indicator-sound/image_names", test_libindicator_image_names);
 
 	return g_test_run ();

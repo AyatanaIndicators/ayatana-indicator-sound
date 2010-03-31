@@ -94,7 +94,7 @@ am_indicator_sound_service_OBJECTS =  \
 indicator_sound_service_OBJECTS =  \
 	$(am_indicator_sound_service_OBJECTS)
 indicator_sound_service_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 indicator_sound_service_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(indicator_sound_service_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
@@ -220,6 +220,8 @@ POFILES = @POFILES@
 POSUB = @POSUB@
 PO_IN_DATADIR_FALSE = @PO_IN_DATADIR_FALSE@
 PO_IN_DATADIR_TRUE = @PO_IN_DATADIR_TRUE@
+PULSEAUDIO_CFLAGS = @PULSEAUDIO_CFLAGS@
+PULSEAUDIO_LIBS = @PULSEAUDIO_LIBS@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -317,8 +319,8 @@ indicator_sound_service_SOURCES = \
     slider-menu-item.h \
     slider-menu-item.c
 
-indicator_sound_service_CFLAGS = $(SOUNDSERVICE_CFLAGS) $(GCONF_CFLAGS) -DLIBEXECDIR=\"$(libexecdir)\" -Wall -Werror
-indicator_sound_service_LDADD = $(SOUNDSERVICE_LIBS) $(GCONF_LIBS)
+indicator_sound_service_CFLAGS = $(PULSEAUDIO_CFLAGS) $(SOUNDSERVICE_CFLAGS) $(GCONF_CFLAGS) -DLIBEXECDIR=\"$(libexecdir)\" -Wall -Werror
+indicator_sound_service_LDADD = $(PULSEAUDIO_LIBS) $(SOUNDSERVICE_LIBS) $(GCONF_LIBS)
 
 ###############
 # Other Stuff
