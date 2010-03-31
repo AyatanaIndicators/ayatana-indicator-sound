@@ -1,4 +1,4 @@
-indicator-sound (0.2.1-0ubuntu1) UNRELEASED; urgency=low
+indicator-sound (0.2.1-0ubuntu1) lucid; urgency=low
 
   * New upstream release.
     - can't change audio using mouse wheel (LP: #521046)
