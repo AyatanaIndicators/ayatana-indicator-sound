@@ -140,7 +140,7 @@ sound_service_dbus_init (SoundServiceDbus *self)
 	}
     /* register the service on it */
 	dbus_g_connection_register_g_object(priv->connection,
-	                                    "/org/ayatana/indicator/sound/service",
+	                                    INDICATOR_SOUND_SERVICE_DBUS_OBJECT,
 	                                    G_OBJECT(self));
 }
 

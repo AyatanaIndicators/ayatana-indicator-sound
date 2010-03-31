@@ -1,10 +1,10 @@
 
-AC_INIT(indicator-sound, 0.2.1, conor.curran@canonical.com)
+AC_INIT(indicator-sound, 0.2.2, conor.curran@canonical.com)
 
 AC_PREREQ(2.53)
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(indicator-sound, 0.2.1)
+AM_INIT_AUTOMAKE(indicator-sound, 0.2.2)
 
 AM_MAINTAINER_MODE
 
@@ -23,7 +23,7 @@ m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
 ###########################
 # Dependencies 
-###########################
+###########################  
 
 GTK_REQUIRED_VERSION=2.12
 INDICATOR_REQUIRED_VERSION=0.3.6
@@ -34,7 +34,7 @@ INDICATOR_DISPLAY_OBJECTS=0.1.4
 
 PKG_CHECK_MODULES(APPLET, gtk+-2.0 >= $GTK_REQUIRED_VERSION
                           indicator >= $INDICATOR_REQUIRED_VERSION
-						  dbusmenu-gtk >= $DBUSMENUGTK_REQUIRED_VERSION
+			  dbusmenu-gtk >= $DBUSMENUGTK_REQUIRED_VERSION
                           libido-0.1 >= $INDICATOR_DISPLAY_OBJECTS)
                           
 AC_SUBST(APPLET_CFLAGS)
@@ -42,9 +42,12 @@ AC_SUBST(APPLET_LIBS)
 
 DBUSMENUGLIB_REQUIRED_VERSION=0.1.1
 
+PKG_CHECK_MODULES(PULSEAUDIO, libpulse-mainloop-glib >= $PULSE_AUDIO_REQUIRED_VERSION)
+AC_SUBST(PULSEAUDIO_CFLAGS)
+AC_SUBST(PULSEAUDIO_LIBS)
+
 PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib >= $DBUSMENUGLIB_REQUIRED_VERSION
                                 indicator >= $INDICATOR_REQUIRED_VERSION
-                                libpulse-mainloop-glib >= $PULSE_AUDIO_REQUIRED_VERSION
 )
 
 AC_SUBST(SOUNDSERVICE_CFLAGS)

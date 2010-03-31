@@ -1,3 +1,18 @@
+indicator-sound (0.2.2-0ubuntu1) lucid; urgency=low
+
+  * New upstream version
+    - Animation for mute-blocking state greatly improved
+    - Handles sink removal far better
+    - improves scrolling action icon on panel
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 31 Mar 2010 18:12:47 +0200
+
+indicator-sound (0.2.2-0ubuntu1) UNRELEASED; urgency=low
+
+  * New upstream release.
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 31 Mar 2010 17:49:12 +0200
+
 indicator-sound (0.2.1-0ubuntu1) lucid; urgency=low
 
   * New upstream release.
