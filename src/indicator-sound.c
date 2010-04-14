@@ -457,11 +457,14 @@ static void fetch_sink_availability_from_dbus()
         return;
     }
     device_available = *available_input;
-    if (device_available == FALSE)
+    if (device_available == FALSE){
         update_state(STATE_SINKS_NONE);
         g_debug("NO DEVICE AVAILABLE");
+    }
 
-    gtk_widget_set_sensitive(volume_slider, device_available);
+    if (GTK_IS_WIDGET (volume_slider))
+        gtk_widget_set_sensitive(volume_slider, device_available);
+    
     g_free(available_input);
     g_debug("IndicatorSound::fetch_sink_availability_from_dbus -> AVAILABILTY returned from dbus method is %i", device_available);
 
