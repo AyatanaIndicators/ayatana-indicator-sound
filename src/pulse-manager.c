@@ -46,6 +46,18 @@ static void destroy_sink_info(void *value);
 static gboolean determine_sink_availability();
 static void reconnect_to_pulse();
 
+static gboolean has_volume_changed(const pa_sink_info* new_sink, sink_info* cached_sink);
+/*static gdouble construct_volume_with_respect_to_balance(pa_cvolume* new_vol, pa_cvolume* cached_vol, pa_channel_map* cached_map);*/
+
+
+enum {
+    VOLUME,
+    BALANCE,
+    FADE,
+    LFE,
+};
+
+#define NUM_TYPES LFE + 1
 
 /**
 Refactoring notes
@@ -223,23 +235,36 @@ void set_sink_volume(gdouble percent)
     if(pa_server_available == FALSE)
         return;   
     g_debug("in the pulse manager:set_sink_volume with percent %f", percent);
+
     if(DEFAULT_SINK_INDEX < 0)
     {
         g_warning("We have no default sink !!! - returning after not attempting to set any volume of any sink");
         return;
     }
 
-    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));   
-
+    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));
+    pa_volume_t cached_volume = pa_cvolume_max(&s->volume);
     pa_volume_t new_volume = (pa_volume_t) ((percent * PA_VOLUME_NORM) / 100);
-    g_debug("new_volume double check :%f", pa_sw_volume_to_linear(new_volume));
-    g_debug("new volume calculated :%f", (gdouble)new_volume);
-    pa_cvolume dev_vol;
-    pa_cvolume_set(&dev_vol, s->volume.channels, new_volume);   
-    s->volume = dev_vol;
-    pa_operation_unref(pa_context_set_sink_volume_by_index(pulse_context, DEFAULT_SINK_INDEX, &dev_vol, NULL, NULL));
-    
+    pa_volume_t difference = 0;
+
+    if( cached_volume > new_volume ){
+        g_debug("I'm moving down down ...");
+        difference = cached_volume - new_volume;
+        pa_cvolume_dec(&s->volume, difference);        
+    }
+    else if ( cached_volume < new_volume ){
+        g_debug("I'm moving up up ...");
+        difference = new_volume - cached_volume;
+        pa_cvolume_inc(&s->volume, difference);                
+    }
+
+    g_debug("Calculated difference : %f", (gdouble)difference);
+    g_debug("new_volume calculated from percentage input :%f", pa_sw_volume_to_linear(new_volume));
+    g_debug("new volume calculated from resultant output :%f", pa_sw_volume_to_linear(pa_cvolume_max(&s->volume)));
+
+    pa_operation_unref(pa_context_set_sink_volume_by_index(pulse_context, DEFAULT_SINK_INDEX, &s->volume, NULL, NULL));
 }
+
 
 
 /**********************************************************************************************************************/
@@ -373,9 +398,18 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
         s->name = g_strdup(info->name);
         gboolean mute_changed = s->mute != !!info->mute;
         s->mute = !!info->mute;
-        gboolean volume_changed = (pa_cvolume_equal(&info->volume, &s->volume) == 0);
+        g_debug("new balance : %i", (int)(pa_cvolume_get_balance(&info->volume, &info->channel_map) * 100));
+        g_debug("cached balance : %i", (int)(pa_cvolume_get_balance(&s->volume, &s->channel_map) * 100));
+        g_debug("update_sink_info: new_volume input : %f", (gdouble)(pa_cvolume_avg(&info->volume)));
+        g_debug("update sink info: cached volume is at: %f", (gdouble)(pa_cvolume_avg(&s->volume)));
+        gboolean volume_changed = has_volume_changed(info, s);
+
+        g_debug("update sink info : volume changed = %i", volume_changed);
+        g_debug("update sink info : compatibility = %i", pa_cvolume_compatible_with_channel_map(&info->volume, &s->channel_map));
+
         s->volume = info->volume;
-        s->base_volume = info->base_volume;
+        s->channel_map = info->channel_map;
+        
         if(DEFAULT_SINK_INDEX == s->index)
         {
             //update the UI
@@ -409,11 +443,27 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
         value->name = g_strdup(info->name);
         value->mute = !!info->mute;
         value->volume = info->volume;
+        value->channel_map = info->channel_map;
         value->base_volume = info->base_volume;
         g_hash_table_insert(sink_hash, GINT_TO_POINTER(value->index), value);
         g_debug("pulse-manager:update_sink_info -> After adding a new sink to our hash");
         sound_service_dbus_update_sink_availability(dbus_service, TRUE);    
    } 
+}
+
+
+static gboolean has_volume_changed(const pa_sink_info* new_sink, sink_info* cached_sink)
+{
+    if(pa_cvolume_compatible_with_channel_map(&new_sink->volume, &cached_sink->channel_map) == FALSE)
+        return FALSE;
+
+    if(pa_cvolume_equal(&new_sink->volume, &cached_sink->volume) == TRUE)
+        return FALSE;
+
+    if((int)(pa_cvolume_get_balance(&new_sink->volume, &new_sink->channel_map) * 100) != (int)(pa_cvolume_get_balance(&cached_sink->volume, &cached_sink->channel_map) * 100))
+        return FALSE;
+
+    return TRUE;
 }
 
 
