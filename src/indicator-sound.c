@@ -117,10 +117,11 @@ static GtkImage *speaker_image = NULL;
 static gint current_state = 0;
 static gint previous_state = 0;
 
-static gdouble initial_volume_percent = 0;
+static gdouble initial_volume_percent;
 static gboolean initial_mute ;
 static gboolean device_available;
-static gboolean slider_in_direct_use = FALSE;
+static gboolean slider_in_direct_use;
+static gdouble exterior_vol_update;
 
 static GtkIconSize design_team_size;
 static gint blocked_id;
@@ -163,6 +164,7 @@ static void indicator_sound_init (IndicatorSound *self)
     initial_mute = FALSE;
     device_available = TRUE;
     slider_in_direct_use = FALSE;
+    exterior_vol_update = 0;
 
 	g_signal_connect(G_OBJECT(self->service), INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE, G_CALLBACK(connection_changed), self);
     return;
@@ -551,6 +553,7 @@ static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_pe
         // DEBUG
         gdouble current_value = gtk_range_get_value(range);
         g_debug("SIGNAL- update sink volume - current_value : %f and new value : %f", current_value, volume_percent);
+        exterior_vol_update = volume_percent;
         gtk_range_set_value(range, volume_percent);
         determine_state_from_volume(volume_percent);
     }
@@ -597,6 +600,10 @@ This callback will get triggered irregardless of whether its a user change or a 
 static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data)
 {
     gdouble current_value =  CLAMP(gtk_range_get_value(range), 0, 100);
+    if(current_value == exterior_vol_update){   
+        g_debug("ignore the value changed event - its come from the outside");
+        return FALSE;
+    }
     DbusmenuMenuitem *item = (DbusmenuMenuitem*)user_data;
     GValue value = {0};
     g_value_init(&value, G_TYPE_DOUBLE);
@@ -621,7 +628,6 @@ static void slider_released (GtkWidget *widget, gpointer user_data)
     slider_in_direct_use = FALSE;
     g_debug ("!!!!!! released\n");
 }
-
 
 
 /**
