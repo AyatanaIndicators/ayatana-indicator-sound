@@ -242,27 +242,16 @@ void set_sink_volume(gdouble percent)
         return;
     }
 
-    sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));
-    pa_volume_t cached_volume = pa_cvolume_max(&s->volume);
-    pa_volume_t new_volume = (pa_volume_t) ((percent * PA_VOLUME_NORM) / 100);
-    pa_volume_t difference = 0;
+    sink_info *cached_sink = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));
 
-    if( cached_volume > new_volume ){
-        g_debug("I'm moving down down ...");
-        difference = cached_volume - new_volume;
-        pa_cvolume_dec(&s->volume, difference);        
-    }
-    else if ( cached_volume < new_volume ){
-        g_debug("I'm moving up up ...");
-        difference = new_volume - cached_volume;
-        pa_cvolume_inc(&s->volume, difference);                
-    }
+    pa_cvolume new_volume;
+    pa_cvolume_init(&new_volume); 
+    new_volume.channels = 1; 
+    pa_volume_t new_volume_value = (pa_volume_t) ((percent * PA_VOLUME_NORM) / 100);
+    pa_cvolume_set(&new_volume, 1, new_volume_value);
+    pa_cvolume_set(&cached_sink->volume, cached_sink->channel_map.channels, new_volume_value);
 
-    g_debug("Calculated difference : %f", (gdouble)difference);
-    g_debug("new_volume calculated from percentage input :%f", pa_sw_volume_to_linear(new_volume));
-    g_debug("new volume calculated from resultant output :%f", pa_sw_volume_to_linear(pa_cvolume_max(&s->volume)));
-
-    pa_operation_unref(pa_context_set_sink_volume_by_index(pulse_context, DEFAULT_SINK_INDEX, &s->volume, NULL, NULL));
+    pa_operation_unref(pa_context_set_sink_volume_by_index(pulse_context, DEFAULT_SINK_INDEX, &new_volume, NULL, NULL));
 }
 
 
