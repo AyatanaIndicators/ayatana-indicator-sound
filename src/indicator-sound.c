@@ -164,7 +164,7 @@ static void indicator_sound_init (IndicatorSound *self)
     initial_mute = FALSE;
     device_available = TRUE;
     slider_in_direct_use = FALSE;
-    exterior_vol_update = 0;
+    exterior_vol_update = -10;
 
 	g_signal_connect(G_OBJECT(self->service), INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE, G_CALLBACK(connection_changed), self);
     return;
@@ -237,7 +237,6 @@ slider_parent_changed (GtkWidget *widget,
 {
     gtk_widget_set_size_request (widget, 200, -1);
     g_debug("slider parent changed");
-    //fetch_volume_percent_from_dbus();
 }
 
 /**
@@ -370,12 +369,12 @@ static void prepare_blocked_animation()
     temp_image = indicator_image_helper(blocked_name);
     GdkPixbuf* blocked_buf = gtk_image_get_pixbuf(temp_image);
 
-    int i;
-
     if(mute_buf == NULL || blocked_buf == NULL){
-        g_debug("Don bother with the animation, the theme aint got the goods");
+        g_debug("Don bother with the animation, the theme aint got the goods !");
         return;
     }
+
+    int i;
 
     // sample 51 snapshots - range : 0-256
     for(i = 0; i < 51; i++)
@@ -386,6 +385,9 @@ static void prepare_blocked_animation()
                              0, 0, 1, 1, GDK_INTERP_BILINEAR, MIN(255, i * 5));
         blocked_animation_list = g_list_append(blocked_animation_list, gdk_pixbuf_copy(blocked_buf));
     }
+    g_object_unref(temp_image);
+    g_object_unref(mute_buf);
+    g_object_unref(blocked_buf);
 }
 
 
@@ -446,6 +448,35 @@ void determine_state_from_volume(gdouble volume_percent)
 }
 
 
+static gboolean start_animation()
+{
+    blocked_iter = blocked_animation_list;
+    blocked_id = 0;
+    g_debug("exit from blocked hold start the animation\n");
+    animation_id = g_timeout_add(50, fade_back_to_mute_image, NULL);
+    return FALSE;
+}
+
+static gboolean fade_back_to_mute_image()
+{
+    if(blocked_iter != NULL)
+    {
+        g_debug("in animation 'loop'\n");
+        gtk_image_set_from_pixbuf(speaker_image, blocked_iter->data);
+        blocked_iter = blocked_iter->next;
+        return TRUE;
+    }
+    else{
+        animation_id = 0;
+/*        update_state(STATE_MUTED);*/
+        g_debug("exit from animation\n");
+        return FALSE;
+    }
+}
+
+/**
+DBus method handlers
+**/
 static void fetch_sink_availability_from_dbus()
 {
     GError * error = NULL;
@@ -509,6 +540,9 @@ static void fetch_mute_value_from_dbus()
     g_debug("at the indicator start up and the MUTE returned from dbus method is %i", initial_mute);
 }
 
+/**
+DBus signal catchers
+**/
 static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean block_value, gpointer userdata)
 {
     g_debug("signal caught - sink input while muted with value %i", block_value);
@@ -519,30 +553,6 @@ static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean blo
     }
 }
 
-static gboolean start_animation()
-{
-    blocked_iter = blocked_animation_list;
-    blocked_id = 0;
-    g_debug("exit from blocked hold start the animation\n");
-    animation_id = g_timeout_add(50, fade_back_to_mute_image, NULL);
-    return FALSE;
-}
-
-static gboolean fade_back_to_mute_image()
-{
-    if(blocked_iter != NULL)
-    {
-        g_debug("in animation 'loop'\n");
-        gtk_image_set_from_pixbuf(speaker_image, blocked_iter->data);
-        blocked_iter = blocked_iter->next;
-        return TRUE;
-    }
-    else{
-        animation_id = 0;
-        g_debug("exit from animation\n");
-        return FALSE;
-    }
-}
 
 static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_percent, gpointer userdata)
 {
@@ -592,6 +602,9 @@ static void catch_signal_sink_availability_update(DBusGProxy *proxy, gboolean av
     g_debug("signal caught - sink availability update with  value: %i", available_value);
 }
 
+/**
+UI callbacks
+**/
 
 /**
 value_changed_event_cb:
@@ -687,6 +700,7 @@ static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer dat
             if(new_value != current_value && current_state != STATE_MUTED)
             {
                 g_debug("Attempting to set the range from the key listener to %f", new_value);
+                exterior_vol_update = -10;
                 gtk_range_set_value(range, new_value);
             }
     }
