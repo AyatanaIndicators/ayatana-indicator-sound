@@ -310,7 +310,6 @@ new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuC
 static void
 connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata)
 {
-    // TODO: This could be safer.
 	if (connected) {
 		if (sound_dbus_proxy == NULL) {
 			GError * error = NULL;
@@ -347,6 +346,7 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
 
 	} else {
         //TODO : will need to handle this scenario
+        // Not much can we do here really, if there is no dbus connection tis goosed.
 	}
 
 	return;
@@ -401,9 +401,10 @@ prepare_blocked_animation()
                              0, 0, 1, 1, GDK_INTERP_BILINEAR, MIN(255, i * 5));
         blocked_animation_list = g_list_append(blocked_animation_list, gdk_pixbuf_copy(blocked_buf));
     }
-    g_object_unref(temp_image);
-    g_object_unref(mute_buf);
-    g_object_unref(blocked_buf);
+    g_object_ref_sink(mute_buf);
+	g_object_unref(mute_buf);
+    g_object_ref_sink(blocked_buf);
+	g_object_unref(blocked_buf);
 }
 
 
@@ -756,6 +757,7 @@ static void
 style_changed_cb(GtkWidget *widget, gpointer user_data)
 {
     g_debug("Just caught a style change event");
+    update_state(current_state);
     reset_mute_blocking_animation();
     update_state(current_state);
     free_the_animation_list();
