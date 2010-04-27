@@ -112,6 +112,7 @@ static const gint STATE_MEDIUM = 3;
 static const gint STATE_HIGH = 4;
 static const gint STATE_MUTED_WHILE_INPUT = 5;
 static const gint STATE_SINKS_NONE = 6;
+static const gint OUT_OF_RANGE = -10;
 
 static GHashTable *volume_states = NULL;
 static GtkImage *speaker_image = NULL;
@@ -168,7 +169,7 @@ indicator_sound_init (IndicatorSound *self)
     initial_mute = FALSE;
     device_available = TRUE;
     slider_in_direct_use = FALSE;
-    exterior_vol_update = -10;
+    exterior_vol_update = OUT_OF_RANGE;
 
 	g_signal_connect(G_OBJECT(self->service), INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE, G_CALLBACK(connection_changed), self);
     return;
@@ -284,7 +285,6 @@ new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuC
     g_signal_connect(volume_slider, "slider-grabbed", G_CALLBACK(slider_grabbed), NULL);
     g_signal_connect(volume_slider, "slider-released", G_CALLBACK(slider_released), NULL);
     g_signal_connect(slider, "style-set", G_CALLBACK(style_changed_cb), NULL);
-
 
     // Set images on the ido
     GtkWidget* primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)volume_slider);
@@ -743,7 +743,9 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
             if(new_value != current_value && current_state != STATE_MUTED)
             {
                 g_debug("Attempting to set the range from the key listener to %f", new_value);
-                exterior_vol_update = -10;
+                // In order to ensure that the exterior filtering does not catch this, reset the exterior_vol_update
+                // to ensure these updates. 
+                exterior_vol_update = OUT_OF_RANGE;
                 gtk_range_set_value(range, new_value);
             }
     }
