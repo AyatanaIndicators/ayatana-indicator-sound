@@ -1,3 +1,12 @@
+indicator-sound (0.2.3-0ubuntu1) lucid-proposed; urgency=low
+
+  * New upstream version:
+    - "Changing left/right balance in sound-preferences changes the output 
+       volume slider when indicator-applet is running" (lp: #532095)
+    - update the mute animation on theme changes (lp: #568586)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 29 Apr 2010 11:53:37 +0200
+
 indicator-sound (0.2.2-0ubuntu1) lucid; urgency=low
 
   * New upstream version
