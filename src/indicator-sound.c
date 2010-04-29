@@ -89,6 +89,7 @@ static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data);
 static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
 static void slider_grabbed(GtkWidget *widget, gpointer user_data);
 static void slider_released(GtkWidget *widget, gpointer user_data);
+static void style_changed_cb(GtkWidget *widget, gpointer user_data);
 
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
@@ -111,16 +112,18 @@ static const gint STATE_MEDIUM = 3;
 static const gint STATE_HIGH = 4;
 static const gint STATE_MUTED_WHILE_INPUT = 5;
 static const gint STATE_SINKS_NONE = 6;
+static const gint OUT_OF_RANGE = -10;
 
 static GHashTable *volume_states = NULL;
 static GtkImage *speaker_image = NULL;
 static gint current_state = 0;
 static gint previous_state = 0;
 
-static gdouble initial_volume_percent = 0;
+static gdouble initial_volume_percent;
 static gboolean initial_mute ;
 static gboolean device_available;
-static gboolean slider_in_direct_use = FALSE;
+static gboolean slider_in_direct_use;
+static gdouble exterior_vol_update;
 
 static GtkIconSize design_team_size;
 static gint blocked_id;
@@ -131,8 +134,10 @@ static GList * blocked_iter = NULL;
 static void prepare_blocked_animation();
 static gboolean fade_back_to_mute_image();
 static gboolean start_animation();
+static void reset_mute_blocking_animation();
+static void free_the_animation_list();
 
-// Construction
+
 static void
 indicator_sound_class_init (IndicatorSoundClass *klass)
 {
@@ -152,7 +157,8 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
 	return;
 }
 
-static void indicator_sound_init (IndicatorSound *self)
+static void
+indicator_sound_init (IndicatorSound *self)
 {
 	self->service = NULL;
 	self->service = indicator_service_manager_new_version(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_VERSION);
@@ -163,6 +169,7 @@ static void indicator_sound_init (IndicatorSound *self)
     initial_mute = FALSE;
     device_available = TRUE;
     slider_in_direct_use = FALSE;
+    exterior_vol_update = OUT_OF_RANGE;
 
 	g_signal_connect(G_OBJECT(self->service), INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE, G_CALLBACK(connection_changed), self);
     return;
@@ -179,13 +186,20 @@ indicator_sound_dispose (GObject *object)
 	}
     g_hash_table_destroy(volume_states);
 
-    if(blocked_animation_list != NULL){
-        g_list_foreach (blocked_animation_list, (GFunc)g_object_unref, NULL);
-        g_list_free(blocked_animation_list);
-    }
+    free_the_animation_list();
 
 	G_OBJECT_CLASS (indicator_sound_parent_class)->dispose (object);
 	return;
+}
+
+static void 
+free_the_animation_list()
+{
+    if(blocked_animation_list != NULL){
+        g_list_foreach (blocked_animation_list, (GFunc)g_object_unref, NULL);
+        g_list_free(blocked_animation_list);
+        blocked_animation_list = NULL;
+    }
 }
 
 static void
@@ -235,14 +249,14 @@ slider_parent_changed (GtkWidget *widget,
 {
     gtk_widget_set_size_request (widget, 200, -1);
     g_debug("slider parent changed");
-    //fetch_volume_percent_from_dbus();
 }
 
 /**
 new_slider_item:
 Create a new dBusMenu Slider item.
 **/
-static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
+static gboolean
+new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
     IndicatorObject *io = NULL;
 
@@ -270,6 +284,7 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
     g_signal_connect(slider, "value-changed", G_CALLBACK(value_changed_event_cb), newitem);
     g_signal_connect(volume_slider, "slider-grabbed", G_CALLBACK(slider_grabbed), NULL);
     g_signal_connect(volume_slider, "slider-released", G_CALLBACK(slider_released), NULL);
+    g_signal_connect(slider, "style-set", G_CALLBACK(style_changed_cb), NULL);
 
     // Set images on the ido
     GtkWidget* primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)volume_slider);
@@ -295,7 +310,6 @@ static gboolean new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * p
 static void
 connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata)
 {
-    // TODO: This could be safer.
 	if (connected) {
 		if (sound_dbus_proxy == NULL) {
 			GError * error = NULL;
@@ -332,6 +346,7 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
 
 	} else {
         //TODO : will need to handle this scenario
+        // Not much can we do here really, if there is no dbus connection tis goosed.
 	}
 
 	return;
@@ -340,7 +355,8 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
 /*
 Prepare states Array.
 */
-void prepare_state_machine()
+void 
+prepare_state_machine()
 {
     volume_states = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
     g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MUTED), g_strdup("audio-volume-muted-panel"));
@@ -357,7 +373,8 @@ prepare_blocked_animation:
 Prepares the array of images to be used in the blocked animation.
 Only called at startup.
 */
-static void prepare_blocked_animation()
+static void
+prepare_blocked_animation()
 {
     gchar* blocked_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
     gchar* muted_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED));
@@ -368,12 +385,12 @@ static void prepare_blocked_animation()
     temp_image = indicator_image_helper(blocked_name);
     GdkPixbuf* blocked_buf = gtk_image_get_pixbuf(temp_image);
 
-    int i;
-
     if(mute_buf == NULL || blocked_buf == NULL){
-        g_debug("Don bother with the animation, the theme aint got the goods");
+        g_debug("Don bother with the animation, the theme aint got the goods !");
         return;
     }
+
+    int i;
 
     // sample 51 snapshots - range : 0-256
     for(i = 0; i < 51; i++)
@@ -384,31 +401,40 @@ static void prepare_blocked_animation()
                              0, 0, 1, 1, GDK_INTERP_BILINEAR, MIN(255, i * 5));
         blocked_animation_list = g_list_append(blocked_animation_list, gdk_pixbuf_copy(blocked_buf));
     }
+    g_object_ref_sink(mute_buf);
+	g_object_unref(mute_buf);
+    g_object_ref_sink(blocked_buf);
+	g_object_unref(blocked_buf);
 }
 
 
-gint get_state()
+gint
+get_state()
 {
     return current_state;
 }
 
-gchar* get_state_image_name(gint state)
+gchar*
+get_state_image_name(gint state)
 {
     return g_hash_table_lookup(volume_states, GINT_TO_POINTER(state));
 }
 
-void prepare_for_tests(IndicatorObject *io)
+void
+prepare_for_tests(IndicatorObject *io)
 {
     prepare_state_machine();
     get_icon(io);
 }
 
-void tidy_up_hash()
+void
+tidy_up_hash()
 {
     g_hash_table_destroy(volume_states);
 }
 
-static void update_state(const gint state)
+static void
+update_state(const gint state)
 {
 /*    g_debug("update state beginning - previous_state = %i", previous_state);*/
 
@@ -422,7 +448,8 @@ static void update_state(const gint state)
 }
 
 
-void determine_state_from_volume(gdouble volume_percent)
+void
+determine_state_from_volume(gdouble volume_percent)
 {
 /*    g_debug("determine_state_from_volume - previous_state = %i", previous_state);*/
     if (device_available == FALSE)
@@ -444,7 +471,38 @@ void determine_state_from_volume(gdouble volume_percent)
 }
 
 
-static void fetch_sink_availability_from_dbus()
+static gboolean
+start_animation()
+{
+    blocked_iter = blocked_animation_list;
+    blocked_id = 0;
+    g_debug("exit from blocked hold start the animation\n");
+    animation_id = g_timeout_add(50, fade_back_to_mute_image, NULL);
+    return FALSE;
+}
+
+static gboolean
+fade_back_to_mute_image()
+{
+    if(blocked_iter != NULL)
+    {
+        g_debug("in animation 'loop'\n");
+        gtk_image_set_from_pixbuf(speaker_image, blocked_iter->data);
+        blocked_iter = blocked_iter->next;
+        return TRUE;
+    }
+    else{
+        animation_id = 0;
+        g_debug("exit from animation now\n");
+        return FALSE;
+    }
+}
+
+/*******************************************************************/
+//DBus method handlers
+/*******************************************************************/
+static void
+fetch_sink_availability_from_dbus()
 {
     GError * error = NULL;
     gboolean * available_input;
@@ -457,17 +515,21 @@ static void fetch_sink_availability_from_dbus()
         return;
     }
     device_available = *available_input;
-    if (device_available == FALSE)
+    if (device_available == FALSE){
         update_state(STATE_SINKS_NONE);
         g_debug("NO DEVICE AVAILABLE");
+    }
 
-    gtk_widget_set_sensitive(volume_slider, device_available);
+    if (GTK_IS_WIDGET (volume_slider))
+        gtk_widget_set_sensitive(volume_slider, device_available);
+    
     g_free(available_input);
     g_debug("IndicatorSound::fetch_sink_availability_from_dbus -> AVAILABILTY returned from dbus method is %i", device_available);
 
 }
 
-static void fetch_volume_percent_from_dbus()
+static void 
+fetch_volume_percent_from_dbus()
 {
     GError * error = NULL;
     gdouble *volume_percent_input;
@@ -485,7 +547,8 @@ static void fetch_volume_percent_from_dbus()
     g_debug("at the indicator start up and the volume percent returned from dbus method is %f", initial_volume_percent);
 }
 
-static void fetch_mute_value_from_dbus()
+static void 
+fetch_mute_value_from_dbus()
 {
     GError * error = NULL;
     gboolean *mute_input;
@@ -504,7 +567,11 @@ static void fetch_mute_value_from_dbus()
     g_debug("at the indicator start up and the MUTE returned from dbus method is %i", initial_mute);
 }
 
-static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean block_value, gpointer userdata)
+/*******************************************************************/
+//DBus signal catchers
+/*******************************************************************/
+static void
+catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean block_value, gpointer userdata)
 {
     g_debug("signal caught - sink input while muted with value %i", block_value);
     if (block_value == 1 && blocked_id == 0 && animation_id == 0 && blocked_animation_list != NULL) {
@@ -514,32 +581,9 @@ static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean blo
     }
 }
 
-static gboolean start_animation()
-{
-    blocked_iter = blocked_animation_list;
-    blocked_id = 0;
-    g_debug("exit from blocked hold start the animation\n");
-    animation_id = g_timeout_add(50, fade_back_to_mute_image, NULL);
-    return FALSE;
-}
 
-static gboolean fade_back_to_mute_image()
-{
-    if(blocked_iter != NULL)
-    {
-        g_debug("in animation 'loop'\n");
-        gtk_image_set_from_pixbuf(speaker_image, blocked_iter->data);
-        blocked_iter = blocked_iter->next;
-        return TRUE;
-    }
-    else{
-        animation_id = 0;
-        g_debug("exit from animation\n");
-        return FALSE;
-    }
-}
-
-static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_percent, gpointer userdata)
+static void
+catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_percent, gpointer userdata)
 {
     if (slider_in_direct_use == FALSE){
         GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
@@ -548,12 +592,14 @@ static void catch_signal_sink_volume_update(DBusGProxy *proxy, gdouble volume_pe
         // DEBUG
         gdouble current_value = gtk_range_get_value(range);
         g_debug("SIGNAL- update sink volume - current_value : %f and new value : %f", current_value, volume_percent);
+        exterior_vol_update = volume_percent;
         gtk_range_set_value(range, volume_percent);
         determine_state_from_volume(volume_percent);
     }
 }
 
-static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer userdata)
+static void
+catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer userdata)
 {
     //We can be sure the service won't send a mute signal unless it has changed !
     //UNMUTE's force a volume update therefore icon is updated appropriately => no need for unmute handling here.
@@ -562,22 +608,29 @@ static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value
         update_state(STATE_MUTED);
     }
     else{
-        if(animation_id != 0){
-            g_debug("about to remove the animation_id callback from the mainloop!!**");
-            g_source_remove(animation_id);
-            animation_id = 0;
-        }
-        if(blocked_id != 0){
-            g_debug("about to remove the blocked_id callback from the mainloop!!**");
-            g_source_remove(blocked_id);
-            blocked_id = 0;            
-        }
+        reset_mute_blocking_animation();
     }
     g_debug("signal caught - sink mute update with mute value: %i", mute_value);
     gtk_widget_set_sensitive(volume_slider, !mute_value);
 }
 
-static void catch_signal_sink_availability_update(DBusGProxy *proxy, gboolean available_value, gpointer userdata)
+static void
+reset_mute_blocking_animation()
+{
+    if(animation_id != 0){
+        g_debug("about to remove the animation_id callback from the mainloop!!**");
+        g_source_remove(animation_id);
+        animation_id = 0;
+    }
+    if(blocked_id != 0){
+        g_debug("about to remove the blocked_id callback from the mainloop!!**");
+        g_source_remove(blocked_id);
+        blocked_id = 0;            
+    } 
+}
+
+static void
+catch_signal_sink_availability_update(DBusGProxy *proxy, gboolean available_value, gpointer userdata)
 {
     device_available  = available_value;
     if (device_available == FALSE){
@@ -587,13 +640,24 @@ static void catch_signal_sink_availability_update(DBusGProxy *proxy, gboolean av
 }
 
 
+
+
+/*******************************************************************/
+//UI callbacks
+/******************************************************************/
+
 /**
 value_changed_event_cb:
 This callback will get triggered irregardless of whether its a user change or a programmatic change.
 **/
-static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data)
+static gboolean
+value_changed_event_cb(GtkRange *range, gpointer user_data)
 {
     gdouble current_value =  CLAMP(gtk_range_get_value(range), 0, 100);
+    if(current_value == exterior_vol_update){   
+        g_debug("ignore the value changed event - its come from the outside");
+        return FALSE;
+    }
     DbusmenuMenuitem *item = (DbusmenuMenuitem*)user_data;
     GValue value = {0};
     g_value_init(&value, G_TYPE_DOUBLE);
@@ -607,24 +671,26 @@ static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data)
 }
 
 
-static void slider_grabbed (GtkWidget *widget, gpointer user_data)
+static void
+slider_grabbed (GtkWidget *widget, gpointer user_data)
 {
     slider_in_direct_use = TRUE;
     g_debug ("!!!!!!  grabbed\n");
 }
 
-static void slider_released (GtkWidget *widget, gpointer user_data)
+static void
+slider_released (GtkWidget *widget, gpointer user_data)
 {
     slider_in_direct_use = FALSE;
     g_debug ("!!!!!! released\n");
 }
 
 
-
 /**
 key_press_cb:
 **/
-static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
+static gboolean
+key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
 {
     gboolean digested = FALSE;
 
@@ -678,12 +744,25 @@ static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer dat
             if(new_value != current_value && current_state != STATE_MUTED)
             {
                 g_debug("Attempting to set the range from the key listener to %f", new_value);
+                // In order to ensure that the exterior filtering does not catch this, reset the exterior_vol_update
+                // to ensure these updates. 
+                exterior_vol_update = OUT_OF_RANGE;
                 gtk_range_set_value(range, new_value);
             }
     }
     return digested;
 }
 
+static void
+style_changed_cb(GtkWidget *widget, gpointer user_data)
+{
+    g_debug("Just caught a style change event");
+    update_state(current_state);
+    reset_mute_blocking_animation();
+    update_state(current_state);
+    free_the_animation_list();
+    prepare_blocked_animation();
+}
 
 static void
 scroll (IndicatorObject *io, gint delta, IndicatorScrollDirection direction)
@@ -695,8 +774,6 @@ scroll (IndicatorObject *io, gint delta, IndicatorScrollDirection direction)
     GtkAdjustment *adj = gtk_range_get_adjustment (GTK_RANGE (sound->slider));
     gdouble value = gtk_range_get_value (GTK_RANGE (sound->slider));
     
-    //g_debug("the scroll step size = %f", adj->step_increment);
-
     if (direction == INDICATOR_OBJECT_SCROLL_UP){
         value += adj->step_increment;
     }
