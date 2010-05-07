@@ -47,7 +47,8 @@ sound-service-server.h: $(srcdir)/sound-service.xml
 # libsoundmenu vala
 #####################
 music_bridge_VALASOURCES = \
-	music-bridge.vala
+	music-bridge.vala \
+	rhythmbox-controller.vala
 
 music_bridge_VALAFLAGS = \
   --ccode \
@@ -59,11 +60,12 @@ music_bridge_VALAFLAGS = \
   --pkg gee-1.0 \
   --pkg indicate \
   --pkg DbusmenuGlib-0.2 \
+	--pkg dbus-glib-1
+ 
   $(MAINTAINER_VALAFLAGS)
 
 music_bridge_APIFILES = \
-  music-bridge.h
-
+  music-bridge.h 
 
 music_bridge_vala.stamp $(music_bridge_APIFILES): $(music_bridge_VALASOURCES)
 	$(AM_V_GEN) $(VALAC) $(music_bridge_VALAFLAGS) $^
