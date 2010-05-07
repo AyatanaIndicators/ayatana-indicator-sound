@@ -5,18 +5,20 @@ public class BridgeServer : GLib.Object{
 
     private Listener listener;
 
-//    private static const int LISTENING_MODE = 0;
-//    private static const int MASTER_MODE = 0;
-//    private int current_mode = LISTENING_MODE;
-
+      private static const int LISTENING_MODE = 0;
+      private static const int MASTER_MODE = 0;
+      private int current_mode = LISTENING_MODE;
+      private RhythmboxController rb;
+		
     public BridgeServer(){
-        listener = Listener.ref_default();        
-        listener.indicator_added.connect(on_indicator_added);
-        listener.indicator_removed.connect(on_indicator_removed);
-        listener.indicator_modified.connect(on_indicator_modified);
-        listener.server_added.connect(on_server_added);
-        listener.server_removed.connect(on_server_removed);
-        listener.server_count_changed.connect(on_server_count_changed);
+          listener = Listener.ref_default();        
+          listener.indicator_added.connect(on_indicator_added);
+          listener.indicator_removed.connect(on_indicator_removed);
+          listener.indicator_modified.connect(on_indicator_modified);
+          listener.server_added.connect(on_server_added);
+          listener.server_removed.connect(on_server_removed);
+          listener.server_count_changed.connect(on_server_count_changed);
+					//rb = new RhythmboxController();	
     }
 		
 		public void test_me(){
@@ -45,7 +47,7 @@ public class BridgeServer : GLib.Object{
         else{
             debug("client of type %s has registered with us", type);
 		        if (type.contains("rhythmbox") == true){
-							new RhythmboxController();	
+							rb = new RhythmboxController();	
 						}
         }
     }
