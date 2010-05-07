@@ -18,7 +18,7 @@ public class RhythmboxController : GLib.Object{
 		this.rhythmbox_shell = connection.get_object ("org.gnome.Rhythmbox", "/org/gnome/Rhythmbox/Shell", "/org/gnome/Rhythmbox/Shell");
 		this.rhythmbox_playlistmgr = connection.get_object ("org.gnome.Rhythmbox", "/org/gnome/Rhythmbox/PlaylistManager", "/org/gnome/Rhythmbox/PlaylistManager");
 
-		this.rhythmbox_player.PlayingUriChanged += onUriChange;
+		//this.rhythmbox_player.PlayingUriChanged += onUriChange;
 		this.rhythmbox_player.elapsedChanged += onElapsedChange;
 		
 		this.rhythmbox_player.setMute(false);
@@ -29,9 +29,9 @@ public class RhythmboxController : GLib.Object{
 		debug("New rhythmbox controller has been instantiated %i", (int)b);
 	}
 
-	private void onUriChange(dynamic DBus.Object rhythmbox, string uri){
-		debug("onUriChange, new uri : %s", uri);	
-	}
+//	private void onUriChange(dynamic DBus.Object rhythmbox, string uri){
+//		debug("onUriChange, new uri : %s", uri);	
+//	}
 
 	private void onElapsedChange(dynamic DBus.Object rhythmbox, uint32 time){
 		debug("onElapsedChange, new time = %u", time);

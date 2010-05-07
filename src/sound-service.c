@@ -73,7 +73,6 @@ main (int argc, char ** argv)
   dbus_menu_manager_setup();
 	BridgeServer* server = bridge_server_new();	
 	bridge_server_test_me(server);
-	//g_object_new(bridge_server_new, NULL);	
 
     // Run the loop
   mainloop = g_main_loop_new(NULL, FALSE);
