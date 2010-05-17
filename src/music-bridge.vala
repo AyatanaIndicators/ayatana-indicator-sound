@@ -1,66 +1,72 @@
 using Indicate;
 using DbusmenuGlib;
+using DbusmenuMenuitem;
 
-public class BridgeServer : GLib.Object{
+public class BridgeServer : GLib.Object
+{
 
-    private Listener listener;
+  private Listener listener;
+  private RhythmboxController rb;
+	private DbusmenuMenuitem root_menu;
 
-      private static const int LISTENING_MODE = 0;
-      private static const int MASTER_MODE = 0;
-      private int current_mode = LISTENING_MODE;
-      private RhythmboxController rb;
-		
-    public BridgeServer(){
-          listener = Listener.ref_default();        
-          listener.indicator_added.connect(on_indicator_added);
-          listener.indicator_removed.connect(on_indicator_removed);
-          listener.indicator_modified.connect(on_indicator_modified);
-          listener.server_added.connect(on_server_added);
-          listener.server_removed.connect(on_server_removed);
-          listener.server_count_changed.connect(on_server_count_changed);
-					//rb = new RhythmboxController();	
+  public BridgeServer()
+  {
+    listener = Listener.ref_default();
+    listener.indicator_added.connect(on_indicator_added);
+    listener.indicator_removed.connect(on_indicator_removed);
+    listener.indicator_modified.connect(on_indicator_modified);
+    listener.server_added.connect(on_server_added);
+    listener.server_removed.connect(on_server_removed);
+    listener.server_count_changed.connect(on_server_count_changed);
+  }
+
+  public void set_root_menu_item(DbusmenuMenuitem menu)
+  {
+    debug("BridgeServer -> set_root_menu_item");
+		root_menu = menu;
+  }
+
+  public void on_indicator_added(Indicate.ListenerServer object, Indicate.ListenerIndicator p0)
+  {
+    debug("BridgerServer -> on_indicator_added");
+  }
+
+  public void on_indicator_removed(Indicate.ListenerServer object, Indicate.ListenerIndicator p0)
+  {
+    debug("BridgeServer -> on_indicator_removed");
+  }
+
+  public void on_indicator_modified(Indicate.ListenerServer object, Indicate.ListenerIndicator p0, string s)
+  {
+    debug("BridgeServer -> indicator_modified with vale %s", s );
+  }
+
+  public void on_server_added(Indicate.ListenerServer object, string type)
+  {
+    debug("BridgeServer -> on_server_added with value %s", type);
+    if (type == null) return;
+    if (type.contains("music") == false) {
+      debug("server is of no interest,  it is not an music server");
+      return;
+    } else {
+      debug("client of type %s has registered with us", type);
+      if (type.contains("rhythmbox") == true) {
+        rb = new RhythmboxController();
+      }
     }
-		
-		public void test_me(){
-			debug("I'm being tested'");
-		}
+  }
 
-    public void on_indicator_added(Indicate.ListenerServer object, Indicate.ListenerIndicator p0){
-        debug("BridgerServer -> on_indicator_added");
-    }
+  public void on_server_removed(Indicate.ListenerServer object, string s)
+  {
+    debug("BridgeServer -> on_server_removed with value %s", s);
+  }
 
-    public void on_indicator_removed(Indicate.ListenerServer object, Indicate.ListenerIndicator p0){
-        debug("BridgeServer -> on_indicator_removed");
-    }
+  public void on_server_count_changed(Indicate.ListenerServer object, uint i)
+  {
+    debug("BridgeServer -> on_server_count_changed with value %u", i);
+  }
 
-    public void on_indicator_modified(Indicate.ListenerServer object, Indicate.ListenerIndicator p0, string s){
-        debug("BridgeServer -> indicator_modified with vale %s", s );
-    }
-
-    public void on_server_added(Indicate.ListenerServer object, string type){
-        debug("BridgeServer -> on_server_added with value %s", type);
-	    if (type == null) return;
-        if (type.contains("music") == false){
-            debug("server is of no interest,  it is not an music server");
-            return;
-        }
-        else{
-            debug("client of type %s has registered with us", type);
-		        if (type.contains("rhythmbox") == true){
-							rb = new RhythmboxController();	
-						}
-        }
-    }
-
-    public void on_server_removed(Indicate.ListenerServer object, string s){
-        debug("BridgeServer -> on_server_removed with value %s", s);
-    }
-    
-    public void on_server_count_changed(Indicate.ListenerServer object, uint i){
-        debug("BridgeServer -> on_server_count_changed with value %u", i);
-    }
-
-} 
+}
 
 
 //public void main (string[] args) {

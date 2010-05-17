@@ -1,6 +1,8 @@
 #ifndef __INCLUDE_DBUS_MENU_MANAGER_H__
 #define __INCLUDE_DBUS_MENU_MANAGER_H__
 
+#include <libdbusmenu-glib/menuitem.h>
+
 /*
 This handles the management of the dbusmeneu items.
 Copyright 2010 Canonical Ltd.
@@ -21,7 +23,7 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-void dbus_menu_manager_setup();
+DbusmenuMenuitem* dbus_menu_manager_setup();
 void dbus_menu_manager_teardown();
 void dbus_menu_manager_update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_muted, gdouble current_vol);
 // TODO update pa_state should incorporate the method below !

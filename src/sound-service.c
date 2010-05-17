@@ -70,9 +70,9 @@ main (int argc, char ** argv)
 	                 INDICATOR_SERVICE_SIGNAL_SHUTDOWN,
 	                 G_CALLBACK(service_shutdown), NULL);    
 
-  dbus_menu_manager_setup();
+	DbusmenuMenuitem* root_menuitem = dbus_menu_manager_setup();
 	BridgeServer* server = bridge_server_new();	
-	bridge_server_test_me(server);
+	bridge_server_set_root_menu_item(server, root_menuitem);
 
     // Run the loop
   mainloop = g_main_loop_new(NULL, FALSE);
