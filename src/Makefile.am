@@ -47,25 +47,23 @@ sound-service-server.h: $(srcdir)/sound-service.xml
 # libsoundmenu vala
 #####################
 music_bridge_VALASOURCES = \
-	music-bridge.vala \
-	rhythmbox-controller.vala
+	music-player-bridge.vala 
 
 music_bridge_VALAFLAGS = \
   --ccode \
-  -H music-bridge.h -d . \
+  -H music-player-bridge.h -d . \
   --library music-bridge \
   --vapidir=./ \
-  --vapidir=$(abs_top_builddir)/vapi/ \
   --thread \
   --pkg gee-1.0 \
-  --pkg indicate \
-  --pkg DbusmenuGlib-0.2 \
+  --pkg Indicate-0.2 \
+  --pkg Dbusmenu-Glib-0.2 \
 	--pkg dbus-glib-1
  
   $(MAINTAINER_VALAFLAGS)
 
 music_bridge_APIFILES = \
-  music-bridge.h 
+  music-player-bridge.h 
 
 music_bridge_vala.stamp $(music_bridge_APIFILES): $(music_bridge_VALASOURCES)
 	$(AM_V_GEN) $(VALAC) $(music_bridge_VALAFLAGS) $^

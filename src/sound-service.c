@@ -23,7 +23,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "sound-service.h"
 #include "dbus-menu-manager.h"
 #include "pulse-manager.h"
-#include "music-bridge.h"
+#include "music-player-bridge.h"
 
 static GMainLoop *mainloop = NULL;
 
@@ -71,8 +71,8 @@ main (int argc, char ** argv)
 	                 G_CALLBACK(service_shutdown), NULL);    
 
 	DbusmenuMenuitem* root_menuitem = dbus_menu_manager_setup();
-	BridgeServer* server = bridge_server_new();	
-	bridge_server_set_root_menu_item(server, root_menuitem);
+	MusicPlayerBridge* server = music_player_bridge_new();	
+	music_player_bridge_set_root_menu_item(server, root_menuitem);
 
     // Run the loop
   mainloop = g_main_loop_new(NULL, FALSE);
