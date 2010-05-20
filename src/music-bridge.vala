@@ -1,16 +1,19 @@
 using Indicate;
 using DbusmenuGlib;
 using DbusmenuMenuitem;
+//using Gee;
 
 public class BridgeServer : GLib.Object
 {
 
   private Listener listener;
-  private RhythmboxController rb;
-	private DbusmenuMenuitem root_menu;
-
+  private DbusmenuMenuitem root_menu;
+	//private HashMap<string, DbusmenuMenuitem> registered_clients;  
+	
   public BridgeServer()
   {
+		//registered_clients = new HashMap<string, DbusmenuMenuitem> ();
+		root_menu = null;
     listener = Listener.ref_default();
     listener.indicator_added.connect(on_indicator_added);
     listener.indicator_removed.connect(on_indicator_removed);
@@ -48,11 +51,17 @@ public class BridgeServer : GLib.Object
     if (type.contains("music") == false) {
       debug("server is of no interest,  it is not an music server");
       return;
-    } else {
+    } 
+		else {
       debug("client of type %s has registered with us", type);
-      if (type.contains("rhythmbox") == true) {
-        rb = new RhythmboxController();
-      }
+			if (root_menu != null){
+				debug("Just about to create the registration menu item");
+				DbusmenuMenuitem client_item = new DbusmenuMenuitem();
+				string client_name = type.split(".")[1];
+				client_item.property_set(DBUSMENU_MENUITEM_PROP_LABEL, client_name.concat(" is registered"));
+				//registered_clients.set(client_name, client_item); 
+				root_menu.child_append(client_item);
+			}
     }
   }
 
