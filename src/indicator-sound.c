@@ -91,6 +91,9 @@ static void slider_grabbed(GtkWidget *widget, gpointer user_data);
 static void slider_released(GtkWidget *widget, gpointer user_data);
 static void style_changed_cb(GtkWidget *widget, gpointer user_data);
 
+//transport bar related
+static gboolean new_transport_bar(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
+
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
 static void connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata);
@@ -150,9 +153,9 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
 	io_class->get_label = get_label;
 	io_class->get_image = get_icon;
 	io_class->get_menu  = get_menu;
-    io_class->scroll    = scroll;
+  io_class->scroll    = scroll;
 
-    design_team_size = gtk_icon_size_register("design-team-size", 22, 22);
+  design_team_size = gtk_icon_size_register("design-team-size", 22, 22);
 
 	return;
 }
@@ -217,9 +220,9 @@ get_label (IndicatorObject * io)
 
 static GtkImage *
 get_icon (IndicatorObject * io)
-{
-    gchar* current_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
-    g_debug("At start-up attempting to set the image to %s", current_name);
+{	
+  gchar* current_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
+  g_debug("At start-up attempting to set the image to %s", current_name);
 	speaker_image = indicator_image_helper(current_name);
 	gtk_widget_show(GTK_WIDGET(speaker_image));
 	return speaker_image;
@@ -231,16 +234,15 @@ get_icon (IndicatorObject * io)
 static GtkMenu *
 get_menu (IndicatorObject * io)
 {
-    DbusmenuGtkMenu *menu = dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT);
-    DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);
+  DbusmenuGtkMenu *menu = dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT);
+  DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);
+  g_object_set_data (G_OBJECT (client), "indicator", io);
+  dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SLIDER_MENUITEM_TYPE, new_slider_item);
+	dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TRANSPORT_MENUITEM_TYPE, new_transport_bar);
 
-    g_object_set_data (G_OBJECT (client),
-                       "indicator", io);
-    dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SLIDER_MENUITEM_TYPE, new_slider_item);
-
-    // register Key-press listening on the menu widget as the slider does not allow this.
-    g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), NULL);
-    return GTK_MENU(menu);
+  // register Key-press listening on the menu widget as the slider does not allow this.
+  g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), NULL);
+  return GTK_MENU(menu);
 }
 
 static void
@@ -307,6 +309,13 @@ new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuC
     return TRUE;
 }
 
+static gboolean new_transport_bar(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
+{
+	g_debug("indicator-sound: new_transport_bar() called ");
+	return TRUE;
+}
+
+
 static void
 connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata)
 {
@@ -337,11 +346,11 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
 			dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_AVAILABLE_UPDATE, G_TYPE_BOOLEAN, G_TYPE_INVALID);
 			dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_AVAILABLE_UPDATE, G_CALLBACK(catch_signal_sink_availability_update), NULL, NULL);
 
-            // Ensure we are in a coherent state with the service at start up.
-            // Preserve ordering!
-            fetch_volume_percent_from_dbus();
-            fetch_mute_value_from_dbus();
-            fetch_sink_availability_from_dbus();
+			// Ensure we are in a coherent state with the service at start up.
+			// Preserve ordering!
+			fetch_volume_percent_from_dbus();
+			fetch_mute_value_from_dbus();
+			fetch_sink_availability_from_dbus();
 		}
 
 	} else {
@@ -645,7 +654,6 @@ catch_signal_sink_availability_update(DBusGProxy *proxy, gboolean available_valu
 /*******************************************************************/
 //UI callbacks
 /******************************************************************/
-
 /**
 value_changed_event_cb:
 This callback will get triggered irregardless of whether its a user change or a programmatic change.
@@ -692,94 +700,93 @@ key_press_cb:
 static gboolean
 key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
 {
-    gboolean digested = FALSE;
+  gboolean digested = FALSE;
 
-    GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
-    GtkRange* range = (GtkRange*)slider;
-    gdouble current_value = gtk_range_get_value(range);
-    gdouble new_value = current_value;
-    const gdouble five_percent = 5;
-    GtkWidget *menuitem;
+  GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
+  GtkRange* range = (GtkRange*)slider;
+  gdouble current_value = gtk_range_get_value(range);
+  gdouble new_value = current_value;
+  const gdouble five_percent = 5;
+  GtkWidget *menuitem;
 
-    menuitem = GTK_MENU_SHELL (widget)->active_menu_item;
-    if(IDO_IS_SCALE_MENU_ITEM(menuitem) == TRUE)
+  menuitem = GTK_MENU_SHELL (widget)->active_menu_item;
+  if(IDO_IS_SCALE_MENU_ITEM(menuitem) == TRUE)
+  {
+		switch(event->keyval)
     {
-        switch(event->keyval)
-            {
-            case GDK_Right:
-                digested = TRUE;
-                if(event->state & GDK_CONTROL_MASK)
-                {
-                    new_value = 100;
-                }
-                else
-                {
-                    new_value = current_value + five_percent;
-                }
-                break;
-            case GDK_Left:
-                digested = TRUE;
-                if(event->state & GDK_CONTROL_MASK)
-                {
-                    new_value = 0;
-                }
-                else
-                {
-                    new_value = current_value - five_percent;
-                }
-                break;
-            case GDK_plus:
-                digested = TRUE;
-                new_value = current_value + five_percent;
-                break;
-            case GDK_minus:
-                digested = TRUE;
-                new_value = current_value - five_percent;
-                break;
-            default:
-                break;
-            }
-
-            new_value = CLAMP(new_value, 0, 100);
-            if(new_value != current_value && current_state != STATE_MUTED)
-            {
-                g_debug("Attempting to set the range from the key listener to %f", new_value);
-                // In order to ensure that the exterior filtering does not catch this, reset the exterior_vol_update
-                // to ensure these updates. 
-                exterior_vol_update = OUT_OF_RANGE;
-                gtk_range_set_value(range, new_value);
-            }
+    case GDK_Right:
+	    digested = TRUE;
+	    if(event->state & GDK_CONTROL_MASK)
+	    {
+		    new_value = 100;
+    	}
+    	else
+    	{
+        new_value = current_value + five_percent;
+    	}
+    	break;
+    case GDK_Left:
+    	digested = TRUE;
+      if(event->state & GDK_CONTROL_MASK)
+      {
+          new_value = 0;
+      }
+      else
+      {
+          new_value = current_value - five_percent;
+      }
+      break;
+    case GDK_plus:
+      digested = TRUE;
+      new_value = current_value + five_percent;
+      break;
+    case GDK_minus:
+      digested = TRUE;
+      new_value = current_value - five_percent;
+      break;
+    default:
+      break;
     }
-    return digested;
+
+    new_value = CLAMP(new_value, 0, 100);
+    if(new_value != current_value && current_state != STATE_MUTED)
+    {
+      g_debug("Attempting to set the range from the key listener to %f", new_value);
+      // In order to ensure that the exterior filtering does not catch this, reset the exterior_vol_update
+      // to ensure these updates. 
+      exterior_vol_update = OUT_OF_RANGE;
+      gtk_range_set_value(range, new_value);
+    }
+  }
+  return digested;
 }
 
 static void
 style_changed_cb(GtkWidget *widget, gpointer user_data)
 {
-    g_debug("Just caught a style change event");
-    update_state(current_state);
-    reset_mute_blocking_animation();
-    update_state(current_state);
-    free_the_animation_list();
-    prepare_blocked_animation();
+  g_debug("Just caught a style change event");
+  update_state(current_state);
+  reset_mute_blocking_animation();
+  update_state(current_state);
+  free_the_animation_list();
+  prepare_blocked_animation();
 }
 
 static void
 scroll (IndicatorObject *io, gint delta, IndicatorScrollDirection direction)
 {
-    if (device_available == FALSE || current_state == STATE_MUTED)
-        return;
+	if (device_available == FALSE || current_state == STATE_MUTED)
+  	return;
 
-    IndicatorSound *sound = INDICATOR_SOUND (io);
-    GtkAdjustment *adj = gtk_range_get_adjustment (GTK_RANGE (sound->slider));
-    gdouble value = gtk_range_get_value (GTK_RANGE (sound->slider));
+  IndicatorSound *sound = INDICATOR_SOUND (io);
+  GtkAdjustment *adj = gtk_range_get_adjustment (GTK_RANGE (sound->slider));
+  gdouble value = gtk_range_get_value (GTK_RANGE (sound->slider));
     
-    if (direction == INDICATOR_OBJECT_SCROLL_UP){
-        value += adj->step_increment;
-    }
-    else{
-        value -= adj->step_increment;
-    }
-    gtk_range_set_value (GTK_RANGE (sound->slider),
-                   value);
+  if (direction == INDICATOR_OBJECT_SCROLL_UP){
+  	value += adj->step_increment;
+  }
+  else{
+		value -= adj->step_increment;
+  }
+  gtk_range_set_value (GTK_RANGE (sound->slider), value);
 }

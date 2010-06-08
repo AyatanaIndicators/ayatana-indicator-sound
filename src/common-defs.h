@@ -27,3 +27,4 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 // DBUS items
 #define DBUSMENU_SLIDER_MENUITEM_TYPE          "x-canonical-ido-slider-item"
 #define DBUSMENU_SLIDER_MENUITEM_PROP_VOLUME   "volume"
+#define DBUSMENU_TRANSPORT_MENUITEM_TYPE        "x-canonical-transport-bar"

@@ -49,6 +49,7 @@ public class MusicPlayerBridge : GLib.Object
 		string client_name = type.split(".")[1];
 		if (root_menu != null && client_name != null){
 			Dbusmenu.Menuitem client_item = new Dbusmenu.Menuitem();
+			
 			client_item.property_set(MENUITEM_PROP_LABEL, client_name.concat(" is registered"));
 			registered_clients.set(client_name, client_item); 
 			root_menu.child_append(client_item);

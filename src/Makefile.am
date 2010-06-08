@@ -47,7 +47,8 @@ sound-service-server.h: $(srcdir)/sound-service.xml
 # libsoundmenu vala
 #####################
 music_bridge_VALASOURCES = \
-	music-player-bridge.vala 
+	music-player-bridge.vala \
+	transport-menu-item.vala
 
 music_bridge_VALAFLAGS = \
   --ccode \
