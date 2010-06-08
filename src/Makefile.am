@@ -9,6 +9,8 @@ soundmenulib_LTLIBRARIES = libsoundmenu.la
 libsoundmenu_la_SOURCES = \
   common-defs.h \
 	indicator-sound.h \
+	transport-bar.c \
+	transport-bar.h \
 	indicator-sound.c \
 	dbus-shared-names.h \
   sound-service-client.h 
@@ -88,7 +90,7 @@ indicator_sound_service_SOURCES = \
   slider-menu-item.c \
   $(music_bridge_VALASOURCES:.vala=.c)
 
-indicator_sound_service_CFLAGS = $(PULSEAUDIO_CFLAGS) $(SOUNDSERVICE_CFLAGS) $(GCONF_CFLAGS) -DLIBEXECDIR=\"$(libexecdir)\" -Wall -Werror
+indicator_sound_service_CFLAGS = $(PULSEAUDIO_CFLAGS) $(SOUNDSERVICE_CFLAGS) $(GCONF_CFLAGS) -DLIBEXECDIR=\"$(libexecdir)\" -Wall
 indicator_sound_service_LDADD = $(PULSEAUDIO_LIBS) $(SOUNDSERVICE_LIBS) $(GCONF_LIBS)
 
 #########################

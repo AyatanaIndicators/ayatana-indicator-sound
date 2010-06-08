@@ -38,6 +38,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <libindicator/indicator-image-helper.h>
 
 #include "indicator-sound.h"
+#include "transport-bar"
 #include "dbus-shared-names.h"
 #include "sound-service-client.h"
 #include "common-defs.h"
@@ -312,6 +313,7 @@ new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuC
 static gboolean new_transport_bar(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
 	g_debug("indicator-sound: new_transport_bar() called ");
+	TransportBar* bar = transport_bar_new();
 	return TRUE;
 }
 

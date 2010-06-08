@@ -40,8 +40,8 @@ struct _TransportBarClass {
 struct _TransportBar {
 };
 
-GType transport_item_get_type (void);
-TransportBar* transport_item_new();
+GType transport_bar_get_type (void);
+TransportBar* transport_bar_new();
 
 G_END_DECLS
 

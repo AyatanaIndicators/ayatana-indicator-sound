@@ -48,11 +48,10 @@ public class MusicPlayerBridge : GLib.Object
 		if(server_is_not_of_interest(type)) return;
 		string client_name = type.split(".")[1];
 		if (root_menu != null && client_name != null){
-			Dbusmenu.Menuitem client_item = new Dbusmenu.Menuitem();
-			
-			client_item.property_set(MENUITEM_PROP_LABEL, client_name.concat(" is registered"));
-			registered_clients.set(client_name, client_item); 
-			root_menu.child_append(client_item);
+			TransportMenuItem transport_item = new TransportMenuItem();			
+			//client_item.property_set(MENUITEM_PROP_LABEL, client_name.concat(" is registered"));
+			registered_clients.set(client_name, transport_item); 
+			root_menu.child_append(transport_item);
 			debug("client of name %s has successfully registered with us", client_name);
 		}
   }
