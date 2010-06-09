@@ -19,8 +19,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __TRANSPORT_BAR_H__
 #define __TRANSPORT_BAR_H__
 
-#include <glib.h>
-#include <glib-object.h>
+#include <gtk/gtkmenuitem.h>
 
 G_BEGIN_DECLS
 
@@ -35,13 +34,15 @@ typedef struct _TransportBar      TransportBar;
 typedef struct _TransportBarClass TransportBarClass;
 
 struct _TransportBarClass {
+	  GtkMenuItemClass parent_class;
 };
 
 struct _TransportBar {
+	  GtkMenuItem parent;
 };
 
 GType transport_bar_get_type (void);
-TransportBar* transport_bar_new();
+GtkWidget* transport_bar_new();
 
 G_END_DECLS
 

@@ -30,7 +30,7 @@ typedef struct _TransportBarPrivate TransportBarPrivate;
 
 struct _TransportBarPrivate
 {
-	GtkWidget* hBox;
+	GtkWidget* hbox;
 	GtkWidget* previous_button;
 	GtkWidget* play_button;
 	GtkWidget* next_button;	
@@ -43,7 +43,8 @@ static void transport_bar_class_init (TransportBarClass *klass);
 static void transport_bar_init       (TransportBar *self);
 static void transport_bar_dispose    (GObject *object);
 static void transport_bar_finalize   (GObject *object);
-G_DEFINE_TYPE (TransportBar, transport_bar, DBUSMENU_TYPE_MENUITEM);
+
+G_DEFINE_TYPE (TransportBar, transport_bar, GTK_TYPE_MENU_ITEM);
 
 static void
 transport_bar_class_init (TransportBarClass *klass)
@@ -54,29 +55,35 @@ transport_bar_class_init (TransportBarClass *klass)
 
 	object_class->dispose = transport_bar_dispose;
 	object_class->finalize = transport_bar_finalize;
-
-	return;
 }
 
 static void
 transport_bar_init (TransportBar *self)
 {
-	g_debug("Building new Transport Item");
-	hBox = gtk_hbox_new(TRUE, 2));
-	previous_button = gtk_button_new_with_label("Previous"));
-  next_button = gtk_button_new_with_label("Next"));
-	play_button =	gtk_button_new_with_label("Play"));
-	gtk_container_add((GtkContainer*) hBox, previous_button); 
-	gtk_container_add((GtkContainer*) hBox, next_button); 
-	gtk_container_add((GtkContainer*) hBox, play_button); 
-	return;
+	g_debug("TransportBar::transport_bar_init");
+
+	TransportBarPrivate * priv = TRANSPORT_BAR_GET_PRIVATE(self);
+	GtkWidget *hbox;
+
+	hbox = gtk_hbox_new(TRUE, 2);
+	priv->previous_button = gtk_button_new_with_label("Previous");
+  priv->next_button = gtk_button_new_with_label("Next");
+	priv->play_button =	gtk_button_new_with_label("Play");
+
+	gtk_box_pack_start (GTK_BOX (hbox), priv->previous_button, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), priv->play_button, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), priv->next_button, FALSE, FALSE, 0);
+	
+  priv->hbox = hbox;
+
+  gtk_widget_show_all (priv->hbox);
+  gtk_container_add (GTK_CONTAINER (self), hbox);
 }
 
 static void
 transport_bar_dispose (GObject *object)
 {
 	G_OBJECT_CLASS (transport_bar_parent_class)->dispose (object);
-	return;
 }
 
 static void
@@ -85,9 +92,13 @@ transport_bar_finalize (GObject *object)
 	G_OBJECT_CLASS (transport_bar_parent_class)->finalize (object);
 }
 
-TransportBar*
+/**
+ * transport_new:
+ * @returns: a new #TransportBar.
+ **/
+GtkWidget* 
 transport_bar_new()
 {
-	TransportBar *self = g_object_new(TRANSPORT_BAR_TYPE, NULL);
-	return self;
+	return g_object_new(TRANSPORT_BAR_TYPE, NULL);
 }
+

@@ -38,7 +38,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <libindicator/indicator-image-helper.h>
 
 #include "indicator-sound.h"
-#include "transport-bar"
+#include "transport-bar.h"
 #include "dbus-shared-names.h"
 #include "sound-service-client.h"
 #include "common-defs.h"
@@ -62,7 +62,7 @@ struct _IndicatorSoundClass {
 //GObject instance struct
 struct _IndicatorSound {
 	IndicatorObject parent;
-        GtkWidget *slider;
+  GtkWidget *slider;
 	IndicatorServiceManager *service;
 };
 // GObject Boiler plate
@@ -166,17 +166,17 @@ indicator_sound_init (IndicatorSound *self)
 {
 	self->service = NULL;
 	self->service = indicator_service_manager_new_version(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_VERSION);
-    prepare_state_machine();
-    prepare_blocked_animation();
-    animation_id = 0;
-    blocked_id = 0;
-    initial_mute = FALSE;
-    device_available = TRUE;
-    slider_in_direct_use = FALSE;
-    exterior_vol_update = OUT_OF_RANGE;
+  prepare_state_machine();
+  prepare_blocked_animation();
+  animation_id = 0;
+  blocked_id = 0;
+  initial_mute = FALSE;
+  device_available = TRUE;
+  slider_in_direct_use = FALSE;
+  exterior_vol_update = OUT_OF_RANGE;
 
 	g_signal_connect(G_OBJECT(self->service), INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE, G_CALLBACK(connection_changed), self);
-    return;
+  return;
 }
 
 static void
@@ -188,9 +188,9 @@ indicator_sound_dispose (GObject *object)
 		g_object_unref(G_OBJECT(self->service));
 		self->service = NULL;
 	}
-    g_hash_table_destroy(volume_states);
+  g_hash_table_destroy(volume_states);
 
-    free_the_animation_list();
+  free_the_animation_list();
 
 	G_OBJECT_CLASS (indicator_sound_parent_class)->dispose (object);
 	return;
@@ -199,11 +199,11 @@ indicator_sound_dispose (GObject *object)
 static void 
 free_the_animation_list()
 {
-    if(blocked_animation_list != NULL){
-        g_list_foreach (blocked_animation_list, (GFunc)g_object_unref, NULL);
-        g_list_free(blocked_animation_list);
-        blocked_animation_list = NULL;
-    }
+  if(blocked_animation_list != NULL){
+    g_list_foreach (blocked_animation_list, (GFunc)g_object_unref, NULL);
+    g_list_free(blocked_animation_list);
+    blocked_animation_list = NULL;
+  }
 }
 
 static void
@@ -313,7 +313,19 @@ new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuC
 static gboolean new_transport_bar(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
 	g_debug("indicator-sound: new_transport_bar() called ");
-	TransportBar* bar = transport_bar_new();
+
+	GtkWidget* bar = NULL;
+	
+	g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
+  g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
+
+	bar = transport_bar_new();
+  GtkMenuItem *menu_transport_bar = GTK_MENU_ITEM(bar);
+
+  dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_transport_bar, parent);
+	
+	gtk_widget_show_all(bar);
+	
 	return TRUE;
 }
 
@@ -387,34 +399,34 @@ Only called at startup.
 static void
 prepare_blocked_animation()
 {
-    gchar* blocked_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
-    gchar* muted_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED));
+  gchar* blocked_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
+  gchar* muted_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED));
 
-    GtkImage* temp_image = indicator_image_helper(muted_name);
-    GdkPixbuf* mute_buf = gtk_image_get_pixbuf(temp_image);
+  GtkImage* temp_image = indicator_image_helper(muted_name);
+  GdkPixbuf* mute_buf = gtk_image_get_pixbuf(temp_image);
 
-    temp_image = indicator_image_helper(blocked_name);
-    GdkPixbuf* blocked_buf = gtk_image_get_pixbuf(temp_image);
+  temp_image = indicator_image_helper(blocked_name);
+  GdkPixbuf* blocked_buf = gtk_image_get_pixbuf(temp_image);
 
-    if(mute_buf == NULL || blocked_buf == NULL){
-        g_debug("Don bother with the animation, the theme aint got the goods !");
-        return;
-    }
+  if(mute_buf == NULL || blocked_buf == NULL){
+    g_debug("Don bother with the animation, the theme aint got the goods !");
+    return;
+  }
 
-    int i;
+  int i;
 
-    // sample 51 snapshots - range : 0-256
-    for(i = 0; i < 51; i++)
-    {
-        gdk_pixbuf_composite(mute_buf, blocked_buf, 0, 0,
-                             gdk_pixbuf_get_width(mute_buf),
-                             gdk_pixbuf_get_height(mute_buf),
-                             0, 0, 1, 1, GDK_INTERP_BILINEAR, MIN(255, i * 5));
-        blocked_animation_list = g_list_append(blocked_animation_list, gdk_pixbuf_copy(blocked_buf));
-    }
-    g_object_ref_sink(mute_buf);
+  // sample 51 snapshots - range : 0-256
+  for(i = 0; i < 51; i++)
+  {
+    gdk_pixbuf_composite(mute_buf, blocked_buf, 0, 0,
+                         gdk_pixbuf_get_width(mute_buf),
+                         gdk_pixbuf_get_height(mute_buf),
+                         0, 0, 1, 1, GDK_INTERP_BILINEAR, MIN(255, i * 5));
+    blocked_animation_list = g_list_append(blocked_animation_list, gdk_pixbuf_copy(blocked_buf));
+  }
+  g_object_ref_sink(mute_buf);
 	g_object_unref(mute_buf);
-    g_object_ref_sink(blocked_buf);
+  g_object_ref_sink(blocked_buf);
 	g_object_unref(blocked_buf);
 }
 
@@ -422,26 +434,26 @@ prepare_blocked_animation()
 gint
 get_state()
 {
-    return current_state;
+  return current_state;
 }
 
 gchar*
 get_state_image_name(gint state)
 {
-    return g_hash_table_lookup(volume_states, GINT_TO_POINTER(state));
+  return g_hash_table_lookup(volume_states, GINT_TO_POINTER(state));
 }
 
 void
 prepare_for_tests(IndicatorObject *io)
 {
-    prepare_state_machine();
-    get_icon(io);
+  prepare_state_machine();
+  get_icon(io);
 }
 
 void
 tidy_up_hash()
 {
-    g_hash_table_destroy(volume_states);
+  g_hash_table_destroy(volume_states);
 }
 
 static void
@@ -449,13 +461,13 @@ update_state(const gint state)
 {
 /*    g_debug("update state beginning - previous_state = %i", previous_state);*/
 
-    previous_state = current_state;
+  previous_state = current_state;
 
 /*    g_debug("update state 3rd line - previous_state = %i", previous_state);*/
 
-    current_state = state;
-    gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
-    indicator_image_helper_update(speaker_image, image_name);
+  current_state = state;
+  gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
+  indicator_image_helper_update(speaker_image, image_name);
 }
 
 
