@@ -44,17 +44,29 @@ static void transport_bar_init       (TransportBar *self);
 static void transport_bar_dispose    (GObject *object);
 static void transport_bar_finalize   (GObject *object);
 
+
+static gboolean transport_bar_button_press_event (GtkWidget             *menuitem,
+                                                  GdkEventButton        *event);
+static gboolean transport_bar_button_release_event (GtkWidget             *menuitem,
+                                                    GdkEventButton        *event);
+
+
 G_DEFINE_TYPE (TransportBar, transport_bar, GTK_TYPE_MENU_ITEM);
 
 static void
 transport_bar_class_init (TransportBarClass *klass)
 {
-	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+	GObjectClass 			*gobject_class = G_OBJECT_CLASS (klass);
+  //GtkObjectClass    *object_class = GTK_OBJECT_CLASS (klass);
+  GtkWidgetClass    *widget_class = GTK_WIDGET_CLASS (klass);
 
+  widget_class->button_press_event = transport_bar_button_press_event;
+  widget_class->button_release_event = transport_bar_button_release_event;
+	
 	g_type_class_add_private (klass, sizeof (TransportBarPrivate));
 
-	object_class->dispose = transport_bar_dispose;
-	object_class->finalize = transport_bar_finalize;
+	gobject_class->dispose = transport_bar_dispose;
+	gobject_class->finalize = transport_bar_finalize;
 }
 
 static void
@@ -66,9 +78,9 @@ transport_bar_init (TransportBar *self)
 	GtkWidget *hbox;
 
 	hbox = gtk_hbox_new(TRUE, 2);
-	priv->previous_button = gtk_button_new_with_label("Previous");
-  priv->next_button = gtk_button_new_with_label("Next");
-	priv->play_button =	gtk_button_new_with_label("Play");
+	priv->previous_button = gtk_button_new_with_label("<<");
+  priv->next_button = gtk_button_new_with_label(">>");
+	priv->play_button =	gtk_button_new_with_label(">");
 
 	gtk_box_pack_start (GTK_BOX (hbox), priv->previous_button, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), priv->play_button, FALSE, FALSE, 0);
@@ -77,6 +89,7 @@ transport_bar_init (TransportBar *self)
   priv->hbox = hbox;
 
   gtk_widget_show_all (priv->hbox);
+	gtk_widget_set_sensitive(GTK_WIDGET(self), FALSE);
   gtk_container_add (GTK_CONTAINER (self), hbox);
 }
 
@@ -90,6 +103,23 @@ static void
 transport_bar_finalize (GObject *object)
 {
 	G_OBJECT_CLASS (transport_bar_parent_class)->finalize (object);
+}
+
+/* keyevents */
+static gboolean
+transport_bar_button_press_event (GtkWidget *menuitem, 
+                                  GdkEventButton *event)
+{
+	g_debug("TransportBar::button_press_event");
+	return TRUE;
+}
+
+static gboolean
+transport_bar_button_release_event (GtkWidget *menuitem, 
+                                  GdkEventButton *event)
+{
+	g_debug("TransportBar::button_release_event");
+	return TRUE;
 }
 
 /**
