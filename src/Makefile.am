@@ -50,7 +50,8 @@ sound-service-server.h: $(srcdir)/sound-service.xml
 #####################
 music_bridge_VALASOURCES = \
 	music-player-bridge.vala \
-	transport-menu-item.vala
+	transport-menu-item.vala \
+	player-controller.vala
 
 music_bridge_VALAFLAGS = \
   --ccode \
