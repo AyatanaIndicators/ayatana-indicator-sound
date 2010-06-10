@@ -36,6 +36,16 @@ struct _TransportBarPrivate
 	GtkWidget* next_button;	
 };
 
+enum {
+  PLAY,
+	PAUSE,
+  NEXT,
+	PREVIOUS,
+  LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0 };
+
 #define TRANSPORT_BAR_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TRANSPORT_BAR_TYPE, TransportBarPrivate))
 
 /* Prototypes */
@@ -49,6 +59,9 @@ static gboolean transport_bar_button_press_event (GtkWidget             *menuite
                                                   GdkEventButton        *event);
 static gboolean transport_bar_button_release_event (GtkWidget             *menuitem,
                                                     GdkEventButton        *event);
+static gboolean transport_bar_play_button_trigger (GtkWidget* widget, 
+																											 GdkEventButton *event,
+                                      								 gpointer        user_data);
 
 
 G_DEFINE_TYPE (TransportBar, transport_bar, GTK_TYPE_MENU_ITEM);
@@ -57,7 +70,6 @@ static void
 transport_bar_class_init (TransportBarClass *klass)
 {
 	GObjectClass 			*gobject_class = G_OBJECT_CLASS (klass);
-  //GtkObjectClass    *object_class = GTK_OBJECT_CLASS (klass);
   GtkWidgetClass    *widget_class = GTK_WIDGET_CLASS (klass);
 
   widget_class->button_press_event = transport_bar_button_press_event;
@@ -67,6 +79,39 @@ transport_bar_class_init (TransportBarClass *klass)
 
 	gobject_class->dispose = transport_bar_dispose;
 	gobject_class->finalize = transport_bar_finalize;
+
+  signals[PLAY] = g_signal_new ("play",
+                               G_OBJECT_CLASS_TYPE (gobject_class),
+                               G_SIGNAL_RUN_FIRST,
+                               0,
+                               NULL, NULL,
+                               g_cclosure_marshal_VOID__VOID,
+                               G_TYPE_NONE, 0);
+
+  signals[PAUSE] = g_signal_new ("pause",
+                               G_OBJECT_CLASS_TYPE (gobject_class),
+                               G_SIGNAL_RUN_FIRST,
+                               0,
+                               NULL, NULL,
+                               g_cclosure_marshal_VOID__VOID,
+                               G_TYPE_NONE, 0);
+
+
+	signals[NEXT] = g_signal_new ("next",
+                               G_OBJECT_CLASS_TYPE (gobject_class),
+                               G_SIGNAL_RUN_FIRST,
+                               0,
+                               NULL, NULL,
+                               g_cclosure_marshal_VOID__VOID,
+                               G_TYPE_NONE, 0);
+
+  signals[PREVIOUS] = g_signal_new ("previous",
+                               G_OBJECT_CLASS_TYPE (gobject_class),
+                               G_SIGNAL_RUN_FIRST,
+                               0,
+                               NULL, NULL,
+                               g_cclosure_marshal_VOID__VOID,
+                               G_TYPE_NONE, 0);	
 }
 
 static void
@@ -85,12 +130,16 @@ transport_bar_init (TransportBar *self)
 	gtk_box_pack_start (GTK_BOX (hbox), priv->previous_button, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), priv->play_button, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), priv->next_button, FALSE, FALSE, 0);
+
+	g_signal_connect(priv->play_button, "button-press-event", G_CALLBACK(transport_bar_play_button_trigger), NULL);
+
 	
   priv->hbox = hbox;
 
   gtk_widget_show_all (priv->hbox);
-	gtk_widget_set_sensitive(GTK_WIDGET(self), FALSE);
   gtk_container_add (GTK_CONTAINER (self), hbox);
+
+	
 }
 
 static void
@@ -110,19 +159,29 @@ static gboolean
 transport_bar_button_press_event (GtkWidget *menuitem, 
                                   GdkEventButton *event)
 {
-	g_debug("TransportBar::button_press_event");
-	return TRUE;
+	g_debug("TransportBar::menu_press_event");
+	return FALSE;
 }
 
 static gboolean
 transport_bar_button_release_event (GtkWidget *menuitem, 
                                   GdkEventButton *event)
 {
-	g_debug("TransportBar::button_release_event");
-	return TRUE;
+	g_debug("TransportBar::menu_release_event");
+	return FALSE;
 }
 
-/**
+/* Individual keyevents on the buttons */
+static gboolean
+transport_bar_play_button_trigger(GtkWidget* widget,
+                                      GdkEventButton *event,
+                                      gpointer        user_data)
+{
+	g_debug("TransportBar::PLAY button_press_event");	
+	return FALSE;
+}
+
+ /**
  * transport_new:
  * @returns: a new #TransportBar.
  **/

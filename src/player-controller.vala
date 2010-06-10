@@ -11,14 +11,20 @@ public class PlayerController : GLib.Object
 	public PlayerController(Dbusmenu.Menuitem root, string client_name, bool active)
 	{
 		this.root_menu = root;
-		this.name = format_client_name(client_name);
+		this.name = format_client_name(client_name.strip());
 		this.is_active = active;
 		this.custom_items = new ArrayList<Dbusmenu.Menuitem>();
-			//Dbusmenu.Menuitem[];
 		self_construct();
 	}
 
-	public void self_construct()
+	public void vanish()
+	{
+		foreach(Dbusmenu.Menuitem item in this.custom_items){
+			root_menu.child_delete(item);			
+		}
+	}
+	
+	private void self_construct()
 	{
 		Dbusmenu.Menuitem client_item = new Dbusmenu.Menuitem();
 		this.custom_items.add(client_item);
@@ -29,19 +35,16 @@ public class PlayerController : GLib.Object
 		root_menu.child_append(transport_item);		
 	}
 
-	public void vanish()
+	private static string format_client_name(string client_name)
 	{
-		foreach(Dbusmenu.Menuitem item in this.custom_items){
-			root_menu.child_delete(item);			
+		string formatted = client_name;
+		//debug("PlayerController->format_client_name");
+		if(formatted.len() > 1){
+			formatted = client_name.up(1).concat(client_name.slice(1, client_name.len()));
+			debug("PlayerController->format_client_name - : %s", formatted);
 		}
+		
+		return formatted;
 	}
 	
-	public static string format_client_name(string client_name)
-	{
-		debug("PlayerController->format_client_name");
-		//string first_letter = client_name.slice(1);
-		//debug("PlayerController->format_client_name - first_letter: %s", first_letter);
-		return client_name;
-	}
-		
 }
