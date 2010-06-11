@@ -20,6 +20,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define __TRANSPORT_BAR_H__
 
 #include <gtk/gtkmenuitem.h>
+#include <libdbusmenu-gtk/menu.h>
 
 G_BEGIN_DECLS
 
@@ -43,6 +44,7 @@ struct _TransportBar {
 
 GType transport_bar_get_type (void);
 GtkWidget* transport_bar_new();
+void connect_with_other_half(DbusmenuMenuitem *twin_item);
 
 G_END_DECLS
 

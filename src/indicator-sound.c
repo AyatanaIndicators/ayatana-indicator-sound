@@ -319,7 +319,7 @@ static gboolean new_transport_bar(DbusmenuMenuitem * newitem, DbusmenuMenuitem *
 	g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
-	bar = transport_bar_new();
+	bar = transport_bar_new(newitem);
   GtkMenuItem *menu_transport_bar = GTK_MENU_ITEM(bar);
 
   dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_transport_bar, parent);

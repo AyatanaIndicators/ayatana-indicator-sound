@@ -26,6 +26,9 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "common-defs.h"
 #include <gtk/gtk.h>
 
+// TODO: think about leakage: ted !
+
+
 typedef struct _TransportBarPrivate TransportBarPrivate;
 
 struct _TransportBarPrivate
@@ -59,10 +62,11 @@ static gboolean transport_bar_button_press_event (GtkWidget             *menuite
                                                   GdkEventButton        *event);
 static gboolean transport_bar_button_release_event (GtkWidget             *menuitem,
                                                     GdkEventButton        *event);
-static gboolean transport_bar_play_button_trigger (GtkWidget* widget, 
-																											 GdkEventButton *event,
-                                      								 gpointer        user_data);
-
+static gboolean transport_bar_play_button_trigger (GtkWidget 		 	*widget, 
+																									GdkEventButton 	*event,
+                                      						gpointer        user_data);
+static void transport_bar_update_state(gchar * property, 
+                                       GValue * value);
 
 G_DEFINE_TYPE (TransportBar, transport_bar, GTK_TYPE_MENU_ITEM);
 
@@ -132,19 +136,22 @@ transport_bar_init (TransportBar *self)
 	gtk_box_pack_start (GTK_BOX (hbox), priv->next_button, FALSE, FALSE, 0);
 
 	g_signal_connect(priv->play_button, "button-press-event", G_CALLBACK(transport_bar_play_button_trigger), NULL);
-
-	
   priv->hbox = hbox;
+	
+	g_signal_connect(DBUSMENU_MENUITEM(self), "property-changed", G_CALLBACK(transport_bar_update_state), NULL);
 
   gtk_widget_show_all (priv->hbox);
   gtk_container_add (GTK_CONTAINER (self), hbox);
-
 	
 }
 
 static void
 transport_bar_dispose (GObject *object)
 {
+	//if(IS_TRANSPORT_BAR(object) == TRUE){ 
+	//	TransportBarPrivate * priv = TRANSPORT_BAR_GET_PRIVATE(TRANSPORT_BAR(object));
+	//	g_object_unref(priv->previous_button);
+	//}
 	G_OBJECT_CLASS (transport_bar_parent_class)->dispose (object);
 }
 
@@ -174,13 +181,22 @@ transport_bar_button_release_event (GtkWidget *menuitem,
 /* Individual keyevents on the buttons */
 static gboolean
 transport_bar_play_button_trigger(GtkWidget* widget,
-                                      GdkEventButton *event,
-                                      gpointer        user_data)
+                                  GdkEventButton *event,
+                                  gpointer        user_data)
 {
 	g_debug("TransportBar::PLAY button_press_event");	
 	return FALSE;
 }
 
+static void transport_bar_update_state(gchar *property, GValue *value)
+{
+	g_debug("transport_bar_update_state - %s", property);  
+}
+
+void transport_bar_connect_with_other_half(TransportBar *self, DbusmenuMenuitem *twin_item)
+{
+	
+}
  /**
  * transport_new:
  * @returns: a new #TransportBar.

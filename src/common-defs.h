@@ -24,7 +24,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define SIGNAL_SINK_MUTE_UPDATE "SinkMuteUpdate"
 #define SIGNAL_SINK_AVAILABLE_UPDATE "SinkAvailableUpdate"
 
-// DBUS items
+/* DBUS Custom Items */
 #define DBUSMENU_SLIDER_MENUITEM_TYPE          "x-canonical-ido-slider-item"
-#define DBUSMENU_SLIDER_MENUITEM_PROP_VOLUME   "volume"
-#define DBUSMENU_TRANSPORT_MENUITEM_TYPE        "x-canonical-transport-bar"
+#define DBUSMENU_TRANSPORT_MENUITEM_TYPE       "x-canonical-transport-bar"
+#define DBUSMENU_TRANSPORT_MENUITEM_STATE  		 "x-canonical-transport-state"
