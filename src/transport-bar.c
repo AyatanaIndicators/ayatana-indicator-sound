@@ -29,6 +29,9 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 // TODO: think about leakage: ted !
 
 
+
+static DbusmenuMenuitem* twin_item;
+
 typedef struct _TransportBarPrivate TransportBarPrivate;
 
 struct _TransportBarPrivate
@@ -66,9 +69,12 @@ static gboolean transport_bar_play_button_trigger (GtkWidget 		 	*widget,
 																									GdkEventButton 	*event,
                                       						gpointer        user_data);
 static void transport_bar_update_state(gchar * property, 
-                                       GValue * value);
+                                       GValue * value,
+                                       gpointer userdata);
 
 G_DEFINE_TYPE (TransportBar, transport_bar, GTK_TYPE_MENU_ITEM);
+
+
 
 static void
 transport_bar_class_init (TransportBarClass *klass)
@@ -138,7 +144,7 @@ transport_bar_init (TransportBar *self)
 	g_signal_connect(priv->play_button, "button-press-event", G_CALLBACK(transport_bar_play_button_trigger), NULL);
   priv->hbox = hbox;
 	
-	g_signal_connect(DBUSMENU_MENUITEM(self), "property-changed", G_CALLBACK(transport_bar_update_state), NULL);
+	g_signal_connect(G_OBJECT(twin_item), "property-changed", G_CALLBACK(transport_bar_update_state), self);
 
   gtk_widget_show_all (priv->hbox);
   gtk_container_add (GTK_CONTAINER (self), hbox);
@@ -188,22 +194,49 @@ transport_bar_play_button_trigger(GtkWidget* widget,
 	return FALSE;
 }
 
-static void transport_bar_update_state(gchar *property, GValue *value)
+//TODO figure out why the userdata is not what I expect it to be. 
+static void transport_bar_update_state(gchar *property, GValue *value, gpointer userdata)
 {
-	g_debug("transport_bar_update_state - %s", property);  
+	//TransportBar* bar = (TransportBar*)userdata;
+	// TODO problem line	
+	//if(IS_TRANSPORT_BAR(bar)){
+	//g_debug("after line 1!!");
+
+	//TransportBarPrivate *priv = TRANSPORT_BAR_GET_PRIVATE(bar);
+	//g_debug("after line 2!!");
+	//gchar* label = "changed";
+	//g_debug("after line 3!!");
+	//gtk_button_set_label(GTK_BUTTON(priv->play_button), g_strdup(label));
+	//}
+	//if(GTK_IS_BUTTON(GTK_BUTTON(priv->play_button))){
+	
+	//	gtk_button_set_label(GTK_BUTTON(priv->play_button), g_strdup(label));
+	//	g_debug("its a button");
+	//}
+	//else{
+		//g_debug("No Goddamn button!!");
+	//}
+	//}
+	g_debug("transport_bar_update_state - with property  %s", property);  
+
+	if (value == NULL){
+		g_debug("value is null");
+		return;
+	}
+	// TODO problem line	
+	//gchar* input = g_strdup(g_value_get_string(value));
+	//g_debug("transport_bar_update_state - with value  %s", input);  
+
 }
 
-void transport_bar_connect_with_other_half(TransportBar *self, DbusmenuMenuitem *twin_item)
-{
-	
-}
  /**
  * transport_new:
  * @returns: a new #TransportBar.
  **/
 GtkWidget* 
-transport_bar_new()
+transport_bar_new(DbusmenuMenuitem *item)
 {
+	twin_item = item;
 	return g_object_new(TRANSPORT_BAR_TYPE, NULL);
 }
 

@@ -8,7 +8,7 @@ public class PlayerController : GLib.Object
 	private bool is_active;
 	private ArrayList<Dbusmenu.Menuitem> custom_items;	
 
-	// TODO: pass in the appropriate position for the menu
+	// TODO: pass in the appropriate position for the menu (to handle multiple players)
 	public PlayerController(Dbusmenu.Menuitem root, string client_name, bool active)
 	{
 		this.root_menu = root;
@@ -38,8 +38,12 @@ public class PlayerController : GLib.Object
 		title_item.property_set(MENUITEM_PROP_ICON_NAME, "applications-multimedia");			
 		this.custom_items.add(title_item);
 
+		// Metadata item
+		MetadataMenuitem metadata_item = new MetadataMenuitem();
+		this.custom_items.add(metadata_item);
+		
 		// Transport item
-		TransportMenuItem transport_item = new TransportMenuItem();
+		TransportMenuitem transport_item = new TransportMenuitem();
 		this.custom_items.add(transport_item);
 
 		int offset = 2;
@@ -48,12 +52,6 @@ public class PlayerController : GLib.Object
 		}
 		return true;
 	}	
-//		if(!root_menu.child_add_position(client_item, 2) ||
-//		!root_menu.child_add_position(transport_item, 3)){
-//			//TODO raise here!
-//			return false;
-//		}
-//		return true;
 	
 
 	private static string format_client_name(string client_name)
@@ -62,8 +60,7 @@ public class PlayerController : GLib.Object
 		if(formatted.len() > 1){
 			formatted = client_name.up(1).concat(client_name.slice(1, client_name.len()));
 			debug("PlayerController->format_client_name - : %s", formatted);
-		}
-		
+		}		
 		return formatted;
 	}
 	

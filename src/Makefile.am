@@ -11,6 +11,8 @@ libsoundmenu_la_SOURCES = \
 	indicator-sound.h \
 	transport-bar.c \
 	transport-bar.h \
+	metadata-widget.c \
+	metadata-widget.h \
 	indicator-sound.c \
 	dbus-shared-names.h \
   sound-service-client.h 
@@ -51,6 +53,7 @@ sound-service-server.h: $(srcdir)/sound-service.xml
 music_bridge_VALASOURCES = \
 	music-player-bridge.vala \
 	transport-menu-item.vala \
+	metadata-menu-item.vala \
 	player-controller.vala
 
 music_bridge_VALAFLAGS = \

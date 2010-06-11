@@ -28,3 +28,9 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DBUSMENU_SLIDER_MENUITEM_TYPE          "x-canonical-ido-slider-item"
 #define DBUSMENU_TRANSPORT_MENUITEM_TYPE       "x-canonical-transport-bar"
 #define DBUSMENU_TRANSPORT_MENUITEM_STATE  		 "x-canonical-transport-state"
+
+#define DBUSMENU_METADATA_MENUITEM_TYPE = "x-canonical-metadata-menu-item";
+#define DBUSMENU_METADATA_MENUITEM_TEXT_ARTIST = "x-canonical-metadata-text-artist";
+#define DBUSMENU_METADATA_MENUITEM_TEXT_PIECE = "x-canonical-metadata-text-piece";
+#define DBUSMENU_METADATA_MENUITEM_TEXT_CONTAINER = "x-canonical-metadata-text-container";
+#define DBUSMENU_METADATA_MENUITEM_IMAGE = "x-canonical-metadata-image";
