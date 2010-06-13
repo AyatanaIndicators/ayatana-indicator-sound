@@ -26,10 +26,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "common-defs.h"
 #include <gtk/gtk.h>
 
-// TODO: think about leakage: ted !
-
-
-
 static DbusmenuMenuitem* twin_item;
 
 typedef struct _MetadataWidgetPrivate MetadataWidgetPrivate;
@@ -37,6 +33,8 @@ typedef struct _MetadataWidgetPrivate MetadataWidgetPrivate;
 struct _MetadataWidgetPrivate
 {
 	GtkWidget* hbox;
+	GtkWidget* album_art;
+  gchar* our_path;
 };
 
 #define METADATA_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), METADATA_WIDGET_TYPE, MetadataWidgetPrivate))
@@ -70,7 +68,7 @@ metadata_widget_class_init (MetadataWidgetClass *klass)
 	GObjectClass 			*gobject_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass    *widget_class = GTK_WIDGET_CLASS (klass);
 
-	widget_class->button_press_event = metadata_widget_press_event;
+	widget_class->button_press_event = metadata_widget_button_press_event;
   widget_class->button_release_event = metadata_widget_button_release_event;
 	
 	g_type_class_add_private (klass, sizeof (MetadataWidgetPrivate));
@@ -90,7 +88,16 @@ metadata_widget_init (MetadataWidget *self)
 
 	hbox = gtk_hbox_new(TRUE, 2);
 
-	g_signal_connect(G_OBJECT(twin_item), "property-changed", G_CALLBACK(metadata_widget_update_state), self);
+	const gchar* path = dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_IMAGE);
+
+	g_debug("MetadataWidget:init - path = %s", path);
+
+	priv->our_path = g_strdup(path);
+	
+	priv->album_art = gtk_image_new_from_file(priv->our_path);
+	
+	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
+	                 G_CALLBACK(metadata_widget_update_state), self);
 
   gtk_widget_show_all (priv->hbox);
   gtk_container_add (GTK_CONTAINER (self), hbox);
@@ -100,10 +107,6 @@ metadata_widget_init (MetadataWidget *self)
 static void
 metadata_widget_dispose (GObject *object)
 {
-	//if(IS_METADATA_WIDGET(object) == TRUE){ 
-	//	MetadataWidget * priv = METADATA_WIDGET_GET_PRIVATE(METADATA_WIDGET(object));
-	//	g_object_unref(priv->previous_button);
-	//}
 	G_OBJECT_CLASS (metadata_widget_parent_class)->dispose (object);
 }
 
@@ -134,36 +137,12 @@ metadata_widget_button_release_event (GtkWidget *menuitem,
 //TODO figure out why the userdata is not what I expect it to be. 
 static void metadata_widget_update_state(gchar *property, GValue *value, gpointer userdata)
 {
-	//MetadataWidget* bar = (MetadataWidget*)userdata;
-	// TODO problem line	
-	//if(IS_METADATA_WIDGET(bar)){
-	//g_debug("after line 1!!");
-
-	//MetadataWidget *priv = METADATA_WIDGET_GET_PRIVATE(bar);
-	//g_debug("after line 2!!");
-	//gchar* label = "changed";
-	//g_debug("after line 3!!");
-	//gtk_button_set_label(GTK_BUTTON(priv->play_button), g_strdup(label));
-	//}
-	//if(GTK_IS_BUTTON(GTK_BUTTON(priv->play_button))){
-	
-	//	gtk_button_set_label(GTK_BUTTON(priv->play_button), g_strdup(label));
-	//	g_debug("its a button");
-	//}
-	//else{
-		//g_debug("No Goddamn button!!");
-	//}
-	//}
 	g_debug("metadata_widget_update_state - with property  %s", property);  
 
 	if (value == NULL){
 		g_debug("value is null");
 		return;
 	}
-	// TODO problem line	
-	//gchar* input = g_strdup(g_value_get_string(value));
-	//g_debug("metadata_widget_update_state - with value  %s", input);  
-
 }
 
  /**

@@ -8,7 +8,7 @@ public class MetadataMenuitem : Dbusmenu.Menuitem
  	const string DBUSMENU_METADATA_MENUITEM_TEXT_ARTIST = "x-canonical-metadata-text-artist";
  	const string DBUSMENU_METADATA_MENUITEM_TEXT_PIECE = "x-canonical-metadata-text-piece";
  	const string DBUSMENU_METADATA_MENUITEM_TEXT_CONTAINER = "x-canonical-metadata-text-container";
-	const string DBUSMENU_METADATA_MENUITEM_IMAGE = "x-canonical-metadata-image";
+	const string DBUSMENU_METADATA_MENUITEM_IMAGE_PATH = "x-canonical-metadata-image";
 
 	public MetadataMenuitem()
   {
@@ -16,7 +16,7 @@ public class MetadataMenuitem : Dbusmenu.Menuitem
 		this.property_set(DBUSMENU_METADATA_MENUITEM_TEXT_ARTIST, "Sonnamble");
 		this.property_set(DBUSMENU_METADATA_MENUITEM_TEXT_PIECE, "Nocturne");
 		this.property_set(DBUSMENU_METADATA_MENUITEM_TEXT_CONTAINER, "Seven Months in E minor");
-		this.property_set(DBUSMENU_METADATA_MENUITEM_IMAGE, "");
+		this.property_set(DBUSMENU_METADATA_MENUITEM_IMAGE_PATH, "/home/ronoc/Desktop/Sonnamble/Sonnamble_CD.jpg");
 	}
 
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)

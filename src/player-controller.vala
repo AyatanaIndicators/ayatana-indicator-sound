@@ -34,7 +34,7 @@ public class PlayerController : GLib.Object
 
 		// Title item
 		Dbusmenu.Menuitem title_item = new Dbusmenu.Menuitem();
-		title_item.property_set(MENUITEM_PROP_LABEL, this.name.concat(""));					
+		title_item.property_set(MENUITEM_PROP_LABEL, this.name);					
 		title_item.property_set(MENUITEM_PROP_ICON_NAME, "applications-multimedia");			
 		this.custom_items.add(title_item);
 
