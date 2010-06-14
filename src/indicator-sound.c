@@ -39,6 +39,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "indicator-sound.h"
 #include "transport-bar.h"
+#include "metadata-widget.h"
 #include "dbus-shared-names.h"
 #include "sound-service-client.h"
 #include "common-defs.h"
@@ -92,8 +93,9 @@ static void slider_grabbed(GtkWidget *widget, gpointer user_data);
 static void slider_released(GtkWidget *widget, gpointer user_data);
 static void style_changed_cb(GtkWidget *widget, gpointer user_data);
 
-//transport bar related
+//player widgets related
 static gboolean new_transport_bar(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
+static gboolean new_metadata_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
@@ -240,6 +242,7 @@ get_menu (IndicatorObject * io)
   g_object_set_data (G_OBJECT (client), "indicator", io);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SLIDER_MENUITEM_TYPE, new_slider_item);
 	dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TRANSPORT_MENUITEM_TYPE, new_transport_bar);
+	dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_METADATA_MENUITEM_TYPE, new_metadata_widget);
 
   // register Key-press listening on the menu widget as the slider does not allow this.
   g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), NULL);
@@ -310,7 +313,8 @@ new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuC
     return TRUE;
 }
 
-static gboolean new_transport_bar(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
+static gboolean
+new_transport_bar(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
 	g_debug("indicator-sound: new_transport_bar() called ");
 
@@ -328,6 +332,30 @@ static gboolean new_transport_bar(DbusmenuMenuitem * newitem, DbusmenuMenuitem *
 	
 	return TRUE;
 }
+
+static gboolean
+new_metadata_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
+{
+	g_debug("indicator-sound: new_metadata_widget");
+
+	GtkWidget* metadata = NULL;
+
+	g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
+  g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
+
+	metadata = metadata_widget_new (newitem);
+	GtkMenuItem *menu_metadata_widget = GTK_MENU_ITEM(metadata);
+	
+  dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_metadata_widget, parent);
+
+	gtk_widget_show_all(metadata);
+
+	return TRUE;
+}
+
+//const gchar* path = dbusmenu_menuitem_property_get(new_item, DBUSMENU_METADATA_MENUITEM_IMAGE_PATH);
+
+//g_debug("New transport bar path = %s", path);
 
 
 static void

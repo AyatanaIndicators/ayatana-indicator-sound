@@ -88,9 +88,9 @@ metadata_widget_init (MetadataWidget *self)
 
 	hbox = gtk_hbox_new(TRUE, 2);
 
-	const gchar* path = dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_IMAGE);
+	//const gchar* path = dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_IMAGE_PATH);
 
-	g_debug("MetadataWidget:init - path = %s", path);
+	//g_debug("MetadataWidget:init - path = %s", path);
 
 	priv->our_path = g_strdup(path);
 	
@@ -138,11 +138,6 @@ metadata_widget_button_release_event (GtkWidget *menuitem,
 static void metadata_widget_update_state(gchar *property, GValue *value, gpointer userdata)
 {
 	g_debug("metadata_widget_update_state - with property  %s", property);  
-
-	if (value == NULL){
-		g_debug("value is null");
-		return;
-	}
 }
 
  /**

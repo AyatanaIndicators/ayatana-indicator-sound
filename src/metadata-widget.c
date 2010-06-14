@@ -138,11 +138,6 @@ metadata_widget_button_release_event (GtkWidget *menuitem,
 static void metadata_widget_update_state(gchar *property, GValue *value, gpointer userdata)
 {
 	g_debug("metadata_widget_update_state - with property  %s", property);  
-
-	if (value == NULL){
-		g_debug("value is null");
-		return;
-	}
 }
 
  /**

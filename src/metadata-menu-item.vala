@@ -17,6 +17,9 @@ public class MetadataMenuitem : Dbusmenu.Menuitem
 		this.property_set(DBUSMENU_METADATA_MENUITEM_TEXT_PIECE, "Nocturne");
 		this.property_set(DBUSMENU_METADATA_MENUITEM_TEXT_CONTAINER, "Seven Months in E minor");
 		this.property_set(DBUSMENU_METADATA_MENUITEM_IMAGE_PATH, "/home/ronoc/Desktop/Sonnamble/Sonnamble_CD.jpg");
+
+		debug("image_path property set %s:", this.property_get(DBUSMENU_METADATA_MENUITEM_IMAGE_PATH));
+
 	}
 
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
