@@ -9,8 +9,8 @@ soundmenulib_LTLIBRARIES = libsoundmenu.la
 libsoundmenu_la_SOURCES = \
   common-defs.h \
 	indicator-sound.h \
-	transport-bar.c \
-	transport-bar.h \
+	transport-widget.c \
+	transport-widget.h \
 	metadata-widget.c \
 	metadata-widget.h \
 	indicator-sound.c \

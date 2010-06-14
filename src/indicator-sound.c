@@ -38,7 +38,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <libindicator/indicator-image-helper.h>
 
 #include "indicator-sound.h"
-#include "transport-bar.h"
+#include "transport-widget.h"
 #include "metadata-widget.h"
 #include "dbus-shared-names.h"
 #include "sound-service-client.h"
@@ -314,7 +314,7 @@ new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuC
 }
 
 static gboolean
-new_transport_bar(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
+new_transport_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
 	g_debug("indicator-sound: new_transport_bar() called ");
 
@@ -323,7 +323,7 @@ new_transport_bar(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbusmen
 	g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
-	bar = transport_bar_new(newitem);
+	bar = transport_widget_new(newitem);
   GtkMenuItem *menu_transport_bar = GTK_MENU_ITEM(bar);
 
   dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_transport_bar, parent);

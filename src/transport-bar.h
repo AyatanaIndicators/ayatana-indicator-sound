@@ -16,34 +16,34 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along 
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef __TRANSPORT_BAR_H__
-#define __TRANSPORT_BAR_H__
+#ifndef __TRANSPORT_WIDGET_H__
+#define __TRANSPORT_WIDGET_H__
 
 #include <gtk/gtkmenuitem.h>
 #include <libdbusmenu-gtk/menu.h>
 
 G_BEGIN_DECLS
 
-#define TRANSPORT_BAR_TYPE            (transport_bar_get_type ())
-#define TRANSPORT_BAR(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), TRANSPORT_BAR_TYPE, TransportBar))
-#define TRANSPORT_BAR_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), TRANSPORT_BAR_TYPE, TransportBarClass))
-#define IS_TRANSPORT_BAR(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TRANSPORT_BAR_TYPE))
-#define IS_TRANSPORT_BAR_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TRANSPORT_BAR_TYPE))
-#define TRANSPORT_BAR_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), TRANSPORT_BAR_TYPE, TransportBarClass))
+#define TRANSPORT_WIDGET_TYPE            (transport_widget_get_type ())
+#define TRANSPORT_WIDGET(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), TRANSPORT_WIDGET_TYPE, TransportWidget))
+#define TRANSPORT_WIDGET_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), TRANSPORT_WIDGET_TYPE, TransportWidgetClass))
+#define IS_TRANSPORT_WIDGET(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TRANSPORT_WIDGET_TYPE))
+#define IS_TRANSPORT_WIDGET_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TRANSPORT_WIDGET_TYPE))
+#define TRANSPORT_WIDGET_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), TRANSPORT_WIDGET_TYPE, TransportWidgetClass))
 
-typedef struct _TransportBar      TransportBar;
-typedef struct _TransportBarClass TransportBarClass;
+typedef struct _TransportWidget      TransportWidget;
+typedef struct _TransportWidgetClass TransportWidgetClass;
 
-struct _TransportBarClass {
+struct _TransportWidgetClass {
 	  GtkMenuItemClass parent_class;
 };
 
-struct _TransportBar {
+struct _TransportWidget {
 	  GtkMenuItem parent;
 };
 
-GType transport_bar_get_type (void);
-GtkWidget* transport_bar_new(DbusmenuMenuitem *twin_item);
+GType transport_widget_get_type (void);
+GtkWidget* transport_widget_new(DbusmenuMenuitem *twin_item);
 
 G_END_DECLS
 
