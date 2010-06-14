@@ -15,7 +15,5 @@ public class TransportMenuitem : Dbusmenu.Menuitem
 
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
 	{
-		this.property_set(DBUSMENU_TRANSPORT_MENUITEM_STATE, "1");		
-		debug("TransportItem -> handle event caught!");
 	}	
 }

@@ -58,14 +58,21 @@ static void transport_widget_init       (TransportWidget *self);
 static void transport_widget_dispose    (GObject *object);
 static void transport_widget_finalize   (GObject *object);
 
-/* UI and dbus callbacks */
-static gboolean transport_widget_button_press_event (GtkWidget             *menuitem,
-                                                  GdkEventButton        *event);
+/* UI and dbusmenu callbacks */
+static gboolean transport_widget_button_press_event 	(GtkWidget             *menuitem,
+                                                  		GdkEventButton        *event);
 static gboolean transport_widget_button_release_event (GtkWidget             *menuitem,
-                                                    GdkEventButton        *event);
-static gboolean transport_widget_play_button_trigger (GtkWidget 		 	*widget, 
-																									GdkEventButton 	*event,
-                                      						gpointer        user_data);
+                                                    	GdkEventButton        *event);
+static gboolean transport_widget_play_button_press_event (GtkWidget 		 	*widget, 
+																													GdkEventButton 	*event,
+                                      										gpointer        user_data);
+static gboolean transport_widget_previous_button_press_event (GtkWidget 		 	*widget, 
+																															GdkEventButton 	*event,
+                                      												gpointer        user_data);
+static gboolean transport_widget_next_button_press_event (GtkWidget 		 	*widget, 
+																													GdkEventButton 	*event,
+                                      										gpointer        user_data);
+
 static void transport_widget_update_state(DbusmenuMenuitem* item,
                                        gchar * property, 
                                        GValue * value,
@@ -138,27 +145,26 @@ transport_widget_init (TransportWidget *self)
   priv->next_button = gtk_button_new_with_label(">>");
 	priv->play_button =	gtk_button_new_with_label(">");
 
-	gtk_box_pack_start (GTK_BOX (hbox), priv->previous_button, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (hbox), priv->play_button, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (hbox), priv->next_button, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), priv->previous_button, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), priv->play_button, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), priv->next_button, FALSE, TRUE, 0);
 
-	g_signal_connect(priv->play_button, "button-press-event", G_CALLBACK(transport_widget_play_button_trigger), NULL);
-  priv->hbox = hbox;
+	g_signal_connect(GTK_OBJECT(priv->play_button), "button-press-event", G_CALLBACK(transport_widget_play_button_press_event), priv->play_button);
+	g_signal_connect(GTK_OBJECT(priv->previous_button), "button-press-event", G_CALLBACK(transport_widget_previous_button_press_event), NULL);
+	g_signal_connect(GTK_OBJECT(priv->next_button), "button-press-event", G_CALLBACK(transport_widget_next_button_press_event), NULL);
+
+	priv->hbox = hbox;
 	
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", G_CALLBACK(transport_widget_update_state), self);
 
-  gtk_widget_show_all (priv->hbox);
-  gtk_container_add (GTK_CONTAINER (self), hbox);
+	gtk_container_add (GTK_CONTAINER (self), priv->hbox);
 	
+  gtk_widget_show_all (priv->hbox);
 }
 
 static void
 transport_widget_dispose (GObject *object)
 {
-	//if(IS_TRANSPORT_BAR(object) == TRUE){ 
-	//	TransportWidgetPrivate * priv = TRANSPORT_BAR_GET_PRIVATE(TRANSPORT_BAR(object));
-	//	g_object_unref(priv->previous_button);
-	//}
 	G_OBJECT_CLASS (transport_widget_parent_class)->dispose (object);
 }
 
@@ -171,10 +177,25 @@ transport_widget_finalize (GObject *object)
 /* keyevents */
 static gboolean
 transport_widget_button_press_event (GtkWidget *menuitem, 
-                                  GdkEventButton *event)
+                                  	GdkEventButton *event)
 {
 	g_debug("TransportWidget::menu_press_event");
-	return FALSE;
+	//TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE(TRANSPORT_WIDGET(menuitem));
+	//gtk_button_pressed(GTK_BUTTON(priv->play_button));
+	//gtk_button_pressed(GTK_BUTTON(priv->previous_button));
+	//gtk_button_pressed(GTK_BUTTON(priv->next_button));
+
+	//if (event->type == GDK_BUTTON_PRESS) {
+		//GdkEventButton *bevent = (GdkEventButton *) event; 
+		//gtk_button_pressed(bevent->button);
+//gtk_menu_popup (GTK_MENU (menuitem), NULL, NULL, NULL, NULL,
+//    	               bevent->button, bevent->time);
+   	/* Tell calling code that we have handled this event; the buck
+   	* stops here. */
+   	//return TRUE;
+  //}
+	
+	return TRUE;
 }
 
 static gboolean
@@ -182,17 +203,35 @@ transport_widget_button_release_event (GtkWidget *menuitem,
                                   GdkEventButton *event)
 {
 	g_debug("TransportWidget::menu_release_event");
-	return FALSE;
+	return TRUE;
 }
 
 /* Individual keyevents on the buttons */
 static gboolean
-transport_widget_play_button_trigger(GtkWidget* widget,
-                                  GdkEventButton *event,
-                                  gpointer        user_data)
+transport_widget_play_button_press_event(	GtkWidget* 			widget,
+                                  				GdkEventButton 	*event,
+                                  				gpointer        user_data)
 {
-	g_debug("TransportWidget::PLAY button_press_event");	
-	return FALSE;
+	g_debug("!!!!! TransportWidget::PLAY button_press_event");	
+	return TRUE;
+}
+
+static gboolean
+transport_widget_previous_button_press_event(	GtkWidget* 			widget,
+                                  				GdkEventButton 	*event,
+                                  				gpointer        user_data)
+{
+	g_debug("!!!!! TransportWidget::PREVIOUS button_press_event");	
+	return TRUE;
+}
+
+static gboolean
+transport_widget_next_button_press_event(	GtkWidget* 			widget,
+                                  				GdkEventButton 	*event,
+                                  				gpointer        user_data)
+{
+	g_debug("!!!!! TransportWidget::NEXT button_press_event");	
+	return TRUE;
 }
 
 /**
