@@ -22,7 +22,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <glib/gi18n.h>
-#include "transport-bar.h"
+#include "transport-widget.h"
 #include "common-defs.h"
 #include <gtk/gtk.h>
 

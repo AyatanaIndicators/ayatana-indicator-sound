@@ -94,7 +94,7 @@ static void slider_released(GtkWidget *widget, gpointer user_data);
 static void style_changed_cb(GtkWidget *widget, gpointer user_data);
 
 //player widgets related
-static gboolean new_transport_bar(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
+static gboolean new_transport_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 static gboolean new_metadata_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 
 // DBUS communication
@@ -241,7 +241,7 @@ get_menu (IndicatorObject * io)
   DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);
   g_object_set_data (G_OBJECT (client), "indicator", io);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SLIDER_MENUITEM_TYPE, new_slider_item);
-	dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TRANSPORT_MENUITEM_TYPE, new_transport_bar);
+	dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TRANSPORT_MENUITEM_TYPE, new_transport_widget);
 	dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_METADATA_MENUITEM_TYPE, new_metadata_widget);
 
   // register Key-press listening on the menu widget as the slider does not allow this.
