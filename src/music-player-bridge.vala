@@ -7,11 +7,11 @@ public class MusicPlayerBridge : GLib.Object
 
   private Listener listener;
   private Dbusmenu.Menuitem root_menu;
-	private HashMap<string, Dbusmenu.Menuitem> registered_clients;  
+	private HashMap<string, PlayerController> registered_clients;  
 	
   public MusicPlayerBridge()
   {
-		registered_clients = new HashMap<string, Dbusmenu.Menuitem> ();
+		registered_clients = new HashMap<string, PlayerController> ();
     listener = Listener.ref_default();
     listener.indicator_added.connect(on_indicator_added);
     listener.indicator_removed.connect(on_indicator_removed);
@@ -48,10 +48,8 @@ public class MusicPlayerBridge : GLib.Object
 		if(server_is_not_of_interest(type)) return;
 		string client_name = type.split(".")[1];
 		if (root_menu != null && client_name != null){
-			Dbusmenu.Menuitem client_item = new Dbusmenu.Menuitem();
-			client_item.property_set(MENUITEM_PROP_LABEL, client_name.concat(" is registered"));
-			registered_clients.set(client_name, client_item); 
-			root_menu.child_append(client_item);
+			PlayerController ctrl = new PlayerController(root_menu, client_name, true);
+			registered_clients.set(client_name, ctrl); 
 			debug("client of name %s has successfully registered with us", client_name);
 		}
   }
@@ -62,7 +60,7 @@ public class MusicPlayerBridge : GLib.Object
 		if(server_is_not_of_interest(type)) return;
 		string client_name = type.split(".")[1];
 		if (root_menu != null && client_name != null){
-			root_menu.child_delete(registered_clients[client_name]);
+			registered_clients[client_name].vanish();
 			registered_clients.remove(client_name);
 			debug("Successively removed menu_item for client %s from registered_clients", client_name);
 		}
