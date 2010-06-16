@@ -17,23 +17,12 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along 
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-using Dbusmenu;
 using Gee;
 
-public class TransportMenuitem : Dbusmenu.Menuitem
-{
-	/* Not ideal duplicate definition of const - see common-defs/h */
- 	const string DBUSMENU_TRANSPORT_MENUITEM_TYPE = "x-canonical-transport-bar";
- 	const string DBUSMENU_TRANSPORT_MENUITEM_STATE = "x-canonical-transport-state";
-
-	public TransportMenuitem()
-  {
-		this.property_set(MENUITEM_PROP_TYPE, DBUSMENU_TRANSPORT_MENUITEM_TYPE);
-		this.property_set(DBUSMENU_TRANSPORT_MENUITEM_STATE, "play");
+public class MprisControllerV2 : MprisController
+{		
+	public MprisControllerV2(string name, PlayerController controller){
+		base(name, controller, "org.mpris.MediaPlayer.Player");
 	}
 
-	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
-	{
-	}	
 }

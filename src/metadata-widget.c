@@ -53,9 +53,9 @@ static gboolean metadata_widget_button_press_event (GtkWidget *menuitem,
 static gboolean metadata_widget_button_release_event (GtkWidget *menuitem, 
                                   										GdkEventButton *event);
 // Dbusmenuitem properties update callback
-static void metadata_widget_update_state(gchar * property, 
-                                       GValue * value,
-                                       gpointer userdata);
+static void metadata_widget_update_state(DbusmenuMenuitem* item, gchar* property, 
+                                       GValue* value, gpointer userdata);
+
 //static void update_content( 
 
 
@@ -159,9 +159,20 @@ metadata_widget_button_release_event (GtkWidget *menuitem,
 	return TRUE;
 }
 
-static void metadata_widget_update_state(gchar *property, GValue *value, gpointer userdata)
+static void 
+metadata_widget_update_state(DbusmenuMenuitem* item, gchar* property, 
+                                       GValue* value, gpointer userdata)
 {
-	g_debug("metadata_widget_update_state - with property  %s", property);  
+	//g_debug("metadata_widget_update_state - with property  %s", property); 
+	MetadataWidget* mitem = METADATA_WIDGET(userdata);
+	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(mitem);
+	
+	if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_ARTIST, property) == 0){  
+		gtk_label_set_text(GTK_LABEL(priv->artist_label), g_value_get_string(value));
+	}
+	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_PIECE, property) == 0){  
+		gtk_label_set_text(GTK_LABEL(priv->piece_label), g_value_get_string(value));
+	}	
 }
 
  /**
