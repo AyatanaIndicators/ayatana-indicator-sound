@@ -54,7 +54,9 @@ music_bridge_VALASOURCES = \
 	music-player-bridge.vala \
 	transport-menu-item.vala \
 	metadata-menu-item.vala \
-	player-controller.vala
+	player-controller.vala \
+	mpris-controller-v2.vala \
+	mpris-controller.vala
 
 music_bridge_VALAFLAGS = \
   --ccode \
