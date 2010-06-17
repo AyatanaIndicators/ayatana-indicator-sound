@@ -1,3 +1,9 @@
+indicator-sound (0.3.1-0ubuntu1) UNRELEASED; urgency=low
+
+  * New upstream release.
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 17 Jun 2010 16:50:31 -0400
+
 indicator-sound (0.2.3-0ubuntu1) lucid-proposed; urgency=low
 
   * New upstream version:

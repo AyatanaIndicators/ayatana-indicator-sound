@@ -15,7 +15,10 @@ Build-Depends: debhelper (>= 7),
                libpulse-dev (>= 0.9.18),
                libpulse-mainloop-glib0 (>= 0.9.18),
                libido-0.1-dev (>= 0.1.2),
-               libgconf2-dev
+               libgconf2-dev,
+               libgee-dev,
+               libindicate-dev,
+               valac
 Standards-Version: 3.8.4
 Homepage: https://launchpad.net/indicator-sound
 

@@ -89,14 +89,14 @@ Gracefully close our connection with the Pulse async library.
 void close_pulse_activites()
 {
     if (pulse_context != NULL){
-        g_debug("freeing the pulse context");
+/*        g_debug("freeing the pulse context");*/
  	    pa_context_unref(pulse_context);
         pulse_context = NULL;
    	}
     g_hash_table_destroy(sink_hash);
     pa_glib_mainloop_free(pa_main_loop);
     pa_main_loop = NULL;
-    g_debug("I just closed communication with Pulse");
+/*    g_debug("I just closed communication with Pulse");*/
 }
 
 /** 
@@ -147,7 +147,7 @@ static gboolean determine_sink_availability()
     // Firstly check to see if we have any sinks
     // if not get the hell out of here !
     if (g_hash_table_size(sink_hash) < 1){
-        g_debug("Sink_available returning false because sinks_hash is empty !!!");    
+/*        g_debug("Sink_available returning false because sinks_hash is empty !!!");    */
         DEFAULT_SINK_INDEX = -1;    
         return FALSE;
     }
@@ -166,9 +166,9 @@ static gboolean determine_sink_availability()
     // Up until now the most rebust method to test this is to manually remove the available sink device 
     // kernel module and then reload (rmmod & modprobe).
     // TODO: Edge case of dynamic loading and unloading of sinks should be handled also.
-    g_debug("About to test for to see if the available sink is null - s->name = %s", s->name);
+/*    g_debug("About to test for to see if the available sink is null - s->name = %s", s->name);*/
     gboolean available = g_ascii_strncasecmp("auto_null", s->name, 9) != 0;
-    g_debug("PA_Manager ->  determine_sink_availability: %i", available);
+/*    g_debug("PA_Manager ->  determine_sink_availability: %i", available);*/
     return available;
 }
 
@@ -184,7 +184,7 @@ static gboolean default_sink_is_muted()
 
 static void check_sink_input_while_muted_event(gint sink_index)
 {
-    g_debug("SINKINPUTWHILEMUTED SIGNAL EVENT TO BE SENT FROM PA MANAGER - check trace for value");
+/*    g_debug("SINKINPUTWHILEMUTED SIGNAL EVENT TO BE SENT FROM PA MANAGER - check trace for value");*/
 
     if (default_sink_is_muted(sink_index) == TRUE){
         sound_service_dbus_sink_input_while_muted (dbus_service, TRUE);
@@ -201,7 +201,7 @@ static gdouble get_default_sink_volume()
     sink_info *s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));
     pa_volume_t vol = pa_cvolume_avg(&s->volume);
     gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
-    g_debug("software volume = %f", volume_percent);
+/*    g_debug("software volume = %f", volume_percent);*/
     return volume_percent;
 }
 
@@ -216,13 +216,13 @@ static void mute_each_sink(gpointer key, gpointer value, gpointer user_data)
         sound_service_dbus_update_sink_volume(dbus_service, get_default_sink_volume());
     }
 
-    g_debug("in the pulse manager: mute each sink %i", GPOINTER_TO_INT(user_data));
+/*    g_debug("in the pulse manager: mute each sink %i", GPOINTER_TO_INT(user_data));*/
 }
 
 void toggle_global_mute(gboolean mute_value)
 {
     g_hash_table_foreach(sink_hash, mute_each_sink, GINT_TO_POINTER(mute_value));
-    g_debug("in the pulse manager: toggle global mute value %i", mute_value);
+/*    g_debug("in the pulse manager: toggle global mute value %i", mute_value);*/
 }
 
 
@@ -234,7 +234,7 @@ void set_sink_volume(gdouble percent)
 {
     if(pa_server_available == FALSE)
         return;   
-    g_debug("in the pulse manager:set_sink_volume with percent %f", percent);
+/*    g_debug("in the pulse manager:set_sink_volume with percent %f", percent);*/
 
     if(DEFAULT_SINK_INDEX < 0)
     {
@@ -287,7 +287,7 @@ static void gather_pulse_information(pa_context *c, void *userdata)
 
 static void context_success_callback(pa_context *c, int success, void *userdata)
 {
-    g_debug("Context Success Callback - result = %i", success);
+/*    g_debug("Context Success Callback - result = %i", success);*/
 }
 
 /**
@@ -315,7 +315,7 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
         }
     }
     else{
-        g_debug("About to add an item to our hash");
+/*        g_debug("About to add an item to our hash");*/
         sink_info *value;
         value = g_new0(sink_info, 1);
         value->index = sink->index;
@@ -325,7 +325,7 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
         value->base_volume = sink->base_volume;
         value->channel_map = sink->channel_map;
         g_hash_table_insert(sink_hash, GINT_TO_POINTER(sink->index), value);
-        g_debug("After adding an item to our hash");
+/*        g_debug("After adding an item to our hash");*/
     }
 }
 
@@ -339,7 +339,7 @@ static void pulse_default_sink_info_callback(pa_context *c, const pa_sink_info *
     }
     else{
         DEFAULT_SINK_INDEX = info->index;
-        g_debug("Just set the default sink index to %i", DEFAULT_SINK_INDEX);    
+/*        g_debug("Just set the default sink index to %i", DEFAULT_SINK_INDEX);    */
         GList *keys = g_hash_table_get_keys(sink_hash);
         gint position =  g_list_index(keys, GINT_TO_POINTER(info->index));
         // Only update sink-list if the index is not in our already fetched list.
@@ -358,17 +358,17 @@ static void pulse_sink_input_info_callback(pa_context *c, const pa_sink_input_in
     if (eol > 0) {
         if (pa_context_errno(c) == PA_ERR_NOENTITY)
             return;
-        g_warning("Sink INPUT info callback failure");
+/*        g_warning("Sink INPUT info callback failure");*/
         return;
     }
 	else{
         if (info == NULL)
         {
             // TODO: watch this carefully - PA async api should not be doing this . . .
-            g_warning("\n Sink input info callback : SINK INPUT INFO IS NULL BUT EOL was not POSITIVE!!!");
+/*            g_warning("\n Sink input info callback : SINK INPUT INFO IS NULL BUT EOL was not POSITIVE!!!");*/
             return;
         }
-		g_debug("\n SINK INPUT INFO sink index : %d \n", info->sink);
+/*		g_debug("\n SINK INPUT INFO sink index : %d \n", info->sink);*/
         check_sink_input_while_muted_event(info->sink);
 	}
 }
@@ -378,7 +378,7 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
     if (eol > 0) {
         if (pa_context_errno(c) == PA_ERR_NOENTITY)
             return;
-        g_warning("Sink INPUT info callback failure");
+/*        g_warning("Sink INPUT info callback failure");*/
         return;
     }
     gint position = -1;
@@ -414,19 +414,19 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
             {
                 pa_volume_t vol = pa_cvolume_max(&s->volume);
                 gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
-                g_debug("Updating volume from PA manager with volume = %f", volume_percent);
+/*                g_debug("Updating volume from PA manager with volume = %f", volume_percent);*/
                 sound_service_dbus_update_sink_volume(dbus_service, volume_percent); 
             }
             
             if (mute_changed == TRUE)
             {     
-                g_debug("Updating Mute from PA manager with mute = %i", s->mute);
+/*                g_debug("Updating Mute from PA manager with mute = %i", s->mute);*/
                 sound_service_dbus_update_sink_mute(dbus_service, s->mute);
                 dbus_menu_manager_update_mute_ui(s->mute);
                 if(s->mute == FALSE){
                     pa_volume_t vol = pa_cvolume_max(&s->volume);
                     gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
-                    g_debug("Updating volume from PA manager with volume = %f", volume_percent);
+/*                    g_debug("Updating volume from PA manager with volume = %f", volume_percent);*/
                     sound_service_dbus_update_sink_volume(dbus_service, volume_percent);
                 }
             }
@@ -443,7 +443,7 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
         value->channel_map = info->channel_map;
         value->base_volume = info->base_volume;
         g_hash_table_insert(sink_hash, GINT_TO_POINTER(value->index), value);
-        g_debug("pulse-manager:update_sink_info -> After adding a new sink to our hash");
+/*        g_debug("pulse-manager:update_sink_info -> After adding a new sink to our hash");*/
         sound_service_dbus_update_sink_availability(dbus_service, TRUE);    
    } 
 }
@@ -457,7 +457,7 @@ static gboolean has_volume_changed(const pa_sink_info* new_sink, sink_info* cach
     pa_cvolume new_vol = construct_mono_volume(&new_sink->volume);
 
     if(pa_cvolume_equal(&new_vol, &(cached_sink->volume)) == TRUE){
-        g_debug("has_volume_changed: volumes appear to be equal? no change triggered!");    
+/*        g_debug("has_volume_changed: volumes appear to be equal? no change triggered!");    */
         return FALSE;
     }
     
@@ -467,7 +467,7 @@ static gboolean has_volume_changed(const pa_sink_info* new_sink, sink_info* cach
 
 static void pulse_server_info_callback(pa_context *c, const pa_server_info *info, void *userdata)
 {
-    g_debug("server info callback");
+/*    g_debug("server info callback");*/
     pa_operation *operation;
     if (info == NULL)
     {
@@ -507,32 +507,32 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
                 if(index == DEFAULT_SINK_INDEX)
                     sound_service_dbus_update_sink_availability(dbus_service, FALSE);    
 
-                g_debug("Subscribed_events_callback - removing sink of index %i from our sink hash - keep the cache tidy !", index);
+/*                g_debug("Subscribed_events_callback - removing sink of index %i from our sink hash - keep the cache tidy !", index);*/
                 g_hash_table_remove(sink_hash, GINT_TO_POINTER(index)); 
 
                 if(index == DEFAULT_SINK_INDEX){
-                    g_debug("subscribed_events_callback - PA_SUBSCRIPTION_EVENT_SINK REMOVAL: default sink %i has been removed.", DEFAULT_SINK_INDEX);  
+/*                    g_debug("subscribed_events_callback - PA_SUBSCRIPTION_EVENT_SINK REMOVAL: default sink %i has been removed.", DEFAULT_SINK_INDEX);  */
                     DEFAULT_SINK_INDEX = -1;    
                     determine_sink_availability();
                 }
-                g_debug("subscribed_events_callback - Now what is our default sink : %i", DEFAULT_SINK_INDEX);    
+/*                g_debug("subscribed_events_callback - Now what is our default sink : %i", DEFAULT_SINK_INDEX);    */
             } 
             else 
             {
-			    g_debug("subscribed_events_callback - PA_SUBSCRIPTION_EVENT_SINK: a generic sink event - will trigger an update");            
+/*			    g_debug("subscribed_events_callback - PA_SUBSCRIPTION_EVENT_SINK: a generic sink event - will trigger an update");            */
                 pa_operation_unref(pa_context_get_sink_info_by_index(c, index, update_sink_info, userdata));
             }            
             break;
         case PA_SUBSCRIPTION_EVENT_SINK_INPUT:
-			g_debug("subscribed_events_callback - PA_SUBSCRIPTION_EVENT_SINK_INPUT event triggered!!");
+/*			g_debug("subscribed_events_callback - PA_SUBSCRIPTION_EVENT_SINK_INPUT event triggered!!");*/
             if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE)
             {
                 //handle the sink input remove event - not relevant for current design
             }            
             else 
             {			
-    		    pa_operation_unref(pa_context_get_sink_input_info(c, index, pulse_sink_input_info_callback, userdata));
-    		}
+    		    	pa_operation_unref(pa_context_get_sink_input_info(c, index, pulse_sink_input_info_callback, userdata));
+    				}
     	    break;
         case PA_SUBSCRIPTION_EVENT_SERVER:
             g_debug("subscribed_events_callback - PA_SUBSCRIPTION_EVENT_SERVER change of some description ???");
@@ -551,16 +551,16 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
 static void context_state_callback(pa_context *c, void *userdata) {
 	switch (pa_context_get_state(c)) {
         case PA_CONTEXT_UNCONNECTED:
-			g_debug("unconnected");
+/*			g_debug("unconnected");*/
 			break;
         case PA_CONTEXT_CONNECTING:
-			g_debug("connecting - waiting for the server to become available");
+/*			g_debug("connecting - waiting for the server to become available");*/
 			break;
         case PA_CONTEXT_AUTHORIZING:
-			g_debug("authorizing");
+/*			g_debug("authorizing");*/
 			break;
         case PA_CONTEXT_SETTING_NAME:
-			g_debug("context setting name");
+/*			g_debug("context setting name");*/
 			break;
         case PA_CONTEXT_FAILED:
 			g_warning("FAILED to retrieve context - Is PulseAudio Daemon running ?");
@@ -568,10 +568,10 @@ static void context_state_callback(pa_context *c, void *userdata) {
             reconnect_to_pulse();
 			break;
         case PA_CONTEXT_TERMINATED:
-			g_debug("context terminated");
+/*			g_debug("context terminated");*/
 			break;
         case PA_CONTEXT_READY:
-			g_debug("PA daemon is ready");
+				g_debug("PA daemon is ready");
             pa_operation *o;
 
             pa_context_set_subscribe_callback(c, subscribed_events_callback, userdata);

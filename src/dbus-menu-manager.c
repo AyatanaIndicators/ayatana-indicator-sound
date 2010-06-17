@@ -25,7 +25,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <dbus/dbus-glib-bindings.h>
 
 #include <libdbusmenu-glib/server.h>
-#include <libdbusmenu-glib/menuitem.h>
 #include <libdbusmenu-glib/client.h>
 
 #include "dbus-menu-manager.h" 
@@ -60,7 +59,7 @@ static void refresh_menu();
 /**
 setup:
 **/
-void dbus_menu_manager_setup()
+DbusmenuMenuitem* dbus_menu_manager_setup()
 {
     root_menuitem = dbusmenu_menuitem_new();
     g_debug("Root ID: %d", dbusmenu_menuitem_get_id(root_menuitem));
@@ -72,6 +71,7 @@ void dbus_menu_manager_setup()
     DbusmenuServer *server = dbusmenu_server_new(INDICATOR_SOUND_DBUS_OBJECT);
     dbusmenu_server_set_root(server, root_menuitem);
     establish_pulse_activities(dbus_interface);
+		return root_menuitem;
 }
 
 /**
