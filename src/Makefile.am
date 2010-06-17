@@ -7,7 +7,7 @@ libexec_PROGRAMS = indicator-sound-service
 soundmenulibdir = $(INDICATORDIR)
 soundmenulib_LTLIBRARIES = libsoundmenu.la
 libsoundmenu_la_SOURCES = \
-  common-defs.h \
+        common-defs.h \
 	indicator-sound.h \
 	transport-widget.c \
 	transport-widget.h \
@@ -105,8 +105,8 @@ indicator_sound_service_LDADD = $(PULSEAUDIO_LIBS) $(SOUNDSERVICE_LIBS) $(GCONF_
 EXTRA_DIST = \
   sound-service.xml \
   sound-service.list \
-  $(music_bridge_la_APIFILES) \
-  $(music_bridge_la_VALASOURCES)
+  $(music_bridge_APIFILES) \
+  $(music_bridge_VALASOURCES)
 
 #######################
 # Stuff to clean Stuff
@@ -115,8 +115,9 @@ BUILT_SOURCES = \
 	music_bridge_vala.stamp \
 	sound-service-client.h \
   sound-service-server.h \
-  $(music_bridge_la_APIFILES) \
-  $(music_bridge_la_VALASOURCES:.vala=.c) 
+  music-bridge.vapi \
+  $(music_bridge_APIFILES) \
+  $(music_bridge_VALASOURCES:.vala=.c)
 
 CLEANFILES = \
 	$(BUILT_SOURCES)
