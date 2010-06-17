@@ -32,7 +32,8 @@ test_indicator_sound_CFLAGS = \
 test_indicator_sound_LDADD = \
 	libmockpulse.la \
 	$(PULSEAUDIO_LIBS) \
-	$(APPLET_LIBS) 
+	$(APPLET_LIBS) \
+        ../src/libsoundmenu.la 
 
 
 #########################################
