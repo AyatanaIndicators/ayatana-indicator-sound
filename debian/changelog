@@ -1,6 +1,9 @@
 indicator-sound (0.3.1-0ubuntu1) UNRELEASED; urgency=low
 
   * New upstream release.
+  * debian/control
+    - bumped build-dep version of libdbusmenu-glib-dev to (>= 0.3.1)
+    - Added build-dep for libindicate-dev (>= 0.4.1)
 
  -- Ken VanDine <ken.vandine@canonical.com>  Thu, 17 Jun 2010 16:50:31 -0400
 
