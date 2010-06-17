@@ -170,7 +170,7 @@ transport_widget_button_press_event (GtkWidget *menuitem,
 
 	gboolean state = g_ascii_strcasecmp(gtk_button_get_label(GTK_BUTTON(priv->play_button)), ">") == 0;
 
-	gtk_button_set_label(GTK_BUTTON(priv->play_button), g_strdup(transport_widget_toggle_play_label(gtk_button_get_label(GTK_BUTTON(priv->play_button)))));
+	gtk_button_set_label(GTK_BUTTON(priv->play_button), transport_widget_toggle_play_label(gtk_button_get_label(GTK_BUTTON(priv->play_button))));
  	GValue value = {0};
   g_value_init(&value, G_TYPE_BOOLEAN);
 	g_debug("TransportWidget::menu_press_event - going to send value %i", state);

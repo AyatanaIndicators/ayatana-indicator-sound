@@ -158,10 +158,13 @@ metadata_widget_button_release_event (GtkWidget *menuitem,
 	return TRUE;
 }
 
+// TODO: Manage empty/mangled music details <unknown artist> etc.
 static void 
 metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
                                        GValue* value, gpointer userdata)
 {
+	g_return_if_fail (IS_METADATA_WIDGET (userdata));	
+
 	MetadataWidget* mitem = METADATA_WIDGET(userdata);
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(mitem);
 	
@@ -175,8 +178,13 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 		gtk_label_set_text(GTK_LABEL(priv->container_label), g_value_get_string(value));
 	}	
 	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_IMAGE_PATH, property) == 0){
-		priv->image_path = g_strdup(g_value_get_string(value));
-		if(priv->image_path != NULL){			
+		if(priv->image_path != NULL){
+			g_free(priv->image_path);
+		}
+		
+		priv->image_path = g_value_dup_string(value);
+
+		if(priv->image_path != NULL){
 			update_album_art(mitem);
 		}
 	}		

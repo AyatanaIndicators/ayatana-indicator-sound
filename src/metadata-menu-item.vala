@@ -26,7 +26,7 @@ public class MetadataMenuitem : Dbusmenu.Menuitem
 	public static string sanitize_image_path(string path)
 	{
 		string result = path.strip();
-		if(result.contains("file:///")){
+		if(result.has_prefix("file:///")){
 			result = result.slice(7, result.len());		                   
 		}
 		debug("Sanitize image path - result = %s", result);
