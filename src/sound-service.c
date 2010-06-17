@@ -23,6 +23,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "sound-service.h"
 #include "dbus-menu-manager.h"
 #include "pulse-manager.h"
+#include "music-player-bridge.h"
 
 static GMainLoop *mainloop = NULL;
 
@@ -43,9 +44,9 @@ service_shutdown (IndicatorService *service, gpointer user_data)
 
 	if (mainloop != NULL) {
 		g_debug("Service shutdown !");
-        // TODO: uncomment for release !!
-       	close_pulse_activites();
-        g_main_loop_quit(mainloop);
+    // TODO: uncomment for release !!
+   	close_pulse_activites();
+    g_main_loop_quit(mainloop);
 	}
 	return;
 }
@@ -57,7 +58,7 @@ main:
 int
 main (int argc, char ** argv)
 {
-    g_type_init();
+  g_type_init();
 
 	setlocale (LC_ALL, "");
 	bindtextdomain (GETTEXT_PACKAGE, GNOMELOCALEDIR);
@@ -69,13 +70,15 @@ main (int argc, char ** argv)
 	                 INDICATOR_SERVICE_SIGNAL_SHUTDOWN,
 	                 G_CALLBACK(service_shutdown), NULL);    
 
-    dbus_menu_manager_setup();
+	DbusmenuMenuitem* root_menuitem = dbus_menu_manager_setup();
+	MusicPlayerBridge* server = music_player_bridge_new();	
+	music_player_bridge_set_root_menu_item(server, root_menuitem);
 
     // Run the loop
-    mainloop = g_main_loop_new(NULL, FALSE);
-    g_main_loop_run(mainloop);
-
-    return 0;
+  mainloop = g_main_loop_new(NULL, FALSE);
+  g_main_loop_run(mainloop);
+	
+  return 0;
 }
 
 
