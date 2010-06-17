@@ -176,7 +176,9 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	}	
 	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_IMAGE_PATH, property) == 0){
 		priv->image_path = g_strdup(g_value_get_string(value));
-		update_album_art(mitem);
+		if(priv->image_path != NULL){			
+			update_album_art(mitem);
+		}
 	}		
 }
 
@@ -184,10 +186,12 @@ static void update_album_art(MetadataWidget* self){
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);	
 	GdkPixbuf* pixbuf;
 	pixbuf = gdk_pixbuf_new_from_file(priv->image_path, NULL);
-  pixbuf = gdk_pixbuf_scale_simple(pixbuf,60,60,GDK_INTERP_BILINEAR);
+  pixbuf = gdk_pixbuf_scale_simple(pixbuf,60, 60,GDK_INTERP_BILINEAR);
+	g_debug("attempting to set the image with path %s", priv->image_path);
 	gtk_image_set_from_pixbuf(GTK_IMAGE(priv->album_art), pixbuf);
 	g_object_unref(pixbuf);	
 }
+
 
  /**
  * transport_new:

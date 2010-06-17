@@ -26,14 +26,29 @@ public class TransportMenuitem : Dbusmenu.Menuitem
 	/* Not ideal duplicate definition of const - see common-defs/h */
  	const string DBUSMENU_TRANSPORT_MENUITEM_TYPE = "x-canonical-transport-bar";
  	const string DBUSMENU_TRANSPORT_MENUITEM_STATE = "x-canonical-transport-state";
-
+	private MprisController mpris_adaptor;
+	
 	public TransportMenuitem()
   {
 		this.property_set(MENUITEM_PROP_TYPE, DBUSMENU_TRANSPORT_MENUITEM_TYPE);
-		this.property_set(DBUSMENU_TRANSPORT_MENUITEM_STATE, "play");
+		// Hardcode the set up state until we can get the struct vala bug fixed
+		this.property_set_bool(DBUSMENU_TRANSPORT_MENUITEM_STATE, false);
+		debug("transport on the vala side");
 	}
 
+	public void set_adaptor(MprisController adaptor)
+	{
+		this.mpris_adaptor = adaptor;		
+	}
+	
+	/**
+	 Callback method for the handle_event
+	 * TRUE  => Playing
+	 * FALSE => Paused
+	 **/
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
 	{
+		debug("handle_event with bool value %s", input_value.get_boolean().to_string());
+		this.mpris_adaptor.toggle_playback(input_value.get_boolean());
 	}	
 }

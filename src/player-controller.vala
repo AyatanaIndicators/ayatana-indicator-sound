@@ -18,20 +18,20 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 using Dbusmenu;
 using Gee;
 
 public class PlayerController : GLib.Object
 {
-	private const int METADATA = 2;
+	private const int METADATA = 2;	
+	private const int TRANSPORT = 3;
+	
 	private Dbusmenu.Menuitem root_menu;
 	private string name;
 	private bool is_active;
 	private ArrayList<Dbusmenu.Menuitem> custom_items;	
 	private MprisController mpris_adaptor;
 
-	// TODO: pass in the appropriate position for the menu (to handle multiple players)
 	public PlayerController(Dbusmenu.Menuitem root, string client_name, bool active)
 	{
 		this.root_menu = root;
@@ -39,12 +39,20 @@ public class PlayerController : GLib.Object
 		this.is_active = active;
 		this.custom_items = new ArrayList<Dbusmenu.Menuitem>();
 		self_construct();
+		
 		// Temporary scenario to handle both v1 and v2 of MPRIS.
 		if(this.name == "Vlc"){
 			this.mpris_adaptor = new MprisControllerV2(this.name, this);
-		}else{
+		}
+		else{
 			this.mpris_adaptor = new MprisController(this.name, this);
-		}					
+		}			
+
+		// TODO subclass dbusmenuMenuitem to something like a playermenuitem 
+		// and use this type to collectively 
+		// control widgets.
+		TransportMenuitem t = (TransportMenuitem)this.custom_items[TRANSPORT];
+		t.set_adaptor(this.mpris_adaptor);
 	}
 
 	public void vanish()

@@ -17,13 +17,22 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along 
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 using Gee;
+
 
 public class MprisController : GLib.Object
 {
   private DBus.Connection connection;
-  private dynamic DBus.Object mpris_player;
+  public dynamic DBus.Object mpris_player;
 	private PlayerController controller;
+  struct status {
+    public int32 playback;
+    public int32 shuffle;
+    public int32 repeat;
+    public int32 endless;
+  }
+		
 	
 	public MprisController(string name, PlayerController controller, string mpris_interface="org.freedesktop.MediaPlayer"){
     try {
@@ -34,6 +43,7 @@ public class MprisController : GLib.Object
 		this.controller = controller;
 		this.mpris_player = this.connection.get_object ("org.mpris.".concat(name.down()) , "/Player", mpris_interface);				
     this.mpris_player.TrackChange += onTrackChange;	
+    this.mpris_player.StatusChange += onStatusChange;		
 		this.controller.update_playing_info(get_track_data());
 	}
 
@@ -45,6 +55,36 @@ public class MprisController : GLib.Object
 	private void onTrackChange(dynamic DBus.Object mpris_client, HashTable<string,Value?> ht)
 	{
 		this.controller.update_playing_info(format_metadata(ht));
+	}
+
+	/**
+	 * TRUE  => Playing
+	 * FALSE => Paused
+	 **/
+	public void toggle_playback(bool state)
+	{
+		if(state == true){
+			debug("about to play");
+			this.mpris_player.Play();				
+		}
+		else{
+			debug("about to pause");
+			this.mpris_player.Pause();						
+		}		
+	}
+	
+	private void onStatusChange(dynamic DBus.Object mpris_client, status st)
+  {
+    debug("onStatusChange - signal received");	
+		//ValueArray a = new ValueArray(4);
+		//Value v = new Value(typeof(int32));          
+		//v.set_int(st.playback);
+		//a.append(v);
+		//debug("onStatusChange - play %i", a.get_nth(0).get_int());
+		//int playback = (ValueArray)st.get_nth(0).get_int();
+		//int shuffle = ar.get_nth(1).get_int();
+		//int repeat = ar.get_nth(2).get_int();
+		//int endless = ar.get_nth(3).get_int();		
 	}
 
 	private static HashMap<string, string> format_metadata(HashTable<string,Value?> data)
