@@ -38,8 +38,7 @@ typedef struct _SoundServiceDbus      SoundServiceDbus;
 typedef struct _SoundServiceDbusClass SoundServiceDbusClass;
 typedef struct _SoundData             SoundData;
 
-struct _SoundData
-{
+struct _SoundData {
   SoundServiceDbus *service;
 };
 
@@ -49,7 +48,7 @@ struct _SoundServiceDbus {
 
 struct _SoundServiceDbusClass {
   GObjectClass parent_class;
-}; 
+};
 GType sound_service_dbus_get_type  (void) G_GNUC_CONST;
 
 // Utility methods to get the SIGNAL messages across into the sound-service-dbus
