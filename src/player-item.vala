@@ -32,9 +32,9 @@ public class PlayerItem : Dbusmenu.Menuitem
 	public virtual void update(HashMap<string, Value?> data)
 	{
 		debug("PlayerItem::update()");
-		foreach(var key in this.attributes().keys){
-			this.attributes.get(key);
-		}
+		//foreach(var key in this.attributes().keys){
+		//	this.attributes.get(key);
+		//}
 	}
 
 	public void set_adaptor(MprisController adaptor)
