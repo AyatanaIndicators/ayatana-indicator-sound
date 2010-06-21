@@ -6,16 +6,16 @@ public class MetadataMenuitem : PlayerItem
 {
 	public MetadataMenuitem()
   {
-		this.property_set(MENUITEM_PROP_TYPE, CommonDefs.DBUSMENU_METADATA_MENUITEM_TYPE);
+		this.property_set(MENUITEM_PROP_TYPE, DBUSMENU_METADATA_MENUITEM_TYPE);
 		
 	}
 
 	public override void update(HashMap<string, string> data)
 	{
-		this.property_set(CommonDefs.DBUSMENU_METADATA_MENUITEM_TEXT_ARTIST, data.get("artist").strip());
-		this.property_set(CommonDefs.DBUSMENU_METADATA_MENUITEM_TEXT_TITLE, data.get("title").strip());
-		this.property_set(CommonDefs.DBUSMENU_METADATA_MENUITEM_TEXT_ALBUM, data.get("album").strip());
-		this.property_set(CommonDefs.DBUSMENU_METADATA_MENUITEM_IMAGE_PATH, sanitize_image_path(data.get("arturl")));
+		this.property_set(DBUSMENU_METADATA_MENUITEM_TEXT_ARTIST, data.get("artist").strip());
+		this.property_set(DBUSMENU_METADATA_MENUITEM_TEXT_TITLE, data.get("title").strip());
+		this.property_set(DBUSMENU_METADATA_MENUITEM_TEXT_ALBUM, data.get("album").strip());
+		this.property_set(DBUSMENU_METADATA_MENUITEM_IMAGE_PATH, sanitize_image_path(data.get("arturl")));
 	}
 
 	public static string sanitize_image_path(string path)
