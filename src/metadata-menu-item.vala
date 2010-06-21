@@ -33,19 +33,8 @@ public class MetadataMenuitem : PlayerItem
 		results.set(MENUITEM_TEXT_TITLE, typeof(string));
     results.set(MENUITEM_TEXT_ARTIST, typeof(string));
     results.set(MENUITEM_TEXT_ALBUM, typeof(string));
-    results.set(MENUITEM_TEXT_ARTURL, typeof(string));
+    results.set(MENUITEM_ARTURL, typeof(string));
 		return results;
 	}
 		
-
-	public static HashMap<string, string> format_updates(HashMap<string, Value?> data)
-	{
-		HashMap<string,string> results = new HashMap<string, string>();		
-		
-		results.set(MENUITEM_TEXT_TITLE, (string)data.lookup("title").strip());
-    results.set(MENUITEM_TEXT_ARTIST, (string)data.lookup("artist").strip());
-    results.set(MENUITEM_TEXT_ALBUM, (string)data.lookup("album").strip(), typeof(string));
-    results.set(MENUITEM_TEXT_ARTURL, sanitize_image_path((string)data.lookup("arturl").strip()), typeof(string));
-		return results;
-	}
 }

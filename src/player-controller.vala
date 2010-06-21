@@ -23,13 +23,13 @@ using Gee;
 
 public class PlayerController : GLib.Object
 {
-	private const int METADATA = 2;	
+	public const int METADATA = 2;	
 	private const int TRANSPORT = 3;
 	
 	private Dbusmenu.Menuitem root_menu;
 	private string name;
 	private bool is_active;
-	private ArrayList<PlayerItem> custom_items;	
+	public ArrayList<PlayerItem> custom_items;	
 	private MprisController mpris_adaptor;
 
 	public PlayerController(Dbusmenu.Menuitem root, string client_name, bool active)
@@ -47,7 +47,6 @@ public class PlayerController : GLib.Object
 		else{
 			this.mpris_adaptor = new MprisController(this.name, this);
 		}			
-
 		this.custom_items[TRANSPORT].set_adaptor(this.mpris_adaptor);
 	}
 
@@ -81,12 +80,12 @@ public class PlayerController : GLib.Object
 		return true;
 	}	
 
-	public void update_playing_info(HashMap<string, string> data)
-	{
-		debug("PlayerController - update_playing_info");
-		MetadataMenuitem item = this.custom_items[METADATA] as MetadataMenuitem;		
-		item.update(data);
-	}
+	//public void update_playing_info(HashMap<string, string> data)
+	//{
+	//	debug("PlayerController - update_playing_info");
+	//	MetadataMenuitem item = this.custom_items[METADATA] as MetadataMenuitem;		
+	//	item.update(data, MetadataMenuitem.attributes_format());
+	//}
 
 	private static string format_client_name(string client_name)
 	{

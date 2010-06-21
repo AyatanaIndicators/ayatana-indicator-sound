@@ -34,10 +34,10 @@ public class TransportMenuitem : PlayerItem
 		debug("transport on the vala side");
 	}
 
-	public override void update(HashMap<string, string> data)
-	{
-		debug("TransportMenuitem::update()");
-	}
+	//public override void update(HashMap<string, string> data)
+	//{
+	//	debug("TransportMenuitem::update()");
+	//}
 		
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
 	{

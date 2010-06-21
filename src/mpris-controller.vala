@@ -44,17 +44,18 @@ public class MprisController : GLib.Object
 		this.mpris_player = this.connection.get_object ("org.mpris.".concat(name.down()) , "/Player", mpris_interface);				
     this.mpris_player.TrackChange += onTrackChange;	
     this.mpris_player.StatusChange += onStatusChange;		
-		this.controller.update_playing_info(get_track_data());
+		//this.controller.update_playing_info(get_track_data());
 	}
 
-	public HashMap<string, string> get_track_data()
-	{
-		return format_metadata(this.mpris_player.GetMetadata());
-	}
+	//public HashMap<string, string> get_track_data()
+	//{
+		//return format_metadata(this.mpris_player.GetMetadata());
+	//}
 
 	private void onTrackChange(dynamic DBus.Object mpris_client, HashTable<string,Value?> ht)
 	{
-		this.controller.update_playing_info(MetadataMenuitem.format_updates(ht));
+		this.controller.custom_items[this.controller.METADATA].update(ht,
+		                                              MetadataMenuitem.attributes_format());
 	}
 
 	/**
