@@ -61,7 +61,9 @@ static gboolean transport_widget_button_press_event 	(GtkWidget             *men
                                                   		GdkEventButton        *event);
 static gboolean transport_widget_button_release_event (GtkWidget             *menuitem,
                                                     	GdkEventButton        *event);
-
+static void transport_widget_play_clicked (GtkWidget* button,
+                                           TransportWidget* self);
+                                          
 static void transport_widget_property_update(DbusmenuMenuitem* item,
                                        gchar * property, 
                                        GValue * value,
@@ -78,7 +80,9 @@ transport_widget_class_init (TransportWidgetClass *klass)
 {
 	GObjectClass 			*gobject_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass    *widget_class = GTK_WIDGET_CLASS (klass);
+	GtkMenuItemClass *menu_item_class =  GTK_MENU_ITEM_CLASS(klass);
 
+	menu_item_class->hide_on_activate = FALSE;
   widget_class->button_press_event = transport_widget_button_press_event;
   widget_class->button_release_event = transport_widget_button_release_event;
 	
@@ -143,6 +147,8 @@ transport_widget_init (TransportWidget *self)
 	
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", G_CALLBACK(transport_widget_property_update), self);
 
+	g_signal_connect(priv->play_button, "clicked", G_CALLBACK(transport_widget_play_clicked), self);
+	                 
 	gtk_container_add (GTK_CONTAINER (self), priv->hbox);
 
   gtk_widget_show_all (priv->hbox);
@@ -166,8 +172,10 @@ transport_widget_button_press_event (GtkWidget *menuitem,
                                   	GdkEventButton *event)
 {
 	g_debug("TransportWidget::menu_press_event");
+
 	TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE(TRANSPORT_WIDGET(menuitem));
 
+	gtk_widget_event (priv->hbox, (GdkEvent*)event);
 	gboolean state = g_ascii_strcasecmp(gtk_button_get_label(GTK_BUTTON(priv->play_button)), ">") == 0;
 
 	gtk_button_set_label(GTK_BUTTON(priv->play_button), transport_widget_toggle_play_label(gtk_button_get_label(GTK_BUTTON(priv->play_button))));
@@ -181,11 +189,21 @@ transport_widget_button_press_event (GtkWidget *menuitem,
 	return TRUE;
 }
 
+static void
+transport_widget_play_clicked(GtkWidget* button,
+                              TransportWidget* self)
+{
+	g_debug("Transport_widget_play_clicked");
+}
+                              
 static gboolean
 transport_widget_button_release_event (GtkWidget *menuitem, 
                                   GdkEventButton *event)
 {
 	g_debug("TransportWidget::menu_release_event");
+	TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE(TRANSPORT_WIDGET(menuitem));
+	gtk_widget_event (priv->hbox, (GdkEvent*)event);
+	
 	return TRUE;
 }
 

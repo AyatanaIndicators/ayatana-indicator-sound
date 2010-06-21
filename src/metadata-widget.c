@@ -106,13 +106,13 @@ metadata_widget_init (MetadataWidget *self)
 	
 	// piece
 	GtkWidget* piece;
-	piece = gtk_label_new(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_TEXT_PIECE));
+	piece = gtk_label_new(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_TEXT_TITLE));
 	priv->piece_label =  piece;
 
 
 	// container
 	GtkWidget* container;
-	container = gtk_label_new(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_TEXT_CONTAINER));
+	container = gtk_label_new(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_TEXT_ALBUM));
 	priv->container_label = container;
 
 	// Pack in the right order
@@ -171,10 +171,10 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_ARTIST, property) == 0){  
 		gtk_label_set_text(GTK_LABEL(priv->artist_label), g_value_get_string(value));
 	}
-	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_PIECE, property) == 0){  
+	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_TITLE, property) == 0){  
 		gtk_label_set_text(GTK_LABEL(priv->piece_label), g_value_get_string(value));
 	}	
-	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_CONTAINER, property) == 0){  
+	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_ALBUM, property) == 0){  
 		gtk_label_set_text(GTK_LABEL(priv->container_label), g_value_get_string(value));
 	}	
 	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_IMAGE_PATH, property) == 0){

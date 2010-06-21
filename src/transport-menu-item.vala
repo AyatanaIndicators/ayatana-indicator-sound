@@ -21,31 +21,24 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 using Dbusmenu;
 using Gee;
 
-public class TransportMenuitem : Dbusmenu.Menuitem
+public class TransportMenuitem : PlayerItem
 {
 	/* Not ideal duplicate definition of const - see common-defs/h */
  	const string DBUSMENU_TRANSPORT_MENUITEM_TYPE = "x-canonical-transport-bar";
  	const string DBUSMENU_TRANSPORT_MENUITEM_STATE = "x-canonical-transport-state";
-	private MprisController mpris_adaptor;
 	
 	public TransportMenuitem()
   {
 		this.property_set(MENUITEM_PROP_TYPE, DBUSMENU_TRANSPORT_MENUITEM_TYPE);
-		// Hardcode the set up state until we can get the struct vala bug fixed
 		this.property_set_bool(DBUSMENU_TRANSPORT_MENUITEM_STATE, false);
 		debug("transport on the vala side");
 	}
 
-	public void set_adaptor(MprisController adaptor)
+	public override void update(HashMap<string, string> data)
 	{
-		this.mpris_adaptor = adaptor;		
+		debug("TransportMenuitem::update()");
 	}
-	
-	/**
-	 Callback method for the handle_event
-	 * TRUE  => Playing
-	 * FALSE => Paused
-	 **/
+		
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
 	{
 		debug("handle_event with bool value %s", input_value.get_boolean().to_string());

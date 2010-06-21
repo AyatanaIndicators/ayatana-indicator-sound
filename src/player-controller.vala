@@ -29,7 +29,7 @@ public class PlayerController : GLib.Object
 	private Dbusmenu.Menuitem root_menu;
 	private string name;
 	private bool is_active;
-	private ArrayList<Dbusmenu.Menuitem> custom_items;	
+	private ArrayList<PlayerItem> custom_items;	
 	private MprisController mpris_adaptor;
 
 	public PlayerController(Dbusmenu.Menuitem root, string client_name, bool active)
@@ -37,7 +37,7 @@ public class PlayerController : GLib.Object
 		this.root_menu = root;
 		this.name = format_client_name(client_name.strip());
 		this.is_active = active;
-		this.custom_items = new ArrayList<Dbusmenu.Menuitem>();
+		this.custom_items = new ArrayList<PlayerItem>();
 		self_construct();
 		
 		// Temporary scenario to handle both v1 and v2 of MPRIS.
@@ -48,11 +48,7 @@ public class PlayerController : GLib.Object
 			this.mpris_adaptor = new MprisController(this.name, this);
 		}			
 
-		// TODO subclass dbusmenuMenuitem to something like a playermenuitem 
-		// and use this type to collectively 
-		// control widgets.
-		TransportMenuitem t = (TransportMenuitem)this.custom_items[TRANSPORT];
-		t.set_adaptor(this.mpris_adaptor);
+		this.custom_items[TRANSPORT].set_adaptor(this.mpris_adaptor);
 	}
 
 	public void vanish()
@@ -65,15 +61,10 @@ public class PlayerController : GLib.Object
 	private bool self_construct()
 	{
 		// Separator item
-		Dbusmenu.Menuitem separator_item = new Dbusmenu.Menuitem();
-		separator_item.property_set(MENUITEM_PROP_TYPE, CLIENT_TYPES_SEPARATOR);			
-		this.custom_items.add(separator_item);
+		this.custom_items.add(PlayerItem.new_separator_item());
 
 		// Title item
-		Dbusmenu.Menuitem title_item = new Dbusmenu.Menuitem();
-		title_item.property_set(MENUITEM_PROP_LABEL, this.name);					
-		title_item.property_set(MENUITEM_PROP_ICON_NAME, "applications-multimedia");			
-		this.custom_items.add(title_item);
+		this.custom_items.add(PlayerItem.new_title_item(this.name));
 
 		// Metadata item
 		MetadataMenuitem metadata_item = new MetadataMenuitem();
@@ -84,7 +75,7 @@ public class PlayerController : GLib.Object
 		this.custom_items.add(transport_item);
 
 		int offset = 2;
-		foreach(Dbusmenu.Menuitem item in this.custom_items){
+		foreach(PlayerItem item in this.custom_items){
 			root_menu.child_add_position(item, offset + this.custom_items.index_of(item));			
 		}
 		return true;

@@ -76,13 +76,12 @@ public class MprisController : GLib.Object
 	private void onStatusChange(dynamic DBus.Object mpris_client, status st)
   {
     debug("onStatusChange - signal received");	
-		//ValueArray a = new ValueArray(4);
-		//Value v = new Value(typeof(int32));          
-		//v.set_int(st.playback);
-		//a.append(v);
-		//debug("onStatusChange - play %i", a.get_nth(0).get_int());
-		//int playback = (ValueArray)st.get_nth(0).get_int();
-		//int shuffle = ar.get_nth(1).get_int();
+		status* status = &st;
+		unowned ValueArray ar = (ValueArray)status;
+		
+		int playback = ar.get_nth(0).get_int();
+		debug("onStatusChange - play %i", ar.get_nth(0).get_int());
+		
 		//int repeat = ar.get_nth(2).get_int();
 		//int endless = ar.get_nth(3).get_int();		
 	}

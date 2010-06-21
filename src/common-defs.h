@@ -31,6 +31,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define DBUSMENU_METADATA_MENUITEM_TYPE  				"x-canonical-metadata-menu-item"
 #define DBUSMENU_METADATA_MENUITEM_TEXT_ARTIST  "x-canonical-metadata-text-artist"
-#define DBUSMENU_METADATA_MENUITEM_TEXT_PIECE  	"x-canonical-metadata-text-piece"
-#define DBUSMENU_METADATA_MENUITEM_TEXT_CONTAINER  "x-canonical-metadata-text-container"
-#define DBUSMENU_METADATA_MENUITEM_IMAGE_PATH  			"x-canonical-metadata-image"
+#define DBUSMENU_METADATA_MENUITEM_TEXT_TITLE  	"x-canonical-metadata-text-title"
+#define DBUSMENU_METADATA_MENUITEM_TEXT_ALBUM   "x-canonical-metadata-text-album"
+#define DBUSMENU_METADATA_MENUITEM_IMAGE_PATH  	"x-canonical-metadata-image"
