@@ -7,3 +7,9 @@ namespace DbusmenuMetadata{
 	public const string MENUITEM_TEXT_ALBUM;
 	public const string MENUITEM_ARTURL;	
 }
+
+[CCode (cheader_filename = "common-defs.h")]
+namespace DbusmenuTransport{
+	public const string MENUITEM_TYPE;
+	public const string MENUITEM_STATE;
+}

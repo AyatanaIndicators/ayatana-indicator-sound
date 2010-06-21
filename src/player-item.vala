@@ -28,49 +28,43 @@ public class PlayerItem : Dbusmenu.Menuitem
 	public PlayerItem()
 	{		
 	}
-	
-	public void update(HashTable<string, Value?> data, HashMap<string, Type> attributes)
+
+	public void update(HashTable<string, Value?> data, HashSet<string> attributes)
 	{
 		debug("PlayerItem::update()");
-		foreach(var property in attributes){
-			//debug("property value = %s", attributes.get(property.key).name());
-			GLib.Object obj = GLib.Object.new(attributes.get(property.key));
-			debug("bang line");
-			Type t = obj.get_type();
-			if(t.is_a(typeof(string)) == true){
-				debug("obj is a string !!! we can tell -halla fucking lula!");
+		foreach(string property in attributes){
+			string[] input_keys = property.split("-");
+			string search_key = input_keys[input_keys.length-1 : input_keys.length][0];
+			if (data.lookup(search_key).holds (typeof (string))){
+				this.property_set(property, this.sanitize_string(data.lookup(search_key) as string));
+			}			    
+			else if (data.lookup(search_key).holds (typeof (int))){
+				// Circumvent weird vala bug
+				int* v = (int*)data.lookup(search_key);
+				int r = *v;
+				this.property_set_int(property, r);
 			}
-			//string[] input_keys = property.key.split("-");
-			//string search_key = input_keys[input_keys.length-1 : input_keys.length][0];
-			//debug("key parsed from properties is %s", search_key);
-			//debug("and the bloody type should be %s", property.value.name());
-			//var input_value = data.lookup(search_key) as property.value.name();
-			//foreach(var s in input_keys){
-			//	debug("string = %s", s);
-			//}
-			//string[] st = input_keys[input_keys.length-1 : input_keys.length];
-			//property.value as attributes.get(property.key)
-			//this.property_set(property.key, );
 		}
-	}
+	}	
 
 	public void set_adaptor(MprisController adaptor)
 	{
 		this.mpris_adaptor = adaptor;		
 	}
 
-	public static HashMap<string, string> format_updates(HashTable<string,Value?> ht)
+
+	public static string sanitize_string(string st)
 	{
-		HashMap<string,string> results = new HashMap<string, string>();		
-		//HashMap<string, Type> attrs = attributes_format();
-		//results.set(MENUITEM_TEXT_TITLE, (string)data.lookup("title").strip());
-    //results.set(MENUITEM_TEXT_ARTIST, (string)data.lookup("artist").strip());
-    //results.set(MENUITEM_TEXT_ALBUM, (string)data.lookup("album").strip(), typeof(string));
-    //results.set(MENUITEM_TEXT_ARTURL, sanitize_image_path((string)data.lookup("arturl").strip()), typeof(string));
-		return results;
+		string result = st.strip();
+		if(result.has_prefix("file:///")){
+			result = result.slice(7, result.len());		                   
+		}
+		debug("Sanitize string - result = %s", result);
+		return result;
 	}
+
 	
-	// Bespoke constructors for player items
+	//----- Custom constructors for player items ----------------//
 	// Title item
 	public static PlayerItem new_title_item(dynamic string name)
 	{

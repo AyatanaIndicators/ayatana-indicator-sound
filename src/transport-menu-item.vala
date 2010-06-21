@@ -20,25 +20,18 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Dbusmenu;
 using Gee;
+using DbusmenuTransport;
 
 public class TransportMenuitem : PlayerItem
 {
-	/* Not ideal duplicate definition of const - see common-defs/h */
- 	const string DBUSMENU_TRANSPORT_MENUITEM_TYPE = "x-canonical-transport-bar";
- 	const string DBUSMENU_TRANSPORT_MENUITEM_STATE = "x-canonical-transport-state";
 	
 	public TransportMenuitem()
   {
-		this.property_set(MENUITEM_PROP_TYPE, DBUSMENU_TRANSPORT_MENUITEM_TYPE);
-		this.property_set_bool(DBUSMENU_TRANSPORT_MENUITEM_STATE, false);
+		this.property_set(MENUITEM_PROP_TYPE, MENUITEM_TYPE);
+		this.property_set_bool(MENUITEM_STATE, false);
 		debug("transport on the vala side");
 	}
 
-	//public override void update(HashMap<string, string> data)
-	//{
-	//	debug("TransportMenuitem::update()");
-	//}
-		
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
 	{
 		debug("handle_event with bool value %s", input_value.get_boolean().to_string());
