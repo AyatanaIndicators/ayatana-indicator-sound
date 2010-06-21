@@ -44,6 +44,11 @@ public class PlayerItem : Dbusmenu.Menuitem
 				int r = *v;
 				this.property_set_int(property, r);
 			}
+			else if(data.lookup(search_key).holds (typeof (bool))){
+				bool* b = (bool*)data.lookup(search_key);
+				bool input = *b;
+				this.property_set_bool(property, input);
+			}
 		}
 	}	
 

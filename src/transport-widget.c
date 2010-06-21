@@ -222,7 +222,7 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	TransportWidget* bar = (TransportWidget*)userdata;
 	TransportWidgetPrivate *priv = TRANSPORT_WIDGET_GET_PRIVATE(bar);
 	
-	gtk_button_set_label(GTK_BUTTON(priv->play_button), g_strdup(transport_widget_toggle_play_label(property)));
+	gtk_button_set_label(GTK_BUTTON(priv->play_button), transport_widget_toggle_play_label(property));
 }
 
 // will be needed for image swapping

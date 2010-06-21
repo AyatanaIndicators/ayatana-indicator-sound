@@ -36,5 +36,12 @@ public class TransportMenuitem : PlayerItem
 	{
 		debug("handle_event with bool value %s", input_value.get_boolean().to_string());
 		this.mpris_adaptor.toggle_playback(input_value.get_boolean());
+	}
+
+	public static HashSet<string> attributes_format()
+	{
+		HashSet<string> attrs = new HashSet<string>();		
+		attrs.add(MENUITEM_STATE);
+		return attrs;
 	}	
 }

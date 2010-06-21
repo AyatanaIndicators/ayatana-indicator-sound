@@ -20,7 +20,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Gee;
 
-
 public class MprisController : GLib.Object
 {
   private DBus.Connection connection;
@@ -33,7 +32,6 @@ public class MprisController : GLib.Object
     public int32 endless;
   }
 		
-	
 	public MprisController(string name, PlayerController controller, string mpris_interface="org.freedesktop.MediaPlayer"){
     try {
       this.connection = DBus.Bus.get (DBus.BusType.SESSION);
@@ -44,18 +42,13 @@ public class MprisController : GLib.Object
 		this.mpris_player = this.connection.get_object ("org.mpris.".concat(name.down()) , "/Player", mpris_interface);				
     this.mpris_player.TrackChange += onTrackChange;	
     this.mpris_player.StatusChange += onStatusChange;		
-		//this.controller.update_playing_info(get_track_data());
 	}
 
-	//public HashMap<string, string> get_track_data()
-	//{
-		//return format_metadata(this.mpris_player.GetMetadata());
-	//}
 
 	private void onTrackChange(dynamic DBus.Object mpris_client, HashTable<string,Value?> ht)
 	{
 		this.controller.custom_items[this.controller.METADATA].update(ht,
-		                                              MetadataMenuitem.attributes_format());
+		                            MetadataMenuitem.attributes_format());
 	}
 
 	/**
@@ -80,11 +73,14 @@ public class MprisController : GLib.Object
 		status* status = &st;
 		unowned ValueArray ar = (ValueArray)status;
 		
-		int playback = ar.get_nth(0).get_int();
-		debug("onStatusChange - play %i", ar.get_nth(0).get_int());
-		
-		//int repeat = ar.get_nth(2).get_int();
-		//int endless = ar.get_nth(3).get_int();		
+		bool play_state = (ar.get_nth(0).get_int() == 1);
+		debug("onStatusChange - play state %s", play_state.to_string());
+		HashTable<string, Value?> ht = new HashTable<string, Value?>(str_hash, str_equal);
+		Value v = Value(typeof(bool));
+		v.set_boolean(play_state);
+		ht.insert("state", play_state); 
+		this.controller.custom_items[this.controller.TRANSPORT].update(ht,
+		                             TransportMenuitem.attributes_format());
 	}
 	
 }
