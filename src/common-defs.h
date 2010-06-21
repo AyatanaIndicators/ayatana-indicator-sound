@@ -33,4 +33,4 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DBUSMENU_METADATA_MENUITEM_TEXT_ARTIST  "x-canonical-metadata-text-artist"
 #define DBUSMENU_METADATA_MENUITEM_TEXT_TITLE  	"x-canonical-metadata-text-title"
 #define DBUSMENU_METADATA_MENUITEM_TEXT_ALBUM   "x-canonical-metadata-text-album"
-#define DBUSMENU_METADATA_MENUITEM_IMAGE_PATH  	"x-canonical-metadata-image"
+#define DBUSMENU_METADATA_MENUITEM_ARTURL  			"x-canonical-metadata-image"

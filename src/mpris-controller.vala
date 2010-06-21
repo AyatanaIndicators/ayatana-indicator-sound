@@ -54,7 +54,7 @@ public class MprisController : GLib.Object
 
 	private void onTrackChange(dynamic DBus.Object mpris_client, HashTable<string,Value?> ht)
 	{
-		this.controller.update_playing_info(format_metadata(ht));
+		this.controller.update_playing_info(MetadataMenuitem.format_updates(ht));
 	}
 
 	/**
@@ -84,17 +84,6 @@ public class MprisController : GLib.Object
 		
 		//int repeat = ar.get_nth(2).get_int();
 		//int endless = ar.get_nth(3).get_int();		
-	}
-
-	private static HashMap<string, string> format_metadata(HashTable<string,Value?> data)
-	{
-		HashMap<string,string> results = new HashMap<string, string>();
-		debug("format_metadata - title = %s", (string)data.lookup("title"));
-		results.set("title", (string)data.lookup("title"));
-    results.set("artist", (string)data.lookup("artist"));
-    results.set("album", (string)data.lookup("album"));
-    results.set("arturl", (string)data.lookup("arturl"));
-		return results;                          				
 	}
 	
 }

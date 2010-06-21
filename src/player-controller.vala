@@ -84,7 +84,7 @@ public class PlayerController : GLib.Object
 	public void update_playing_info(HashMap<string, string> data)
 	{
 		debug("PlayerController - update_playing_info");
-		MetadataMenuitem item = (MetadataMenuitem)this.custom_items[METADATA];		
+		MetadataMenuitem item = this.custom_items[METADATA] as MetadataMenuitem;		
 		item.update(data);
 	}
 

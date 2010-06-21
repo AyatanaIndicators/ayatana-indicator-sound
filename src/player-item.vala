@@ -26,15 +26,17 @@ public class PlayerItem : Dbusmenu.Menuitem
 	public MprisController mpris_adaptor;
 	
 	public PlayerItem()
-	{
+	{		
 	}
 	
-	public virtual void update(HashMap<string, Value?> data)
+	public void update(HashMap<string, Value?> data, Type type)
 	{
 		debug("PlayerItem::update()");
-		//foreach(var key in this.attributes().keys){
-		//	this.attributes.get(key);
-		//}
+		HashMap<string, Type> attributes = type.attributes_format();
+		foreach(var property in data){		
+			//property.value as attributes.get(property.key)
+			//this.property_set(property.key, );
+		}
 	}
 
 	public void set_adaptor(MprisController adaptor)
@@ -58,8 +60,6 @@ public class PlayerItem : Dbusmenu.Menuitem
 		PlayerItem separator = new PlayerItem();
 		separator.property_set(MENUITEM_PROP_TYPE, CLIENT_TYPES_SEPARATOR);					
 		return separator;
-	}
-
-	
+	}	
 }
 
