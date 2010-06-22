@@ -89,5 +89,6 @@ public class MprisController : GLib.Object
 		ht.insert("state", v); 
 		this.controller.custom_items[this.controller.TRANSPORT].update(ht, TransportMenuitem.attributes_format());
 	}
+
 	
 }

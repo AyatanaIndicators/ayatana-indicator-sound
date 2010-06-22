@@ -136,6 +136,7 @@ transport_widget_init (TransportWidget *self)
 	hbox = gtk_hbox_new(TRUE, 2);
 	gchar* symbol = transport_widget_toggle_play_label(dbusmenu_menuitem_property_get_int(twin_item, DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE));
 	priv->play_button =	gtk_button_new_with_label(symbol);
+	//g_free(symbol);
 	gtk_box_pack_start (GTK_BOX (hbox), priv->play_button, FALSE, TRUE, 0);
 
 	priv->hbox = hbox;
@@ -167,6 +168,9 @@ transport_widget_button_press_event (GtkWidget *menuitem,
                                   	GdkEventButton *event)
 {
 	g_debug("TransportWidget::menu_press_event");
+	if(IS_TRANSPORT_WIDGET(menuitem) == FALSE){
+		return FALSE;
+	}
 
 	TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE(TRANSPORT_WIDGET(menuitem));
 
@@ -196,6 +200,10 @@ transport_widget_button_release_event (GtkWidget *menuitem,
                                   GdkEventButton *event)
 {
 	g_debug("TransportWidget::menu_release_event");
+	if(IS_TRANSPORT_WIDGET(menuitem) == FALSE){
+		return FALSE;
+	}
+
 	TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE(TRANSPORT_WIDGET(menuitem));
 	gtk_widget_event (priv->hbox, (GdkEvent*)event);
 	
@@ -208,7 +216,7 @@ transport_widget_button_release_event (GtkWidget *menuitem,
 **/
 static void 
 transport_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
-                                       GValue* value, gpointer userdata)
+                                 GValue* value, gpointer userdata)
 {
 	g_debug("transport_widget_update_state - with property  %s", property);  
 	int update_value = g_value_get_int(value);
