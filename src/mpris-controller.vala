@@ -80,16 +80,14 @@ public class MprisController : GLib.Object
   {
     debug("onStatusChange - signal received");	
 		status* status = &st;
-		unowned ValueArray ar = (ValueArray)status;
-		
+		unowned ValueArray ar = (ValueArray)status;		
 		int play_state = ar.get_nth(0).get_int();
 		debug("onStatusChange - play state %i", play_state);
-		//HashTable<string, Value?> ht = new HashTable<string, Value?>(str_hash, str_equal);
-		//int* type = &play_state;
-		//Value v = Value(typeof(int*));
-		//v.set_pointer(type);
-		//ht.insert("state", v); 
-		(this.controller.custom_items[this.controller.TRANSPORT] as TransportMenuitem).change_play_state(play_state);
+		HashTable<string, Value?> ht = new HashTable<string, Value?>(str_hash, str_equal);
+		Value v = Value(typeof(int));
+		v.set_int(play_state);
+		ht.insert("state", v); 
+		this.controller.custom_items[this.controller.TRANSPORT].update(ht, TransportMenuitem.attributes_format());
 	}
 	
 }

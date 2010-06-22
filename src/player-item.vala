@@ -1,5 +1,4 @@
 /*
-This service primarily controls PulseAudio and is driven by the sound indicator menu on the panel.
 Copyright 2010 Canonical Ltd.
 
 Authors:
@@ -36,20 +35,18 @@ public class PlayerItem : Dbusmenu.Menuitem
 			string[] input_keys = property.split("-");
 			string search_key = input_keys[input_keys.length-1 : input_keys.length][0];
 			debug("search key = %s", search_key);
-			if (data.lookup(search_key).holds (typeof (string))){
-				debug("track data change player item update");
-				this.property_set(property, this.sanitize_string(data.lookup(search_key) as string));
+
+			Value v = data.lookup(search_key);
+
+			if (v.holds (typeof (string))){
+				this.property_set(property, this.sanitize_string(v.get_string()));
 			}			    
-			else if (data.lookup(search_key).holds (typeof (int))){
-				// Circumvent weird vala bug
-				int* v = (int*)data.lookup(search_key);
-				int r = *v;
-				this.property_set_int(property, r);
+			else if (v.holds (typeof (int))){
+				debug("with value : %i", v.get_int());
+				this.property_set_int(property, v.get_int());
 			}
-			else if(data.lookup(search_key).holds (typeof (bool))){
-				bool* b = (bool*)data.lookup(search_key);
-				bool input = *b;
-				this.property_set_bool(property, input);
+			else if(v.holds (typeof (bool))){
+				this.property_set_bool(property, v.get_boolean());
 			}
 		}
 	}	
