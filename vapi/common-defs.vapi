@@ -17,25 +17,17 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Dbusmenu;
-using Gee;
-using DbusmenuMetadata;
+[CCode (cheader_filename = "common-defs.h")]
+namespace DbusmenuMetadata{
+	public const string MENUITEM_TYPE;
+	public const string MENUITEM_TEXT_ARTIST;
+	public const string MENUITEM_TEXT_TITLE;
+	public const string MENUITEM_TEXT_ALBUM;
+	public const string MENUITEM_ARTURL;	
+}
 
-public class MetadataMenuitem : PlayerItem
-{
-	public MetadataMenuitem()
-  {
-		this.property_set(MENUITEM_PROP_TYPE, MENUITEM_TYPE);
-	}
-
-	public static HashSet<string> attributes_format()
-	{
-		HashSet<string> attrs = new HashSet<string>();		
-		attrs.add(MENUITEM_TEXT_TITLE);
-    attrs.add(MENUITEM_TEXT_ARTIST);
-    attrs.add(MENUITEM_TEXT_ALBUM);
-    attrs.add(MENUITEM_ARTURL);
-		return attrs;
-	}
-		
+[CCode (cheader_filename = "common-defs.h")]
+namespace DbusmenuTransport{
+	public const string MENUITEM_TYPE;
+	public const string MENUITEM_PLAY_STATE;
 }

@@ -20,7 +20,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Gee;
 
-
 public class MprisController : GLib.Object
 {
   private DBus.Connection connection;
@@ -33,7 +32,6 @@ public class MprisController : GLib.Object
     public int32 endless;
   }
 		
-	
 	public MprisController(string name, PlayerController controller, string mpris_interface="org.freedesktop.MediaPlayer"){
     try {
       this.connection = DBus.Bus.get (DBus.BusType.SESSION);
@@ -43,18 +41,23 @@ public class MprisController : GLib.Object
 		this.controller = controller;
 		this.mpris_player = this.connection.get_object ("org.mpris.".concat(name.down()) , "/Player", mpris_interface);				
     this.mpris_player.TrackChange += onTrackChange;	
-    this.mpris_player.StatusChange += onStatusChange;		
-		this.controller.update_playing_info(get_track_data());
+    this.mpris_player.StatusChange += onStatusChange;	
+
+		status st = this.mpris_player.GetStatus();
+		int play_state =  st.playback;
+		debug("GetStatusChange - play state %i", play_state);
+		(this.controller.custom_items[this.controller.TRANSPORT] as TransportMenuitem).change_play_state(play_state);
+		this.controller.custom_items[this.controller.METADATA].update(this.mpris_player.GetMetadata(),
+		                            MetadataMenuitem.attributes_format());
+		
 	}
 
-	public HashMap<string, string> get_track_data()
-	{
-		return format_metadata(this.mpris_player.GetMetadata());
-	}
 
 	private void onTrackChange(dynamic DBus.Object mpris_client, HashTable<string,Value?> ht)
 	{
-		this.controller.update_playing_info(format_metadata(ht));
+		debug("onTrackChange");
+		this.controller.custom_items[this.controller.METADATA].update(ht,
+		                            MetadataMenuitem.attributes_format());
 	}
 
 	/**
@@ -76,26 +79,16 @@ public class MprisController : GLib.Object
 	private void onStatusChange(dynamic DBus.Object mpris_client, status st)
   {
     debug("onStatusChange - signal received");	
-		//ValueArray a = new ValueArray(4);
-		//Value v = new Value(typeof(int32));          
-		//v.set_int(st.playback);
-		//a.append(v);
-		//debug("onStatusChange - play %i", a.get_nth(0).get_int());
-		//int playback = (ValueArray)st.get_nth(0).get_int();
-		//int shuffle = ar.get_nth(1).get_int();
-		//int repeat = ar.get_nth(2).get_int();
-		//int endless = ar.get_nth(3).get_int();		
+		status* status = &st;
+		unowned ValueArray ar = (ValueArray)status;		
+		int play_state = ar.get_nth(0).get_int();
+		debug("onStatusChange - play state %i", play_state);
+		HashTable<string, Value?> ht = new HashTable<string, Value?>(str_hash, str_equal);
+		Value v = Value(typeof(int));
+		v.set_int(play_state);
+		ht.insert("state", v); 
+		this.controller.custom_items[this.controller.TRANSPORT].update(ht, TransportMenuitem.attributes_format());
 	}
 
-	private static HashMap<string, string> format_metadata(HashTable<string,Value?> data)
-	{
-		HashMap<string,string> results = new HashMap<string, string>();
-		debug("format_metadata - title = %s", (string)data.lookup("title"));
-		results.set("title", (string)data.lookup("title"));
-    results.set("artist", (string)data.lookup("artist"));
-    results.set("album", (string)data.lookup("album"));
-    results.set("arturl", (string)data.lookup("arturl"));
-		return results;                          				
-	}
 	
 }

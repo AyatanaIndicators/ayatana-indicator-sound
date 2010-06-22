@@ -1,5 +1,4 @@
 /*
-This service primarily controls PulseAudio and is driven by the sound indicator menu on the panel.
 Copyright 2010 Canonical Ltd.
 
 Authors:
@@ -20,35 +19,32 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Dbusmenu;
 using Gee;
+using DbusmenuTransport;
 
-public class TransportMenuitem : Dbusmenu.Menuitem
+public class TransportMenuitem : PlayerItem
 {
-	/* Not ideal duplicate definition of const - see common-defs/h */
- 	const string DBUSMENU_TRANSPORT_MENUITEM_TYPE = "x-canonical-transport-bar";
- 	const string DBUSMENU_TRANSPORT_MENUITEM_STATE = "x-canonical-transport-state";
-	private MprisController mpris_adaptor;
 	
 	public TransportMenuitem()
   {
-		this.property_set(MENUITEM_PROP_TYPE, DBUSMENU_TRANSPORT_MENUITEM_TYPE);
-		// Hardcode the set up state until we can get the struct vala bug fixed
-		this.property_set_bool(DBUSMENU_TRANSPORT_MENUITEM_STATE, false);
+		this.property_set(MENUITEM_PROP_TYPE, MENUITEM_TYPE);
 		debug("transport on the vala side");
 	}
 
-	public void set_adaptor(MprisController adaptor)
+	public void change_play_state(int state)
 	{
-		this.mpris_adaptor = adaptor;		
+		this.property_set_int(MENUITEM_PLAY_STATE, state);	
 	}
 	
-	/**
-	 Callback method for the handle_event
-	 * TRUE  => Playing
-	 * FALSE => Paused
-	 **/
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
 	{
 		debug("handle_event with bool value %s", input_value.get_boolean().to_string());
 		this.mpris_adaptor.toggle_playback(input_value.get_boolean());
+	}
+
+	public static HashSet<string> attributes_format()
+	{
+		HashSet<string> attrs = new HashSet<string>();		
+		attrs.add(MENUITEM_PLAY_STATE);
+		return attrs;
 	}	
 }

@@ -61,13 +61,15 @@ static gboolean transport_widget_button_press_event 	(GtkWidget             *men
                                                   		GdkEventButton        *event);
 static gboolean transport_widget_button_release_event (GtkWidget             *menuitem,
                                                     	GdkEventButton        *event);
-
+static void transport_widget_play_clicked (GtkWidget* button,
+                                           TransportWidget* self);
+                                          
 static void transport_widget_property_update(DbusmenuMenuitem* item,
                                        gchar * property, 
                                        GValue * value,
                                        gpointer userdata);
 // utility methods
-static gchar* transport_widget_toggle_play_label(const gchar* state);
+static gchar* transport_widget_toggle_play_label(gint state);
 
 G_DEFINE_TYPE (TransportWidget, transport_widget, GTK_TYPE_MENU_ITEM);
 
@@ -78,7 +80,9 @@ transport_widget_class_init (TransportWidgetClass *klass)
 {
 	GObjectClass 			*gobject_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass    *widget_class = GTK_WIDGET_CLASS (klass);
+	GtkMenuItemClass *menu_item_class =  GTK_MENU_ITEM_CLASS(klass);
 
+	menu_item_class->hide_on_activate = FALSE;
   widget_class->button_press_event = transport_widget_button_press_event;
   widget_class->button_release_event = transport_widget_button_release_event;
 	
@@ -130,19 +134,17 @@ transport_widget_init (TransportWidget *self)
 	GtkWidget *hbox;
 
 	hbox = gtk_hbox_new(TRUE, 2);
-
-	gchar* label = ">";
-	if(dbusmenu_menuitem_property_get_bool(twin_item, DBUSMENU_TRANSPORT_MENUITEM_STATE) == TRUE){
-		label = "||";
-	}
-
-	priv->play_button =	gtk_button_new_with_label(g_strdup(label));
+	gchar* symbol = transport_widget_toggle_play_label(dbusmenu_menuitem_property_get_int(twin_item, DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE));
+	priv->play_button =	gtk_button_new_with_label(symbol);
+	//g_free(symbol);
 	gtk_box_pack_start (GTK_BOX (hbox), priv->play_button, FALSE, TRUE, 0);
 
 	priv->hbox = hbox;
 	
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", G_CALLBACK(transport_widget_property_update), self);
 
+	g_signal_connect(priv->play_button, "clicked", G_CALLBACK(transport_widget_play_clicked), self);
+	                 
 	gtk_container_add (GTK_CONTAINER (self), priv->hbox);
 
   gtk_widget_show_all (priv->hbox);
@@ -166,11 +168,16 @@ transport_widget_button_press_event (GtkWidget *menuitem,
                                   	GdkEventButton *event)
 {
 	g_debug("TransportWidget::menu_press_event");
+	if(IS_TRANSPORT_WIDGET(menuitem) == FALSE){
+		return FALSE;
+	}
+
 	TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE(TRANSPORT_WIDGET(menuitem));
 
+	gtk_widget_event (priv->hbox, (GdkEvent*)event);
 	gboolean state = g_ascii_strcasecmp(gtk_button_get_label(GTK_BUTTON(priv->play_button)), ">") == 0;
 
-	gtk_button_set_label(GTK_BUTTON(priv->play_button), transport_widget_toggle_play_label(gtk_button_get_label(GTK_BUTTON(priv->play_button))));
+	gtk_button_set_label(GTK_BUTTON(priv->play_button), transport_widget_toggle_play_label((gint)state));
  	GValue value = {0};
   g_value_init(&value, G_TYPE_BOOLEAN);
 	g_debug("TransportWidget::menu_press_event - going to send value %i", state);
@@ -181,11 +188,25 @@ transport_widget_button_press_event (GtkWidget *menuitem,
 	return TRUE;
 }
 
+static void
+transport_widget_play_clicked(GtkWidget* button,
+                              TransportWidget* self)
+{
+	g_debug("Transport_widget_play_clicked");
+}
+                              
 static gboolean
 transport_widget_button_release_event (GtkWidget *menuitem, 
                                   GdkEventButton *event)
 {
 	g_debug("TransportWidget::menu_release_event");
+	if(IS_TRANSPORT_WIDGET(menuitem) == FALSE){
+		return FALSE;
+	}
+
+	TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE(TRANSPORT_WIDGET(menuitem));
+	gtk_widget_event (priv->hbox, (GdkEvent*)event);
+	
 	return TRUE;
 }
 
@@ -195,23 +216,23 @@ transport_widget_button_release_event (GtkWidget *menuitem,
 **/
 static void 
 transport_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
-                                       GValue* value, gpointer userdata)
+                                 GValue* value, gpointer userdata)
 {
 	g_debug("transport_widget_update_state - with property  %s", property);  
-	gchar* input = g_strdup(g_value_get_string(value));
-	g_debug("transport_widget_update_state - with value  %s", input);  
+	int update_value = g_value_get_int(value);
+	g_debug("transport_widget_update_state - with value  %i", update_value);  
 
 	TransportWidget* bar = (TransportWidget*)userdata;
 	TransportWidgetPrivate *priv = TRANSPORT_WIDGET_GET_PRIVATE(bar);
 	
-	gtk_button_set_label(GTK_BUTTON(priv->play_button), g_strdup(transport_widget_toggle_play_label(property)));
+	gtk_button_set_label(GTK_BUTTON(priv->play_button), transport_widget_toggle_play_label(update_value));
 }
 
 // will be needed for image swapping
-static gchar* transport_widget_toggle_play_label(const gchar* state)
+static gchar* transport_widget_toggle_play_label(int play_state)
 {
 	gchar* label = ">";
-	if(g_strcmp0(state, ">") == 0){
+	if(play_state == 1){
 		label = "||";
 	}
 	return label;
