@@ -64,7 +64,7 @@ music_bridge_VALAFLAGS = \
   -H music-player-bridge.h -d . \
   --library music-bridge \
   --vapidir=./ \
-  --vapidir=../vapi/ \
+  --vapidir=$(top_srcdir)/vapi/ \
   --thread \
   --pkg gee-1.0 \
   --pkg Indicate-0.2 \
