@@ -11,5 +11,5 @@ namespace DbusmenuMetadata{
 [CCode (cheader_filename = "common-defs.h")]
 namespace DbusmenuTransport{
 	public const string MENUITEM_TYPE;
-	public const string MENUITEM_STATE;
+	public const string MENUITEM_PLAY_STATE;
 }

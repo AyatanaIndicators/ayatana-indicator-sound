@@ -35,7 +35,9 @@ public class PlayerItem : Dbusmenu.Menuitem
 		foreach(string property in attributes){
 			string[] input_keys = property.split("-");
 			string search_key = input_keys[input_keys.length-1 : input_keys.length][0];
+			debug("search key = %s", search_key);
 			if (data.lookup(search_key).holds (typeof (string))){
+				debug("track data change player item update");
 				this.property_set(property, this.sanitize_string(data.lookup(search_key) as string));
 			}			    
 			else if (data.lookup(search_key).holds (typeof (int))){

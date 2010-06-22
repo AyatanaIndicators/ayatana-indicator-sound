@@ -69,7 +69,7 @@ static void transport_widget_property_update(DbusmenuMenuitem* item,
                                        GValue * value,
                                        gpointer userdata);
 // utility methods
-static gchar* transport_widget_toggle_play_label(const gchar* state);
+static gchar* transport_widget_toggle_play_label(gint state);
 
 G_DEFINE_TYPE (TransportWidget, transport_widget, GTK_TYPE_MENU_ITEM);
 
@@ -134,13 +134,8 @@ transport_widget_init (TransportWidget *self)
 	GtkWidget *hbox;
 
 	hbox = gtk_hbox_new(TRUE, 2);
-
-	gchar* label = ">";
-	if(dbusmenu_menuitem_property_get_bool(twin_item, DBUSMENU_TRANSPORT_MENUITEM_STATE) == TRUE){
-		label = "||";
-	}
-
-	priv->play_button =	gtk_button_new_with_label(g_strdup(label));
+	gchar* symbol = transport_widget_toggle_play_label(dbusmenu_menuitem_property_get_int(twin_item, DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE));
+	priv->play_button =	gtk_button_new_with_label(symbol);
 	gtk_box_pack_start (GTK_BOX (hbox), priv->play_button, FALSE, TRUE, 0);
 
 	priv->hbox = hbox;
@@ -178,7 +173,7 @@ transport_widget_button_press_event (GtkWidget *menuitem,
 	gtk_widget_event (priv->hbox, (GdkEvent*)event);
 	gboolean state = g_ascii_strcasecmp(gtk_button_get_label(GTK_BUTTON(priv->play_button)), ">") == 0;
 
-	gtk_button_set_label(GTK_BUTTON(priv->play_button), transport_widget_toggle_play_label(gtk_button_get_label(GTK_BUTTON(priv->play_button))));
+	gtk_button_set_label(GTK_BUTTON(priv->play_button), transport_widget_toggle_play_label((gint)state));
  	GValue value = {0};
   g_value_init(&value, G_TYPE_BOOLEAN);
 	g_debug("TransportWidget::menu_press_event - going to send value %i", state);
@@ -216,20 +211,20 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
                                        GValue* value, gpointer userdata)
 {
 	g_debug("transport_widget_update_state - with property  %s", property);  
-	gchar* input = g_strdup(g_value_get_string(value));
-	g_debug("transport_widget_update_state - with value  %s", input);  
+	int update_value = g_value_get_int(value);
+	g_debug("transport_widget_update_state - with value  %i", update_value);  
 
 	TransportWidget* bar = (TransportWidget*)userdata;
 	TransportWidgetPrivate *priv = TRANSPORT_WIDGET_GET_PRIVATE(bar);
 	
-	gtk_button_set_label(GTK_BUTTON(priv->play_button), transport_widget_toggle_play_label(property));
+	gtk_button_set_label(GTK_BUTTON(priv->play_button), transport_widget_toggle_play_label(update_value));
 }
 
 // will be needed for image swapping
-static gchar* transport_widget_toggle_play_label(const gchar* state)
+static gchar* transport_widget_toggle_play_label(int play_state)
 {
 	gchar* label = ">";
-	if(g_strcmp0(state, ">") == 0){
+	if(play_state == 1){
 		label = "||";
 	}
 	return label;

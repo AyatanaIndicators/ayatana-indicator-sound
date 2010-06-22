@@ -28,10 +28,14 @@ public class TransportMenuitem : PlayerItem
 	public TransportMenuitem()
   {
 		this.property_set(MENUITEM_PROP_TYPE, MENUITEM_TYPE);
-		this.property_set_bool(MENUITEM_STATE, false);
 		debug("transport on the vala side");
 	}
 
+	public void change_play_state(int state)
+	{
+		this.property_set_int(MENUITEM_PLAY_STATE, state);	
+	}
+	
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
 	{
 		debug("handle_event with bool value %s", input_value.get_boolean().to_string());
@@ -41,7 +45,7 @@ public class TransportMenuitem : PlayerItem
 	public static HashSet<string> attributes_format()
 	{
 		HashSet<string> attrs = new HashSet<string>();		
-		attrs.add(MENUITEM_STATE);
+		attrs.add(MENUITEM_PLAY_STATE);
 		return attrs;
 	}	
 }

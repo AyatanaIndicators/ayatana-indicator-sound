@@ -41,12 +41,21 @@ public class MprisController : GLib.Object
 		this.controller = controller;
 		this.mpris_player = this.connection.get_object ("org.mpris.".concat(name.down()) , "/Player", mpris_interface);				
     this.mpris_player.TrackChange += onTrackChange;	
-    this.mpris_player.StatusChange += onStatusChange;		
+    this.mpris_player.StatusChange += onStatusChange;	
+
+		status st = this.mpris_player.GetStatus();
+		int play_state =  st.playback;
+		debug("GetStatusChange - play state %i", play_state);
+		(this.controller.custom_items[this.controller.TRANSPORT] as TransportMenuitem).change_play_state(play_state);
+		this.controller.custom_items[this.controller.METADATA].update(this.mpris_player.GetMetadata(),
+		                            MetadataMenuitem.attributes_format());
+		
 	}
 
 
 	private void onTrackChange(dynamic DBus.Object mpris_client, HashTable<string,Value?> ht)
 	{
+		debug("onTrackChange");
 		this.controller.custom_items[this.controller.METADATA].update(ht,
 		                            MetadataMenuitem.attributes_format());
 	}
@@ -73,14 +82,14 @@ public class MprisController : GLib.Object
 		status* status = &st;
 		unowned ValueArray ar = (ValueArray)status;
 		
-		bool play_state = (ar.get_nth(0).get_int() == 1);
-		debug("onStatusChange - play state %s", play_state.to_string());
-		HashTable<string, Value?> ht = new HashTable<string, Value?>(str_hash, str_equal);
-		Value v = Value(typeof(bool));
-		v.set_boolean(play_state);
-		ht.insert("state", play_state); 
-		this.controller.custom_items[this.controller.TRANSPORT].update(ht,
-		                             TransportMenuitem.attributes_format());
+		int play_state = ar.get_nth(0).get_int();
+		debug("onStatusChange - play state %i", play_state);
+		//HashTable<string, Value?> ht = new HashTable<string, Value?>(str_hash, str_equal);
+		//int* type = &play_state;
+		//Value v = Value(typeof(int*));
+		//v.set_pointer(type);
+		//ht.insert("state", v); 
+		(this.controller.custom_items[this.controller.TRANSPORT] as TransportMenuitem).change_play_state(play_state);
 	}
 	
 }
