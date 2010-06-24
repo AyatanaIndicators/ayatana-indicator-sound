@@ -6,10 +6,6 @@
 
 #include <glib.h>
 #include <glib-object.h>
-#include <libdbusmenu-glib/client.h>
-#include <libdbusmenu-glib/menuitem-proxy.h>
-#include <libdbusmenu-glib/menuitem.h>
-#include <libdbusmenu-glib/server.h>
 #include <libindicate/./indicator-messages.h>
 #include <libindicate/./indicator.h>
 #include <libindicate/./interests.h>
@@ -17,6 +13,10 @@
 #include <libindicate/./server.h>
 #include <stdlib.h>
 #include <string.h>
+#include <libdbusmenu-glib/client.h>
+#include <libdbusmenu-glib/menuitem-proxy.h>
+#include <libdbusmenu-glib/menuitem.h>
+#include <libdbusmenu-glib/server.h>
 #include <gee.h>
 #include <dbus/dbus-glib-lowlevel.h>
 #include <dbus/dbus-glib.h>
@@ -35,16 +35,16 @@ typedef struct _MusicPlayerBridge MusicPlayerBridge;
 typedef struct _MusicPlayerBridgeClass MusicPlayerBridgeClass;
 typedef struct _MusicPlayerBridgePrivate MusicPlayerBridgePrivate;
 
-#define TYPE_TRANSPORT_MENUITEM (transport_menuitem_get_type ())
-#define TRANSPORT_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_TRANSPORT_MENUITEM, TransportMenuitem))
-#define TRANSPORT_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_TRANSPORT_MENUITEM, TransportMenuitemClass))
-#define IS_TRANSPORT_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_TRANSPORT_MENUITEM))
-#define IS_TRANSPORT_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_TRANSPORT_MENUITEM))
-#define TRANSPORT_MENUITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_TRANSPORT_MENUITEM, TransportMenuitemClass))
+#define TYPE_PLAYER_ITEM (player_item_get_type ())
+#define PLAYER_ITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PLAYER_ITEM, PlayerItem))
+#define PLAYER_ITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PLAYER_ITEM, PlayerItemClass))
+#define IS_PLAYER_ITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_PLAYER_ITEM))
+#define IS_PLAYER_ITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_PLAYER_ITEM))
+#define PLAYER_ITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_PLAYER_ITEM, PlayerItemClass))
 
-typedef struct _TransportMenuitem TransportMenuitem;
-typedef struct _TransportMenuitemClass TransportMenuitemClass;
-typedef struct _TransportMenuitemPrivate TransportMenuitemPrivate;
+typedef struct _PlayerItem PlayerItem;
+typedef struct _PlayerItemClass PlayerItemClass;
+typedef struct _PlayerItemPrivate PlayerItemPrivate;
 
 #define TYPE_MPRIS_CONTROLLER (mpris_controller_get_type ())
 #define MPRIS_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_MPRIS_CONTROLLER, MprisController))
@@ -55,6 +55,17 @@ typedef struct _TransportMenuitemPrivate TransportMenuitemPrivate;
 
 typedef struct _MprisController MprisController;
 typedef struct _MprisControllerClass MprisControllerClass;
+
+#define TYPE_TRANSPORT_MENUITEM (transport_menuitem_get_type ())
+#define TRANSPORT_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_TRANSPORT_MENUITEM, TransportMenuitem))
+#define TRANSPORT_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_TRANSPORT_MENUITEM, TransportMenuitemClass))
+#define IS_TRANSPORT_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_TRANSPORT_MENUITEM))
+#define IS_TRANSPORT_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_TRANSPORT_MENUITEM))
+#define TRANSPORT_MENUITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_TRANSPORT_MENUITEM, TransportMenuitemClass))
+
+typedef struct _TransportMenuitem TransportMenuitem;
+typedef struct _TransportMenuitemClass TransportMenuitemClass;
+typedef struct _TransportMenuitemPrivate TransportMenuitemPrivate;
 
 #define TYPE_METADATA_MENUITEM (metadata_menuitem_get_type ())
 #define METADATA_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_METADATA_MENUITEM, MetadataMenuitem))
@@ -90,6 +101,17 @@ typedef struct _MprisControllerV2 MprisControllerV2;
 typedef struct _MprisControllerV2Class MprisControllerV2Class;
 typedef struct _MprisControllerV2Private MprisControllerV2Private;
 
+#define TYPE_FAMILIAR_PLAYERS_DB (familiar_players_db_get_type ())
+#define FAMILIAR_PLAYERS_DB(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_FAMILIAR_PLAYERS_DB, FamiliarPlayersDB))
+#define FAMILIAR_PLAYERS_DB_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_FAMILIAR_PLAYERS_DB, FamiliarPlayersDBClass))
+#define IS_FAMILIAR_PLAYERS_DB(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_FAMILIAR_PLAYERS_DB))
+#define IS_FAMILIAR_PLAYERS_DB_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_FAMILIAR_PLAYERS_DB))
+#define FAMILIAR_PLAYERS_DB_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_FAMILIAR_PLAYERS_DB, FamiliarPlayersDBClass))
+
+typedef struct _FamiliarPlayersDB FamiliarPlayersDB;
+typedef struct _FamiliarPlayersDBClass FamiliarPlayersDBClass;
+typedef struct _FamiliarPlayersDBPrivate FamiliarPlayersDBPrivate;
+
 struct _MusicPlayerBridge {
 	GObject parent_instance;
 	MusicPlayerBridgePrivate * priv;
@@ -99,27 +121,39 @@ struct _MusicPlayerBridgeClass {
 	GObjectClass parent_class;
 };
 
-struct _TransportMenuitem {
+struct _PlayerItem {
 	DbusmenuMenuitem parent_instance;
+	PlayerItemPrivate * priv;
+	MprisController* mpris_adaptor;
+};
+
+struct _PlayerItemClass {
+	DbusmenuMenuitemClass parent_class;
+	void (*check_layout) (PlayerItem* self);
+};
+
+struct _TransportMenuitem {
+	PlayerItem parent_instance;
 	TransportMenuitemPrivate * priv;
 };
 
 struct _TransportMenuitemClass {
-	DbusmenuMenuitemClass parent_class;
+	PlayerItemClass parent_class;
 };
 
 struct _MetadataMenuitem {
-	DbusmenuMenuitem parent_instance;
+	PlayerItem parent_instance;
 	MetadataMenuitemPrivate * priv;
 };
 
 struct _MetadataMenuitemClass {
-	DbusmenuMenuitemClass parent_class;
+	PlayerItemClass parent_class;
 };
 
 struct _PlayerController {
 	GObject parent_instance;
 	PlayerControllerPrivate * priv;
+	GeeArrayList* custom_items;
 };
 
 struct _PlayerControllerClass {
@@ -145,39 +179,63 @@ struct _MprisControllerV2Class {
 	MprisControllerClass parent_class;
 };
 
+struct _FamiliarPlayersDB {
+	GObject parent_instance;
+	FamiliarPlayersDBPrivate * priv;
+};
+
+struct _FamiliarPlayersDBClass {
+	GObjectClass parent_class;
+};
+
 
 GType music_player_bridge_get_type (void);
 MusicPlayerBridge* music_player_bridge_new (void);
 MusicPlayerBridge* music_player_bridge_construct (GType object_type);
+void music_player_bridge_on_server_added (MusicPlayerBridge* self, IndicateListenerServer* object, const char* type);
+void music_player_bridge_on_server_removed (MusicPlayerBridge* self, IndicateListenerServer* object, const char* type);
 void music_player_bridge_set_root_menu_item (MusicPlayerBridge* self, DbusmenuMenuitem* menu);
+void music_player_bridge_on_server_count_changed (MusicPlayerBridge* self, IndicateListenerServer* object, guint i);
 void music_player_bridge_on_indicator_added (MusicPlayerBridge* self, IndicateListenerServer* object, IndicateListenerIndicator* p0);
 void music_player_bridge_on_indicator_removed (MusicPlayerBridge* self, IndicateListenerServer* object, IndicateListenerIndicator* p0);
 void music_player_bridge_on_indicator_modified (MusicPlayerBridge* self, IndicateListenerServer* object, IndicateListenerIndicator* p0, const char* s);
-void music_player_bridge_on_server_added (MusicPlayerBridge* self, IndicateListenerServer* object, const char* type);
-void music_player_bridge_on_server_removed (MusicPlayerBridge* self, IndicateListenerServer* object, const char* type);
-void music_player_bridge_on_server_count_changed (MusicPlayerBridge* self, IndicateListenerServer* object, guint i);
+GType player_item_get_type (void);
+GType mpris_controller_get_type (void);
 GType transport_menuitem_get_type (void);
 TransportMenuitem* transport_menuitem_new (void);
 TransportMenuitem* transport_menuitem_construct (GType object_type);
-GType mpris_controller_get_type (void);
-void transport_menuitem_set_adaptor (TransportMenuitem* self, MprisController* adaptor);
+void transport_menuitem_change_play_state (TransportMenuitem* self, gint state);
+GeeHashSet* transport_menuitem_attributes_format (void);
 GType metadata_menuitem_get_type (void);
 MetadataMenuitem* metadata_menuitem_new (void);
 MetadataMenuitem* metadata_menuitem_construct (GType object_type);
-void metadata_menuitem_update (MetadataMenuitem* self, GeeHashMap* data);
-char* metadata_menuitem_sanitize_image_path (const char* path);
+GeeHashSet* metadata_menuitem_attributes_format (void);
+gboolean metadata_menuitem_populated (MetadataMenuitem* self);
 GType player_controller_get_type (void);
+#define PLAYER_CONTROLLER_METADATA 2
 PlayerController* player_controller_new (DbusmenuMenuitem* root, const char* client_name, gboolean active);
 PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, const char* client_name, gboolean active);
 void player_controller_vanish (PlayerController* self);
-void player_controller_update_playing_info (PlayerController* self, GeeHashMap* data);
 GType mpris_controller_v2_get_type (void);
 MprisControllerV2* mpris_controller_v2_new (const char* name, PlayerController* controller);
 MprisControllerV2* mpris_controller_v2_construct (GType object_type, const char* name, PlayerController* controller);
 MprisController* mpris_controller_new (const char* name, PlayerController* controller, const char* mpris_interface);
 MprisController* mpris_controller_construct (GType object_type, const char* name, PlayerController* controller, const char* mpris_interface);
-GeeHashMap* mpris_controller_get_track_data (MprisController* self);
 void mpris_controller_toggle_playback (MprisController* self, gboolean state);
+PlayerItem* player_item_new (void);
+PlayerItem* player_item_construct (GType object_type);
+void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes);
+void player_item_set_adaptor (PlayerItem* self, MprisController* adaptor);
+char* player_item_sanitize_string (const char* st);
+PlayerItem* player_item_new_title_item (const char* name);
+PlayerItem* player_item_new_separator_item (void);
+void player_item_check_layout (PlayerItem* self);
+GType familiar_players_db_get_type (void);
+FamiliarPlayersDB* familiar_players_db_new (void);
+FamiliarPlayersDB* familiar_players_db_construct (GType object_type);
+void familiar_players_db_insert (FamiliarPlayersDB* self, const char* desktop);
+gboolean familiar_players_db_already_familiar (FamiliarPlayersDB* self, const char* desktop);
+GeeSet* familiar_players_db_records (FamiliarPlayersDB* self);
 
 
 G_END_DECLS

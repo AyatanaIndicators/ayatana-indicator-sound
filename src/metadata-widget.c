@@ -93,7 +93,7 @@ metadata_widget_init (MetadataWidget *self)
 	
 	// image
 	priv->album_art = gtk_image_new();
-	priv->image_path = g_strdup(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_IMAGE_PATH));
+	priv->image_path = g_strdup(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_ARTURL));
 	update_album_art(self);	
 	gtk_box_pack_start (GTK_BOX (priv->hbox), priv->album_art, FALSE, FALSE, 0);	
 	GtkWidget* vbox = gtk_vbox_new(TRUE, 0);
@@ -106,13 +106,13 @@ metadata_widget_init (MetadataWidget *self)
 	
 	// piece
 	GtkWidget* piece;
-	piece = gtk_label_new(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_TEXT_PIECE));
+	piece = gtk_label_new(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_TEXT_TITLE));
 	priv->piece_label =  piece;
 
 
 	// container
 	GtkWidget* container;
-	container = gtk_label_new(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_TEXT_CONTAINER));
+	container = gtk_label_new(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_TEXT_ALBUM));
 	priv->container_label = container;
 
 	// Pack in the right order
@@ -171,13 +171,13 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_ARTIST, property) == 0){  
 		gtk_label_set_text(GTK_LABEL(priv->artist_label), g_value_get_string(value));
 	}
-	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_PIECE, property) == 0){  
+	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_TITLE, property) == 0){  
 		gtk_label_set_text(GTK_LABEL(priv->piece_label), g_value_get_string(value));
 	}	
-	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_CONTAINER, property) == 0){  
+	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_ALBUM, property) == 0){  
 		gtk_label_set_text(GTK_LABEL(priv->container_label), g_value_get_string(value));
 	}	
-	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_IMAGE_PATH, property) == 0){
+	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_ARTURL, property) == 0){
 		if(priv->image_path != NULL){
 			g_free(priv->image_path);
 		}
@@ -194,7 +194,7 @@ static void update_album_art(MetadataWidget* self){
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);	
 	GdkPixbuf* pixbuf;
 	pixbuf = gdk_pixbuf_new_from_file(priv->image_path, NULL);
-  pixbuf = gdk_pixbuf_scale_simple(pixbuf,60, 60,GDK_INTERP_BILINEAR);
+  pixbuf = gdk_pixbuf_scale_simple(pixbuf,60, 60, GDK_INTERP_BILINEAR);
 	g_debug("attempting to set the image with path %s", priv->image_path);
 	gtk_image_set_from_pixbuf(GTK_IMAGE(priv->album_art), pixbuf);
 	g_object_unref(pixbuf);	
