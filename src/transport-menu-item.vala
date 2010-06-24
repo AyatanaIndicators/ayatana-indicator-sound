@@ -41,6 +41,11 @@ public class TransportMenuitem : PlayerItem
 		this.mpris_adaptor.toggle_playback(input_value.get_boolean());
 	}
 
+	public override void check_layout(){
+		// nothing to be done for this item - always active
+	}
+	
+
 	public static HashSet<string> attributes_format()
 	{
 		HashSet<string> attrs = new HashSet<string>();		

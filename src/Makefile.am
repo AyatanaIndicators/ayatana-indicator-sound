@@ -57,20 +57,22 @@ music_bridge_VALASOURCES = \
 	player-controller.vala \
 	mpris-controller-v2.vala \
 	mpris-controller.vala \
-	player-item.vala
+	player-item.vala \
+	familiar-players-db.vala
 
 music_bridge_VALAFLAGS = \
   --ccode \
   -H music-player-bridge.h -d . \
-  --vapidir=./ \
   --vapidir=$(top_srcdir)/vapi/ \
+  --vapidir=./ \
   --thread \
   --pkg gee-1.0 \
   --pkg Indicate-0.2 \
   --pkg Dbusmenu-Glib-0.2 \
   --pkg common-defs \
 	--pkg dbus-glib-1 \
-  $(MAINTAINER_VALAFLAGS)
+	--pkg gio-unix-2.0 
+ $(MAINTAINER_VALAFLAGS)
 
 music_bridge_APIFILES = \
   music-player-bridge.h 

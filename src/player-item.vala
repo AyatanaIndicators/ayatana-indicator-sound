@@ -27,18 +27,21 @@ public class PlayerItem : Dbusmenu.Menuitem
 	public PlayerItem()
 	{		
 	}
-
+	
 	public void update(HashTable<string, Value?> data, HashSet<string> attributes)
 	{
 		debug("PlayerItem::update()");
+		if(ensure_valid_updates(data, attributes) == false){
+			debug("PlayerItem::Update -> The hashtable update does not contain what we were expecting - just leave it!");
+			return;
+		}
 		foreach(string property in attributes){
 			string[] input_keys = property.split("-");
 			string search_key = input_keys[input_keys.length-1 : input_keys.length][0];
 			debug("search key = %s", search_key);
-
 			Value v = data.lookup(search_key);
-
 			if (v.holds (typeof (string))){
+				debug("with value : %s", v.get_string());
 				this.property_set(property, this.sanitize_string(v.get_string()));
 			}			    
 			else if (v.holds (typeof (int))){
@@ -49,6 +52,8 @@ public class PlayerItem : Dbusmenu.Menuitem
 				this.property_set_bool(property, v.get_boolean());
 			}
 		}
+		// TODO: not working
+		//this.check_layout();
 	}	
 
 	public void set_adaptor(MprisController adaptor)
@@ -56,6 +61,17 @@ public class PlayerItem : Dbusmenu.Menuitem
 		this.mpris_adaptor = adaptor;		
 	}
 
+	private static bool ensure_valid_updates(HashTable<string, Value?> data, HashSet<string> attributes)
+	{
+		if(data == null){
+			return false;
+		}
+		if(data.size() < attributes.size){
+			warning("update hash was too small for the target");
+			return false;
+		}
+		return true;		
+	}
 
 	public static string sanitize_string(string st)
 	{
@@ -85,5 +101,9 @@ public class PlayerItem : Dbusmenu.Menuitem
 		separator.property_set(MENUITEM_PROP_TYPE, CLIENT_TYPES_SEPARATOR);					
 		return separator;
 	}	
+
+	public virtual void check_layout(){
+		warning("this should not be hit");
+	}
 }
 
