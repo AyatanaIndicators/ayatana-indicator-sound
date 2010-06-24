@@ -1,5 +1,4 @@
 /*
-This service primarily controls PulseAudio and is driven by the sound indicator menu on the panel.
 Copyright 2010 Canonical Ltd.
 
 Authors:
@@ -28,9 +27,11 @@ public class MusicPlayerBridge : GLib.Object
   private Listener listener;
   private Dbusmenu.Menuitem root_menu;
 	private HashMap<string, PlayerController> registered_clients;  
+	private FamiliarPlayersDB playersDB;
 	
   public MusicPlayerBridge()
   {
+		playersDB = new FamiliarPlayersDB();
 		registered_clients = new HashMap<string, PlayerController> ();
     listener = Listener.ref_default();
     listener.indicator_added.connect(on_indicator_added);
@@ -46,26 +47,24 @@ public class MusicPlayerBridge : GLib.Object
 		root_menu = menu;
   }
 
-  public void on_indicator_added(Indicate.ListenerServer object, Indicate.ListenerIndicator p0)
-  {
-    debug("MusicPlayerBridge-> on_indicator_added");
-  }
+//static void 
+//desktop_cb (IndicateListener * listener, IndicateListenerServer * server, gchar * value, gpointer data)
 
-  public void on_indicator_removed(Indicate.ListenerServer object, Indicate.ListenerIndicator p0)
-  {
-    debug("MusicPlayerBridge -> on_indicator_removed");
-  }
-
-  public void on_indicator_modified(Indicate.ListenerServer object, Indicate.ListenerIndicator p0, string s)
-  {
-    debug("MusicPlayerBridge -> indicator_modified with vale %s", s );
-  }
-
-  public void on_server_added(Indicate.ListenerServer object, string type)
+	public void desktop_info_callback(Indicate.Listener listener,
+	                                 	Indicate.ListenerServer server,
+	                                 	owned string value, void* data)	                                  
+	{
+		
+	}
+	
+	public void on_server_added(Indicate.ListenerServer object, string type)
   {
     debug("MusicPlayerBridge -> on_server_added with value %s", type);
 		if(server_is_not_of_interest(type)) return;
 		string client_name = type.split(".")[1];
+		listener_get_server_property_cb cb = (listener_get_server_property_cb)desktop_info_callback;
+		this.listener.server_get_desktop(object, cb);
+		
 		if (root_menu != null && client_name != null){
 			PlayerController ctrl = new PlayerController(root_menu, client_name, true);
 			registered_clients.set(client_name, ctrl); 
@@ -97,6 +96,20 @@ public class MusicPlayerBridge : GLib.Object
   public void on_server_count_changed(Indicate.ListenerServer object, uint i)
   {
     debug("MusicPlayerBridge-> on_server_count_changed with value %u", i);
+  }
+  public void on_indicator_added(Indicate.ListenerServer object, Indicate.ListenerIndicator p0)
+  {
+    debug("MusicPlayerBridge-> on_indicator_added");
+  }
+
+  public void on_indicator_removed(Indicate.ListenerServer object, Indicate.ListenerIndicator p0)
+  {
+    debug("MusicPlayerBridge -> on_indicator_removed");
+  }
+
+  public void on_indicator_modified(Indicate.ListenerServer object, Indicate.ListenerIndicator p0, string s)
+  {
+    debug("MusicPlayerBridge -> indicator_modified with vale %s", s );
   }
 
 }

@@ -57,7 +57,8 @@ music_bridge_VALASOURCES = \
 	player-controller.vala \
 	mpris-controller-v2.vala \
 	mpris-controller.vala \
-	player-item.vala
+	player-item.vala \
+	familiar-players-db.vala
 
 music_bridge_VALAFLAGS = \
   --ccode \
