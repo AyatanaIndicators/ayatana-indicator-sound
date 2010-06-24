@@ -29,19 +29,19 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 typedef struct {
-    gchar* name;
-    gint index;
-    pa_cvolume volume;
-    pa_channel_map channel_map;
-    gboolean mute;
-    pa_volume_t base_volume;
+  gchar* name;
+  gint index;
+  pa_cvolume volume;
+  pa_channel_map channel_map;
+  gboolean mute;
+  pa_volume_t base_volume;
 } sink_info;
 
 
 pa_context* get_context(void);
 void establish_pulse_activities(SoundServiceDbus *service);
 void set_sink_volume(gdouble percent);
-void toggle_global_mute(gboolean mute_value); 
+void toggle_global_mute(gboolean mute_value);
 void close_pulse_activites();
 
 #endif
