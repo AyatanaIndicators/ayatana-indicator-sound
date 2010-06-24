@@ -23,21 +23,22 @@ using Gee;
 
 public class PlayerController : GLib.Object
 {
-	private const int METADATA = 2;	
+	public const int METADATA = 2;	
 	private const int TRANSPORT = 3;
 	
 	private Dbusmenu.Menuitem root_menu;
 	private string name;
 	private bool is_active;
-	private ArrayList<Dbusmenu.Menuitem> custom_items;	
+	public ArrayList<PlayerItem> custom_items;	
 	private MprisController mpris_adaptor;
-
+	private string desktop_path;
+	
 	public PlayerController(Dbusmenu.Menuitem root, string client_name, bool active)
 	{
 		this.root_menu = root;
 		this.name = format_client_name(client_name.strip());
 		this.is_active = active;
-		this.custom_items = new ArrayList<Dbusmenu.Menuitem>();
+		this.custom_items = new ArrayList<PlayerItem>();
 		self_construct();
 		
 		// Temporary scenario to handle both v1 and v2 of MPRIS.
@@ -47,12 +48,11 @@ public class PlayerController : GLib.Object
 		else{
 			this.mpris_adaptor = new MprisController(this.name, this);
 		}			
+		this.custom_items[TRANSPORT].set_adaptor(this.mpris_adaptor);
 
-		// TODO subclass dbusmenuMenuitem to something like a playermenuitem 
-		// and use this type to collectively 
-		// control widgets.
-		TransportMenuitem t = (TransportMenuitem)this.custom_items[TRANSPORT];
-		t.set_adaptor(this.mpris_adaptor);
+		// At start up if there is no metadata then hide the item.
+		// TODO: NOT working -> dbus menu bug ?
+		//((MetadataMenuitem)this.custom_items[METADATA]).check_layout();
 	}
 
 	public void vanish()
@@ -65,15 +65,10 @@ public class PlayerController : GLib.Object
 	private bool self_construct()
 	{
 		// Separator item
-		Dbusmenu.Menuitem separator_item = new Dbusmenu.Menuitem();
-		separator_item.property_set(MENUITEM_PROP_TYPE, CLIENT_TYPES_SEPARATOR);			
-		this.custom_items.add(separator_item);
+		this.custom_items.add(PlayerItem.new_separator_item());
 
 		// Title item
-		Dbusmenu.Menuitem title_item = new Dbusmenu.Menuitem();
-		title_item.property_set(MENUITEM_PROP_LABEL, this.name);					
-		title_item.property_set(MENUITEM_PROP_ICON_NAME, "applications-multimedia");			
-		this.custom_items.add(title_item);
+		this.custom_items.add(PlayerItem.new_title_item(this.name));
 
 		// Metadata item
 		MetadataMenuitem metadata_item = new MetadataMenuitem();
@@ -84,18 +79,11 @@ public class PlayerController : GLib.Object
 		this.custom_items.add(transport_item);
 
 		int offset = 2;
-		foreach(Dbusmenu.Menuitem item in this.custom_items){
+		foreach(PlayerItem item in this.custom_items){
 			root_menu.child_add_position(item, offset + this.custom_items.index_of(item));			
 		}
 		return true;
 	}	
-
-	public void update_playing_info(HashMap<string, string> data)
-	{
-		debug("PlayerController - update_playing_info");
-		MetadataMenuitem item = (MetadataMenuitem)this.custom_items[METADATA];		
-		item.update(data);
-	}
 
 	private static string format_client_name(string client_name)
 	{
