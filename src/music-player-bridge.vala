@@ -32,6 +32,7 @@ public class MusicPlayerBridge : GLib.Object
   public MusicPlayerBridge()
   {
 		playersDB = new FamiliarPlayersDB();
+		try_to_add_inactive_familiar_clients();
 		registered_clients = new HashMap<string, PlayerController> ();
     listener = Listener.ref_default();
     listener.indicator_added.connect(on_indicator_added);
@@ -42,30 +43,20 @@ public class MusicPlayerBridge : GLib.Object
     listener.server_count_changed.connect(on_server_count_changed);
   }
 
-  public void set_root_menu_item(Dbusmenu.Menuitem menu)
-  {
-		root_menu = menu;
-  }
-
-//static void 
-//desktop_cb (IndicateListener * listener, IndicateListenerServer * server, gchar * value, gpointer data)
-
-	public void desktop_info_callback(Indicate.Listener listener,
-	                                 	Indicate.ListenerServer server,
-	                                 	owned string value, void* data)	                                  
-	{
-		
+	private void try_to_add_inactive_familiar_clients(){
+		//foreach(string app in this.playersDB.records()){
+		//	
+		//}
 	}
 	
 	public void on_server_added(Indicate.ListenerServer object, string type)
   {
     debug("MusicPlayerBridge -> on_server_added with value %s", type);
 		if(server_is_not_of_interest(type)) return;
-		string client_name = type.split(".")[1];
-		listener_get_server_property_cb cb = (listener_get_server_property_cb)desktop_info_callback;
-		this.listener.server_get_desktop(object, cb);
-		
+		string client_name = type.split(".")[1];		
 		if (root_menu != null && client_name != null){
+			listener_get_server_property_cb cb = (listener_get_server_property_cb)desktop_info_callback;
+			this.listener.server_get_desktop(object, cb, this);			
 			PlayerController ctrl = new PlayerController(root_menu, client_name, true);
 			registered_clients.set(client_name, ctrl); 
 			debug("client of name %s has successfully registered with us", client_name);
@@ -93,7 +84,20 @@ public class MusicPlayerBridge : GLib.Object
 		return false;
 	}
 		
-  public void on_server_count_changed(Indicate.ListenerServer object, uint i)
+	private void desktop_info_callback(Indicate.ListenerServer server,
+	                                 	owned string path, void* data)	                                  
+	{
+		debug("we got a desktop file path hopefully: %s", path);	
+		MusicPlayerBridge bridge = data as MusicPlayerBridge;
+		bridge.playersDB.insert(path);
+	}
+
+  public void set_root_menu_item(Dbusmenu.Menuitem menu)
+  {
+		root_menu = menu;
+  }
+
+	public void on_server_count_changed(Indicate.ListenerServer object, uint i)
   {
     debug("MusicPlayerBridge-> on_server_count_changed with value %u", i);
   }

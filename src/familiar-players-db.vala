@@ -100,7 +100,6 @@ public class FamiliarPlayersDB : GLib.Object
 	{
 		KeyFile  keyfile = new KeyFile();
 		string[] desktops = {};
-		//Set<string> keys = this.players_DB.keys;
 		foreach(string key in this.players_DB.keys){
 			desktops += key;
 		}
@@ -133,7 +132,7 @@ public class FamiliarPlayersDB : GLib.Object
 		return true;
 	}
 
-	public void db_add(string desktop)
+	public void insert(string desktop)
 	{
 		if(already_familiar(desktop) == false){
 			if(this.write_id != 0){
@@ -149,4 +148,10 @@ public class FamiliarPlayersDB : GLib.Object
 	{
 		return this.players_DB.get(desktop);
 	}
+
+	public Gee.Set<string> records()
+	{
+		return this.players_DB.keys;		
+	}
+	
 }

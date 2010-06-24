@@ -28,17 +28,32 @@ public class PlayerItem : Dbusmenu.Menuitem
 	{		
 	}
 
+	private static bool ensure_valid_updates(HashTable<string, Value?> data, HashSet<string> attributes)
+	{
+		if(data == null){
+			return false;
+		}
+		if(data.size() < attributes.size){
+			warning("update hash was too small for the target");
+			return false;
+		}
+		return true;		
+	}
+	
 	public void update(HashTable<string, Value?> data, HashSet<string> attributes)
 	{
 		debug("PlayerItem::update()");
+		if(ensure_valid_updates(data, attributes) == false){
+			debug("PlayerItem::Update -> update hash is not what we were expecting");
+			return;
+		}
 		foreach(string property in attributes){
 			string[] input_keys = property.split("-");
 			string search_key = input_keys[input_keys.length-1 : input_keys.length][0];
 			debug("search key = %s", search_key);
-
 			Value v = data.lookup(search_key);
-
 			if (v.holds (typeof (string))){
+				debug("with value : %s", v.get_string());
 				this.property_set(property, this.sanitize_string(v.get_string()));
 			}			    
 			else if (v.holds (typeof (int))){
