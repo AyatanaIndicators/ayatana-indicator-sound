@@ -31,7 +31,8 @@ public class PlayerController : GLib.Object
 	private bool is_active;
 	public ArrayList<PlayerItem> custom_items;	
 	private MprisController mpris_adaptor;
-
+	private string desktop_path;
+	
 	public PlayerController(Dbusmenu.Menuitem root, string client_name, bool active)
 	{
 		this.root_menu = root;
@@ -48,6 +49,10 @@ public class PlayerController : GLib.Object
 			this.mpris_adaptor = new MprisController(this.name, this);
 		}			
 		this.custom_items[TRANSPORT].set_adaptor(this.mpris_adaptor);
+
+		// At start up if there is no metadata then hide the item.
+		// TODO: NOT working -> dbus menu bug ?
+		//((MetadataMenuitem)this.custom_items[METADATA]).check_layout();
 	}
 
 	public void vanish()
@@ -79,13 +84,6 @@ public class PlayerController : GLib.Object
 		}
 		return true;
 	}	
-
-	//public void update_playing_info(HashMap<string, string> data)
-	//{
-	//	debug("PlayerController - update_playing_info");
-	//	MetadataMenuitem item = this.custom_items[METADATA] as MetadataMenuitem;		
-	//	item.update(data, MetadataMenuitem.attributes_format());
-	//}
 
 	private static string format_client_name(string client_name)
 	{

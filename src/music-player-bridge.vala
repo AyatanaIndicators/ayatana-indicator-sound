@@ -20,6 +20,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 using Indicate;
 using Dbusmenu;
 using Gee;
+using GLib;
 
 public class MusicPlayerBridge : GLib.Object
 {
@@ -32,7 +33,6 @@ public class MusicPlayerBridge : GLib.Object
   public MusicPlayerBridge()
   {
 		playersDB = new FamiliarPlayersDB();
-		try_to_add_inactive_familiar_clients();
 		registered_clients = new HashMap<string, PlayerController> ();
     listener = Listener.ref_default();
     listener.indicator_added.connect(on_indicator_added);
@@ -42,11 +42,33 @@ public class MusicPlayerBridge : GLib.Object
     listener.server_removed.connect(on_server_removed);
     listener.server_count_changed.connect(on_server_count_changed);
   }
-
+	// Alpha 2 not in use ... yet.
 	private void try_to_add_inactive_familiar_clients(){
-		//foreach(string app in this.playersDB.records()){
-		//	
-		//}
+		// for now just use one of the entries.
+		int count = 0;
+		foreach(string app in this.playersDB.records()){
+			if(count == 0){
+				debug("we have found %s", app);
+				string[] bits = app.split("/");
+
+				try{
+					string app_name = bits[bits.length -1].split(".")[0];
+					debug("we have found %s", app_name);
+					PlayerController ctrl = new PlayerController(this.root_menu, 
+					                                             app_name,
+					                                             false);
+					this.registered_clients.set(app_name, ctrl);
+					DesktopAppInfo info = new DesktopAppInfo.from_filename(app_name); 					
+					string desc =	info.get_display_name();
+					debug("description from app %s", desc);
+					count += 1;					
+				}
+				catch(Error er){
+					warning("desktop path in cache is not formatted as we have anticipated");
+				}
+			}
+			break;
+		}
 	}
 	
 	public void on_server_added(Indicate.ListenerServer object, string type)
@@ -94,7 +116,8 @@ public class MusicPlayerBridge : GLib.Object
 
   public void set_root_menu_item(Dbusmenu.Menuitem menu)
   {
-		root_menu = menu;
+		this.root_menu = menu;
+		//try_to_add_inactive_familiar_clients();
   }
 
 	public void on_server_count_changed(Indicate.ListenerServer object, uint i)

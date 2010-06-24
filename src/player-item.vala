@@ -27,24 +27,12 @@ public class PlayerItem : Dbusmenu.Menuitem
 	public PlayerItem()
 	{		
 	}
-
-	private static bool ensure_valid_updates(HashTable<string, Value?> data, HashSet<string> attributes)
-	{
-		if(data == null){
-			return false;
-		}
-		if(data.size() < attributes.size){
-			warning("update hash was too small for the target");
-			return false;
-		}
-		return true;		
-	}
 	
 	public void update(HashTable<string, Value?> data, HashSet<string> attributes)
 	{
 		debug("PlayerItem::update()");
 		if(ensure_valid_updates(data, attributes) == false){
-			debug("PlayerItem::Update -> update hash is not what we were expecting");
+			debug("PlayerItem::Update -> The hashtable update does not contain what we were expecting - just leave it!");
 			return;
 		}
 		foreach(string property in attributes){
@@ -64,6 +52,8 @@ public class PlayerItem : Dbusmenu.Menuitem
 				this.property_set_bool(property, v.get_boolean());
 			}
 		}
+		// TODO: not working
+		//this.check_layout();
 	}	
 
 	public void set_adaptor(MprisController adaptor)
@@ -71,6 +61,17 @@ public class PlayerItem : Dbusmenu.Menuitem
 		this.mpris_adaptor = adaptor;		
 	}
 
+	private static bool ensure_valid_updates(HashTable<string, Value?> data, HashSet<string> attributes)
+	{
+		if(data == null){
+			return false;
+		}
+		if(data.size() < attributes.size){
+			warning("update hash was too small for the target");
+			return false;
+		}
+		return true;		
+	}
 
 	public static string sanitize_string(string st)
 	{
@@ -100,5 +101,9 @@ public class PlayerItem : Dbusmenu.Menuitem
 		separator.property_set(MENUITEM_PROP_TYPE, CLIENT_TYPES_SEPARATOR);					
 		return separator;
 	}	
+
+	public virtual void check_layout(){
+		warning("this should not be hit");
+	}
 }
 

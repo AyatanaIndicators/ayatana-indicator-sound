@@ -78,15 +78,12 @@ public class FamiliarPlayersDB : GLib.Object
 		return false;		
 	}
 		
-	private bool load_data_from_key_file()
-	{
+	private bool load_data_from_key_file(){
 		try{
 			string[] desktops = this.key_file.get_string_list(GROUP_NAME,
 				                                          			KEY_NAME);
-				                                          			
-			int i = 0;
-			while (desktops[i] != null) {
-				this.players_DB.set(desktops[i], true);  
+			foreach(string s in desktops){
+				this.players_DB.set(s, true);
 			}
 			return true;
 		}
