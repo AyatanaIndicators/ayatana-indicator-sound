@@ -62,7 +62,6 @@ music_bridge_VALASOURCES = \
 music_bridge_VALAFLAGS = \
   --ccode \
   -H music-player-bridge.h -d . \
-  --library music-bridge \
   --vapidir=./ \
   --vapidir=$(top_srcdir)/vapi/ \
   --thread \
@@ -70,8 +69,7 @@ music_bridge_VALAFLAGS = \
   --pkg Indicate-0.2 \
   --pkg Dbusmenu-Glib-0.2 \
   --pkg common-defs \
-	--pkg dbus-glib-1
- 
+	--pkg dbus-glib-1 \
   $(MAINTAINER_VALAFLAGS)
 
 music_bridge_APIFILES = \
@@ -118,7 +116,6 @@ BUILT_SOURCES = \
 	music_bridge_vala.stamp \
 	sound-service-client.h \
   sound-service-server.h \
-  music-bridge.vapi \
   $(music_bridge_APIFILES) \
   $(music_bridge_VALASOURCES:.vala=.c)
 
