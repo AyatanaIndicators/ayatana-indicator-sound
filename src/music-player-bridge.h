@@ -224,6 +224,7 @@ MprisController* mpris_controller_construct (GType object_type, const char* name
 void mpris_controller_toggle_playback (MprisController* self, gboolean state);
 PlayerItem* player_item_new (void);
 PlayerItem* player_item_construct (GType object_type);
+void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
 void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes);
 void player_item_set_adaptor (PlayerItem* self, MprisController* adaptor);
 char* player_item_sanitize_string (const char* st);

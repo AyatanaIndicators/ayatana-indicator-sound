@@ -145,6 +145,7 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 GeeHashSet* metadata_menuitem_attributes_format (void);
 MprisController* mpris_controller_new (const char* name, PlayerController* controller, const char* mpris_interface);
 MprisController* mpris_controller_construct (GType object_type, const char* name, PlayerController* controller, const char* mpris_interface);
+void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
 static void _dynamic_Play2 (DBusGProxy* self, GError** error);
 static void _dynamic_Pause3 (DBusGProxy* self, GError** error);
 void mpris_controller_toggle_playback (MprisController* self, gboolean state);
@@ -292,13 +293,18 @@ MprisController* mpris_controller_new (const char* name, PlayerController* contr
 static void mpris_controller_onTrackChange (MprisController* self, DBusGProxy* mpris_client, GHashTable* ht) {
 	GeeHashSet* _tmp1_;
 	PlayerItem* _tmp0_;
+	GeeHashSet* _tmp3_;
+	PlayerItem* _tmp2_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (mpris_client != NULL);
 	g_return_if_fail (ht != NULL);
 	g_debug ("mpris-controller.vala:58: onTrackChange");
-	player_item_update (_tmp0_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->controller->custom_items, PLAYER_CONTROLLER_METADATA), ht, _tmp1_ = metadata_menuitem_attributes_format ());
+	player_item_reset (_tmp0_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->controller->custom_items, PLAYER_CONTROLLER_METADATA), _tmp1_ = metadata_menuitem_attributes_format ());
 	_g_object_unref0 (_tmp1_);
 	_g_object_unref0 (_tmp0_);
+	player_item_update (_tmp2_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->controller->custom_items, PLAYER_CONTROLLER_METADATA), ht, _tmp3_ = metadata_menuitem_attributes_format ());
+	_g_object_unref0 (_tmp3_);
+	_g_object_unref0 (_tmp2_);
 }
 
 
@@ -323,7 +329,7 @@ void mpris_controller_toggle_playback (MprisController* self, gboolean state) {
 	g_return_if_fail (self != NULL);
 	_inner_error_ = NULL;
 	if (state == TRUE) {
-		g_debug ("mpris-controller.vala:70: about to play");
+		g_debug ("mpris-controller.vala:71: about to play");
 		_dynamic_Play2 (self->mpris_player, &_inner_error_);
 		if (_inner_error_ != NULL) {
 			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
@@ -331,7 +337,7 @@ void mpris_controller_toggle_playback (MprisController* self, gboolean state) {
 			return;
 		}
 	} else {
-		g_debug ("mpris-controller.vala:74: about to pause");
+		g_debug ("mpris-controller.vala:75: about to pause");
 		_dynamic_Pause3 (self->mpris_player, &_inner_error_);
 		if (_inner_error_ != NULL) {
 			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
@@ -362,11 +368,11 @@ static void mpris_controller_onStatusChange (MprisController* self, DBusGProxy* 
 	PlayerItem* _tmp0_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (mpris_client != NULL);
-	g_debug ("mpris-controller.vala:81: onStatusChange - signal received");
+	g_debug ("mpris-controller.vala:82: onStatusChange - signal received");
 	status = st;
 	ar = (GValueArray*) status;
 	play_state = g_value_get_int (g_value_array_get_nth (ar, (guint) 0));
-	g_debug ("mpris-controller.vala:85: onStatusChange - play state %i", play_state);
+	g_debug ("mpris-controller.vala:86: onStatusChange - play state %i", play_state);
 	ht = g_hash_table_new (g_str_hash, g_str_equal);
 	g_value_init (&v, G_TYPE_INT);
 	g_value_set_int (&v, play_state);
