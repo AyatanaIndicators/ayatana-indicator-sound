@@ -56,6 +56,7 @@ public class MprisController : GLib.Object
 	private void onTrackChange(dynamic DBus.Object mpris_client, HashTable<string,Value?> ht)
 	{
 		debug("onTrackChange");
+		this.controller.custom_items[this.controller.METADATA].reset(MetadataMenuitem.attributes_format());
 		this.controller.custom_items[this.controller.METADATA].update(ht,
 		                            MetadataMenuitem.attributes_format());
 	}

@@ -27,6 +27,13 @@ public class PlayerItem : Dbusmenu.Menuitem
 	public PlayerItem()
 	{		
 	}
+
+	public void reset(HashSet<string> attrs){		
+		foreach(string s in attrs){
+			debug("attempting to set prop %s to null", s);
+			this.property_set(s, null);
+		}
+	}
 	
 	public void update(HashTable<string, Value?> data, HashSet<string> attributes)
 	{
@@ -39,7 +46,8 @@ public class PlayerItem : Dbusmenu.Menuitem
 			string[] input_keys = property.split("-");
 			string search_key = input_keys[input_keys.length-1 : input_keys.length][0];
 			debug("search key = %s", search_key);
-			Value v = data.lookup(search_key);
+			Value? v = data.lookup(search_key);
+			
 			if (v.holds (typeof (string))){
 				debug("with value : %s", v.get_string());
 				this.property_set(property, this.sanitize_string(v.get_string()));
