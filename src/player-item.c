@@ -26,9 +26,9 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <libdbusmenu-glib/menuitem-proxy.h>
 #include <libdbusmenu-glib/menuitem.h>
 #include <libdbusmenu-glib/server.h>
+#include <gee.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gee.h>
 
 
 #define TYPE_PLAYER_ITEM (player_item_get_type ())
@@ -75,7 +75,9 @@ enum  {
 };
 PlayerItem* player_item_new (void);
 PlayerItem* player_item_construct (GType object_type);
+void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
 static gboolean player_item_ensure_valid_updates (GHashTable* data, GeeHashSet* attributes);
+static GValue* _g_value_dup (GValue* self);
 char* player_item_sanitize_string (const char* st);
 void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes);
 void player_item_set_adaptor (PlayerItem* self, MprisController* adaptor);
@@ -102,13 +104,44 @@ PlayerItem* player_item_new (void) {
 }
 
 
+void player_item_reset (PlayerItem* self, GeeHashSet* attrs) {
+	g_return_if_fail (self != NULL);
+	g_return_if_fail (attrs != NULL);
+	{
+		GeeIterator* _s_it;
+		_s_it = gee_abstract_collection_iterator ((GeeAbstractCollection*) attrs);
+		while (TRUE) {
+			char* s;
+			if (!gee_iterator_next (_s_it)) {
+				break;
+			}
+			s = (char*) gee_iterator_get (_s_it);
+			g_debug ("player-item.vala:33: attempting to set prop %s to null", s);
+			dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, s, NULL);
+			_g_free0 (s);
+		}
+		_g_object_unref0 (_s_it);
+	}
+}
+
+
+static GValue* _g_value_dup (GValue* self) {
+	return g_boxed_copy (G_TYPE_VALUE, self);
+}
+
+
+static gpointer __g_value_dup0 (gpointer self) {
+	return self ? _g_value_dup (self) : NULL;
+}
+
+
 void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes) {
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (data != NULL);
 	g_return_if_fail (attributes != NULL);
-	g_debug ("player-item.vala:33: PlayerItem::update()");
+	g_debug ("player-item.vala:40: PlayerItem::update()");
 	if (player_item_ensure_valid_updates (data, attributes) == FALSE) {
-		g_debug ("player-item.vala:35: PlayerItem::Update -> The hashtable update does n" \
+		g_debug ("player-item.vala:42: PlayerItem::Update -> The hashtable update does n" \
 "ot contain what we were expecting - just leave it!");
 		return;
 	}
@@ -125,35 +158,34 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 			char** _tmp3_ = NULL;
 			gint _tmp2_;
 			char* search_key;
-			GValue _tmp4_ = {0};
-			GValue v;
+			GValue* v;
 			if (!gee_iterator_next (_property_it)) {
 				break;
 			}
 			property = (char*) gee_iterator_get (_property_it);
 			input_keys = (_tmp1_ = _tmp0_ = g_strsplit (property, "-", 0), input_keys_length1 = _vala_array_length (_tmp0_), _input_keys_size_ = input_keys_length1, _tmp1_);
 			search_key = g_strdup ((_tmp3_ = input_keys + (input_keys_length1 - 1), _tmp2_ = input_keys_length1 - (input_keys_length1 - 1), _tmp3_)[0]);
-			g_debug ("player-item.vala:41: search key = %s", search_key);
-			v = G_IS_VALUE ((GValue*) g_hash_table_lookup (data, search_key)) ? (g_value_init (&_tmp4_, G_VALUE_TYPE ((GValue*) g_hash_table_lookup (data, search_key))), g_value_copy ((GValue*) g_hash_table_lookup (data, search_key), &_tmp4_), _tmp4_) : (*((GValue*) g_hash_table_lookup (data, search_key)));
-			if (G_VALUE_HOLDS (&v, G_TYPE_STRING)) {
-				char* _tmp5_;
-				g_debug ("player-item.vala:44: with value : %s", g_value_get_string (&v));
-				dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, property, _tmp5_ = player_item_sanitize_string (g_value_get_string (&v)));
-				_g_free0 (_tmp5_);
+			g_debug ("player-item.vala:48: search key = %s", search_key);
+			v = __g_value_dup0 ((GValue*) g_hash_table_lookup (data, search_key));
+			if (G_VALUE_HOLDS (v, G_TYPE_STRING)) {
+				char* _tmp4_;
+				g_debug ("player-item.vala:52: with value : %s", g_value_get_string (v));
+				dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, property, _tmp4_ = player_item_sanitize_string (g_value_get_string (v)));
+				_g_free0 (_tmp4_);
 			} else {
-				if (G_VALUE_HOLDS (&v, G_TYPE_INT)) {
-					g_debug ("player-item.vala:48: with value : %i", g_value_get_int (&v));
-					dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, property, g_value_get_int (&v));
+				if (G_VALUE_HOLDS (v, G_TYPE_INT)) {
+					g_debug ("player-item.vala:56: with value : %i", g_value_get_int (v));
+					dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, property, g_value_get_int (v));
 				} else {
-					if (G_VALUE_HOLDS (&v, G_TYPE_BOOLEAN)) {
-						dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, property, g_value_get_boolean (&v));
+					if (G_VALUE_HOLDS (v, G_TYPE_BOOLEAN)) {
+						dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, property, g_value_get_boolean (v));
 					}
 				}
 			}
 			_g_free0 (property);
 			input_keys = (_vala_array_free (input_keys, input_keys_length1, (GDestroyNotify) g_free), NULL);
 			_g_free0 (search_key);
-			G_IS_VALUE (&v) ? (g_value_unset (&v), NULL) : NULL;
+			_g_free0 (v);
 		}
 		_g_object_unref0 (_property_it);
 	}
@@ -182,7 +214,7 @@ static gboolean player_item_ensure_valid_updates (GHashTable* data, GeeHashSet* 
 		return result;
 	}
 	if (g_hash_table_size (data) < gee_collection_get_size ((GeeCollection*) attributes)) {
-		g_warning ("player-item.vala:70: update hash was too small for the target");
+		g_warning ("player-item.vala:78: update hash was too small for the target");
 		result = FALSE;
 		return result;
 	}
@@ -244,7 +276,7 @@ char* player_item_sanitize_string (const char* st) {
 		char* _tmp0_;
 		_result_ = (_tmp0_ = string_slice (_result_, (glong) 7, g_utf8_strlen (_result_, -1)), _g_free0 (_result_), _tmp0_);
 	}
-	g_debug ("player-item.vala:82: Sanitize string - result = %s", _result_);
+	g_debug ("player-item.vala:90: Sanitize string - result = %s", _result_);
 	result = _result_;
 	return result;
 }
@@ -274,7 +306,7 @@ PlayerItem* player_item_new_separator_item (void) {
 
 static void player_item_real_check_layout (PlayerItem* self) {
 	g_return_if_fail (self != NULL);
-	g_warning ("player-item.vala:106: this should not be hit");
+	g_warning ("player-item.vala:114: this should not be hit");
 }
 
 

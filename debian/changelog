@@ -1,3 +1,11 @@
+indicator-sound (0.3.3-0ubuntu1) UNRELEASED; urgency=low
+
+  * New upstream release.
+    - Fixes menu flicker when playing a song with artwork 
+      displayed (LP: #598438)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 25 Jun 2010 11:19:15 -0400
+
 indicator-sound (0.3.2-0ubuntu1) maverick; urgency=low
 
   * New upstream release.
