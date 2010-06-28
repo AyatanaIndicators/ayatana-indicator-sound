@@ -21,10 +21,8 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "config.h"
 #endif
 
-#include <glib/gi18n.h>
+#include <math.h>
 #include "play-button.h"
-#include "common-defs.h"
-#include <gtk/gtk.h>
 
 
 typedef struct _PlayButtonPrivate PlayButtonPrivate;
@@ -43,6 +41,7 @@ static void play_button_dispose    (GObject *object);
 static void play_button_finalize   (GObject *object);
 
 static gboolean play_button_expose (GtkWidget *button, GdkEventExpose *event);
+static void draw (GtkWidget* button, cairo_t *cr);
                                           
 G_DEFINE_TYPE (PlayButton, play_button, GTK_TYPE_DRAWING_AREA);
 
@@ -50,22 +49,32 @@ G_DEFINE_TYPE (PlayButton, play_button, GTK_TYPE_DRAWING_AREA);
 static void
 play_button_class_init (PlayButtonClass *klass)
 {
-	g_type_class_add_private (klass, sizeof (PlayButtonPrivate));
- 	GtkWidgetClass* widget_class;
+	
+	GObjectClass	*gobject_class = G_OBJECT_CLASS (klass);
+ 	GtkWidgetClass* widget_class = GTK_WIDGET_CLASS (klass);
 
-  widget_class = GTK_WIDGET_CLASS (klass);
+	g_type_class_add_private (klass, sizeof (PlayButtonPrivate));
 
   widget_class->expose_event = play_button_expose;
 
 	gobject_class->dispose = play_button_dispose;
 	gobject_class->finalize = play_button_finalize;
-
 }
 
 static void
 play_button_init (PlayButton *self)
 {
 	g_debug("PlayButton::play_button_init");
+	GtkAllocation alloc;
+
+	alloc.width = 100;
+	alloc.height = 100;
+	alloc.x = 0;
+	alloc.y = 0;
+	
+	gtk_widget_set_allocation(GTK_WIDGET(self), 
+	                          &alloc);
+	//g_free(alloc);
 }
 
 static void
@@ -83,11 +92,66 @@ play_button_finalize (GObject *object)
 static gboolean
 play_button_expose (GtkWidget *button, GdkEventExpose *event)
 {
-return FALSE;
+	cairo_t *cr;
+  cr = gdk_cairo_create (button->window);
+  cairo_rectangle (cr,
+                   event->area.x, event->area.y,
+                   event->area.width, event->area.height);
+
+	cairo_clip(cr);
+	draw (button, cr);
+  cairo_destroy (cr);
+	return FALSE;
 }
 
+static void
+draw (GtkWidget* button, cairo_t *cr)
+{
+	double x, y;
+	double radius;
+	int i;
+	
+	x = button->allocation.x + button->allocation.width / 2;
+	y = button->allocation.y + button->allocation.height / 2;
+	radius = MIN (button->allocation.width / 2,
+		      button->allocation.height / 2) - 5;
 
-                              
+	/* button back */
+	cairo_arc (cr, x, y, radius, 0, 2 * M_PI);
+	cairo_set_source_rgb (cr, 1, 1, 1);
+	cairo_fill_preserve (cr);
+	cairo_set_source_rgb (cr, 0, 0, 0);
+	cairo_stroke (cr);
+
+	/* button ticks */
+	for (i = 0; i < 12; i++)
+	{
+		int inset;
+	
+		cairo_save (cr); /* stack-pen-size */
+		
+		if (i % 3 == 0)
+		{
+			inset = 0.2 * radius;
+		}
+		else
+		{
+			inset = 0.1 * radius;
+			cairo_set_line_width (cr, 0.5 *
+					cairo_get_line_width (cr));
+		}
+		
+		cairo_move_to (cr,
+				x + (radius - inset) * cos (i * M_PI / 6),
+				y + (radius - inset) * sin (i * M_PI / 6));
+		cairo_line_to (cr,
+				x + radius * cos (i * M_PI / 6),
+				y + radius * sin (i * M_PI / 6));
+		cairo_stroke (cr);
+		cairo_restore (cr); /* stack-pen-size */
+	}
+}
+
 /**
 * play_button_new:
 * @returns: a new #PlayButton.

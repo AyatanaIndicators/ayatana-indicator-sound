@@ -13,6 +13,8 @@ libsoundmenu_la_SOURCES = \
 	transport-widget.h \
 	metadata-widget.c \
 	metadata-widget.h \
+	play-button.c \
+	play-button.h \
 	indicator-sound.c \
 	dbus-shared-names.h \
   sound-service-client.h 

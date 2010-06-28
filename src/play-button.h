@@ -19,6 +19,8 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __PLAY_BUTTON_H__
 #define __PLAY_BUTTON_H__
 
+#include <gtk/gtk.h>
+
 G_BEGIN_DECLS
 
 #define PLAY_BUTTON_TYPE            (play_button_get_type ())
