@@ -34,8 +34,8 @@ typedef struct _TransportWidgetPrivate TransportWidgetPrivate;
 
 struct _TransportWidgetPrivate
 {
-	GtkWidget* hbox;
-	GtkWidget* play_button;
+	//GtkWidget* hbox;
+	//GtkWidget* play_button;
 };
 
 enum {
