@@ -1,3 +1,14 @@
+indicator-sound (0.3.4-0ubuntu1) maverick; urgency=low
+
+  * New upstream version:
+    - Album art now positioned correctly
+    - Track title, artist name and album name now the correct size, 
+      weight and position
+    - Text truncated with an ellipsis if it is over the an estimated acceptable 
+      width (no guidance given by design).
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 28 Jun 2010 17:20:03 +0200
+
 indicator-sound (0.3.3-0ubuntu1) maverick; urgency=low
 
   * New upstream release.
