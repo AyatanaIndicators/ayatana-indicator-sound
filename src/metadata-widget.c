@@ -57,6 +57,9 @@ static void metadata_widget_property_update(DbusmenuMenuitem* item, gchar* prope
                                        GValue* value, gpointer userdata);
 
 static void update_album_art(MetadataWidget* self);
+static void style_artist_text(MetadataWidget* self);
+static void style_title_text(MetadataWidget* self);
+static void style_album_text(MetadataWidget* self);
 
 
 G_DEFINE_TYPE (MetadataWidget, metadata_widget, GTK_TYPE_MENU_ITEM);
@@ -88,32 +91,52 @@ metadata_widget_init (MetadataWidget *self)
 
 	GtkWidget *hbox;
 
-	hbox = gtk_hbox_new(TRUE, 0);
+	hbox = gtk_hbox_new(FALSE, 0);
 	priv->hbox = hbox;
-	
+
 	// image
 	priv->album_art = gtk_image_new();
 	priv->image_path = g_strdup(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_ARTURL));
 	update_album_art(self);	
-	gtk_box_pack_start (GTK_BOX (priv->hbox), priv->album_art, FALSE, FALSE, 0);	
-	GtkWidget* vbox = gtk_vbox_new(TRUE, 0);
 
+	gtk_box_pack_start (GTK_BOX (priv->hbox), priv->album_art, FALSE, FALSE, 0);	
+
+	
+	GtkWidget* vbox = gtk_vbox_new(FALSE, 0);
+	gtk_container_set_border_width(GTK_CONTAINER(vbox), 10);
 	// artist
 	GtkWidget* artist;
-	artist = gtk_label_new(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_TEXT_ARTIST));
-	priv->artist_label = artist;
+	artist = gtk_label_new(dbusmenu_menuitem_property_get(twin_item,
+	                                                      DBUSMENU_METADATA_MENUITEM_TEXT_ARTIST));
 	
+	gtk_misc_set_alignment(GTK_MISC(artist), (gfloat)0, (gfloat)0);
+	gtk_label_set_width_chars(GTK_LABEL(artist), 20);	
+	gtk_label_set_ellipsize(GTK_LABEL(artist), PANGO_ELLIPSIZE_END);	
+	priv->artist_label = artist;
+	// Style it up.
+	style_artist_text(self);
 	
 	// piece
 	GtkWidget* piece;
-	piece = gtk_label_new(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_TEXT_TITLE));
+	piece = gtk_label_new(dbusmenu_menuitem_property_get(twin_item,
+	                                                     DBUSMENU_METADATA_MENUITEM_TEXT_TITLE));
+	gtk_misc_set_alignment(GTK_MISC(piece), (gfloat)0, (gfloat)0);
+	gtk_label_set_width_chars(GTK_LABEL(piece), 16);
+	gtk_label_set_ellipsize(GTK_LABEL(piece), PANGO_ELLIPSIZE_END);
 	priv->piece_label =  piece;
-
+	// Style it up.
+	style_title_text(self);
 
 	// container
 	GtkWidget* container;
-	container = gtk_label_new(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_TEXT_ALBUM));
+	container = gtk_label_new(dbusmenu_menuitem_property_get(twin_item,
+	                                                         DBUSMENU_METADATA_MENUITEM_TEXT_ALBUM));
+	gtk_misc_set_alignment(GTK_MISC(container), (gfloat)0, (gfloat)0);
+	gtk_label_set_width_chars(GTK_LABEL(container), 20);		
+	gtk_label_set_ellipsize(GTK_LABEL(container), PANGO_ELLIPSIZE_END);	
 	priv->container_label = container;
+	// Style it up.
+	style_album_text(self);
 
 	// Pack in the right order
 	gtk_box_pack_start (GTK_BOX (vbox), priv->piece_label, FALSE, FALSE, 0);	
@@ -170,27 +193,29 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	
 	if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_ARTIST, property) == 0){  
 		gtk_label_set_text(GTK_LABEL(priv->artist_label), g_value_get_string(value));
+		style_artist_text(mitem);
 	}
 	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_TITLE, property) == 0){  
-		gtk_label_set_text(GTK_LABEL(priv->piece_label), g_value_get_string(value));
+		gtk_label_set_text(GTK_LABEL(priv->piece_label), g_value_get_string(value));		
+		style_title_text(mitem);
 	}	
 	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_ALBUM, property) == 0){  
 		gtk_label_set_text(GTK_LABEL(priv->container_label), g_value_get_string(value));
+		style_album_text(mitem);	
 	}	
 	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_ARTURL, property) == 0){
 		if(priv->image_path != NULL){
 			g_free(priv->image_path);
 		}
-		
 		priv->image_path = g_value_dup_string(value);
-
 		if(priv->image_path != NULL){
 			update_album_art(mitem);
 		}
 	}		
 }
 
-static void update_album_art(MetadataWidget* self){
+static void
+update_album_art(MetadataWidget* self){
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);	
 	GdkPixbuf* pixbuf;
 	pixbuf = gdk_pixbuf_new_from_file(priv->image_path, NULL);
@@ -200,6 +225,41 @@ static void update_album_art(MetadataWidget* self){
 	g_object_unref(pixbuf);	
 }
 
+// TODO refactor next 3 methods into one once the style has been 
+// "signed off" by design
+static void
+style_artist_text(MetadataWidget* self)
+{
+	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);	
+	char* markup;
+	markup = g_markup_printf_escaped ("<span size=\"small\">%s</span>",
+	                                  gtk_label_get_text(GTK_LABEL(priv->artist_label)));
+	gtk_label_set_markup (GTK_LABEL (priv->artist_label), markup);
+	g_free(markup);
+}
+
+static void
+style_title_text(MetadataWidget* self)
+{
+	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);	
+
+	char* markup;
+	markup = g_markup_printf_escaped ("<span weight=\"bold\">%s</span>",
+	                                  gtk_label_get_text(GTK_LABEL(priv->piece_label)));
+	gtk_label_set_markup (GTK_LABEL (priv->piece_label), markup);
+	g_free(markup);
+}
+
+static void
+style_album_text(MetadataWidget* self)
+{
+	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);	
+	char* markup;
+	markup = g_markup_printf_escaped ("<span size=\"small\">%s</span>",
+	                                  gtk_label_get_text(GTK_LABEL(priv->container_label)));
+	gtk_label_set_markup (GTK_LABEL (priv->container_label), markup);
+	g_free(markup);
+}
 
  /**
  * transport_new:
