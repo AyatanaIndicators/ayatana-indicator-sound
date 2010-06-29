@@ -65,16 +65,6 @@ static void
 play_button_init (PlayButton *self)
 {
 	g_debug("PlayButton::play_button_init");
-	GtkAllocation alloc;
-
-	alloc.width = 100;
-	alloc.height = 100;
-	alloc.x = 0;
-	alloc.y = 0;
-	
-	gtk_widget_set_allocation(GTK_WIDGET(self), 
-	                          &alloc);
-	//g_free(alloc);
 }
 
 static void
@@ -92,9 +82,24 @@ play_button_finalize (GObject *object)
 static gboolean
 play_button_expose (GtkWidget *button, GdkEventExpose *event)
 {
+	GtkAllocation alloc;
+
+	alloc.width = 200;
+	alloc.height = 600;
+	alloc.x = 100;
+	alloc.y = 100;
+	
+	gtk_widget_set_allocation(GTK_WIDGET(button), 
+	                          &alloc);
+
 	cairo_t *cr;
   cr = gdk_cairo_create (button->window);
-  cairo_rectangle (cr,
+
+	g_debug("PlayButton::Draw - width = %i", button->allocation.width);
+	g_debug("PlayButton::Draw - event->area.width = %i", event->area.width);
+	g_debug("PlayButton::Draw - event->area.x = %i", event->area.x);
+
+	cairo_rectangle (cr,
                    event->area.x, event->area.y,
                    event->area.width, event->area.height);
 
