@@ -40,7 +40,7 @@ static void play_button_init       (PlayButton *self);
 static void play_button_dispose    (GObject *object);
 static void play_button_finalize   (GObject *object);
 
-static gboolean play_button_expose (GtkWidget *button, GdkEventExpose *event);
+static gboolean play_button_expose (GtkWidget *button, GdkEventExpose *event, gpointer userdata);
 static void draw (GtkWidget* button, cairo_t *cr);
                                           
 G_DEFINE_TYPE (PlayButton, play_button, GTK_TYPE_DRAWING_AREA);
@@ -81,7 +81,7 @@ play_button_finalize (GObject *object)
 }
 
 static gboolean
-play_button_expose (GtkWidget *button, GdkEventExpose *event)
+play_button_expose (GtkWidget *button, GdkEventExpose *event, gpointer userdata)
 {
 	GtkAllocation alloc;
 
@@ -123,7 +123,7 @@ draw (GtkWidget* button, cairo_t *cr)
 		      button->allocation.height / 2) - 5;
 
 	/* button back */
-	cairo_arc (cr, x, y, radius, 0, 2 * M_PI);
+	cairo_arc (cr, x, y, radius, 0, 2 * G_PI);
 	cairo_set_source_rgb (cr, 1, 1, 1);
 	cairo_fill_preserve (cr);
 	cairo_set_source_rgb (cr, 0, 0, 0);
@@ -148,11 +148,11 @@ draw (GtkWidget* button, cairo_t *cr)
 		}
 		
 		cairo_move_to (cr,
-				x + (radius - inset) * cos (i * M_PI / 6),
-				y + (radius - inset) * sin (i * M_PI / 6));
+				x + (radius - inset) * cos (i * G_PI / 6),
+				y + (radius - inset) * sin (i * G_PI / 6));
 		cairo_line_to (cr,
-				x + radius * cos (i * M_PI / 6),
-				y + radius * sin (i * M_PI / 6));
+				x + radius * cos (i * G_PI / 6),
+				y + radius * sin (i * G_PI / 6));
 		cairo_stroke (cr);
 		cairo_restore (cr); /* stack-pen-size */
 	}
