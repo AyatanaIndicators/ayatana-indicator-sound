@@ -27,7 +27,6 @@ public class TransportMenuitem : PlayerItem
 	public TransportMenuitem()
   {
 		this.property_set(MENUITEM_PROP_TYPE, MENUITEM_TYPE);
-		debug("transport on the vala side");
 	}
 
 	public void change_play_state(int state)

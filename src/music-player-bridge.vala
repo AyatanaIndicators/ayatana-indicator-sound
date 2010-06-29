@@ -42,15 +42,22 @@ public class MusicPlayerBridge : GLib.Object
     listener.server_removed.connect(on_server_removed);
     listener.server_count_changed.connect(on_server_count_changed);
   }
-	// Alpha 2 not in use ... yet.
+
 	private void try_to_add_inactive_familiar_clients(){
 		// for now just use one of the entries.
 		int count = 0;
 		foreach(string app in this.playersDB.records()){
 			if(count == 0){
 				debug("we have found %s", app);
+				if(app == null){
+					debug("moving on to next player");
+					continue;
+				}
 				string[] bits = app.split("/");
-
+				if(bits.length < 2){
+					continue;
+				}
+				debug("trying to dig deeper %s", app);				
 				try{
 					string app_name = bits[bits.length -1].split(".")[0];
 					debug("we have found %s", app_name);
@@ -58,9 +65,11 @@ public class MusicPlayerBridge : GLib.Object
 					                                             app_name,
 					                                             false);
 					this.registered_clients.set(app_name, ctrl);
-					DesktopAppInfo info = new DesktopAppInfo.from_filename(app_name); 					
-					string desc =	info.get_display_name();
-					debug("description from app %s", desc);
+					DesktopAppInfo info = new DesktopAppInfo.from_filename(app); 
+					GLib.AppInfo app_info = info as GLib.AppInfo;
+					
+					debug("Display name = %s", app_info.get_display_name());
+					app_info.launch(null, null);
 					count += 1;					
 				}
 				catch(Error er){
@@ -93,7 +102,8 @@ public class MusicPlayerBridge : GLib.Object
 		if (root_menu != null && client_name != null){
 			registered_clients[client_name].vanish();
 			registered_clients.remove(client_name);
-			debug("Successively removed menu_item for client %s from registered_clients", client_name);
+			debug("Successively removed menu_item for client %s from registered_clients",
+			      client_name);
 		}
 	}
 	
@@ -109,15 +119,22 @@ public class MusicPlayerBridge : GLib.Object
 	private void desktop_info_callback(Indicate.ListenerServer server,
 	                                 	owned string path, void* data)	                                  
 	{
-		debug("we got a desktop file path hopefully: %s", path);	
 		MusicPlayerBridge bridge = data as MusicPlayerBridge;
-		bridge.playersDB.insert(path);
+		// Not the most secure validation
+		// TODO revisit validation mechanism
+		if(path.contains("/")){
+			debug("About to store desktop file path: %s", path);	
+			bridge.playersDB.insert(path);
+		}
+		else{
+			debug("Ignoring desktop file path: %s", path);
+		}
 	}
 
   public void set_root_menu_item(Dbusmenu.Menuitem menu)
   {
 		this.root_menu = menu;
-		//try_to_add_inactive_familiar_clients();
+		try_to_add_inactive_familiar_clients();
   }
 
 	public void on_server_count_changed(Indicate.ListenerServer object, uint i)
