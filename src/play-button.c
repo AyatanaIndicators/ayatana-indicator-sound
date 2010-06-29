@@ -51,11 +51,11 @@ play_button_class_init (PlayButtonClass *klass)
 {
 	
 	GObjectClass	*gobject_class = G_OBJECT_CLASS (klass);
- 	GtkWidgetClass* widget_class = GTK_WIDGET_CLASS (klass);
+ 	//GtkWidgetClass* widget_class = GTK_WIDGET_CLASS (klass);
 
 	g_type_class_add_private (klass, sizeof (PlayButtonPrivate));
 
-  widget_class->expose_event = play_button_expose;
+  //widget_class->expose_event = play_button_expose;
 
 	gobject_class->dispose = play_button_dispose;
 	gobject_class->finalize = play_button_finalize;
@@ -64,7 +64,8 @@ play_button_class_init (PlayButtonClass *klass)
 static void
 play_button_init (PlayButton *self)
 {
-	g_debug("PlayButton::play_button_init");
+	g_debug("PlayButton::play_button_init");	
+	g_signal_connect(GTK_WIDGET(self), "expose-event", G_CALLBACK (play_button_expose), NULL);
 }
 
 static void
@@ -86,8 +87,8 @@ play_button_expose (GtkWidget *button, GdkEventExpose *event)
 
 	alloc.width = 200;
 	alloc.height = 600;
-	alloc.x = 100;
-	alloc.y = 100;
+	alloc.x = 10;
+	alloc.y = 10;
 	
 	gtk_widget_set_allocation(GTK_WIDGET(button), 
 	                          &alloc);
@@ -103,7 +104,7 @@ play_button_expose (GtkWidget *button, GdkEventExpose *event)
                    event->area.x, event->area.y,
                    event->area.width, event->area.height);
 
-	cairo_clip(cr);
+	//cairo_clip(cr);
 	draw (button, cr);
   cairo_destroy (cr);
 	return FALSE;
@@ -155,6 +156,7 @@ draw (GtkWidget* button, cairo_t *cr)
 		cairo_stroke (cr);
 		cairo_restore (cr); /* stack-pen-size */
 	}
+	 cairo_surface_write_to_png(cairo_get_target (cr), "/tmp/foobar.png");	
 }
 
 /**
@@ -164,6 +166,8 @@ draw (GtkWidget* button, cairo_t *cr)
 GtkWidget* 
 play_button_new()
 {
-	return g_object_new(PLAY_BUTTON_TYPE, NULL);
+	GtkWidget* widget =	g_object_new(PLAY_BUTTON_TYPE, NULL);
+	gtk_widget_set_app_paintable (widget, TRUE);	
+	return widget;
 }
 
