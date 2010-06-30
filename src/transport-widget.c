@@ -45,6 +45,7 @@ static void transport_widget_class_init (TransportWidgetClass *klass);
 static void transport_widget_init       (TransportWidget *self);
 static void transport_widget_dispose    (GObject *object);
 static void transport_widget_finalize   (GObject *object);
+static gboolean transport_widget_expose_event(GtkWidget* widget, GdkEventExpose* event);
 
 /* UI and dbusmenu callbacks */
 static gboolean transport_widget_button_press_event 	(GtkWidget             *menuitem,
@@ -68,6 +69,7 @@ transport_widget_class_init (TransportWidgetClass *klass)
 	menu_item_class->hide_on_activate = FALSE;
   widget_class->button_press_event = transport_widget_button_press_event;
   widget_class->button_release_event = transport_widget_button_release_event;	
+	widget_class->expose_event = transport_widget_expose_event;
 	g_type_class_add_private (klass, sizeof (TransportWidgetPrivate));
 
 	gobject_class->dispose = transport_widget_dispose;
@@ -89,16 +91,6 @@ transport_widget_init (TransportWidget *self)
 
 	priv->play_button = play_button_new();
 
-	GtkAllocation alloc;
-
-	alloc.width = 200;
-	alloc.height = 600;
-	alloc.x = 100;
-	alloc.y = 0;
-	
-	gtk_widget_set_allocation(GTK_WIDGET(priv->play_button), 
-	                          &alloc);
-
 	gtk_box_pack_start (GTK_BOX (priv->hbox), priv->play_button, FALSE, FALSE, 0);	
 	
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", G_CALLBACK(transport_widget_property_update), self);
@@ -119,6 +111,15 @@ transport_widget_finalize (GObject *object)
 {
 	G_OBJECT_CLASS (transport_widget_parent_class)->finalize (object);
 }
+
+static gboolean 
+transport_widget_expose_event(GtkWidget* widget, GdkEventExpose* event)
+{
+	//TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE(widget);	
+	//gtk_container_propagate_expose(GTK_CONTAINER(widget),priv->play_button, event);
+	return TRUE;
+}
+	
 
 /* keyevents */
 static gboolean

@@ -40,7 +40,7 @@ static void play_button_init       (PlayButton *self);
 static void play_button_dispose    (GObject *object);
 static void play_button_finalize   (GObject *object);
 
-static gboolean play_button_expose (GtkWidget *button, GdkEventExpose *event, gpointer userdata);
+static gboolean play_button_expose (GtkWidget *button, GdkEventExpose *event);
 static void draw (GtkWidget* button, cairo_t *cr);
                                           
 G_DEFINE_TYPE (PlayButton, play_button, GTK_TYPE_DRAWING_AREA);
@@ -51,11 +51,11 @@ play_button_class_init (PlayButtonClass *klass)
 {
 	
 	GObjectClass	*gobject_class = G_OBJECT_CLASS (klass);
- 	//GtkWidgetClass* widget_class = GTK_WIDGET_CLASS (klass);
+ 	GtkWidgetClass* widget_class = GTK_WIDGET_CLASS (klass);
 
 	g_type_class_add_private (klass, sizeof (PlayButtonPrivate));
 
-  //widget_class->expose_event = play_button_expose;
+ 	widget_class->expose_event = play_button_expose;
 
 	gobject_class->dispose = play_button_dispose;
 	gobject_class->finalize = play_button_finalize;
@@ -65,7 +65,7 @@ static void
 play_button_init (PlayButton *self)
 {
 	g_debug("PlayButton::play_button_init");	
-	g_signal_connect(GTK_WIDGET(self), "expose-event", G_CALLBACK (play_button_expose), NULL);
+	gtk_widget_set_size_request(GTK_WIDGET(self), 50, 50); 
 }
 
 static void
@@ -81,18 +81,8 @@ play_button_finalize (GObject *object)
 }
 
 static gboolean
-play_button_expose (GtkWidget *button, GdkEventExpose *event, gpointer userdata)
+play_button_expose (GtkWidget *button, GdkEventExpose *event)
 {
-	GtkAllocation alloc;
-
-	alloc.width = 200;
-	alloc.height = 600;
-	alloc.x = 10;
-	alloc.y = 10;
-	
-	gtk_widget_set_allocation(GTK_WIDGET(button), 
-	                          &alloc);
-
 	cairo_t *cr;
   cr = gdk_cairo_create (button->window);
 
@@ -110,14 +100,23 @@ play_button_expose (GtkWidget *button, GdkEventExpose *event, gpointer userdata)
 	return FALSE;
 }
 
+
 static void
 draw (GtkWidget* button, cairo_t *cr)
 {
-	double x, y;
+	double x=50;
+	double y=30;
 	double radius;
-	int i;
 	
-	x = button->allocation.x + button->allocation.width / 2;
+	int rect_width = 100;
+	int rect_height = 50;
+	
+	cairo_move_to(cr, x+radius, y);
+	cairo_line_to(cr, x+rect_width-radius, y);
+	cairo_curve_to(cr, x+rect_width, y, x+rect_width, y, x+rect_width, y+radius); 
+  cairo_line_to(x+w,y+h-r)                 
+	cairo_curve_to(cr,               
+	x = button->allocation.x - button->allocation.width / 2;
 	y = button->allocation.y + button->allocation.height / 2;
 	radius = MIN (button->allocation.width / 2,
 		      button->allocation.height / 2) - 5;
@@ -158,6 +157,8 @@ draw (GtkWidget* button, cairo_t *cr)
 	}
 	 cairo_surface_write_to_png(cairo_get_target (cr), "/tmp/foobar.png");	
 }
+
+
 
 /**
 * play_button_new:

@@ -47,6 +47,8 @@ static void metadata_widget_class_init (MetadataWidgetClass *klass);
 static void metadata_widget_init       (MetadataWidget *self);
 static void metadata_widget_dispose    (GObject *object);
 static void metadata_widget_finalize   (GObject *object);
+static gboolean metadata_widget_expose_event(GtkWidget* widget, GdkEventExpose* event);
+
 // keyevent consumers
 static gboolean metadata_widget_button_press_event (GtkWidget *menuitem, 
                                   									GdkEventButton *event);
@@ -74,7 +76,7 @@ metadata_widget_class_init (MetadataWidgetClass *klass)
 
 	widget_class->button_press_event = metadata_widget_button_press_event;
   widget_class->button_release_event = metadata_widget_button_release_event;
-	
+	widget_class->expose_event = metadata_widget_expose_event;
 	g_type_class_add_private (klass, sizeof (MetadataWidgetPrivate));
 
 	gobject_class->dispose = metadata_widget_dispose;
@@ -150,6 +152,15 @@ metadata_widget_init (MetadataWidget *self)
 	gtk_widget_show_all (priv->hbox);
   gtk_container_add (GTK_CONTAINER (self), hbox);
 	
+}
+
+static gboolean
+metadata_widget_expose_event(GtkWidget* widget, GdkEventExpose* event)
+{
+	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);
+		
+	gtk_container_propagate_expose(GTK_CONTAINER(widget), priv->hbox, event); 
+	return TRUE;
 }
 
 static void
