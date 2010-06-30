@@ -27,19 +27,20 @@ public class PlayerController : GLib.Object
 	private const int TRANSPORT = 3;
 	
 	private Dbusmenu.Menuitem root_menu;
-	private string name;
-	private bool is_active;
+	public string name { get; set;}	
+	public bool active { get; set;}
 	public ArrayList<PlayerItem> custom_items;	
 	private MprisController mpris_adaptor;
-	private string desktop_path;
-	
-	public PlayerController(Dbusmenu.Menuitem root, string client_name, bool active)
+	public AppInfo app_info { get; set;}
+		
+	public PlayerController(Dbusmenu.Menuitem root, string client_name, AppInfo? info = null)
 	{
 		this.root_menu = root;
 		this.name = format_client_name(client_name.strip());
-		this.is_active = active;
 		this.custom_items = new ArrayList<PlayerItem>();
+		this.app_info	= info;
 		self_construct();
+ 	  //app_info.launch(null, null);
 		
 		// Temporary scenario to handle both v1 and v2 of MPRIS.
 		if(this.name == "Vlc"){
@@ -61,6 +62,14 @@ public class PlayerController : GLib.Object
 			root_menu.child_delete(item);			
 		}
 	}
+
+	//public void switch_active(bool active){
+	//	this.is_active = active;
+	//}
+
+	//public bool has_app_info(){
+	//	return (this.app_info != null);
+	//}
 	
 	private bool self_construct()
 	{
@@ -84,7 +93,7 @@ public class PlayerController : GLib.Object
 		}
 		return true;
 	}	
-
+	
 	private static string format_client_name(string client_name)
 	{
 		string formatted = client_name;
@@ -94,5 +103,5 @@ public class PlayerController : GLib.Object
 		}		
 		return formatted;
 	}
-	
+
 }
