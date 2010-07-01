@@ -65,7 +65,7 @@ static void
 play_button_init (PlayButton *self)
 {
 	g_debug("PlayButton::play_button_init");	
-	gtk_widget_set_size_request(GTK_WIDGET(self), 50, 50); 
+	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 80); 
 }
 
 static void
@@ -94,7 +94,7 @@ play_button_expose (GtkWidget *button, GdkEventExpose *event)
                    event->area.x, event->area.y,
                    event->area.width, event->area.height);
 
-	//cairo_clip(cr);
+	cairo_clip(cr);
 	draw (button, cr);
   cairo_destroy (cr);
 	return FALSE;
@@ -104,58 +104,37 @@ play_button_expose (GtkWidget *button, GdkEventExpose *event)
 static void
 draw (GtkWidget* button, cairo_t *cr)
 {
-	double x=50;
-	double y=30;
-	double radius;
+	int rect_width = 150;
+	int rect_height = 30;
+
+	double x= button->allocation.width/2 - rect_width/2;
+	double y= button->allocation.height/2 -rect_height/2;
+	double radius=60;
 	
-	int rect_width = 100;
-	int rect_height = 50;
 	
 	cairo_move_to(cr, x+radius, y);
 	cairo_line_to(cr, x+rect_width-radius, y);
 	cairo_curve_to(cr, x+rect_width, y, x+rect_width, y, x+rect_width, y+radius); 
-  cairo_line_to(x+w,y+h-r)                 
-	cairo_curve_to(cr,               
-	x = button->allocation.x - button->allocation.width / 2;
-	y = button->allocation.y + button->allocation.height / 2;
-	radius = MIN (button->allocation.width / 2,
-		      button->allocation.height / 2) - 5;
 
-	/* button back */
-	cairo_arc (cr, x, y, radius, 0, 2 * G_PI);
+	cairo_line_to(cr, x + rect_width, y + rect_height - radius);              
+  cairo_curve_to(cr, x + rect_width, y + rect_height, x + rect_width,
+                 y + rect_height, x + rect_width - radius, y + rect_height);
+
+	cairo_line_to(cr, x + radius, y + rect_height);
+	cairo_curve_to(cr, x, y + rect_height, x, y+rect_height, x, y+rect_height-radius);
+	cairo_line_to(cr, x, y + radius);	
+	cairo_curve_to(cr, x, y, x, y, x + radius, y);
+
+	cairo_arc(cr, x+(rect_width/2), y+(rect_height/2), radius/2, 0, 2 * M_PI);
+
 	cairo_set_source_rgb (cr, 1, 1, 1);
 	cairo_fill_preserve (cr);
-	cairo_set_source_rgb (cr, 0, 0, 0);
-	cairo_stroke (cr);
 
-	/* button ticks */
-	for (i = 0; i < 12; i++)
-	{
-		int inset;
-	
-		cairo_save (cr); /* stack-pen-size */
-		
-		if (i % 3 == 0)
-		{
-			inset = 0.2 * radius;
-		}
-		else
-		{
-			inset = 0.1 * radius;
-			cairo_set_line_width (cr, 0.5 *
-					cairo_get_line_width (cr));
-		}
-		
-		cairo_move_to (cr,
-				x + (radius - inset) * cos (i * G_PI / 6),
-				y + (radius - inset) * sin (i * G_PI / 6));
-		cairo_line_to (cr,
-				x + radius * cos (i * G_PI / 6),
-				y + radius * sin (i * G_PI / 6));
-		cairo_stroke (cr);
-		cairo_restore (cr); /* stack-pen-size */
-	}
-	 cairo_surface_write_to_png(cairo_get_target (cr), "/tmp/foobar.png");	
+  //      cr.fill()
+  //      cr.stroke()	
+	//cairo_set_source_rgb (cr, 1, 1, 1);
+	//cairo_stroke (cr);
+	 //cairo_surface_write_to_png(cairo_get_target (cr), "/tmp/foobar.png");	
 }
 
 

@@ -74,7 +74,6 @@ transport_widget_class_init (TransportWidgetClass *klass)
 
 	gobject_class->dispose = transport_widget_dispose;
 	gobject_class->finalize = transport_widget_finalize;
-
 }
 
 static void
@@ -87,6 +86,9 @@ transport_widget_init (TransportWidget *self)
 
 	hbox = gtk_hbox_new(TRUE, 2);
 
+	//GtkAllocation alloc;
+	//gtk_widget_get_allocation(GTK_WIDGET(self), &alloc);
+	//g_debug("allocation width for the transport widget %i", alloc.width);
 	priv->hbox = hbox;
 
 	priv->play_button = play_button_new();
