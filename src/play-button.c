@@ -42,6 +42,8 @@ static void play_button_finalize   (GObject *object);
 
 static gboolean play_button_expose (GtkWidget *button, GdkEventExpose *event);
 static void draw (GtkWidget* button, cairo_t *cr);
+static void play_button_draw_background(cairo_t* cr, double x, double y, int width, int height, double radius);
+
                                           
 G_DEFINE_TYPE (PlayButton, play_button, GTK_TYPE_DRAWING_AREA);
 
@@ -104,14 +106,47 @@ play_button_expose (GtkWidget *button, GdkEventExpose *event)
 static void
 draw (GtkWidget* button, cairo_t *cr)
 {
+
 	int rect_width = 150;
 	int rect_height = 30;
-
+	double radius=40;
 	double x= button->allocation.width/2 - rect_width/2;
 	double y= button->allocation.height/2 -rect_height/2;
-	double radius=60;
+
+	//cairo_set_operator (cr, CAIRO_OPERATOR_CLEAR);
+  //cairo_paint(cr);	
+
+	play_button_draw_background(cr, x, y, rect_width, rect_height, radius);
 	
+	cairo_pattern_t *pat;
 	
+	pat = cairo_pattern_create_linear (0.0, 0.0,  0.0, 256.0);
+	cairo_pattern_add_color_stop_rgba (pat, 0, 0, 0, 0, 256.0);
+	cairo_pattern_add_color_stop_rgba (pat, 0.4, 256, 256, 256, 160.0);
+	cairo_pattern_add_color_stop_rgba (pat, 0.6, 256, 256, 256, 256.0);
+
+	cairo_set_source (cr, pat);
+	cairo_fill (cr);
+
+	//int factor = 10;
+	//cairo_reset_clip(cr);
+	play_button_draw_background(cr, x+2.5, y+2.5, rect_width-5, rect_height-5, radius-5);
+	//cairo_translate(cr, 50, 50);
+	cairo_set_source_rgba (cr, 256,256,256, 15);
+	cairo_fill(cr);
+	//cairo_reset_clip(cr);
+	cairo_pattern_destroy (pat);
+	
+  //      cr.fill()
+  //      cr.stroke()	
+	//cairo_set_source_rgb (cr, 1, 1, 1);
+	//cairo_stroke (cr);
+	cairo_surface_write_to_png(cairo_get_target (cr), "/tmp/foobar.png");	
+}
+
+static void
+play_button_draw_background(cairo_t* cr, double x, double y, int rect_width, int rect_height, double radius)
+{	
 	cairo_move_to(cr, x+radius, y);
 	cairo_line_to(cr, x+rect_width-radius, y);
 	cairo_curve_to(cr, x+rect_width, y, x+rect_width, y, x+rect_width, y+radius); 
@@ -125,18 +160,9 @@ draw (GtkWidget* button, cairo_t *cr)
 	cairo_line_to(cr, x, y + radius);	
 	cairo_curve_to(cr, x, y, x, y, x + radius, y);
 
-	cairo_arc(cr, x+(rect_width/2), y+(rect_height/2), radius/2, 0, 2 * M_PI);
-
-	cairo_set_source_rgb (cr, 1, 1, 1);
-	cairo_fill_preserve (cr);
-
-  //      cr.fill()
-  //      cr.stroke()	
-	//cairo_set_source_rgb (cr, 1, 1, 1);
-	//cairo_stroke (cr);
-	 //cairo_surface_write_to_png(cairo_get_target (cr), "/tmp/foobar.png");	
+	cairo_arc(cr, x+(rect_width/2), y+(rect_height/2), radius/1.7, 0, 2 * M_PI);	
+	cairo_close_path(cr);
 }
-
 
 
 /**

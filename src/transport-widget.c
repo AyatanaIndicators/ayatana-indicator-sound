@@ -92,7 +92,6 @@ transport_widget_init (TransportWidget *self)
 	priv->hbox = hbox;
 
 	priv->play_button = play_button_new();
-
 	gtk_box_pack_start (GTK_BOX (priv->hbox), priv->play_button, FALSE, FALSE, 0);	
 	
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", G_CALLBACK(transport_widget_property_update), self);
