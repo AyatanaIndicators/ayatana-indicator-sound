@@ -42,6 +42,7 @@ struct _PlayButton {
 };
 
 GType play_button_get_type (void);
+void play_button_set_style(GtkWidget* button, GtkStyle* style);
 GtkWidget* play_button_new();
 
 G_END_DECLS

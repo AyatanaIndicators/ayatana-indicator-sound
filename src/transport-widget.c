@@ -86,12 +86,12 @@ transport_widget_init (TransportWidget *self)
 
 	hbox = gtk_hbox_new(TRUE, 2);
 
-	//GtkAllocation alloc;
-	//gtk_widget_get_allocation(GTK_WIDGET(self), &alloc);
-	//g_debug("allocation width for the transport widget %i", alloc.width);
+	GtkStyle* style = gtk_rc_get_style(GTK_WIDGET(self));
+	
 	priv->hbox = hbox;
-
 	priv->play_button = play_button_new();
+	play_button_set_style(priv->play_button, style);
+	
 	gtk_box_pack_start (GTK_BOX (priv->hbox), priv->play_button, FALSE, FALSE, 0);	
 	
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", G_CALLBACK(transport_widget_property_update), self);
