@@ -153,35 +153,39 @@ draw (GtkWidget* button, cairo_t *cr)
 	play_button_draw_pause_symbol(cr, rect_width/2 + rect_height/10 + x -1 + offset/2, rect_height/5 +y );
 
 	play_button_draw_pause_symbol(cr, rect_width/2 + rect_height/10 + x + offset/2 + 10, rect_height/5 +y );
-	play_button_draw_previous_symbol(cr, x+rect_height/2 + offset, y + offset);
+	play_button_draw_previous_symbol(cr, x+rect_height/2 + offset, y + offset+2);
 	cairo_surface_write_to_png(cairo_get_target (cr), "/tmp/foobar.png");	
 }
 
 static void 
 play_button_draw_previous_symbol(cairo_t* cr, double x, double y)
 {
-	cairo_set_line_width (cr, 3);
-	cairo_move_to (cr, x, y);
-	gint shape_height = 17;
+	gint line_width = 2;
+	cairo_set_line_width (cr, line_width);
+	gint shape_height = 15;
 	gint shape_width = 22;
-	cairo_move_to(x, y);
-	cairo_rel_line_to (cr, 0, shape_height);
-	cairo_move_to (cr, x, y+shape_height/2);
-	cairo_rel_line_to (cr, 15, -shape_height/2);
-	//cairo_move_to (cr, x, y+shape_height/2);
-	//cairo_rel_line_to (cr, 15, +shape_height/2);
-	//cairo_rel_line_to (cr, 15, shape_height/2);
+	gint single_arrow_width=16;
 
 	cairo_pattern_t *pat;
-	pat = cairo_pattern_create_linear (x, y,  x, y+16);
+	pat = cairo_pattern_create_linear (x, y,  x, y+shape_height);
 
 	cairo_pattern_add_color_stop_rgb(pat, 0, 227/255.0, 222/255.0, 214/255.0);
 	cairo_pattern_add_color_stop_rgb(pat, .1, 207/255.0, 201/255.0, 190/255.0);
-	cairo_pattern_add_color_stop_rgb(pat, .6, 123/255.0, 123/255.0, 120/255.0);
+	cairo_pattern_add_color_stop_rgb(pat, .4, 123/255.0, 123/255.0, 120/255.0);
 	cairo_set_source (cr, pat);	
+
+	cairo_move_to(cr, x, y);
+	cairo_rel_line_to (cr, 0, shape_height);
+	cairo_stroke(cr);
+	
+	cairo_move_to (cr, x+line_width, y+shape_height/2);	
+	cairo_line_to (cr, x+single_arrow_width, y);
+	cairo_line_to (cr, x+single_arrow_width, y+shape_height);
+	cairo_line_to (cr, x+line_width, y+shape_height/2);
 	cairo_fill(cr);
-	cairo_close_path(cr);
-		
+	
+	cairo_pattern_destroy (pat);
+	cairo_close_path(cr);		
 }
 
 static void 
@@ -210,7 +214,7 @@ play_button_draw_pause_symbol(cairo_t* cr, double x, double y)
 	pat = cairo_pattern_create_linear (x+1, y+1,  x+1, y+16);
 	cairo_pattern_add_color_stop_rgb(pat, .3, 252/255.0, 252/255.0, 251/255.0);
 	cairo_pattern_add_color_stop_rgb(pat, .8, 227/255.0, 222/255.0, 214/255.0);
-	//1cairo_pattern_add_color_stop_rgb(pat, .9, 207/255.0, 201/255.0, 190/255.0);
+	//cairo_pattern_add_color_stop_rgb(pat, .9, 207/255.0, 201/255.0, 190/255.0);
 	cairo_set_source (cr, pat);	
 	cairo_stroke(cr);
 	cairo_close_path(cr);
