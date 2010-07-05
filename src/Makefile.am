@@ -19,7 +19,7 @@ libsoundmenu_la_SOURCES = \
 	dbus-shared-names.h \
   sound-service-client.h 
 
-libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -Werror -DG_LOG_DOMAIN=\"Indicator-Sound\"
+libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -DG_LOG_DOMAIN=\"Indicator-Sound\"
 libsoundmenu_la_LIBADD = $(APPLET_LIBS)
 libsoundmenu_la_LDFLAGS = -module -avoid-version
 

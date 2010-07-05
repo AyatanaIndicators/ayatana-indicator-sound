@@ -53,6 +53,7 @@ static void play_button_draw_background_shadow_1(GtkWidget* button, cairo_t* cr,
 
 //static void play_button_draw_play_symbol(cairo_t* cr, double x, double y);
 static void play_button_draw_pause_symbol(cairo_t* cr, double x, double y);
+static void play_button_draw_previous_symbol(cairo_t* cr, double x, double y);
 
 
 G_DEFINE_TYPE (PlayButton, play_button, GTK_TYPE_DRAWING_AREA);
@@ -142,42 +143,74 @@ draw (GtkWidget* button, cairo_t *cr)
 	play_button_draw_background_shadow_1(button, cr, x, y, rect_width, rect_height, p_radius);
 	
 	// Draw the inside drop shadow background
-	gint offset = 1.5;
-	play_button_draw_background_shadow_2(button, cr, x+ offset/2, y + offset/2, rect_width-offset, rect_height-offset, p_radius-offset/2);
+	gint offset = 4;
+	play_button_draw_background_shadow_2(button, cr, x + offset-1, y + offset/2, rect_width-offset, rect_height-offset, p_radius-(offset/2));
 
-	offset = 3;
+	offset = 5;
 	// Draw the inside actual background
-	play_button_draw_background(button, cr, x+offset/2, y + offset/2, rect_width-offset, rect_height-offset, p_radius-offset/2);
+	play_button_draw_background(button, cr, x+offset-1, y + offset/2+1, rect_width-offset, rect_height-offset, p_radius-offset/2);
 
-	play_button_draw_pause_symbol(cr, rect_width/2 + rect_height/10 + x, rect_height/5 +y );
+	play_button_draw_pause_symbol(cr, rect_width/2 + rect_height/10 + x -1 + offset/2, rect_height/5 +y );
+
+	play_button_draw_pause_symbol(cr, rect_width/2 + rect_height/10 + x + offset/2 + 10, rect_height/5 +y );
+	play_button_draw_previous_symbol(cr, x+rect_height/2 + offset, y + offset);
 	cairo_surface_write_to_png(cairo_get_target (cr), "/tmp/foobar.png");	
+}
+
+static void 
+play_button_draw_previous_symbol(cairo_t* cr, double x, double y)
+{
+	cairo_set_line_width (cr, 3);
+	cairo_move_to (cr, x, y);
+	gint shape_height = 17;
+	gint shape_width = 22;
+	cairo_move_to(x, y);
+	cairo_rel_line_to (cr, 0, shape_height);
+	cairo_move_to (cr, x, y+shape_height/2);
+	cairo_rel_line_to (cr, 15, -shape_height/2);
+	//cairo_move_to (cr, x, y+shape_height/2);
+	//cairo_rel_line_to (cr, 15, +shape_height/2);
+	//cairo_rel_line_to (cr, 15, shape_height/2);
+
+	cairo_pattern_t *pat;
+	pat = cairo_pattern_create_linear (x, y,  x, y+16);
+
+	cairo_pattern_add_color_stop_rgb(pat, 0, 227/255.0, 222/255.0, 214/255.0);
+	cairo_pattern_add_color_stop_rgb(pat, .1, 207/255.0, 201/255.0, 190/255.0);
+	cairo_pattern_add_color_stop_rgb(pat, .6, 123/255.0, 123/255.0, 120/255.0);
+	cairo_set_source (cr, pat);	
+	cairo_fill(cr);
+	cairo_close_path(cr);
+		
 }
 
 static void 
 play_button_draw_pause_symbol(cairo_t* cr, double x, double y)
 {
-	cairo_set_line_width (cr, 6.0);
+	cairo_set_line_width (cr, 7);
 	cairo_set_line_cap  (cr, CAIRO_LINE_CAP_ROUND);
 	cairo_move_to (cr, x, y);
-	cairo_rel_line_to (cr, 0, 16);
+	cairo_rel_line_to (cr, 0, 18);
 	//cairo_set_source_rgb(cr, 94/255.0, 93/255.0, 90/255.0);
 
 	cairo_pattern_t *pat;
 	pat = cairo_pattern_create_linear (x, y,  x, y+16);
 	cairo_pattern_add_color_stop_rgb(pat, 0, 227/255.0, 222/255.0, 214/255.0);
-	cairo_pattern_add_color_stop_rgb(pat, .1, 94/255.0, 93/255.0, 90/255.0);
+	cairo_pattern_add_color_stop_rgb(pat, .1, 207/255.0, 201/255.0, 190/255.0);
+	cairo_pattern_add_color_stop_rgb(pat, .6, 123/255.0, 123/255.0, 120/255.0);
 	cairo_set_source (cr, pat);	
 	cairo_stroke(cr);
 	cairo_close_path(cr);
 
-	cairo_set_line_width (cr, 5.0);
+	cairo_set_line_width (cr, 5.5);
 	cairo_set_line_cap  (cr, CAIRO_LINE_CAP_ROUND);
-	cairo_move_to (cr, x+1, y+1);
-	cairo_rel_line_to (cr, 0, 15);
+	cairo_move_to (cr, x, y+0.75);
+	cairo_rel_line_to (cr, 0, 16.5);
 
 	pat = cairo_pattern_create_linear (x+1, y+1,  x+1, y+16);
-	cairo_pattern_add_color_stop_rgb(pat, .7, 252/255.0, 252/255.0, 251/255.0);
-	cairo_pattern_add_color_stop_rgb(pat, .9, 207/255.0, 201/255.0, 190/255.0);
+	cairo_pattern_add_color_stop_rgb(pat, .3, 252/255.0, 252/255.0, 251/255.0);
+	cairo_pattern_add_color_stop_rgb(pat, .8, 227/255.0, 222/255.0, 214/255.0);
+	//1cairo_pattern_add_color_stop_rgb(pat, .9, 207/255.0, 201/255.0, 190/255.0);
 	cairo_set_source (cr, pat);	
 	cairo_stroke(cr);
 	cairo_close_path(cr);
@@ -196,20 +229,21 @@ play_button_draw_background(GtkWidget* button, cairo_t* cr, double x, double y, 
 
 	cairo_pattern_t *pat;
 	pat = cairo_pattern_create_linear (x, y,  x, y+rect_height);
-	cairo_pattern_add_color_stop_rgb(pat, .7, 227/255.0, 222/255.0, 214/255.0);
-	cairo_pattern_add_color_stop_rgb(pat, .9, 183/255.0, 178/255.0, 172/255.0);
+	cairo_pattern_add_color_stop_rgb(pat, .5, 225/255.0, 218/255.0, 211/255.0);
+	cairo_pattern_add_color_stop_rgb(pat, .7, 197/255.0, 192/255.0, 185/255.0);
+	cairo_pattern_add_color_stop_rgb(pat, .9, 185/255.0, 179/255.0, 173/255.0);
 	cairo_set_source (cr, pat);
 	cairo_stroke (cr);
 
 	cairo_close_path(cr);
-	cairo_arc(cr, rect_width/2 + radius/2 + x, rect_height/2 +y, p_radius, 0, 2*M_PI);
+	cairo_arc(cr, rect_width/2 + radius/2 + x + 2, rect_height/2 +y, p_radius, 0, 2*M_PI);
 	cairo_set_source (cr, pat);	
 	cairo_fill(cr);
 
 	cairo_close_path(cr);
-	cairo_arc(cr, rect_width/2 + radius/2 + x, rect_height/2 +y, p_radius, 0, 2*M_PI);
+	cairo_arc(cr, rect_width/2 + radius/2 + x + 2, rect_height/2 +y, p_radius, 0, 2*M_PI);
 	cairo_set_source_rgb(cr, 94/255.0, 93/255.0, 90/255.0);
-	cairo_set_line_width (cr, 2);	
+	cairo_set_line_width (cr, 0.75);	
 	cairo_stroke(cr);
 	cairo_close_path(cr);	
 	cairo_pattern_destroy (pat);
@@ -226,16 +260,16 @@ play_button_draw_background_shadow_1(GtkWidget* button, cairo_t* cr, double x, d
 	cairo_line_to(cr, x+rect_width, y+radius);
 
 	cairo_pattern_t *pat;
-	pat = cairo_pattern_create_linear (0, 0,  0, rect_height);
-	cairo_pattern_add_color_stop_rgb(pat, .2, 36/255.0, 35/255.0, 33/255.0);
+	pat = cairo_pattern_create_linear (x, y,  x, y+rect_height);
+	cairo_pattern_add_color_stop_rgb(pat, .4, 36/255.0, 35/255.0, 33/255.0);
 	cairo_pattern_add_color_stop_rgb(pat, .7, 123/255.0, 123/255.0, 120/255.0);
 	cairo_set_source (cr, pat);
 	cairo_stroke (cr);
 
 	cairo_close_path(cr);
-	cairo_arc(cr, rect_width/2 + radius/2 + x, rect_height/2 +y, p_radius, 0, 2*M_PI);
-	pat = cairo_pattern_create_linear (0, 0,  0, rect_height+(p_radius-rect_height/2));
-	cairo_pattern_add_color_stop_rgb(pat, .2, 36/255.0, 35/255.0, 33/255.0);
+	cairo_arc(cr, rect_width/2 + radius/2 + x + 2, rect_height/2 +y, p_radius, 0, 2*M_PI);
+	pat = cairo_pattern_create_linear ((rect_width/2 + radius/2 + x),  rect_height/2 + y-p_radius, (rect_width/2 + radius/2 + x), rect_height+(p_radius-rect_height/2));
+	cairo_pattern_add_color_stop_rgb(pat, .4, 36/255.0, 35/255.0, 33/255.0);
 	cairo_pattern_add_color_stop_rgb(pat, .7, 123/255.0, 123/255.0, 120/255.0);
 	cairo_set_source (cr, pat);	
 	cairo_fill(cr);
@@ -255,16 +289,16 @@ play_button_draw_background_shadow_2(GtkWidget* button, cairo_t* cr, double x, d
 	cairo_line_to(cr, x+rect_width, y+radius);
 
 	cairo_pattern_t *pat;
-	pat = cairo_pattern_create_linear (0, 0,  0, rect_height);
-	cairo_pattern_add_color_stop_rgb(pat, .2, 61/255.0, 60/255.0, 57/255.0);
+	pat = cairo_pattern_create_linear (x, y,  x, y+rect_height);
+	cairo_pattern_add_color_stop_rgb(pat, .4, 61/255.0, 60/255.0, 57/255.0);
 	cairo_pattern_add_color_stop_rgb(pat, .7, 94/255.0, 93/255.0, 90/255.0);
 	cairo_set_source (cr, pat);
 	cairo_stroke (cr);
 	
 	cairo_close_path(cr);
-	cairo_arc(cr, rect_width/2 + radius/2 + x, rect_height/2 +y, p_radius, 0, 2*M_PI);
-	pat = cairo_pattern_create_linear (0, 0,  0, rect_height+(p_radius-rect_height/2));
-	cairo_pattern_add_color_stop_rgb(pat, .2, 61/255.0, 60/255.0, 57/255.0);
+	cairo_arc(cr, rect_width/2 + radius/2 + x + 2, rect_height/2 +y, p_radius, 0, 2*M_PI);
+	pat = cairo_pattern_create_linear ((rect_width/2 + radius/2 + x),  rect_height/2 + y-p_radius, (rect_width/2 + radius/2 + x), rect_height+(p_radius-rect_height/2));
+	cairo_pattern_add_color_stop_rgb(pat, .4, 61/255.0, 60/255.0, 57/255.0);
 	cairo_pattern_add_color_stop_rgb(pat, .7, 94/255.0, 93/255.0, 90/255.0);
 	
 	cairo_set_source (cr, pat);	
