@@ -44,6 +44,7 @@ public class MusicPlayerBridge : GLib.Object
   }
 
 	private void try_to_add_inactive_familiar_clients(){
+		// TODO handle multple players - just working with one right now
 		int count = 0;
 		foreach(string app in this.playersDB.records()){
 			if(count == 0){
@@ -59,9 +60,9 @@ public class MusicPlayerBridge : GLib.Object
 					}
 					GLib.AppInfo app_info = info as GLib.AppInfo;
 					PlayerController ctrl = new PlayerController(this.root_menu, 
-					                                             app_info.get_name(),
-					                                             app_info);
-					ctrl.set("active", false);
+					                                             app_info.get_name(), 
+					                                             PlayerController.OFFLINE);
+					ctrl.set("app_info", app_info);
 					this.registered_clients.set(app_info.get_name().down().strip(), ctrl);					
 					debug("Created a player controller for %s which was found in the cache file", app_info.get_name().down().strip());
 					count += 1;					
@@ -83,11 +84,11 @@ public class MusicPlayerBridge : GLib.Object
 			// If we have an instance already for this player, ensure it is switched to active
 			if(this.registered_clients.keys.contains(client_name)){
 				debug("It figured out that it already has an instance for this player already");
-				this.registered_clients[client_name].set("active", true);
+				this.registered_clients[client_name].activate();
 			}
 			//else init a new one
 			else{			
-				PlayerController ctrl = new PlayerController(root_menu, client_name);
+				PlayerController ctrl = new PlayerController(root_menu, client_name, PlayerController.READY);
 				registered_clients.set(client_name, ctrl); 
 				debug("New Client of name %s has successfully registered with us", client_name);
 			}
@@ -125,14 +126,12 @@ public class MusicPlayerBridge : GLib.Object
 	                                 	owned string path, void* data)	                                  
 	{
 		MusicPlayerBridge bridge = data as MusicPlayerBridge;
-		// Not the most secure validation
-		// TODO revisit validation mechanism
 		if(path.contains("/") && bridge.playersDB.already_familiar(path) == false){
 			debug("About to store desktop file path: %s", path);
 			bridge.playersDB.insert(path);
 			AppInfo? app_info = create_app_info(path);
 			if(app_info != null){
-				PlayerController ctrl = bridge.registered_clients[app_info.get_name().down().strip()];
+				PlayerController ctrl = bridge.registered_clients[app_info.get_name().down().strip()];				
 				ctrl.set("app_info", app_info);
 				debug("successfully created appinfo from path and set it on the respective instance");				
 			}	
@@ -169,7 +168,7 @@ public class MusicPlayerBridge : GLib.Object
 
 	public static AppInfo? create_app_info(string path)
 	{
-		DesktopAppInfo info = new DesktopAppInfo.from_filename(path); 
+		DesktopAppInfo info = new DesktopAppInfo.from_filename(path);
 		if(path == null){
 			warning("Could not create a desktopappinfo instance from app: %s", path);
 			return null;

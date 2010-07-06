@@ -26,8 +26,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "common-defs.h"
 #include <gtk/gtk.h>
 
-// TODO: think about leakage: ted !
-
 static DbusmenuMenuitem* twin_item;
 
 typedef struct _TransportWidgetPrivate TransportWidgetPrivate;

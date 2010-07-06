@@ -22,10 +22,18 @@ using Gee;
 
 public class PlayerItem : Dbusmenu.Menuitem
 {
+
 	public MprisController mpris_adaptor;
-	
-	public PlayerItem()
+	public string item_type { get; construct; }
+
+	public PlayerItem(string type)
 	{		
+		Object(item_type: type);
+	}
+	
+	construct {
+		debug("in the base constructor for %s", item_type); 
+		this.property_set(MENUITEM_PROP_TYPE, item_type);
 	}
 
 	public void reset(HashSet<string> attrs){		
@@ -94,19 +102,19 @@ public class PlayerItem : Dbusmenu.Menuitem
 	
 	//----- Custom constructors for player items ----------------//
 	// Title item
-	public static PlayerItem new_title_item(dynamic string name)
-	{
-		PlayerItem item = new PlayerItem();
-		item.property_set(MENUITEM_PROP_LABEL, name);					
-		item.property_set(MENUITEM_PROP_ICON_NAME, "applications-multimedia");			
-		return item;		
-	}
+	//public static PlayerItem new_title_item(dynamic string name)
+	//{
+	//	PlayerItem item = new PlayerItem();
+	//	item.property_set(MENUITEM_PROP_LABEL, name);					
+	//	item.property_set(MENUITEM_PROP_ICON_NAME, "applications-multimedia");			
+	//	return item;		
+	//}
 
 	// Separator item
 	public static PlayerItem new_separator_item()
 	{
-		PlayerItem separator = new PlayerItem();
-		separator.property_set(MENUITEM_PROP_TYPE, CLIENT_TYPES_SEPARATOR);					
+		PlayerItem separator = new PlayerItem(CLIENT_TYPES_SEPARATOR);
+		//separator.property_set(MENUITEM_PROP_TYPE, CLIENT_TYPES_SEPARATOR);					
 		return separator;
 	}	
 

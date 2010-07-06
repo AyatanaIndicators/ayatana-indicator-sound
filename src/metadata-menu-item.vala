@@ -25,7 +25,7 @@ public class MetadataMenuitem : PlayerItem
 {
 	public MetadataMenuitem()
   {
-		this.property_set(MENUITEM_PROP_TYPE, MENUITEM_TYPE);
+		Object(item_type: MENUITEM_TYPE); 	
 	}
 
 	public static HashSet<string> attributes_format()

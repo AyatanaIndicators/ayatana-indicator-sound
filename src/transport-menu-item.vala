@@ -26,7 +26,7 @@ public class TransportMenuitem : PlayerItem
 	
 	public TransportMenuitem()
   {
-		this.property_set(MENUITEM_PROP_TYPE, MENUITEM_TYPE);
+		Object(item_type: MENUITEM_TYPE); 
 	}
 
 	public void change_play_state(int state)
@@ -37,7 +37,7 @@ public class TransportMenuitem : PlayerItem
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
 	{
 		debug("handle_event with bool value %s", input_value.get_boolean().to_string());
-		this.mpris_adaptor.toggle_playback(input_value.get_boolean());
+		this.mpris_adaptor.toggle_playback(input_value.get_boolean());	
 	}
 
 	public override void check_layout(){

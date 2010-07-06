@@ -25,37 +25,79 @@ public class PlayerController : GLib.Object
 {
 	public const int METADATA = 2;	
 	private const int TRANSPORT = 3;
+
+	public static const int OFFLINE 				= 0;
+	public static const int INSTANTIATING  	= 1;
+	public static const int READY						= 2;
+	public static const int CONNECTED				= 3;
+	public static const int DISCONNECTED 		= 4;
+	
+	public int current_state = OFFLINE;
+	
 	
 	private Dbusmenu.Menuitem root_menu;
 	public string name { get; set;}	
-	public bool active { get; set;}
 	public ArrayList<PlayerItem> custom_items;	
 	private MprisController mpris_adaptor;
-	public AppInfo app_info { get; set;}
+	public AppInfo? app_info { get; set;}
 		
-	public PlayerController(Dbusmenu.Menuitem root, string client_name, AppInfo? info = null)
+	public PlayerController(Dbusmenu.Menuitem root, string client_name, int state = OFFLINE)
 	{
 		this.root_menu = root;
 		this.name = format_client_name(client_name.strip());
 		this.custom_items = new ArrayList<PlayerItem>();
-		this.app_info	= info;
-		self_construct();
- 	  //app_info.launch(null, null);
-		
-		// Temporary scenario to handle both v1 and v2 of MPRIS.
+		this.update_state(state);
+		construct_widgets();
+		establish_mpris_connection();
+		update_layout();
+	}
+
+	public void update_state(int new_state)
+	{
+		debug("update_state : new state %i", new_state);
+		this.current_state = new_state;
+	}
+	
+	public void activate()
+	{
+		debug("about to try to establish an mpris connection");
+		this.establish_mpris_connection();	
+		this.custom_items[METADATA].property_set_bool(MENUITEM_PROP_VISIBLE, true);		
+	}
+
+	/*
+	 instantiate()
+	 The user should be able to start the app from the transport bar when in an offline state
+	 There is a need to wait before the application is on DBus before attempting to access its mpris address
+	 Hence only when the it has registered with us via libindicate do we attempt to kick off mpris communication
+	 */
+	public void instantiate()
+	{
+ 	  this.app_info.launch(null, null);
+		this.update_state(INSTANTIATING);
+	}
+	
+	private void establish_mpris_connection()
+	{		
+		if(this.current_state != READY){
+			debug("establish_mpris_connection - Not ready to connect");
+			return;
+		}
 		if(this.name == "Vlc"){
 			this.mpris_adaptor = new MprisControllerV2(this.name, this);
 		}
 		else{
 			this.mpris_adaptor = new MprisController(this.name, this);
-		}			
-		this.custom_items[TRANSPORT].set_adaptor(this.mpris_adaptor);
-
-		// At start up if there is no metadata then hide the item.
-		// TODO: NOT working -> dbus menu bug ?
-		//((MetadataMenuitem)this.custom_items[METADATA]).check_layout();
+		}
+		if(this.mpris_adaptor.connected() == true){
+			this.custom_items[TRANSPORT].set_adaptor(this.mpris_adaptor);
+			this.update_state(CONNECTED);
+		}
+		else{
+			this.update_state(DISCONNECTED);
+		}
 	}
-
+	
 	public void vanish()
 	{
 		foreach(Dbusmenu.Menuitem item in this.custom_items){
@@ -63,21 +105,25 @@ public class PlayerController : GLib.Object
 		}
 	}
 
-	//public void switch_active(bool active){
-	//	this.is_active = active;
-	//}
-
-	//public bool has_app_info(){
-	//	return (this.app_info != null);
-	//}
+	private void update_layout()
+	{
+		bool visibility = true;
+		if(this.current_state != CONNECTED){
+			visibility = false;
+		}
+		this.custom_items[TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);
+		this.custom_items[METADATA].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);
+	}
 	
-	private bool self_construct()
+	
+	private void construct_widgets()
 	{
 		// Separator item
-		this.custom_items.add(PlayerItem.new_separator_item());
+		this.custom_items.add(new PlayerItem(CLIENT_TYPES_SEPARATOR));
 
 		// Title item
-		this.custom_items.add(PlayerItem.new_title_item(this.name));
+		TitleMenuitem title_menu_item = new TitleMenuitem();
+		this.custom_items.add(title_menu_item);
 
 		// Metadata item
 		MetadataMenuitem metadata_item = new MetadataMenuitem();
@@ -91,7 +137,6 @@ public class PlayerController : GLib.Object
 		foreach(PlayerItem item in this.custom_items){
 			root_menu.child_add_position(item, offset + this.custom_items.index_of(item));			
 		}
-		return true;
 	}	
 	
 	private static string format_client_name(string client_name)
