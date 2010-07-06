@@ -15,6 +15,8 @@ PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along 
 with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Uses code from ctk
 */
 
 #ifdef HAVE_CONFIG_H
@@ -58,6 +60,227 @@ static void play_button_draw_previous_symbol(cairo_t* cr, double x, double y);
 
 G_DEFINE_TYPE (PlayButton, play_button, GTK_TYPE_DRAWING_AREA);
 
+/// internal helper functions //////////////////////////////////////////////////
+
+static double
+_align (double val)
+{
+  double fract = val - (int) val;
+
+  if (fract != 0.5f)
+    return (double) ((int) val + 0.5f);
+  else
+    return val;
+}
+
+static inline void
+_blurinner (guchar* pixel,
+	    gint*   zR,
+	    gint*   zG,
+	    gint*   zB,
+	    gint*   zA,
+	    gint    alpha,
+	    gint    aprec,
+	    gint    zprec)
+{
+	gint R;
+	gint G;
+	gint B;
+	guchar A;
+
+	R = *pixel;
+	G = *(pixel + 1);
+	B = *(pixel + 2);
+	A = *(pixel + 3);
+
+	*zR += (alpha * ((R << zprec) - *zR)) >> aprec;
+	*zG += (alpha * ((G << zprec) - *zG)) >> aprec;
+	*zB += (alpha * ((B << zprec) - *zB)) >> aprec;
+	*zA += (alpha * ((A << zprec) - *zA)) >> aprec;
+
+	*pixel       = *zR >> zprec;
+	*(pixel + 1) = *zG >> zprec;
+	*(pixel + 2) = *zB >> zprec;
+	*(pixel + 3) = *zA >> zprec;
+}
+
+static inline void
+_blurrow (guchar* pixels,
+	  gint    width,
+	  gint    height,
+	  gint    channels,
+	  gint    line,
+	  gint    alpha,
+	  gint    aprec,
+	  gint    zprec)
+{
+	gint    zR;
+	gint    zG;
+	gint    zB;
+	gint    zA;
+	gint    index;
+	guchar* scanline;
+
+	scanline = &(pixels[line * width * channels]);
+
+	zR = *scanline << zprec;
+	zG = *(scanline + 1) << zprec;
+	zB = *(scanline + 2) << zprec;
+	zA = *(scanline + 3) << zprec;
+
+	for (index = 0; index < width; index ++)
+		_blurinner (&scanline[index * channels],
+			    &zR,
+			    &zG,
+			    &zB,
+			    &zA,
+			    alpha,
+			    aprec,
+			    zprec);
+
+	for (index = width - 2; index >= 0; index--)
+		_blurinner (&scanline[index * channels],
+			    &zR,
+			    &zG,
+			    &zB,
+			    &zA,
+			    alpha,
+			    aprec,
+			    zprec);
+}
+
+static inline void
+_blurcol (guchar* pixels,
+	  gint    width,
+	  gint    height,
+	  gint    channels,
+	  gint    x,
+	  gint    alpha,
+	  gint    aprec,
+	  gint    zprec)
+{
+	gint zR;
+	gint zG;
+	gint zB;
+	gint zA;
+	gint index;
+	guchar* ptr;
+
+	ptr = pixels;
+
+	ptr += x * channels;
+
+	zR = *((guchar*) ptr    ) << zprec;
+	zG = *((guchar*) ptr + 1) << zprec;
+	zB = *((guchar*) ptr + 2) << zprec;
+	zA = *((guchar*) ptr + 3) << zprec;
+
+	for (index = width; index < (height - 1) * width; index += width)
+		_blurinner ((guchar*) &ptr[index * channels],
+			    &zR,
+			    &zG,
+			    &zB,
+			    &zA,
+			    alpha,
+			    aprec,
+			    zprec);
+
+	for (index = (height - 2) * width; index >= 0; index -= width)
+		_blurinner ((guchar*) &ptr[index * channels],
+			    &zR,
+			    &zG,
+			    &zB,
+			    &zA,
+			    alpha,
+			    aprec,
+			    zprec);
+}
+
+void
+_expblur (guchar* pixels,
+	  gint    width,
+	  gint    height,
+	  gint    channels,
+	  gint    radius,
+	  gint    aprec,
+	  gint    zprec)
+{
+	gint alpha;
+	gint row = 0;
+	gint col = 0;
+
+	if (radius < 1)
+		return;
+
+	// calculate the alpha such that 90% of 
+	// the kernel is within the radius.
+	// (Kernel extends to infinity)
+	alpha = (gint) ((1 << aprec) * (1.0f - expf (-2.3f / (radius + 1.f))));
+
+	for (; row < height; row++)
+		_blurrow (pixels,
+			  width,
+			  height,
+			  channels,
+			  row,
+			  alpha,
+			  aprec,
+			  zprec);
+
+	for(; col < width; col++)
+		_blurcol (pixels,
+			  width,
+			  height,
+			  channels,
+			  col,
+			  alpha,
+			  aprec,
+			  zprec);
+
+	return;
+}
+
+void
+_surface_blur (cairo_surface_t* surface,
+               guint            radius)
+{
+	guchar*        pixels;
+	guint          width;
+	guint          height;
+	cairo_format_t format;
+
+	// before we mess with the surface execute any pending drawing
+	cairo_surface_flush (surface);
+
+	pixels = cairo_image_surface_get_data (surface);
+	width  = cairo_image_surface_get_width (surface);
+	height = cairo_image_surface_get_height (surface);
+	format = cairo_image_surface_get_format (surface);
+
+	switch (format)
+	{
+		case CAIRO_FORMAT_ARGB32:
+			_expblur (pixels, width, height, 4, radius, 16, 7);
+		break;
+
+		case CAIRO_FORMAT_RGB24:
+			_expblur (pixels, width, height, 3, radius, 16, 7);
+		break;
+
+		case CAIRO_FORMAT_A8:
+			_expblur (pixels, width, height, 1, radius, 16, 7);
+		break;
+
+		default :
+			// do nothing
+		break;
+	}
+
+	// inform cairo we altered the surfaces contents
+	cairo_surface_mark_dirty (surface);	
+}
+
+/// GObject functions //////////////////////////////////////////////////////////
 
 static void
 play_button_class_init (PlayButtonClass *klass)
@@ -97,7 +320,7 @@ static gboolean
 play_button_expose (GtkWidget *button, GdkEventExpose *event)
 {
 	cairo_t *cr;
-  cr = gdk_cairo_create (button->window);
+	cr = gdk_cairo_create (button->window);
 
 	g_debug("PlayButton::Draw - width = %i", button->allocation.width);
 	g_debug("PlayButton::Draw - event->area.width = %i", event->area.width);
@@ -109,7 +332,7 @@ play_button_expose (GtkWidget *button, GdkEventExpose *event)
 
 	cairo_clip(cr);
 	draw (button, cr);
-  cairo_destroy (cr);
+	cairo_destroy (cr);
 	return FALSE;
 }
 
@@ -126,34 +349,189 @@ play_button_set_style(GtkWidget* button, GtkStyle* style)
 }
 
 static void
+draw_gradient (cairo_t* cr,
+               double   x,
+               double   y,
+               double   w,
+               double   r,
+               double*  rgba_start,
+               double*  rgba_end)
+{
+	cairo_pattern_t* pattern = NULL;
+
+	cairo_move_to (cr, x, y);
+	cairo_line_to (cr, x + w - 2.0f * r, y);
+	cairo_arc (cr,
+		   x + w - 2.0f * r,
+		   y + r,
+		   r,
+		   -90.0f * G_PI / 180.0f,
+		   90.0f * G_PI / 180.0f);
+	cairo_line_to (cr, x, y + 2.0f * r);
+	cairo_arc (cr,
+		   x,
+		   y + r,
+		   r,
+		   90.0f * G_PI / 180.0f,
+		   270.0f * G_PI / 180.0f);
+	cairo_close_path (cr);
+
+	pattern = cairo_pattern_create_linear (x, y, x, y + 2.0f * r);
+	cairo_pattern_add_color_stop_rgba (pattern,
+	                                   0.0f,
+	                                   rgba_start[0],
+	                                   rgba_start[1],
+	                                   rgba_start[2],
+	                                   rgba_start[3]);
+	cairo_pattern_add_color_stop_rgba (pattern,
+	                                   1.0f,
+	                                   rgba_end[0],
+	                                   rgba_end[1],
+	                                   rgba_end[2],
+	                                   rgba_end[3]);
+	cairo_set_source (cr, pattern);
+	cairo_fill (cr);
+	cairo_pattern_destroy (pattern);
+}
+
+static void
+draw_circle (cairo_t* cr,
+	     double   x,
+	     double   y,
+	     double   r,
+	     double*  rgba_start,
+	     double*  rgba_end)
+{
+	cairo_pattern_t* pattern = NULL;
+
+	cairo_move_to (cr, x, y);
+	cairo_arc (cr,
+		   x + r,
+		   y + r,
+		   r,
+		   0.0f * G_PI / 180.0f,
+		   360.0f * G_PI / 180.0f);
+
+	pattern = cairo_pattern_create_linear (x, y, x, y + 2.0f * r);
+	cairo_pattern_add_color_stop_rgba (pattern,
+	                                   0.0f,
+	                                   rgba_start[0],
+	                                   rgba_start[1],
+	                                   rgba_start[2],
+	                                   rgba_start[3]);
+	cairo_pattern_add_color_stop_rgba (pattern,
+	                                   1.0f,
+	                                   rgba_end[0],
+	                                   rgba_end[1],
+	                                   rgba_end[2],
+	                                   rgba_end[3]);
+	cairo_set_source (cr, pattern);
+	cairo_fill (cr);
+	cairo_pattern_destroy (pattern);
+}
+
+static void
 draw (GtkWidget* button, cairo_t *cr)
 {
-
 	//PlayButtonPrivate* priv = PLAY_BUTTON_GET_PRIVATE(button);
-	double rect_width = 115;
-	double rect_height = 28;
-	double p_radius = 21;
+	double rect_width = 130;
 	double y = 15;
 	double x = 22;
+	double inner_height   = 25.0f;
+	double inner_radius   = 12.5f;
+	double inner_start[]  = {229.0f / 255.0f,
+			         223.0f / 255.0f,
+			         215.0f / 255.0f,
+			         1.0f};
+	double inner_end[]    = {183.0f / 255.0f,
+				 178.0f / 255.0f,
+				 172.0f / 255.0f,
+				 1.0f};
+	double middle_height  = 27.0f;
+	double middle_radius  = 13.5f;
+	double middle_start[] = {61.0f / 255.0f,
+				 60.0f / 255.0f,
+				 57.0f / 255.0f,
+				 1.0f};
+	double middle_end[]   = {94.0f / 255.0f,
+				 93.0f / 255.0f,
+				 90.0f / 255.0f,
+				 1.0f};
+	double outter_height  = 29.0f;
+	double outter_radius  = 14.5f;
+	double outter_start[] = {36.0f / 255.0f,
+				 35.0f / 255.0f,
+				 33.0f / 255.0f,
+				 1.0f};
+	double outter_end[]   = {123.0f / 255.0f,
+				 123.0f / 255.0f,
+				 120.0f / 255.0f,
+				 1.0f};
+
+	double circle_radius = 19.0f;
+
 	//double radius=35;
 	//double x= button->allocation.width/2 - rect_width/2;
 	//double y= button->allocation.height/2 -rect_height/2;
 
+	// ffwd/back-background
+        draw_gradient (cr,
+                       x,
+                       y,
+                       rect_width,
+                       outter_radius,
+                       outter_start,
+                       outter_end);
+        draw_gradient (cr,
+                       x,
+                       y + 1,
+                       rect_width - 2,
+                       middle_radius,
+                       middle_start,
+                       middle_end);
+        draw_gradient (cr,
+                       x,
+                       y + 2,
+                       rect_width - 4,
+                       inner_radius,
+                       inner_start,
+                       inner_end);
+
+	// play/pause-background
+        draw_circle (cr,
+		     x + rect_width / 2.0f - 2.0f * outter_radius - 4.5f,
+		     y - ((circle_radius - outter_radius)),
+		     circle_radius,
+		     outter_start,
+		     outter_end);
+        draw_circle (cr,
+                       x + rect_width / 2.0f - 2.0f * outter_radius - 4.5f + 1.0f,
+                       y - ((circle_radius - outter_radius)) + 1.0f,
+                       circle_radius - 1,
+                       middle_start,
+                       middle_end);
+        draw_circle (cr,
+                     x + rect_width / 2.0f - 2.0f * outter_radius - 4.5f + 2.0f,
+                     y - ((circle_radius - outter_radius)) + 2.0f,
+                     circle_radius - 2.0f,
+                     inner_start,
+		     inner_end);
+
 	// Draw the outside drop shadow background
-	play_button_draw_background_shadow_1(button, cr, x, y, rect_width, rect_height, p_radius);
+	//play_button_draw_background_shadow_1(button, cr, x, y, rect_width, rect_height, p_radius);
 	
 	// Draw the inside drop shadow background
-	gint offset = 4;
-	play_button_draw_background_shadow_2(button, cr, x + offset-1, y + offset/2, rect_width-offset, rect_height-offset, p_radius-(offset/2));
+	/*gint offset = 4;
+	play_button_draw_background_shadow_2(button, cr, x + offset-1, y + offset/2, rect_width-offset, rect_height-offset, p_radius-(offset/2));*/
 
-	offset = 5;
+	//offset = 5;
 	// Draw the inside actual background
-	play_button_draw_background(button, cr, x+offset-1, y + offset/2+1, rect_width-offset, rect_height-offset, p_radius-offset/2);
+	/*play_button_draw_background(button, cr, x+offset-1, y + offset/2+1, rect_width-offset, rect_height-offset, p_radius-offset/2);
 
 	play_button_draw_pause_symbol(cr, rect_width/2 + rect_height/10 + x -1 + offset/2, rect_height/5 +y );
 
 	play_button_draw_pause_symbol(cr, rect_width/2 + rect_height/10 + x + offset/2 + 10, rect_height/5 +y );
-	play_button_draw_previous_symbol(cr, x+rect_height/2 + offset, y + offset+2);
+	play_button_draw_previous_symbol(cr, x+rect_height/2 + offset, y + offset+2);*/
 	cairo_surface_write_to_png(cairo_get_target (cr), "/tmp/foobar.png");	
 }
 
