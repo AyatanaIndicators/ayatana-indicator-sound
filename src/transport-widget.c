@@ -134,7 +134,7 @@ transport_widget_init (TransportWidget *self)
 	hbox = gtk_hbox_new(TRUE, 2);
 	gchar* symbol = transport_widget_toggle_play_label(dbusmenu_menuitem_property_get_int(twin_item, DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE));
 	priv->play_button =	gtk_button_new_with_label(symbol);
-	//g_free(symbol);
+
 	gtk_box_pack_start (GTK_BOX (hbox), priv->play_button, FALSE, TRUE, 0);
 
 	priv->hbox = hbox;

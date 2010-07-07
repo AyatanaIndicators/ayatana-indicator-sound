@@ -91,7 +91,7 @@ title_widget_init (TitleWidget *self)
 	priv->hbox = hbox;
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
 	                 G_CALLBACK(title_widget_property_update), self);
-
+	// TODO - waiting theme icon name for correct usage
 	priv->player_icon = gtk_image_new_from_file("/home/ronoc/branches/sound-menu-v2/finish-indicate/indicator-sound/data/sound_icon.png"); 
 	gtk_box_pack_start(GTK_BOX (priv->hbox), priv->player_icon, FALSE, FALSE, 0);		
 	
