@@ -18,32 +18,31 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 using Dbusmenu;
+using DbusmenuTitle;
 using Gee;
-using DbusmenuTransport;
 
-public class TransportMenuitem : PlayerItem
+public class TitleMenuitem : PlayerItem
 {
-	
-	public TransportMenuitem(PlayerController parent)
-  {
-		Object(item_type: MENUITEM_TYPE, owner: parent); 
+	public TitleMenuitem(PlayerController parent, string name)
+	{
+		Object(item_type: MENUITEM_TYPE, owner: parent);
+		this.property_set(MENUITEM_TEXT_NAME, name);		
 	}
 
-	public void change_play_state(int state)
-	{
-		this.property_set_int(MENUITEM_PLAY_STATE, state);	
-	}
-	
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
 	{
 		debug("handle_event with bool value %s", input_value.get_boolean().to_string());
-		this.owner.mpris_adaptor.toggle_playback(input_value.get_boolean());	
-	}	
+		if(this.owner.current_state == PlayerController.OFFLINE)
+		{
+			this.owner.instantiate();
+		}
+	}
+	
 
 	public static HashSet<string> attributes_format()
 	{
 		HashSet<string> attrs = new HashSet<string>();		
-		attrs.add(MENUITEM_PLAY_STATE);
-		return attrs;
+		attrs.add(MENUITEM_TEXT_NAME);
+ 		return attrs;
 	}	
 }

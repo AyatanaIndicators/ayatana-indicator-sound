@@ -76,6 +76,11 @@ public class MprisController : GLib.Object
 			this.mpris_player.Pause();						
 		}		
 	}
+
+	public bool connected()
+	{
+		return (this.mpris_player != null);
+	}
 	
 	private void onStatusChange(dynamic DBus.Object mpris_client, status st)
   {

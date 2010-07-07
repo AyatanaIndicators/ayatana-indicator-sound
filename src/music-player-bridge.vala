@@ -42,25 +42,29 @@ public class MusicPlayerBridge : GLib.Object
     listener.server_removed.connect(on_server_removed);
     listener.server_count_changed.connect(on_server_count_changed);
   }
-	// Alpha 2 not in use ... yet.
+
 	private void try_to_add_inactive_familiar_clients(){
-		// for now just use one of the entries.
+		// TODO handle multple players - just working with one right now
 		int count = 0;
 		foreach(string app in this.playersDB.records()){
 			if(count == 0){
-				debug("we have found %s", app);
-				string[] bits = app.split("/");
-
+				if(app == null){
+					warning("App string in keyfile is null therefore moving on to next player");
+					continue;
+				}
 				try{
-					string app_name = bits[bits.length -1].split(".")[0];
-					debug("we have found %s", app_name);
+					DesktopAppInfo info = new DesktopAppInfo.from_filename(app); 
+					if(info == null){
+						warning("Could not create a desktopappinfo instance from app: %s", app);
+						continue;					
+					}
+					GLib.AppInfo app_info = info as GLib.AppInfo;
 					PlayerController ctrl = new PlayerController(this.root_menu, 
-					                                             app_name,
-					                                             false);
-					this.registered_clients.set(app_name, ctrl);
-					DesktopAppInfo info = new DesktopAppInfo.from_filename(app_name); 					
-					string desc =	info.get_display_name();
-					debug("description from app %s", desc);
+					                                             app_info.get_name(), 
+					                                             PlayerController.OFFLINE);
+					ctrl.set("app_info", app_info);
+					this.registered_clients.set(app_info.get_name().down().strip(), ctrl);					
+					debug("Created a player controller for %s which was found in the cache file", app_info.get_name().down().strip());
 					count += 1;					
 				}
 				catch(Error er){
@@ -75,13 +79,25 @@ public class MusicPlayerBridge : GLib.Object
   {
     debug("MusicPlayerBridge -> on_server_added with value %s", type);
 		if(server_is_not_of_interest(type)) return;
-		string client_name = type.split(".")[1];		
+		string client_name = type.split(".")[1];
 		if (root_menu != null && client_name != null){
-			listener_get_server_property_cb cb = (listener_get_server_property_cb)desktop_info_callback;
-			this.listener.server_get_desktop(object, cb, this);			
-			PlayerController ctrl = new PlayerController(root_menu, client_name, true);
-			registered_clients.set(client_name, ctrl); 
-			debug("client of name %s has successfully registered with us", client_name);
+			// If we have an instance already for this player, ensure it is switched to active
+			if(this.registered_clients.keys.contains(client_name)){
+				debug("It figured out that it already has an instance for this player already");
+				this.registered_clients[client_name].update_state(PlayerController.READY);
+				this.registered_clients[client_name].activate();
+			}
+			//else init a new one
+			else{			
+				PlayerController ctrl = new PlayerController(root_menu, client_name, PlayerController.READY);
+				registered_clients.set(client_name, ctrl); 
+				debug("New Client of name %s has successfully registered with us", client_name);
+			}
+			// irregardless check that it has a desktop file if not kick off a request for it
+			if(this.registered_clients[client_name].app_info == null){
+				listener_get_server_property_cb cb = (listener_get_server_property_cb)desktop_info_callback;
+				this.listener.server_get_desktop(object, cb, this);					
+			}			
 		}
   }
 
@@ -93,7 +109,8 @@ public class MusicPlayerBridge : GLib.Object
 		if (root_menu != null && client_name != null){
 			registered_clients[client_name].vanish();
 			registered_clients.remove(client_name);
-			debug("Successively removed menu_item for client %s from registered_clients", client_name);
+			debug("Successively removed menu_item for client %s from registered_clients",
+			      client_name);
 		}
 	}
 	
@@ -109,15 +126,26 @@ public class MusicPlayerBridge : GLib.Object
 	private void desktop_info_callback(Indicate.ListenerServer server,
 	                                 	owned string path, void* data)	                                  
 	{
-		debug("we got a desktop file path hopefully: %s", path);	
 		MusicPlayerBridge bridge = data as MusicPlayerBridge;
-		bridge.playersDB.insert(path);
+		if(path.contains("/") && bridge.playersDB.already_familiar(path) == false){
+			debug("About to store desktop file path: %s", path);
+			bridge.playersDB.insert(path);
+			AppInfo? app_info = create_app_info(path);
+			if(app_info != null){
+				PlayerController ctrl = bridge.registered_clients[app_info.get_name().down().strip()];				
+				ctrl.set("app_info", app_info);
+				debug("successfully created appinfo from path and set it on the respective instance");				
+			}	
+		}
+		else{
+			debug("Ignoring desktop file path because its either invalid of the db cache file has it already: %s", path);
+		}
 	}
 
   public void set_root_menu_item(Dbusmenu.Menuitem menu)
   {
 		this.root_menu = menu;
-		//try_to_add_inactive_familiar_clients();
+		try_to_add_inactive_familiar_clients();
   }
 
 	public void on_server_count_changed(Indicate.ListenerServer object, uint i)
@@ -138,6 +166,17 @@ public class MusicPlayerBridge : GLib.Object
   {
     debug("MusicPlayerBridge -> indicator_modified with vale %s", s );
   }
+
+	public static AppInfo? create_app_info(string path)
+	{
+		DesktopAppInfo info = new DesktopAppInfo.from_filename(path);
+		if(path == null){
+			warning("Could not create a desktopappinfo instance from app: %s", path);
+			return null;
+		}
+		GLib.AppInfo app_info = info as GLib.AppInfo;		
+		return app_info;
+	}
 
 }
 
