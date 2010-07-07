@@ -27,6 +27,31 @@ Uses code from ctk
 #include <math.h>
 #include "play-button.h"
 
+#define RECT_WIDTH 130.0f
+#define Y 15.0f
+#define X	22.0f
+#define INNER_RADIUS 12.5
+#define	MIDDLE_RADIUS 13.5f
+#define OUTER_RADIUS  14.5f
+#define CIRCLE_RADIUS 19.0f
+#define PREV_WIDTH  25.0f
+#define PREV_HEIGHT 17.0f
+#define	NEXT_WIDTH  25.0f //PREV_WIDTH
+#define NEXT_HEIGHT 17.0f //PREV_HEIGHT
+#define TRI_WIDTH  11.0f
+#define TRI_HEIGHT 13.0f
+#define TRI_OFFSET  6.0f
+#define PREV_X 20.0f
+#define PREV_Y 21.0f
+#define NEXT_X 98.0f
+#define NEXT_Y 21.0f //prev_y
+#define PAUSE_WIDTH 21.0f
+#define PAUSE_HEIGHT 27.0f
+#define BAR_WIDTH 4.5f
+#define BAR_HEIGHT 24.0f
+#define BAR_OFFSET 10.0f
+#define PAUSE_X 62.0f
+#define	PAUSE_Y 15.0f
 
 typedef struct _PlayButtonPrivate PlayButtonPrivate;
 
@@ -49,15 +74,6 @@ static void play_button_finalize   (GObject *object);
 
 static gboolean play_button_expose (GtkWidget *button, GdkEventExpose *event);
 static void draw (GtkWidget* button, cairo_t *cr);
-static void play_button_draw_background(GtkWidget* button, cairo_t* cr, double x, double y, double width, double height, double p_radius);
-static void play_button_draw_background_shadow_2(GtkWidget* button, cairo_t* cr, double x, double y, double rect_width, double rect_height,  double p_radius);
-static void play_button_draw_background_shadow_1(GtkWidget* button, cairo_t* cr, double x, double y, double rect_width, double rect_height, double p_radius);
-
-
-//static void play_button_draw_play_symbol(cairo_t* cr, double x, double y);
-static void play_button_draw_pause_symbol(cairo_t* cr, double x, double y);
-static void play_button_draw_previous_symbol(cairo_t* cr, double x, double y);
-
 
 G_DEFINE_TYPE (PlayButton, play_button, GTK_TYPE_DRAWING_AREA);
 
@@ -301,7 +317,6 @@ play_button_class_init (PlayButtonClass *klass)
 static void
 play_button_init (PlayButton *self)
 {
-	g_debug("PlayButton::play_button_init");	
 	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 80); 
 }
 
@@ -322,10 +337,6 @@ play_button_expose (GtkWidget *button, GdkEventExpose *event)
 {
 	cairo_t *cr;
 	cr = gdk_cairo_create (button->window);
-
-	g_debug("PlayButton::Draw - width = %i", button->allocation.width);
-	g_debug("PlayButton::Draw - event->area.width = %i", event->area.width);
-	g_debug("PlayButton::Draw - event->area.x = %i", event->area.x);
 
 	cairo_rectangle (cr,
                    event->area.x, event->area.y,
@@ -517,7 +528,6 @@ _mask_pause (cairo_t* cr,
 	cairo_move_to (cr, x + bar_offset, y);
 	cairo_line_to (cr, x + bar_offset, y + bar_height);
 
-	//cairo_close_path (cr);
 }
 
 static void
@@ -575,232 +585,175 @@ _finalize (cairo_t*          cr,
 static void
 draw (GtkWidget* button, cairo_t *cr)
 {
-	//PlayButtonPrivate* priv = PLAY_BUTTON_GET_PRIVATE(button);
-	double rect_width = 130;
-	double y = 15;
-	double x = 22;
-	double inner_height   = 25.0f;
-	double inner_radius   = 12.5f;
-	double inner_start[]  = {229.0f / 255.0f,
-			         223.0f / 255.0f,
-			         215.0f / 255.0f,
-			         1.0f};
-	double inner_end[]    = {183.0f / 255.0f,
-				 178.0f / 255.0f,
-				 172.0f / 255.0f,
-				 1.0f};
-	double middle_height  = 27.0f;
-	double middle_radius  = 13.5f;
-	double middle_start[] = {61.0f / 255.0f,
-				 60.0f / 255.0f,
-				 57.0f / 255.0f,
-				 1.0f};
-	double middle_end[]   = {94.0f / 255.0f,
-				 93.0f / 255.0f,
-				 90.0f / 255.0f,
-				 1.0f};
-	double outter_height  = 29.0f;
-	double outter_radius  = 14.5f;
-	double outter_start[] = {36.0f / 255.0f,
-				 35.0f / 255.0f,
-				 33.0f / 255.0f,
-				 1.0f};
-	double outter_end[]   = {123.0f / 255.0f,
-				 123.0f / 255.0f,
-				 120.0f / 255.0f,
-				 1.0f};
-
-	double circle_radius = 19.0f;
-
-	double button_start[]  = {252.0f / 255.0f,
-				  251.0f / 255.0f,
-				  251.0f / 255.0f,
-				  1.0f};
-	double button_end[]    = {186.0f / 255.0f,
-				  180.0f / 255.0f,
-				  170.0f / 255.0f,
-				  1.0f};
-	double button_shadow[] = {0.0f / 255.0f,
-				  0.0f / 255.0f,
-				  0.0f / 255.0f,
-				  0.75f};
-	double prev_width      = 25.0f;
-	double prev_height     = 17.0f;
-	double next_width      = prev_width;
-	double next_height     = prev_height;
 	cairo_surface_t*  surf = NULL;
 	cairo_t*       cr_surf = NULL;
-	double tri_width       = 11.0f;
-	double tri_height      = 13.0f;
-	double tri_offset      =  6.0f;
-	double prev_x          = 20.0f;
-	double prev_y          = 21.0f;
-	double next_x          = 98.0f;
-	double next_y          = prev_y;
-	double pause_width     = 21.0f;
-	double pause_height    = 27.0f;
-	double bar_width       = 4.5f;
-	double bar_height      = 24.0f;
-	double bar_offset      = 10.0f;
-	double pause_x         = 62.0f;
-	double pause_y         = 15.0f;
 
+	double INNER_START[] =  {229.0f/255.0f, 223.0f/255.0f, 215.0f/255.0f, 1.0f};
+	double INNER_END[] = {183.0f / 255.0f, 178.0f / 255.0f, 172.0f / 255.0f, 1.0f};
+	double MIDDLE_START[] = {61.0f / 255.0f, 60.0f / 255.0f, 57.0f / 255.0f, 1.0f};
+	double MIDDLE_END[] = {94.0f / 255.0f,93.0f / 255.0f, 90.0f / 255.0f,1.0f};
+	double OUTER_START[] = {36.0f / 255.0f, 35.0f / 255.0f, 33.0f / 255.0f, 1.0f};
+	double OUTER_END[] = {123.0f / 255.0f, 123.0f / 255.0f, 120.0f / 255.0f, 1.0f};
+	double BUTTON_START[] = {252.0f / 255.0f, 251.0f / 255.0f, 251.0f / 255.0f,1.0f};
+	double BUTTON_END[] = {186.0f / 255.0f,180.0f / 255.0f, 170.0f / 255.0f, 1.0f};
+	double BUTTON_SHADOW[] = {0.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 0.75f};
+	
+	
 	// prev/next-background
-        draw_gradient (cr,
-                       x,
-                       y,
-                       rect_width,
-                       outter_radius,
-                       outter_start,
-                       outter_end);
-        draw_gradient (cr,
-                       x,
-                       y + 1,
-                       rect_width - 2,
-                       middle_radius,
-                       middle_start,
-                       middle_end);
-        draw_gradient (cr,
-                       x,
-                       y + 2,
-                       rect_width - 4,
-                       inner_radius,
-                       inner_start,
-                       inner_end);
+  draw_gradient (cr,
+                 X,
+                 Y,
+                 RECT_WIDTH,
+                 OUTER_RADIUS,
+                 OUTER_START,
+                 OUTER_END);
+  draw_gradient (cr,
+                 X,
+                 Y + 1,
+                 RECT_WIDTH - 2,
+                 MIDDLE_RADIUS,
+                 MIDDLE_START,
+                 MIDDLE_END);
+  draw_gradient (cr,
+                 X,
+                 Y + 2,
+                 RECT_WIDTH - 4,
+                 INNER_RADIUS,
+                 INNER_START,
+                 INNER_END);
 
 	// play/pause-background
         draw_circle (cr,
-		     x + rect_width / 2.0f - 2.0f * outter_radius - 4.5f,
-		     y - ((circle_radius - outter_radius)),
-		     circle_radius,
-		     outter_start,
-		     outter_end);
+		     X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 4.5f,
+		     Y - ((CIRCLE_RADIUS - OUTER_RADIUS)),
+		     CIRCLE_RADIUS,
+		     OUTER_START,
+		     OUTER_END);
         draw_circle (cr,
-                       x + rect_width / 2.0f - 2.0f * outter_radius - 4.5f + 1.0f,
-                       y - ((circle_radius - outter_radius)) + 1.0f,
-                       circle_radius - 1,
-                       middle_start,
-                       middle_end);
+                       X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 4.5f + 1.0f,
+                       Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 1.0f,
+                       CIRCLE_RADIUS - 1,
+                       MIDDLE_START,
+                       MIDDLE_END);
         draw_circle (cr,
-                     x + rect_width / 2.0f - 2.0f * outter_radius - 4.5f + 2.0f,
-                     y - ((circle_radius - outter_radius)) + 2.0f,
-                     circle_radius - 2.0f,
-                     inner_start,
-		     inner_end);
+                     X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 4.5f + 2.0f,
+                     Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 2.0f,
+                     CIRCLE_RADIUS - 2.0f,
+                     INNER_START,
+		     INNER_END);
 
 	// draw previous-button drop-shadow
-	_setup (&cr_surf, &surf, prev_width, prev_height);
+	_setup (&cr_surf, &surf, PREV_WIDTH, PREV_HEIGHT);
 	_mask_prev (cr_surf,
-		    (prev_width - (2.0f * tri_width - tri_offset)) / 2.0f,
-		    (prev_height - tri_height) / 2.0f,
-		    tri_width,
-		    tri_height,
-		    tri_offset);
+		    (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+		    (PREV_HEIGHT - TRI_HEIGHT) / 2.0f,
+		    TRI_WIDTH,
+		    TRI_HEIGHT,
+		    TRI_OFFSET);
 	_fill (cr_surf,
-               (prev_width - (2.0f * tri_width - tri_offset)) / 2.0f,
-               (prev_height - tri_height) / 2.0f,
-               (prev_width - (2.0f * tri_width - tri_offset)) / 2.0f,
-	       (double) tri_height,
-	       button_shadow,
-	       button_shadow,
+               (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+               (PREV_HEIGHT - TRI_HEIGHT) / 2.0f,
+               (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+	       (double) TRI_HEIGHT,
+	       BUTTON_SHADOW,
+	       BUTTON_SHADOW,
 	       FALSE);
 	_surface_blur (surf, 1);
-	_finalize (cr, &cr_surf, &surf, prev_x, prev_y + 1.0f);
+	_finalize (cr, &cr_surf, &surf, PREV_X, PREV_Y + 1.0f);
 
 	// draw previous-button
-	_setup (&cr_surf, &surf, prev_width, prev_height);
+	_setup (&cr_surf, &surf, PREV_WIDTH, PREV_HEIGHT);
 	_mask_prev (cr_surf,
-		    (prev_width - (2.0f * tri_width - tri_offset)) / 2.0f,
-		    (prev_height - tri_height) / 2.0f,
-		    tri_width,
-		    tri_height,
-		    tri_offset);
+		    (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+		    (PREV_HEIGHT - TRI_HEIGHT) / 2.0f,
+		    TRI_WIDTH,
+		    TRI_HEIGHT,
+		    TRI_OFFSET);
 	_fill (cr_surf,
-	       (prev_width - (2.0f * tri_width - tri_offset)) / 2.0f,
-	       (prev_height - tri_height) / 2.0f,
-	       (prev_width - (2.0f * tri_width - tri_offset)) / 2.0f,
-	       (double) tri_height,
-	       button_start,
-	       button_end,
+	       (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+	       (PREV_HEIGHT - TRI_HEIGHT) / 2.0f,
+	       (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+	       (double) TRI_HEIGHT,
+	       BUTTON_START,
+	       BUTTON_END,
 	       FALSE);
-	_finalize (cr, &cr_surf, &surf, prev_x, prev_y);
+	_finalize (cr, &cr_surf, &surf, PREV_X, PREV_Y);
 
 	// draw next-button drop-shadow
-	_setup (&cr_surf, &surf, next_width, next_height);
+	_setup (&cr_surf, &surf, NEXT_WIDTH, NEXT_HEIGHT);
 	_mask_next (cr_surf,
-		    (next_width - (2.0f * tri_width - tri_offset)) / 2.0f,
-		    (next_height - tri_height) / 2.0f,
-		    tri_width,
-		    tri_height,
-		    tri_offset);
+		    (NEXT_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+		    (NEXT_HEIGHT - TRI_HEIGHT) / 2.0f,
+		    TRI_WIDTH,
+		    TRI_HEIGHT,
+		    TRI_OFFSET);
 	_fill (cr_surf,
-	       (next_width - (2.0f * tri_width - tri_offset)) / 2.0f,
-	       (next_height - tri_height) / 2.0f,
-	       (next_width - (2.0f * tri_width - tri_offset)) / 2.0f,
-	       (double) tri_height,
-	       button_shadow,
-	       button_shadow,
+	       (NEXT_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+	       (NEXT_HEIGHT - TRI_HEIGHT) / 2.0f,
+	       (NEXT_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+	       (double) TRI_HEIGHT,
+	       BUTTON_SHADOW,
+	       BUTTON_SHADOW,
 	       FALSE);
 	_surface_blur (surf, 1);
-	_finalize (cr, &cr_surf, &surf, next_x, next_y + 1.0f);
+	_finalize (cr, &cr_surf, &surf, NEXT_X, NEXT_Y + 1.0f);
 
 	// draw next-button
-	_setup (&cr_surf, &surf, next_width, next_height);
+	_setup (&cr_surf, &surf, NEXT_WIDTH, NEXT_HEIGHT);
 	_mask_next (cr_surf,
-		    (next_width - (2.0f * tri_width - tri_offset)) / 2.0f,
-		    (next_height - tri_height) / 2.0f,
-		    tri_width,
-		    tri_height,
-		    tri_offset);
+		    (NEXT_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+		    (NEXT_HEIGHT - TRI_HEIGHT) / 2.0f,
+		    TRI_WIDTH,
+		    TRI_HEIGHT,
+		    TRI_OFFSET);
 	_fill (cr_surf,
-	       (next_width - (2.0f * tri_width - tri_offset)) / 2.0f,
-	       (next_height - tri_height) / 2.0f,
-	       (next_width - (2.0f * tri_width - tri_offset)) / 2.0f,
-	       (double) tri_height,
-	       button_start,
-	       button_end,
+	       (NEXT_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+	       (NEXT_HEIGHT - TRI_HEIGHT) / 2.0f,
+	       (NEXT_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+	       (double) TRI_HEIGHT,
+	       BUTTON_START,
+	       BUTTON_END,
 	       FALSE);
-	_finalize (cr, &cr_surf, &surf, next_x, next_y);
+	_finalize (cr, &cr_surf, &surf, NEXT_X, NEXT_Y);
 
 	// draw pause-button drop-shadow
-	_setup (&cr_surf, &surf, pause_width, pause_height);
+	_setup (&cr_surf, &surf, PAUSE_WIDTH, PAUSE_HEIGHT);
 	_mask_pause (cr_surf,
-		     (pause_width - (2.0f * bar_width + bar_offset)) / 2.0f,
-		     (pause_height - bar_height) / 2.0f,
-		     bar_width,
-		     bar_height - 2.0f * bar_width,
-		     bar_offset);
+		     (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+		     (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
+		     BAR_WIDTH,
+		     BAR_HEIGHT - 2.0f * BAR_WIDTH,
+		     BAR_OFFSET);
 	_fill (cr_surf,
-	       (pause_width - (2.0f * bar_width + bar_offset)) / 2.0f,
-	       (pause_height - bar_height) / 2.0f,
-	       (pause_width - (2.0f * bar_width + bar_offset)) / 2.0f,
-	       (double) bar_height,
-	       button_shadow,
-	       button_shadow,
+	       (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+	       (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
+	       (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+	       (double) BAR_HEIGHT,
+	       BUTTON_SHADOW,
+	       BUTTON_SHADOW,
 	       TRUE);
 	_surface_blur (surf, 1);
-	_finalize (cr, &cr_surf, &surf, pause_x, pause_y + 1.0f);
+	_finalize (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y + 1.0f);
 
 	// draw pause-button
-	_setup (&cr_surf, &surf, pause_width, pause_height);
+	_setup (&cr_surf, &surf, PAUSE_WIDTH, PAUSE_HEIGHT);
 	_mask_pause (cr_surf,
-		     (pause_width - (2.0f * bar_width + bar_offset)) / 2.0f,
-		     (pause_height - bar_height) / 2.0f,
-		     bar_width,
-		     bar_height - 2.0f * bar_width,
-		     bar_offset);
+		     (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+		     (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
+		     BAR_WIDTH,
+		     BAR_HEIGHT - 2.0f * BAR_WIDTH,
+		     BAR_OFFSET);
 	_fill (cr_surf,
-	       (pause_width - (2.0f * bar_width + bar_offset)) / 2.0f,
-	       (pause_height - bar_height) / 2.0f,
-	       (pause_width - (2.0f * bar_width + bar_offset)) / 2.0f,
-	       (double) bar_height,
-	       button_start,
-	       button_end,
+	       (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+	       (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
+	       (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+	       (double) BAR_HEIGHT,
+	       BUTTON_START,
+	       BUTTON_END,
 	       TRUE);
-	_finalize (cr, &cr_surf, &surf, pause_x, pause_y);
-
-	cairo_surface_write_to_png (cairo_get_target (cr), "/tmp/foobar.png");
+	_finalize (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y);
 }
+
 
 /**
 * play_button_new:
