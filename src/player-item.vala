@@ -22,8 +22,7 @@ using Gee;
 
 public class PlayerItem : Dbusmenu.Menuitem
 {
-
-	public MprisController mpris_adaptor;
+	public PlayerController owner {get; construct;}
 	public string item_type { get; construct; }
 
 	public PlayerItem(string type)
@@ -32,7 +31,6 @@ public class PlayerItem : Dbusmenu.Menuitem
 	}
 	
 	construct {
-		debug("in the base constructor for %s", item_type); 
 		this.property_set(MENUITEM_PROP_TYPE, item_type);
 	}
 
@@ -68,14 +66,7 @@ public class PlayerItem : Dbusmenu.Menuitem
 				this.property_set_bool(property, v.get_boolean());
 			}
 		}
-		// TODO: not working
-		//this.check_layout();
 	}	
-
-	public void set_adaptor(MprisController adaptor)
-	{
-		this.mpris_adaptor = adaptor;		
-	}
 
 	private static bool ensure_valid_updates(HashTable<string, Value?> data, HashSet<string> attributes)
 	{
@@ -99,27 +90,5 @@ public class PlayerItem : Dbusmenu.Menuitem
 		return result;
 	}
 
-	
-	//----- Custom constructors for player items ----------------//
-	// Title item
-	//public static PlayerItem new_title_item(dynamic string name)
-	//{
-	//	PlayerItem item = new PlayerItem();
-	//	item.property_set(MENUITEM_PROP_LABEL, name);					
-	//	item.property_set(MENUITEM_PROP_ICON_NAME, "applications-multimedia");			
-	//	return item;		
-	//}
-
-	// Separator item
-	public static PlayerItem new_separator_item()
-	{
-		PlayerItem separator = new PlayerItem(CLIENT_TYPES_SEPARATOR);
-		//separator.property_set(MENUITEM_PROP_TYPE, CLIENT_TYPES_SEPARATOR);					
-		return separator;
-	}	
-
-	public virtual void check_layout(){
-		warning("this should not be hit");
-	}
 }
 

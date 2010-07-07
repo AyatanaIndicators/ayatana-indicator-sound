@@ -38,7 +38,7 @@ public class PlayerController : GLib.Object
 	private Dbusmenu.Menuitem root_menu;
 	public string name { get; set;}	
 	public ArrayList<PlayerItem> custom_items;	
-	private MprisController mpris_adaptor;
+	public MprisController mpris_adaptor;
 	public AppInfo? app_info { get; set;}
 		
 	public PlayerController(Dbusmenu.Menuitem root, string client_name, int state = OFFLINE)
@@ -90,7 +90,6 @@ public class PlayerController : GLib.Object
 			this.mpris_adaptor = new MprisController(this.name, this);
 		}
 		if(this.mpris_adaptor.connected() == true){
-			this.custom_items[TRANSPORT].set_adaptor(this.mpris_adaptor);
 			this.update_state(CONNECTED);
 		}
 		else{
@@ -122,7 +121,7 @@ public class PlayerController : GLib.Object
 		this.custom_items.add(new PlayerItem(CLIENT_TYPES_SEPARATOR));
 
 		// Title item
-		TitleMenuitem title_menu_item = new TitleMenuitem();
+		TitleMenuitem title_menu_item = new TitleMenuitem(this, this.name);
 		this.custom_items.add(title_menu_item);
 
 		// Metadata item
@@ -130,7 +129,7 @@ public class PlayerController : GLib.Object
 		this.custom_items.add(metadata_item);
 		
 		// Transport item
-		TransportMenuitem transport_item = new TransportMenuitem();
+		TransportMenuitem transport_item = new TransportMenuitem(this);
 		this.custom_items.add(transport_item);
 
 		int offset = 2;

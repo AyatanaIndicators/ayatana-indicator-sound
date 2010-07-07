@@ -23,10 +23,21 @@ using Gee;
 
 public class TitleMenuitem : PlayerItem
 {
-	public TitleMenuitem()
+	public TitleMenuitem(PlayerController parent, string name)
 	{
-		Object(item_type: MENUITEM_TYPE);
+		Object(item_type: MENUITEM_TYPE, owner: parent);
+		this.property_set(MENUITEM_TEXT_NAME, name);		
 	}
+
+	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
+	{
+		debug("handle_event with bool value %s", input_value.get_boolean().to_string());
+		if(this.owner.current_state == PlayerController.OFFLINE)
+		{
+			this.owner.instantiate();
+		}
+	}
+	
 
 	public static HashSet<string> attributes_format()
 	{

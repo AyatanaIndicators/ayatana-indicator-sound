@@ -37,11 +37,6 @@ public class MetadataMenuitem : PlayerItem
     attrs.add(MENUITEM_ARTURL);
 		return attrs;
 	}
-
-	public override void check_layout(){
-		this.property_set_bool(MENUITEM_PROP_VISIBLE, this.populated()); 
-		debug("check layout for the metadata = %s", this.populated().to_string()); 
-	}
 	
 	public bool populated()
 	{
