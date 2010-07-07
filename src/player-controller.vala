@@ -60,7 +60,6 @@ public class PlayerController : GLib.Object
 	
 	public void activate()
 	{
-		debug("about to try to establish an mpris connection");
 		this.establish_mpris_connection();	
 		this.custom_items[METADATA].property_set_bool(MENUITEM_PROP_VISIBLE, true);		
 	}
@@ -95,6 +94,7 @@ public class PlayerController : GLib.Object
 		else{
 			this.update_state(DISCONNECTED);
 		}
+		this.update_layout();
 	}
 	
 	public void vanish()

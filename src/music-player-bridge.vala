@@ -84,6 +84,7 @@ public class MusicPlayerBridge : GLib.Object
 			// If we have an instance already for this player, ensure it is switched to active
 			if(this.registered_clients.keys.contains(client_name)){
 				debug("It figured out that it already has an instance for this player already");
+				this.registered_clients[client_name].update_state(PlayerController.READY);
 				this.registered_clients[client_name].activate();
 			}
 			//else init a new one
