@@ -53,6 +53,13 @@ Uses code from ctk
 #define PAUSE_X 62.0f
 #define	PAUSE_Y 15.0f
 
+// Transport events
+enum {
+	PREVIOUS,
+	PLAY_PAUSE,
+	NEXT
+};
+
 typedef struct _PlayButtonPrivate PlayButtonPrivate;
 
 struct _PlayButtonPrivate
@@ -348,6 +355,29 @@ play_button_expose (GtkWidget *button, GdkEventExpose *event)
 	return FALSE;
 }
 
+
+gint
+determine_button_event(GtkWidget* button, GdkEventButton* event)
+{
+	g_debug("event x coordinate = %f", event->x);
+	g_debug("event y coordinate = %f", event->y);
+	gint result = 0;
+	// For now very simple rectangular collision detection
+	if(event->x > 40 && event->x < 80
+	   && event->y > 22 && event->y < 46){
+		result = PREVIOUS;
+	}
+	else if(event->x > 86 && event->x < 118
+	   && event->y > 20 && event->y < 47){
+		result = PLAY_PAUSE;		
+	}
+	else if(event->x > 122 && event->x < 164
+	   && event->y > 22 && event->y < 46){
+		result = NEXT;		
+	}
+	
+	return result;
+}
 
 void
 play_button_set_style(GtkWidget* button, GtkStyle* style)

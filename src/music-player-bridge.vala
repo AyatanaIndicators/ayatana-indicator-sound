@@ -61,7 +61,7 @@ public class MusicPlayerBridge : GLib.Object
 					GLib.AppInfo app_info = info as GLib.AppInfo;
 					PlayerController ctrl = new PlayerController(this.root_menu, 
 					                                             app_info.get_name(), 
-					                                             PlayerController.OFFLINE);
+					                                             PlayerController.state.OFFLINE);
 					ctrl.set("app_info", app_info);
 					this.registered_clients.set(app_info.get_name().down().strip(), ctrl);					
 					debug("Created a player controller for %s which was found in the cache file", app_info.get_name().down().strip());
@@ -84,12 +84,12 @@ public class MusicPlayerBridge : GLib.Object
 			// If we have an instance already for this player, ensure it is switched to active
 			if(this.registered_clients.keys.contains(client_name)){
 				debug("It figured out that it already has an instance for this player already");
-				this.registered_clients[client_name].update_state(PlayerController.READY);
+				this.registered_clients[client_name].update_state(PlayerController.state.READY);
 				this.registered_clients[client_name].activate();
 			}
 			//else init a new one
 			else{			
-				PlayerController ctrl = new PlayerController(root_menu, client_name, PlayerController.READY);
+				PlayerController ctrl = new PlayerController(root_menu, client_name, PlayerController.state.READY);
 				registered_clients.set(client_name, ctrl); 
 				debug("New Client of name %s has successfully registered with us", client_name);
 			}

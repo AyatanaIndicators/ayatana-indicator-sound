@@ -132,13 +132,24 @@ transport_widget_button_press_event (GtkWidget *menuitem,
 		return FALSE;
 	}
 
-	//TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE(TRANSPORT_WIDGET(menuitem));
+	TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE(TRANSPORT_WIDGET(menuitem));
 
- 	//GValue value = {0};
-  //g_value_init(&value, G_TYPE_BOOLEAN);
-	//g_debug("TransportWidget::menu_press_event - going to send value %i", state);
-	//g_value_set_boolean(&value, state);	
-	//dbusmenu_menuitem_handle_event (twin_item, "Transport state change", &value, 0);
+  GtkWidget *parent;
+
+  // can we block emissions of "grab-notify" on parent??
+  parent = gtk_widget_get_parent (GTK_WIDGET (menuitem));
+	gint result = determine_button_event(priv->play_button, event);
+
+  //GTK_OBJECT_FLAGS (scale) |= GTK_HAS_GRAB;
+  //gtk_widget_event (scale,
+                    //((GdkEvent *)(void*)(event)));
+  //GTK_OBJECT_FLAGS (scale) &= ~(GTK_HAS_GRAB);
+
+ 	GValue value = {0};
+  g_value_init(&value, G_TYPE_INT);
+	g_debug("TransportWidget::menu_press_event - going to send value %i", result);
+	g_value_set_int(&value, result);	
+	dbusmenu_menuitem_handle_event (twin_item, "Transport state change", &value, 0);
 	
 	return TRUE;
 }

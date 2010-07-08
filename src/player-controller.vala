@@ -26,13 +26,15 @@ public class PlayerController : GLib.Object
 	public const int METADATA = 2;	
 	private const int TRANSPORT = 3;
 
-	public static const int OFFLINE 				= 0;
-	public static const int INSTANTIATING  	= 1;
-	public static const int READY						= 2;
-	public static const int CONNECTED				= 3;
-	public static const int DISCONNECTED 		= 4;
+	public enum state{
+	 	OFFLINE,
+		INSTANTIATING,
+		READY,
+		CONNECTED,
+		DISCONNECTED
+	}
 	
-	public int current_state = OFFLINE;
+	public int current_state = state.OFFLINE;
 	
 	
 	private Dbusmenu.Menuitem root_menu;
@@ -41,18 +43,18 @@ public class PlayerController : GLib.Object
 	public MprisController mpris_adaptor;
 	public AppInfo? app_info { get; set;}
 		
-	public PlayerController(Dbusmenu.Menuitem root, string client_name, int state = OFFLINE)
+	public PlayerController(Dbusmenu.Menuitem root, string client_name, state initial_state)
 	{
 		this.root_menu = root;
 		this.name = format_client_name(client_name.strip());
 		this.custom_items = new ArrayList<PlayerItem>();
-		this.update_state(state);
+		this.update_state(initial_state);
 		construct_widgets();
 		establish_mpris_connection();
 		update_layout();
 	}
 
-	public void update_state(int new_state)
+	public void update_state(state new_state)
 	{
 		debug("update_state : new state %i", new_state);
 		this.current_state = new_state;
@@ -72,13 +74,18 @@ public class PlayerController : GLib.Object
 	 */
 	public void instantiate()
 	{
- 	  this.app_info.launch(null, null);
-		this.update_state(INSTANTIATING);
+		try{
+ 	  	this.app_info.launch(null, null);
+			this.update_state(state.INSTANTIATING);
+		}
+		catch(GLib.Error error){
+			warning("Failed to launch app %s with error message: %s", this.name, error.message);
+		}
 	}
 	
 	private void establish_mpris_connection()
 	{		
-		if(this.current_state != READY){
+		if(this.current_state != state.READY){
 			debug("establish_mpris_connection - Not ready to connect");
 			return;
 		}
@@ -89,10 +96,10 @@ public class PlayerController : GLib.Object
 			this.mpris_adaptor = new MprisController(this.name, this);
 		}
 		if(this.mpris_adaptor.connected() == true){
-			this.update_state(CONNECTED);
+			this.update_state(state.CONNECTED);
 		}
 		else{
-			this.update_state(DISCONNECTED);
+			this.update_state(state.DISCONNECTED);
 		}
 		this.update_layout();
 	}
@@ -107,9 +114,10 @@ public class PlayerController : GLib.Object
 	private void update_layout()
 	{
 		bool visibility = true;
-		if(this.current_state != CONNECTED){
+		if(this.current_state != state.CONNECTED){
 			visibility = false;
 		}
+		debug("about the set the visibility on both the transport and metadata widget to %s", visibility.to_string());
 		this.custom_items[TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);
 		this.custom_items[METADATA].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);
 	}

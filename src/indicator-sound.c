@@ -328,9 +328,8 @@ new_transport_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbus
   bar = transport_widget_new(newitem);
   GtkMenuItem *menu_transport_bar = GTK_MENU_ITEM(bar);
 
+	gtk_widget_show_all(bar);
   dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_transport_bar, parent);
-
-  gtk_widget_show_all(bar);
 
   return TRUE;
 }
@@ -348,9 +347,8 @@ new_metadata_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbusm
   metadata = metadata_widget_new (newitem);
   GtkMenuItem *menu_metadata_widget = GTK_MENU_ITEM(metadata);
 
+	gtk_widget_show_all(metadata);
   dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_metadata_widget, parent);
-
-  gtk_widget_show_all(metadata);
 
   return TRUE;
 }
