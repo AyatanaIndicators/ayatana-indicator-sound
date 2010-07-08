@@ -13,13 +13,15 @@ libsoundmenu_la_SOURCES = \
 	transport-widget.h \
 	metadata-widget.c \
 	metadata-widget.h \
+	play-button.c \
+	play-button.h \
 	indicator-sound.c \
 	title-widget.c \
 	title-widget.h \
 	dbus-shared-names.h \
   sound-service-client.h 
 
-libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -Werror -DG_LOG_DOMAIN=\"Indicator-Sound\"
+libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -DG_LOG_DOMAIN=\"Indicator-Sound\"
 libsoundmenu_la_LIBADD = $(APPLET_LIBS)
 libsoundmenu_la_LDFLAGS = -module -avoid-version
 

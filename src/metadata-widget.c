@@ -47,6 +47,8 @@ static void metadata_widget_class_init (MetadataWidgetClass *klass);
 static void metadata_widget_init       (MetadataWidget *self);
 static void metadata_widget_dispose    (GObject *object);
 static void metadata_widget_finalize   (GObject *object);
+static gboolean metadata_widget_expose_event(GtkWidget* widget, GdkEventExpose* event);
+
 // keyevent consumers
 static gboolean metadata_widget_button_press_event (GtkWidget *menuitem, 
                                   									GdkEventButton *event);
@@ -74,7 +76,7 @@ metadata_widget_class_init (MetadataWidgetClass *klass)
 
 	widget_class->button_press_event = metadata_widget_button_press_event;
   widget_class->button_release_event = metadata_widget_button_release_event;
-	
+	widget_class->expose_event = metadata_widget_expose_event;
 	g_type_class_add_private (klass, sizeof (MetadataWidgetPrivate));
 
 	gobject_class->dispose = metadata_widget_dispose;
@@ -111,7 +113,7 @@ metadata_widget_init (MetadataWidget *self)
 	
 	gtk_misc_set_alignment(GTK_MISC(artist), (gfloat)0, (gfloat)0);
 	gtk_label_set_width_chars(GTK_LABEL(artist), 20);	
-	gtk_label_set_ellipsize(GTK_LABEL(artist), PANGO_ELLIPSIZE_END);	
+	gtk_label_set_ellipsize(GTK_LABEL(artist), PANGO_ELLIPSIZE_MIDDLE);	
 	priv->artist_label = artist;
 	// Style it up.
 	style_artist_text(self);
@@ -122,7 +124,7 @@ metadata_widget_init (MetadataWidget *self)
 	                                                     DBUSMENU_METADATA_MENUITEM_TEXT_TITLE));
 	gtk_misc_set_alignment(GTK_MISC(piece), (gfloat)0, (gfloat)0);
 	gtk_label_set_width_chars(GTK_LABEL(piece), 16);
-	gtk_label_set_ellipsize(GTK_LABEL(piece), PANGO_ELLIPSIZE_END);
+	gtk_label_set_ellipsize(GTK_LABEL(piece), PANGO_ELLIPSIZE_MIDDLE);
 	priv->piece_label =  piece;
 	// Style it up.
 	style_title_text(self);
@@ -133,7 +135,7 @@ metadata_widget_init (MetadataWidget *self)
 	                                                         DBUSMENU_METADATA_MENUITEM_TEXT_ALBUM));
 	gtk_misc_set_alignment(GTK_MISC(container), (gfloat)0, (gfloat)0);
 	gtk_label_set_width_chars(GTK_LABEL(container), 20);		
-	gtk_label_set_ellipsize(GTK_LABEL(container), PANGO_ELLIPSIZE_END);	
+	gtk_label_set_ellipsize(GTK_LABEL(container), PANGO_ELLIPSIZE_MIDDLE);	
 	priv->container_label = container;
 	// Style it up.
 	style_album_text(self);
@@ -150,6 +152,15 @@ metadata_widget_init (MetadataWidget *self)
 	gtk_widget_show_all (priv->hbox);
   gtk_container_add (GTK_CONTAINER (self), hbox);
 	
+}
+
+static gboolean
+metadata_widget_expose_event(GtkWidget* widget, GdkEventExpose* event)
+{
+	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);
+		
+	gtk_container_propagate_expose(GTK_CONTAINER(widget), priv->hbox, event); 
+	return TRUE;
 }
 
 static void
