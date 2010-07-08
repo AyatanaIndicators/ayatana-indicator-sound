@@ -18,30 +18,31 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 using Dbusmenu;
+using DbusmenuTitle;
 using Gee;
-using DbusmenuMetadata;
 
-public class MetadataMenuitem : PlayerItem
+public class TitleMenuitem : PlayerItem
 {
-	public MetadataMenuitem()
-  {
-		Object(item_type: MENUITEM_TYPE); 	
+	public TitleMenuitem(PlayerController parent, string name)
+	{
+		Object(item_type: MENUITEM_TYPE, owner: parent);
+		this.property_set(MENUITEM_TEXT_NAME, name);		
 	}
+
+	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
+	{
+		debug("handle_event with bool value %s", input_value.get_boolean().to_string());
+		if(this.owner.current_state == PlayerController.state.OFFLINE)
+		{
+			this.owner.instantiate();
+		}
+	}
+	
 
 	public static HashSet<string> attributes_format()
 	{
 		HashSet<string> attrs = new HashSet<string>();		
-		attrs.add(MENUITEM_TEXT_TITLE);
-    attrs.add(MENUITEM_TEXT_ARTIST);
-    attrs.add(MENUITEM_TEXT_ALBUM);
-    attrs.add(MENUITEM_ARTURL);
-		return attrs;
-	}
-	
-	public bool populated()
-	{
-		return (this.property_get(MENUITEM_TEXT_TITLE) != null && 
-		        this.property_get(MENUITEM_TEXT_TITLE) != "");
-	}
-		
+		attrs.add(MENUITEM_TEXT_NAME);
+ 		return attrs;
+	}	
 }

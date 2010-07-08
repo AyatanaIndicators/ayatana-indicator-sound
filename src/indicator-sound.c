@@ -40,6 +40,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "indicator-sound.h"
 #include "transport-widget.h"
 #include "metadata-widget.h"
+#include "title-widget.h"
 #include "dbus-shared-names.h"
 #include "sound-service-client.h"
 #include "common-defs.h"
@@ -96,6 +97,7 @@ static void style_changed_cb(GtkWidget *widget, gpointer user_data);
 //player widgets related
 static gboolean new_transport_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 static gboolean new_metadata_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
+static gboolean new_title_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
@@ -243,7 +245,7 @@ get_menu (IndicatorObject * io)
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SLIDER_MENUITEM_TYPE, new_slider_item);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TRANSPORT_MENUITEM_TYPE, new_transport_widget);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_METADATA_MENUITEM_TYPE, new_metadata_widget);
-
+  dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TITLE_MENUITEM_TYPE, new_title_widget);
   // register Key-press listening on the menu widget as the slider does not allow this.
   g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), NULL);
   return GTK_MENU(menu);
@@ -326,9 +328,8 @@ new_transport_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbus
   bar = transport_widget_new(newitem);
   GtkMenuItem *menu_transport_bar = GTK_MENU_ITEM(bar);
 
+	gtk_widget_show_all(bar);
   dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_transport_bar, parent);
-
-  gtk_widget_show_all(bar);
 
   return TRUE;
 }
@@ -346,16 +347,31 @@ new_metadata_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbusm
   metadata = metadata_widget_new (newitem);
   GtkMenuItem *menu_metadata_widget = GTK_MENU_ITEM(metadata);
 
+	gtk_widget_show_all(metadata);
   dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_metadata_widget, parent);
-
-  gtk_widget_show_all(metadata);
 
   return TRUE;
 }
 
-//const gchar* path = dbusmenu_menuitem_property_get(new_item, DBUSMENU_METADATA_MENUITEM_IMAGE_PATH);
+static gboolean
+new_title_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
+{
+  g_debug("indicator-sound: new_title_widget");
 
-//g_debug("New transport bar path = %s", path);
+  GtkWidget* title = NULL;
+
+  g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
+  g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
+
+  title = title_widget_new (newitem);
+  GtkMenuItem *menu_title_widget = GTK_MENU_ITEM(title);
+
+  dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_title_widget, parent);
+
+  gtk_widget_show_all(title);
+
+  return TRUE;
+}
 
 
 static void

@@ -1,3 +1,16 @@
+indicator-sound (0.3.5-0ubuntu1) UNRELEASED; urgency=low
+
+  * New upstream release:
+    -New transport widget integrated
+    -New title widget integrated which allows the user 
+     to launch familiar app directly from the menu
+    - UI tidied
+    - Each player that registers with the menu will be stored in the 
+      cache file allowing the menu to show the application even if it has 
+      not been launched.
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 08 Jul 2010 19:30:26 +0200
+
 indicator-sound (0.3.4-0ubuntu1) maverick; urgency=low
 
   * New upstream version:

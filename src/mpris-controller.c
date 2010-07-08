@@ -84,6 +84,8 @@ typedef struct _TransportMenuitem TransportMenuitem;
 typedef struct _TransportMenuitemClass TransportMenuitemClass;
 #define _g_hash_table_unref0(var) ((var == NULL) ? NULL : (var = (g_hash_table_unref (var), NULL)))
 
+#define TRANSPORT_MENUITEM_TYPE_ACTION (transport_menuitem_action_get_type ())
+
 struct _MprisController {
 	GObject parent_instance;
 	MprisControllerPrivate * priv;
@@ -101,20 +103,25 @@ struct _MprisControllerPrivate {
 
 struct _MprisControllerstatus {
 	gint32 playback;
-	gint32 shuffle;
-	gint32 repeat;
-	gint32 endless;
 };
 
 struct _PlayerController {
 	GObject parent_instance;
 	PlayerControllerPrivate * priv;
+	gint current_state;
 	GeeArrayList* custom_items;
+	MprisController* mpris_adaptor;
 };
 
 struct _PlayerControllerClass {
 	GObjectClass parent_class;
 };
+
+typedef enum  {
+	TRANSPORT_MENUITEM_ACTION_PREVIOUS,
+	TRANSPORT_MENUITEM_ACTION_PLAY_PAUSE,
+	TRANSPORT_MENUITEM_ACTION_NEXT
+} TransportMenuitemaction;
 
 
 static gpointer mpris_controller_parent_class = NULL;
@@ -146,9 +153,14 @@ GeeHashSet* metadata_menuitem_attributes_format (void);
 MprisController* mpris_controller_new (const char* name, PlayerController* controller, const char* mpris_interface);
 MprisController* mpris_controller_construct (GType object_type, const char* name, PlayerController* controller, const char* mpris_interface);
 void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
-static void _dynamic_Play2 (DBusGProxy* self, GError** error);
-static void _dynamic_Pause3 (DBusGProxy* self, GError** error);
-void mpris_controller_toggle_playback (MprisController* self, gboolean state);
+GType transport_menuitem_action_get_type (void);
+static void _dynamic_GetStatus2 (DBusGProxy* self, MprisControllerstatus* result, GError** error);
+static void _dynamic_Play3 (DBusGProxy* self, GError** error);
+static void _dynamic_Pause4 (DBusGProxy* self, GError** error);
+static void _dynamic_previous5 (DBusGProxy* self, GError** error);
+static void _dynamic_next6 (DBusGProxy* self, GError** error);
+void mpris_controller_transport_event (MprisController* self, TransportMenuitemaction command);
+gboolean mpris_controller_connected (MprisController* self);
 static GValue* _g_value_dup (GValue* self);
 GeeHashSet* transport_menuitem_attributes_format (void);
 static void mpris_controller_finalize (GObject* obj);
@@ -179,22 +191,19 @@ static void _mpris_controller_onStatusChange_dynamic_StatusChange2_ (DBusGProxy*
 
 
 void _dynamic_StatusChange3_connect (gpointer obj, const char * signal_name, GCallback handler, gpointer data) {
-	dbus_g_object_register_marshaller (g_cclosure_user_marshal_VOID__BOXED, G_TYPE_NONE, dbus_g_type_get_struct ("GValueArray", G_TYPE_INT, G_TYPE_INT, G_TYPE_INT, G_TYPE_INT, G_TYPE_INVALID), G_TYPE_INVALID);
-	dbus_g_proxy_add_signal (obj, "StatusChange", dbus_g_type_get_struct ("GValueArray", G_TYPE_INT, G_TYPE_INT, G_TYPE_INT, G_TYPE_INT, G_TYPE_INVALID), G_TYPE_INVALID);
+	dbus_g_object_register_marshaller (g_cclosure_user_marshal_VOID__BOXED, G_TYPE_NONE, dbus_g_type_get_struct ("GValueArray", G_TYPE_INT, G_TYPE_INVALID), G_TYPE_INVALID);
+	dbus_g_proxy_add_signal (obj, "StatusChange", dbus_g_type_get_struct ("GValueArray", G_TYPE_INT, G_TYPE_INVALID), G_TYPE_INVALID);
 	dbus_g_proxy_connect_signal (obj, signal_name, handler, data, NULL);
 }
 
 
 static void _dynamic_GetStatus0 (DBusGProxy* self, MprisControllerstatus* result, GError** error) {
 	GValueArray* dbus_result;
-	dbus_g_proxy_call (self, "GetStatus", error, G_TYPE_INVALID, dbus_g_type_get_struct ("GValueArray", G_TYPE_INT, G_TYPE_INT, G_TYPE_INT, G_TYPE_INT, G_TYPE_INVALID), &dbus_result, G_TYPE_INVALID);
+	dbus_g_proxy_call (self, "GetStatus", error, G_TYPE_INVALID, dbus_g_type_get_struct ("GValueArray", G_TYPE_INT, G_TYPE_INVALID), &dbus_result, G_TYPE_INVALID);
 	if (*error) {
 		return;
 	}
 	result->playback = g_value_get_int (&dbus_result->values[0]);
-	result->shuffle = g_value_get_int (&dbus_result->values[1]);
-	result->repeat = g_value_get_int (&dbus_result->values[2]);
-	result->endless = g_value_get_int (&dbus_result->values[3]);
 }
 
 
@@ -234,12 +243,12 @@ MprisController* mpris_controller_construct (GType object_type, const char* name
 		DBusGConnection* _tmp1_;
 		_tmp0_ = dbus_g_bus_get (DBUS_BUS_SESSION, &_inner_error_);
 		if (_inner_error_ != NULL) {
-			goto __catch1_g_error;
+			goto __catch2_g_error;
 		}
 		self->priv->connection = (_tmp1_ = _tmp0_, _dbus_g_connection_unref0 (self->priv->connection), _tmp1_);
 	}
-	goto __finally1;
-	__catch1_g_error:
+	goto __finally2;
+	__catch2_g_error:
 	{
 		GError * e;
 		e = _inner_error_;
@@ -249,7 +258,7 @@ MprisController* mpris_controller_construct (GType object_type, const char* name
 			_g_error_free0 (e);
 		}
 	}
-	__finally1:
+	__finally2:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -308,7 +317,17 @@ static void mpris_controller_onTrackChange (MprisController* self, DBusGProxy* m
 }
 
 
-static void _dynamic_Play2 (DBusGProxy* self, GError** error) {
+static void _dynamic_GetStatus2 (DBusGProxy* self, MprisControllerstatus* result, GError** error) {
+	GValueArray* dbus_result;
+	dbus_g_proxy_call (self, "GetStatus", error, G_TYPE_INVALID, dbus_g_type_get_struct ("GValueArray", G_TYPE_INT, G_TYPE_INVALID), &dbus_result, G_TYPE_INVALID);
+	if (*error) {
+		return;
+	}
+	result->playback = g_value_get_int (&dbus_result->values[0]);
+}
+
+
+static void _dynamic_Play3 (DBusGProxy* self, GError** error) {
 	dbus_g_proxy_call (self, "Play", error, G_TYPE_INVALID, G_TYPE_INVALID);
 	if (*error) {
 		return;
@@ -316,7 +335,7 @@ static void _dynamic_Play2 (DBusGProxy* self, GError** error) {
 }
 
 
-static void _dynamic_Pause3 (DBusGProxy* self, GError** error) {
+static void _dynamic_Pause4 (DBusGProxy* self, GError** error) {
 	dbus_g_proxy_call (self, "Pause", error, G_TYPE_INVALID, G_TYPE_INVALID);
 	if (*error) {
 		return;
@@ -324,27 +343,86 @@ static void _dynamic_Pause3 (DBusGProxy* self, GError** error) {
 }
 
 
-void mpris_controller_toggle_playback (MprisController* self, gboolean state) {
+static void _dynamic_previous5 (DBusGProxy* self, GError** error) {
+	dbus_g_proxy_call (self, "Previous", error, G_TYPE_INVALID, G_TYPE_INVALID);
+	if (*error) {
+		return;
+	}
+}
+
+
+static void _dynamic_next6 (DBusGProxy* self, GError** error) {
+	dbus_g_proxy_call (self, "Next", error, G_TYPE_INVALID, G_TYPE_INVALID);
+	if (*error) {
+		return;
+	}
+}
+
+
+void mpris_controller_transport_event (MprisController* self, TransportMenuitemaction command) {
 	GError * _inner_error_;
 	g_return_if_fail (self != NULL);
 	_inner_error_ = NULL;
-	if (state == TRUE) {
-		g_debug ("mpris-controller.vala:71: about to play");
-		_dynamic_Play2 (self->mpris_player, &_inner_error_);
+	g_debug ("mpris-controller.vala:70: transport_event input = %i", (gint) command);
+	if (command == TRANSPORT_MENUITEM_ACTION_PLAY_PAUSE) {
+		MprisControllerstatus _tmp0_ = {0};
+		MprisControllerstatus st;
+		gboolean play_state;
+		gboolean new_play_state;
+		st = (_dynamic_GetStatus2 (self->mpris_player, &_tmp0_, &_inner_error_), _tmp0_);
 		if (_inner_error_ != NULL) {
 			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
 			return;
+		}
+		play_state = st.playback == 1;
+		g_debug ("mpris-controller.vala:74: toggle_playback - initial play state %i", (gint) play_state);
+		new_play_state = !play_state;
+		g_debug ("mpris-controller.vala:76: toggle_playback - new play state %i", (gint) new_play_state);
+		if (new_play_state == TRUE) {
+			g_debug ("mpris-controller.vala:78: about to play");
+			_dynamic_Play3 (self->mpris_player, &_inner_error_);
+			if (_inner_error_ != NULL) {
+				g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+				g_clear_error (&_inner_error_);
+				return;
+			}
+		} else {
+			g_debug ("mpris-controller.vala:82: about to pause");
+			_dynamic_Pause4 (self->mpris_player, &_inner_error_);
+			if (_inner_error_ != NULL) {
+				g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+				g_clear_error (&_inner_error_);
+				return;
+			}
 		}
 	} else {
-		g_debug ("mpris-controller.vala:75: about to pause");
-		_dynamic_Pause3 (self->mpris_player, &_inner_error_);
-		if (_inner_error_ != NULL) {
-			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
-			g_clear_error (&_inner_error_);
-			return;
+		if (command == TRANSPORT_MENUITEM_ACTION_PREVIOUS) {
+			_dynamic_previous5 (self->mpris_player, &_inner_error_);
+			if (_inner_error_ != NULL) {
+				g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+				g_clear_error (&_inner_error_);
+				return;
+			}
+		} else {
+			if (command == TRANSPORT_MENUITEM_ACTION_NEXT) {
+				_dynamic_next6 (self->mpris_player, &_inner_error_);
+				if (_inner_error_ != NULL) {
+					g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+					g_clear_error (&_inner_error_);
+					return;
+				}
+			}
 		}
 	}
+}
+
+
+gboolean mpris_controller_connected (MprisController* self) {
+	gboolean result = FALSE;
+	g_return_val_if_fail (self != NULL, FALSE);
+	result = self->mpris_player != NULL;
+	return result;
 }
 
 
@@ -368,11 +446,11 @@ static void mpris_controller_onStatusChange (MprisController* self, DBusGProxy* 
 	PlayerItem* _tmp0_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (mpris_client != NULL);
-	g_debug ("mpris-controller.vala:82: onStatusChange - signal received");
+	g_debug ("mpris-controller.vala:101: onStatusChange - signal received");
 	status = st;
 	ar = (GValueArray*) status;
 	play_state = g_value_get_int (g_value_array_get_nth (ar, (guint) 0));
-	g_debug ("mpris-controller.vala:86: onStatusChange - play state %i", play_state);
+	g_debug ("mpris-controller.vala:105: onStatusChange - play state %i", play_state);
 	ht = g_hash_table_new (g_str_hash, g_str_equal);
 	g_value_init (&v, G_TYPE_INT);
 	g_value_set_int (&v, play_state);

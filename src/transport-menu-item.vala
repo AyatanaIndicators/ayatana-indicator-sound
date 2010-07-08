@@ -23,11 +23,15 @@ using DbusmenuTransport;
 
 public class TransportMenuitem : PlayerItem
 {
+	public enum action{
+		PREVIOUS,
+		PLAY_PAUSE,
+		NEXT
+	}
 	
-	public TransportMenuitem()
+	public TransportMenuitem(PlayerController parent)
   {
-		this.property_set(MENUITEM_PROP_TYPE, MENUITEM_TYPE);
-		debug("transport on the vala side");
+		Object(item_type: MENUITEM_TYPE, owner: parent); 
 	}
 
 	public void change_play_state(int state)
@@ -37,14 +41,11 @@ public class TransportMenuitem : PlayerItem
 	
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
 	{
-		debug("handle_event with bool value %s", input_value.get_boolean().to_string());
-		this.mpris_adaptor.toggle_playback(input_value.get_boolean());
-	}
-
-	public override void check_layout(){
-		// nothing to be done for this item - always active
-	}
-	
+		int input = input_value.get_int();
+		debug("handle_event with value %s", input.to_string());
+		// Fire and forgot - the widget would not have sent it over it didn't think it was relevant.
+		this.owner.mpris_adaptor.transport_event((action)input);
+	}	
 
 	public static HashSet<string> attributes_format()
 	{

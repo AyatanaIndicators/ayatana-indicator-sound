@@ -27,9 +27,9 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <libdbusmenu-glib/menuitem.h>
 #include <libdbusmenu-glib/server.h>
 #include <common-defs.h>
+#include <gee.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gee.h>
 
 
 #define TYPE_PLAYER_ITEM (player_item_get_type ())
@@ -43,16 +43,6 @@ typedef struct _PlayerItem PlayerItem;
 typedef struct _PlayerItemClass PlayerItemClass;
 typedef struct _PlayerItemPrivate PlayerItemPrivate;
 
-#define TYPE_MPRIS_CONTROLLER (mpris_controller_get_type ())
-#define MPRIS_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_MPRIS_CONTROLLER, MprisController))
-#define MPRIS_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_MPRIS_CONTROLLER, MprisControllerClass))
-#define IS_MPRIS_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_MPRIS_CONTROLLER))
-#define IS_MPRIS_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_MPRIS_CONTROLLER))
-#define MPRIS_CONTROLLER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_MPRIS_CONTROLLER, MprisControllerClass))
-
-typedef struct _MprisController MprisController;
-typedef struct _MprisControllerClass MprisControllerClass;
-
 #define TYPE_TRANSPORT_MENUITEM (transport_menuitem_get_type ())
 #define TRANSPORT_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_TRANSPORT_MENUITEM, TransportMenuitem))
 #define TRANSPORT_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_TRANSPORT_MENUITEM, TransportMenuitemClass))
@@ -63,18 +53,39 @@ typedef struct _MprisControllerClass MprisControllerClass;
 typedef struct _TransportMenuitem TransportMenuitem;
 typedef struct _TransportMenuitemClass TransportMenuitemClass;
 typedef struct _TransportMenuitemPrivate TransportMenuitemPrivate;
+
+#define TRANSPORT_MENUITEM_TYPE_ACTION (transport_menuitem_action_get_type ())
+
+#define TYPE_PLAYER_CONTROLLER (player_controller_get_type ())
+#define PLAYER_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PLAYER_CONTROLLER, PlayerController))
+#define PLAYER_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PLAYER_CONTROLLER, PlayerControllerClass))
+#define IS_PLAYER_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_PLAYER_CONTROLLER))
+#define IS_PLAYER_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_PLAYER_CONTROLLER))
+#define PLAYER_CONTROLLER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_PLAYER_CONTROLLER, PlayerControllerClass))
+
+typedef struct _PlayerController PlayerController;
+typedef struct _PlayerControllerClass PlayerControllerClass;
 #define _g_free0(var) (var = (g_free (var), NULL))
+typedef struct _PlayerControllerPrivate PlayerControllerPrivate;
+
+#define TYPE_MPRIS_CONTROLLER (mpris_controller_get_type ())
+#define MPRIS_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_MPRIS_CONTROLLER, MprisController))
+#define MPRIS_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_MPRIS_CONTROLLER, MprisControllerClass))
+#define IS_MPRIS_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_MPRIS_CONTROLLER))
+#define IS_MPRIS_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_MPRIS_CONTROLLER))
+#define MPRIS_CONTROLLER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_MPRIS_CONTROLLER, MprisControllerClass))
+
+typedef struct _MprisController MprisController;
+typedef struct _MprisControllerClass MprisControllerClass;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 
 struct _PlayerItem {
 	DbusmenuMenuitem parent_instance;
 	PlayerItemPrivate * priv;
-	MprisController* mpris_adaptor;
 };
 
 struct _PlayerItemClass {
 	DbusmenuMenuitemClass parent_class;
-	void (*check_layout) (PlayerItem* self);
 };
 
 struct _TransportMenuitem {
@@ -86,38 +97,67 @@ struct _TransportMenuitemClass {
 	PlayerItemClass parent_class;
 };
 
+typedef enum  {
+	TRANSPORT_MENUITEM_ACTION_PREVIOUS,
+	TRANSPORT_MENUITEM_ACTION_PLAY_PAUSE,
+	TRANSPORT_MENUITEM_ACTION_NEXT
+} TransportMenuitemaction;
+
+struct _PlayerController {
+	GObject parent_instance;
+	PlayerControllerPrivate * priv;
+	gint current_state;
+	GeeArrayList* custom_items;
+	MprisController* mpris_adaptor;
+};
+
+struct _PlayerControllerClass {
+	GObjectClass parent_class;
+};
+
 
 static gpointer transport_menuitem_parent_class = NULL;
 
 GType player_item_get_type (void);
-GType mpris_controller_get_type (void);
 GType transport_menuitem_get_type (void);
 enum  {
 	TRANSPORT_MENUITEM_DUMMY_PROPERTY
 };
-PlayerItem* player_item_new (void);
-PlayerItem* player_item_construct (GType object_type);
-TransportMenuitem* transport_menuitem_new (void);
-TransportMenuitem* transport_menuitem_construct (GType object_type);
+GType transport_menuitem_action_get_type (void);
+GType player_controller_get_type (void);
+TransportMenuitem* transport_menuitem_new (PlayerController* parent);
+TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerController* parent);
 void transport_menuitem_change_play_state (TransportMenuitem* self, gint state);
-void mpris_controller_toggle_playback (MprisController* self, gboolean state);
+PlayerController* player_item_get_owner (PlayerItem* self);
+GType mpris_controller_get_type (void);
+void mpris_controller_transport_event (MprisController* self, TransportMenuitemaction command);
 static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const char* name, GValue* input_value, guint timestamp);
-static void transport_menuitem_real_check_layout (PlayerItem* base);
 GeeHashSet* transport_menuitem_attributes_format (void);
 
 
 
-TransportMenuitem* transport_menuitem_construct (GType object_type) {
+GType transport_menuitem_action_get_type (void) {
+	static volatile gsize transport_menuitem_action_type_id__volatile = 0;
+	if (g_once_init_enter (&transport_menuitem_action_type_id__volatile)) {
+		static const GEnumValue values[] = {{TRANSPORT_MENUITEM_ACTION_PREVIOUS, "TRANSPORT_MENUITEM_ACTION_PREVIOUS", "previous"}, {TRANSPORT_MENUITEM_ACTION_PLAY_PAUSE, "TRANSPORT_MENUITEM_ACTION_PLAY_PAUSE", "play-pause"}, {TRANSPORT_MENUITEM_ACTION_NEXT, "TRANSPORT_MENUITEM_ACTION_NEXT", "next"}, {0, NULL, NULL}};
+		GType transport_menuitem_action_type_id;
+		transport_menuitem_action_type_id = g_enum_register_static ("TransportMenuitemaction", values);
+		g_once_init_leave (&transport_menuitem_action_type_id__volatile, transport_menuitem_action_type_id);
+	}
+	return transport_menuitem_action_type_id__volatile;
+}
+
+
+TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerController* parent) {
 	TransportMenuitem * self;
-	self = (TransportMenuitem*) player_item_construct (object_type);
-	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_MENUITEM_PROP_TYPE, DBUSMENU_TRANSPORT_MENUITEM_TYPE);
-	g_debug ("transport-menu-item.vala:30: transport on the vala side");
+	g_return_val_if_fail (parent != NULL, NULL);
+	self = (TransportMenuitem*) g_object_new (object_type, "item-type", DBUSMENU_TRANSPORT_MENUITEM_TYPE, "owner", parent, NULL);
 	return self;
 }
 
 
-TransportMenuitem* transport_menuitem_new (void) {
-	return transport_menuitem_construct (TYPE_TRANSPORT_MENUITEM);
+TransportMenuitem* transport_menuitem_new (PlayerController* parent) {
+	return transport_menuitem_construct (TYPE_TRANSPORT_MENUITEM, parent);
 }
 
 
@@ -127,32 +167,16 @@ void transport_menuitem_change_play_state (TransportMenuitem* self, gint state) 
 }
 
 
-static char* bool_to_string (gboolean self) {
-	char* result = NULL;
-	if (self) {
-		result = g_strdup ("true");
-		return result;
-	} else {
-		result = g_strdup ("false");
-		return result;
-	}
-}
-
-
 static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const char* name, GValue* input_value, guint timestamp) {
 	TransportMenuitem * self;
+	gint input;
 	char* _tmp0_;
 	self = (TransportMenuitem*) base;
 	g_return_if_fail (name != NULL);
-	g_debug ("transport-menu-item.vala:40: handle_event with bool value %s", _tmp0_ = bool_to_string (g_value_get_boolean (input_value)));
+	input = g_value_get_int (input_value);
+	g_debug ("transport-menu-item.vala:45: handle_event with value %s", _tmp0_ = g_strdup_printf ("%i", input));
 	_g_free0 (_tmp0_);
-	mpris_controller_toggle_playback (((PlayerItem*) self)->mpris_adaptor, g_value_get_boolean (input_value));
-}
-
-
-static void transport_menuitem_real_check_layout (PlayerItem* base) {
-	TransportMenuitem * self;
-	self = (TransportMenuitem*) base;
+	mpris_controller_transport_event (player_item_get_owner ((PlayerItem*) self)->mpris_adaptor, (TransportMenuitemaction) input);
 }
 
 
@@ -169,7 +193,6 @@ GeeHashSet* transport_menuitem_attributes_format (void) {
 static void transport_menuitem_class_init (TransportMenuitemClass * klass) {
 	transport_menuitem_parent_class = g_type_class_peek_parent (klass);
 	DBUSMENU_MENUITEM_CLASS (klass)->handle_event = transport_menuitem_real_handle_event;
-	PLAYER_ITEM_CLASS (klass)->check_layout = transport_menuitem_real_check_layout;
 }
 
 
