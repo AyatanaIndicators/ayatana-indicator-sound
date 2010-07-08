@@ -32,7 +32,7 @@ public class TitleMenuitem : PlayerItem
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
 	{
 		debug("handle_event with bool value %s", input_value.get_boolean().to_string());
-		if(this.owner.current_state == PlayerController.OFFLINE)
+		if(this.owner.current_state == PlayerController.state.OFFLINE)
 		{
 			this.owner.instantiate();
 		}

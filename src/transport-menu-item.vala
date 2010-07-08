@@ -23,6 +23,11 @@ using DbusmenuTransport;
 
 public class TransportMenuitem : PlayerItem
 {
+	public enum action{
+		PREVIOUS,
+		PLAY_PAUSE,
+		NEXT
+	}
 	
 	public TransportMenuitem(PlayerController parent)
   {
@@ -38,12 +43,8 @@ public class TransportMenuitem : PlayerItem
 	{
 		int input = input_value.get_int();
 		debug("handle_event with value %s", input.to_string());
-		if(input > 0){
-			this.owner.mpris_adaptor.transport_event(input);
-		}
-		else{
-			debug("A mouse event I'm not interested in");
-		}
+		// Fire and forgot - the widget would not have sent it over it didn't think it was relevant.
+		this.owner.mpris_adaptor.transport_event((action)input);
 	}	
 
 	public static HashSet<string> attributes_format()

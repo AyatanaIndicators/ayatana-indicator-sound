@@ -25,6 +25,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "title-widget.h"
 #include "common-defs.h"
 #include <gtk/gtk.h>
+#include <libindicator/indicator-image-helper.h>
 
 static DbusmenuMenuitem* twin_item;
 
@@ -91,8 +92,8 @@ title_widget_init (TitleWidget *self)
 	priv->hbox = hbox;
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
 	                 G_CALLBACK(title_widget_property_update), self);
-	// TODO - waiting theme icon name for correct usage
-	priv->player_icon = gtk_image_new_from_file("/home/ronoc/branches/sound-menu-v2/finish-indicate/indicator-sound/data/sound_icon.png"); 
+
+	priv->player_icon = indicator_image_helper("sound_icon");
 	gtk_box_pack_start(GTK_BOX (priv->hbox), priv->player_icon, FALSE, FALSE, 0);		
 	
 	priv->name = gtk_label_new(dbusmenu_menuitem_property_get(twin_item, 
