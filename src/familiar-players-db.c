@@ -139,17 +139,17 @@ static gboolean familiar_players_db_create_key_file (FamiliarPlayersDB* self) {
 			_tmp1_ = g_key_file_load_from_file (self->priv->key_file, self->priv->file_name, G_KEY_FILE_NONE, &_inner_error_);
 			if (_inner_error_ != NULL) {
 				if (_inner_error_->domain == G_FILE_ERROR) {
-					goto __catch2_g_file_error;
+					goto __catch3_g_file_error;
 				}
-				goto __finally2;
+				goto __finally3;
 			}
 			if (_tmp1_ == TRUE) {
 				result = TRUE;
 				return result;
 			}
 		}
-		goto __finally2;
-		__catch2_g_file_error:
+		goto __finally3;
+		__catch3_g_file_error:
 		{
 			GError * e;
 			e = _inner_error_;
@@ -160,7 +160,7 @@ static gboolean familiar_players_db_create_key_file (FamiliarPlayersDB* self) {
 				_g_error_free0 (e);
 			}
 		}
-		__finally2:
+		__finally3:
 		if (_inner_error_ != NULL) {
 			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -182,7 +182,7 @@ static gboolean familiar_players_db_check_for_keys (FamiliarPlayersDB* self) {
 		_tmp0_ = g_key_file_has_key (self->priv->key_file, FAMILIAR_PLAYERS_DB_GROUP_NAME, FAMILIAR_PLAYERS_DB_KEY_NAME, &_inner_error_);
 		if (_inner_error_ != NULL) {
 			if (_inner_error_->domain == G_KEY_FILE_ERROR) {
-				goto __catch3_g_key_file_error;
+				goto __catch4_g_key_file_error;
 			}
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -193,8 +193,8 @@ static gboolean familiar_players_db_check_for_keys (FamiliarPlayersDB* self) {
 			return result;
 		}
 	}
-	goto __finally3;
-	__catch3_g_key_file_error:
+	goto __finally4;
+	__catch4_g_key_file_error:
 	{
 		GError * e;
 		e = _inner_error_;
@@ -205,7 +205,7 @@ static gboolean familiar_players_db_check_for_keys (FamiliarPlayersDB* self) {
 			return result;
 		}
 	}
-	__finally3:
+	__finally4:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -232,9 +232,9 @@ static gboolean familiar_players_db_load_data_from_key_file (FamiliarPlayersDB* 
 		desktops = (_tmp1_ = g_key_file_get_string_list (self->priv->key_file, FAMILIAR_PLAYERS_DB_GROUP_NAME, FAMILIAR_PLAYERS_DB_KEY_NAME, &_tmp0_, &_inner_error_), desktops_length1 = _tmp0_, _desktops_size_ = desktops_length1, _tmp1_);
 		if (_inner_error_ != NULL) {
 			if (_inner_error_->domain == G_FILE_ERROR) {
-				goto __catch4_g_file_error;
+				goto __catch5_g_file_error;
 			}
-			goto __finally4;
+			goto __finally5;
 		}
 		{
 			char** s_collection;
@@ -255,8 +255,8 @@ static gboolean familiar_players_db_load_data_from_key_file (FamiliarPlayersDB* 
 		desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
 		return result;
 	}
-	goto __finally4;
-	__catch4_g_file_error:
+	goto __finally5;
+	__catch5_g_file_error:
 	{
 		GError * _error_;
 		_error_ = _inner_error_;
@@ -268,7 +268,7 @@ static gboolean familiar_players_db_load_data_from_key_file (FamiliarPlayersDB* 
 			return result;
 		}
 	}
-	__finally4:
+	__finally5:
 	{
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -324,8 +324,8 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 		char* _tmp4_;
 		data = (_tmp4_ = g_key_file_to_data (keyfile, &data_length, NULL), _g_free0 (data), _tmp4_);
 	}
-	goto __finally5;
-	__catch5_g_error:
+	goto __finally6;
+	__catch6_g_error:
 	{
 		GError * e;
 		e = _inner_error_;
@@ -340,7 +340,7 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 			return result;
 		}
 	}
-	__finally5:
+	__finally6:
 	if (_inner_error_ != NULL) {
 		_g_key_file_free0 (keyfile);
 		desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
@@ -362,7 +362,7 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 		_tmp5_ = g_file_set_contents (self->priv->file_name, data, (gssize) data_length, &_inner_error_);
 		if (_inner_error_ != NULL) {
 			if (_inner_error_->domain == G_FILE_ERROR) {
-				goto __catch6_g_file_error;
+				goto __catch7_g_file_error;
 			}
 			_g_key_file_free0 (keyfile);
 			desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
@@ -375,8 +375,8 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 			g_warning ("familiar-players-db.vala:123: Unable to write out file '%s'", self->priv->file_name);
 		}
 	}
-	goto __finally6;
-	__catch6_g_file_error:
+	goto __finally7;
+	__catch7_g_file_error:
 	{
 		GError * err;
 		err = _inner_error_;
@@ -386,7 +386,7 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 			_g_error_free0 (err);
 		}
 	}
-	__finally6:
+	__finally7:
 	if (_inner_error_ != NULL) {
 		_g_key_file_free0 (keyfile);
 		desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
@@ -426,11 +426,30 @@ void familiar_players_db_insert (FamiliarPlayersDB* self, const char* desktop) {
 }
 
 
+static char* bool_to_string (gboolean self) {
+	char* result = NULL;
+	if (self) {
+		result = g_strdup ("true");
+		return result;
+	} else {
+		result = g_strdup ("false");
+		return result;
+	}
+}
+
+
 gboolean familiar_players_db_already_familiar (FamiliarPlayersDB* self, const char* desktop) {
 	gboolean result = FALSE;
+	char* _tmp1_;
+	GeeSet* _tmp0_;
+	GeeSet* _tmp2_;
+	gboolean _tmp3_;
 	g_return_val_if_fail (self != NULL, FALSE);
 	g_return_val_if_fail (desktop != NULL, FALSE);
-	result = GPOINTER_TO_INT (gee_abstract_map_get ((GeeAbstractMap*) self->priv->players_DB, desktop));
+	g_debug ("familiar-players-db.vala:146: playerDB->already_familiar - result %s", _tmp1_ = bool_to_string (gee_collection_contains ((GeeCollection*) (_tmp0_ = gee_map_get_keys ((GeeMap*) self->priv->players_DB)), desktop)));
+	_g_free0 (_tmp1_);
+	_g_object_unref0 (_tmp0_);
+	result = (_tmp3_ = gee_collection_contains ((GeeCollection*) (_tmp2_ = gee_map_get_keys ((GeeMap*) self->priv->players_DB)), desktop), _g_object_unref0 (_tmp2_), _tmp3_);
 	return result;
 }
 

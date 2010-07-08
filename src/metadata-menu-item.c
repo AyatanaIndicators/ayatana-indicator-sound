@@ -43,16 +43,6 @@ typedef struct _PlayerItem PlayerItem;
 typedef struct _PlayerItemClass PlayerItemClass;
 typedef struct _PlayerItemPrivate PlayerItemPrivate;
 
-#define TYPE_MPRIS_CONTROLLER (mpris_controller_get_type ())
-#define MPRIS_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_MPRIS_CONTROLLER, MprisController))
-#define MPRIS_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_MPRIS_CONTROLLER, MprisControllerClass))
-#define IS_MPRIS_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_MPRIS_CONTROLLER))
-#define IS_MPRIS_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_MPRIS_CONTROLLER))
-#define MPRIS_CONTROLLER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_MPRIS_CONTROLLER, MprisControllerClass))
-
-typedef struct _MprisController MprisController;
-typedef struct _MprisControllerClass MprisControllerClass;
-
 #define TYPE_METADATA_MENUITEM (metadata_menuitem_get_type ())
 #define METADATA_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_METADATA_MENUITEM, MetadataMenuitem))
 #define METADATA_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_METADATA_MENUITEM, MetadataMenuitemClass))
@@ -64,17 +54,14 @@ typedef struct _MetadataMenuitem MetadataMenuitem;
 typedef struct _MetadataMenuitemClass MetadataMenuitemClass;
 typedef struct _MetadataMenuitemPrivate MetadataMenuitemPrivate;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
-#define _g_free0(var) (var = (g_free (var), NULL))
 
 struct _PlayerItem {
 	DbusmenuMenuitem parent_instance;
 	PlayerItemPrivate * priv;
-	MprisController* mpris_adaptor;
 };
 
 struct _PlayerItemClass {
 	DbusmenuMenuitemClass parent_class;
-	void (*check_layout) (PlayerItem* self);
 };
 
 struct _MetadataMenuitem {
@@ -90,26 +77,21 @@ struct _MetadataMenuitemClass {
 static gpointer metadata_menuitem_parent_class = NULL;
 
 GType player_item_get_type (void);
-GType mpris_controller_get_type (void);
 GType metadata_menuitem_get_type (void);
 enum  {
 	METADATA_MENUITEM_DUMMY_PROPERTY
 };
-PlayerItem* player_item_new (void);
-PlayerItem* player_item_construct (GType object_type);
 MetadataMenuitem* metadata_menuitem_new (void);
 MetadataMenuitem* metadata_menuitem_construct (GType object_type);
 GeeHashSet* metadata_menuitem_attributes_format (void);
 gboolean metadata_menuitem_populated (MetadataMenuitem* self);
-static void metadata_menuitem_real_check_layout (PlayerItem* base);
 static int _vala_strcmp0 (const char * str1, const char * str2);
 
 
 
 MetadataMenuitem* metadata_menuitem_construct (GType object_type) {
 	MetadataMenuitem * self;
-	self = (MetadataMenuitem*) player_item_construct (object_type);
-	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_MENUITEM_PROP_TYPE, DBUSMENU_METADATA_MENUITEM_TYPE);
+	self = (MetadataMenuitem*) g_object_new (object_type, "item-type", DBUSMENU_METADATA_MENUITEM_TYPE, NULL);
 	return self;
 }
 
@@ -132,28 +114,6 @@ GeeHashSet* metadata_menuitem_attributes_format (void) {
 }
 
 
-static char* bool_to_string (gboolean self) {
-	char* result = NULL;
-	if (self) {
-		result = g_strdup ("true");
-		return result;
-	} else {
-		result = g_strdup ("false");
-		return result;
-	}
-}
-
-
-static void metadata_menuitem_real_check_layout (PlayerItem* base) {
-	MetadataMenuitem * self;
-	char* _tmp0_;
-	self = (MetadataMenuitem*) base;
-	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_MENUITEM_PROP_VISIBLE, metadata_menuitem_populated (self));
-	g_debug ("metadata-menu-item.vala:43: check layout for the metadata = %s", _tmp0_ = bool_to_string (metadata_menuitem_populated (self)));
-	_g_free0 (_tmp0_);
-}
-
-
 gboolean metadata_menuitem_populated (MetadataMenuitem* self) {
 	gboolean result = FALSE;
 	gboolean _tmp0_ = FALSE;
@@ -170,7 +130,6 @@ gboolean metadata_menuitem_populated (MetadataMenuitem* self) {
 
 static void metadata_menuitem_class_init (MetadataMenuitemClass * klass) {
 	metadata_menuitem_parent_class = g_type_class_peek_parent (klass);
-	PLAYER_ITEM_CLASS (klass)->check_layout = metadata_menuitem_real_check_layout;
 }
 
 

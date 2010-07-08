@@ -27,9 +27,9 @@ public class MprisController : GLib.Object
 	private PlayerController controller;
   struct status {
     public int32 playback;
-    public int32 shuffle;
-    public int32 repeat;
-    public int32 endless;
+    //public int32 shuffle; // Not used just yet
+    //public int32 repeat;
+    //public int32 endless;
   }
 		
 	public MprisController(string name, PlayerController controller, string mpris_interface="org.freedesktop.MediaPlayer"){
@@ -65,16 +65,35 @@ public class MprisController : GLib.Object
 	 * TRUE  => Playing
 	 * FALSE => Paused
 	 **/
-	public void toggle_playback(bool state)
+	public void transport_event(TransportMenuitem.action command)
 	{
-		if(state == true){
-			debug("about to play");
-			this.mpris_player.Play();				
+		debug("transport_event input = %i", (int)command);
+		if(command == TransportMenuitem.action.PLAY_PAUSE){
+			status st = this.mpris_player.GetStatus();
+			bool play_state =  st.playback == 1;
+			debug("toggle_playback - initial play state %i", (int)play_state);
+			bool new_play_state = !play_state;
+			debug("toggle_playback - new play state %i", (int)new_play_state);
+			if(new_play_state == true){
+				debug("about to play");
+				this.mpris_player.Play();				
+			}
+			else{
+				debug("about to pause");
+				this.mpris_player.Pause();						
+			}
 		}
-		else{
-			debug("about to pause");
-			this.mpris_player.Pause();						
-		}		
+		else if(command == TransportMenuitem.action.PREVIOUS){
+			this.mpris_player.previous();
+		}
+		else if(command == TransportMenuitem.action.NEXT){
+			this.mpris_player.next();
+		}
+	}
+
+	public bool connected()
+	{
+		return (this.mpris_player != null);
 	}
 	
 	private void onStatusChange(dynamic DBus.Object mpris_client, status st)
