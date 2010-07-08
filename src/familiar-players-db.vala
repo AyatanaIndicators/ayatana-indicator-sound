@@ -143,7 +143,8 @@ public class FamiliarPlayersDB : GLib.Object
 	
 	public bool already_familiar(string desktop)
 	{
-		return this.players_DB.get(desktop);
+		debug("playerDB->already_familiar - result %s", this.players_DB.keys.contains(desktop).to_string()); 
+		return this.players_DB.keys.contains(desktop);
 	}
 
 	public Gee.Set<string> records()

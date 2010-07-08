@@ -26,9 +26,9 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <libdbusmenu-glib/menuitem-proxy.h>
 #include <libdbusmenu-glib/menuitem.h>
 #include <libdbusmenu-glib/server.h>
-#include <gee.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gee.h>
 
 
 #define TYPE_PLAYER_ITEM (player_item_get_type ())
@@ -42,65 +42,74 @@ typedef struct _PlayerItem PlayerItem;
 typedef struct _PlayerItemClass PlayerItemClass;
 typedef struct _PlayerItemPrivate PlayerItemPrivate;
 
-#define TYPE_MPRIS_CONTROLLER (mpris_controller_get_type ())
-#define MPRIS_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_MPRIS_CONTROLLER, MprisController))
-#define MPRIS_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_MPRIS_CONTROLLER, MprisControllerClass))
-#define IS_MPRIS_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_MPRIS_CONTROLLER))
-#define IS_MPRIS_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_MPRIS_CONTROLLER))
-#define MPRIS_CONTROLLER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_MPRIS_CONTROLLER, MprisControllerClass))
+#define TYPE_PLAYER_CONTROLLER (player_controller_get_type ())
+#define PLAYER_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PLAYER_CONTROLLER, PlayerController))
+#define PLAYER_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PLAYER_CONTROLLER, PlayerControllerClass))
+#define IS_PLAYER_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_PLAYER_CONTROLLER))
+#define IS_PLAYER_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_PLAYER_CONTROLLER))
+#define PLAYER_CONTROLLER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_PLAYER_CONTROLLER, PlayerControllerClass))
 
-typedef struct _MprisController MprisController;
-typedef struct _MprisControllerClass MprisControllerClass;
+typedef struct _PlayerController PlayerController;
+typedef struct _PlayerControllerClass PlayerControllerClass;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 #define _g_free0(var) (var = (g_free (var), NULL))
 
 struct _PlayerItem {
 	DbusmenuMenuitem parent_instance;
 	PlayerItemPrivate * priv;
-	MprisController* mpris_adaptor;
 };
 
 struct _PlayerItemClass {
 	DbusmenuMenuitemClass parent_class;
-	void (*check_layout) (PlayerItem* self);
+};
+
+struct _PlayerItemPrivate {
+	PlayerController* _owner;
+	char* _item_type;
 };
 
 
 static gpointer player_item_parent_class = NULL;
 
 GType player_item_get_type (void);
-GType mpris_controller_get_type (void);
+GType player_controller_get_type (void);
+#define PLAYER_ITEM_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_PLAYER_ITEM, PlayerItemPrivate))
 enum  {
-	PLAYER_ITEM_DUMMY_PROPERTY
+	PLAYER_ITEM_DUMMY_PROPERTY,
+	PLAYER_ITEM_OWNER,
+	PLAYER_ITEM_ITEM_TYPE
 };
-PlayerItem* player_item_new (void);
-PlayerItem* player_item_construct (GType object_type);
+PlayerItem* player_item_new (const char* type);
+PlayerItem* player_item_construct (GType object_type, const char* type);
 void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
 static gboolean player_item_ensure_valid_updates (GHashTable* data, GeeHashSet* attributes);
 static GValue* _g_value_dup (GValue* self);
 char* player_item_sanitize_string (const char* st);
 void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes);
-void player_item_set_adaptor (PlayerItem* self, MprisController* adaptor);
-PlayerItem* player_item_new_title_item (const char* name);
-PlayerItem* player_item_new_separator_item (void);
-void player_item_check_layout (PlayerItem* self);
-static void player_item_real_check_layout (PlayerItem* self);
+PlayerController* player_item_get_owner (PlayerItem* self);
+static void player_item_set_owner (PlayerItem* self, PlayerController* value);
+const char* player_item_get_item_type (PlayerItem* self);
+static void player_item_set_item_type (PlayerItem* self, const char* value);
+static GObject * player_item_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
 static void player_item_finalize (GObject* obj);
+static void player_item_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
+static void player_item_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
 static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNotify destroy_func);
 static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify destroy_func);
 static gint _vala_array_length (gpointer array);
 
 
 
-PlayerItem* player_item_construct (GType object_type) {
+PlayerItem* player_item_construct (GType object_type, const char* type) {
 	PlayerItem * self;
-	self = g_object_newv (object_type, 0, NULL);
+	g_return_val_if_fail (type != NULL, NULL);
+	self = (PlayerItem*) g_object_new (object_type, "item-type", type, NULL);
 	return self;
 }
 
 
-PlayerItem* player_item_new (void) {
-	return player_item_construct (TYPE_PLAYER_ITEM);
+PlayerItem* player_item_new (const char* type) {
+	return player_item_construct (TYPE_PLAYER_ITEM, type);
 }
 
 
@@ -116,7 +125,7 @@ void player_item_reset (PlayerItem* self, GeeHashSet* attrs) {
 				break;
 			}
 			s = (char*) gee_iterator_get (_s_it);
-			g_debug ("player-item.vala:33: attempting to set prop %s to null", s);
+			g_debug ("player-item.vala:39: attempting to set prop %s to null", s);
 			dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, s, NULL);
 			_g_free0 (s);
 		}
@@ -139,9 +148,9 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (data != NULL);
 	g_return_if_fail (attributes != NULL);
-	g_debug ("player-item.vala:40: PlayerItem::update()");
+	g_debug ("player-item.vala:46: PlayerItem::update()");
 	if (player_item_ensure_valid_updates (data, attributes) == FALSE) {
-		g_debug ("player-item.vala:42: PlayerItem::Update -> The hashtable update does n" \
+		g_debug ("player-item.vala:48: PlayerItem::Update -> The hashtable update does n" \
 "ot contain what we were expecting - just leave it!");
 		return;
 	}
@@ -165,16 +174,16 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 			property = (char*) gee_iterator_get (_property_it);
 			input_keys = (_tmp1_ = _tmp0_ = g_strsplit (property, "-", 0), input_keys_length1 = _vala_array_length (_tmp0_), _input_keys_size_ = input_keys_length1, _tmp1_);
 			search_key = g_strdup ((_tmp3_ = input_keys + (input_keys_length1 - 1), _tmp2_ = input_keys_length1 - (input_keys_length1 - 1), _tmp3_)[0]);
-			g_debug ("player-item.vala:48: search key = %s", search_key);
+			g_debug ("player-item.vala:54: search key = %s", search_key);
 			v = __g_value_dup0 ((GValue*) g_hash_table_lookup (data, search_key));
 			if (G_VALUE_HOLDS (v, G_TYPE_STRING)) {
 				char* _tmp4_;
-				g_debug ("player-item.vala:52: with value : %s", g_value_get_string (v));
+				g_debug ("player-item.vala:58: with value : %s", g_value_get_string (v));
 				dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, property, _tmp4_ = player_item_sanitize_string (g_value_get_string (v)));
 				_g_free0 (_tmp4_);
 			} else {
 				if (G_VALUE_HOLDS (v, G_TYPE_INT)) {
-					g_debug ("player-item.vala:56: with value : %i", g_value_get_int (v));
+					g_debug ("player-item.vala:62: with value : %i", g_value_get_int (v));
 					dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, property, g_value_get_int (v));
 				} else {
 					if (G_VALUE_HOLDS (v, G_TYPE_BOOLEAN)) {
@@ -192,19 +201,6 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 }
 
 
-static gpointer _g_object_ref0 (gpointer self) {
-	return self ? g_object_ref (self) : NULL;
-}
-
-
-void player_item_set_adaptor (PlayerItem* self, MprisController* adaptor) {
-	MprisController* _tmp0_;
-	g_return_if_fail (self != NULL);
-	g_return_if_fail (adaptor != NULL);
-	self->mpris_adaptor = (_tmp0_ = _g_object_ref0 (adaptor), _g_object_unref0 (self->mpris_adaptor), _tmp0_);
-}
-
-
 static gboolean player_item_ensure_valid_updates (GHashTable* data, GeeHashSet* attributes) {
 	gboolean result = FALSE;
 	g_return_val_if_fail (data != NULL, FALSE);
@@ -214,7 +210,7 @@ static gboolean player_item_ensure_valid_updates (GHashTable* data, GeeHashSet* 
 		return result;
 	}
 	if (g_hash_table_size (data) < gee_collection_get_size ((GeeCollection*) attributes)) {
-		g_warning ("player-item.vala:78: update hash was too small for the target");
+		g_warning ("player-item.vala:77: update hash was too small for the target");
 		result = FALSE;
 		return result;
 	}
@@ -276,60 +272,85 @@ char* player_item_sanitize_string (const char* st) {
 		char* _tmp0_;
 		_result_ = (_tmp0_ = string_slice (_result_, (glong) 7, g_utf8_strlen (_result_, -1)), _g_free0 (_result_), _tmp0_);
 	}
-	g_debug ("player-item.vala:90: Sanitize string - result = %s", _result_);
+	g_debug ("player-item.vala:89: Sanitize string - result = %s", _result_);
 	result = _result_;
 	return result;
 }
 
 
-PlayerItem* player_item_new_title_item (const char* name) {
-	PlayerItem* result = NULL;
-	PlayerItem* item;
-	g_return_val_if_fail (name != NULL, NULL);
-	item = player_item_new ();
-	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) item, DBUSMENU_MENUITEM_PROP_LABEL, name);
-	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) item, DBUSMENU_MENUITEM_PROP_ICON_NAME, "applications-multimedia");
-	result = item;
+PlayerController* player_item_get_owner (PlayerItem* self) {
+	PlayerController* result;
+	g_return_val_if_fail (self != NULL, NULL);
+	result = self->priv->_owner;
 	return result;
 }
 
 
-PlayerItem* player_item_new_separator_item (void) {
-	PlayerItem* result = NULL;
-	PlayerItem* separator;
-	separator = player_item_new ();
-	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) separator, DBUSMENU_MENUITEM_PROP_TYPE, DBUSMENU_CLIENT_TYPES_SEPARATOR);
-	result = separator;
-	return result;
+static gpointer _g_object_ref0 (gpointer self) {
+	return self ? g_object_ref (self) : NULL;
 }
 
 
-static void player_item_real_check_layout (PlayerItem* self) {
+static void player_item_set_owner (PlayerItem* self, PlayerController* value) {
+	PlayerController* _tmp0_;
 	g_return_if_fail (self != NULL);
-	g_warning ("player-item.vala:114: this should not be hit");
+	self->priv->_owner = (_tmp0_ = _g_object_ref0 (value), _g_object_unref0 (self->priv->_owner), _tmp0_);
+	g_object_notify ((GObject *) self, "owner");
 }
 
 
-void player_item_check_layout (PlayerItem* self) {
-	PLAYER_ITEM_GET_CLASS (self)->check_layout (self);
+const char* player_item_get_item_type (PlayerItem* self) {
+	const char* result;
+	g_return_val_if_fail (self != NULL, NULL);
+	result = self->priv->_item_type;
+	return result;
+}
+
+
+static void player_item_set_item_type (PlayerItem* self, const char* value) {
+	char* _tmp0_;
+	g_return_if_fail (self != NULL);
+	self->priv->_item_type = (_tmp0_ = g_strdup (value), _g_free0 (self->priv->_item_type), _tmp0_);
+	g_object_notify ((GObject *) self, "item-type");
+}
+
+
+static GObject * player_item_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties) {
+	GObject * obj;
+	GObjectClass * parent_class;
+	PlayerItem * self;
+	parent_class = G_OBJECT_CLASS (player_item_parent_class);
+	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
+	self = PLAYER_ITEM (obj);
+	{
+		dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_MENUITEM_PROP_TYPE, self->priv->_item_type);
+	}
+	return obj;
 }
 
 
 static void player_item_class_init (PlayerItemClass * klass) {
 	player_item_parent_class = g_type_class_peek_parent (klass);
-	PLAYER_ITEM_CLASS (klass)->check_layout = player_item_real_check_layout;
+	g_type_class_add_private (klass, sizeof (PlayerItemPrivate));
+	G_OBJECT_CLASS (klass)->get_property = player_item_get_property;
+	G_OBJECT_CLASS (klass)->set_property = player_item_set_property;
+	G_OBJECT_CLASS (klass)->constructor = player_item_constructor;
 	G_OBJECT_CLASS (klass)->finalize = player_item_finalize;
+	g_object_class_install_property (G_OBJECT_CLASS (klass), PLAYER_ITEM_OWNER, g_param_spec_object ("owner", "owner", "owner", TYPE_PLAYER_CONTROLLER, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+	g_object_class_install_property (G_OBJECT_CLASS (klass), PLAYER_ITEM_ITEM_TYPE, g_param_spec_string ("item-type", "item-type", "item-type", NULL, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 }
 
 
 static void player_item_instance_init (PlayerItem * self) {
+	self->priv = PLAYER_ITEM_GET_PRIVATE (self);
 }
 
 
 static void player_item_finalize (GObject* obj) {
 	PlayerItem * self;
 	self = PLAYER_ITEM (obj);
-	_g_object_unref0 (self->mpris_adaptor);
+	_g_object_unref0 (self->priv->_owner);
+	_g_free0 (self->priv->_item_type);
 	G_OBJECT_CLASS (player_item_parent_class)->finalize (obj);
 }
 
@@ -343,6 +364,40 @@ GType player_item_get_type (void) {
 		g_once_init_leave (&player_item_type_id__volatile, player_item_type_id);
 	}
 	return player_item_type_id__volatile;
+}
+
+
+static void player_item_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec) {
+	PlayerItem * self;
+	self = PLAYER_ITEM (object);
+	switch (property_id) {
+		case PLAYER_ITEM_OWNER:
+		g_value_set_object (value, player_item_get_owner (self));
+		break;
+		case PLAYER_ITEM_ITEM_TYPE:
+		g_value_set_string (value, player_item_get_item_type (self));
+		break;
+		default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+		break;
+	}
+}
+
+
+static void player_item_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec) {
+	PlayerItem * self;
+	self = PLAYER_ITEM (object);
+	switch (property_id) {
+		case PLAYER_ITEM_OWNER:
+		player_item_set_owner (self, g_value_get_object (value));
+		break;
+		case PLAYER_ITEM_ITEM_TYPE:
+		player_item_set_item_type (self, g_value_get_string (value));
+		break;
+		default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+		break;
+	}
 }
 
 

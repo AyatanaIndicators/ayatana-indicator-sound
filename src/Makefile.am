@@ -13,11 +13,15 @@ libsoundmenu_la_SOURCES = \
 	transport-widget.h \
 	metadata-widget.c \
 	metadata-widget.h \
+	play-button.c \
+	play-button.h \
 	indicator-sound.c \
+	title-widget.c \
+	title-widget.h \
 	dbus-shared-names.h \
   sound-service-client.h 
 
-libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -Werror -DG_LOG_DOMAIN=\"Indicator-Sound\"
+libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -DG_LOG_DOMAIN=\"Indicator-Sound\"
 libsoundmenu_la_LIBADD = $(APPLET_LIBS)
 libsoundmenu_la_LDFLAGS = -module -avoid-version
 
@@ -54,6 +58,7 @@ music_bridge_VALASOURCES = \
 	music-player-bridge.vala \
 	transport-menu-item.vala \
 	metadata-menu-item.vala \
+	title-menu-item.vala \
 	player-controller.vala \
 	mpris-controller-v2.vala \
 	mpris-controller.vala \
