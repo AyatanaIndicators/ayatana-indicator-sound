@@ -36,8 +36,14 @@ public class TransportMenuitem : PlayerItem
 	
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
 	{
-		debug("handle_event with bool value %s", input_value.get_boolean().to_string());
-		this.owner.mpris_adaptor.toggle_playback(input_value.get_boolean());	
+		int input = input_value.get_int();
+		debug("handle_event with value %s", input.to_string());
+		if(input > 0){
+			this.owner.mpris_adaptor.transport_event(input);
+		}
+		else{
+			debug("A mouse event I'm not interested in");
+		}
 	}	
 
 	public static HashSet<string> attributes_format()

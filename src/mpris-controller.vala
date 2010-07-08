@@ -65,16 +65,29 @@ public class MprisController : GLib.Object
 	 * TRUE  => Playing
 	 * FALSE => Paused
 	 **/
-	public void toggle_playback(bool state)
+	public void transport_event(int command)
 	{
-		if(state == true){
-			debug("about to play");
-			this.mpris_player.Play();				
+		if(command == 2){
+			status st = this.mpris_player.GetStatus();
+			bool play_state =  st.playback == 1;
+			debug("toggle_playback - initial play state %i", (int)play_state);
+			bool new_play_state = !play_state;
+			debug("toggle_playback - new play state %i", (int)new_play_state);
+			if(new_play_state == true){
+				debug("about to play");
+				this.mpris_player.Play();				
+			}
+			else{
+				debug("about to pause");
+				this.mpris_player.Pause();						
+			}
 		}
-		else{
-			debug("about to pause");
-			this.mpris_player.Pause();						
-		}		
+		else if(command == 1){
+			this.mpris_player.previous();
+		}
+		else if(command == 3){
+			this.mpris_player.next();
+		}
 	}
 
 	public bool connected()

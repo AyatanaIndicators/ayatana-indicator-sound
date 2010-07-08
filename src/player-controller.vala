@@ -110,6 +110,7 @@ public class PlayerController : GLib.Object
 		if(this.current_state != CONNECTED){
 			visibility = false;
 		}
+		debug("about the set the visibility on both the transport and metadata widget to %s", visibility.to_string());
 		this.custom_items[TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);
 		this.custom_items[METADATA].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);
 	}
