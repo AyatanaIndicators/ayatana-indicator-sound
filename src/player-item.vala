@@ -58,7 +58,12 @@ public class PlayerItem : Dbusmenu.Menuitem
 				string update = v.get_string().strip();
 				debug("with value : %s", update);
 				if(property.contains("arturl")){
-					update = Filename.from_uri(update.strip());					
+					try{
+						update = Filename.from_uri(update.strip());
+					}
+					catch(ConvertError e){
+						warning("Problem converting URI %s to file path", update); 
+					}
 				}
 				this.property_set(property, update);
 			}			    

@@ -77,7 +77,7 @@ public class MusicPlayerBridge : GLib.Object
 			return 2;
 		}
 		else{
-			return (2 + (this.registered_clients.size * 3));
+			return (2 + (this.registered_clients.size * 4));
 		}
 	}
 	
