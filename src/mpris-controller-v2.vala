@@ -21,8 +21,8 @@ using Gee;
 
 public class MprisControllerV2 : MprisController
 {		
-	public MprisControllerV2(string name, PlayerController controller){
-		base(name, controller, "org.mpris.MediaPlayer.Player");
+	public MprisControllerV2(PlayerController ctrl, string inter="org.mpris.MediaPlayer.Player"){
+		Object(owner: ctrl, mpris_interface: inter);				
 	}
 
 }
