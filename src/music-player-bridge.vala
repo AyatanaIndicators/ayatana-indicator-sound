@@ -52,7 +52,7 @@ public class MusicPlayerBridge : GLib.Object
 					warning("App string in keyfile is null therefore moving on to next player");
 					continue;
 				}
-				DesktopAppInfo info = new DesktopAppInfo.from_filename(app); 
+				DesktopAppInfo info = new DesktopAppInfo.from_filename(app);
 				if(info == null){
 					warning("Could not create a desktopappinfo instance from app: %s", app);
 					continue;					
@@ -65,7 +65,7 @@ public class MusicPlayerBridge : GLib.Object
 				ctrl.set("app_info", app_info);
 				this.registered_clients.set(app_info.get_name().down().strip(), ctrl);					
 				debug("Created a player controller for %s which was found in the cache file", app_info.get_name().down().strip());
-				count += 1;					
+				count += 1;
 			}
 			break;
 		}

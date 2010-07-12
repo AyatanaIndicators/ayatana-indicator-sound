@@ -59,7 +59,7 @@ public class PlayerController : GLib.Object
 
 	public void update_state(state new_state)
 	{
-		debug("update_state : new state %i", new_state);
+		debug("update_state - player controller %s : new state %i", this.name, new_state);
 		this.current_state = new_state;
 	}
 	
@@ -77,6 +77,7 @@ public class PlayerController : GLib.Object
 	 */
 	public void instantiate()
 	{
+		debug("instantiate in player controller for %s", this.name);
 		try{
  	  	this.app_info.launch(null, null);
 			this.update_state(state.INSTANTIATING);
@@ -140,7 +141,7 @@ public class PlayerController : GLib.Object
 		this.custom_items.add(new PlayerItem(CLIENT_TYPES_SEPARATOR));
 
 		// Title item
-		TitleMenuitem title_menu_item = new TitleMenuitem(this, this.name);
+		TitleMenuitem title_menu_item = new TitleMenuitem(this);
 		this.custom_items.add(title_menu_item);
 
 		// Metadata item
