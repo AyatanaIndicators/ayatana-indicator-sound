@@ -63,7 +63,6 @@ typedef struct _TitleMenuitemPrivate TitleMenuitemPrivate;
 
 typedef struct _PlayerController PlayerController;
 typedef struct _PlayerControllerClass PlayerControllerClass;
-#define _g_free0(var) (var = (g_free (var), NULL))
 typedef struct _PlayerControllerPrivate PlayerControllerPrivate;
 
 #define TYPE_MPRIS_CONTROLLER (mpris_controller_get_type ())
@@ -126,8 +125,9 @@ enum  {
 	TITLE_MENUITEM_DUMMY_PROPERTY
 };
 GType player_controller_get_type (void);
-TitleMenuitem* title_menuitem_new (PlayerController* parent, const char* name);
-TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* parent, const char* name);
+const char* player_controller_get_name (PlayerController* self);
+TitleMenuitem* title_menuitem_new (PlayerController* parent);
+TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* parent);
 PlayerController* player_item_get_owner (PlayerItem* self);
 GType mpris_controller_get_type (void);
 GType player_controller_state_get_type (void);
@@ -137,40 +137,26 @@ GeeHashSet* title_menuitem_attributes_format (void);
 
 
 
-TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* parent, const char* name) {
+TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* parent) {
 	TitleMenuitem * self;
 	g_return_val_if_fail (parent != NULL, NULL);
-	g_return_val_if_fail (name != NULL, NULL);
 	self = (TitleMenuitem*) g_object_new (object_type, "item-type", DBUSMENU_TITLE_MENUITEM_TYPE, "owner", parent, NULL);
-	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_TITLE_MENUITEM_TEXT_NAME, name);
+	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_TITLE_MENUITEM_TEXT_NAME, player_controller_get_name (parent));
 	return self;
 }
 
 
-TitleMenuitem* title_menuitem_new (PlayerController* parent, const char* name) {
-	return title_menuitem_construct (TYPE_TITLE_MENUITEM, parent, name);
-}
-
-
-static char* bool_to_string (gboolean self) {
-	char* result = NULL;
-	if (self) {
-		result = g_strdup ("true");
-		return result;
-	} else {
-		result = g_strdup ("false");
-		return result;
-	}
+TitleMenuitem* title_menuitem_new (PlayerController* parent) {
+	return title_menuitem_construct (TYPE_TITLE_MENUITEM, parent);
 }
 
 
 static void title_menuitem_real_handle_event (DbusmenuMenuitem* base, const char* name, GValue* input_value, guint timestamp) {
 	TitleMenuitem * self;
-	char* _tmp0_;
 	self = (TitleMenuitem*) base;
 	g_return_if_fail (name != NULL);
-	g_debug ("title-menu-item.vala:34: handle_event with bool value %s", _tmp0_ = bool_to_string (g_value_get_boolean (input_value)));
-	_g_free0 (_tmp0_);
+	g_debug ("title-menu-item.vala:34: handle_event for owner %s with owner state = " \
+"%i and title menu name %s", player_controller_get_name (player_item_get_owner ((PlayerItem*) self)), player_item_get_owner ((PlayerItem*) self)->current_state, dbusmenu_menuitem_property_get ((DbusmenuMenuitem*) self, DBUSMENU_TITLE_MENUITEM_TEXT_NAME));
 	if (player_item_get_owner ((PlayerItem*) self)->current_state == PLAYER_CONTROLLER_STATE_OFFLINE) {
 		player_controller_instantiate (player_item_get_owner ((PlayerItem*) self));
 	}

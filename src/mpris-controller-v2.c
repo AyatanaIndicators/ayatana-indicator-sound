@@ -23,8 +23,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <glib.h>
 #include <glib-object.h>
-#include <dbus/dbus-glib-lowlevel.h>
-#include <dbus/dbus-glib.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -64,7 +62,6 @@ typedef struct _PlayerControllerClass PlayerControllerClass;
 struct _MprisController {
 	GObject parent_instance;
 	MprisControllerPrivate * priv;
-	DBusGProxy* mpris_player;
 };
 
 struct _MprisControllerClass {
@@ -89,24 +86,22 @@ enum  {
 	MPRIS_CONTROLLER_V2_DUMMY_PROPERTY
 };
 GType player_controller_get_type (void);
-MprisController* mpris_controller_new (const char* name, PlayerController* controller, const char* mpris_interface);
-MprisController* mpris_controller_construct (GType object_type, const char* name, PlayerController* controller, const char* mpris_interface);
-MprisControllerV2* mpris_controller_v2_new (const char* name, PlayerController* controller);
-MprisControllerV2* mpris_controller_v2_construct (GType object_type, const char* name, PlayerController* controller);
+MprisControllerV2* mpris_controller_v2_new (PlayerController* ctrl, const char* inter);
+MprisControllerV2* mpris_controller_v2_construct (GType object_type, PlayerController* ctrl, const char* inter);
 
 
 
-MprisControllerV2* mpris_controller_v2_construct (GType object_type, const char* name, PlayerController* controller) {
+MprisControllerV2* mpris_controller_v2_construct (GType object_type, PlayerController* ctrl, const char* inter) {
 	MprisControllerV2 * self;
-	g_return_val_if_fail (name != NULL, NULL);
-	g_return_val_if_fail (controller != NULL, NULL);
-	self = (MprisControllerV2*) mpris_controller_construct (object_type, name, controller, "org.mpris.MediaPlayer.Player");
+	g_return_val_if_fail (ctrl != NULL, NULL);
+	g_return_val_if_fail (inter != NULL, NULL);
+	self = (MprisControllerV2*) g_object_new (object_type, "owner", ctrl, "mpris-interface", inter, NULL);
 	return self;
 }
 
 
-MprisControllerV2* mpris_controller_v2_new (const char* name, PlayerController* controller) {
-	return mpris_controller_v2_construct (TYPE_MPRIS_CONTROLLER_V2, name, controller);
+MprisControllerV2* mpris_controller_v2_new (PlayerController* ctrl, const char* inter) {
+	return mpris_controller_v2_construct (TYPE_MPRIS_CONTROLLER_V2, ctrl, inter);
 }
 
 

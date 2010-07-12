@@ -27,7 +27,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <gtk/gtk.h>
 #include <libindicator/indicator-image-helper.h>
 
-static DbusmenuMenuitem* twin_item;
 
 typedef struct _TitleWidgetPrivate TitleWidgetPrivate;
 
@@ -36,6 +35,7 @@ struct _TitleWidgetPrivate
 	GtkWidget* hbox;
 	GtkWidget* name;
 	GtkWidget* player_icon;	
+	DbusmenuMenuitem* twin_item;	
 };
 
 #define TITLE_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TITLE_WIDGET_TYPE, TitleWidgetPrivate))
@@ -57,7 +57,10 @@ static gboolean title_widget_expose_event(GtkWidget* widget,
 // Dbusmenuitem properties update callback
 static void title_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
                                        GValue* value, gpointer userdata);
-static void style_name_text(TitleWidget* self);
+static void title_widget_set_twin_item(	TitleWidget* self,
+                           							DbusmenuMenuitem* twin_item);
+static void title_widget_style_name_text(TitleWidget* self);
+
 G_DEFINE_TYPE (TitleWidget, title_widget, GTK_TYPE_MENU_ITEM);
 
 
@@ -90,22 +93,9 @@ title_widget_init (TitleWidget *self)
 
 	hbox = gtk_hbox_new(FALSE, 0);
 	priv->hbox = hbox;
-	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
-	                 G_CALLBACK(title_widget_property_update), self);
 
 	priv->player_icon = indicator_image_helper("sound_icon");
 	gtk_box_pack_start(GTK_BOX (priv->hbox), priv->player_icon, FALSE, FALSE, 0);		
-	
-	priv->name = gtk_label_new(dbusmenu_menuitem_property_get(twin_item, 
-	                                                          DBUSMENU_TITLE_MENUITEM_TEXT_NAME));
-	gtk_misc_set_padding(GTK_MISC(priv->name), 10, 0);
-	gtk_box_pack_start (GTK_BOX (priv->hbox), priv->name, FALSE, FALSE, 0);		
-
-	style_name_text(self);
-	
-	gtk_widget_show_all (priv->hbox);
-  gtk_container_add (GTK_CONTAINER (self), hbox);
-	
 }
 
 static void
@@ -126,12 +116,13 @@ title_widget_button_press_event (GtkWidget *menuitem,
                                   GdkEventButton *event)
 {
 	g_debug("TitleWidget::menu_press_event");
-
+	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(menuitem);
+	
 	GValue value = {0};
   g_value_init(&value, G_TYPE_BOOLEAN);
 
 	g_value_set_boolean(&value, TRUE);	
-	dbusmenu_menuitem_handle_event (twin_item, "Title menu event", &value, 0);
+	dbusmenu_menuitem_handle_event (priv->twin_item, "Title menu event", &value, 0);
 	
 	return TRUE;
 }
@@ -163,12 +154,31 @@ title_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	
 	if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_TEXT_NAME, property) == 0){  
 		gtk_label_set_text(GTK_LABEL(priv->name), g_value_get_string(value));
-		style_name_text(mitem);
+		title_widget_style_name_text(mitem);
 	}
 }
 
 static void
-style_name_text(TitleWidget* self)
+title_widget_set_twin_item(TitleWidget* self,
+                           DbusmenuMenuitem* twin_item)
+{
+	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(self);
+	priv->twin_item = twin_item;
+	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
+	                 G_CALLBACK(title_widget_property_update), self);	
+	priv->name = gtk_label_new(dbusmenu_menuitem_property_get(priv->twin_item, 
+	                                                          DBUSMENU_TITLE_MENUITEM_TEXT_NAME));
+	gtk_misc_set_padding(GTK_MISC(priv->name), 10, 0);
+	gtk_box_pack_start (GTK_BOX (priv->hbox), priv->name, FALSE, FALSE, 0);		
+
+	title_widget_style_name_text(self);
+	
+	gtk_widget_show_all (priv->hbox);
+  gtk_container_add (GTK_CONTAINER (self), priv->hbox);	
+}
+                           
+static void
+title_widget_style_name_text(TitleWidget* self)
 {
 	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(self);
 
@@ -186,7 +196,8 @@ style_name_text(TitleWidget* self)
 GtkWidget* 
 title_widget_new(DbusmenuMenuitem *item)
 {
-	twin_item = item;
-	return g_object_new(TITLE_WIDGET_TYPE, NULL);
+	GtkWidget* widget = g_object_new(TITLE_WIDGET_TYPE, NULL);
+	title_widget_set_twin_item((TitleWidget*)widget, item);
+	return widget;
 }
 

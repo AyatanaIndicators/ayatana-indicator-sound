@@ -52,26 +52,32 @@ public class MusicPlayerBridge : GLib.Object
 					warning("App string in keyfile is null therefore moving on to next player");
 					continue;
 				}
-				try{
-					DesktopAppInfo info = new DesktopAppInfo.from_filename(app); 
-					if(info == null){
-						warning("Could not create a desktopappinfo instance from app: %s", app);
-						continue;					
-					}
-					GLib.AppInfo app_info = info as GLib.AppInfo;
-					PlayerController ctrl = new PlayerController(this.root_menu, 
-					                                             app_info.get_name(), 
-					                                             PlayerController.state.OFFLINE);
-					ctrl.set("app_info", app_info);
-					this.registered_clients.set(app_info.get_name().down().strip(), ctrl);					
-					debug("Created a player controller for %s which was found in the cache file", app_info.get_name().down().strip());
-					count += 1;					
+				DesktopAppInfo info = new DesktopAppInfo.from_filename(app);
+				if(info == null){
+					warning("Could not create a desktopappinfo instance from app: %s", app);
+					continue;					
 				}
-				catch(Error er){
-					warning("desktop path in cache is not formatted as we have anticipated");
-				}
+				GLib.AppInfo app_info = info as GLib.AppInfo;
+				PlayerController ctrl = new PlayerController(this.root_menu, 
+				                                             app_info.get_name(),
+				                                             calculate_menu_position(),
+				                                             PlayerController.state.OFFLINE);
+				ctrl.set("app_info", app_info);
+				this.registered_clients.set(app_info.get_name().down().strip(), ctrl);					
+				debug("Created a player controller for %s which was found in the cache file", app_info.get_name().down().strip());
+				count += 1;
 			}
 			break;
+		}
+	}
+
+	private int calculate_menu_position()
+	{
+		if(this.registered_clients.size == 0){
+			return 2;
+		}
+		else{
+			return (2 + (this.registered_clients.size * 4));
 		}
 	}
 	
@@ -89,8 +95,13 @@ public class MusicPlayerBridge : GLib.Object
 			}
 			//else init a new one
 			else{			
-				PlayerController ctrl = new PlayerController(root_menu, client_name, PlayerController.state.READY);
+				
+				PlayerController ctrl = new PlayerController(root_menu,
+				                                             client_name,
+				                                             calculate_menu_position(),
+				                                             PlayerController.state.READY);
 				registered_clients.set(client_name, ctrl); 
+				
 				debug("New Client of name %s has successfully registered with us", client_name);
 			}
 			// irregardless check that it has a desktop file if not kick off a request for it

@@ -55,8 +55,17 @@ public class PlayerItem : Dbusmenu.Menuitem
 			Value? v = data.lookup(search_key);
 			
 			if (v.holds (typeof (string))){
-				debug("with value : %s", v.get_string());
-				this.property_set(property, this.sanitize_string(v.get_string()));
+				string update = v.get_string().strip();
+				debug("with value : %s", update);
+				if(property.contains("arturl")){
+					try{
+						update = Filename.from_uri(update.strip());
+					}
+					catch(ConvertError e){
+						warning("Problem converting URI %s to file path", update); 
+					}
+				}
+				this.property_set(property, update);
 			}			    
 			else if (v.holds (typeof (int))){
 				debug("with value : %i", v.get_int());
@@ -78,16 +87,6 @@ public class PlayerItem : Dbusmenu.Menuitem
 			return false;
 		}
 		return true;		
-	}
-
-	public static string sanitize_string(string st)
-	{
-		string result = st.strip();
-		if(result.has_prefix("file:///")){
-			result = result.slice(7, result.len());		                   
-		}
-		debug("Sanitize string - result = %s", result);
-		return result;
 	}
 
 }

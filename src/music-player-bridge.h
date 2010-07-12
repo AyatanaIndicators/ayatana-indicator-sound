@@ -202,7 +202,6 @@ typedef enum  {
 struct _MprisController {
 	GObject parent_instance;
 	MprisControllerPrivate * priv;
-	DBusGProxy* mpris_player;
 };
 
 struct _MprisControllerClass {
@@ -253,14 +252,14 @@ MetadataMenuitem* metadata_menuitem_construct (GType object_type);
 GeeHashSet* metadata_menuitem_attributes_format (void);
 gboolean metadata_menuitem_populated (MetadataMenuitem* self);
 GType title_menuitem_get_type (void);
-TitleMenuitem* title_menuitem_new (PlayerController* parent, const char* name);
-TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* parent, const char* name);
+TitleMenuitem* title_menuitem_new (PlayerController* parent);
+TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* parent);
 GeeHashSet* title_menuitem_attributes_format (void);
 GType mpris_controller_get_type (void);
 GType player_controller_state_get_type (void);
 #define PLAYER_CONTROLLER_METADATA 2
-PlayerController* player_controller_new (DbusmenuMenuitem* root, const char* client_name, PlayerControllerstate initial_state);
-PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, const char* client_name, PlayerControllerstate initial_state);
+PlayerController* player_controller_new (DbusmenuMenuitem* root, const char* client_name, gint offset, PlayerControllerstate initial_state);
+PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, const char* client_name, gint offset, PlayerControllerstate initial_state);
 void player_controller_update_state (PlayerController* self, PlayerControllerstate new_state);
 void player_controller_activate (PlayerController* self);
 void player_controller_instantiate (PlayerController* self);
@@ -269,18 +268,22 @@ const char* player_controller_get_name (PlayerController* self);
 void player_controller_set_name (PlayerController* self, const char* value);
 GAppInfo* player_controller_get_app_info (PlayerController* self);
 void player_controller_set_app_info (PlayerController* self, GAppInfo* value);
+gint player_controller_get_menu_offset (PlayerController* self);
+void player_controller_set_menu_offset (PlayerController* self, gint value);
 GType mpris_controller_v2_get_type (void);
-MprisControllerV2* mpris_controller_v2_new (const char* name, PlayerController* controller);
-MprisControllerV2* mpris_controller_v2_construct (GType object_type, const char* name, PlayerController* controller);
-MprisController* mpris_controller_new (const char* name, PlayerController* controller, const char* mpris_interface);
-MprisController* mpris_controller_construct (GType object_type, const char* name, PlayerController* controller, const char* mpris_interface);
+MprisControllerV2* mpris_controller_v2_new (PlayerController* ctrl, const char* inter);
+MprisControllerV2* mpris_controller_v2_construct (GType object_type, PlayerController* ctrl, const char* inter);
+MprisController* mpris_controller_new (PlayerController* ctrl, const char* inter);
+MprisController* mpris_controller_construct (GType object_type, PlayerController* ctrl, const char* inter);
 void mpris_controller_transport_event (MprisController* self, TransportMenuitemaction command);
 gboolean mpris_controller_connected (MprisController* self);
+DBusGProxy* mpris_controller_get_mpris_player (MprisController* self);
+PlayerController* mpris_controller_get_owner (MprisController* self);
+const char* mpris_controller_get_mpris_interface (MprisController* self);
 PlayerItem* player_item_new (const char* type);
 PlayerItem* player_item_construct (GType object_type, const char* type);
 void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
 void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes);
-char* player_item_sanitize_string (const char* st);
 PlayerController* player_item_get_owner (PlayerItem* self);
 const char* player_item_get_item_type (PlayerItem* self);
 GType familiar_players_db_get_type (void);
