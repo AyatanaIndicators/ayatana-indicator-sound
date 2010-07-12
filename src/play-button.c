@@ -29,7 +29,7 @@ Uses code from ctk
 
 #define RECT_WIDTH 130.0f
 #define Y 15.0f
-#define X	22.0f
+#define X	37.0f
 #define INNER_RADIUS 12.5
 #define	MIDDLE_RADIUS 13.5f
 #define OUTER_RADIUS  14.5f
@@ -41,16 +41,16 @@ Uses code from ctk
 #define TRI_WIDTH  11.0f
 #define TRI_HEIGHT 13.0f
 #define TRI_OFFSET  6.0f
-#define PREV_X 20.0f
+#define PREV_X 35.0f
 #define PREV_Y 21.0f
-#define NEXT_X 98.0f
+#define NEXT_X 113.0f
 #define NEXT_Y 21.0f //prev_y
 #define PAUSE_WIDTH 21.0f
 #define PAUSE_HEIGHT 27.0f
 #define BAR_WIDTH 4.5f
 #define BAR_HEIGHT 24.0f
 #define BAR_OFFSET 10.0f
-#define PAUSE_X 62.0f
+#define PAUSE_X 77.0f
 #define	PAUSE_Y 15.0f
 
 // Transport events
@@ -363,15 +363,15 @@ determine_button_event(GtkWidget* button, GdkEventButton* event)
 	g_debug("event y coordinate = %f", event->y);
 	gint result = 0;
 	// For now very simple rectangular collision detection
-	if(event->x > 40 && event->x < 80
+	if(event->x > 55 && event->x < 95
 	   && event->y > 22 && event->y < 46){
 		result = PREVIOUS;
 	}
-	else if(event->x > 86 && event->x < 118
+	else if(event->x > 101 && event->x < 133
 	   && event->y > 20 && event->y < 47){
 		result = PLAY_PAUSE;		
 	}
-	else if(event->x > 122 && event->x < 164
+	else if(event->x > 137 && event->x < 179
 	   && event->y > 22 && event->y < 46){
 		result = NEXT;		
 	}

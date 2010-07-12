@@ -366,9 +366,9 @@ new_title_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbusmenu
   title = title_widget_new (newitem);
   GtkMenuItem *menu_title_widget = GTK_MENU_ITEM(title);
 
-  dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_title_widget, parent);
-
   gtk_widget_show_all(title);
+
+	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_title_widget, parent);
 
   return TRUE;
 }
