@@ -42,13 +42,16 @@ public class PlayerController : GLib.Object
 	public ArrayList<PlayerItem> custom_items;	
 	public MprisController mpris_adaptor;
 	public AppInfo? app_info { get; set;}
+	public int menu_offset { get; set;}
 		
-	public PlayerController(Dbusmenu.Menuitem root, string client_name, state initial_state)
+	public PlayerController(Dbusmenu.Menuitem root, string client_name, int offset, state initial_state)
 	{
 		this.root_menu = root;
 		this.name = format_client_name(client_name.strip());
 		this.custom_items = new ArrayList<PlayerItem>();
 		this.update_state(initial_state);
+		this.menu_offset = offset;
+		debug("offset = %i", offset);
 		construct_widgets();
 		establish_mpris_connection();
 		update_layout();
@@ -56,7 +59,7 @@ public class PlayerController : GLib.Object
 
 	public void update_state(state new_state)
 	{
-		debug("update_state : new state %i", new_state);
+		debug("update_state - player controller %s : new state %i", this.name, new_state);
 		this.current_state = new_state;
 	}
 	
@@ -74,6 +77,7 @@ public class PlayerController : GLib.Object
 	 */
 	public void instantiate()
 	{
+		debug("instantiate in player controller for %s", this.name);
 		try{
  	  	this.app_info.launch(null, null);
 			this.update_state(state.INSTANTIATING);
@@ -89,13 +93,17 @@ public class PlayerController : GLib.Object
 			debug("establish_mpris_connection - Not ready to connect");
 			return;
 		}
+
 		if(this.name == "Vlc"){
-			this.mpris_adaptor = new MprisControllerV2(this.name, this);
+			debug("establishing a vlc mpris controller");
+			this.mpris_adaptor = new MprisController(this, "org.mpris.MediaPlayer.Player");
 		}
 		else{
-			this.mpris_adaptor = new MprisController(this.name, this);
+			this.mpris_adaptor = new MprisController(this);
 		}
+		
 		if(this.mpris_adaptor.connected() == true){
+			debug("yup I'm connected");
 			this.update_state(state.CONNECTED);
 		}
 		else{
@@ -120,6 +128,10 @@ public class PlayerController : GLib.Object
 		debug("about the set the visibility on both the transport and metadata widget to %s", visibility.to_string());
 		this.custom_items[TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);
 		this.custom_items[METADATA].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);
+		// DEBUG
+		if(this.mpris_adaptor == null){
+			warning("Why is the mpris object null");
+		}
 	}
 	
 	
@@ -129,7 +141,7 @@ public class PlayerController : GLib.Object
 		this.custom_items.add(new PlayerItem(CLIENT_TYPES_SEPARATOR));
 
 		// Title item
-		TitleMenuitem title_menu_item = new TitleMenuitem(this, this.name);
+		TitleMenuitem title_menu_item = new TitleMenuitem(this);
 		this.custom_items.add(title_menu_item);
 
 		// Metadata item
@@ -140,9 +152,8 @@ public class PlayerController : GLib.Object
 		TransportMenuitem transport_item = new TransportMenuitem(this);
 		this.custom_items.add(transport_item);
 
-		int offset = 2;
 		foreach(PlayerItem item in this.custom_items){
-			root_menu.child_add_position(item, offset + this.custom_items.index_of(item));			
+			root_menu.child_add_position(item, this.menu_offset + this.custom_items.index_of(item));			
 		}
 	}	
 	

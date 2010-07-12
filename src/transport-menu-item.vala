@@ -43,7 +43,7 @@ public class TransportMenuitem : PlayerItem
 	{
 		int input = input_value.get_int();
 		debug("handle_event with value %s", input.to_string());
-		// Fire and forgot - the widget would not have sent it over it didn't think it was relevant.
+		debug("transport owner name = %s", this.owner.name);
 		this.owner.mpris_adaptor.transport_event((action)input);
 	}	
 

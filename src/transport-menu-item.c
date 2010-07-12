@@ -27,9 +27,9 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <libdbusmenu-glib/menuitem.h>
 #include <libdbusmenu-glib/server.h>
 #include <common-defs.h>
-#include <gee.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gee.h>
 
 
 #define TYPE_PLAYER_ITEM (player_item_get_type ())
@@ -129,6 +129,7 @@ TransportMenuitem* transport_menuitem_new (PlayerController* parent);
 TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerController* parent);
 void transport_menuitem_change_play_state (TransportMenuitem* self, gint state);
 PlayerController* player_item_get_owner (PlayerItem* self);
+const char* player_controller_get_name (PlayerController* self);
 GType mpris_controller_get_type (void);
 void mpris_controller_transport_event (MprisController* self, TransportMenuitemaction command);
 static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const char* name, GValue* input_value, guint timestamp);
@@ -176,6 +177,7 @@ static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const 
 	input = g_value_get_int (input_value);
 	g_debug ("transport-menu-item.vala:45: handle_event with value %s", _tmp0_ = g_strdup_printf ("%i", input));
 	_g_free0 (_tmp0_);
+	g_debug ("transport-menu-item.vala:46: transport owner name = %s", player_controller_get_name (player_item_get_owner ((PlayerItem*) self)));
 	mpris_controller_transport_event (player_item_get_owner ((PlayerItem*) self)->mpris_adaptor, (TransportMenuitemaction) input);
 }
 

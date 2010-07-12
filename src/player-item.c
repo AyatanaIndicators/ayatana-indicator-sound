@@ -53,6 +53,7 @@ typedef struct _PlayerController PlayerController;
 typedef struct _PlayerControllerClass PlayerControllerClass;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 #define _g_free0(var) (var = (g_free (var), NULL))
+#define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 
 struct _PlayerItem {
 	DbusmenuMenuitem parent_instance;
@@ -84,7 +85,6 @@ PlayerItem* player_item_construct (GType object_type, const char* type);
 void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
 static gboolean player_item_ensure_valid_updates (GHashTable* data, GeeHashSet* attributes);
 static GValue* _g_value_dup (GValue* self);
-char* player_item_sanitize_string (const char* st);
 void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes);
 PlayerController* player_item_get_owner (PlayerItem* self);
 static void player_item_set_owner (PlayerItem* self, PlayerController* value);
@@ -144,10 +144,32 @@ static gpointer __g_value_dup0 (gpointer self) {
 }
 
 
+static char* string_strip (const char* self) {
+	char* result = NULL;
+	char* _result_;
+	g_return_val_if_fail (self != NULL, NULL);
+	_result_ = g_strdup (self);
+	g_strstrip (_result_);
+	result = _result_;
+	return result;
+}
+
+
+static gboolean string_contains (const char* self, const char* needle) {
+	gboolean result = FALSE;
+	g_return_val_if_fail (self != NULL, FALSE);
+	g_return_val_if_fail (needle != NULL, FALSE);
+	result = strstr (self, needle) != NULL;
+	return result;
+}
+
+
 void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes) {
+	GError * _inner_error_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (data != NULL);
 	g_return_if_fail (attributes != NULL);
+	_inner_error_ = NULL;
 	g_debug ("player-item.vala:46: PlayerItem::update()");
 	if (player_item_ensure_valid_updates (data, attributes) == FALSE) {
 		g_debug ("player-item.vala:48: PlayerItem::Update -> The hashtable update does n" \
@@ -177,13 +199,61 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 			g_debug ("player-item.vala:54: search key = %s", search_key);
 			v = __g_value_dup0 ((GValue*) g_hash_table_lookup (data, search_key));
 			if (G_VALUE_HOLDS (v, G_TYPE_STRING)) {
-				char* _tmp4_;
-				g_debug ("player-item.vala:58: with value : %s", g_value_get_string (v));
-				dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, property, _tmp4_ = player_item_sanitize_string (g_value_get_string (v)));
-				_g_free0 (_tmp4_);
+				char* update;
+				update = string_strip (g_value_get_string (v));
+				g_debug ("player-item.vala:59: with value : %s", update);
+				if (string_contains (property, "arturl")) {
+					{
+						char* _tmp4_;
+						char* _tmp5_;
+						char* _tmp6_;
+						char* _tmp7_;
+						_tmp6_ = (_tmp5_ = g_filename_from_uri (_tmp4_ = string_strip (update), NULL, &_inner_error_), _g_free0 (_tmp4_), _tmp5_);
+						if (_inner_error_ != NULL) {
+							if (_inner_error_->domain == G_CONVERT_ERROR) {
+								goto __catch2_g_convert_error;
+							}
+							_g_free0 (update);
+							_g_free0 (property);
+							input_keys = (_vala_array_free (input_keys, input_keys_length1, (GDestroyNotify) g_free), NULL);
+							_g_free0 (search_key);
+							_g_free0 (v);
+							_g_object_unref0 (_property_it);
+							g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+							g_clear_error (&_inner_error_);
+							return;
+						}
+						update = (_tmp7_ = _tmp6_, _g_free0 (update), _tmp7_);
+					}
+					goto __finally2;
+					__catch2_g_convert_error:
+					{
+						GError * e;
+						e = _inner_error_;
+						_inner_error_ = NULL;
+						{
+							g_warning ("player-item.vala:65: Problem converting URI %s to file path", update);
+							_g_error_free0 (e);
+						}
+					}
+					__finally2:
+					if (_inner_error_ != NULL) {
+						_g_free0 (update);
+						_g_free0 (property);
+						input_keys = (_vala_array_free (input_keys, input_keys_length1, (GDestroyNotify) g_free), NULL);
+						_g_free0 (search_key);
+						_g_free0 (v);
+						_g_object_unref0 (_property_it);
+						g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+						g_clear_error (&_inner_error_);
+						return;
+					}
+				}
+				dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, property, update);
+				_g_free0 (update);
 			} else {
 				if (G_VALUE_HOLDS (v, G_TYPE_INT)) {
-					g_debug ("player-item.vala:62: with value : %i", g_value_get_int (v));
+					g_debug ("player-item.vala:71: with value : %i", g_value_get_int (v));
 					dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, property, g_value_get_int (v));
 				} else {
 					if (G_VALUE_HOLDS (v, G_TYPE_BOOLEAN)) {
@@ -210,70 +280,11 @@ static gboolean player_item_ensure_valid_updates (GHashTable* data, GeeHashSet* 
 		return result;
 	}
 	if (g_hash_table_size (data) < gee_collection_get_size ((GeeCollection*) attributes)) {
-		g_warning ("player-item.vala:77: update hash was too small for the target");
+		g_warning ("player-item.vala:86: update hash was too small for the target");
 		result = FALSE;
 		return result;
 	}
 	result = TRUE;
-	return result;
-}
-
-
-static char* string_strip (const char* self) {
-	char* result = NULL;
-	char* _result_;
-	g_return_val_if_fail (self != NULL, NULL);
-	_result_ = g_strdup (self);
-	g_strstrip (_result_);
-	result = _result_;
-	return result;
-}
-
-
-static char* string_slice (const char* self, glong start, glong end) {
-	char* result = NULL;
-	glong string_length;
-	gboolean _tmp0_ = FALSE;
-	gboolean _tmp1_ = FALSE;
-	const char* start_string;
-	g_return_val_if_fail (self != NULL, NULL);
-	string_length = g_utf8_strlen (self, -1);
-	if (start < 0) {
-		start = string_length + start;
-	}
-	if (end < 0) {
-		end = string_length + end;
-	}
-	if (start >= 0) {
-		_tmp0_ = start <= string_length;
-	} else {
-		_tmp0_ = FALSE;
-	}
-	g_return_val_if_fail (_tmp0_, NULL);
-	if (end >= 0) {
-		_tmp1_ = end <= string_length;
-	} else {
-		_tmp1_ = FALSE;
-	}
-	g_return_val_if_fail (_tmp1_, NULL);
-	g_return_val_if_fail (start <= end, NULL);
-	start_string = g_utf8_offset_to_pointer (self, start);
-	result = g_strndup (start_string, ((gchar*) g_utf8_offset_to_pointer (start_string, end - start)) - ((gchar*) start_string));
-	return result;
-}
-
-
-char* player_item_sanitize_string (const char* st) {
-	char* result = NULL;
-	char* _result_;
-	g_return_val_if_fail (st != NULL, NULL);
-	_result_ = string_strip (st);
-	if (g_str_has_prefix (_result_, "file:///")) {
-		char* _tmp0_;
-		_result_ = (_tmp0_ = string_slice (_result_, (glong) 7, g_utf8_strlen (_result_, -1)), _g_free0 (_result_), _tmp0_);
-	}
-	g_debug ("player-item.vala:89: Sanitize string - result = %s", _result_);
-	result = _result_;
 	return result;
 }
 

@@ -27,15 +27,13 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <gtk/gtk.h>
 #include "play-button.h"
 
-
-static DbusmenuMenuitem* twin_item;
-
 typedef struct _TransportWidgetPrivate TransportWidgetPrivate;
 
 struct _TransportWidgetPrivate
 {
 	GtkWidget* hbox;
 	GtkWidget* play_button;
+	DbusmenuMenuitem* twin_item;		
 };
 
 #define TRANSPORT_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TRANSPORT_WIDGET_TYPE, TransportWidgetPrivate))
@@ -45,17 +43,23 @@ static void transport_widget_class_init (TransportWidgetClass *klass);
 static void transport_widget_init       (TransportWidget *self);
 static void transport_widget_dispose    (GObject *object);
 static void transport_widget_finalize   (GObject *object);
-static gboolean transport_widget_expose_event(GtkWidget* widget, GdkEventExpose* event);
+
+static void transport_widget_set_twin_item(TransportWidget* self,
+                           								 DbusmenuMenuitem* twin_item);
+
+static gboolean transport_widget_expose_event(GtkWidget* widget,
+                                              GdkEventExpose* event);
 
 /* UI and dbusmenu callbacks */
-static gboolean transport_widget_button_press_event 	(GtkWidget             *menuitem,
-                                                  		GdkEventButton        *event);
-static gboolean transport_widget_button_release_event (GtkWidget             *menuitem,
-                                                    	GdkEventButton        *event);                                          
+static gboolean transport_widget_button_press_event 	(GtkWidget      *menuitem,
+                                                  		GdkEventButton  *event);
+static gboolean transport_widget_button_release_event (GtkWidget      *menuitem,
+                                                    	GdkEventButton  *event);                                          
 static void transport_widget_property_update(DbusmenuMenuitem* item,
                                        				gchar * property, 
                                        				GValue * value,
                                        				gpointer userdata);
+
 
 G_DEFINE_TYPE (TransportWidget, transport_widget, GTK_TYPE_MENU_ITEM);
 
@@ -93,8 +97,6 @@ transport_widget_init (TransportWidget *self)
 	play_button_set_style(priv->play_button, style);
 	
 	gtk_box_pack_start (GTK_BOX (priv->hbox), priv->play_button, FALSE, FALSE, 0);	
-	
-	g_signal_connect(G_OBJECT(twin_item), "property-changed", G_CALLBACK(transport_widget_property_update), self);
 	                 
 	gtk_container_add (GTK_CONTAINER (self), priv->hbox);
 
@@ -120,14 +122,21 @@ transport_widget_expose_event(GtkWidget* widget, GdkEventExpose* event)
 	//gtk_container_propagate_expose(GTK_CONTAINER(widget),priv->play_button, event);
 	return TRUE;
 }
-	
+
+static void transport_widget_set_twin_item(TransportWidget* self,
+                           								 DbusmenuMenuitem* twin_item)
+{
+	TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(self);
+	priv->twin_item = twin_item;
+	g_signal_connect(G_OBJECT(priv->twin_item), "property-changed", 
+	                 G_CALLBACK(transport_widget_property_update), self);
+}
 
 /* keyevents */
 static gboolean
 transport_widget_button_press_event (GtkWidget *menuitem, 
                                   	GdkEventButton *event)
 {
-	g_debug("TransportWidget::menu_press_event");
 	if(IS_TRANSPORT_WIDGET(menuitem) == FALSE){
 		return FALSE;
 	}
@@ -136,20 +145,15 @@ transport_widget_button_press_event (GtkWidget *menuitem,
 
   GtkWidget *parent;
 
-  // can we block emissions of "grab-notify" on parent??
   parent = gtk_widget_get_parent (GTK_WIDGET (menuitem));
-	gint result = determine_button_event(priv->play_button, event);
 
-  //GTK_OBJECT_FLAGS (scale) |= GTK_HAS_GRAB;
-  //gtk_widget_event (scale,
-                    //((GdkEvent *)(void*)(event)));
-  //GTK_OBJECT_FLAGS (scale) &= ~(GTK_HAS_GRAB);
+	gint result = determine_button_event(priv->play_button, event);
 
  	GValue value = {0};
   g_value_init(&value, G_TYPE_INT);
 	g_debug("TransportWidget::menu_press_event - going to send value %i", result);
 	g_value_set_int(&value, result);	
-	dbusmenu_menuitem_handle_event (twin_item, "Transport state change", &value, 0);
+	dbusmenu_menuitem_handle_event (priv->twin_item, "Transport state change", &value, 0);
 	
 	return TRUE;
 }
@@ -191,7 +195,8 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 GtkWidget* 
 transport_widget_new(DbusmenuMenuitem *item)
 {
-	twin_item = item;
-	return g_object_new(TRANSPORT_WIDGET_TYPE, NULL);
+	GtkWidget* widget =  g_object_new(TRANSPORT_WIDGET_TYPE, NULL);
+	transport_widget_set_twin_item((TransportWidget*)widget, item);
+	return widget;
 }
 
