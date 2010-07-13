@@ -44,6 +44,8 @@ struct _PlayButton {
 GType play_button_get_type (void);
 void play_button_set_style(GtkWidget* button, GtkStyle* style);
 gint determine_button_event(GtkWidget* button, GdkEventButton* event);
+void play_button_react_to_button_press(GtkWidget* button, gint command);
+void play_button_react_to_button_release(GtkWidget* button);
 
 GtkWidget* play_button_new();
 

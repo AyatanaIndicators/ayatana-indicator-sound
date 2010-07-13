@@ -137,9 +137,7 @@ static gboolean
 transport_widget_button_press_event (GtkWidget *menuitem, 
                                   	GdkEventButton *event)
 {
-	if(IS_TRANSPORT_WIDGET(menuitem) == FALSE){
-		return FALSE;
-	}
+	g_return_val_if_fail(IS_TRANSPORT_WIDGET(menuitem), FALSE);
 
 	TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE(TRANSPORT_WIDGET(menuitem));
 
@@ -155,6 +153,7 @@ transport_widget_button_press_event (GtkWidget *menuitem,
 		g_debug("TransportWidget::menu_press_event - going to send value %i", result);
 		g_value_set_int(&value, result);	
 		dbusmenu_menuitem_handle_event (priv->twin_item, "Transport state change", &value, 0);
+		play_button_react_to_button_press(priv->play_button, result);
 	}	
 	return TRUE;
 }
@@ -165,9 +164,9 @@ transport_widget_button_release_event (GtkWidget *menuitem,
                                   GdkEventButton *event)
 {
 	g_debug("TransportWidget::menu_release_event");
-	if(IS_TRANSPORT_WIDGET(menuitem) == FALSE){
-		return FALSE;
-	}
+	g_return_val_if_fail(IS_TRANSPORT_WIDGET(menuitem), FALSE);
+	TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE(TRANSPORT_WIDGET(menuitem));	
+  play_button_react_to_button_release(priv->play_button);
 	
 	return TRUE;
 }
