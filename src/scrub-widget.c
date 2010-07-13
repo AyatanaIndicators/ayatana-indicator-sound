@@ -25,7 +25,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "scrub-widget.h"
 #include "common-defs.h"
 
-
 typedef struct _ScrubWidgetPrivate ScrubWidgetPrivate;
 
 struct _ScrubWidgetPrivate

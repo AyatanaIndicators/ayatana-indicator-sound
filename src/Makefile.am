@@ -18,6 +18,7 @@ libsoundmenu_la_SOURCES = \
 	indicator-sound.c \
 	title-widget.c \
 	title-widget.h \
+	scrub-widget.c \
 	scrub-widget.h \
 	dbus-shared-names.h \
   sound-service-client.h 

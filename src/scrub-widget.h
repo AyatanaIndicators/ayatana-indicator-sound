@@ -1,4 +1,4 @@
-s/*
+/*
 Copyright 2010 Canonical Ltd.
 
 Authors:
@@ -44,7 +44,7 @@ struct _ScrubWidget {
 };
 
 GType scrub_widget_get_type (void) G_GNUC_CONST;
-GtkWidget* scrub_widget_new(DbusmenuMenuitem *twin_item);
+GtkWidget* scrub_widget_new(DbusmenuMenuitem* twin_item);
 
 G_END_DECLS
 
