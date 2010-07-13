@@ -53,11 +53,17 @@ Uses code from ctk
 #define PAUSE_X 77.0f
 #define	PAUSE_Y 15.0f
 
-// Transport events
+// Transport Manual events
 enum {
 	PREVIOUS,
 	PLAY_PAUSE,
 	NEXT
+};
+
+// Transport updates
+enum{
+	PAUSE,
+	PLAY
 };
 
 static const gint NO_COMMAND = -1;

@@ -46,6 +46,7 @@ void play_button_set_style(GtkWidget* button, GtkStyle* style);
 gint determine_button_event(GtkWidget* button, GdkEventButton* event);
 void play_button_react_to_button_press(GtkWidget* button, gint command);
 void play_button_react_to_button_release(GtkWidget* button);
+void play_button_toggle_play_pause(GtkWidget* button, int update);
 
 GtkWidget* play_button_new();
 
