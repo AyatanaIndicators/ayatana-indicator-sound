@@ -56,8 +56,8 @@ public class MprisController : GLib.Object
 		status st = this.mpris_player.GetStatus();
 		int play_state =  st.playback;
 		debug("GetStatusChange - play state %i", play_state);
-		(this.owner.custom_items[this.owner.TRANSPORT] as TransportMenuitem).change_play_state(play_state);
-		this.owner.custom_items[this.owner.METADATA].update(this.mpris_player.GetMetadata(),
+		(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(play_state);
+		this.owner.custom_items[PlayerController.widget_order.METADATA].update(this.mpris_player.GetMetadata(),
 		                            MetadataMenuitem.attributes_format());
 		
 	}
@@ -66,8 +66,8 @@ public class MprisController : GLib.Object
 	private void onTrackChange(dynamic DBus.Object mpris_client, HashTable<string,Value?> ht)
 	{
 		debug("onTrackChange");
-		this.owner.custom_items[this.owner.METADATA].reset(MetadataMenuitem.attributes_format());
-		this.owner.custom_items[this.owner.METADATA].update(ht,
+		this.owner.custom_items[PlayerController.widget_order.METADATA].reset(MetadataMenuitem.attributes_format());
+		this.owner.custom_items[PlayerController.widget_order.METADATA].update(ht,
 		                            MetadataMenuitem.attributes_format());
 	}
 
@@ -117,7 +117,7 @@ public class MprisController : GLib.Object
 		Value v = Value(typeof(int));
 		v.set_int(play_state);
 		ht.insert("state", v); 
-		this.owner.custom_items[this.owner.TRANSPORT].update(ht, TransportMenuitem.attributes_format());
+		this.owner.custom_items[PlayerController.widget_order.TRANSPORT].update(ht, TransportMenuitem.attributes_format());
 	}
 
 	

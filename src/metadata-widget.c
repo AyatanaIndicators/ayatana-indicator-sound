@@ -109,7 +109,7 @@ metadata_widget_init (MetadataWidget *self)
 	// artist
 	GtkWidget* artist;
 	artist = gtk_label_new(dbusmenu_menuitem_property_get(twin_item,
-	                                                      DBUSMENU_METADATA_MENUITEM_TEXT_ARTIST));
+	                                                      DBUSMENU_METADATA_MENUITEM_ARTIST));
 	
 	gtk_misc_set_alignment(GTK_MISC(artist), (gfloat)0, (gfloat)0);
 	gtk_label_set_width_chars(GTK_LABEL(artist), 15);	
@@ -121,7 +121,7 @@ metadata_widget_init (MetadataWidget *self)
 	// piece
 	GtkWidget* piece;
 	piece = gtk_label_new(dbusmenu_menuitem_property_get(twin_item,
-	                                                     DBUSMENU_METADATA_MENUITEM_TEXT_TITLE));
+	                                                     DBUSMENU_METADATA_MENUITEM_TITLE));
 	gtk_misc_set_alignment(GTK_MISC(piece), (gfloat)0, (gfloat)0);
 	gtk_label_set_width_chars(GTK_LABEL(piece), 12);
 	gtk_label_set_ellipsize(GTK_LABEL(piece), PANGO_ELLIPSIZE_MIDDLE);
@@ -132,7 +132,7 @@ metadata_widget_init (MetadataWidget *self)
 	// container
 	GtkWidget* container;
 	container = gtk_label_new(dbusmenu_menuitem_property_get(twin_item,
-	                                                         DBUSMENU_METADATA_MENUITEM_TEXT_ALBUM));
+	                                                         DBUSMENU_METADATA_MENUITEM_ALBUM));
 	gtk_misc_set_alignment(GTK_MISC(container), (gfloat)0, (gfloat)0);
 	gtk_label_set_width_chars(GTK_LABEL(container), 15);		
 	gtk_label_set_ellipsize(GTK_LABEL(container), PANGO_ELLIPSIZE_MIDDLE);	
@@ -202,15 +202,15 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	MetadataWidget* mitem = METADATA_WIDGET(userdata);
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(mitem);
 	
-	if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_ARTIST, property) == 0){  
+	if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_ARTIST, property) == 0){  
 		gtk_label_set_text(GTK_LABEL(priv->artist_label), g_value_get_string(value));
 		style_artist_text(mitem);
 	}
-	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_TITLE, property) == 0){  
+	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TITLE, property) == 0){  
 		gtk_label_set_text(GTK_LABEL(priv->piece_label), g_value_get_string(value));		
 		style_title_text(mitem);
 	}	
-	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TEXT_ALBUM, property) == 0){  
+	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_ALBUM, property) == 0){  
 		gtk_label_set_text(GTK_LABEL(priv->container_label), g_value_get_string(value));
 		style_album_text(mitem);	
 	}	

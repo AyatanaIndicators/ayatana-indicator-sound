@@ -23,8 +23,16 @@ using Gee;
 
 public class PlayerController : GLib.Object
 {
-	public const int METADATA = 2;	
-	private const int TRANSPORT = 3;
+	public const int WIDGET_QUANTITY = 4;//for now //5;
+
+	public static enum widget_order{
+		SEPARATOR,
+		TITLE,
+		METADATA,
+		TRANSPORT
+	}
+	//public const int METADATA = 2;	
+	//private const int TRANSPORT = 3;
 
 	public enum state{
 	 	OFFLINE,
@@ -51,7 +59,6 @@ public class PlayerController : GLib.Object
 		this.custom_items = new ArrayList<PlayerItem>();
 		this.update_state(initial_state);
 		this.menu_offset = offset;
-		debug("offset = %i", offset);
 		construct_widgets();
 		establish_mpris_connection();
 		update_layout();
@@ -66,7 +73,7 @@ public class PlayerController : GLib.Object
 	public void activate()
 	{
 		this.establish_mpris_connection();	
-		this.custom_items[METADATA].property_set_bool(MENUITEM_PROP_VISIBLE, true);		
+		this.custom_items[widget_order.METADATA].property_set_bool(MENUITEM_PROP_VISIBLE, true);		
 	}
 
 	/*
@@ -126,8 +133,8 @@ public class PlayerController : GLib.Object
 			visibility = false;
 		}
 		debug("about the set the visibility on both the transport and metadata widget to %s", visibility.to_string());
-		this.custom_items[TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);
-		this.custom_items[METADATA].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);
+		this.custom_items[widget_order.TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);
+		this.custom_items[widget_order.METADATA].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);
 		// DEBUG
 		if(this.mpris_adaptor == null){
 			warning("Why is the mpris object null");
