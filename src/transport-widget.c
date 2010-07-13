@@ -149,12 +149,13 @@ transport_widget_button_press_event (GtkWidget *menuitem,
 
 	gint result = determine_button_event(priv->play_button, event);
 
- 	GValue value = {0};
-  g_value_init(&value, G_TYPE_INT);
-	g_debug("TransportWidget::menu_press_event - going to send value %i", result);
-	g_value_set_int(&value, result);	
-	dbusmenu_menuitem_handle_event (priv->twin_item, "Transport state change", &value, 0);
-	
+	if(result >= 0){
+	 	GValue value = {0};
+		g_value_init(&value, G_TYPE_INT);
+		g_debug("TransportWidget::menu_press_event - going to send value %i", result);
+		g_value_set_int(&value, result);	
+		dbusmenu_menuitem_handle_event (priv->twin_item, "Transport state change", &value, 0);
+	}	
 	return TRUE;
 }
 

@@ -361,7 +361,7 @@ determine_button_event(GtkWidget* button, GdkEventButton* event)
 {
 	g_debug("event x coordinate = %f", event->x);
 	g_debug("event y coordinate = %f", event->y);
-	gint result = 0;
+	gint result = -1;
 	// For now very simple rectangular collision detection
 	if(event->x > 55 && event->x < 95
 	   && event->y > 22 && event->y < 46){
