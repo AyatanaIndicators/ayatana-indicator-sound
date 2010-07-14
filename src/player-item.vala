@@ -47,7 +47,8 @@ public class PlayerItem : Dbusmenu.Menuitem
 		if(ensure_valid_updates(data, attributes) == false){
 			debug("PlayerItem::Update -> The hashtable update does not contain what we were expecting - just leave it!");
 			return;
-		}
+		}		
+		
 		foreach(string property in attributes){
 			string[] input_keys = property.split("-");
 			string search_key = input_keys[input_keys.length-1 : input_keys.length][0];
@@ -57,6 +58,7 @@ public class PlayerItem : Dbusmenu.Menuitem
 			if (v.holds (typeof (string))){
 				string update = v.get_string().strip();
 				debug("with value : %s", update);
+				// Special case for the arturl URI's.
 				if(property.contains("arturl")){
 					try{
 						update = Filename.from_uri(update.strip());

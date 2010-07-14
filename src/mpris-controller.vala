@@ -71,10 +71,6 @@ public class MprisController : GLib.Object
 		                            MetadataMenuitem.attributes_format());
 	}
 
-	/**
-	 * TRUE  => Playing
-	 * FALSE => Paused
-	 **/
 	public void transport_event(TransportMenuitem.action command)
 	{
 		debug("transport_event input = %i", (int)command);
@@ -101,6 +97,21 @@ public class MprisController : GLib.Object
 		}
 	}
 
+	public void set_position(double position)
+	{
+		debug("Set position with pos (0-100) %f", position);
+		HashTable<string, Value?> data = this.mpris_player.GetMetadata();
+		Value? time_value = data.lookup("time");
+		if(time_value == null){
+			warning("Can't fetch the duration of the track therefore cant set the position");
+			return;
+		}
+		uint32 total_time = time_value.get_uint32();
+		debug("total time of track = %i", (int)total_time);		
+		double new_time_position = total_time * position/100.0;
+		this.mpris_player.SetPosition((int)(new_time_position * 1000));
+	}
+	
 	public bool connected()
 	{
 		return (this.mpris_player != null);

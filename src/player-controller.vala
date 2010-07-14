@@ -23,16 +23,15 @@ using Gee;
 
 public class PlayerController : GLib.Object
 {
-	public const int WIDGET_QUANTITY = 4;//for now //5;
+	public const int WIDGET_QUANTITY = 5;
 
 	public static enum widget_order{
 		SEPARATOR,
 		TITLE,
 		METADATA,
+		SCRUB,
 		TRANSPORT
 	}
-	//public const int METADATA = 2;	
-	//private const int TRANSPORT = 3;
 
 	public enum state{
 	 	OFFLINE,
@@ -134,14 +133,14 @@ public class PlayerController : GLib.Object
 		}
 		debug("about the set the visibility on both the transport and metadata widget to %s", visibility.to_string());
 		this.custom_items[widget_order.TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);
-		this.custom_items[widget_order.METADATA].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);
+		this.custom_items[widget_order.SCRUB].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);
+		this.custom_items[widget_order.METADATA].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);		
 		// DEBUG
 		if(this.mpris_adaptor == null){
 			warning("Why is the mpris object null");
 		}
 	}
-	
-	
+		
 	private void construct_widgets()
 	{
 		// Separator item
@@ -154,11 +153,16 @@ public class PlayerController : GLib.Object
 		// Metadata item
 		MetadataMenuitem metadata_item = new MetadataMenuitem();
 		this.custom_items.add(metadata_item);
-		
+
+		// Scrub item
+		ScrubMenuitem scrub_item = new ScrubMenuitem(this);
+		this.custom_items.add(scrub_item);
+
 		// Transport item
 		TransportMenuitem transport_item = new TransportMenuitem(this);
 		this.custom_items.add(transport_item);
 
+		
 		foreach(PlayerItem item in this.custom_items){
 			root_menu.child_add_position(item, this.menu_offset + this.custom_items.index_of(item));			
 		}

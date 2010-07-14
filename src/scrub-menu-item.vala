@@ -25,12 +25,14 @@ public class ScrubMenuitem : PlayerItem
 {
 	public ScrubMenuitem(PlayerController parent)
 	{
-		Object(item_type: MENUITEM_TYPE);
+		debug("Transport object constructor - service side");
+		Object(item_type: MENUITEM_TYPE, owner: parent);
 	}
 
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
 	{
-		debug("handle_event for owner %s with owner state = %i", this.owner.name, this.owner.current_state);		
+		debug("handle_event for owner %s with value: %f", this.owner.name, input_value.get_double());		
+		this.owner.mpris_adaptor.set_position(input_value.get_double());		
 	}
 	
 	public static HashSet<string> attributes_format()
