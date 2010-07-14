@@ -26,8 +26,6 @@ public class MprisController : GLib.Object
 	public dynamic DBus.Object mpris_player{get; construct;}	
 	public PlayerController owner {get; construct;}	
 	public string mpris_interface {get; construct;}
-	private string name;
-
 	
 	struct status {
     public int32 playback;
@@ -99,17 +97,18 @@ public class MprisController : GLib.Object
 
 	public void set_position(double position)
 	{
-		debug("Set position with pos (0-100) %f", position);
+		//debug("Set position with pos (0-100) %f", position);
 		HashTable<string, Value?> data = this.mpris_player.GetMetadata();
 		Value? time_value = data.lookup("time");
 		if(time_value == null){
 			warning("Can't fetch the duration of the track therefore cant set the position");
 			return;
 		}
-		uint32 total_time = time_value.get_uint32();
-		debug("total time of track = %i", (int)total_time);		
+		uint32 total_time = time_value.get_uint();
+		//debug("total time of track = %i", (int)total_time);				
 		double new_time_position = total_time * position/100.0;
-		this.mpris_player.SetPosition((int)(new_time_position * 1000));
+		//debug("new position = %f", (new_time_position * 1000));		
+		this.mpris_player.PositionSet((int32)(new_time_position * 1000));
 	}
 	
 	public bool connected()

@@ -51,18 +51,20 @@ public class FamiliarPlayersDB : GLib.Object
 	}
 
 	private bool create_key_file(){
+		bool result = false;
 		if (test(this.file_name, GLib.FileTest.EXISTS)) {
 			this.key_file = new KeyFile();
 			try{
-				if (this.key_file.load_from_file(this.file_name, KeyFileFlags.NONE) == true) {
-					return true;
-				}
+				result = this.key_file.load_from_file(this.file_name, KeyFileFlags.NONE);
 			}
-			catch(FileError e){
-				warning("FamiliarPlayersDB - error trying to load KeyFile");
+			catch(GLib.KeyFileError e){
+				warning("FamiliarPlayersDB::create_key_file() - KeyFileError");
 			}
+			catch(GLib.FileError e){
+				warning("FamiliarPlayersDB::create_key_file() - FileError");
+			}			
 		}
-		return false;
+		return result;
 	}
 
 	private bool check_for_keys(){
@@ -87,7 +89,7 @@ public class FamiliarPlayersDB : GLib.Object
 			}
 			return true;
 		}
-		catch(FileError error){
+		catch(GLib.KeyFileError error){
 			warning("Error loading the Desktop string list");				
 			return false;
 		}
@@ -108,7 +110,7 @@ public class FamiliarPlayersDB : GLib.Object
 		try{
 			data  = keyfile.to_data(out data_length);
 		}
-		catch(Error e){
+		catch(GLib.KeyFileError e){
 			warning("Problems dumping keyfile to a string");
 			return false;
 		}
