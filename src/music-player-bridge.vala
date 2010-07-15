@@ -77,7 +77,7 @@ public class MusicPlayerBridge : GLib.Object
 			return 2;
 		}
 		else{
-			return (2 + (this.registered_clients.size * 4));
+			return (2 + (this.registered_clients.size * PlayerController.WIDGET_QUANTITY));
 		}
 	}
 	
@@ -93,9 +93,8 @@ public class MusicPlayerBridge : GLib.Object
 				this.registered_clients[client_name].update_state(PlayerController.state.READY);
 				this.registered_clients[client_name].activate();
 			}
-			//else init a new one
 			else{			
-				
+				//else init a new one				
 				PlayerController ctrl = new PlayerController(root_menu,
 				                                             client_name,
 				                                             calculate_menu_position(),

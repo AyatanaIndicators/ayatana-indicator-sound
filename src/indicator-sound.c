@@ -41,6 +41,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "transport-widget.h"
 #include "metadata-widget.h"
 #include "title-widget.h"
+#include "scrub-widget.h"
 #include "dbus-shared-names.h"
 #include "sound-service-client.h"
 #include "common-defs.h"
@@ -94,10 +95,11 @@ static void slider_grabbed(GtkWidget *widget, gpointer user_data);
 static void slider_released(GtkWidget *widget, gpointer user_data);
 static void style_changed_cb(GtkWidget *widget, gpointer user_data);
 
-//player widgets related
+//player widget realisation methods
 static gboolean new_transport_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 static gboolean new_metadata_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 static gboolean new_title_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
+static gboolean new_scrub_bar_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
@@ -246,7 +248,9 @@ get_menu (IndicatorObject * io)
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TRANSPORT_MENUITEM_TYPE, new_transport_widget);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_METADATA_MENUITEM_TYPE, new_metadata_widget);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TITLE_MENUITEM_TYPE, new_title_widget);
-  // register Key-press listening on the menu widget as the slider does not allow this.
+	dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SCRUB_MENUITEM_TYPE, new_scrub_bar_widget);	
+
+	// register Key-press listening on the menu widget as the slider does not allow this.
   g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), NULL);
   return GTK_MENU(menu);
 }
@@ -273,7 +277,8 @@ new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuC
 
   io = g_object_get_data (G_OBJECT (client), "indicator");
 
-  volume_slider = ido_scale_menu_item_new_with_range ("Volume", initial_volume_percent, 0, 100, 1);
+  volume_slider = ido_scale_menu_item_new_with_range ("Volume", IDO_RANGE_STYLE_DEFAULT, initial_volume_percent, 0, 100, 1);
+	ido_scale_menu_item_set_style (IDO_SCALE_MENU_ITEM (volume_slider), IDO_SCALE_MENU_ITEM_STYLE_IMAGE);	
   g_object_set(volume_slider, "reverse-scroll-events", TRUE, NULL);
 
   g_signal_connect (volume_slider,
@@ -369,6 +374,26 @@ new_title_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbusmenu
   gtk_widget_show_all(title);
 
 	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_title_widget, parent);
+
+  return TRUE;
+}
+
+static gboolean
+new_scrub_bar_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
+{
+  g_debug("indicator-sound: new_scrub_bar_widget");
+
+  GtkWidget* scrub_bar = NULL;
+
+  g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
+  g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
+
+  scrub_bar = scrub_widget_new (newitem);
+  GtkMenuItem *menu_scrub_widget = GTK_MENU_ITEM(scrub_widget_get_ido_bar(SCRUB_WIDGET(scrub_bar)));
+
+  gtk_widget_show_all(scrub_widget_get_ido_bar(SCRUB_WIDGET(scrub_bar)));
+
+	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_scrub_widget, parent);
 
   return TRUE;
 }

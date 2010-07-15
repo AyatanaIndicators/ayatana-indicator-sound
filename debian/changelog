@@ -1,3 +1,12 @@
+indicator-sound (0.3.7-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    - Initial release of the scrub bar
+  * debian/control
+    - Bump build depends for libido-0.1-dev to 0.1.9
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 15 Jul 2010 12:25:57 -0400
+
 indicator-sound (0.3.6-0ubuntu1) maverick; urgency=low
 
   * New upstream release.
