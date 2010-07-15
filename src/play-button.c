@@ -53,12 +53,6 @@ Uses code from ctk
 #define PAUSE_X 77.0f
 #define	PAUSE_Y 15.0f
 
-// Transport Manual events
-enum {
-	PREVIOUS,
-	PLAY_PAUSE,
-	NEXT
-};
 
 // Transport updates
 enum{
@@ -66,18 +60,16 @@ enum{
 	PLAY
 };
 
-static const gint NO_COMMAND = -1;
-
 typedef struct _PlayButtonPrivate PlayButtonPrivate;
 
 struct _PlayButtonPrivate
 {
-	GdkColor 	background_colour_fg;
-	GdkColor 	background_colour_bg_dark;
-	GdkColor 	background_colour_bg_light;
-	GdkColor 	foreground_colour_fg;
-	GdkColor 	foreground_colour_bg;
-	gint 			current_command;
+	GdkColor 				background_colour_fg;
+	GdkColor 				background_colour_bg_dark;
+	GdkColor 				background_colour_bg_light;
+	GdkColor 				foreground_colour_fg;
+	GdkColor 				foreground_colour_bg;
+	PlayButtonEvent current_command;
 };
 
 #define PLAY_BUTTON_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), PLAY_BUTTON_TYPE, PlayButtonPrivate))
@@ -334,7 +326,7 @@ static void
 play_button_init (PlayButton *self)
 {
 	PlayButtonPrivate* priv = PLAY_BUTTON_GET_PRIVATE(self);	
-	priv->current_command	= NO_COMMAND;
+	priv->current_command	= TRANSPORT_NADA;
 	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 80); 
 }
 
@@ -367,32 +359,30 @@ play_button_expose (GtkWidget *button, GdkEventExpose *event)
 }
 
 
-gint
+PlayButtonEvent
 determine_button_event(GtkWidget* button, GdkEventButton* event)
 {
 	g_debug("event x coordinate = %f", event->x);
 	g_debug("event y coordinate = %f", event->y);
-	gint result = NO_COMMAND;
-
+	PlayButtonEvent button_event = TRANSPORT_NADA;
 	// For now very simple rectangular collision detection
 	if(event->x > 55 && event->x < 95
 	   && event->y > 22 && event->y < 46){
-		result = PREVIOUS;
+		button_event = TRANSPORT_PREVIOUS;
 	}
 	else if(event->x > 101 && event->x < 133
 	   && event->y > 20 && event->y < 47){
-		result = PLAY_PAUSE;		
+		button_event = TRANSPORT_PLAY_PAUSE;	
 	}
 	else if(event->x > 137 && event->x < 179
 	   && event->y > 22 && event->y < 46){
-		result = NEXT;		
-	}
-	
-	return result;
+		button_event = TRANSPORT_NEXT;
+	}	
+	return button_event;
 }
 
 void 
-play_button_react_to_button_press(GtkWidget* button, gint command)
+play_button_react_to_button_press(GtkWidget* button, PlayButtonEvent command)
 {
 	g_return_if_fail(IS_PLAY_BUTTON(button));
 	PlayButtonPrivate* priv = PLAY_BUTTON_GET_PRIVATE(button);
@@ -417,7 +407,7 @@ play_button_react_to_button_release(GtkWidget* button)
 {
 	g_return_if_fail(IS_PLAY_BUTTON(button));
 	PlayButtonPrivate* priv = PLAY_BUTTON_GET_PRIVATE(button);	
-	priv->current_command = NO_COMMAND;
+	priv->current_command = TRANSPORT_NADA;
 	cairo_t *cr;
 	cr = gdk_cairo_create (button->window);
 	/*cairo_rectangle (cr,
@@ -707,7 +697,7 @@ draw (GtkWidget* button, cairo_t *cr)
                INNER_START,
                INNER_END);
 
-	if(priv->current_command == PREVIOUS){
+	if(priv->current_command == TRANSPORT_PREVIOUS){
 		draw_gradient (cr,
 		               X,
 		               Y + 2,
@@ -716,7 +706,7 @@ draw (GtkWidget* button, cairo_t *cr)
 		               INNER_COMPRESSED_START,
 		               INNER_COMPRESSED_END);
 	}	
-	else if(priv->current_command == NEXT){
+	else if(priv->current_command == TRANSPORT_NEXT){
 		draw_gradient (cr,
 		               RECT_WIDTH / 2 + X,
 		               Y + 2,
@@ -745,7 +735,7 @@ draw (GtkWidget* button, cairo_t *cr)
                      CIRCLE_RADIUS - 2.0f,
                      INNER_START,
 		     						 INNER_END);
-				if(priv->current_command == PLAY_PAUSE){
+				if(priv->current_command == TRANSPORT_PLAY_PAUSE){
 		      draw_circle (cr,
 		                   X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 4.5f + 2.0f,
 		                   Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 2.0f,

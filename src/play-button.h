@@ -33,6 +33,13 @@ G_BEGIN_DECLS
 typedef struct _PlayButton      PlayButton;
 typedef struct _PlayButtonClass PlayButtonClass;
 
+typedef enum {
+	TRANSPORT_PREVIOUS,
+	TRANSPORT_PLAY_PAUSE,
+	TRANSPORT_NEXT,
+	TRANSPORT_NADA
+}PlayButtonEvent;
+
 struct _PlayButtonClass {
 	  GtkDrawingAreaClass parent_class;
 };
@@ -43,8 +50,8 @@ struct _PlayButton {
 
 GType play_button_get_type (void);
 void play_button_set_style(GtkWidget* button, GtkStyle* style);
-gint determine_button_event(GtkWidget* button, GdkEventButton* event);
-void play_button_react_to_button_press(GtkWidget* button, gint command);
+PlayButtonEvent determine_button_event(GtkWidget* button, GdkEventButton* event);
+void play_button_react_to_button_press(GtkWidget* button,  PlayButtonEvent command);
 void play_button_react_to_button_release(GtkWidget* button);
 void play_button_toggle_play_pause(GtkWidget* button, int update);
 
