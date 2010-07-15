@@ -418,7 +418,13 @@ play_button_react_to_button_release(GtkWidget* button)
 	draw (button, cr);
 	cairo_destroy (cr);
 	
-}                             
+}    
+
+void 
+play_button_toggle_play_pause(GtkWidget* button, int update)
+{
+}
+
 
 void
 play_button_set_style(GtkWidget* button, GtkStyle* style)
