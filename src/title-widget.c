@@ -152,7 +152,7 @@ title_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	TitleWidget* mitem = TITLE_WIDGET(userdata);
 	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(mitem);
 	
-	if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_TEXT_NAME, property) == 0){  
+	if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_NAME, property) == 0){  
 		gtk_label_set_text(GTK_LABEL(priv->name), g_value_get_string(value));
 		title_widget_style_name_text(mitem);
 	}
@@ -167,7 +167,7 @@ title_widget_set_twin_item(TitleWidget* self,
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
 	                 G_CALLBACK(title_widget_property_update), self);	
 	priv->name = gtk_label_new(dbusmenu_menuitem_property_get(priv->twin_item, 
-	                                                          DBUSMENU_TITLE_MENUITEM_TEXT_NAME));
+	                                                          DBUSMENU_TITLE_MENUITEM_NAME));
 	gtk_misc_set_padding(GTK_MISC(priv->name), 10, 0);
 	gtk_box_pack_start (GTK_BOX (priv->hbox), priv->name, FALSE, FALSE, 0);		
 

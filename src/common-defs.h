@@ -29,11 +29,16 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DBUSMENU_TRANSPORT_MENUITEM_TYPE       	"x-canonical-transport-bar"
 #define DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE  "x-canonical-transport-play-state"
 
-#define DBUSMENU_METADATA_MENUITEM_TYPE  				"x-canonical-metadata-menu-item"
-#define DBUSMENU_METADATA_MENUITEM_TEXT_ARTIST  "x-canonical-metadata-text-artist"
-#define DBUSMENU_METADATA_MENUITEM_TEXT_TITLE  	"x-canonical-metadata-text-title"
-#define DBUSMENU_METADATA_MENUITEM_TEXT_ALBUM   "x-canonical-metadata-text-album"
-#define DBUSMENU_METADATA_MENUITEM_ARTURL  			"x-canonical-metadata-arturl"
+#define DBUSMENU_METADATA_MENUITEM_TYPE  				"x-canonical-sound-menu-player-metadata-menu-item"
+#define DBUSMENU_METADATA_MENUITEM_ARTIST  			"x-canonical-sound-menu-player-metadata-artist"
+#define DBUSMENU_METADATA_MENUITEM_TITLE  			"x-canonical-sound-menu-player-metadata-title"
+#define DBUSMENU_METADATA_MENUITEM_ALBUM   			"x-canonical-sound-menu-player-metadata-album"
+#define DBUSMENU_METADATA_MENUITEM_ARTURL  			"x-canonical-sound-menu-player-metadata-arturl"
 
 #define DBUSMENU_TITLE_MENUITEM_TYPE          	"x-canonical-sound-menu-player-title-menu-item"
-#define DBUSMENU_TITLE_MENUITEM_TEXT_NAME       "x-canonical-sound-menu-player-title-name"
+#define DBUSMENU_TITLE_MENUITEM_NAME       			"x-canonical-sound-menu-player-title-name"
+
+#define DBUSMENU_SCRUB_MENUITEM_TYPE						"x-canonical-sound-menu-player-scrub-menu-item"
+#define DBUSMENU_SCRUB_MENUITEM_DURATION				"x-canonical-sound-menu-player-scrub-time"
+#define DBUSMENU_SCRUB_MENUITEM_POSITION				"x-canonical-sound-menu-player-scrub-position"
+
