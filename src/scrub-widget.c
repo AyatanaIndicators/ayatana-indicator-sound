@@ -75,7 +75,7 @@ scrub_widget_init (ScrubWidget *self)
 	g_debug("ScrubWidget::scrub_widget_init");
 	ScrubWidgetPrivate * priv = SCRUB_WIDGET_GET_PRIVATE(self);
 
-  priv->ido_scrub_bar = ido_scale_menu_item_new_with_range ("Scrub", 0, 0, 100, 1);
+  priv->ido_scrub_bar = ido_scale_menu_item_new_with_range ("Scrub", IDO_RANGE_STYLE_SMALL,  0, 0, 100, 1);
 	ido_scale_menu_item_set_style (IDO_SCALE_MENU_ITEM(priv->ido_scrub_bar), IDO_SCALE_MENU_ITEM_STYLE_LABEL);	
 	
 	g_object_set(priv->ido_scrub_bar, "reverse-scroll-events", TRUE, NULL);

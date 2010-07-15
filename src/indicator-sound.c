@@ -277,7 +277,7 @@ new_slider_item(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuC
 
   io = g_object_get_data (G_OBJECT (client), "indicator");
 
-  volume_slider = ido_scale_menu_item_new_with_range ("Volume", initial_volume_percent, 0, 100, 1);
+  volume_slider = ido_scale_menu_item_new_with_range ("Volume", IDO_RANGE_STYLE_DEFAULT, initial_volume_percent, 0, 100, 1);
 	ido_scale_menu_item_set_style (IDO_SCALE_MENU_ITEM (volume_slider), IDO_SCALE_MENU_ITEM_STYLE_IMAGE);	
   g_object_set(volume_slider, "reverse-scroll-events", TRUE, NULL);
 

@@ -137,9 +137,7 @@ static gboolean
 transport_widget_button_press_event (GtkWidget *menuitem, 
                                   	GdkEventButton *event)
 {
-	if(IS_TRANSPORT_WIDGET(menuitem) == FALSE){
-		return FALSE;
-	}
+	g_return_val_if_fail(IS_TRANSPORT_WIDGET(menuitem), FALSE);
 
 	TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE(TRANSPORT_WIDGET(menuitem));
 
@@ -147,14 +145,16 @@ transport_widget_button_press_event (GtkWidget *menuitem,
 
   parent = gtk_widget_get_parent (GTK_WIDGET (menuitem));
 
-	gint result = determine_button_event(priv->play_button, event);
+	PlayButtonEvent result = determine_button_event(priv->play_button, event);
 
- 	GValue value = {0};
-  g_value_init(&value, G_TYPE_INT);
-	g_debug("TransportWidget::menu_press_event - going to send value %i", result);
-	g_value_set_int(&value, result);	
-	dbusmenu_menuitem_handle_event (priv->twin_item, "Transport state change", &value, 0);
-	
+	if(result != TRANSPORT_NADA){
+	 	GValue value = {0};
+		g_value_init(&value, G_TYPE_INT);
+		g_debug("TransportWidget::menu_press_event - going to send value %i", (int)result);
+		g_value_set_int(&value, (int)result);	
+		dbusmenu_menuitem_handle_event (priv->twin_item, "Transport state change", &value, 0);
+		play_button_react_to_button_press(priv->play_button, result);
+	}	
 	return TRUE;
 }
 
@@ -164,9 +164,9 @@ transport_widget_button_release_event (GtkWidget *menuitem,
                                   GdkEventButton *event)
 {
 	g_debug("TransportWidget::menu_release_event");
-	if(IS_TRANSPORT_WIDGET(menuitem) == FALSE){
-		return FALSE;
-	}
+	g_return_val_if_fail(IS_TRANSPORT_WIDGET(menuitem), FALSE);
+	TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE(TRANSPORT_WIDGET(menuitem));	
+  play_button_react_to_button_release(priv->play_button);
 	
 	return TRUE;
 }
@@ -180,12 +180,13 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
                                  GValue* value, gpointer userdata)
 {
 	g_debug("transport_widget_update_state - with property  %s", property);  
-	//int update_value = g_value_get_int(value);
-	//g_debug("transport_widget_update_state - with value  %i", update_value);  
-
-	//TransportWidget* bar = (TransportWidget*)userdata;
-	//TransportWidgetPrivate *priv = TRANSPORT_WIDGET_GET_PRIVATE(bar);
+	TransportWidget* bar = (TransportWidget*)userdata;
+	g_return_if_fail(IS_TRANSPORT_WIDGET(bar));
 	
+	TransportWidgetPrivate *priv = TRANSPORT_WIDGET_GET_PRIVATE(bar);
+	int update_value = g_value_get_int(value);
+	g_debug("transport_widget_update_state - with value  %i", update_value);  
+	play_button_toggle_play_pause(priv->play_button, update_value);
 }
 
  /**
