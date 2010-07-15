@@ -33,7 +33,6 @@ G_BEGIN_DECLS
 #define IS_SOUND_SERVICE_DBUS_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), SOUND_SERVICE_DBUS_TYPE))
 #define SOUND_SERVICE_DBUS_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), SOUND_SERVICE_DBUS_TYPE, SoundServiceDbusClass))
 
-
 typedef struct _SoundServiceDbus      SoundServiceDbus;
 typedef struct _SoundServiceDbusClass SoundServiceDbusClass;
 typedef struct _SoundData             SoundData;

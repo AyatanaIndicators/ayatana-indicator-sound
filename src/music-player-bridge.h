@@ -19,6 +19,8 @@
 #include <libdbusmenu-glib/server.h>
 #include <gio/gio.h>
 #include <gee.h>
+#include <float.h>
+#include <math.h>
 #include <dbus/dbus-glib-lowlevel.h>
 #include <dbus/dbus-glib.h>
 
@@ -81,6 +83,17 @@ typedef struct _MetadataMenuitem MetadataMenuitem;
 typedef struct _MetadataMenuitemClass MetadataMenuitemClass;
 typedef struct _MetadataMenuitemPrivate MetadataMenuitemPrivate;
 
+#define TYPE_SCRUB_MENUITEM (scrub_menuitem_get_type ())
+#define SCRUB_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_SCRUB_MENUITEM, ScrubMenuitem))
+#define SCRUB_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_SCRUB_MENUITEM, ScrubMenuitemClass))
+#define IS_SCRUB_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_SCRUB_MENUITEM))
+#define IS_SCRUB_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_SCRUB_MENUITEM))
+#define SCRUB_MENUITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_SCRUB_MENUITEM, ScrubMenuitemClass))
+
+typedef struct _ScrubMenuitem ScrubMenuitem;
+typedef struct _ScrubMenuitemClass ScrubMenuitemClass;
+typedef struct _ScrubMenuitemPrivate ScrubMenuitemPrivate;
+
 #define TYPE_TITLE_MENUITEM (title_menuitem_get_type ())
 #define TITLE_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_TITLE_MENUITEM, TitleMenuitem))
 #define TITLE_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_TITLE_MENUITEM, TitleMenuitemClass))
@@ -102,6 +115,8 @@ typedef struct _PlayerControllerPrivate PlayerControllerPrivate;
 
 typedef struct _MprisController MprisController;
 typedef struct _MprisControllerClass MprisControllerClass;
+
+#define PLAYER_CONTROLLER_TYPE_WIDGET_ORDER (player_controller_widget_order_get_type ())
 
 #define PLAYER_CONTROLLER_TYPE_STATE (player_controller_state_get_type ())
 typedef struct _MprisControllerPrivate MprisControllerPrivate;
@@ -170,6 +185,15 @@ struct _MetadataMenuitemClass {
 	PlayerItemClass parent_class;
 };
 
+struct _ScrubMenuitem {
+	PlayerItem parent_instance;
+	ScrubMenuitemPrivate * priv;
+};
+
+struct _ScrubMenuitemClass {
+	PlayerItemClass parent_class;
+};
+
 struct _TitleMenuitem {
 	PlayerItem parent_instance;
 	TitleMenuitemPrivate * priv;
@@ -190,6 +214,14 @@ struct _PlayerController {
 struct _PlayerControllerClass {
 	GObjectClass parent_class;
 };
+
+typedef enum  {
+	PLAYER_CONTROLLER_WIDGET_ORDER_SEPARATOR,
+	PLAYER_CONTROLLER_WIDGET_ORDER_TITLE,
+	PLAYER_CONTROLLER_WIDGET_ORDER_METADATA,
+	PLAYER_CONTROLLER_WIDGET_ORDER_SCRUB,
+	PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT
+} PlayerControllerwidget_order;
 
 typedef enum  {
 	PLAYER_CONTROLLER_STATE_OFFLINE,
@@ -251,13 +283,19 @@ MetadataMenuitem* metadata_menuitem_new (void);
 MetadataMenuitem* metadata_menuitem_construct (GType object_type);
 GeeHashSet* metadata_menuitem_attributes_format (void);
 gboolean metadata_menuitem_populated (MetadataMenuitem* self);
+GType scrub_menuitem_get_type (void);
+ScrubMenuitem* scrub_menuitem_new (PlayerController* parent);
+ScrubMenuitem* scrub_menuitem_construct (GType object_type, PlayerController* parent);
+void scrub_menuitem_update_position (ScrubMenuitem* self, gint32 new_position);
+GeeHashSet* scrub_menuitem_attributes_format (void);
 GType title_menuitem_get_type (void);
 TitleMenuitem* title_menuitem_new (PlayerController* parent);
 TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* parent);
 GeeHashSet* title_menuitem_attributes_format (void);
 GType mpris_controller_get_type (void);
+GType player_controller_widget_order_get_type (void);
 GType player_controller_state_get_type (void);
-#define PLAYER_CONTROLLER_METADATA 2
+#define PLAYER_CONTROLLER_WIDGET_QUANTITY 5
 PlayerController* player_controller_new (DbusmenuMenuitem* root, const char* client_name, gint offset, PlayerControllerstate initial_state);
 PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, const char* client_name, gint offset, PlayerControllerstate initial_state);
 void player_controller_update_state (PlayerController* self, PlayerControllerstate new_state);
@@ -276,6 +314,7 @@ MprisControllerV2* mpris_controller_v2_construct (GType object_type, PlayerContr
 MprisController* mpris_controller_new (PlayerController* ctrl, const char* inter);
 MprisController* mpris_controller_construct (GType object_type, PlayerController* ctrl, const char* inter);
 void mpris_controller_transport_event (MprisController* self, TransportMenuitemaction command);
+void mpris_controller_set_position (MprisController* self, double position);
 gboolean mpris_controller_connected (MprisController* self);
 DBusGProxy* mpris_controller_get_mpris_player (MprisController* self);
 PlayerController* mpris_controller_get_owner (MprisController* self);
