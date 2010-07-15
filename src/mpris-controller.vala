@@ -50,23 +50,38 @@ public class MprisController : GLib.Object
 
 		this.mpris_player.TrackChange += onTrackChange;	
     this.mpris_player.StatusChange += onStatusChange;	
+		initial_update();
+	}
 
+	private void initial_update()
+	{
 		status st = this.mpris_player.GetStatus();
 		int play_state =  st.playback;
 		debug("GetStatusChange - play state %i", play_state);
 		(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(play_state);
 		this.owner.custom_items[PlayerController.widget_order.METADATA].update(this.mpris_player.GetMetadata(),
 		                            MetadataMenuitem.attributes_format());
+		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.mpris_player.GetMetadata(),
+		                        ScrubMenuitem.attributes_format());		
+		// temporary fix
+		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
+		scrub.update_position(this.mpris_player.PositionGet());
 		
 	}
-
 
 	private void onTrackChange(dynamic DBus.Object mpris_client, HashTable<string,Value?> ht)
 	{
 		debug("onTrackChange");
 		this.owner.custom_items[PlayerController.widget_order.METADATA].reset(MetadataMenuitem.attributes_format());
+		this.owner.custom_items[PlayerController.widget_order.SCRUB].reset(ScrubMenuitem.attributes_format());
 		this.owner.custom_items[PlayerController.widget_order.METADATA].update(ht,
 		                            MetadataMenuitem.attributes_format());
+		debug("about to update the duration on the scrub bar");
+		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.mpris_player.GetMetadata(),
+		                        ScrubMenuitem.attributes_format());		
+		// temporary fix
+		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
+		scrub.update_position(this.mpris_player.PositionGet());
 	}
 
 	public void transport_event(TransportMenuitem.action command)

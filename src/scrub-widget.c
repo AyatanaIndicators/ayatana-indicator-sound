@@ -32,7 +32,6 @@ struct _ScrubWidgetPrivate
 {
 	DbusmenuMenuitem* twin_item;	
 	GtkWidget* ido_scrub_bar;
-	GtkStyle* style;	
 };
 
 #define SCRUB_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), SCRUB_WIDGET_TYPE, ScrubWidgetPrivate))
@@ -46,8 +45,10 @@ static void scrub_widget_property_update( DbusmenuMenuitem* item, gchar* propert
                                        	  GValue* value, gpointer userdata);
 static void scrub_widget_set_twin_item(	ScrubWidget* self,
                            							DbusmenuMenuitem* twin_item);
-static void scrub_widget_parent_changed ( GtkWidget *widget, gpointer	user_data);
 static gchar* scrub_widget_format_time(gint time);
+static void scrub_widget_set_ido_position(ScrubWidget* self,
+                                          gint position,
+                                          gint duration);
 static gboolean scrub_widget_change_value_cb (GtkRange     *range,
                                  							GtkScrollType scroll,
                                  							gdouble       value,
@@ -76,13 +77,8 @@ scrub_widget_init (ScrubWidget *self)
 
   priv->ido_scrub_bar = ido_scale_menu_item_new_with_range ("Scrub", 0, 0, 100, 1);
 	ido_scale_menu_item_set_style (IDO_SCALE_MENU_ITEM(priv->ido_scrub_bar), IDO_SCALE_MENU_ITEM_STYLE_LABEL);	
-	ido_scale_menu_item_set_primary_label(IDO_SCALE_MENU_ITEM(priv->ido_scrub_bar), "00:00"); 	
-	ido_scale_menu_item_set_secondary_label(IDO_SCALE_MENU_ITEM(priv->ido_scrub_bar), "05:35"); 	
+	
 	g_object_set(priv->ido_scrub_bar, "reverse-scroll-events", TRUE, NULL);
-
-  //g_signal_connect (priv->ido_scrub_bar,
-  //                  "notify::parent", G_CALLBACK (scrub_widget_parent_changed),
-  //                  NULL);
 	
   // register slider changes listening on the range
   GtkWidget* scrub_widget = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_scrub_bar);	
@@ -103,29 +99,29 @@ scrub_widget_finalize (GObject *object)
 
 static void 
 scrub_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
-                                       GValue* value, gpointer userdata)
+                             GValue* value, gpointer userdata)
 {
+	g_debug("scrub-widget::property_update"); 
+	
 	g_return_if_fail (IS_SCRUB_WIDGET (userdata));	
 	ScrubWidget* mitem = SCRUB_WIDGET(userdata);
 	ScrubWidgetPrivate * priv = SCRUB_WIDGET_GET_PRIVATE(mitem);
 	
 	if(g_ascii_strcasecmp(DBUSMENU_SCRUB_MENUITEM_DURATION, property) == 0){
+		g_debug("scrub-widget::update length = %i", g_value_get_int(value)); 
 		ido_scale_menu_item_set_secondary_label(IDO_SCALE_MENU_ITEM(priv->ido_scrub_bar),
 		                                      scrub_widget_format_time(g_value_get_int(value))); 			
 	}
 	else if(g_ascii_strcasecmp(DBUSMENU_SCRUB_MENUITEM_POSITION, property) == 0){
+		g_debug("scrub-widget::update position = %i", g_value_get_int(value)); 
 		ido_scale_menu_item_set_primary_label(IDO_SCALE_MENU_ITEM(priv->ido_scrub_bar),
-		                                      scrub_widget_format_time(g_value_get_int(value))); 					
+		                                      scrub_widget_format_time(g_value_get_int(value)/1000)); 					
 	}	
+	scrub_widget_set_ido_position(mitem, 
+	                                dbusmenu_menuitem_property_get_int(priv->twin_item, DBUSMENU_SCRUB_MENUITEM_POSITION)/1000,
+																	dbusmenu_menuitem_property_get_int(priv->twin_item, DBUSMENU_SCRUB_MENUITEM_DURATION));	                                
+	
 }
-
-/*static void
-scrub_widget_parent_changed (GtkWidget *widget,
-                       gpointer   user_data)
-{
-  gtk_widget_set_size_request (widget, 200, -1);
-  g_debug("slider parent changed");
-}*/
 
 static void
 scrub_widget_set_twin_item(ScrubWidget* self,
@@ -136,6 +132,19 @@ scrub_widget_set_twin_item(ScrubWidget* self,
 
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
 	                 G_CALLBACK(scrub_widget_property_update), self);
+
+	gchar* left_text = scrub_widget_format_time(dbusmenu_menuitem_property_get_int(priv->twin_item,
+	                                                                               DBUSMENU_SCRUB_MENUITEM_POSITION)/1000); 	
+	gchar* right_text = scrub_widget_format_time(dbusmenu_menuitem_property_get_int(priv->twin_item, 
+	                                                                                DBUSMENU_SCRUB_MENUITEM_DURATION)); 	
+	scrub_widget_set_ido_position(self, 
+	                                dbusmenu_menuitem_property_get_int(priv->twin_item, DBUSMENU_SCRUB_MENUITEM_POSITION)/1000,
+																	dbusmenu_menuitem_property_get_int(priv->twin_item, DBUSMENU_SCRUB_MENUITEM_DURATION));	                                
+	                                
+	ido_scale_menu_item_set_primary_label(IDO_SCALE_MENU_ITEM(priv->ido_scrub_bar), left_text); 	
+	ido_scale_menu_item_set_secondary_label(IDO_SCALE_MENU_ITEM(priv->ido_scrub_bar), right_text);
+	g_free(left_text);
+	g_free(right_text);
 }
 
 static gboolean
@@ -171,10 +180,29 @@ scrub_widget_format_time(gint time)
 	gint minutes = time/60;
 	gint seconds = time % 60;
 	gchar* prefix="0";
+	gchar* seconds_prefix="0";
 	if(minutes > 9)
 		prefix="";
-	return g_strdup_printf("%s%i:%i", prefix, minutes, seconds);	
+	if(seconds > 9)
+		seconds_prefix="";
+	return g_strdup_printf("%s%i:%s%i", prefix, minutes, seconds_prefix, seconds);	
 }
+
+static void
+scrub_widget_set_ido_position(ScrubWidget* self,
+                              gint position,
+                              gint duration)
+{
+	ScrubWidgetPrivate * priv = SCRUB_WIDGET_GET_PRIVATE(self);
+	gdouble ido_position = position/(gdouble)duration	* 100.0;
+	g_debug("scrub_widget_set_ido_position - pos: %i, duration: %i, ido_pos: %f", position, duration, ido_position);
+  GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_scrub_bar);
+  GtkRange *range = (GtkRange*)slider;
+	if(duration == 0)
+		ido_position = 0.0;
+ 	gtk_range_set_value(range, ido_position);
+}
+
                            
  /**
  * scrub_widget_new:
