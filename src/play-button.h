@@ -40,6 +40,11 @@ typedef enum {
 	TRANSPORT_NADA
 }PlayButtonEvent;
 
+typedef enum {
+	PLAY,
+	PAUSE	
+}PlayButtonState;
+
 struct _PlayButtonClass {
 	  GtkDrawingAreaClass parent_class;
 };
@@ -53,7 +58,7 @@ void play_button_set_style(GtkWidget* button, GtkStyle* style);
 PlayButtonEvent determine_button_event(GtkWidget* button, GdkEventButton* event);
 void play_button_react_to_button_press(GtkWidget* button,  PlayButtonEvent command);
 void play_button_react_to_button_release(GtkWidget* button);
-void play_button_toggle_play_pause(GtkWidget* button, int update);
+void play_button_toggle_play_pause(GtkWidget* button, PlayButtonState update);
 
 GtkWidget* play_button_new();
 
