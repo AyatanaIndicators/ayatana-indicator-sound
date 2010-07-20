@@ -25,6 +25,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "scrub-widget.h"
 #include "common-defs.h"
 #include <libido/idoscalemenuitem.h>
+#include <libido/idotimeline.h>
 
 typedef struct _ScrubWidgetPrivate ScrubWidgetPrivate;
 
@@ -32,6 +33,7 @@ struct _ScrubWidgetPrivate
 {
 	DbusmenuMenuitem* twin_item;	
 	GtkWidget* ido_scrub_bar;
+	IdoTimeline* time_line;
 };
 
 #define SCRUB_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), SCRUB_WIDGET_TYPE, ScrubWidgetPrivate))
@@ -54,6 +56,13 @@ static gboolean scrub_widget_change_value_cb (GtkRange     *range,
                                  							gdouble       value,
                                  							gpointer      user_data);
 
+static void scrub_widget_timeline_frame_cb(IdoTimeline *timeline,
+			      												 				gdouble      progress,
+                                     				gpointer 		userdata);
+static void scrub_widget_timeline_started_cb(IdoTimeline *timeline,
+                                     				gpointer 		userdata);
+static void scrub_widget_timeline_finished_cb(IdoTimeline *timeline,
+                                     				gpointer 		userdata);
 
 G_DEFINE_TYPE (ScrubWidget, scrub_widget, G_TYPE_OBJECT);
 
@@ -76,13 +85,19 @@ scrub_widget_init (ScrubWidget *self)
 	ScrubWidgetPrivate * priv = SCRUB_WIDGET_GET_PRIVATE(self);
 
   priv->ido_scrub_bar = ido_scale_menu_item_new_with_range ("Scrub", IDO_RANGE_STYLE_SMALL,  0, 0, 100, 1);
-	ido_scale_menu_item_set_style (IDO_SCALE_MENU_ITEM(priv->ido_scrub_bar), IDO_SCALE_MENU_ITEM_STYLE_LABEL);	
+	priv->time_line = ido_timeline_new(0);
 	
+	ido_scale_menu_item_set_style (IDO_SCALE_MENU_ITEM(priv->ido_scrub_bar), IDO_SCALE_MENU_ITEM_STYLE_LABEL);	
+	//ido_timeline_set_fps(priv->time_line, .00000001);
 	g_object_set(priv->ido_scrub_bar, "reverse-scroll-events", TRUE, NULL);
 	
   // register slider changes listening on the range
   GtkWidget* scrub_widget = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_scrub_bar);	
   g_signal_connect(scrub_widget, "change-value", G_CALLBACK(scrub_widget_change_value_cb), self);	
+	g_signal_connect(priv->time_line, "frame", G_CALLBACK(scrub_widget_timeline_frame_cb), self);	
+	g_signal_connect(priv->time_line, "started", G_CALLBACK(scrub_widget_timeline_started_cb), self);		
+	g_signal_connect(priv->time_line, "finished", G_CALLBACK(scrub_widget_timeline_finished_cb), self);		
+
 }
 
 static void
@@ -111,6 +126,11 @@ scrub_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 		g_debug("scrub-widget::update length = %i", g_value_get_int(value)); 
 		ido_scale_menu_item_set_secondary_label(IDO_SCALE_MENU_ITEM(priv->ido_scrub_bar),
 		                                      scrub_widget_format_time(g_value_get_int(value))); 			
+		ido_timeline_set_duration(priv->time_line, g_value_get_int(value)); 	
+		ido_timeline_start(priv->time_line);		
+		g_debug("timeline is running: %i", (gint)ido_timeline_is_running(priv->time_line));
+		g_debug("timeline duration = %i", ido_timeline_get_duration(priv->time_line));
+		//ido_timeline_set_fps(priv->time_line, 0.5);     
 	}
 	else if(g_ascii_strcasecmp(DBUSMENU_SCRUB_MENUITEM_POSITION, property) == 0){
 		g_debug("scrub-widget::update position = %i", g_value_get_int(value)); 
@@ -203,8 +223,49 @@ scrub_widget_set_ido_position(ScrubWidget* self,
  	gtk_range_set_value(range, ido_position);
 }
 
+static void
+scrub_widget_timeline_frame_cb(	IdoTimeline *timeline,
+			      						 				gdouble     	progress,
+                         				gpointer 		user_data)
+{
+	g_debug("Timeline CB : %f", progress);
+	g_return_if_fail (IS_SCRUB_WIDGET (user_data));
+	ScrubWidget* mitem = SCRUB_WIDGET(user_data);
+	ScrubWidgetPrivate * priv = SCRUB_WIDGET_GET_PRIVATE(mitem);
+	gint position = progress * dbusmenu_menuitem_property_get_int(priv->twin_item, 
+	                                   														DBUSMENU_SCRUB_MENUITEM_DURATION);	
+	gchar* left_text = scrub_widget_format_time(position); 	
+	ido_scale_menu_item_set_primary_label(IDO_SCALE_MENU_ITEM(priv->ido_scrub_bar), left_text); 	
+  GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_scrub_bar);
+  GtkRange *range = (GtkRange*)slider;
+ 	gtk_range_set_value(range, progress * 100);
+
+	g_debug("position in seconds %i and in words %s", position, left_text);
+	g_debug("timeline is running: %i", (gint)ido_timeline_is_running(priv->time_line));
+	g_debug("timeline duration = %i", ido_timeline_get_duration(priv->time_line));	
+	
+	g_free(left_text);
+}
+
+static void
+scrub_widget_timeline_started_cb(	IdoTimeline *timeline,
+                         			 		gpointer 		user_data)
+{
+	g_debug("Timeline Started!");	
+}
                            
- /**
+static void
+scrub_widget_timeline_finished_cb(IdoTimeline *timeline,
+                         			 		gpointer 		user_data)
+{
+	g_debug("Timeline Finished!");	
+	g_return_if_fail (IS_SCRUB_WIDGET (user_data));
+	ScrubWidget* mitem = SCRUB_WIDGET(user_data);
+	ScrubWidgetPrivate * priv = SCRUB_WIDGET_GET_PRIVATE(mitem);
+	ido_timeline_rewind(priv->time_line);
+}
+
+/**
  * scrub_widget_new:
  * @returns: a new #ScrubWidget.
  **/
