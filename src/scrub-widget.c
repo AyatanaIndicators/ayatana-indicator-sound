@@ -77,7 +77,6 @@ scrub_widget_class_init (ScrubWidgetClass *klass)
 	gobject_class->finalize = scrub_widget_finalize;
 }
 
-
 static void
 scrub_widget_init (ScrubWidget *self)
 {
@@ -88,7 +87,7 @@ scrub_widget_init (ScrubWidget *self)
 	priv->time_line = ido_timeline_new(0);
 	
 	ido_scale_menu_item_set_style (IDO_SCALE_MENU_ITEM(priv->ido_scrub_bar), IDO_SCALE_MENU_ITEM_STYLE_LABEL);	
-	//ido_timeline_set_fps(priv->time_line, .00000001);
+	//ido_timeline_set_fps(priv->time_line, 0.000001f);
 	g_object_set(priv->ido_scrub_bar, "reverse-scroll-events", TRUE, NULL);
 	
   // register slider changes listening on the range
@@ -125,22 +124,33 @@ scrub_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	if(g_ascii_strcasecmp(DBUSMENU_SCRUB_MENUITEM_DURATION, property) == 0){
 		g_debug("scrub-widget::update length = %i", g_value_get_int(value)); 
 		ido_scale_menu_item_set_secondary_label(IDO_SCALE_MENU_ITEM(priv->ido_scrub_bar),
-		                                      scrub_widget_format_time(g_value_get_int(value))); 			
-		ido_timeline_set_duration(priv->time_line, g_value_get_int(value)); 	
-		ido_timeline_start(priv->time_line);		
+		                                      	scrub_widget_format_time(g_value_get_int(value))); 			
+		ido_timeline_set_duration(priv->time_line, g_value_get_int(value) * 1000); 	
 		g_debug("timeline is running: %i", (gint)ido_timeline_is_running(priv->time_line));
 		g_debug("timeline duration = %i", ido_timeline_get_duration(priv->time_line));
-		//ido_timeline_set_fps(priv->time_line, 0.5);     
+		scrub_widget_set_ido_position(mitem, 
+	                              dbusmenu_menuitem_property_get_int(priv->twin_item, DBUSMENU_SCRUB_MENUITEM_POSITION)/1000,
+																dbusmenu_menuitem_property_get_int(priv->twin_item, DBUSMENU_SCRUB_MENUITEM_DURATION));	                                		
 	}
 	else if(g_ascii_strcasecmp(DBUSMENU_SCRUB_MENUITEM_POSITION, property) == 0){
 		g_debug("scrub-widget::update position = %i", g_value_get_int(value)); 
 		ido_scale_menu_item_set_primary_label(IDO_SCALE_MENU_ITEM(priv->ido_scrub_bar),
 		                                      scrub_widget_format_time(g_value_get_int(value)/1000)); 					
-	}	
-	scrub_widget_set_ido_position(mitem, 
-	                                dbusmenu_menuitem_property_get_int(priv->twin_item, DBUSMENU_SCRUB_MENUITEM_POSITION)/1000,
-																	dbusmenu_menuitem_property_get_int(priv->twin_item, DBUSMENU_SCRUB_MENUITEM_DURATION));	                                
-	
+		scrub_widget_set_ido_position(mitem, 
+	                              dbusmenu_menuitem_property_get_int(priv->twin_item, DBUSMENU_SCRUB_MENUITEM_POSITION)/1000,
+																dbusmenu_menuitem_property_get_int(priv->twin_item, DBUSMENU_SCRUB_MENUITEM_DURATION));	                                
+
+	}
+	else if(g_ascii_strcasecmp(DBUSMENU_SCRUB_MENUITEM_PLAY_STATE, property) == 0){
+		if(g_value_get_int(value) == 0){
+			g_debug("START TIMELINE");
+			ido_timeline_start(priv->time_line);
+		}
+		else{
+			g_debug("PAUSE TIMELINE");			
+			ido_timeline_pause(priv->time_line);
+		}
+	}
 }
 
 static void
@@ -153,8 +163,7 @@ scrub_widget_set_twin_item(ScrubWidget* self,
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
 	                 G_CALLBACK(scrub_widget_property_update), self);
 
-	gchar* left_text = scrub_widget_format_time(dbusmenu_menuitem_property_get_int(priv->twin_item,
-	                                                                               DBUSMENU_SCRUB_MENUITEM_POSITION)/1000); 	
+	gchar* left_text = scrub_widget_format_time(dbusmenu_menuitem_property_get_int(priv->twin_item,	                                                                               DBUSMENU_SCRUB_MENUITEM_POSITION)/1000); 	
 	gchar* right_text = scrub_widget_format_time(dbusmenu_menuitem_property_get_int(priv->twin_item, 
 	                                                                                DBUSMENU_SCRUB_MENUITEM_DURATION)); 	
 	scrub_widget_set_ido_position(self, 
@@ -259,10 +268,10 @@ scrub_widget_timeline_finished_cb(IdoTimeline *timeline,
                          			 		gpointer 		user_data)
 {
 	g_debug("Timeline Finished!");	
-	g_return_if_fail (IS_SCRUB_WIDGET (user_data));
+	/*g_return_if_fail (IS_SCRUB_WIDGET (user_data));
 	ScrubWidget* mitem = SCRUB_WIDGET(user_data);
 	ScrubWidgetPrivate * priv = SCRUB_WIDGET_GET_PRIVATE(mitem);
-	ido_timeline_rewind(priv->time_line);
+	ido_timeline_rewind(priv->time_line);*/
 }
 
 /**

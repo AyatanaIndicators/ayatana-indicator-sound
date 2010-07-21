@@ -117,6 +117,7 @@ public class MprisController : GLib.Object
 		v.set_int(play_state);
 		ht.insert("state", v); 
 		this.owner.custom_items[PlayerController.widget_order.TRANSPORT].update(ht, TransportMenuitem.attributes_format());
+		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(ht, ScrubMenuitem.attributes_format());
 	}
 	
 	private void onTrackChange(dynamic DBus.Object mpris_client, HashTable<string,Value?> ht)
