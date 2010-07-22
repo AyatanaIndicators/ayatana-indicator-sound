@@ -328,7 +328,7 @@ play_button_init (PlayButton *self)
 	priv->command_coordinates =  g_hash_table_new_full(g_direct_hash,
 	                                             				g_direct_equal,
 	                                             				NULL,
-	                                             				g_list_free);
+	                                             				(GDestroyNotify)g_list_free);
 	GList* previous_list = NULL;
 	previous_list = g_list_insert(previous_list, GINT_TO_POINTER(15), 0);
 	previous_list = g_list_insert(previous_list, GINT_TO_POINTER(10), 1);
@@ -939,7 +939,6 @@ draw (GtkWidget* button, cairo_t *cr)
 			     BUTTON_SHADOW,
 			     BUTTON_SHADOW,
 			     FALSE);
-		cairo_surface_write_to_png(surf, "/tmp/drop_shadow.png");
 		_surface_blur (surf, 1);
 		_finalize (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y + 1.0f);
 		// draw play-button
@@ -960,8 +959,6 @@ draw (GtkWidget* button, cairo_t *cr)
 			     BUTTON_START,
 			     BUTTON_END,
 			     FALSE);
-		cairo_surface_write_to_png(surf, "/tmp/play.png");
-
 		_finalize (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y);
 	}
 	

@@ -38,10 +38,10 @@ public class MetadataMenuitem : PlayerItem
 		return attrs;
 	}
 	
-	public bool populated()
+	public bool not_populated()
 	{
-		return (this.property_get(MENUITEM_TITLE) != null && 
-		        this.property_get(MENUITEM_TITLE) != "");
+		return (this.property_get(MENUITEM_TITLE) == null && 
+		        this.property_get(MENUITEM_TITLE) == "");
 	}
 		
 }
