@@ -32,6 +32,7 @@ public class TransportMenuitem : PlayerItem
 	public TransportMenuitem(PlayerController parent)
   {
 		Object(item_type: MENUITEM_TYPE, owner: parent); 
+		this.property_set_int(MENUITEM_PLAY_STATE, 1);		
 	}
 
 	public void change_play_state(int state)

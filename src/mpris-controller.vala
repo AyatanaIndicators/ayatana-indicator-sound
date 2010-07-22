@@ -65,8 +65,7 @@ public class MprisController : GLib.Object
 		                        ScrubMenuitem.attributes_format());		
 		// temporary fix
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
-		scrub.update_position(this.mpris_player.PositionGet());
-		
+		scrub.update_position(this.mpris_player.PositionGet());		
 	}
 
 	public void transport_event(TransportMenuitem.action command)
@@ -86,7 +85,7 @@ public class MprisController : GLib.Object
 
 	public void set_position(double position)
 	{
-		//debug("Set position with pos (0-100) %f", position);
+		debug("Set position with pos (0-100) %f", position);
 		HashTable<string, Value?> data = this.mpris_player.GetMetadata();
 		Value? time_value = data.lookup("time");
 		if(time_value == null){
@@ -94,10 +93,12 @@ public class MprisController : GLib.Object
 			return;
 		}
 		uint32 total_time = time_value.get_uint();
-		//debug("total time of track = %i", (int)total_time);				
+		debug("total time of track = %i", (int)total_time);				
 		double new_time_position = total_time * position/100.0;
-		//debug("new position = %f", (new_time_position * 1000));		
-		this.mpris_player.PositionSet((int32)(new_time_position * 1000));
+		debug("new position = %f", (new_time_position * 1000));		
+		this.mpris_player.PositionSet((int32)(new_time_position));
+		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
+		scrub.update_position(this.mpris_player.PositionGet());				
 	}
 	
 	public bool connected()
@@ -117,6 +118,7 @@ public class MprisController : GLib.Object
 		v.set_int(play_state);
 		ht.insert("state", v); 
 		this.owner.custom_items[PlayerController.widget_order.TRANSPORT].update(ht, TransportMenuitem.attributes_format());
+		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(ht, ScrubMenuitem.attributes_format());
 	}
 	
 	private void onTrackChange(dynamic DBus.Object mpris_client, HashTable<string,Value?> ht)
