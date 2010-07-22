@@ -18,40 +18,33 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 using Dbusmenu;
+using DbusmenuScrub;
 using Gee;
-using DbusmenuTransport;
 
-public class TransportMenuitem : PlayerItem
+public class ScrubMenuitem : PlayerItem
 {
-	public enum action{
-		PREVIOUS,
-		PLAY_PAUSE,
-		NEXT
-	}
-	
-	public TransportMenuitem(PlayerController parent)
-  {
-		Object(item_type: MENUITEM_TYPE, owner: parent); 
-		this.property_set_int(MENUITEM_PLAY_STATE, 1);		
+	public ScrubMenuitem(PlayerController parent)
+	{
+		Object(item_type: MENUITEM_TYPE, owner: parent);
 	}
 
-	public void change_play_state(int state)
-	{
-		this.property_set_int(MENUITEM_PLAY_STATE, state);	
-	}
-	
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
 	{
-		int input = input_value.get_int();
-		debug("handle_event with value %s", input.to_string());
-		debug("transport owner name = %s", this.owner.name);
-		this.owner.mpris_adaptor.transport_event((action)input);
-	}	
+		debug("handle_event for owner %s with value: %f", this.owner.name, input_value.get_double());		
+		this.owner.mpris_adaptor.set_position(input_value.get_double());		
+	}
 
+	public void update_position(int32 new_position)
+	{
+		this.property_set_int(MENUITEM_POSITION, new_position);
+	}		
+	
 	public static HashSet<string> attributes_format()
 	{
 		HashSet<string> attrs = new HashSet<string>();		
-		attrs.add(MENUITEM_PLAY_STATE);
+		attrs.add(MENUITEM_DURATION);
+		attrs.add(MENUITEM_POSITION);
+		attrs.add(MENUITEM_PLAY_STATE);		
 		return attrs;
 	}	
 }
