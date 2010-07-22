@@ -282,7 +282,7 @@ GType metadata_menuitem_get_type (void);
 MetadataMenuitem* metadata_menuitem_new (void);
 MetadataMenuitem* metadata_menuitem_construct (GType object_type);
 GeeHashSet* metadata_menuitem_attributes_format (void);
-gboolean metadata_menuitem_populated (MetadataMenuitem* self);
+gboolean metadata_menuitem_not_populated (MetadataMenuitem* self);
 GType scrub_menuitem_get_type (void);
 ScrubMenuitem* scrub_menuitem_new (PlayerController* parent);
 ScrubMenuitem* scrub_menuitem_construct (GType object_type, PlayerController* parent);
@@ -302,6 +302,7 @@ void player_controller_update_state (PlayerController* self, PlayerControllersta
 void player_controller_activate (PlayerController* self);
 void player_controller_instantiate (PlayerController* self);
 void player_controller_vanish (PlayerController* self);
+void player_controller_update_layout (PlayerController* self);
 const char* player_controller_get_name (PlayerController* self);
 void player_controller_set_name (PlayerController* self, const char* value);
 GAppInfo* player_controller_get_app_info (PlayerController* self);

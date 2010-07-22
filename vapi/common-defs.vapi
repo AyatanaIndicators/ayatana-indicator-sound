@@ -43,4 +43,5 @@ namespace DbusmenuScrub{
 	public const string MENUITEM_TYPE;
 	public const string MENUITEM_POSITION;
 	public const string MENUITEM_DURATION;	
+	public const string MENUITEM_PLAY_STATE;		
 }

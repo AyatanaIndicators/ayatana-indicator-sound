@@ -41,4 +41,5 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DBUSMENU_SCRUB_MENUITEM_TYPE						"x-canonical-sound-menu-player-scrub-menu-item"
 #define DBUSMENU_SCRUB_MENUITEM_DURATION				"x-canonical-sound-menu-player-scrub-time"
 #define DBUSMENU_SCRUB_MENUITEM_POSITION				"x-canonical-sound-menu-player-scrub-position"
+#define DBUSMENU_SCRUB_MENUITEM_PLAY_STATE			"x-canonical-sound-menu-player-scrub-play-state"
 

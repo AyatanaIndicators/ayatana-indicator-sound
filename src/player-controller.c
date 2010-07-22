@@ -71,16 +71,6 @@ typedef struct _MprisControllerClass MprisControllerClass;
 #define _g_free0(var) (var = (g_free (var), NULL))
 #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 
-#define TYPE_TITLE_MENUITEM (title_menuitem_get_type ())
-#define TITLE_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_TITLE_MENUITEM, TitleMenuitem))
-#define TITLE_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_TITLE_MENUITEM, TitleMenuitemClass))
-#define IS_TITLE_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_TITLE_MENUITEM))
-#define IS_TITLE_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_TITLE_MENUITEM))
-#define TITLE_MENUITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_TITLE_MENUITEM, TitleMenuitemClass))
-
-typedef struct _TitleMenuitem TitleMenuitem;
-typedef struct _TitleMenuitemClass TitleMenuitemClass;
-
 #define TYPE_METADATA_MENUITEM (metadata_menuitem_get_type ())
 #define METADATA_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_METADATA_MENUITEM, MetadataMenuitem))
 #define METADATA_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_METADATA_MENUITEM, MetadataMenuitemClass))
@@ -90,6 +80,16 @@ typedef struct _TitleMenuitemClass TitleMenuitemClass;
 
 typedef struct _MetadataMenuitem MetadataMenuitem;
 typedef struct _MetadataMenuitemClass MetadataMenuitemClass;
+
+#define TYPE_TITLE_MENUITEM (title_menuitem_get_type ())
+#define TITLE_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_TITLE_MENUITEM, TitleMenuitem))
+#define TITLE_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_TITLE_MENUITEM, TitleMenuitemClass))
+#define IS_TITLE_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_TITLE_MENUITEM))
+#define IS_TITLE_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_TITLE_MENUITEM))
+#define TITLE_MENUITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_TITLE_MENUITEM, TitleMenuitemClass))
+
+typedef struct _TitleMenuitem TitleMenuitem;
+typedef struct _TitleMenuitemClass TitleMenuitemClass;
 
 #define TYPE_SCRUB_MENUITEM (scrub_menuitem_get_type ())
 #define SCRUB_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_SCRUB_MENUITEM, ScrubMenuitem))
@@ -168,7 +168,7 @@ void player_controller_update_state (PlayerController* self, PlayerControllersta
 void player_controller_set_menu_offset (PlayerController* self, gint value);
 static void player_controller_construct_widgets (PlayerController* self);
 static void player_controller_establish_mpris_connection (PlayerController* self);
-static void player_controller_update_layout (PlayerController* self);
+void player_controller_update_layout (PlayerController* self);
 PlayerController* player_controller_new (DbusmenuMenuitem* root, const char* client_name, gint offset, PlayerControllerstate initial_state);
 PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, const char* client_name, gint offset, PlayerControllerstate initial_state);
 const char* player_controller_get_name (PlayerController* self);
@@ -179,6 +179,7 @@ MprisController* mpris_controller_new (PlayerController* ctrl, const char* inter
 MprisController* mpris_controller_construct (GType object_type, PlayerController* ctrl, const char* inter);
 gboolean mpris_controller_connected (MprisController* self);
 void player_controller_vanish (PlayerController* self);
+GType metadata_menuitem_get_type (void);
 PlayerItem* player_item_new (const char* type);
 PlayerItem* player_item_construct (GType object_type, const char* type);
 TitleMenuitem* title_menuitem_new (PlayerController* parent);
@@ -186,7 +187,6 @@ TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* pa
 GType title_menuitem_get_type (void);
 MetadataMenuitem* metadata_menuitem_new (void);
 MetadataMenuitem* metadata_menuitem_construct (GType object_type);
-GType metadata_menuitem_get_type (void);
 ScrubMenuitem* scrub_menuitem_new (PlayerController* parent);
 ScrubMenuitem* scrub_menuitem_construct (GType object_type, PlayerController* parent);
 GType scrub_menuitem_get_type (void);
@@ -291,7 +291,7 @@ void player_controller_instantiate (PlayerController* self) {
 	GError * _inner_error_;
 	g_return_if_fail (self != NULL);
 	_inner_error_ = NULL;
-	g_debug ("player-controller.vala:86: instantiate in player controller for %s", self->priv->_name);
+	g_debug ("player-controller.vala:87: instantiate in player controller for %s", self->priv->_name);
 	{
 		g_app_info_launch (self->priv->_app_info, NULL, NULL, &_inner_error_);
 		if (_inner_error_ != NULL) {
@@ -306,7 +306,7 @@ void player_controller_instantiate (PlayerController* self) {
 		_error_ = _inner_error_;
 		_inner_error_ = NULL;
 		{
-			g_warning ("player-controller.vala:92: Failed to launch app %s with error message:" \
+			g_warning ("player-controller.vala:93: Failed to launch app %s with error message:" \
 " %s", self->priv->_name, _error_->message);
 			_g_error_free0 (_error_);
 		}
@@ -323,20 +323,20 @@ void player_controller_instantiate (PlayerController* self) {
 static void player_controller_establish_mpris_connection (PlayerController* self) {
 	g_return_if_fail (self != NULL);
 	if (self->current_state != PLAYER_CONTROLLER_STATE_READY) {
-		g_debug ("player-controller.vala:99: establish_mpris_connection - Not ready to c" \
-"onnect");
+		g_debug ("player-controller.vala:100: establish_mpris_connection - Not ready to " \
+"connect");
 		return;
 	}
 	if (_vala_strcmp0 (self->priv->_name, "Vlc") == 0) {
 		MprisController* _tmp0_;
-		g_debug ("player-controller.vala:104: establishing a vlc mpris controller");
+		g_debug ("player-controller.vala:105: establishing a vlc mpris controller");
 		self->mpris_adaptor = (_tmp0_ = mpris_controller_new (self, "org.mpris.MediaPlayer.Player"), _g_object_unref0 (self->mpris_adaptor), _tmp0_);
 	} else {
 		MprisController* _tmp1_;
 		self->mpris_adaptor = (_tmp1_ = mpris_controller_new (self, "org.freedesktop.MediaPlayer"), _g_object_unref0 (self->mpris_adaptor), _tmp1_);
 	}
 	if (mpris_controller_connected (self->mpris_adaptor) == TRUE) {
-		g_debug ("player-controller.vala:112: yup I'm connected");
+		g_debug ("player-controller.vala:113: yup I'm connected");
 		player_controller_update_state (self, PLAYER_CONTROLLER_STATE_CONNECTED);
 	} else {
 		player_controller_update_state (self, PLAYER_CONTROLLER_STATE_DISCONNECTED);
@@ -376,29 +376,34 @@ static char* bool_to_string (gboolean self) {
 }
 
 
-static void player_controller_update_layout (PlayerController* self) {
+void player_controller_update_layout (PlayerController* self) {
 	gboolean visibility;
-	char* _tmp0_;
-	PlayerItem* _tmp1_;
+	PlayerItem* _tmp0_;
+	MetadataMenuitem* meta_item;
+	char* _tmp1_;
 	PlayerItem* _tmp2_;
 	PlayerItem* _tmp3_;
+	PlayerItem* _tmp4_;
 	g_return_if_fail (self != NULL);
 	visibility = TRUE;
+	meta_item = (_tmp0_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA), IS_METADATA_MENUITEM (_tmp0_) ? ((MetadataMenuitem*) _tmp0_) : NULL);
 	if (self->current_state != PLAYER_CONTROLLER_STATE_CONNECTED) {
 		visibility = FALSE;
 	}
-	g_debug ("player-controller.vala:134: about the set the visibility on both the t" \
-"ransport and metadata widget to %s", _tmp0_ = bool_to_string (visibility));
-	_g_free0 (_tmp0_);
-	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) (_tmp1_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT)), DBUSMENU_MENUITEM_PROP_VISIBLE, visibility);
-	_g_object_unref0 (_tmp1_);
-	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) (_tmp2_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_SCRUB)), DBUSMENU_MENUITEM_PROP_VISIBLE, visibility);
+	g_debug ("player-controller.vala:137: about the set the visibility on both the t" \
+"ransport and metadata widget to %s", _tmp1_ = bool_to_string (visibility));
+	_g_free0 (_tmp1_);
+	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) (_tmp2_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT)), DBUSMENU_MENUITEM_PROP_VISIBLE, visibility);
 	_g_object_unref0 (_tmp2_);
-	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) (_tmp3_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA)), DBUSMENU_MENUITEM_PROP_VISIBLE, visibility);
+	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) (_tmp3_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_SCRUB)), DBUSMENU_MENUITEM_PROP_VISIBLE, visibility);
 	_g_object_unref0 (_tmp3_);
-	if (self->mpris_adaptor == NULL) {
-		g_warning ("player-controller.vala:140: Why is the mpris object null");
+	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) (_tmp4_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA)), DBUSMENU_MENUITEM_PROP_VISIBLE, visibility);
+	_g_object_unref0 (_tmp4_);
+	if (visibility == FALSE) {
+		g_warning ("player-controller.vala:143: Update layout of client %s is setting widg" \
+"ets to invisibile!", self->priv->_name);
 	}
+	_g_object_unref0 (meta_item);
 }
 
 
@@ -485,7 +490,7 @@ static char* player_controller_format_client_name (const char* client_name) {
 		formatted = (_tmp2_ = g_strconcat (_tmp0_ = g_utf8_strup (client_name, (gssize) 1), _tmp1_ = string_slice (client_name, (glong) 1, g_utf8_strlen (client_name, -1)), NULL), _g_free0 (formatted), _tmp2_);
 		_g_free0 (_tmp1_);
 		_g_free0 (_tmp0_);
-		g_debug ("player-controller.vala:176: PlayerController->format_client_name - : %" \
+		g_debug ("player-controller.vala:179: PlayerController->format_client_name - : %" \
 "s", formatted);
 	}
 	result = formatted;

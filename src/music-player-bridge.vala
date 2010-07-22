@@ -35,7 +35,7 @@ public class MusicPlayerBridge : GLib.Object
 		playersDB = new FamiliarPlayersDB();
 		registered_clients = new HashMap<string, PlayerController> ();
     listener = Listener.ref_default();
-    listener.indicator_added.connect(on_indicator_added);
+    listener.indicator_added += on_indicator_added;
     listener.indicator_removed.connect(on_indicator_removed);
     listener.indicator_modified.connect(on_indicator_modified);
     listener.server_added.connect(on_server_added);
@@ -99,8 +99,7 @@ public class MusicPlayerBridge : GLib.Object
 				                                             client_name,
 				                                             calculate_menu_position(),
 				                                             PlayerController.state.READY);
-				registered_clients.set(client_name, ctrl); 
-				
+				registered_clients.set(client_name, ctrl); 				
 				debug("New Client of name %s has successfully registered with us", client_name);
 			}
 			// irregardless check that it has a desktop file if not kick off a request for it
@@ -162,7 +161,7 @@ public class MusicPlayerBridge : GLib.Object
   {
     debug("MusicPlayerBridge-> on_server_count_changed with value %u", i);
   }
-  public void on_indicator_added(Indicate.ListenerServer object, Indicate.ListenerIndicator p0)
+  public void on_indicator_added(ListenerServer object, ListenerIndicator p0)
   {
     debug("MusicPlayerBridge-> on_indicator_added");
   }
