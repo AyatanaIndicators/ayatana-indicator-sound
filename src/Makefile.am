@@ -18,6 +18,8 @@ libsoundmenu_la_SOURCES = \
 	indicator-sound.c \
 	title-widget.c \
 	title-widget.h \
+	scrub-widget.c \
+	scrub-widget.h \
 	dbus-shared-names.h \
   sound-service-client.h 
 
@@ -58,6 +60,7 @@ music_bridge_VALASOURCES = \
 	music-player-bridge.vala \
 	transport-menu-item.vala \
 	metadata-menu-item.vala \
+	scrub-menu-item.vala \
 	title-menu-item.vala \
 	player-controller.vala \
 	mpris-controller-v2.vala \

@@ -52,23 +52,22 @@ Uses code from ctk
 #define BAR_OFFSET 10.0f
 #define PAUSE_X 77.0f
 #define	PAUSE_Y 15.0f
-
-// Transport events
-enum {
-	PREVIOUS,
-	PLAY_PAUSE,
-	NEXT
-};
+#define PLAY_WIDTH 28.0f
+#define PLAY_HEIGHT 29.0f
+#define PLAY_PADDING 5.0f
 
 typedef struct _PlayButtonPrivate PlayButtonPrivate;
 
 struct _PlayButtonPrivate
 {
-	GdkColor 	background_colour_fg;
-	GdkColor 	background_colour_bg_dark;
-	GdkColor 	background_colour_bg_light;
-	GdkColor 	foreground_colour_fg;
-	GdkColor 	foreground_colour_bg;
+	GdkColor 				background_colour_fg;
+	GdkColor 				background_colour_bg_dark;
+	GdkColor 				background_colour_bg_light;
+	GdkColor 				foreground_colour_fg;
+	GdkColor 				foreground_colour_bg;
+	PlayButtonEvent current_command;
+	PlayButtonState current_state;
+	GHashTable* 		command_coordinates;	
 };
 
 #define PLAY_BUTTON_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), PLAY_BUTTON_TYPE, PlayButtonPrivate))
@@ -86,7 +85,7 @@ G_DEFINE_TYPE (PlayButton, play_button, GTK_TYPE_DRAWING_AREA);
 
 /// internal helper functions //////////////////////////////////////////////////
 
-static double
+/*static double
 _align (double val)
 {
   double fract = val - (int) val;
@@ -95,7 +94,7 @@ _align (double val)
     return (double) ((int) val + 0.5f);
   else
     return val;
-}
+}*/
 
 static inline void
 _blurinner (guchar* pixel,
@@ -308,8 +307,7 @@ _surface_blur (cairo_surface_t* surface,
 
 static void
 play_button_class_init (PlayButtonClass *klass)
-{
-	
+{	
 	GObjectClass	*gobject_class = G_OBJECT_CLASS (klass);
  	GtkWidgetClass* widget_class = GTK_WIDGET_CLASS (klass);
 
@@ -324,6 +322,43 @@ play_button_class_init (PlayButtonClass *klass)
 static void
 play_button_init (PlayButton *self)
 {
+	PlayButtonPrivate* priv = PLAY_BUTTON_GET_PRIVATE(self);	
+	priv->current_command	= TRANSPORT_NADA;
+	priv->current_state = PAUSE;
+	priv->command_coordinates =  g_hash_table_new_full(g_direct_hash,
+	                                             				g_direct_equal,
+	                                             				NULL,
+	                                             				(GDestroyNotify)g_list_free);
+	GList* previous_list = NULL;
+	previous_list = g_list_insert(previous_list, GINT_TO_POINTER(15), 0);
+	previous_list = g_list_insert(previous_list, GINT_TO_POINTER(10), 1);
+	previous_list = g_list_insert(previous_list, GINT_TO_POINTER(60), 2);
+	previous_list = g_list_insert(previous_list, GINT_TO_POINTER(34), 3);
+	
+  g_hash_table_insert(priv->command_coordinates,
+                      GINT_TO_POINTER(TRANSPORT_PREVIOUS),
+                      previous_list);
+                     
+	GList* play_list = NULL;
+	play_list = g_list_insert(play_list, GINT_TO_POINTER(60), 0);
+	play_list = g_list_insert(play_list, GINT_TO_POINTER(10), 1);
+	play_list = g_list_insert(play_list, GINT_TO_POINTER(45), 2);
+	play_list = g_list_insert(play_list, GINT_TO_POINTER(40), 3);
+
+	g_hash_table_insert(priv->command_coordinates,
+                      GINT_TO_POINTER(TRANSPORT_PLAY_PAUSE),
+                      play_list);
+
+	GList* next_list = NULL;
+	next_list = g_list_insert(next_list, GINT_TO_POINTER(100), 0);
+	next_list = g_list_insert(next_list, GINT_TO_POINTER(10), 1);
+	next_list = g_list_insert(next_list, GINT_TO_POINTER(60), 2);
+	next_list = g_list_insert(next_list, GINT_TO_POINTER(34), 3);
+
+	g_hash_table_insert(priv->command_coordinates,
+                      GINT_TO_POINTER(TRANSPORT_NEXT),
+                      next_list);
+	
 	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 80); 
 }
 
@@ -356,28 +391,83 @@ play_button_expose (GtkWidget *button, GdkEventExpose *event)
 }
 
 
-gint
+PlayButtonEvent
 determine_button_event(GtkWidget* button, GdkEventButton* event)
 {
 	g_debug("event x coordinate = %f", event->x);
 	g_debug("event y coordinate = %f", event->y);
-	gint result = 0;
+	PlayButtonEvent button_event = TRANSPORT_NADA;
 	// For now very simple rectangular collision detection
 	if(event->x > 55 && event->x < 95
 	   && event->y > 22 && event->y < 46){
-		result = PREVIOUS;
+		button_event = TRANSPORT_PREVIOUS;
 	}
 	else if(event->x > 101 && event->x < 133
 	   && event->y > 20 && event->y < 47){
-		result = PLAY_PAUSE;		
+		button_event = TRANSPORT_PLAY_PAUSE;	
 	}
 	else if(event->x > 137 && event->x < 179
 	   && event->y > 22 && event->y < 46){
-		result = NEXT;		
-	}
-	
-	return result;
+		button_event = TRANSPORT_NEXT;
+	}	
+	return button_event;
 }
+
+void 
+play_button_react_to_button_press(GtkWidget* button, PlayButtonEvent command)
+{
+	g_return_if_fail(IS_PLAY_BUTTON(button));
+	PlayButtonPrivate* priv = PLAY_BUTTON_GET_PRIVATE(button);
+	priv->current_command = command;
+	
+	cairo_t *cr;
+	cr = gdk_cairo_create (button->window);
+
+	GList* list = g_hash_table_lookup(priv->command_coordinates, GINT_TO_POINTER(command));
+	cairo_rectangle(cr,
+	                GPOINTER_TO_INT(g_list_nth_data(list, 0)),
+	                GPOINTER_TO_INT(g_list_nth_data(list, 1)),
+									GPOINTER_TO_INT(g_list_nth_data(list, 2)),	               	
+									GPOINTER_TO_INT(g_list_nth_data(list, 3)));
+	cairo_clip(cr);
+	draw (button, cr);
+	cairo_destroy (cr);
+}
+
+
+void 
+play_button_react_to_button_release(GtkWidget* button)
+{
+	g_return_if_fail(IS_PLAY_BUTTON(button));
+	PlayButtonPrivate* priv = PLAY_BUTTON_GET_PRIVATE(button);	
+	cairo_t *cr;
+	
+	cr = gdk_cairo_create (button->window);
+	GList* list = g_hash_table_lookup(priv->command_coordinates,
+	                                  GINT_TO_POINTER(priv->current_command));
+
+	priv->current_command = TRANSPORT_NADA;
+
+	cairo_rectangle(cr,
+	                GPOINTER_TO_INT(g_list_nth_data(list, 0)),
+	                GPOINTER_TO_INT(g_list_nth_data(list, 1)),
+									GPOINTER_TO_INT(g_list_nth_data(list, 2)),	               	
+									GPOINTER_TO_INT(g_list_nth_data(list, 3)));
+
+	cairo_clip(cr);
+	draw (button, cr);
+	cairo_destroy (cr);
+	
+}    
+
+void
+play_button_toggle_play_pause(GtkWidget* button, PlayButtonState update)
+{
+	PlayButtonPrivate* priv = PLAY_BUTTON_GET_PRIVATE(button);
+	priv->current_state = update;
+	g_debug("PlayButton::toggle play state : %i", priv->current_state); 
+}
+
 
 void
 play_button_set_style(GtkWidget* button, GtkStyle* style)
@@ -561,6 +651,24 @@ _mask_pause (cairo_t* cr,
 }
 
 static void
+_mask_play (cairo_t* cr,
+	     double   x,
+	     double   y,
+	     double   tri_width,
+	     double   tri_height
+	     /*double   tri_offset*/)
+{
+	if (!cr)
+		return;
+
+	cairo_move_to (cr, x,             y);
+	cairo_line_to (cr, x + tri_width, y + tri_height / 2.0f);
+	cairo_line_to (cr, x,             y + tri_height);
+	cairo_close_path (cr);	
+	
+}
+
+static void
 _fill (cairo_t* cr,
        double   x_start,
        double   y_start,
@@ -615,6 +723,9 @@ _finalize (cairo_t*          cr,
 static void
 draw (GtkWidget* button, cairo_t *cr)
 {
+	g_return_if_fail(IS_PLAY_BUTTON(button));
+	PlayButtonPrivate* priv = PLAY_BUTTON_GET_PRIVATE(button);	
+
 	cairo_surface_t*  surf = NULL;
 	cairo_t*       cr_surf = NULL;
 
@@ -627,7 +738,8 @@ draw (GtkWidget* button, cairo_t *cr)
 	double BUTTON_START[] = {252.0f / 255.0f, 251.0f / 255.0f, 251.0f / 255.0f,1.0f};
 	double BUTTON_END[] = {186.0f / 255.0f,180.0f / 255.0f, 170.0f / 255.0f, 1.0f};
 	double BUTTON_SHADOW[] = {0.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 0.75f};
-	
+	double INNER_COMPRESSED_END[] = {61.0f / 255.0f, 60.0f / 255.0f, 57.0f / 255.0f, 1.0f};
+	double INNER_COMPRESSED_START[] = {36.0f / 255.0f, 35.0f / 255.0f, 33.0f / 255.0f, 1.0f};
 	
 	// prev/next-background
   draw_gradient (cr,
@@ -644,13 +756,32 @@ draw (GtkWidget* button, cairo_t *cr)
                  MIDDLE_RADIUS,
                  MIDDLE_START,
                  MIDDLE_END);
-  draw_gradient (cr,
-                 X,
-                 Y + 2,
-                 RECT_WIDTH - 4,
-                 INNER_RADIUS,
-                 INNER_START,
-                 INNER_END);
+	draw_gradient (cr,
+               X,
+               Y + 2,
+               RECT_WIDTH - 4,
+               INNER_RADIUS,
+               INNER_START,
+               INNER_END);
+
+	if(priv->current_command == TRANSPORT_PREVIOUS){
+		draw_gradient (cr,
+		               X,
+		               Y + 2,
+		               RECT_WIDTH/2,
+		               INNER_RADIUS,
+		               INNER_COMPRESSED_START,
+		               INNER_COMPRESSED_END);
+	}	
+	else if(priv->current_command == TRANSPORT_NEXT){
+		draw_gradient (cr,
+		               RECT_WIDTH / 2 + X,
+		               Y + 2,
+		               (RECT_WIDTH - 7)/2,
+		               INNER_RADIUS,
+		               INNER_COMPRESSED_START,
+		               INNER_COMPRESSED_END);		
+	}
 
 	// play/pause-background
         draw_circle (cr,
@@ -670,7 +801,16 @@ draw (GtkWidget* button, cairo_t *cr)
                      Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 2.0f,
                      CIRCLE_RADIUS - 2.0f,
                      INNER_START,
-		     INNER_END);
+		     						 INNER_END);
+				if(priv->current_command == TRANSPORT_PLAY_PAUSE){
+		      draw_circle (cr,
+		                   X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 4.5f + 2.0f,
+		                   Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 2.0f,
+		                   CIRCLE_RADIUS - 2.0f,
+		               		 INNER_COMPRESSED_START,
+		                   INNER_COMPRESSED_END);
+				}
+					
 
 	// draw previous-button drop-shadow
 	_setup (&cr_surf, &surf, PREV_WIDTH, PREV_HEIGHT);
@@ -700,13 +840,13 @@ draw (GtkWidget* button, cairo_t *cr)
 		    TRI_HEIGHT,
 		    TRI_OFFSET);
 	_fill (cr_surf,
-	       (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
-	       (PREV_HEIGHT - TRI_HEIGHT) / 2.0f,
-	       (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
-	       (double) TRI_HEIGHT,
-	       BUTTON_START,
-	       BUTTON_END,
-	       FALSE);
+		     (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+		     (PREV_HEIGHT - TRI_HEIGHT) / 2.0f,
+		     (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+		     (double) TRI_HEIGHT,
+		     BUTTON_START,
+		     BUTTON_END,
+		     FALSE);		
 	_finalize (cr, &cr_surf, &surf, PREV_X, PREV_Y);
 
 	// draw next-button drop-shadow
@@ -747,41 +887,81 @@ draw (GtkWidget* button, cairo_t *cr)
 	_finalize (cr, &cr_surf, &surf, NEXT_X, NEXT_Y);
 
 	// draw pause-button drop-shadow
-	_setup (&cr_surf, &surf, PAUSE_WIDTH, PAUSE_HEIGHT);
-	_mask_pause (cr_surf,
-		     (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
-		     (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
-		     BAR_WIDTH,
-		     BAR_HEIGHT - 2.0f * BAR_WIDTH,
-		     BAR_OFFSET);
-	_fill (cr_surf,
-	       (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
-	       (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
-	       (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
-	       (double) BAR_HEIGHT,
-	       BUTTON_SHADOW,
-	       BUTTON_SHADOW,
-	       TRUE);
-	_surface_blur (surf, 1);
-	_finalize (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y + 1.0f);
+	if(priv->current_state == PLAY){
+		_setup (&cr_surf, &surf, PAUSE_WIDTH, PAUSE_HEIGHT);
+		_mask_pause (cr_surf,
+				   (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+				   (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
+				   BAR_WIDTH,
+				   BAR_HEIGHT - 2.0f * BAR_WIDTH,
+				   BAR_OFFSET);
+		_fill (cr_surf,
+			     (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+			     (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
+			     (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+			     (double) BAR_HEIGHT,
+			     BUTTON_SHADOW,
+			     BUTTON_SHADOW,
+			     TRUE);
+		_surface_blur (surf, 1);
+		_finalize (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y + 1.0f);
 
-	// draw pause-button
-	_setup (&cr_surf, &surf, PAUSE_WIDTH, PAUSE_HEIGHT);
-	_mask_pause (cr_surf,
-		     (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
-		     (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
-		     BAR_WIDTH,
-		     BAR_HEIGHT - 2.0f * BAR_WIDTH,
-		     BAR_OFFSET);
-	_fill (cr_surf,
-	       (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
-	       (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
-	       (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
-	       (double) BAR_HEIGHT,
-	       BUTTON_START,
-	       BUTTON_END,
-	       TRUE);
-	_finalize (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y);
+		// draw pause-button
+		_setup (&cr_surf, &surf, PAUSE_WIDTH, PAUSE_HEIGHT);
+		_mask_pause (cr_surf,
+				   (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+				   (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
+				   BAR_WIDTH,
+				   BAR_HEIGHT - 2.0f * BAR_WIDTH,
+				   BAR_OFFSET);
+		_fill (cr_surf,
+			     (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+			     (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
+			     (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+			     (double) BAR_HEIGHT,
+			     BUTTON_START,
+			     BUTTON_END,
+			     TRUE);
+		_finalize (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y);
+	}
+	else if(priv->current_state == PAUSE){
+		_setup (&cr_surf, &surf, PLAY_WIDTH, PLAY_HEIGHT);
+		_mask_play (cr_surf,
+		            PLAY_PADDING,
+		            PLAY_PADDING,
+		            PLAY_WIDTH - (2*PLAY_PADDING),
+		            PLAY_HEIGHT - (2*PLAY_PADDING));		            
+		_fill (cr_surf,
+		       PLAY_PADDING,
+		       PLAY_PADDING,
+		       PLAY_WIDTH - (2*PLAY_PADDING),
+		       PLAY_HEIGHT - (2*PLAY_PADDING),
+			     BUTTON_SHADOW,
+			     BUTTON_SHADOW,
+			     FALSE);
+		_surface_blur (surf, 1);
+		_finalize (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y + 1.0f);
+		// draw play-button
+		_setup (&cr_surf, &surf, PLAY_WIDTH, PLAY_HEIGHT);
+		cairo_set_line_width (cr, 10.5);
+		cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
+		cairo_set_line_join(cr, CAIRO_LINE_JOIN_ROUND);
+		_mask_play (cr_surf,
+		            PLAY_PADDING,
+		            PLAY_PADDING,
+		            PLAY_WIDTH - (2*PLAY_PADDING),
+		            PLAY_HEIGHT - (2*PLAY_PADDING));		            
+		_fill (cr_surf,
+		       PLAY_PADDING,
+		       PLAY_PADDING,
+		       PLAY_WIDTH - (2*PLAY_PADDING),
+		       PLAY_HEIGHT - (2*PLAY_PADDING),
+			     BUTTON_START,
+			     BUTTON_END,
+			     FALSE);
+		_finalize (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y);
+	}
+	
 }
 
 
@@ -791,8 +971,7 @@ draw (GtkWidget* button, cairo_t *cr)
 **/
 GtkWidget* 
 play_button_new()
-{
-	
+{	
 	GtkWidget* widget =	g_object_new(PLAY_BUTTON_TYPE, NULL);
 	gtk_widget_set_app_paintable (widget, TRUE);	
 	return widget;

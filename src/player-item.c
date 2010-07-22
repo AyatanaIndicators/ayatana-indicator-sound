@@ -127,6 +127,7 @@ void player_item_reset (PlayerItem* self, GeeHashSet* attrs) {
 			s = (char*) gee_iterator_get (_s_it);
 			g_debug ("player-item.vala:39: attempting to set prop %s to null", s);
 			dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, s, NULL);
+			dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, s, 0);
 			_g_free0 (s);
 		}
 		_g_object_unref0 (_s_it);
@@ -170,9 +171,9 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 	g_return_if_fail (data != NULL);
 	g_return_if_fail (attributes != NULL);
 	_inner_error_ = NULL;
-	g_debug ("player-item.vala:46: PlayerItem::update()");
+	g_debug ("player-item.vala:47: PlayerItem::update()");
 	if (player_item_ensure_valid_updates (data, attributes) == FALSE) {
-		g_debug ("player-item.vala:48: PlayerItem::Update -> The hashtable update does n" \
+		g_debug ("player-item.vala:49: PlayerItem::Update -> The hashtable update does n" \
 "ot contain what we were expecting - just leave it!");
 		return;
 	}
@@ -196,12 +197,12 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 			property = (char*) gee_iterator_get (_property_it);
 			input_keys = (_tmp1_ = _tmp0_ = g_strsplit (property, "-", 0), input_keys_length1 = _vala_array_length (_tmp0_), _input_keys_size_ = input_keys_length1, _tmp1_);
 			search_key = g_strdup ((_tmp3_ = input_keys + (input_keys_length1 - 1), _tmp2_ = input_keys_length1 - (input_keys_length1 - 1), _tmp3_)[0]);
-			g_debug ("player-item.vala:54: search key = %s", search_key);
+			g_debug ("player-item.vala:56: search key = %s", search_key);
 			v = __g_value_dup0 ((GValue*) g_hash_table_lookup (data, search_key));
 			if (G_VALUE_HOLDS (v, G_TYPE_STRING)) {
 				char* update;
 				update = string_strip (g_value_get_string (v));
-				g_debug ("player-item.vala:59: with value : %s", update);
+				g_debug ("player-item.vala:61: with value : %s", update);
 				if (string_contains (property, "arturl")) {
 					{
 						char* _tmp4_;
@@ -232,7 +233,7 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 						e = _inner_error_;
 						_inner_error_ = NULL;
 						{
-							g_warning ("player-item.vala:65: Problem converting URI %s to file path", update);
+							g_warning ("player-item.vala:68: Problem converting URI %s to file path", update);
 							_g_error_free0 (e);
 						}
 					}
@@ -253,11 +254,16 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 				_g_free0 (update);
 			} else {
 				if (G_VALUE_HOLDS (v, G_TYPE_INT)) {
-					g_debug ("player-item.vala:71: with value : %i", g_value_get_int (v));
+					g_debug ("player-item.vala:74: with value : %i", g_value_get_int (v));
 					dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, property, g_value_get_int (v));
 				} else {
-					if (G_VALUE_HOLDS (v, G_TYPE_BOOLEAN)) {
-						dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, property, g_value_get_boolean (v));
+					if (G_VALUE_HOLDS (v, G_TYPE_UINT)) {
+						g_debug ("player-item.vala:78: with value : %i", (gint) g_value_get_uint (v));
+						dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, property, (gint) g_value_get_uint (v));
+					} else {
+						if (G_VALUE_HOLDS (v, G_TYPE_BOOLEAN)) {
+							dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, property, g_value_get_boolean (v));
+						}
 					}
 				}
 			}
@@ -276,11 +282,6 @@ static gboolean player_item_ensure_valid_updates (GHashTable* data, GeeHashSet* 
 	g_return_val_if_fail (data != NULL, FALSE);
 	g_return_val_if_fail (attributes != NULL, FALSE);
 	if (data == NULL) {
-		result = FALSE;
-		return result;
-	}
-	if (g_hash_table_size (data) < gee_collection_get_size ((GeeCollection*) attributes)) {
-		g_warning ("player-item.vala:86: update hash was too small for the target");
 		result = FALSE;
 		return result;
 	}

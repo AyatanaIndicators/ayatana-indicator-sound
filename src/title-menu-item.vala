@@ -26,13 +26,11 @@ public class TitleMenuitem : PlayerItem
 	public TitleMenuitem(PlayerController parent)
 	{
 		Object(item_type: MENUITEM_TYPE, owner: parent);
-		this.property_set(MENUITEM_TEXT_NAME, parent.name);		
+		this.property_set(MENUITEM_NAME, parent.name);		
 	}
 
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
-	{
-		debug("handle_event for owner %s with owner state = %i and title menu name %s", this.owner.name, this.owner.current_state, property_get(MENUITEM_TEXT_NAME));
-		
+	{		
 		if(this.owner.current_state == PlayerController.state.OFFLINE)
 		{
 			this.owner.instantiate();
@@ -43,7 +41,7 @@ public class TitleMenuitem : PlayerItem
 	public static HashSet<string> attributes_format()
 	{
 		HashSet<string> attrs = new HashSet<string>();		
-		attrs.add(MENUITEM_TEXT_NAME);
+		attrs.add(MENUITEM_NAME);
  		return attrs;
 	}	
 }

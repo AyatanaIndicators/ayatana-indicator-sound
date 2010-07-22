@@ -1,3 +1,11 @@
+indicator-sound (0.3.8-0ubuntu1) UNRELEASED; urgency=low
+
+  * New upstream release.
+  * debian/control:
+    - update ido requirement
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 22 Jul 2010 21:04:28 +0200
+
 indicator-sound (0.3.6-0ubuntu1) maverick; urgency=low
 
   * New upstream release.

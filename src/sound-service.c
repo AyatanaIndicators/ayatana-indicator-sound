@@ -39,7 +39,6 @@ should follow it.
 void
 service_shutdown (IndicatorService *service, gpointer user_data)
 {
-
   if (mainloop != NULL) {
     g_debug("Service shutdown !");
     // TODO: uncomment for release !!

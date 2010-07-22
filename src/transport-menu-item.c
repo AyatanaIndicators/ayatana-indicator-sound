@@ -153,6 +153,7 @@ TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerContro
 	TransportMenuitem * self;
 	g_return_val_if_fail (parent != NULL, NULL);
 	self = (TransportMenuitem*) g_object_new (object_type, "item-type", DBUSMENU_TRANSPORT_MENUITEM_TYPE, "owner", parent, NULL);
+	dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE, 1);
 	return self;
 }
 
@@ -175,9 +176,9 @@ static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const 
 	self = (TransportMenuitem*) base;
 	g_return_if_fail (name != NULL);
 	input = g_value_get_int (input_value);
-	g_debug ("transport-menu-item.vala:45: handle_event with value %s", _tmp0_ = g_strdup_printf ("%i", input));
+	g_debug ("transport-menu-item.vala:46: handle_event with value %s", _tmp0_ = g_strdup_printf ("%i", input));
 	_g_free0 (_tmp0_);
-	g_debug ("transport-menu-item.vala:46: transport owner name = %s", player_controller_get_name (player_item_get_owner ((PlayerItem*) self)));
+	g_debug ("transport-menu-item.vala:47: transport owner name = %s", player_controller_get_name (player_item_get_owner ((PlayerItem*) self)));
 	mpris_controller_transport_event (player_item_get_owner ((PlayerItem*) self)->mpris_adaptor, (TransportMenuitemaction) input);
 }
 

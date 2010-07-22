@@ -31,17 +31,17 @@ public class MetadataMenuitem : PlayerItem
 	public static HashSet<string> attributes_format()
 	{
 		HashSet<string> attrs = new HashSet<string>();		
-		attrs.add(MENUITEM_TEXT_TITLE);
-    attrs.add(MENUITEM_TEXT_ARTIST);
-    attrs.add(MENUITEM_TEXT_ALBUM);
+		attrs.add(MENUITEM_TITLE);
+    attrs.add(MENUITEM_ARTIST);
+    attrs.add(MENUITEM_ALBUM);
     attrs.add(MENUITEM_ARTURL);
 		return attrs;
 	}
 	
-	public bool populated()
+	public bool not_populated()
 	{
-		return (this.property_get(MENUITEM_TEXT_TITLE) != null && 
-		        this.property_get(MENUITEM_TEXT_TITLE) != "");
+		return (this.property_get(MENUITEM_TITLE) == null && 
+		        this.property_get(MENUITEM_TITLE) == "");
 	}
 		
 }
