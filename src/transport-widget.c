@@ -186,7 +186,7 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	TransportWidgetPrivate *priv = TRANSPORT_WIDGET_GET_PRIVATE(bar);
 	int update_value = g_value_get_int(value);
 	g_debug("transport_widget_update_state - with value  %i", update_value);  
-	play_button_toggle_play_pause(priv->play_button, update_value);
+	play_button_toggle_play_pause(priv->play_button, (PlayButtonState)update_value);
 }
 
  /**

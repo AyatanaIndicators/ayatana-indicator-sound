@@ -37,14 +37,14 @@ public class ScrubMenuitem : PlayerItem
 	public void update_position(int32 new_position)
 	{
 		this.property_set_int(MENUITEM_POSITION, new_position);
-	}
-		
+	}		
 	
 	public static HashSet<string> attributes_format()
 	{
 		HashSet<string> attrs = new HashSet<string>();		
 		attrs.add(MENUITEM_DURATION);
 		attrs.add(MENUITEM_POSITION);
+		attrs.add(MENUITEM_PLAY_STATE);		
 		return attrs;
 	}	
 }

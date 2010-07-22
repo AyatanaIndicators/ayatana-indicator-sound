@@ -285,11 +285,6 @@ static gboolean player_item_ensure_valid_updates (GHashTable* data, GeeHashSet* 
 		result = FALSE;
 		return result;
 	}
-	if (g_hash_table_size (data) < gee_collection_get_size ((GeeCollection*) attributes)) {
-		g_warning ("player-item.vala:93: update hash was too small for the target");
-		result = FALSE;
-		return result;
-	}
 	result = TRUE;
 	return result;
 }

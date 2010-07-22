@@ -89,10 +89,10 @@ public class PlayerItem : Dbusmenu.Menuitem
 		if(data == null){
 			return false;
 		}
-		if(data.size() < attributes.size){
+		/*if(data.size() < attributes.size){
 			warning("update hash was too small for the target");
 			return false;
-		}
+		}*/
 		return true;		
 	}
 

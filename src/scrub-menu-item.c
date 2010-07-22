@@ -163,6 +163,7 @@ GeeHashSet* scrub_menuitem_attributes_format (void) {
 	attrs = gee_hash_set_new (G_TYPE_STRING, (GBoxedCopyFunc) g_strdup, g_free, NULL, NULL);
 	gee_abstract_collection_add ((GeeAbstractCollection*) attrs, DBUSMENU_SCRUB_MENUITEM_DURATION);
 	gee_abstract_collection_add ((GeeAbstractCollection*) attrs, DBUSMENU_SCRUB_MENUITEM_POSITION);
+	gee_abstract_collection_add ((GeeAbstractCollection*) attrs, DBUSMENU_SCRUB_MENUITEM_PLAY_STATE);
 	result = attrs;
 	return result;
 }

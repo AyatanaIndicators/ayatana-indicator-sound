@@ -84,7 +84,7 @@ enum  {
 MetadataMenuitem* metadata_menuitem_new (void);
 MetadataMenuitem* metadata_menuitem_construct (GType object_type);
 GeeHashSet* metadata_menuitem_attributes_format (void);
-gboolean metadata_menuitem_populated (MetadataMenuitem* self);
+gboolean metadata_menuitem_not_populated (MetadataMenuitem* self);
 static int _vala_strcmp0 (const char * str1, const char * str2);
 
 
@@ -114,12 +114,12 @@ GeeHashSet* metadata_menuitem_attributes_format (void) {
 }
 
 
-gboolean metadata_menuitem_populated (MetadataMenuitem* self) {
+gboolean metadata_menuitem_not_populated (MetadataMenuitem* self) {
 	gboolean result = FALSE;
 	gboolean _tmp0_ = FALSE;
 	g_return_val_if_fail (self != NULL, FALSE);
-	if (dbusmenu_menuitem_property_get ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_TITLE) != NULL) {
-		_tmp0_ = _vala_strcmp0 (dbusmenu_menuitem_property_get ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_TITLE), "") != 0;
+	if (dbusmenu_menuitem_property_get ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_TITLE) == NULL) {
+		_tmp0_ = _vala_strcmp0 (dbusmenu_menuitem_property_get ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_TITLE), "") == 0;
 	} else {
 		_tmp0_ = FALSE;
 	}
