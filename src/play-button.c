@@ -454,26 +454,29 @@ void
 play_button_toggle_play_pause(GtkWidget* button, PlayButtonState update)
 {
 	PlayButtonPrivate* priv = PLAY_BUTTON_GET_PRIVATE(button);
+	gboolean changed  = priv->current_state != update; 
 	priv->current_state = update;
 	g_debug("PlayButton::toggle play state : %i", priv->current_state); 
 
-	cairo_t *cr;
+	if(changed == TRUE){
+		g_debug("Toggle play pause - changed of state detected");
+		cairo_t *cr;
 	
-	cr = gdk_cairo_create (button->window);
+		cr = gdk_cairo_create (button->window);
 
-	GList* list = g_hash_table_lookup(priv->command_coordinates,
-	                                  GINT_TO_POINTER(TRANSPORT_PLAY_PAUSE));
+		GList* list = g_hash_table_lookup(priv->command_coordinates,
+			                                GINT_TO_POINTER(TRANSPORT_PLAY_PAUSE));
 
-	cairo_rectangle(cr,
-	                GPOINTER_TO_INT(g_list_nth_data(list, 0)),
-	                GPOINTER_TO_INT(g_list_nth_data(list, 1)),
-									GPOINTER_TO_INT(g_list_nth_data(list, 2)),	               	
-									GPOINTER_TO_INT(g_list_nth_data(list, 3)));
+		cairo_rectangle(cr,
+			              GPOINTER_TO_INT(g_list_nth_data(list, 0)),
+			              GPOINTER_TO_INT(g_list_nth_data(list, 1)),
+										GPOINTER_TO_INT(g_list_nth_data(list, 2)),	               	
+										GPOINTER_TO_INT(g_list_nth_data(list, 3)));
 
-	cairo_clip(cr);
-	draw (button, cr);
-	cairo_destroy (cr);
-
+		cairo_clip(cr);
+		draw (button, cr);
+		cairo_destroy (cr);
+	}
 }
 
 
