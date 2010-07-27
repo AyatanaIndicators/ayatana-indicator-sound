@@ -149,6 +149,8 @@ scrub_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 		ido_timeline_pause(priv->time_line);
 		ido_scale_menu_item_set_primary_label(IDO_SCALE_MENU_ITEM(priv->ido_scrub_bar),
 		                                      scrub_widget_format_time(g_value_get_int(value)/1000)); 					
+
+		g_debug("scrub-widget::update progress = %f", scrub_widget_calculate_progress(mitem)*100); 
 																					
 		ido_timeline_set_progress(priv->time_line, scrub_widget_calculate_progress(mitem)*1000);
 		scrub_widget_set_ido_position(mitem, g_value_get_int(value)/1000,
@@ -235,18 +237,26 @@ scrub_widget_get_ido_bar(ScrubWidget* self)
 static gchar*
 scrub_widget_format_time(gint time)
 {
-	// Assuming its in seconds for now ...
-	gint minutes = time/60;
-	gint seconds = time % 60;
-	gchar* prefix="0";
-	gchar* seconds_prefix="0";
-	if(minutes > 9)
-		prefix="";
-	if(seconds > 9)
-		seconds_prefix="";
-	return g_strdup_printf("%s%i:%s%i", prefix, minutes, seconds_prefix, seconds);	
-}
+// Assuming its in seconds for now ...
+	gchar* prefix = "-";
+	gchar* seconds_prefix = "-";
 
+	if(time != DBUSMENU_PROPERTY_EMPTY){
+		gint minutes = time/60;
+		gint seconds = time % 60;
+		prefix="0";
+		seconds_prefix="0";
+		if(minutes > 9)
+			prefix="";
+		if(seconds > 9)
+			seconds_prefix="";
+		return g_strdup_printf("%s%i:%s%i", prefix, minutes, seconds_prefix, seconds);	
+	}	
+	else{
+		return g_strdup_printf("%s-:%s-", prefix, seconds_prefix);	
+	}
+}
+ 
 static void
 scrub_widget_set_ido_position(ScrubWidget* self,
                               gint position,
@@ -289,7 +299,7 @@ scrub_widget_timeline_frame_cb(	IdoTimeline *timeline,
 	ScrubWidgetPrivate * priv = SCRUB_WIDGET_GET_PRIVATE(mitem);
 	if(priv->scrubbing == TRUE)
 	{
-		//g_debug("don't update the slider or timeline, slider is being scrubbed");
+		g_debug("don't update the slider or timeline, slider is being scrubbed");
 		return;
 	}
 	gint position = progress * dbusmenu_menuitem_property_get_int(priv->twin_item, 
@@ -298,12 +308,12 @@ scrub_widget_timeline_frame_cb(	IdoTimeline *timeline,
 	ido_scale_menu_item_set_primary_label(IDO_SCALE_MENU_ITEM(priv->ido_scrub_bar), left_text); 	
   GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_scrub_bar);
   GtkRange *range = (GtkRange*)slider;
- 	gtk_range_set_value(range, progress * 100);
-
+ 	//gtk_range_set_value(range, progress * 100);
 	/*g_debug("position in seconds %i and in words %s", position, left_text);
 	g_debug("timeline is running: %i", (gint)ido_timeline_is_running(priv->time_line));
 	g_debug("timeline duration = %i", ido_timeline_get_duration(priv->time_line));	
 	*/
+	//g_debug("timeline-update - progress = %f", progress);
 	g_free(left_text);
 }
 
