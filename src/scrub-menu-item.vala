@@ -26,6 +26,7 @@ public class ScrubMenuitem : PlayerItem
 	public ScrubMenuitem(PlayerController parent)
 	{
 		Object(item_type: MENUITEM_TYPE, owner: parent);
+		reset(attributes_format());
 	}
 
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)

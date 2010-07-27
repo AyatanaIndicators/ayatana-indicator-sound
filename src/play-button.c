@@ -85,16 +85,6 @@ G_DEFINE_TYPE (PlayButton, play_button, GTK_TYPE_DRAWING_AREA);
 
 /// internal helper functions //////////////////////////////////////////////////
 
-/*static double
-_align (double val)
-{
-  double fract = val - (int) val;
-
-  if (fract != 0.5f)
-    return (double) ((int) val + 0.5f);
-  else
-    return val;
-}*/
 
 static inline void
 _blurinner (guchar* pixel,
@@ -466,6 +456,24 @@ play_button_toggle_play_pause(GtkWidget* button, PlayButtonState update)
 	PlayButtonPrivate* priv = PLAY_BUTTON_GET_PRIVATE(button);
 	priv->current_state = update;
 	g_debug("PlayButton::toggle play state : %i", priv->current_state); 
+
+	cairo_t *cr;
+	
+	cr = gdk_cairo_create (button->window);
+
+	GList* list = g_hash_table_lookup(priv->command_coordinates,
+	                                  GINT_TO_POINTER(TRANSPORT_PLAY_PAUSE));
+
+	cairo_rectangle(cr,
+	                GPOINTER_TO_INT(g_list_nth_data(list, 0)),
+	                GPOINTER_TO_INT(g_list_nth_data(list, 1)),
+									GPOINTER_TO_INT(g_list_nth_data(list, 2)),	               	
+									GPOINTER_TO_INT(g_list_nth_data(list, 3)));
+
+	cairo_clip(cr);
+	draw (button, cr);
+	cairo_destroy (cr);
+
 }
 
 

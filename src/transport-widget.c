@@ -182,11 +182,14 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	g_debug("transport_widget_update_state - with property  %s", property);  
 	TransportWidget* bar = (TransportWidget*)userdata;
 	g_return_if_fail(IS_TRANSPORT_WIDGET(bar));
-	
-	TransportWidgetPrivate *priv = TRANSPORT_WIDGET_GET_PRIVATE(bar);
-	int update_value = g_value_get_int(value);
-	g_debug("transport_widget_update_state - with value  %i", update_value);  
-	play_button_toggle_play_pause(priv->play_button, (PlayButtonState)update_value);
+
+	if(g_ascii_strcasecmp(DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE, property) == 0)
+	{
+		TransportWidgetPrivate *priv = TRANSPORT_WIDGET_GET_PRIVATE(bar);
+		int update_value = g_value_get_int(value);
+		g_debug("transport_widget_update_state - with value  %i", update_value);  
+		play_button_toggle_play_pause(priv->play_button, (PlayButtonState)update_value);
+	}
 }
 
  /**
