@@ -458,7 +458,7 @@ play_button_toggle_play_pause(GtkWidget* button, PlayButtonState update)
 	priv->current_state = update;
 	g_debug("PlayButton::toggle play state : %i", priv->current_state); 
 
-	if(changed == TRUE){
+	/*if(changed == TRUE){
 		g_debug("Toggle play pause - changed of state detected");
 		cairo_t *cr;
 	
@@ -476,7 +476,7 @@ play_button_toggle_play_pause(GtkWidget* button, PlayButtonState update)
 		cairo_clip(cr);
 		draw (button, cr);
 		cairo_destroy (cr);
-	}
+	}*/
 }
 
 
