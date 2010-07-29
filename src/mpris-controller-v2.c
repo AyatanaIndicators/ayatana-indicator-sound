@@ -80,12 +80,12 @@ struct _MprisControllerV2Class {
 
 static gpointer mpris_controller_v2_parent_class = NULL;
 
-GType mpris_controller_get_type (void);
-GType mpris_controller_v2_get_type (void);
+GType mpris_controller_get_type (void) G_GNUC_CONST;
+GType mpris_controller_v2_get_type (void) G_GNUC_CONST;
 enum  {
 	MPRIS_CONTROLLER_V2_DUMMY_PROPERTY
 };
-GType player_controller_get_type (void);
+GType player_controller_get_type (void) G_GNUC_CONST;
 MprisControllerV2* mpris_controller_v2_new (PlayerController* ctrl, const char* inter);
 MprisControllerV2* mpris_controller_v2_construct (GType object_type, PlayerController* ctrl, const char* inter);
 

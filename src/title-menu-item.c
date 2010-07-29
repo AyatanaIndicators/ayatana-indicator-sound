@@ -119,18 +119,18 @@ typedef enum  {
 
 static gpointer title_menuitem_parent_class = NULL;
 
-GType player_item_get_type (void);
-GType title_menuitem_get_type (void);
+GType player_item_get_type (void) G_GNUC_CONST;
+GType title_menuitem_get_type (void) G_GNUC_CONST;
 enum  {
 	TITLE_MENUITEM_DUMMY_PROPERTY
 };
-GType player_controller_get_type (void);
+GType player_controller_get_type (void) G_GNUC_CONST;
 const char* player_controller_get_name (PlayerController* self);
 TitleMenuitem* title_menuitem_new (PlayerController* parent);
 TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* parent);
 PlayerController* player_item_get_owner (PlayerItem* self);
-GType mpris_controller_get_type (void);
-GType player_controller_state_get_type (void);
+GType mpris_controller_get_type (void) G_GNUC_CONST;
+GType player_controller_state_get_type (void) G_GNUC_CONST;
 void player_controller_instantiate (PlayerController* self);
 static void title_menuitem_real_handle_event (DbusmenuMenuitem* base, const char* name, GValue* input_value, guint timestamp);
 GeeHashSet* title_menuitem_attributes_format (void);
