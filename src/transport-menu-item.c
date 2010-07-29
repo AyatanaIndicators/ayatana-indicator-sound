@@ -118,19 +118,19 @@ struct _PlayerControllerClass {
 
 static gpointer transport_menuitem_parent_class = NULL;
 
-GType player_item_get_type (void);
-GType transport_menuitem_get_type (void);
+GType player_item_get_type (void) G_GNUC_CONST;
+GType transport_menuitem_get_type (void) G_GNUC_CONST;
 enum  {
 	TRANSPORT_MENUITEM_DUMMY_PROPERTY
 };
-GType transport_menuitem_action_get_type (void);
-GType player_controller_get_type (void);
+GType transport_menuitem_action_get_type (void) G_GNUC_CONST;
+GType player_controller_get_type (void) G_GNUC_CONST;
 TransportMenuitem* transport_menuitem_new (PlayerController* parent);
 TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerController* parent);
 void transport_menuitem_change_play_state (TransportMenuitem* self, gint state);
 PlayerController* player_item_get_owner (PlayerItem* self);
 const char* player_controller_get_name (PlayerController* self);
-GType mpris_controller_get_type (void);
+GType mpris_controller_get_type (void) G_GNUC_CONST;
 void mpris_controller_transport_event (MprisController* self, TransportMenuitemaction command);
 static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const char* name, GValue* input_value, guint timestamp);
 GeeHashSet* transport_menuitem_attributes_format (void);

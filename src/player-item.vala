@@ -24,7 +24,8 @@ public class PlayerItem : Dbusmenu.Menuitem
 {
 	public PlayerController owner {get; construct;}
 	public string item_type { get; construct; }
-
+	private const int EMPTY = -1;
+	
 	public PlayerItem(string type)
 	{		
 		Object(item_type: type);
@@ -36,17 +37,16 @@ public class PlayerItem : Dbusmenu.Menuitem
 
 	public void reset(HashSet<string> attrs){		
 		foreach(string s in attrs){
-			debug("attempting to set prop %s to null", s);
-			this.property_set(s, null);
-			this.property_set_int(s, 0);
+			debug("attempting to set prop %s to EMPTY", s);
+			this.property_set_int(s, EMPTY);
 		}
 	}
 	
 	public void update(HashTable<string, Value?> data, HashSet<string> attributes)
 	{
 		debug("PlayerItem::update()");
-		if(ensure_valid_updates(data, attributes) == false){
-			debug("PlayerItem::Update -> The hashtable update does not contain what we were expecting - just leave it!");
+		if(data == null){
+			debug("PlayerItem::Update -> The hashtable was null - just leave it!");
 			return;
 		}		
 		
@@ -82,19 +82,21 @@ public class PlayerItem : Dbusmenu.Menuitem
 				this.property_set_bool(property, v.get_boolean());
 			}
 		}
-	}	
-
-	private static bool ensure_valid_updates(HashTable<string, Value?> data, HashSet<string> attributes)
-	{
-		if(data == null){
-			return false;
+		if(this.property_get_bool(MENUITEM_PROP_VISIBLE) == false){
+			this.property_set_bool(MENUITEM_PROP_VISIBLE, true);
 		}
-		/*if(data.size() < attributes.size){
-			warning("update hash was too small for the target");
-			return false;
-		}*/
-		return true;		
+	}	
+	
+	public bool populated(HashSet<string> attrs)
+	{
+		foreach(string prop in attrs){
+		  int value_int = property_get_int(prop);
+			debug("populate - prop %s and value %i", prop, value_int);
+			if(property_get_int(prop) != EMPTY){
+				return true;
+			}
+		}
+		return false;
 	}
-
 }
 

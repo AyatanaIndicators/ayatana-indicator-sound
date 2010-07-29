@@ -76,22 +76,24 @@ struct _MetadataMenuitemClass {
 
 static gpointer metadata_menuitem_parent_class = NULL;
 
-GType player_item_get_type (void);
-GType metadata_menuitem_get_type (void);
+GType player_item_get_type (void) G_GNUC_CONST;
+GType metadata_menuitem_get_type (void) G_GNUC_CONST;
 enum  {
 	METADATA_MENUITEM_DUMMY_PROPERTY
 };
+void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
+GeeHashSet* metadata_menuitem_attributes_format (void);
 MetadataMenuitem* metadata_menuitem_new (void);
 MetadataMenuitem* metadata_menuitem_construct (GType object_type);
-GeeHashSet* metadata_menuitem_attributes_format (void);
-gboolean metadata_menuitem_not_populated (MetadataMenuitem* self);
-static int _vala_strcmp0 (const char * str1, const char * str2);
 
 
 
 MetadataMenuitem* metadata_menuitem_construct (GType object_type) {
 	MetadataMenuitem * self;
+	GeeHashSet* _tmp0_;
 	self = (MetadataMenuitem*) g_object_new (object_type, "item-type", DBUSMENU_METADATA_MENUITEM_TYPE, NULL);
+	player_item_reset ((PlayerItem*) self, _tmp0_ = metadata_menuitem_attributes_format ());
+	_g_object_unref0 (_tmp0_);
 	return self;
 }
 
@@ -114,20 +116,6 @@ GeeHashSet* metadata_menuitem_attributes_format (void) {
 }
 
 
-gboolean metadata_menuitem_not_populated (MetadataMenuitem* self) {
-	gboolean result = FALSE;
-	gboolean _tmp0_ = FALSE;
-	g_return_val_if_fail (self != NULL, FALSE);
-	if (dbusmenu_menuitem_property_get ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_TITLE) == NULL) {
-		_tmp0_ = _vala_strcmp0 (dbusmenu_menuitem_property_get ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_TITLE), "") == 0;
-	} else {
-		_tmp0_ = FALSE;
-	}
-	result = _tmp0_;
-	return result;
-}
-
-
 static void metadata_menuitem_class_init (MetadataMenuitemClass * klass) {
 	metadata_menuitem_parent_class = g_type_class_peek_parent (klass);
 }
@@ -146,17 +134,6 @@ GType metadata_menuitem_get_type (void) {
 		g_once_init_leave (&metadata_menuitem_type_id__volatile, metadata_menuitem_type_id);
 	}
 	return metadata_menuitem_type_id__volatile;
-}
-
-
-static int _vala_strcmp0 (const char * str1, const char * str2) {
-	if (str1 == NULL) {
-		return -(str1 != str2);
-	}
-	if (str2 == NULL) {
-		return str1 != str2;
-	}
-	return strcmp (str1, str2);
 }
 
 
