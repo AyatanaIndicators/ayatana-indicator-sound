@@ -118,8 +118,6 @@ transport_widget_finalize (GObject *object)
 static gboolean 
 transport_widget_expose_event(GtkWidget* widget, GdkEventExpose* event)
 {
-	//TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE(widget);	
-	//gtk_container_propagate_expose(GTK_CONTAINER(widget),priv->play_button, event);
 	return TRUE;
 }
 

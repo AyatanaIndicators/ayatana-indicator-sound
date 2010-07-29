@@ -23,14 +23,15 @@ using Gee;
 
 public class PlayerController : GLib.Object
 {
-	public const int WIDGET_QUANTITY = 5;
+	public const int WIDGET_QUANTITY = 6;
 
 	public static enum widget_order{
 		SEPARATOR,
 		TITLE,
 		METADATA,
 		SCRUB,
-		TRANSPORT
+		TRANSPORT,
+		PLAYLIST
 	}
 
 	public enum state{
@@ -133,6 +134,8 @@ public class PlayerController : GLib.Object
 			this.custom_items[widget_order.SCRUB].property_set_bool(MENUITEM_PROP_VISIBLE,
 			                                                        false);
 			this.custom_items[widget_order.METADATA].property_set_bool(MENUITEM_PROP_VISIBLE,
+			                                                           false);
+	  	this.custom_items[widget_order.PLAYLIST].property_set_bool(MENUITEM_PROP_VISIBLE,
 			                                                           false);		
 			return;			
 		}
@@ -146,8 +149,10 @@ public class PlayerController : GLib.Object
 
 
 		this.custom_items[widget_order.TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE,
-		                                                            this.current_state == state.CONNECTED);
-		
+		                                                            true);
+
+	  this.custom_items[widget_order.PLAYLIST].property_set_bool(MENUITEM_PROP_VISIBLE,
+		                                                            true);
 	}
 		
 	private void construct_widgets()
@@ -170,12 +175,34 @@ public class PlayerController : GLib.Object
 		// Transport item
 		TransportMenuitem transport_item = new TransportMenuitem(this);
 		this.custom_items.add(transport_item);
-
+		
+		this.custom_items.add(create_playlist());		
 		
 		foreach(PlayerItem item in this.custom_items){
 			root_menu.child_add_position(item, this.menu_offset + this.custom_items.index_of(item));			
 		}
 	}	
+
+	private PlayerItem create_playlist()
+	{
+		PlayerItem playlist_root = new PlayerItem(CLIENT_TYPES_DEFAULT);
+		playlist_root.property_set(MENUITEM_PROP_LABEL, "Choose Playlist");
+
+		PlayerItem subentry_1 = new PlayerItem(CLIENT_TYPES_DEFAULT);
+		subentry_1.property_set(MENUITEM_PROP_LABEL, "Raster-noton selection");
+
+		PlayerItem subentry_2 = new PlayerItem(CLIENT_TYPES_DEFAULT);
+		subentry_2.property_set(MENUITEM_PROP_LABEL, "Rune Grammofon selection");
+
+		PlayerItem subentry_3 = new PlayerItem(CLIENT_TYPES_DEFAULT);
+		subentry_3.property_set(MENUITEM_PROP_LABEL, "Kranky selection");
+		
+		playlist_root.child_append(subentry_1);
+		playlist_root.child_append(subentry_2);
+		playlist_root.child_append(subentry_3);
+
+		return playlist_root;
+	}
 	
 	private static string format_client_name(string client_name)
 	{
