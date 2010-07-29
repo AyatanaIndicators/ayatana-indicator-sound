@@ -1,3 +1,16 @@
+indicator-sound (0.3.9-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    - Scrub bar should now work properly.
+    - Spacing between all UI widgets should be fixed.
+    - Playlist menuitem in place (for now this is just a mock up item, will 
+      complete once there is a client with which I can test against)
+    - Transport bar has been visually tweaked.
+  * debian/control
+    - build depend on libido-0.1-dev (>= 0.1.11)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 29 Jul 2010 11:26:41 -0400
+
 indicator-sound (0.3.8-0ubuntu1) maverick; urgency=low
 
   * New upstream release.

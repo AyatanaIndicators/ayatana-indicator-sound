@@ -72,20 +72,21 @@ struct _PlayerItemPrivate {
 
 static gpointer player_item_parent_class = NULL;
 
-GType player_item_get_type (void);
-GType player_controller_get_type (void);
+GType player_item_get_type (void) G_GNUC_CONST;
+GType player_controller_get_type (void) G_GNUC_CONST;
 #define PLAYER_ITEM_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_PLAYER_ITEM, PlayerItemPrivate))
 enum  {
 	PLAYER_ITEM_DUMMY_PROPERTY,
 	PLAYER_ITEM_OWNER,
 	PLAYER_ITEM_ITEM_TYPE
 };
+#define PLAYER_ITEM_EMPTY (-1)
 PlayerItem* player_item_new (const char* type);
 PlayerItem* player_item_construct (GType object_type, const char* type);
 void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
-static gboolean player_item_ensure_valid_updates (GHashTable* data, GeeHashSet* attributes);
 static GValue* _g_value_dup (GValue* self);
 void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes);
+gboolean player_item_populated (PlayerItem* self, GeeHashSet* attrs);
 PlayerController* player_item_get_owner (PlayerItem* self);
 static void player_item_set_owner (PlayerItem* self, PlayerController* value);
 const char* player_item_get_item_type (PlayerItem* self);
@@ -125,9 +126,8 @@ void player_item_reset (PlayerItem* self, GeeHashSet* attrs) {
 				break;
 			}
 			s = (char*) gee_iterator_get (_s_it);
-			g_debug ("player-item.vala:39: attempting to set prop %s to null", s);
-			dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, s, NULL);
-			dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, s, 0);
+			g_debug ("player-item.vala:40: attempting to set prop %s to EMPTY", s);
+			dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, s, PLAYER_ITEM_EMPTY);
 			_g_free0 (s);
 		}
 		_g_object_unref0 (_s_it);
@@ -172,9 +172,9 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 	g_return_if_fail (attributes != NULL);
 	_inner_error_ = NULL;
 	g_debug ("player-item.vala:47: PlayerItem::update()");
-	if (player_item_ensure_valid_updates (data, attributes) == FALSE) {
-		g_debug ("player-item.vala:49: PlayerItem::Update -> The hashtable update does n" \
-"ot contain what we were expecting - just leave it!");
+	if (data == NULL) {
+		g_debug ("player-item.vala:49: PlayerItem::Update -> The hashtable was null - ju" \
+"st leave it!");
 		return;
 	}
 	{
@@ -215,10 +215,10 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 								goto __catch2_g_convert_error;
 							}
 							_g_free0 (update);
-							_g_free0 (property);
-							input_keys = (_vala_array_free (input_keys, input_keys_length1, (GDestroyNotify) g_free), NULL);
-							_g_free0 (search_key);
 							_g_free0 (v);
+							_g_free0 (search_key);
+							input_keys = (_vala_array_free (input_keys, input_keys_length1, (GDestroyNotify) g_free), NULL);
+							_g_free0 (property);
 							_g_object_unref0 (_property_it);
 							g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 							g_clear_error (&_inner_error_);
@@ -240,10 +240,10 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 					__finally2:
 					if (_inner_error_ != NULL) {
 						_g_free0 (update);
-						_g_free0 (property);
-						input_keys = (_vala_array_free (input_keys, input_keys_length1, (GDestroyNotify) g_free), NULL);
-						_g_free0 (search_key);
 						_g_free0 (v);
+						_g_free0 (search_key);
+						input_keys = (_vala_array_free (input_keys, input_keys_length1, (GDestroyNotify) g_free), NULL);
+						_g_free0 (property);
 						_g_object_unref0 (_property_it);
 						g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 						g_clear_error (&_inner_error_);
@@ -267,25 +267,46 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 					}
 				}
 			}
-			_g_free0 (property);
-			input_keys = (_vala_array_free (input_keys, input_keys_length1, (GDestroyNotify) g_free), NULL);
-			_g_free0 (search_key);
 			_g_free0 (v);
+			_g_free0 (search_key);
+			input_keys = (_vala_array_free (input_keys, input_keys_length1, (GDestroyNotify) g_free), NULL);
+			_g_free0 (property);
 		}
 		_g_object_unref0 (_property_it);
+	}
+	if (dbusmenu_menuitem_property_get_bool ((DbusmenuMenuitem*) self, DBUSMENU_MENUITEM_PROP_VISIBLE) == FALSE) {
+		dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_MENUITEM_PROP_VISIBLE, TRUE);
 	}
 }
 
 
-static gboolean player_item_ensure_valid_updates (GHashTable* data, GeeHashSet* attributes) {
+gboolean player_item_populated (PlayerItem* self, GeeHashSet* attrs) {
 	gboolean result = FALSE;
-	g_return_val_if_fail (data != NULL, FALSE);
-	g_return_val_if_fail (attributes != NULL, FALSE);
-	if (data == NULL) {
-		result = FALSE;
-		return result;
+	g_return_val_if_fail (self != NULL, FALSE);
+	g_return_val_if_fail (attrs != NULL, FALSE);
+	{
+		GeeIterator* _prop_it;
+		_prop_it = gee_abstract_collection_iterator ((GeeAbstractCollection*) attrs);
+		while (TRUE) {
+			char* prop;
+			gint value_int;
+			if (!gee_iterator_next (_prop_it)) {
+				break;
+			}
+			prop = (char*) gee_iterator_get (_prop_it);
+			value_int = dbusmenu_menuitem_property_get_int ((DbusmenuMenuitem*) self, prop);
+			g_debug ("player-item.vala:94: populate - prop %s and value %i", prop, value_int);
+			if (dbusmenu_menuitem_property_get_int ((DbusmenuMenuitem*) self, prop) != PLAYER_ITEM_EMPTY) {
+				result = TRUE;
+				_g_free0 (prop);
+				_g_object_unref0 (_prop_it);
+				return result;
+			}
+			_g_free0 (prop);
+		}
+		_g_object_unref0 (_prop_it);
 	}
-	result = TRUE;
+	result = FALSE;
 	return result;
 }
 

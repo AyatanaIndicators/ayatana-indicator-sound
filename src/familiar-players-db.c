@@ -63,7 +63,7 @@ struct _FamiliarPlayersDBPrivate {
 
 static gpointer familiar_players_db_parent_class = NULL;
 
-GType familiar_players_db_get_type (void);
+GType familiar_players_db_get_type (void) G_GNUC_CONST;
 #define FAMILIAR_PLAYERS_DB_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_FAMILIAR_PLAYERS_DB, FamiliarPlayersDBPrivate))
 enum  {
 	FAMILIAR_PLAYERS_DB_DUMMY_PROPERTY
@@ -352,17 +352,17 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 			g_warning ("familiar-players-db.vala:114: Problems dumping keyfile to a string");
 			result = FALSE;
 			_g_error_free0 (e);
-			_g_key_file_free0 (keyfile);
-			desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
 			_g_free0 (data);
+			desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
+			_g_key_file_free0 (keyfile);
 			return result;
 		}
 	}
 	__finally6:
 	if (_inner_error_ != NULL) {
-		_g_key_file_free0 (keyfile);
-		desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
 		_g_free0 (data);
+		desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
+		_g_key_file_free0 (keyfile);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return FALSE;
@@ -370,9 +370,9 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 	if (g_mkdir_with_parents (self->priv->dir_name, 0700) != 0) {
 		g_warning ("familiar-players-db.vala:119: Unable to make directory: %s", self->priv->dir_name);
 		result = FALSE;
-		_g_key_file_free0 (keyfile);
-		desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
 		_g_free0 (data);
+		desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
+		_g_key_file_free0 (keyfile);
 		return result;
 	}
 	{
@@ -382,9 +382,9 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 			if (_inner_error_->domain == G_FILE_ERROR) {
 				goto __catch7_g_file_error;
 			}
-			_g_key_file_free0 (keyfile);
-			desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
 			_g_free0 (data);
+			desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
+			_g_key_file_free0 (keyfile);
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
 			return FALSE;
@@ -406,17 +406,17 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 	}
 	__finally7:
 	if (_inner_error_ != NULL) {
-		_g_key_file_free0 (keyfile);
-		desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
 		_g_free0 (data);
+		desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
+		_g_key_file_free0 (keyfile);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return FALSE;
 	}
 	result = TRUE;
-	_g_key_file_free0 (keyfile);
-	desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
 	_g_free0 (data);
+	desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
+	_g_key_file_free0 (keyfile);
 	return result;
 }
 

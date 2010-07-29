@@ -23,14 +23,15 @@ using Gee;
 
 public class PlayerController : GLib.Object
 {
-	public const int WIDGET_QUANTITY = 5;
+	public const int WIDGET_QUANTITY = 6;
 
 	public static enum widget_order{
 		SEPARATOR,
 		TITLE,
 		METADATA,
 		SCRUB,
-		TRANSPORT
+		TRANSPORT,
+		PLAYLIST
 	}
 
 	public enum state{
@@ -56,7 +57,7 @@ public class PlayerController : GLib.Object
 		this.root_menu = root;
 		this.name = format_client_name(client_name.strip());
 		this.custom_items = new ArrayList<PlayerItem>();
-		this.update_state(initial_state);
+		this.current_state = initial_state;
 		this.menu_offset = offset;
 		construct_widgets();
 		establish_mpris_connection();
@@ -67,7 +68,7 @@ public class PlayerController : GLib.Object
 	{
 		debug("update_state - player controller %s : new state %i", this.name, new_state);
 		this.current_state = new_state;
-		//this.update_layout();
+		this.update_layout();
 	}
 	
 	public void activate()
@@ -108,7 +109,7 @@ public class PlayerController : GLib.Object
 		else{
 			this.mpris_adaptor = new MprisController(this);
 		}
-		
+		// TODO refactor
 		if(this.mpris_adaptor.connected() == true){
 			debug("yup I'm connected");
 			this.update_state(state.CONNECTED);
@@ -116,7 +117,6 @@ public class PlayerController : GLib.Object
 		else{
 			this.update_state(state.DISCONNECTED);
 		}
-		this.update_layout();
 	}
 	
 	public void vanish()
@@ -127,21 +127,32 @@ public class PlayerController : GLib.Object
 	}
 
 	public void update_layout()
-	{
-		bool visibility = true;
-		MetadataMenuitem meta_item = this.custom_items[widget_order.METADATA] as MetadataMenuitem;
-		if(this.current_state != state.CONNECTED /*|| 
-		   meta_item.not_populated()*/){
-			visibility = false;
+	{		
+		if(this.current_state != state.CONNECTED){
+			this.custom_items[widget_order.TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE,
+			                                                            false);
+			this.custom_items[widget_order.SCRUB].property_set_bool(MENUITEM_PROP_VISIBLE,
+			                                                        false);
+			this.custom_items[widget_order.METADATA].property_set_bool(MENUITEM_PROP_VISIBLE,
+			                                                           false);
+	  	this.custom_items[widget_order.PLAYLIST].property_set_bool(MENUITEM_PROP_VISIBLE,
+			                                                           false);		
+			return;			
 		}
-		debug("about the set the visibility on both the transport and metadata widget to %s", visibility.to_string());
-		this.custom_items[widget_order.TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);
-		this.custom_items[widget_order.SCRUB].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);
-		this.custom_items[widget_order.METADATA].property_set_bool(MENUITEM_PROP_VISIBLE, visibility);		
-		// DEBUG
-		if(visibility == false){
-			warning("Update layout of client %s is setting widgets to invisibile!", this.name);
-		}
+		
+		debug("update layout - metadata %s", this.custom_items[widget_order.METADATA].populated(MetadataMenuitem.attributes_format()).to_string());
+		this.custom_items[widget_order.METADATA].property_set_bool(MENUITEM_PROP_VISIBLE,
+			                                                        this.custom_items[widget_order.METADATA].populated(MetadataMenuitem.attributes_format()));
+		debug("update layout - scrub %s", this.custom_items[widget_order.SCRUB].populated(ScrubMenuitem.attributes_format()).to_string());
+		this.custom_items[widget_order.SCRUB].property_set_bool(MENUITEM_PROP_VISIBLE,
+		                                                        this.custom_items[widget_order.SCRUB].populated(ScrubMenuitem.attributes_format()));
+
+
+		this.custom_items[widget_order.TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE,
+		                                                            true);
+
+	  this.custom_items[widget_order.PLAYLIST].property_set_bool(MENUITEM_PROP_VISIBLE,
+		                                                            true);
 	}
 		
 	private void construct_widgets()
@@ -164,12 +175,34 @@ public class PlayerController : GLib.Object
 		// Transport item
 		TransportMenuitem transport_item = new TransportMenuitem(this);
 		this.custom_items.add(transport_item);
-
+		
+		this.custom_items.add(create_playlist());		
 		
 		foreach(PlayerItem item in this.custom_items){
 			root_menu.child_add_position(item, this.menu_offset + this.custom_items.index_of(item));			
 		}
 	}	
+
+	private PlayerItem create_playlist()
+	{
+		PlayerItem playlist_root = new PlayerItem(CLIENT_TYPES_DEFAULT);
+		playlist_root.property_set(MENUITEM_PROP_LABEL, "Choose Playlist");
+
+		PlayerItem subentry_1 = new PlayerItem(CLIENT_TYPES_DEFAULT);
+		subentry_1.property_set(MENUITEM_PROP_LABEL, "Raster-noton selection");
+
+		PlayerItem subentry_2 = new PlayerItem(CLIENT_TYPES_DEFAULT);
+		subentry_2.property_set(MENUITEM_PROP_LABEL, "Rune Grammofon selection");
+
+		PlayerItem subentry_3 = new PlayerItem(CLIENT_TYPES_DEFAULT);
+		subentry_3.property_set(MENUITEM_PROP_LABEL, "Kranky selection");
+		
+		playlist_root.child_append(subentry_1);
+		playlist_root.child_append(subentry_2);
+		playlist_root.child_append(subentry_3);
+
+		return playlist_root;
+	}
 	
 	private static string format_client_name(string client_name)
 	{

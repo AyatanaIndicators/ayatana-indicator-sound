@@ -1,17 +1,16 @@
 
-AC_INIT(indicator-sound, 0.3.8, conor.curran@canonical.com)
+AC_INIT(indicator-sound, 0.3.9, conor.curran@canonical.com)
 
 AC_PREREQ(2.53)
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(indicator-sound, 0.3.8)
+AM_INIT_AUTOMAKE(indicator-sound, 0.3.9)
 
 AM_MAINTAINER_MODE
 
 IT_PROG_INTLTOOL([0.35.0])
 AM_PROG_VALAC([0.7.8])
 AS_IF([test -z "$VALAC"], [AC_MSG_ERROR(["No valac compiler found."])])
-
 
 AC_ISC_POSIX
 AC_PROG_CC

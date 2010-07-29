@@ -100,9 +100,9 @@ typedef enum  {
 
 static gpointer music_player_bridge_parent_class = NULL;
 
-GType music_player_bridge_get_type (void);
-GType player_controller_get_type (void);
-GType familiar_players_db_get_type (void);
+GType music_player_bridge_get_type (void) G_GNUC_CONST;
+GType player_controller_get_type (void) G_GNUC_CONST;
+GType familiar_players_db_get_type (void) G_GNUC_CONST;
 #define MUSIC_PLAYER_BRIDGE_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_MUSIC_PLAYER_BRIDGE, MusicPlayerBridgePrivate))
 enum  {
 	MUSIC_PLAYER_BRIDGE_DUMMY_PROPERTY
@@ -125,11 +125,11 @@ MusicPlayerBridge* music_player_bridge_new (void);
 MusicPlayerBridge* music_player_bridge_construct (GType object_type);
 GeeSet* familiar_players_db_records (FamiliarPlayersDB* self);
 static gint music_player_bridge_calculate_menu_position (MusicPlayerBridge* self);
-GType player_controller_state_get_type (void);
+GType player_controller_state_get_type (void) G_GNUC_CONST;
 PlayerController* player_controller_new (DbusmenuMenuitem* root, const char* client_name, gint offset, PlayerControllerstate initial_state);
 PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, const char* client_name, gint offset, PlayerControllerstate initial_state);
 static void music_player_bridge_try_to_add_inactive_familiar_clients (MusicPlayerBridge* self);
-#define PLAYER_CONTROLLER_WIDGET_QUANTITY 5
+#define PLAYER_CONTROLLER_WIDGET_QUANTITY 6
 static gboolean music_player_bridge_server_is_not_of_interest (MusicPlayerBridge* self, const char* type);
 void player_controller_update_state (PlayerController* self, PlayerControllerstate new_state);
 void player_controller_activate (PlayerController* self);
@@ -266,9 +266,9 @@ static void music_player_bridge_try_to_add_inactive_familiar_clients (MusicPlaye
 				_g_free0 (_tmp6_);
 				_g_free0 (_tmp5_);
 				count = count + 1;
-				_g_object_unref0 (info);
-				_g_object_unref0 (app_info);
 				_g_object_unref0 (ctrl);
+				_g_object_unref0 (app_info);
+				_g_object_unref0 (info);
 			}
 			_g_free0 (app);
 			break;
