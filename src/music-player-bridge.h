@@ -220,7 +220,8 @@ typedef enum  {
 	PLAYER_CONTROLLER_WIDGET_ORDER_TITLE,
 	PLAYER_CONTROLLER_WIDGET_ORDER_METADATA,
 	PLAYER_CONTROLLER_WIDGET_ORDER_SCRUB,
-	PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT
+	PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT,
+	PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLIST
 } PlayerControllerwidget_order;
 
 typedef enum  {
@@ -259,7 +260,7 @@ struct _FamiliarPlayersDBClass {
 };
 
 
-GType music_player_bridge_get_type (void);
+GType music_player_bridge_get_type (void) G_GNUC_CONST;
 MusicPlayerBridge* music_player_bridge_new (void);
 MusicPlayerBridge* music_player_bridge_construct (GType object_type);
 void music_player_bridge_on_server_added (MusicPlayerBridge* self, IndicateListenerServer* object, const char* type);
@@ -270,32 +271,31 @@ void music_player_bridge_on_indicator_added (MusicPlayerBridge* self, IndicateLi
 void music_player_bridge_on_indicator_removed (MusicPlayerBridge* self, IndicateListenerServer* object, IndicateListenerIndicator* p0);
 void music_player_bridge_on_indicator_modified (MusicPlayerBridge* self, IndicateListenerServer* object, IndicateListenerIndicator* p0, const char* s);
 GAppInfo* music_player_bridge_create_app_info (const char* path);
-GType player_item_get_type (void);
-GType transport_menuitem_get_type (void);
-GType transport_menuitem_action_get_type (void);
-GType player_controller_get_type (void);
+GType player_item_get_type (void) G_GNUC_CONST;
+GType transport_menuitem_get_type (void) G_GNUC_CONST;
+GType transport_menuitem_action_get_type (void) G_GNUC_CONST;
+GType player_controller_get_type (void) G_GNUC_CONST;
 TransportMenuitem* transport_menuitem_new (PlayerController* parent);
 TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerController* parent);
 void transport_menuitem_change_play_state (TransportMenuitem* self, gint state);
 GeeHashSet* transport_menuitem_attributes_format (void);
-GType metadata_menuitem_get_type (void);
+GType metadata_menuitem_get_type (void) G_GNUC_CONST;
 MetadataMenuitem* metadata_menuitem_new (void);
 MetadataMenuitem* metadata_menuitem_construct (GType object_type);
 GeeHashSet* metadata_menuitem_attributes_format (void);
-gboolean metadata_menuitem_not_populated (MetadataMenuitem* self);
-GType scrub_menuitem_get_type (void);
+GType scrub_menuitem_get_type (void) G_GNUC_CONST;
 ScrubMenuitem* scrub_menuitem_new (PlayerController* parent);
 ScrubMenuitem* scrub_menuitem_construct (GType object_type, PlayerController* parent);
 void scrub_menuitem_update_position (ScrubMenuitem* self, gint32 new_position);
 GeeHashSet* scrub_menuitem_attributes_format (void);
-GType title_menuitem_get_type (void);
+GType title_menuitem_get_type (void) G_GNUC_CONST;
 TitleMenuitem* title_menuitem_new (PlayerController* parent);
 TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* parent);
 GeeHashSet* title_menuitem_attributes_format (void);
-GType mpris_controller_get_type (void);
-GType player_controller_widget_order_get_type (void);
-GType player_controller_state_get_type (void);
-#define PLAYER_CONTROLLER_WIDGET_QUANTITY 5
+GType mpris_controller_get_type (void) G_GNUC_CONST;
+GType player_controller_widget_order_get_type (void) G_GNUC_CONST;
+GType player_controller_state_get_type (void) G_GNUC_CONST;
+#define PLAYER_CONTROLLER_WIDGET_QUANTITY 6
 PlayerController* player_controller_new (DbusmenuMenuitem* root, const char* client_name, gint offset, PlayerControllerstate initial_state);
 PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, const char* client_name, gint offset, PlayerControllerstate initial_state);
 void player_controller_update_state (PlayerController* self, PlayerControllerstate new_state);
@@ -309,7 +309,7 @@ GAppInfo* player_controller_get_app_info (PlayerController* self);
 void player_controller_set_app_info (PlayerController* self, GAppInfo* value);
 gint player_controller_get_menu_offset (PlayerController* self);
 void player_controller_set_menu_offset (PlayerController* self, gint value);
-GType mpris_controller_v2_get_type (void);
+GType mpris_controller_v2_get_type (void) G_GNUC_CONST;
 MprisControllerV2* mpris_controller_v2_new (PlayerController* ctrl, const char* inter);
 MprisControllerV2* mpris_controller_v2_construct (GType object_type, PlayerController* ctrl, const char* inter);
 MprisController* mpris_controller_new (PlayerController* ctrl, const char* inter);
@@ -324,9 +324,10 @@ PlayerItem* player_item_new (const char* type);
 PlayerItem* player_item_construct (GType object_type, const char* type);
 void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
 void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes);
+gboolean player_item_populated (PlayerItem* self, GeeHashSet* attrs);
 PlayerController* player_item_get_owner (PlayerItem* self);
 const char* player_item_get_item_type (PlayerItem* self);
-GType familiar_players_db_get_type (void);
+GType familiar_players_db_get_type (void) G_GNUC_CONST;
 FamiliarPlayersDB* familiar_players_db_new (void);
 FamiliarPlayersDB* familiar_players_db_construct (GType object_type);
 void familiar_players_db_insert (FamiliarPlayersDB* self, const char* desktop);

@@ -26,6 +26,7 @@ public class MetadataMenuitem : PlayerItem
 	public MetadataMenuitem()
   {
 		Object(item_type: MENUITEM_TYPE); 	
+		reset(attributes_format());
 	}
 
 	public static HashSet<string> attributes_format()
@@ -36,12 +37,6 @@ public class MetadataMenuitem : PlayerItem
     attrs.add(MENUITEM_ALBUM);
     attrs.add(MENUITEM_ARTURL);
 		return attrs;
-	}
-	
-	public bool not_populated()
-	{
-		return (this.property_get(MENUITEM_TITLE) == null && 
-		        this.property_get(MENUITEM_TITLE) == "");
 	}
 		
 }

@@ -140,7 +140,8 @@ typedef enum  {
 	PLAYER_CONTROLLER_WIDGET_ORDER_TITLE,
 	PLAYER_CONTROLLER_WIDGET_ORDER_METADATA,
 	PLAYER_CONTROLLER_WIDGET_ORDER_SCRUB,
-	PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT
+	PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT,
+	PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLIST
 } PlayerControllerwidget_order;
 
 typedef enum  {
@@ -152,8 +153,8 @@ typedef enum  {
 
 static gpointer mpris_controller_parent_class = NULL;
 
-GType mpris_controller_get_type (void);
-GType player_controller_get_type (void);
+GType mpris_controller_get_type (void) G_GNUC_CONST;
+GType player_controller_get_type (void) G_GNUC_CONST;
 #define MPRIS_CONTROLLER_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_MPRIS_CONTROLLER, MprisControllerPrivate))
 enum  {
 	MPRIS_CONTROLLER_DUMMY_PROPERTY,
@@ -164,25 +165,25 @@ enum  {
 MprisController* mpris_controller_new (PlayerController* ctrl, const char* inter);
 MprisController* mpris_controller_construct (GType object_type, PlayerController* ctrl, const char* inter);
 DBusGProxy* mpris_controller_get_mpris_player (MprisController* self);
-static GType mpris_controller_status_get_type (void) G_GNUC_UNUSED;
+static GType mpris_controller_status_get_type (void) G_GNUC_CONST G_GNUC_UNUSED;
 static MprisControllerstatus* mpris_controller_status_dup (const MprisControllerstatus* self);
 static void mpris_controller_status_free (MprisControllerstatus* self);
 static void _dynamic_GetStatus0 (DBusGProxy* self, MprisControllerstatus* result, GError** error);
 PlayerController* mpris_controller_get_owner (MprisController* self);
-GType player_item_get_type (void);
-GType player_controller_widget_order_get_type (void);
-GType transport_menuitem_get_type (void);
+GType player_item_get_type (void) G_GNUC_CONST;
+GType player_controller_widget_order_get_type (void) G_GNUC_CONST;
+GType transport_menuitem_get_type (void) G_GNUC_CONST;
 void transport_menuitem_change_play_state (TransportMenuitem* self, gint state);
 static GHashTable* _dynamic_GetMetadata1 (DBusGProxy* self, GError** error);
 void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes);
 GeeHashSet* metadata_menuitem_attributes_format (void);
 static GHashTable* _dynamic_GetMetadata2 (DBusGProxy* self, GError** error);
 GeeHashSet* scrub_menuitem_attributes_format (void);
-GType scrub_menuitem_get_type (void);
+GType scrub_menuitem_get_type (void) G_GNUC_CONST;
 static gint32 _dynamic_PositionGet3 (DBusGProxy* self, GError** error);
 void scrub_menuitem_update_position (ScrubMenuitem* self, gint32 new_position);
 static void mpris_controller_initial_update (MprisController* self);
-GType transport_menuitem_action_get_type (void);
+GType transport_menuitem_action_get_type (void) G_GNUC_CONST;
 static void _dynamic_Pause4 (DBusGProxy* self, GError** error);
 static void _dynamic_Prev5 (DBusGProxy* self, GError** error);
 static void _dynamic_Next6 (DBusGProxy* self, GError** error);
@@ -455,8 +456,8 @@ void mpris_controller_set_position (MprisController* self, double position) {
 	if (time_value == NULL) {
 		g_warning ("mpris-controller.vala:92: Can't fetch the duration of the track theref" \
 "ore cant set the position");
-		_g_hash_table_unref0 (data);
 		_g_free0 (time_value);
+		_g_hash_table_unref0 (data);
 		return;
 	}
 	total_time = (guint32) g_value_get_uint (time_value);
@@ -465,8 +466,8 @@ void mpris_controller_set_position (MprisController* self, double position) {
 	g_debug ("mpris-controller.vala:98: new position = %f", new_time_position * 1000);
 	_dynamic_PositionSet8 (self->priv->_mpris_player, (gint32) new_time_position, &_inner_error_);
 	if (_inner_error_ != NULL) {
-		_g_hash_table_unref0 (data);
 		_g_free0 (time_value);
+		_g_hash_table_unref0 (data);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return;
@@ -474,17 +475,17 @@ void mpris_controller_set_position (MprisController* self, double position) {
 	scrub = (_tmp0_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_SCRUB), IS_SCRUB_MENUITEM (_tmp0_) ? ((ScrubMenuitem*) _tmp0_) : NULL);
 	_tmp1_ = _dynamic_PositionGet9 (self->priv->_mpris_player, &_inner_error_);
 	if (_inner_error_ != NULL) {
-		_g_hash_table_unref0 (data);
-		_g_free0 (time_value);
 		_g_object_unref0 (scrub);
+		_g_free0 (time_value);
+		_g_hash_table_unref0 (data);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return;
 	}
 	scrub_menuitem_update_position (scrub, _tmp1_);
-	_g_hash_table_unref0 (data);
-	_g_free0 (time_value);
 	_g_object_unref0 (scrub);
+	_g_free0 (time_value);
+	_g_hash_table_unref0 (data);
 }
 
 
@@ -513,7 +514,7 @@ static void mpris_controller_onStatusChange (MprisController* self, DBusGProxy* 
 	ar = (GValueArray*) status;
 	play_state = g_value_get_int (g_value_array_get_nth (ar, (guint) 0));
 	g_debug ("mpris-controller.vala:115: onStatusChange - play state %i", play_state);
-	ht = g_hash_table_new (g_str_hash, g_str_equal);
+	ht = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 	g_value_init (&v, G_TYPE_INT);
 	g_value_set_int (&v, play_state);
 	g_hash_table_insert (ht, g_strdup ("state"), __g_value_dup0 (&v));
@@ -523,8 +524,8 @@ static void mpris_controller_onStatusChange (MprisController* self, DBusGProxy* 
 	player_item_update (_tmp2_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_SCRUB), ht, _tmp3_ = scrub_menuitem_attributes_format ());
 	_g_object_unref0 (_tmp3_);
 	_g_object_unref0 (_tmp2_);
-	_g_hash_table_unref0 (ht);
 	G_IS_VALUE (&v) ? (g_value_unset (&v), NULL) : NULL;
+	_g_hash_table_unref0 (ht);
 }
 
 
@@ -663,7 +664,7 @@ static void _mpris_controller_onTrackChange_dynamic_TrackChange0_ (DBusGProxy* _
 void _dynamic_TrackChange1_connect (gpointer obj, const char * signal_name, GCallback handler, gpointer data) {
 	dbus_g_object_register_marshaller (g_cclosure_user_marshal_VOID__BOXED, G_TYPE_NONE, dbus_g_type_get_map ("GHashTable", G_TYPE_STRING, G_TYPE_VALUE), G_TYPE_INVALID);
 	dbus_g_proxy_add_signal (obj, "TrackChange", dbus_g_type_get_map ("GHashTable", G_TYPE_STRING, G_TYPE_VALUE), G_TYPE_INVALID);
-	dbus_g_proxy_connect_signal (obj, signal_name, handler, data, NULL);
+	dbus_g_proxy_connect_signal (obj, "TrackChange", handler, data, NULL);
 }
 
 
@@ -675,7 +676,7 @@ static void _mpris_controller_onStatusChange_dynamic_StatusChange2_ (DBusGProxy*
 void _dynamic_StatusChange3_connect (gpointer obj, const char * signal_name, GCallback handler, gpointer data) {
 	dbus_g_object_register_marshaller (g_cclosure_user_marshal_VOID__BOXED, G_TYPE_NONE, dbus_g_type_get_struct ("GValueArray", G_TYPE_INT, G_TYPE_INT, G_TYPE_INT, G_TYPE_INT, G_TYPE_INVALID), G_TYPE_INVALID);
 	dbus_g_proxy_add_signal (obj, "StatusChange", dbus_g_type_get_struct ("GValueArray", G_TYPE_INT, G_TYPE_INT, G_TYPE_INT, G_TYPE_INT, G_TYPE_INVALID), G_TYPE_INVALID);
-	dbus_g_proxy_connect_signal (obj, signal_name, handler, data, NULL);
+	dbus_g_proxy_connect_signal (obj, "StatusChange", handler, data, NULL);
 }
 
 

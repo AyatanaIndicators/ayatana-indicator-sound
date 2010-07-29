@@ -27,9 +27,9 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <libdbusmenu-glib/menuitem.h>
 #include <libdbusmenu-glib/server.h>
 #include <common-defs.h>
+#include <gee.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gee.h>
 #include <float.h>
 #include <math.h>
 
@@ -55,6 +55,7 @@ typedef struct _PlayerItemPrivate PlayerItemPrivate;
 typedef struct _ScrubMenuitem ScrubMenuitem;
 typedef struct _ScrubMenuitemClass ScrubMenuitemClass;
 typedef struct _ScrubMenuitemPrivate ScrubMenuitemPrivate;
+#define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 
 #define TYPE_PLAYER_CONTROLLER (player_controller_get_type ())
 #define PLAYER_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PLAYER_CONTROLLER, PlayerController))
@@ -76,7 +77,6 @@ typedef struct _PlayerControllerPrivate PlayerControllerPrivate;
 
 typedef struct _MprisController MprisController;
 typedef struct _MprisControllerClass MprisControllerClass;
-#define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 
 struct _PlayerItem {
 	DbusmenuMenuitem parent_instance;
@@ -111,28 +111,32 @@ struct _PlayerControllerClass {
 
 static gpointer scrub_menuitem_parent_class = NULL;
 
-GType player_item_get_type (void);
-GType scrub_menuitem_get_type (void);
+GType player_item_get_type (void) G_GNUC_CONST;
+GType scrub_menuitem_get_type (void) G_GNUC_CONST;
 enum  {
 	SCRUB_MENUITEM_DUMMY_PROPERTY
 };
-GType player_controller_get_type (void);
+void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
+GeeHashSet* scrub_menuitem_attributes_format (void);
+GType player_controller_get_type (void) G_GNUC_CONST;
 ScrubMenuitem* scrub_menuitem_new (PlayerController* parent);
 ScrubMenuitem* scrub_menuitem_construct (GType object_type, PlayerController* parent);
 PlayerController* player_item_get_owner (PlayerItem* self);
 const char* player_controller_get_name (PlayerController* self);
-GType mpris_controller_get_type (void);
+GType mpris_controller_get_type (void) G_GNUC_CONST;
 void mpris_controller_set_position (MprisController* self, double position);
 static void scrub_menuitem_real_handle_event (DbusmenuMenuitem* base, const char* name, GValue* input_value, guint timestamp);
 void scrub_menuitem_update_position (ScrubMenuitem* self, gint32 new_position);
-GeeHashSet* scrub_menuitem_attributes_format (void);
 
 
 
 ScrubMenuitem* scrub_menuitem_construct (GType object_type, PlayerController* parent) {
 	ScrubMenuitem * self;
+	GeeHashSet* _tmp0_;
 	g_return_val_if_fail (parent != NULL, NULL);
 	self = (ScrubMenuitem*) g_object_new (object_type, "item-type", DBUSMENU_SCRUB_MENUITEM_TYPE, "owner", parent, NULL);
+	player_item_reset ((PlayerItem*) self, _tmp0_ = scrub_menuitem_attributes_format ());
+	_g_object_unref0 (_tmp0_);
 	return self;
 }
 
@@ -146,7 +150,7 @@ static void scrub_menuitem_real_handle_event (DbusmenuMenuitem* base, const char
 	ScrubMenuitem * self;
 	self = (ScrubMenuitem*) base;
 	g_return_if_fail (name != NULL);
-	g_debug ("scrub-menu-item.vala:33: handle_event for owner %s with value: %f", player_controller_get_name (player_item_get_owner ((PlayerItem*) self)), g_value_get_double (input_value));
+	g_debug ("scrub-menu-item.vala:34: handle_event for owner %s with value: %f", player_controller_get_name (player_item_get_owner ((PlayerItem*) self)), g_value_get_double (input_value));
 	mpris_controller_set_position (player_item_get_owner ((PlayerItem*) self)->mpris_adaptor, g_value_get_double (input_value));
 }
 
