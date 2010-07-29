@@ -189,13 +189,13 @@ public class PlayerController : GLib.Object
 		playlist_root.property_set(MENUITEM_PROP_LABEL, "Choose Playlist");
 
 		PlayerItem subentry_1 = new PlayerItem(CLIENT_TYPES_DEFAULT);
-		subentry_1.property_set(MENUITEM_PROP_LABEL, "90's Warp");
+		subentry_1.property_set(MENUITEM_PROP_LABEL, "Raster-noton selection");
 
 		PlayerItem subentry_2 = new PlayerItem(CLIENT_TYPES_DEFAULT);
-		subentry_2.property_set(MENUITEM_PROP_LABEL, "Rune Grammafon 00's");
+		subentry_2.property_set(MENUITEM_PROP_LABEL, "Rune Grammofon selection");
 
 		PlayerItem subentry_3 = new PlayerItem(CLIENT_TYPES_DEFAULT);
-		subentry_3.property_set(MENUITEM_PROP_LABEL, "Kranky pics");
+		subentry_3.property_set(MENUITEM_PROP_LABEL, "Kranky selection");
 		
 		playlist_root.child_append(subentry_1);
 		playlist_root.child_append(subentry_2);

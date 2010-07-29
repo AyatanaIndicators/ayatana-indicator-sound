@@ -98,7 +98,7 @@ scrub_widget_init (ScrubWidget *self)
 	g_object_set(priv->ido_scrub_bar, "reverse-scroll-events", TRUE, NULL);
 	priv->scrubbing = FALSE;
 
-	gtk_widget_set_size_request(GTK_WIDGET(priv->ido_scrub_bar), 100, 80); 
+	gtk_widget_set_size_request(GTK_WIDGET(priv->ido_scrub_bar), 100, 25); 
 
   // register slider changes listening on the range
   GtkWidget* scrub_widget = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_scrub_bar);	
@@ -218,6 +218,10 @@ scrub_widget_change_value_cb (GtkRange     *range,
 	g_return_val_if_fail (IS_SCRUB_WIDGET (user_data), FALSE);
 	ScrubWidget* mitem = SCRUB_WIDGET(user_data);
 	ScrubWidgetPrivate * priv = SCRUB_WIDGET_GET_PRIVATE(mitem);
+
+  // Don't bother when the slider is grabbed  
+  if(priv->scrubbing == TRUE)
+    return FALSE;
 
 	GValue value = {0};
   g_value_init(&value, G_TYPE_DOUBLE);
@@ -340,8 +344,7 @@ scrub_widget_slider_grabbed(GtkWidget *widget, gpointer user_data)
 {
 	ScrubWidget* mitem = SCRUB_WIDGET(user_data);
 	ScrubWidgetPrivate * priv = SCRUB_WIDGET_GET_PRIVATE(mitem);
-	priv->scrubbing = TRUE;	
-	
+	priv->scrubbing = TRUE;		
 }
 
 static void
