@@ -42,6 +42,8 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "metadata-widget.h"
 #include "title-widget.h"
 #include "scrub-widget.h"
+#include "volume-widget.h"
+
 #include "dbus-shared-names.h"
 #include "sound-service-client.h"
 #include "common-defs.h"
@@ -89,6 +91,7 @@ static void       scroll   (IndicatorObject*io, gint delta, IndicatorScrollDirec
 //Slider related
 static GtkWidget *volume_slider = NULL;
 static gboolean new_slider_item (DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
+static gboolean new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 static gboolean value_changed_event_cb(GtkRange *range, gpointer user_data);
 static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
 static void slider_grabbed(GtkWidget *widget, gpointer user_data);
@@ -251,7 +254,7 @@ get_menu (IndicatorObject * io)
 	dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SCRUB_MENUITEM_TYPE, new_scrub_bar_widget);	
 
 	// register Key-press listening on the menu widget as the slider does not allow this.
-  g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), NULL);
+  g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), io);
   return GTK_MENU(menu);
 }
 
@@ -396,6 +399,40 @@ new_scrub_bar_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbus
 	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_scrub_widget, parent);
 
   return TRUE;
+}
+
+static gboolean
+new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
+{
+  g_debug("indicator-sound: new_volume_slider_widget");
+
+  GtkWidget* volume_widget = NULL;
+  IndicatorObject *io = NULL;
+
+  g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
+  g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
+
+  volume_widget = volume_widget_new (newitem);
+	GtkWidget* ido_slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(volume_widget));
+	
+
+	io = g_object_get_data (G_OBJECT (client), "indicator");
+	// we still need to hold to a reference to the actual slider to 
+	// react to menu wide key events
+	// not ideal: to be revisited post beta
+	INDICATOR_SOUND (io)->slider = ido_slider_widget;
+	
+  gtk_widget_show_all(ido_slider_widget);
+	gtk_widget_set_sensitive(ido_slider_widget,
+	                         !initial_mute);
+	
+  GtkMenuItem *menu_volume_item = GTK_MENU_ITEM(ido_slider_widget);
+	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client),
+	                                newitem,
+	                                menu_volume_item,
+	                                parent);
+
+  return TRUE;	
 }
 
 
@@ -564,7 +601,7 @@ start_animation()
 {
   blocked_iter = blocked_animation_list;
   blocked_id = 0;
-  g_debug("exit from blocked hold start the animation\n");
+  //g_debug("exit from blocked hold start the animation\n");
   animation_id = g_timeout_add(50, fade_back_to_mute_image, NULL);
   return FALSE;
 }
@@ -777,7 +814,11 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
 {
   gboolean digested = FALSE;
 
-  GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)volume_slider);
+	g_return_val_if_fail(IS_INDICATOR_SOUND(data));
+
+	IndicatorSound *sound = INDICATOR_SOUND (data);
+
+  GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)sound->slider);
   GtkRange* range = (GtkRange*)slider;
   gdouble current_value = gtk_range_get_value(range);
   gdouble new_value = current_value;
