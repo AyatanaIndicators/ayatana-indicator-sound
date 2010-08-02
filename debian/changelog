@@ -1,3 +1,10 @@
+indicator-sound (0.3.9-0ubuntu2) maverick; urgency=low
+
+  * Backport upstream commit to fix the indicator crashing when rhythmbox starts
+    (lp: #612299) 
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 02 Aug 2010 12:08:57 +0200
+
 indicator-sound (0.3.9-0ubuntu1) maverick; urgency=low
 
   * New upstream release.
