@@ -247,7 +247,7 @@ get_menu (IndicatorObject * io)
   DbusmenuGtkMenu *menu = dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT);
   DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);
   g_object_set_data (G_OBJECT (client), "indicator", io);
-  dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SLIDER_MENUITEM_TYPE, new_slider_item);
+  dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_VOLUME_MENUITEM_TYPE, new_volume_slider_widget);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TRANSPORT_MENUITEM_TYPE, new_transport_widget);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_METADATA_MENUITEM_TYPE, new_metadata_widget);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TITLE_MENUITEM_TYPE, new_title_widget);
@@ -814,7 +814,7 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
 {
   gboolean digested = FALSE;
 
-	g_return_val_if_fail(IS_INDICATOR_SOUND(data));
+	g_return_val_if_fail(IS_INDICATOR_SOUND(data), FALSE);
 
 	IndicatorSound *sound = INDICATOR_SOUND (data);
 
@@ -882,9 +882,10 @@ style_changed_cb(GtkWidget *widget, gpointer user_data)
 static void
 scroll (IndicatorObject *io, gint delta, IndicatorScrollDirection direction)
 {
-  if (device_available == FALSE || current_state == STATE_MUTED)
-    return;
+	g_debug("Scroll detected");
 
+	if (device_available == FALSE || current_state == STATE_MUTED)
+    return;
   IndicatorSound *sound = INDICATOR_SOUND (io);
   GtkAdjustment *adj = gtk_range_get_adjustment (GTK_RANGE (sound->slider));
   gdouble value = gtk_range_get_value (GTK_RANGE (sound->slider));

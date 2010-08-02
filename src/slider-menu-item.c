@@ -90,9 +90,11 @@ handle_event (DbusmenuMenuitem * mi, const gchar * name, const GValue * value, g
 
 SliderMenuItem* slider_menu_item_new(gboolean sinks_available, gdouble start_volume)
 {
+	
   SliderMenuItem *self = g_object_new(SLIDER_MENU_ITEM_TYPE, NULL);
-  dbusmenu_menuitem_property_set(DBUSMENU_MENUITEM(self), DBUSMENU_MENUITEM_PROP_TYPE, DBUSMENU_SLIDER_MENUITEM_TYPE);
-  dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(self), DBUSMENU_MENUITEM_PROP_ENABLED, sinks_available);
+  dbusmenu_menuitem_property_set(DBUSMENU_MENUITEM(self), DBUSMENU_MENUITEM_PROP_TYPE, DBUSMENU_VOLUME_MENUITEM_TYPE);
+
+	dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(self), DBUSMENU_MENUITEM_PROP_ENABLED, sinks_available);
   dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(self), DBUSMENU_MENUITEM_PROP_VISIBLE, sinks_available);
   return self;
 }

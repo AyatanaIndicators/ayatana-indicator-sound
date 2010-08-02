@@ -31,6 +31,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "sound-service-dbus.h"
 #include "pulse-manager.h"
 #include "slider-menu-item.h"
+#include "common-defs.h"
 
 #include "dbus-shared-names.h"
 
@@ -74,13 +75,15 @@ DbusmenuMenuitem* dbus_menu_manager_setup()
   return root_menuitem;
 }
 
-/**
-teardown:
-**/
-void dbus_menu_manager_teardown()
+
+void dbus_menu_manager_update_volume(gdouble  volume)
 {
-  //TODO tidy up dbus_interface and items!
+  GValue value = {0};
+  g_value_init(&value, G_TYPE_DOUBLE);
+  g_value_set_double(&value, volume);
+	dbusmenu_menuitem_property_set_value(volume_slider_menuitem, DBUSMENU_VOLUME_MENUITEM_LEVEL, &value);	
 }
+                                     
 
 /**
 update_pa_state:
@@ -123,7 +126,6 @@ void dbus_menu_manager_update_mute_ui(gboolean incoming_mute_value)
 /*-------------------------------------------------------------------------*/
 //                          Private Methods
 /*-------------------------------------------------------------------------*/
-
 static void refresh_menu()
 {
   g_debug("in the refresh menu method");

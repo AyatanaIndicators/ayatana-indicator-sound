@@ -27,7 +27,8 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DBUSMENU_PROPERTY_EMPTY									-1
 
 /* DBUS Custom Items */
-#define DBUSMENU_SLIDER_MENUITEM_TYPE          	"x-canonical-ido-slider-type"
+#define DBUSMENU_VOLUME_MENUITEM_TYPE          	"x-canonical-ido-volume-type"
+#define DBUSMENU_VOLUME_MENUITEM_LEVEL					"x-canonical-ido-volume-level"
 
 #define DBUSMENU_TRANSPORT_MENUITEM_TYPE       	"x-canonical-sound-menu-player-transport-type"
 #define DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE  "x-canonical-sound-menu-player-transport-state"
