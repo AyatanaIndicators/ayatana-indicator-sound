@@ -46,9 +46,6 @@ static void volume_widget_dispose    (GObject *object);
 static void volume_widget_finalize   (GObject *object);
 static void volume_widget_set_twin_item(	VolumeWidget* self,
                            							DbusmenuMenuitem* twin_item);
-static void volume_widget_set_ido_position(VolumeWidget* self,
-                                          gdouble new_volume);
-//callbacks
 static void volume_widget_property_update( DbusmenuMenuitem* item, gchar* property, 
                                        	  GValue* value, gpointer userdata);
 static gboolean volume_widget_change_value_cb (GtkRange     *range,
@@ -92,13 +89,11 @@ volume_widget_init (VolumeWidget *self)
 	
   GtkWidget* volume_widget = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);	
 	
-  // register slider changes listening on the range
-	//g_signal_connect(volume_widget, "change-value", G_CALLBACK(volume_widget_change_value_cb), self);	
+	g_signal_connect(volume_widget, "change-value", G_CALLBACK(volume_widget_change_value_cb), self);	
 	g_signal_connect(volume_widget, "value-changed", G_CALLBACK(volume_widget_value_changed_cb), self);	
   g_signal_connect(priv->ido_volume_slider, "slider-grabbed", G_CALLBACK(volume_widget_slider_grabbed), self);
   g_signal_connect(priv->ido_volume_slider, "slider-released", G_CALLBACK(volume_widget_slider_released), self);
 
-	// Set images on the ido
   GtkWidget* primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)priv->ido_volume_slider);
   GIcon * primary_gicon = g_themed_icon_new_with_default_fallbacks("audio-volume-low-zero-panel");
   gtk_image_set_from_gicon(GTK_IMAGE(primary_image), primary_gicon, GTK_ICON_SIZE_MENU);
@@ -134,11 +129,14 @@ volume_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(mitem);
 	g_debug("scrub-widget::property_update for prop %s", property); 
 	if(g_ascii_strcasecmp(DBUSMENU_VOLUME_MENUITEM_LEVEL, property) == 0){
-  	GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
-  	GtkRange *range = (GtkRange*)slider;
-		gdouble update = g_value_get_double (value);
-		g_debug("volume-widget - update level with value %f", update);
-		gtk_range_set_value(range, update);
+		if(priv->grabbed == FALSE){
+			GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
+			GtkRange *range = (GtkRange*)slider;
+			gdouble update = g_value_get_double (value);
+			g_debug("volume-widget - update level with value %f", update);
+			gtk_range_set_value(range, update);
+  		determine_state_from_volume(update);			
+		}
 	}
 }
 
@@ -151,11 +149,6 @@ volume_widget_set_twin_item(VolumeWidget* self,
 
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
 	                 G_CALLBACK(volume_widget_property_update), self);
-
-	/*volume_widget_set_ido_position(self, 
-	                              dbusmenu_menuitem_property_get_int(priv->twin_item, DBUSMENU_SCRUB_MENUITEM_POSITION)/1000,
-																dbusmenu_menuitem_property_get_int(priv->twin_item, DBUSMENU_SCRUB_MENUITEM_DURATION));	                                	                                
-																*/
 }
 
 static gboolean
@@ -167,17 +160,9 @@ volume_widget_change_value_cb (GtkRange     *range,
 	g_return_val_if_fail (IS_VOLUME_WIDGET (user_data), FALSE);
 	VolumeWidget* mitem = VOLUME_WIDGET(user_data);
 	VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(mitem);
-
-  // Don't bother when the slider is grabbed  
-  if(priv->grabbed == TRUE)
-    return FALSE;
-
-	GValue value = {0};
-  g_value_init(&value, G_TYPE_DOUBLE);
-	gdouble clamped = CLAMP(new_value, 0, 100);
-  g_value_set_double(&value, clamped);
-  dbusmenu_menuitem_handle_event (priv->twin_item, "grabbed", &value, 0);
-	return TRUE;
+	volume_widget_update(mitem, new_value);	
+  determine_state_from_volume(new_value);
+	return FALSE;
 }
 
 static gboolean
@@ -186,23 +171,28 @@ volume_widget_value_changed_cb(GtkRange *range, gpointer user_data)
 	g_return_val_if_fail (IS_VOLUME_WIDGET (user_data), FALSE);
 	VolumeWidget* mitem = VOLUME_WIDGET(user_data);
 	VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(mitem);
-
-	if(priv->grabbed == TRUE){
-		return TRUE;
-	}
+	GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);	
+  gdouble current_value =  CLAMP(gtk_range_get_value(GTK_RANGE(slider)), 0, 100);
 	
-  gdouble current_value =  CLAMP(gtk_range_get_value(GTK_RANGE(priv->ido_volume_slider)), 0, 100);
-	                                 
-  GValue value = {0};
-  g_value_init(&value, G_TYPE_DOUBLE);
-  g_value_set_double(&value, current_value);
-  g_debug("volume_widget_value changed callback - = %f", current_value);
-  dbusmenu_menuitem_handle_event (priv->twin_item, "slider_change", &value, 0);
-  // This is not ideal in that the icon ui will update on ui actions and not on actual service feedback.
-  // but necessary for now as the server does not send volume update information if the source of change was this ui.
-  //determine_state_from_volume(current_value);
-  return FALSE;
+	// We just want this callback to catch mouse icon press events
+	// which set the slider to 0 or 100
+	if(current_value == 0 || current_value == 100){
+		volume_widget_update(mitem, current_value);
+	}
+  return TRUE;
 }
+
+void 
+volume_widget_update(VolumeWidget* self, gdouble update)
+{
+	VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(self);
+	GValue value = {0};
+  g_value_init(&value, G_TYPE_DOUBLE);
+	gdouble clamped = CLAMP(update, 0, 100);
+  g_value_set_double(&value, clamped);
+  dbusmenu_menuitem_handle_event (priv->twin_item, "update", &value, 0);
+}
+
 
 
 GtkWidget*
@@ -220,18 +210,6 @@ volume_widget_parent_changed (GtkWidget *widget,
   g_debug("volume_widget_parent_changed");
 }
 
-
-//TODO: are we using this as convenience function
-static void
-volume_widget_set_ido_position(VolumeWidget* self,
-                              gdouble new_volume)
-{
-	VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(self);
-  GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
-  GtkRange *range = (GtkRange*)slider;
- 	gtk_range_set_value(range, new_volume);
-}
-
 static void
 volume_widget_slider_grabbed(GtkWidget *widget, gpointer user_data)
 {
@@ -246,16 +224,7 @@ volume_widget_slider_released(GtkWidget *widget, gpointer user_data)
 	VolumeWidget* mitem = VOLUME_WIDGET(user_data);
 	VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(mitem);
 	priv->grabbed = FALSE;
-	GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
-  gdouble new_value = gtk_range_get_value(GTK_RANGE(slider));
-	g_debug("okay set the scrub position with %f", new_value);	
-	GValue value = {0};
-  g_value_init(&value, G_TYPE_DOUBLE);
-	gdouble clamped = CLAMP(new_value, 0, 100);
-  g_value_set_double(&value, clamped);
-  dbusmenu_menuitem_handle_event (priv->twin_item, "volume-change", &value, 0);
 }
-
 
 /**
  * volume_widget_new:

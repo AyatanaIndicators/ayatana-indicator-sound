@@ -81,7 +81,7 @@ void dbus_menu_manager_update_volume(gdouble  volume)
   GValue value = {0};
   g_value_init(&value, G_TYPE_DOUBLE);
   g_value_set_double(&value, volume);
-	dbusmenu_menuitem_property_set_value(volume_slider_menuitem, DBUSMENU_VOLUME_MENUITEM_LEVEL, &value);	
+	dbusmenu_menuitem_property_set_value(DBUSMENU_MENUITEM(volume_slider_menuitem), DBUSMENU_VOLUME_MENUITEM_LEVEL, &value);	
 }
                                      
 
