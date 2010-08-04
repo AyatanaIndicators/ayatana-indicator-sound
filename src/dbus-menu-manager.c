@@ -105,7 +105,7 @@ void dbus_menu_manager_update_pa_state(gboolean pa_state, gboolean sink_availabl
   // Emit the signals after the menus are setup/torn down
   // preserve ordering !
   sound_service_dbus_update_sink_availability(dbus_interface, sink_available);
-  sound_service_dbus_update_sink_volume(dbus_interface, percent);
+	dbus_menu_manager_update_volume(percent);
   sound_service_dbus_update_sink_mute(dbus_interface, sink_muted);
   dbus_menu_manager_update_mute_ui(b_all_muted);
 }

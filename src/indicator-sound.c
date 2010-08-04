@@ -335,26 +335,26 @@ new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, 
   g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
-  volume_widget = volume_widget_new (newitem);
-	GtkWidget* ido_slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(volume_widget));
-	
+  volume_widget = volume_widget_new (newitem);	
 	io = g_object_get_data (G_OBJECT (client), "indicator");
 	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
 	priv->volume_widget = volume_widget;
 
-	GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)ido_slider_widget);	
-  g_signal_connect(slider, "style-set", G_CALLBACK(style_changed_cb), NULL);
-		
-  gtk_widget_show_all(ido_slider_widget);
+	GtkWidget* ido_slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));
+
+  g_signal_connect(ido_slider_widget, "style-set", G_CALLBACK(style_changed_cb), NULL);		
 	gtk_widget_set_sensitive(ido_slider_widget,
 	                         !initial_mute);
+	gtk_widget_show_all(ido_slider_widget);
+
 	
   GtkMenuItem *menu_volume_item = GTK_MENU_ITEM(ido_slider_widget);
 	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client),
 	                                newitem,
 	                                menu_volume_item,
 	                                parent);
-  fetch_mute_value_from_dbus();
+	
+	fetch_mute_value_from_dbus();
   fetch_sink_availability_from_dbus(INDICATOR_SOUND (io));
 	
   return TRUE;	
@@ -579,11 +579,8 @@ fetch_sink_availability_from_dbus(IndicatorSound* self)
 	}
 
 	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
-	GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));
-	
-	g_debug("past it");
-	GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)slider_widget);
-  gtk_widget_set_sensitive(slider, device_available);
+	GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));	
+  gtk_widget_set_sensitive(slider_widget, device_available);
 
   g_free(available_input);
   g_debug("IndicatorSound::fetch_sink_availability_from_dbus -> AVAILABILTY returned from dbus method is %i", device_available);
@@ -637,16 +634,15 @@ catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer u
     reset_mute_blocking_animation();
   }
   g_debug("signal caught - sink mute update with mute value: %i", mute_value);
-
 	g_return_if_fail(IS_INDICATOR_SOUND(userdata));
 	IndicatorSound* indicator = INDICATOR_SOUND(userdata);
 	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
+
 	if(priv->volume_widget == NULL){
 		return;
 	}
 	GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget)); 
-	GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)slider_widget);	
-  gtk_widget_set_sensitive(slider, !mute_value);
+  gtk_widget_set_sensitive(slider_widget, !mute_value);
 }
 
 

@@ -44,7 +44,7 @@ static void volume_widget_class_init (VolumeWidgetClass *klass);
 static void volume_widget_init       (VolumeWidget *self);
 static void volume_widget_dispose    (GObject *object);
 static void volume_widget_finalize   (GObject *object);
-static void volume_widget_set_twin_item(	VolumeWidget* self,
+static void volume_widget_set_twin_item( VolumeWidget* self,
                            							DbusmenuMenuitem* twin_item);
 static void volume_widget_property_update( DbusmenuMenuitem* item, gchar* property, 
                                        	  GValue* value, gpointer userdata);
@@ -52,9 +52,7 @@ static gboolean volume_widget_change_value_cb (GtkRange     *range,
                                  							GtkScrollType scroll,
                                  							gdouble       value,
                                  							gpointer      user_data);
-static gboolean volume_widget_value_changed_cb(GtkRange *range,
-                                            gpointer user_data);
-
+static gboolean volume_widget_value_changed_cb(GtkRange *range, gpointer user_data);
 static void volume_widget_slider_grabbed(GtkWidget *widget, gpointer user_data);
 static void volume_widget_slider_released(GtkWidget *widget, gpointer user_data);
 static void volume_widget_parent_changed (GtkWidget *widget, gpointer user_data);
@@ -149,6 +147,14 @@ volume_widget_set_twin_item(VolumeWidget* self,
 
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
 	                 G_CALLBACK(volume_widget_property_update), self);
+	gdouble initial_level = g_value_get_double (dbusmenu_menuitem_property_get_value(twin_item,
+	                                            DBUSMENU_VOLUME_MENUITEM_LEVEL));
+	g_debug("volume_widget_set_twin_item initial level = %f", initial_level);
+	//volume_widget_update(self, initial_level);
+  GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
+  GtkRange *range = (GtkRange*)slider;
+ 	gtk_range_set_value(range, initial_level);
+  determine_state_from_volume(initial_level);	
 }
 
 static gboolean
@@ -159,7 +165,6 @@ volume_widget_change_value_cb (GtkRange     *range,
 {
 	g_return_val_if_fail (IS_VOLUME_WIDGET (user_data), FALSE);
 	VolumeWidget* mitem = VOLUME_WIDGET(user_data);
-	VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(mitem);
 	volume_widget_update(mitem, new_value);	
   determine_state_from_volume(new_value);
 	return FALSE;
