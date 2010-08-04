@@ -184,7 +184,7 @@ volume_widget_value_changed_cb(GtkRange *range, gpointer user_data)
 	if(current_value == 0 || current_value == 100){
 		volume_widget_update(mitem, current_value);
 	}
-  return TRUE;
+  return FALSE;
 }
 
 void 

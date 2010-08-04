@@ -103,7 +103,6 @@ static const gint STATE_MEDIUM = 3;
 static const gint STATE_HIGH = 4;
 static const gint STATE_MUTED_WHILE_INPUT = 5;
 static const gint STATE_SINKS_NONE = 6;
-static const gint OUT_OF_RANGE = -10;
 
 static GHashTable *volume_states = NULL;
 static GtkImage *speaker_image = NULL;
