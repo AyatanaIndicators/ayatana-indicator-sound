@@ -20,6 +20,8 @@ libsoundmenu_la_SOURCES = \
 	title-widget.h \
 	scrub-widget.c \
 	scrub-widget.h \
+	volume-widget.c \
+	volume-widget.h \
 	dbus-shared-names.h \
   sound-service-client.h 
 

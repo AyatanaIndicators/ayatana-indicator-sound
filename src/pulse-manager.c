@@ -211,7 +211,8 @@ static void mute_each_sink(gpointer key, gpointer value, gpointer user_data)
   if (GPOINTER_TO_INT(user_data) == 1) {
     sound_service_dbus_update_sink_mute(dbus_service, TRUE);
   } else {
-    sound_service_dbus_update_sink_volume(dbus_service, get_default_sink_volume());
+    //sound_service_dbus_update_sink_volume(dbus_service, get_default_sink_volume());
+		dbus_menu_manager_update_volume(get_default_sink_volume());
   }
 
   /*    g_debug("in the pulse manager: mute each sink %i", GPOINTER_TO_INT(user_data));*/
@@ -288,7 +289,7 @@ static void context_success_callback(pa_context *c, int success, void *userdata)
 /**
 On Service startup this callback will be called multiple times resulting our sinks_hash container to be filled with the
 available sinks.
-For now this callback it assumes it only used at startup. It may be necessary to use if sinks become available after startup.
+For now this callback assumes it only used at startup. It may be necessary to use if sinks become available after startup.
 Major candidate for refactoring.
 **/
 static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, int eol, void *userdata)
@@ -399,7 +400,7 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
         pa_volume_t vol = pa_cvolume_max(&s->volume);
         gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
         /*                g_debug("Updating volume from PA manager with volume = %f", volume_percent);*/
-        sound_service_dbus_update_sink_volume(dbus_service, volume_percent);
+        dbus_menu_manager_update_volume(volume_percent);
       }
 
       if (mute_changed == TRUE) {
@@ -410,7 +411,8 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
           pa_volume_t vol = pa_cvolume_max(&s->volume);
           gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
           /*                    g_debug("Updating volume from PA manager with volume = %f", volume_percent);*/
-          sound_service_dbus_update_sink_volume(dbus_service, volume_percent);
+          //sound_service_dbus_update_sink_volume(dbus_service, volume_percent);
+	        dbus_menu_manager_update_volume(volume_percent);
         }
       }
     }
