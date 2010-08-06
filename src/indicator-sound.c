@@ -557,6 +557,8 @@ reset_mute_blocking_animation()
 static void
 fetch_sink_availability_from_dbus(IndicatorSound* self)
 {
+	g_return_if_fail(IS_INDICATOR_SOUND(self));
+	
   GError * error = NULL;
   gboolean * available_input;
   available_input = g_new0(gboolean, 1);
@@ -573,17 +575,13 @@ fetch_sink_availability_from_dbus(IndicatorSound* self)
     update_state(STATE_SINKS_NONE);
     g_debug("NO DEVICE AVAILABLE");
   }
-	if(IS_INDICATOR_SOUND(self) == FALSE){
-		g_warning("okay pointer is arseways");
-	}
 
 	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
 	GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));	
   gtk_widget_set_sensitive(slider_widget, device_available);
 
   g_free(available_input);
-  g_debug("IndicatorSound::fetch_sink_availability_from_dbus -> AVAILABILTY returned from dbus method is %i", device_available);
-
+  g_debug("IndicatorSound::fetch_sink_availability_from_dbus ->%i", device_available);
 }
 
 
@@ -621,12 +619,13 @@ catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean block_value, gp
   }
 }
 
-
+/*
+ We can be sure the service won't send a mute signal unless it has changed !
+ UNMUTE's force a volume update therefore icon is updated appropriately => no need for unmute handling here.
+*/ 
 static void
 catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer userdata)
 {
-  //We can be sure the service won't send a mute signal unless it has changed !
-  //UNMUTE's force a volume update therefore icon is updated appropriately => no need for unmute handling here.
   if (mute_value == TRUE && device_available == TRUE) {
     update_state(STATE_MUTED);
   } else {

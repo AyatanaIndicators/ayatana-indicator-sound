@@ -77,7 +77,7 @@ volume_widget_init (VolumeWidget *self)
 	VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(self);
 
   priv->ido_volume_slider = ido_scale_menu_item_new_with_range ("VOLUME", IDO_RANGE_STYLE_DEFAULT,  0, 0, 100, 1);
-	
+	g_object_ref (priv->ido_volume_slider);
 	ido_scale_menu_item_set_style (IDO_SCALE_MENU_ITEM (priv->ido_volume_slider), IDO_SCALE_MENU_ITEM_STYLE_IMAGE);	
   g_object_set(priv->ido_volume_slider, "reverse-scroll-events", TRUE, NULL);
 
@@ -144,13 +144,12 @@ volume_widget_set_twin_item(VolumeWidget* self,
 {
 	VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(self);
 	priv->twin_item = twin_item;
-
+	g_object_ref(priv->twin_item);
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
 	                 G_CALLBACK(volume_widget_property_update), self);
 	gdouble initial_level = g_value_get_double (dbusmenu_menuitem_property_get_value(twin_item,
 	                                            DBUSMENU_VOLUME_MENUITEM_LEVEL));
 	g_debug("volume_widget_set_twin_item initial level = %f", initial_level);
-	//volume_widget_update(self, initial_level);
   GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
   GtkRange *range = (GtkRange*)slider;
  	gtk_range_set_value(range, initial_level);
@@ -170,6 +169,10 @@ volume_widget_change_value_cb (GtkRange     *range,
 	return FALSE;
 }
 
+/*
+ We only want this callback to catch mouse icon press events
+ which set the slider to 0 or 100. Ignore all other events.
+*/ 
 static gboolean
 volume_widget_value_changed_cb(GtkRange *range, gpointer user_data)
 {
@@ -179,8 +182,6 @@ volume_widget_value_changed_cb(GtkRange *range, gpointer user_data)
 	GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);	
   gdouble current_value =  CLAMP(gtk_range_get_value(GTK_RANGE(slider)), 0, 100);
 	
-	// We just want this callback to catch mouse icon press events
-	// which set the slider to 0 or 100
 	if(current_value == 0 || current_value == 100){
 		volume_widget_update(mitem, current_value);
 	}

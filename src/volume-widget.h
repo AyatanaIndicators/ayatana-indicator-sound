@@ -21,7 +21,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <glib.h>
 #include <glib-object.h>
-#include <libdbusmenu-gtk/menu.h>
+#include <libdbusmenu-gtk/menuitem.h>
 
 G_BEGIN_DECLS
 
