@@ -102,6 +102,7 @@ public class PlayerController : GLib.Object
 			return;
 		}
 
+		
 		if(this.name == "Vlc"){
 			debug("establishing a vlc mpris controller");
 			this.mpris_adaptor = new MprisController(this, "org.mpris.MediaPlayer.Player");
