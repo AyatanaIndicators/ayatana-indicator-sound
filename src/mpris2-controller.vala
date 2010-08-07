@@ -22,12 +22,20 @@ using Gee;
  This class will entirely replace mpris-controller.vala hence why there is no
  point in trying to get encorporate both into the same object model. 
  */
-public class Mpris2Controller
+public class Mpris2Controller : GLib.Object
 {		
 	private DBus.Connection connection;
-	public dynamic DBus.Object mpris_root	
-	public dynamic DBus.Object mpris_player	
+	public dynamic DBus.Object mpris2_root {get; construct;}		
+	public dynamic DBus.Object mpris2_player {get; construct;}		
 	public PlayerController owner {get; construct;}	
+
+	struct status {
+    public int32 playback;
+    public double shuffle;
+    public bool repeat;
+    public bool endless;
+    public bool endlessy;
+  }
 	
 	public Mpris2Controller(PlayerController ctrl)
 	{
@@ -36,37 +44,39 @@ public class Mpris2Controller
 	
 	construct{
     try {
+			debug("going to create this mpris 2 controller");			
       this.connection = DBus.Bus.get (DBus.BusType.SESSION);
     } catch (Error e) {
       error("Problems connecting to the session bus - %s", e.message);
     }		
-		this.mpris_root = this.connection.get_object ("org.mpris.mediaplayers.".concat(this.owner.name.down()),
+		this.mpris2_root = this.connection.get_object ("org.mpris.mediaplayers.".concat(this.owner.name.down()),
 		                                              "/org/mpris/MediaPlayer", 
 		                                              "org.mpris.MediaPlayer");				
 
-		this.mpris_player = this.connection.get_object ("org.mpris.mediaplayers.".concat(this.owner.name.down()) ,
+		this.mpris2_player = this.connection.get_object ("org.mpris.mediaplayers.".concat(this.owner.name.down()) ,
 		                                                "/org/mpris/MediaPlayer/Player", 
-		                                                "org.mpris.MediaPlayer.Player");				
+		                                                "org.mpris.MediaPlayer.Player");			
 
 
-		this.mpris_player.TrackChange += onTrackChange;	
-    this.mpris_player.StatusChange += onStatusChange;	
+		this.mpris2_player.TrackChange += onTrackChange;	
+    this.mpris2_player.StatusChange += onStatusChange;
 		initial_update();
 	}
 	
 	private void initial_update()
 	{
-		status st = this.mpris_player.Status;
+		status st = {0,0.0, false, false,false};
+		this.mpris2_player.get("Status", &st);
+		
 		int play_state =  st.playback;
 		debug("GetStatusChange - play state %i", play_state);
 		(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(play_state);
-		this.owner.custom_items[PlayerController.widget_order.METADATA].update(this.mpris_player.GetMetadata(),
-		                            MetadataMenuitem.attributes_format());
-		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.mpris_player.GetMetadata(),
-		                        ScrubMenuitem.attributes_format());		
-		// temporary fix
+		this.owner.custom_items[PlayerController.widget_order.METADATA].update(this.mpris2_player.GetMetadata(),
+			                          MetadataMenuitem.attributes_format());
+		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.mpris2_player.GetMetadata(),
+			                      ScrubMenuitem.attributes_format());		
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
-		scrub.update_position(this.mpris_player.PositionGet());		
+		scrub.update_position(this.mpris2_player.PositionGet());
 	}
 
 	public void transport_event(TransportMenuitem.action command)
@@ -74,20 +84,20 @@ public class Mpris2Controller
 		debug("transport_event input = %i", (int)command);
 		if(command == TransportMenuitem.action.PLAY_PAUSE){
 			debug("transport_event PLAY_PAUSE");
-			this.mpris_player.Pause();							
+			this.mpris2_player.Pause();							
 		}
 		else if(command == TransportMenuitem.action.PREVIOUS){
-			this.mpris_player.Prev();
+			this.mpris2_player.Prev();
 		}
 		else if(command == TransportMenuitem.action.NEXT){
-			this.mpris_player.Next();
+			this.mpris2_player.Next();
 		}
 	}
 
 	public void set_position(double position)
 	{
 		debug("Set position with pos (0-100) %f", position);
-		HashTable<string, Value?> data = this.mpris_player.GetMetadata();
+		HashTable<string, Value?> data = this.mpris2_player.GetMetadata();
 		Value? time_value = data.lookup("time");
 		if(time_value == null){
 			warning("Can't fetch the duration of the track therefore cant set the position");
@@ -97,14 +107,15 @@ public class Mpris2Controller
 		debug("total time of track = %i", (int)total_time);				
 		double new_time_position = total_time * position/100.0;
 		debug("new position = %f", (new_time_position * 1000));		
-		this.mpris_player.PositionSet((int32)(new_time_position));
+		this.mpris2_player.SetPosition((int32)(new_time_position));
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
-		scrub.update_position(this.mpris_player.PositionGet());				
+		scrub.update_position(this.mpris2_player.PositionGet());				
+		
 	}
 	
 	public bool connected()
 	{
-		return (this.mpris_player != null);
+		return (this.mpris2_player != null);
 	}
 	
 	private void onStatusChange(dynamic DBus.Object mpris_client, status st)
@@ -120,6 +131,7 @@ public class Mpris2Controller
 		ht.insert("state", v); 
 		this.owner.custom_items[PlayerController.widget_order.TRANSPORT].update(ht, TransportMenuitem.attributes_format());
 		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(ht, ScrubMenuitem.attributes_format());
+	
 	}
 	
 	private void onTrackChange(dynamic DBus.Object mpris_client, HashTable<string,Value?> ht)
@@ -130,10 +142,10 @@ public class Mpris2Controller
 		this.owner.custom_items[PlayerController.widget_order.METADATA].update(ht,
 		                            MetadataMenuitem.attributes_format());
 		debug("about to update the duration on the scrub bar");
-		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.mpris_player.GetMetadata(),
+		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.mpris2_player.GetMetadata(),
 		                        ScrubMenuitem.attributes_format());		
-		// temporary fix
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
-		scrub.update_position(this.mpris_player.PositionGet());
+		scrub.update_position(this.mpris2_player.PositionGet());
+	
 	}
 }

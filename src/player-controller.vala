@@ -48,7 +48,7 @@ public class PlayerController : GLib.Object
 	private Dbusmenu.Menuitem root_menu;
 	public string name { get; set;}	
 	public ArrayList<PlayerItem> custom_items;	
-	public MprisController mpris_adaptor;
+	public Mpris2Controller mpris_adaptor;
 	public AppInfo? app_info { get; set;}
 	public int menu_offset { get; set;}
 		
@@ -105,10 +105,10 @@ public class PlayerController : GLib.Object
 		
 		if(this.name == "Vlc"){
 			debug("establishing a vlc mpris controller");
-			this.mpris_adaptor = new MprisController(this, "org.mpris.MediaPlayer.Player");
+			this.mpris_adaptor = new Mpris2Controller(this);
 		}
 		else{
-			this.mpris_adaptor = new MprisController(this);
+			//this.mpris_adaptor = new MprisController(this);
 		}
 		// TODO refactor
 		if(this.mpris_adaptor.connected() == true){
