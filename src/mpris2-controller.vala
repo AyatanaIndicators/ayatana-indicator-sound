@@ -18,6 +18,29 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using Gee;
+
+/*struct Status {
+  public int32 playback;
+  public double shuffle;
+  public bool repeat;
+  public bool endless;
+  public bool endlessy;
+}*/
+
+[DBus (name = "org.mpris.mediaplayers.vlc")]
+public interface MprisPlayer : Object {
+	public abstract struct Status { 
+    public int32 Playback_State;
+    public double Playback_Rate;
+    public bool Repeat_State;
+    public bool Shuffle_State;
+		public bool Endless_State;
+	}
+
+
+  //public abstract struct Status () throws DBus.Error;
+}
+
 /*
  This class will entirely replace mpris-controller.vala hence why there is no
  point in trying to get encorporate both into the same object model. 
@@ -26,16 +49,16 @@ public class Mpris2Controller : GLib.Object
 {		
 	private DBus.Connection connection;
 	public dynamic DBus.Object mpris2_root {get; construct;}		
-	public dynamic DBus.Object mpris2_player {get; construct;}		
+	public MprisPlayer mpris2_player {get; construct;}		
 	public PlayerController owner {get; construct;}	
 
-	struct status {
-    public int32 playback;
-    public double shuffle;
-    public bool repeat;
-    public bool endless;
-    public bool endlessy;
-  }
+	/*struct status {
+    public int32 Playback_State;
+    public double Playback_Rate;
+    public bool Repeat_State;
+    public bool Shuffle_State;
+		public bool Endless_State;
+  }*/
 	
 	public Mpris2Controller(PlayerController ctrl)
 	{
@@ -53,34 +76,38 @@ public class Mpris2Controller : GLib.Object
 		                                              "/org/mpris/MediaPlayer", 
 		                                              "org.mpris.MediaPlayer");				
 
-		this.mpris2_player = this.connection.get_object ("org.mpris.mediaplayers.".concat(this.owner.name.down()) ,
-		                                                "/org/mpris/MediaPlayer/Player", 
-		                                                "org.mpris.MediaPlayer.Player");			
-
-
-		this.mpris2_player.TrackChange += onTrackChange;	
-    this.mpris2_player.StatusChange += onStatusChange;
+		this.mpris2_player = (MprisPlayer)this.connection.get_object ("org.mpris.mediaplayers.".concat(this.owner.name.down()) ,
+		                                                							"/org/mpris/MediaPlayer/Player", 
+		                                                							"org.mpris.MediaPlayer.Player");			
+		//this.mpris2_player.TrackChange += onTrackChange;	
+    //this.mpris2_player.StatusChange += onStatusChange;
 		initial_update();
 	}
 	
 	private void initial_update()
 	{
-		status st = {0,0.0, false, false,false};
-		this.mpris2_player.get("Status", &st);
+		//status st = this.mpris2_player.Status;
+		//unowned ValueArray ar = (ValueArray)st;
+		//unowned ValueArray ar = (ValueArray)this.mpris2_player.Status;						
+		bool r  =  (bool)this.mpris2_player.Status.Shuffle_State;
+		int32 p  =  (int32)this.mpris2_player.Status.Playback_State;
+
+		debug("initial update - play state %i", p);
+		debug("initial update - shuffle state %s", r.to_string());
 		
-		int play_state =  st.playback;
-		debug("GetStatusChange - play state %i", play_state);
-		(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(play_state);
+		/*(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(play_state);
 		this.owner.custom_items[PlayerController.widget_order.METADATA].update(this.mpris2_player.GetMetadata(),
 			                          MetadataMenuitem.attributes_format());
 		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.mpris2_player.GetMetadata(),
 			                      ScrubMenuitem.attributes_format());		
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
 		scrub.update_position(this.mpris2_player.PositionGet());
+		*/
 	}
 
 	public void transport_event(TransportMenuitem.action command)
 	{
+		/*
 		debug("transport_event input = %i", (int)command);
 		if(command == TransportMenuitem.action.PLAY_PAUSE){
 			debug("transport_event PLAY_PAUSE");
@@ -92,10 +119,12 @@ public class Mpris2Controller : GLib.Object
 		else if(command == TransportMenuitem.action.NEXT){
 			this.mpris2_player.Next();
 		}
+		*/
 	}
 
 	public void set_position(double position)
 	{
+		/*
 		debug("Set position with pos (0-100) %f", position);
 		HashTable<string, Value?> data = this.mpris2_player.GetMetadata();
 		Value? time_value = data.lookup("time");
@@ -110,7 +139,7 @@ public class Mpris2Controller : GLib.Object
 		this.mpris2_player.SetPosition((int32)(new_time_position));
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
 		scrub.update_position(this.mpris2_player.PositionGet());				
-		
+		*/
 	}
 	
 	public bool connected()
@@ -118,9 +147,10 @@ public class Mpris2Controller : GLib.Object
 		return (this.mpris2_player != null);
 	}
 	
-	private void onStatusChange(dynamic DBus.Object mpris_client, status st)
-  {
-    debug("onStatusChange - signal received");
+	//private void onStatusChange(dynamic DBus.Object mpris_client, status st)
+  //{
+		/*
+		debug("onStatusChange - signal received");
 		status* status = &st;
 		unowned ValueArray ar = (ValueArray)status;		
 		int play_state = ar.get_nth(0).get_int();
@@ -131,12 +161,12 @@ public class Mpris2Controller : GLib.Object
 		ht.insert("state", v); 
 		this.owner.custom_items[PlayerController.widget_order.TRANSPORT].update(ht, TransportMenuitem.attributes_format());
 		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(ht, ScrubMenuitem.attributes_format());
-	
-	}
+		*/
+	//}
 	
 	private void onTrackChange(dynamic DBus.Object mpris_client, HashTable<string,Value?> ht)
 	{
-		debug("onTrackChange");
+		/*(debug("onTrackChange");
 		this.owner.custom_items[PlayerController.widget_order.METADATA].reset(MetadataMenuitem.attributes_format());
 		this.owner.custom_items[PlayerController.widget_order.SCRUB].reset(ScrubMenuitem.attributes_format());
 		this.owner.custom_items[PlayerController.widget_order.METADATA].update(ht,
@@ -146,6 +176,9 @@ public class Mpris2Controller : GLib.Object
 		                        ScrubMenuitem.attributes_format());		
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
 		scrub.update_position(this.mpris2_player.PositionGet());
-	
+		*/
 	}
 }
+
+
+

@@ -100,9 +100,7 @@ public class PlayerController : GLib.Object
 		if(this.current_state != state.READY){
 			debug("establish_mpris_connection - Not ready to connect");
 			return;
-		}
-
-		
+		}		
 		if(this.name == "Vlc"){
 			debug("establishing a vlc mpris controller");
 			this.mpris_adaptor = new Mpris2Controller(this);
