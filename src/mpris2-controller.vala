@@ -19,26 +19,22 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using Gee;
 
-/*struct Status {
-  public int32 playback;
-  public double shuffle;
-  public bool repeat;
-  public bool endless;
-  public bool endlessy;
-}*/
 
-[DBus (name = "org.mpris.mediaplayers.vlc")]
+[DBus (name = "org.mpris.MediaPlayer.Player")]
 public interface MprisPlayer : Object {
-	public abstract struct Status { 
+	public struct Status { 
     public int32 Playback_State;
     public double Playback_Rate;
     public bool Repeat_State;
     public bool Shuffle_State;
 		public bool Endless_State;
 	}
+	public abstract void PlayPause() throws DBus.Error;
+	public abstract void Pause() throws DBus.Error;
+	public abstract void Next() throws DBus.Error;
+	public abstract void Previous() throws DBus.Error;
 
-
-  //public abstract struct Status () throws DBus.Error;
+	public abstract signal void StatusChanged(Status update);
 }
 
 /*
@@ -51,14 +47,6 @@ public class Mpris2Controller : GLib.Object
 	public dynamic DBus.Object mpris2_root {get; construct;}		
 	public MprisPlayer mpris2_player {get; construct;}		
 	public PlayerController owner {get; construct;}	
-
-	/*struct status {
-    public int32 Playback_State;
-    public double Playback_Rate;
-    public bool Repeat_State;
-    public bool Shuffle_State;
-		public bool Endless_State;
-  }*/
 	
 	public Mpris2Controller(PlayerController ctrl)
 	{
@@ -80,7 +68,7 @@ public class Mpris2Controller : GLib.Object
 		                                                							"/org/mpris/MediaPlayer/Player", 
 		                                                							"org.mpris.MediaPlayer.Player");			
 		//this.mpris2_player.TrackChange += onTrackChange;	
-    //this.mpris2_player.StatusChange += onStatusChange;
+    this.mpris2_player.StatusChanged += onStatusChanged;
 		initial_update();
 	}
 	
@@ -106,20 +94,18 @@ public class Mpris2Controller : GLib.Object
 	}
 
 	public void transport_event(TransportMenuitem.action command)
-	{
-		/*
+	{		
 		debug("transport_event input = %i", (int)command);
 		if(command == TransportMenuitem.action.PLAY_PAUSE){
 			debug("transport_event PLAY_PAUSE");
-			this.mpris2_player.Pause();							
+			this.mpris2_player.PlayPause();							
 		}
 		else if(command == TransportMenuitem.action.PREVIOUS){
-			this.mpris2_player.Prev();
+			this.mpris2_player.Previous();
 		}
 		else if(command == TransportMenuitem.action.NEXT){
 			this.mpris2_player.Next();
-		}
-		*/
+		}		
 	}
 
 	public void set_position(double position)
@@ -147,8 +133,10 @@ public class Mpris2Controller : GLib.Object
 		return (this.mpris2_player != null);
 	}
 	
-	//private void onStatusChange(dynamic DBus.Object mpris_client, status st)
-  //{
+	private void onStatusChanged(MprisPlayer.Status st)
+  {
+		debug("on status changed - fucking jesus mother of god");
+		debug("new playback state = %i", st.Playback_State);
 		/*
 		debug("onStatusChange - signal received");
 		status* status = &st;
@@ -162,7 +150,7 @@ public class Mpris2Controller : GLib.Object
 		this.owner.custom_items[PlayerController.widget_order.TRANSPORT].update(ht, TransportMenuitem.attributes_format());
 		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(ht, ScrubMenuitem.attributes_format());
 		*/
-	//}
+	}
 	
 	private void onTrackChange(dynamic DBus.Object mpris_client, HashTable<string,Value?> ht)
 	{

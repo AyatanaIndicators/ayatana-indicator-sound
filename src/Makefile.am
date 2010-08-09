@@ -72,6 +72,7 @@ music_bridge_VALASOURCES = \
 
 music_bridge_VALAFLAGS = \
   --ccode \
+  --disable-dbus-transformation \
   -H music-player-bridge.h -d . \
   --vapidir=$(top_srcdir)/vapi/ \
   --vapidir=./ \
