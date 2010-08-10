@@ -19,7 +19,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using Gee;
 
-
 [DBus (name = "org.mpris.MediaPlayer.Player")]
 public interface MprisPlayer : Object {
 	
@@ -36,7 +35,7 @@ public interface MprisPlayer : Object {
 	public abstract int32 Capabilities{get;}
 	public abstract int32 Position{get;}
 	
-	
+	public abstract void SetPosition(string prop, int32 pos) throws DBus.Error;
 	public abstract void PlayPause() throws DBus.Error;
 	public abstract void Pause() throws DBus.Error;
 	public abstract void Next() throws DBus.Error;
@@ -83,9 +82,6 @@ public class Mpris2Controller : GLib.Object
 	
 	private void initial_update()
 	{
-		//status st = this.mpris2_player.Status;
-		//unowned ValueArray ar = (ValueArray)st;
-		//unowned ValueArray ar = (ValueArray)this.mpris2_player.Status;						
 		bool r  =  (bool)this.mpris2_player.Status.Shuffle_State;
 		int32 p  =  (int32)this.mpris2_player.Status.Playback_State;
 
@@ -118,10 +114,9 @@ public class Mpris2Controller : GLib.Object
 	}
 
 	public void set_position(double position)
-	{
-		/*
+	{		
 		debug("Set position with pos (0-100) %f", position);
-		HashTable<string, Value?> data = this.mpris2_player.GetMetadata();
+		HashTable<string, Value?> data = this.mpris2_player.Metadata;
 		Value? time_value = data.lookup("time");
 		if(time_value == null){
 			warning("Can't fetch the duration of the track therefore cant set the position");
@@ -131,10 +126,11 @@ public class Mpris2Controller : GLib.Object
 		debug("total time of track = %i", (int)total_time);				
 		double new_time_position = total_time * position/100.0;
 		debug("new position = %f", (new_time_position * 1000));		
+		int32 trackid = this.mpris2_player.Metadata.lookup("trackid");
+		debug("the trackid = %i", trackid);
 		this.mpris2_player.SetPosition((int32)(new_time_position));
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
-		scrub.update_position(this.mpris2_player.PositionGet());				
-		*/
+		scrub.update_position(this.mpris2_player.Position);				
 	}
 	
 	public bool connected()
@@ -160,16 +156,11 @@ public class Mpris2Controller : GLib.Object
 		this.owner.custom_items[PlayerController.widget_order.METADATA].update(ht,
 		                            MetadataMenuitem.attributes_format());
 		debug("about to update the duration on the scrub bar");
-
-		/*foreach(string s in this.mpris2_player.Metadata.get_keys()){
-			debug("key  %s has value %s", s,
-			      (string)this.mpris2_player.Metadata.lookup(s));
-		}*/
 		
 		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.mpris2_player.Metadata,
 		                        ScrubMenuitem.attributes_format());		
-		//ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
-		//scrub.update_position(this.mpris2_player.PositionGet());
+		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
+		scrub.update_position(this.mpris2_player.Position);
 	}
 }
 
