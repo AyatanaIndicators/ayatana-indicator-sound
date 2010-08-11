@@ -174,7 +174,7 @@ Bring up the gnome volume preferences dialog
 static void show_sound_settings_dialog (DbusmenuMenuitem *mi, gpointer user_data)
 {
   GError * error = NULL;
-  if (!g_spawn_command_line_async("gnome-volume-control", &error) &&
+  if (!g_spawn_command_line_async("gnome-volume-control --page=applications", &error) &&
       !g_spawn_command_line_async("xfce4-mixer", &error)) 
   {
     g_warning("Unable to show dialog: %s", error->message);
