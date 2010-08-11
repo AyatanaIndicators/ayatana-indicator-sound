@@ -126,9 +126,18 @@ public class Mpris2Controller : GLib.Object
 		debug("total time of track = %i", (int)total_time);				
 		double new_time_position = total_time * position/100.0;
 		debug("new position = %f", (new_time_position * 1000));		
-		int32 trackid = this.mpris2_player.Metadata.lookup("trackid");
-		debug("the trackid = %i", trackid);
-		this.mpris2_player.SetPosition((int32)(new_time_position));
+
+		Value? v = this.mpris2_player.Metadata.lookup("trackid");
+		if(v != null){
+			if(v.holds (typeof (int))){
+				debug("the trackid = %i", v.get_int());			
+			}
+			else if(v.holds (typeof (string))){
+				debug("the trackid = %s", v.get_string());
+			}
+		}
+			        
+		//this.mpris2_player.SetPosition((int32)(new_time_position));
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
 		scrub.update_position(this.mpris2_player.Position);				
 	}
@@ -156,12 +165,18 @@ public class Mpris2Controller : GLib.Object
 		this.owner.custom_items[PlayerController.widget_order.METADATA].update(ht,
 		                            MetadataMenuitem.attributes_format());
 		debug("about to update the duration on the scrub bar");
-		
-		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.mpris2_player.Metadata,
+		Value? v = ht.lookup("time");
+		if(v != null)
+		{
+			debug("with the duration of %i", (int)v.get_uint()); 
+			debug("with Position of %i", this.mpris2_player.Position); 
+		}
+		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(ht,
 		                        ScrubMenuitem.attributes_format());		
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
 		scrub.update_position(this.mpris2_player.Position);
 	}
+	
 }
 
 
