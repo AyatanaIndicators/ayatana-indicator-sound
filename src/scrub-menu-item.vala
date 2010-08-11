@@ -32,13 +32,18 @@ public class ScrubMenuitem : PlayerItem
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
 	{
 		debug("handle_event for owner %s with value: %f", this.owner.name, input_value.get_double());		
-		this.owner.mpris_adaptor.set_position(input_value.get_double());		
+		this.owner.set_track_position(input_value.get_double());		
 	}
 
 	public void update_position(int32 new_position)
 	{
 		this.property_set_int(MENUITEM_POSITION, new_position);
 	}		
+
+	public void update_playstate(int state)
+	{
+		this.property_set_int(MENUITEM_PLAY_STATE, state);		
+	}
 	
 	public static HashSet<string> attributes_format()
 	{

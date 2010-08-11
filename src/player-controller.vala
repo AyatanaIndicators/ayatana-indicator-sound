@@ -48,12 +48,15 @@ public class PlayerController : GLib.Object
 	private Dbusmenu.Menuitem root_menu;
 	public string name { get; set;}	
 	public ArrayList<PlayerItem> custom_items;	
+	public Mpris2Controller mpris2_adaptor;
 	public MprisController mpris_adaptor;
+	public bool mpris2;
 	public AppInfo? app_info { get; set;}
 	public int menu_offset { get; set;}
 		
 	public PlayerController(Dbusmenu.Menuitem root, string client_name, int offset, state initial_state)
 	{
+		this.mpris2 = false;
 		this.root_menu = root;
 		this.name = format_client_name(client_name.strip());
 		this.custom_items = new ArrayList<PlayerItem>();
@@ -74,7 +77,7 @@ public class PlayerController : GLib.Object
 	public void activate()
 	{
 		this.establish_mpris_connection();	
-		this.custom_items[widget_order.METADATA].property_set_bool(MENUITEM_PROP_VISIBLE, true);		
+		//this.custom_items[widget_order.METADATA].property_set_bool(MENUITEM_PROP_VISIBLE, true);		
 	}
 
 	/*
@@ -100,23 +103,16 @@ public class PlayerController : GLib.Object
 		if(this.current_state != state.READY){
 			debug("establish_mpris_connection - Not ready to connect");
 			return;
-		}
-
+		}		
 		if(this.name == "Vlc"){
 			debug("establishing a vlc mpris controller");
-			this.mpris_adaptor = new MprisController(this, "org.mpris.MediaPlayer.Player");
+			this.mpris2_adaptor = new Mpris2Controller(this);
+			this.mpris2 = true;
 		}
 		else{
 			this.mpris_adaptor = new MprisController(this);
 		}
-		// TODO refactor
-		if(this.mpris_adaptor.connected() == true){
-			debug("yup I'm connected");
-			this.update_state(state.CONNECTED);
-		}
-		else{
-			this.update_state(state.DISCONNECTED);
-		}
+		this.determine_state();
 	}
 	
 	public void vanish()
@@ -126,8 +122,17 @@ public class PlayerController : GLib.Object
 		}
 	}
 
+	public void hibernate()
+	{
+		update_state(PlayerController.state.OFFLINE);
+		this.custom_items[widget_order.TRANSPORT].reset(TransportMenuitem.attributes_format());
+		this.custom_items[widget_order.METADATA].reset(MetadataMenuitem.attributes_format());
+		this.custom_items[widget_order.SCRUB].reset(ScrubMenuitem.attributes_format());			
+	}
+
 	public void update_layout()
-	{		
+	{	
+		
 		if(this.current_state != state.CONNECTED){
 			this.custom_items[widget_order.TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE,
 			                                                            false);
@@ -137,12 +142,13 @@ public class PlayerController : GLib.Object
 			                                                           false);
 	  	this.custom_items[widget_order.PLAYLIST].property_set_bool(MENUITEM_PROP_VISIBLE,
 			                                                           false);		
-			return;			
+			return;	
 		}
-		
 		debug("update layout - metadata %s", this.custom_items[widget_order.METADATA].populated(MetadataMenuitem.attributes_format()).to_string());
 		this.custom_items[widget_order.METADATA].property_set_bool(MENUITEM_PROP_VISIBLE,
 			                                                        this.custom_items[widget_order.METADATA].populated(MetadataMenuitem.attributes_format()));
+		//debug("metadata id %i", this.custom_items[widget_order.METADATA].id);
+		
 		debug("update layout - scrub %s", this.custom_items[widget_order.SCRUB].populated(ScrubMenuitem.attributes_format()).to_string());
 		this.custom_items[widget_order.SCRUB].property_set_bool(MENUITEM_PROP_VISIBLE,
 		                                                        this.custom_items[widget_order.SCRUB].populated(ScrubMenuitem.attributes_format()));
@@ -152,7 +158,7 @@ public class PlayerController : GLib.Object
 		                                                            true);
 
 	  this.custom_items[widget_order.PLAYLIST].property_set_bool(MENUITEM_PROP_VISIBLE,
-		                                                            true);
+		                                                         true);	
 	}
 		
 	private void construct_widgets()
@@ -214,4 +220,48 @@ public class PlayerController : GLib.Object
 		return formatted;
 	}
 
+	// Temporarily we will need to handle to different mpris implemenations
+	// Do it for now - a couple of weeks should see this messy carry on out of
+	// the codebase.
+	public void set_track_position(double pos)
+	{
+		if(this.mpris2 == true){ 
+			this.mpris2_adaptor.set_position(pos);
+		}
+		else{
+			this.mpris_adaptor.set_position(pos);			
+		}
+	}
+
+	public void transport_update(TransportMenuitem.action update)
+	{
+		if(this.mpris2 == true){ 
+			this.mpris2_adaptor.transport_event(update);
+		}
+		else{
+			this.mpris_adaptor.transport_event(update);			
+		}		
+	}
+
+	public void determine_state()
+	{
+		if(this.mpris2 == true){ 
+			if(this.mpris2_adaptor.connected() == true){
+				debug("yup I'm connected");
+				this.update_state(state.CONNECTED);
+			}
+			else{
+				this.update_state(state.DISCONNECTED);
+			}
+		}
+		else{
+			if(this.mpris_adaptor.connected() == true){
+				debug("yup I'm connected");
+				this.update_state(state.CONNECTED);
+			}
+			else{
+				this.update_state(state.DISCONNECTED);
+			}			
+		}			
+	}
 }
