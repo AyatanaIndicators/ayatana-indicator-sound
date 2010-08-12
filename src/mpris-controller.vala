@@ -63,7 +63,6 @@ public class MprisController : GLib.Object
 		                            MetadataMenuitem.attributes_format());
 		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.mpris_player.GetMetadata(),
 		                        ScrubMenuitem.attributes_format());		
-		// temporary fix
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
 		scrub.update_position(this.mpris_player.PositionGet());		
 	}

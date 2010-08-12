@@ -58,30 +58,46 @@ public class Mpris2Controller : GLib.Object
 	
 	public Mpris2Controller(PlayerController ctrl)
 	{
-		Object(owner: ctrl);				
+		Object(owner: ctrl);
+		this.mpris2_root = null;
+		this.mpris2_player = null;
 	}
 	
 	construct{
     try {
-			debug("going to create this mpris 2 controller");			
+			debug("Going to try and create an mpris 2 controller");			
       this.connection = DBus.Bus.get (DBus.BusType.SESSION);
     } catch (Error e) {
       error("Problems connecting to the session bus - %s", e.message);
-    }		
-		this.mpris2_root = this.connection.get_object ("org.mpris.mediaplayers.".concat(this.owner.name.down()),
-		                                              "/org/mpris/MediaPlayer", 
-		                                              "org.mpris.MediaPlayer");				
+    }
 
-		this.mpris2_player = (MprisPlayer)this.connection.get_object ("org.mpris.mediaplayers.".concat(this.owner.name.down()) ,
-		                                                							"/org/mpris/MediaPlayer/Player", 
-		                                                							"org.mpris.MediaPlayer.Player");			
-		this.mpris2_player.TrackChanged += onTrackChanged;	
-    this.mpris2_player.StatusChanged += onStatusChanged;
-		initial_update();
+		try {
+			this.mpris2_root = this.connection.get_object ("org.mpris.mediaplayers.".concat(this.owner.name.down()),
+				                                            "/org/mpris/MediaPlayer", 
+				                                            "org.mpris.MediaPlayer");				
+			this.mpris2_player = (MprisPlayer)this.connection.get_object ("org.mpris.mediaplayers.".concat(this.owner.name.down()) ,
+				                                              							"/org/mpris/MediaPlayer/Player", 
+				                                                            "org.mpris.MediaPlayer.Player");			
+		}
+		catch(Error e){
+			error("Problems connecting to  
+		}
+	}
+
+	public bool was_successfull(){
+		if(this.mpris2_root == null ||
+		   this.mpris2_player == null)
+		{
+			return false;
+		}
+		return true;
 	}
 	
-	private void initial_update()
+	public void initial_update()
 	{
+		this.mpris2_player.TrackChanged += onTrackChanged;	
+    this.mpris2_player.StatusChanged += onStatusChanged;
+		
 		bool r  =  (bool)this.mpris2_player.Status.Shuffle_State;
 		int32 p  =  (int32)this.mpris2_player.Status.Playback_State;
 
