@@ -10,17 +10,16 @@ public class MprisBridge : GLib.Object
 	
 	public MprisBridge(PlayerController ctrl)
 	{
-		this.mpris2_controller == new Mpris2Controller(ctrl);
+		this.mpris2_controller = new Mpris2Controller(ctrl);
 		if(this.mpris2_controller.was_successfull() == true){
-			mode_in_use == mode.MPRIS_2;
-			this.mpris1_controller == null;
+			this.mode_in_use = mode.MPRIS_2;
+			this.mpris1_controller = null;
 			this.mpris2_controller.initial_update();
 		}
 		else{
-			delete this.mpris2_controller;
-			this.mpris2_controller == null;
-			mode_in_use == mode.MPRIS_1;
-			this.mpris1_controller = new Mpris1Controller(ctrl);
+			this.mpris2_controller = null;
+			this.mode_in_use = mode.MPRIS_1;
+			this.mpris1_controller = new MprisController(ctrl);
 		}
 	}
 	

@@ -17,32 +17,39 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along 
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-using Gee;
 
-[DBus (name = "org.mpris.MediaPlayer.Player")]
+using GLib;
+using Bus;
+
+[DBus (name = Mpris2Controller.root_interface)]
+public interface MprisRoot : Object {
+	// properties
+	public abstract bool HasTracklist{owned get; set;}
+	public abstract bool CanQuit{owned get; set;}
+	public abstract bool CanRaise{owned get; set;}
+	public abstract string Identity{owned get; set;}
+	public abstract string DesktopEntry{owned get; set;}	
+	// methods
+	public abstract void Quit() throws IOError;
+	public abstract void Raise() throws IOError;
+}
+
+[DBus (name = Mpris2Controller.root_interface.concat(".Player"))]
 public interface MprisPlayer : Object {
 	
-	public struct Status { 
-    public int32 Playback_State;
-    public double Playback_Rate;
-    public bool Repeat_State;
-    public bool Shuffle_State;
-		public bool Endless_State;
-	}
+	public abstract HashTable<string, Value?> Metadata{owned get; set;}
+	public abstract double Volume{owned get; set;}
+	public abstract int32 Capabilities{owned get; set;}
+	public abstract int32 Position{owned get; set;}
 	
-	public abstract HashTable<string, Value?> Metadata{owned get;}
-	public abstract double Volume{get;}
-	public abstract int32 Capabilities{get;}
-	public abstract int32 Position{get;}
-	
-	public abstract void SetPosition(string prop, int32 pos) throws DBus.Error;
-	public abstract void PlayPause() throws DBus.Error;
-	public abstract void Pause() throws DBus.Error;
-	public abstract void Next() throws DBus.Error;
-	public abstract void Previous() throws DBus.Error;
+	public abstract void SetPosition(string prop, int32 pos) throws IOError;
+	public abstract void PlayPause() throws IOError;
+	public abstract void Pause() throws IOError;
+	public abstract void Next() throws IOError;
+	public abstract void Previous() throws IOError;
 
-	public abstract signal void StatusChanged(Status update);
-	public abstract signal void TrackChanged(HashTable<string,Value?> Metadata);
+	//public abstract signal void StatusChanged(Status update);
+	//public abstract signal void TrackChanged(HashTable<string,Value?> Metadata);
 }
 
 /*
@@ -51,43 +58,29 @@ public interface MprisPlayer : Object {
  */
 public class Mpris2Controller : GLib.Object
 {		
-	private DBus.Connection connection;
-	public dynamic DBus.Object mpris2_root {get; construct;}		
+	public static const string root_interface = "org.mpris.MediaPlayer2" ;	
+	public MprisRoot mpris2_root {get; construct;}		
 	public MprisPlayer mpris2_player {get; construct;}		
 	public PlayerController owner {get; construct;}	
 	
 	public Mpris2Controller(PlayerController ctrl)
 	{
 		Object(owner: ctrl);
-		this.mpris2_root = null;
-		this.mpris2_player = null;
 	}
 	
 	construct{
-    try {
-			debug("Going to try and create an mpris 2 controller");			
-      this.connection = DBus.Bus.get (DBus.BusType.SESSION);
-    } catch (Error e) {
-      error("Problems connecting to the session bus - %s", e.message);
-    }
+		this.mpris2_root = Bus.get_proxy_sync (BusType.SESSION, 
+			                                     root_interface.concat(".").concat(this.owner.name.down()),
+				                                   "/org/mpris/MediaPlayer2");
+																																	
+		this.mpris2_player = Bus.get_proxy_sync (BusType.SESSION,
+			                                       root_interface.concat(".").concat(this.owner.name.down()),
+				                                     "/org/mpris/MediaPlayer2/Player");		
 
-		try {
-			this.mpris2_root = this.connection.get_object ("org.mpris.mediaplayers.".concat(this.owner.name.down()),
-				                                            "/org/mpris/MediaPlayer", 
-				                                            "org.mpris.MediaPlayer");				
-			this.mpris2_player = (MprisPlayer)this.connection.get_object ("org.mpris.mediaplayers.".concat(this.owner.name.down()) ,
-				                                              							"/org/mpris/MediaPlayer/Player", 
-				                                                            "org.mpris.MediaPlayer.Player");			
-		}
-		catch(Error e){
-			error("Problems connecting to  
-		}
 	}
-
+	
 	public bool was_successfull(){
-		if(this.mpris2_root == null ||
-		   this.mpris2_player == null)
-		{
+		if(this.mpris2_root == null ||this.mpris2_player == null){
 			return false;
 		}
 		return true;
@@ -95,7 +88,7 @@ public class Mpris2Controller : GLib.Object
 	
 	public void initial_update()
 	{
-		this.mpris2_player.TrackChanged += onTrackChanged;	
+		/*this.mpris2_player.TrackChanged += onTrackChanged;	
     this.mpris2_player.StatusChanged += onStatusChanged;
 		
 		bool r  =  (bool)this.mpris2_player.Status.Shuffle_State;
@@ -111,11 +104,12 @@ public class Mpris2Controller : GLib.Object
 			                      ScrubMenuitem.attributes_format());		
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
 		scrub.update_position(this.mpris2_player.Position);
-		
+		*/
 	}
 
 	public void transport_event(TransportMenuitem.action command)
 	{		
+		/*
 		debug("transport_event input = %i", (int)command);
 		if(command == TransportMenuitem.action.PLAY_PAUSE){
 			debug("transport_event PLAY_PAUSE");
@@ -126,11 +120,13 @@ public class Mpris2Controller : GLib.Object
 		}
 		else if(command == TransportMenuitem.action.NEXT){
 			this.mpris2_player.Next();
-		}		
+		}	
+	*/
 	}
 
 	public void set_position(double position)
-	{		
+	{	
+		/*
 		debug("Set position with pos (0-100) %f", position);
 		HashTable<string, Value?> data = this.mpris2_player.Metadata;
 		Value? time_value = data.lookup("time");
@@ -156,6 +152,7 @@ public class Mpris2Controller : GLib.Object
 		//this.mpris2_player.SetPosition((int32)(new_time_position));
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
 		scrub.update_position(this.mpris2_player.Position);				
+		*/
 	}
 	
 	public bool connected()
@@ -163,7 +160,7 @@ public class Mpris2Controller : GLib.Object
 		return (this.mpris2_player != null);
 	}
 	
-	private void onStatusChanged(MprisPlayer.Status st)
+	/*private void onStatusChanged(MprisPlayer.Status st)
   {
 		debug("onStatusChange - play state %i", st.Playback_State);
 		HashTable<string, Value?> ht = new HashTable<string, Value?>(str_hash, str_equal);
@@ -191,7 +188,7 @@ public class Mpris2Controller : GLib.Object
 		                        ScrubMenuitem.attributes_format());		
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
 		scrub.update_position(this.mpris2_player.Position);
-	}
+	}*/
 	
 }
 

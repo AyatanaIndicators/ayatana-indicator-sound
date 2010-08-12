@@ -53,7 +53,6 @@ public class PlayerController : GLib.Object
 		
 	public PlayerController(Dbusmenu.Menuitem root, string client_name, int offset, state initial_state)
 	{
-		this.mpris2 = false;
 		this.root_menu = root;
 		this.name = format_client_name(client_name.strip());
 		this.custom_items = new ArrayList<PlayerItem>();
@@ -100,7 +99,7 @@ public class PlayerController : GLib.Object
 			debug("establish_mpris_connection - Not ready to connect");
 			return;
 		}		
-		this.mpris_bridge = new MprisBridge(); 
+		this.mpris_bridge = new MprisBridge(this); 
 		this.determine_state();
 	}
 	

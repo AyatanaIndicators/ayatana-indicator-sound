@@ -83,7 +83,9 @@ music_bridge_VALAFLAGS = \
   --pkg Dbusmenu-Glib-0.2 \
   --pkg common-defs \
 	--pkg dbus-glib-1 \
-	--pkg gio-unix-2.0 
+	--pkg gio-2.0 \
+	--pkg gio-unix-2.0
+	 
  $(MAINTAINER_VALAFLAGS)
 
 music_bridge_APIFILES = \
