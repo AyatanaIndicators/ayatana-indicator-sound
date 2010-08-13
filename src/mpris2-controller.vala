@@ -58,7 +58,6 @@ public class Mpris2Controller : GLib.Object
 	public MprisPlayer mpris2_player {get; construct;}		
 	public PlayerController owner {get; construct;}	
 	
-	
 	public Mpris2Controller(PlayerController ctrl)
 	{
 		Object(owner: ctrl);
@@ -86,7 +85,7 @@ public class Mpris2Controller : GLib.Object
 	}
 
 	public void property_changed(Object mpris_player, ParamSpec new_status){
-		debug("playback status changed, %s", new_status.get_name());
+		debug("playback status changed, %s", new_status.get_name());		
 	}
 	
 	public bool was_successfull(){
@@ -153,8 +152,7 @@ public class Mpris2Controller : GLib.Object
 	}
 
 	public void set_position(double position)
-	{	
-		/*
+	{			
 		debug("Set position with pos (0-100) %f", position);
 		HashTable<string, Value?> data = this.mpris2_player.Metadata;
 		Value? time_value = data.lookup("time");
@@ -175,9 +173,8 @@ public class Mpris2Controller : GLib.Object
 			else if(v.holds (typeof (string))){
 				debug("the trackid = %s", v.get_string());
 			}
-		}
-			        
-		//this.mpris2_player.SetPosition((int32)(new_time_position));
+		}			        
+		/*this.mpris2_player.SetPosition((int32)(new_time_position));
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
 		scrub.update_position(this.mpris2_player.Position);				
 		*/
@@ -187,8 +184,7 @@ public class Mpris2Controller : GLib.Object
 	{
 		return (this.mpris2_player != null);
 	}
-	
-	
+		
 }
 
 

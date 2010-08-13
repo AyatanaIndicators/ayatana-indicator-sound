@@ -126,7 +126,7 @@ public class MprisController : GLib.Object
 		
 		this.owner.custom_items[PlayerController.widget_order.METADATA].reset(MetadataMenuitem.attributes_format());
 		this.owner.custom_items[PlayerController.widget_order.SCRUB].reset(ScrubMenuitem.attributes_format());
-		HashTable<string, Value?> status_hash = new HashTable<string, Value?>(str_hash, str_equal);
+		//HashTable<string, Value?> status_hash = new HashTable<string, Value?>(str_hash, str_equal);
 
 		status st = this.mpris_player.GetStatus();
 		int play_state =  st.playback;

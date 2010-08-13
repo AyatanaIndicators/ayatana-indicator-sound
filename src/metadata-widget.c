@@ -201,11 +201,9 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 
 	if(g_value_get_int(value) == DBUSMENU_PROPERTY_EMPTY){
 		g_debug("Metadata widget: property update - reset");
-		gchar* empty = "";
 		GValue new_value = {0};
   	g_value_init(&new_value, G_TYPE_STRING);		
 		g_value_set_string(&new_value, g_strdup(""));		
-		//g_free(empty);
 		value = &new_value;
 	}
 	
