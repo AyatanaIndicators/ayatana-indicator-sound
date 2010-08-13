@@ -53,7 +53,6 @@ AC_SUBST(PULSEAUDIO_LIBS)
 PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib >= $DBUSMENUGLIB_REQUIRED_VERSION
                                 indicator >= $INDICATOR_REQUIRED_VERSION
 																indicate >= $INDICATE_REQUIRED_VERSION
-																gio-2.0 >= $GIO_2_0_REQUIRED_VERSION
 																gee-1.0)
 
 AC_SUBST(SOUNDSERVICE_CFLAGS)
