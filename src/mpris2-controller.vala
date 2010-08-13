@@ -35,7 +35,6 @@ public interface MprisRoot : Object {
 public interface MprisPlayer : Object {
 	
 	public abstract HashTable<string, Value?> Metadata{owned get; set;}
-	public abstract int32 Capabilities{owned get; set;}
 	public abstract int32 Position{owned get; set;}
 	public abstract string PlaybackStatus{owned get; set;}	
 	
@@ -96,17 +95,19 @@ public class Mpris2Controller : GLib.Object
 		}
 		return true;
 	}
+
+	private int determine_play_state(){
+		string status = this.mpris2_player.PlaybackStatus;
+		if(status == "Playing"){
+			return 0;
+		}
+		return 1;		
+	}
 	
 	public void initial_update()
 	{
-		/*this.mpris2_player.TrackChanged += onTrackChanged;	
-    this.mpris2_player.StatusChanged += onStatusChanged;
-		
-		bool r  =  (bool)this.mpris2_player.Status.Shuffle_State;
-		int32 p  =  (int32)this.mpris2_player.Status.Playback_State;
-
+		int32 p = determine_play_state();
 		debug("initial update - play state %i", p);
-		debug("initial update - shuffle state %s", r.to_string());
 		
 		(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(p);
 		this.owner.custom_items[PlayerController.widget_order.METADATA].update(this.mpris2_player.Metadata,
@@ -115,7 +116,7 @@ public class Mpris2Controller : GLib.Object
 			                      ScrubMenuitem.attributes_format());		
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
 		scrub.update_position(this.mpris2_player.Position);
-		*/
+	
 	}
 
 	public void transport_event(TransportMenuitem.action command)
@@ -123,13 +124,31 @@ public class Mpris2Controller : GLib.Object
 		debug("transport_event input = %i", (int)command);
 		if(command == TransportMenuitem.action.PLAY_PAUSE){
 			debug("transport_event PLAY_PAUSE");
-			this.mpris2_player.PlayPause();							
+			try{
+				this.mpris2_player.PlayPause();							
+			}
+			catch(DBus.Error error){
+				warning("DBus Error calling the player objects PlayPause method %s",
+				        error.message);
+			}			
 		}
 		else if(command == TransportMenuitem.action.PREVIOUS){
-			this.mpris2_player.Previous();
+			try{
+				this.mpris2_player.Previous();
+			}
+			catch(DBus.Error error){
+				warning("DBus Error calling the player objects Previous method %s",
+				        error.message);
+			}							
 		}
 		else if(command == TransportMenuitem.action.NEXT){
-			this.mpris2_player.Next();
+			try{
+				this.mpris2_player.Next();
+			}
+			catch(DBus.Error error){
+				warning("DBus Error calling the player objects Next method %s",
+				      	error.message);
+			}								
 		}	
 	}
 
