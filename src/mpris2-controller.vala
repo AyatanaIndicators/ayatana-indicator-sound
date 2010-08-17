@@ -34,23 +34,24 @@ public interface MprisRoot : DBus.Object {
 
 [DBus (name = "org.mpris.MediaPlayer2.Player")]
 public interface MprisPlayer : DBus.Object {
-	
+
+	// properties
 	public abstract HashTable<string, Value?> Metadata{owned get; set;}
 	public abstract int32 Position{owned get; set;}
 	public abstract string PlaybackStatus{owned get; set;}	
-	
+	// methods
 	public abstract void SetPosition(DBus.ObjectPath path, int64 pos) throws DBus.Error;
 	public abstract void PlayPause() throws DBus.Error;
 	public abstract void Pause() throws DBus.Error;
 	public abstract void Next() throws DBus.Error;
 	public abstract void Previous() throws DBus.Error;
-
+	// signals
 	public signal void Seeked(int64 new_position);
-	//public signal void PropertiesChanged(string source, HashTable<string, Value?> changed_properties, string[] invalid);	
 }
 
 [DBus (name = "org.freedesktop.DBus.Properties")]
 public interface FreeDesktopProperties : DBus.Object{
+	// signals
 	public signal void PropertiesChanged(string source, HashTable<string, Value?> changed_properties, string[] invalid);
 }
 
@@ -96,7 +97,7 @@ public class Mpris2Controller : GLib.Object
 	{	
 		debug("properties-changed for interface %s", interface_source);
 		if(changed_properties == null || interface_source.has_prefix(this.root_interface) == false){
-			warning("Property-changed hash is null");
+			warning("Property-changed hash is null or this is an interface that concerns us");
 			return;
 		}
 		Value? play_v = changed_properties.lookup("PlaybackStatus");
@@ -160,8 +161,6 @@ public class Mpris2Controller : GLib.Object
 			                          MetadataMenuitem.attributes_format());
 		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.player.Metadata,
 			                      ScrubMenuitem.attributes_format());		
-		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
-		scrub.update_position(this.player.Position);	
 	}
 
 	public void transport_event(TransportMenuitem.action command)
