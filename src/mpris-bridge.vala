@@ -47,6 +47,17 @@ public class MprisBridge : GLib.Object
 		}
 	}
 
+	public void expose()
+	{
+ 		if(this.mode_in_use == mode.MPRIS_2){
+			this.mpris2_controller.expose();
+		 }
+		else{
+			warning("MPRIS1 clients don't have the ability to raise/expose the client"); 			        
+		}						
+	}
+
+
 	public void set_track_position(double pos)
 	{
 		if(this.mode_in_use == mode.MPRIS_1){
