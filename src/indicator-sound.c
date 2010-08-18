@@ -231,15 +231,6 @@ free_the_animation_list()
   }
 }
 
-/*static void
-slider_parent_changed (GtkWidget *widget,
-                       gpointer   user_data)
-{
-  gtk_widget_set_size_request (widget, 200, -1);
-  g_debug("slider parent changed");
-}*/
-
-
 static gboolean
 new_transport_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {

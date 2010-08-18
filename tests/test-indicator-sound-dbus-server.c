@@ -35,32 +35,29 @@ gboolean
 kill_func (gpointer userdata)
 {
 	g_main_loop_quit(mainloop);
-    // TODO free the dbus interface !!
 	return FALSE;
 }
 
 gint
 main (gint argc, gchar * argv[])
 {
-    g_type_init();
-   
-	//g_debug("DBus ID: %s", dbus_connection_get_server_id(dbus_g_connection_get_connection(dbus_g_bus_get(DBUS_BUS_SESSION, NULL))));
+	g_type_init();
 
-    dbus_interface = g_object_new(SOUND_SERVICE_DBUS_TYPE, NULL);
+	dbus_interface = g_object_new(SOUND_SERVICE_DBUS_TYPE, NULL);
 
-    // Set the mute value
-    sound_service_dbus_update_sink_mute(dbus_interface, TEST_MUTE_VALUE);
-    sound_service_dbus_update_sink_availability(dbus_interface, TEST_AVAILABLE_VALUE);
+	// Set the mute value
+	sound_service_dbus_update_sink_mute(dbus_interface, TEST_MUTE_VALUE);
+	sound_service_dbus_update_sink_availability(dbus_interface, TEST_AVAILABLE_VALUE);
 
-    g_timeout_add_seconds(4, kill_func, NULL);
+	g_timeout_add_seconds(4, kill_func, NULL);
 
-    // Run the loop
-    mainloop = g_main_loop_new(NULL, FALSE);
-    g_main_loop_run(mainloop);
+	// Run the loop
+	mainloop = g_main_loop_new(NULL, FALSE);
+	g_main_loop_run(mainloop);
 
 	g_debug("Quiting");
 
-    return 0;
+	return 0;
 }
 
 

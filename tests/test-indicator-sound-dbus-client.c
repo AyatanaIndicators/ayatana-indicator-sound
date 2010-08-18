@@ -21,7 +21,6 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include <glib.h>
 #include <dbus/dbus-glib.h>
 #include "../src/dbus-shared-names.h"
