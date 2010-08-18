@@ -32,11 +32,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-bindings.h>
 
-#include <libindicator/indicator.h>
-#include <libindicator/indicator-object.h>
-#include <libindicator/indicator-service-manager.h>
-#include <libindicator/indicator-image-helper.h>
-
 #include "indicator-sound.h"
 #include "transport-widget.h"
 #include "metadata-widget.h"
@@ -235,15 +230,6 @@ free_the_animation_list()
     blocked_animation_list = NULL;
   }
 }
-
-/*static void
-slider_parent_changed (GtkWidget *widget,
-                       gpointer   user_data)
-{
-  gtk_widget_set_size_request (widget, 200, -1);
-  g_debug("slider parent changed");
-}*/
-
 
 static gboolean
 new_transport_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)

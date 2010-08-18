@@ -65,6 +65,7 @@ music_bridge_VALASOURCES = \
 	scrub-menu-item.vala \
 	title-menu-item.vala \
 	player-controller.vala \
+	mpris-bridge.vala \
 	mpris-controller.vala \
 	mpris2-controller.vala \
 	player-item.vala \
@@ -82,7 +83,8 @@ music_bridge_VALAFLAGS = \
   --pkg Dbusmenu-Glib-0.2 \
   --pkg common-defs \
 	--pkg dbus-glib-1 \
-	--pkg gio-unix-2.0 
+	--pkg gio-unix-2.0
+	 
  $(MAINTAINER_VALAFLAGS)
 
 music_bridge_APIFILES = \

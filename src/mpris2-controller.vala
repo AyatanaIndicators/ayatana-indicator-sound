@@ -17,32 +17,42 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along 
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-using Gee;
+using DBus;
 
-[DBus (name = "org.mpris.MediaPlayer.Player")]
-public interface MprisPlayer : Object {
-	
-	public struct Status { 
-    public int32 Playback_State;
-    public double Playback_Rate;
-    public bool Repeat_State;
-    public bool Shuffle_State;
-		public bool Endless_State;
-	}
-	
-	public abstract HashTable<string, Value?> Metadata{owned get;}
-	public abstract double Volume{get;}
-	public abstract int32 Capabilities{get;}
-	public abstract int32 Position{get;}
-	
-	public abstract void SetPosition(string prop, int32 pos) throws DBus.Error;
+[DBus (name = "org.mpris.MediaPlayer2")]
+public interface MprisRoot : DBus.Object {
+	// properties
+	public abstract bool HasTracklist{owned get; set;}
+	public abstract bool CanQuit{owned get; set;}
+	public abstract bool CanRaise{owned get; set;}
+	public abstract string Identity{owned get; set;}
+	public abstract string DesktopEntry{owned get; set;}	
+	// methods
+	public abstract void Quit() throws DBus.Error;
+	public abstract void Raise() throws DBus.Error;
+}
+
+[DBus (name = "org.mpris.MediaPlayer2.Player")]
+public interface MprisPlayer : DBus.Object {
+
+	// properties
+	public abstract HashTable<string, Value?> Metadata{owned get; set;}
+	public abstract int32 Position{owned get; set;}
+	public abstract string PlaybackStatus{owned get; set;}	
+	// methods
+	public abstract void SetPosition(DBus.ObjectPath path, int64 pos) throws DBus.Error;
 	public abstract void PlayPause() throws DBus.Error;
 	public abstract void Pause() throws DBus.Error;
 	public abstract void Next() throws DBus.Error;
 	public abstract void Previous() throws DBus.Error;
+	// signals
+	public signal void Seeked(int64 new_position);
+}
 
-	public abstract signal void StatusChanged(Status update);
-	public abstract signal void TrackChanged(HashTable<string,Value?> Metadata);
+[DBus (name = "org.freedesktop.DBus.Properties")]
+public interface FreeDesktopProperties : DBus.Object{
+	// signals
+	public signal void PropertiesChanged(string source, HashTable<string, Value?> changed_properties, string[] invalid);
 }
 
 /*
@@ -51,51 +61,106 @@ public interface MprisPlayer : Object {
  */
 public class Mpris2Controller : GLib.Object
 {		
-	private DBus.Connection connection;
-	public dynamic DBus.Object mpris2_root {get; construct;}		
-	public MprisPlayer mpris2_player {get; construct;}		
-	public PlayerController owner {get; construct;}	
+	public static const string root_interface = "org.mpris.MediaPlayer2" ;	
+	public MprisRoot mpris2_root {get; construct;}		
+	public MprisPlayer player {get; construct;}		
+	public PlayerController owner {get; construct;}
+	public FreeDesktopProperties properties_interface {get; construct;}
 	
 	public Mpris2Controller(PlayerController ctrl)
 	{
-		Object(owner: ctrl);				
+		GLib.Object(owner: ctrl);
 	}
 	
 	construct{
     try {
-			debug("going to create this mpris 2 controller");			
-      this.connection = DBus.Bus.get (DBus.BusType.SESSION);
-    } catch (Error e) {
+      var connection = DBus.Bus.get (DBus.BusType.SESSION);
+			this.mpris2_root = (MprisRoot) connection.get_object (root_interface.concat(".").concat(this.owner.name.down()),
+				                                             "/org/mpris/MediaPlayer2",
+				                                             root_interface);						
+			this.player = (MprisPlayer) connection.get_object (root_interface.concat(".").concat(this.owner.name.down()),
+				                                               "/org/mpris/MediaPlayer2",
+				                                               root_interface.concat(".Player"));						
+			this.player.Seeked += onSeeked;
+
+			this.properties_interface = (FreeDesktopProperties) connection.get_object(root_interface.concat(".").concat(this.owner.name.down()),
+			                                                                          "/org/mpris/MediaPlayer2",
+			                                                                          "org.freedesktop.DBus.Properties");
+			this.properties_interface.PropertiesChanged += property_changed_cb;			
+			
+		} catch (DBus.Error e) {
       error("Problems connecting to the session bus - %s", e.message);
     }		
-		this.mpris2_root = this.connection.get_object ("org.mpris.mediaplayers.".concat(this.owner.name.down()),
-		                                              "/org/mpris/MediaPlayer", 
-		                                              "org.mpris.MediaPlayer");				
+	}
 
-		this.mpris2_player = (MprisPlayer)this.connection.get_object ("org.mpris.mediaplayers.".concat(this.owner.name.down()) ,
-		                                                							"/org/mpris/MediaPlayer/Player", 
-		                                                							"org.mpris.MediaPlayer.Player");			
-		this.mpris2_player.TrackChanged += onTrackChanged;	
-    this.mpris2_player.StatusChanged += onStatusChanged;
-		initial_update();
+	public void property_changed_cb(string interface_source, HashTable<string, Value?> changed_properties, string[] invalid )
+	{	
+		debug("properties-changed for interface %s", interface_source);
+		if(changed_properties == null || interface_source.has_prefix(this.root_interface) == false){
+			warning("Property-changed hash is null or this is an interface that concerns us");
+			return;
+		}
+		Value? play_v = changed_properties.lookup("PlaybackStatus");
+		if(play_v != null){
+			string state = play_v.get_string();		
+			debug("new playback state = %s", state);			
+			int p = this.determine_play_state(state);
+			(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(p);			
+			(this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem).update_playstate(p);			
+		}
+		
+		Value? pos_v = changed_properties.lookup("Position");
+		if(pos_v != null){
+			int64 pos = pos_v.get_int64();
+			debug("new position = %i", (int)pos);
+			(this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem).update_position((int32)pos);						
+		}
+
+		Value? meta_v = changed_properties.lookup("Metadata");
+		if(meta_v != null){
+			debug("metadata is not empty");
+			debug("artist : %s", this.player.Metadata.lookup("artist").get_string());			
+			this.owner.custom_items[PlayerController.widget_order.METADATA].reset(MetadataMenuitem.attributes_format());			
+			this.owner.custom_items[PlayerController.widget_order.METADATA].update(this.player.Metadata,
+			                          																						 MetadataMenuitem.attributes_format());			
+			this.owner.custom_items[PlayerController.widget_order.SCRUB].reset(ScrubMenuitem.attributes_format());	
+			if((int)this.player.Metadata.lookup("artist").get_string().len() > 0 ||
+			   (int)this.player.Metadata.lookup("artist").get_string().len() > 0){
+				this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.player.Metadata,
+					                    																							ScrubMenuitem.attributes_format());			
+			}
+			(this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem).update_playstate(this.determine_play_state(this.player.PlaybackStatus));			
+			
+		}
 	}
 	
-	private void initial_update()
+	private int determine_play_state(string status){
+		if(status == null)
+			return 1;
+		
+		if(status != null && status == "Playing"){
+			debug("determine play state - state = %s", status);
+			return 0;
+		}
+		return 1;		
+	}
+	
+	public void initial_update()
 	{
-		bool r  =  (bool)this.mpris2_player.Status.Shuffle_State;
-		int32 p  =  (int32)this.mpris2_player.Status.Playback_State;
-
-		debug("initial update - play state %i", p);
-		debug("initial update - shuffle state %s", r.to_string());
+		int32 status;
+		if(this.player.PlaybackStatus == null){
+			status = 1;
+		}
+		else{
+			status = determine_play_state(this.player.PlaybackStatus);
+		}
+		debug("initial update - play state %i", status);
 		
-		(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(p);
-		this.owner.custom_items[PlayerController.widget_order.METADATA].update(this.mpris2_player.Metadata,
+		(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(status);
+		this.owner.custom_items[PlayerController.widget_order.METADATA].update(this.player.Metadata,
 			                          MetadataMenuitem.attributes_format());
-		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.mpris2_player.Metadata,
+		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.player.Metadata,
 			                      ScrubMenuitem.attributes_format());		
-		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
-		scrub.update_position(this.mpris2_player.Position);
-		
 	}
 
 	public void transport_event(TransportMenuitem.action command)
@@ -103,80 +168,98 @@ public class Mpris2Controller : GLib.Object
 		debug("transport_event input = %i", (int)command);
 		if(command == TransportMenuitem.action.PLAY_PAUSE){
 			debug("transport_event PLAY_PAUSE");
-			this.mpris2_player.PlayPause();							
+			try{
+				this.player.PlayPause();							
+			}
+			catch(DBus.Error error){
+				warning("DBus Error calling the player objects PlayPause method %s",
+				        error.message);
+			}			
 		}
 		else if(command == TransportMenuitem.action.PREVIOUS){
-			this.mpris2_player.Previous();
+			try{
+				this.player.Previous();
+			}
+			catch(DBus.Error error){
+				warning("DBus Error calling the player objects Previous method %s",
+				        error.message);
+			}							
 		}
 		else if(command == TransportMenuitem.action.NEXT){
-			this.mpris2_player.Next();
-		}		
+			try{
+				this.player.Next();
+			}
+			catch(DBus.Error error){
+				warning("DBus Error calling the player objects Next method %s",
+				      	error.message);
+			}								
+		}	
 	}
-
+	/**
+		TODO: SetPosition on the player object is not working with rhythmbox,
+	  runtime error - "dbus function not supported"
+	 */
 	public void set_position(double position)
-	{		
+	{			
 		debug("Set position with pos (0-100) %f", position);
-		HashTable<string, Value?> data = this.mpris2_player.Metadata;
+		HashTable<string, Value?> data = this.player.Metadata;
 		Value? time_value = data.lookup("time");
 		if(time_value == null){
 			warning("Can't fetch the duration of the track therefore cant set the position");
 			return;
 		}
-		uint32 total_time = time_value.get_uint();
+		// work in microseconds (scale up by 10 TTP-of 3)
+		uint32 total_time = time_value.get_uint() * 1000;
 		debug("total time of track = %i", (int)total_time);				
 		double new_time_position = total_time * position/100.0;
-		debug("new position = %f", (new_time_position * 1000));		
+		debug("new position = %f", (new_time_position));		
 
-		Value? v = this.mpris2_player.Metadata.lookup("trackid");
+		Value? v = this.player.Metadata.lookup("trackid");
 		if(v != null){
-			if(v.holds (typeof (int))){
-				debug("the trackid = %i", v.get_int());			
-			}
-			else if(v.holds (typeof (string))){
+			if(v.holds (typeof (string))){
 				debug("the trackid = %s", v.get_string());
+				DBus.ObjectPath path = new ObjectPath(v.get_string());
+				try{
+					//this.player.SetPosition(path, (int64)(new_time_position));
+				}
+				catch(DBus.Error e){
+					error("DBus Error calling the player objects SetPosition method %s",
+						     e.message);
+				}							
 			}
-		}
-			        
-		//this.mpris2_player.SetPosition((int32)(new_time_position));
+		}			        
+	}
+
+	public void onSeeked(int64 position){
+		debug("Seeked signal callback with pos = %i", (int)position/1000);
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
-		scrub.update_position(this.mpris2_player.Position);				
+		scrub.update_position((int32)position/1000);			
 	}
 	
 	public bool connected()
 	{
-		return (this.mpris2_player != null);
+		return (this.player != null && this.mpris2_root != null);
 	}
-	
-	private void onStatusChanged(MprisPlayer.Status st)
-  {
-		debug("onStatusChange - play state %i", st.Playback_State);
-		HashTable<string, Value?> ht = new HashTable<string, Value?>(str_hash, str_equal);
-		Value v = Value(typeof(int));
-		v.set_int(st.Playback_State);
-		ht.insert("state", v); 
-		this.owner.custom_items[PlayerController.widget_order.TRANSPORT].update(ht, TransportMenuitem.attributes_format());
-		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(ht, ScrubMenuitem.attributes_format());		
-	}
-	
-	private void onTrackChanged(HashTable<string,Value?> ht)
-	{
-		this.owner.custom_items[PlayerController.widget_order.METADATA].reset(MetadataMenuitem.attributes_format());
-		this.owner.custom_items[PlayerController.widget_order.SCRUB].reset(ScrubMenuitem.attributes_format());
-		this.owner.custom_items[PlayerController.widget_order.METADATA].update(ht,
-		                            MetadataMenuitem.attributes_format());
-		debug("about to update the duration on the scrub bar");
-		Value? v = ht.lookup("time");
-		if(v != null)
-		{
-			debug("with the duration of %i", (int)v.get_uint()); 
-			debug("with Position of %i", this.mpris2_player.Position); 
+
+		
+	public bool was_successfull(){
+		if(this.mpris2_root == null ||this.player == null){
+			return false;
 		}
-		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(ht,
-		                        ScrubMenuitem.attributes_format());		
-		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
-		scrub.update_position(this.mpris2_player.Position);
+		return true;
 	}
-	
+
+	public void expose()
+	{
+		if(this.connected() == true){
+			try{
+				this.mpris2_root.Raise();
+			}
+			catch(DBus.Error e){
+				error("Exception thrown while calling root function Raise - %s", e.message);
+			}
+		}
+	}
 }
 
 
