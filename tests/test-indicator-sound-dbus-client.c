@@ -34,59 +34,42 @@ static DBusGProxy * proxy= NULL;
 static void
 test_fetch_mute(DBusGProxy * proxy)
 {
-    GError * error = NULL;
-    gboolean *fetched_mute_value;
-    fetched_mute_value = g_new0(gboolean, 1);
-    org_ayatana_indicator_sound_get_sink_mute(proxy, fetched_mute_value, &error);
+  GError * error = NULL;
+  gboolean *fetched_mute_value;
+  fetched_mute_value = g_new0(gboolean, 1);
+  org_ayatana_indicator_sound_get_sink_mute(proxy, fetched_mute_value, &error);
 	if (error != NULL) {
 		g_warning("test-indicator-sound-dbus-client::test_fetch_mute - Unable to fetch mute: %s", error->message);
 		g_error_free(error);
-        g_free(fetched_mute_value);
-        return;
-	}
-    g_assert(TEST_MUTE_VALUE == *fetched_mute_value); 
     g_free(fetched_mute_value);
-}
-
-static void
-test_fetch_volume(DBusGProxy * proxy)
-{
-	GError * error = NULL;
-    gdouble *volume_percent_input;
-    volume_percent_input = g_new0(gdouble, 1);
-    org_ayatana_indicator_sound_get_sink_volume(proxy, volume_percent_input, &error);
-	if (error != NULL) {
-		g_warning("test-indicator-sound-dbus-client::test_fetch_volume - Unable to fetch VOLUME: %s", error->message);
-		g_error_free(error);
-        g_free(volume_percent_input);
-        return;
+    return;
 	}
-    g_assert(TEST_VOLUME_VALUE == *volume_percent_input); 
-    g_free(volume_percent_input);
+  g_assert(TEST_MUTE_VALUE == *fetched_mute_value); 
+  g_free(fetched_mute_value);
 }
 
 static void 
 test_fetch_availability(DBusGProxy * proxy)
 {
-    GError * error = NULL;
-    gboolean * available_input;
-    available_input = g_new0(gboolean, 1);
-    org_ayatana_indicator_sound_get_sink_availability(proxy, available_input, &error);
-    if (error != NULL) {
-	    g_warning("test-indicator-sound-dbus-client::test_fetch_availability - unable to fetch availability %s", error->message);
-	    g_error_free(error);
-        g_free(available_input);
-        return;
-    }
-    g_assert(TEST_AVAILABLE_VALUE == *available_input);
-    g_free(available_input);
+	GError * error = NULL;
+	gboolean * available_input;
+	available_input = g_new0(gboolean, 1);
+	org_ayatana_indicator_sound_get_sink_availability(proxy, available_input, &error);
+	if (error != NULL) {
+		g_warning("test-indicator-sound-dbus-client::test_fetch_availability - unable to fetch availability %s", error->message);
+		g_error_free(error);
+	  g_free(available_input);
+	  return;
+	}
+	g_assert(TEST_AVAILABLE_VALUE == *available_input);
+	g_free(available_input);
 }
 
 
 gboolean
 kill_func (gpointer userdata)
 {
-    g_free(proxy);
+  g_free(proxy);
 	g_main_loop_quit(mainloop);
 	return FALSE;
 }
@@ -107,24 +90,17 @@ main (gint argc, gchar * argv[])
 	}
 
 	DBusGProxy * proxy = dbus_g_proxy_new_for_name_owner(session_bus,
-                                            ":1.0",
-											 INDICATOR_SOUND_SERVICE_DBUS_OBJECT,
-                                             INDICATOR_SOUND_SERVICE_DBUS_INTERFACE,
-                                             &error);
+                                            					 ":1.0",
+											 																	INDICATOR_SOUND_SERVICE_DBUS_OBJECT,
+                                             						INDICATOR_SOUND_SERVICE_DBUS_INTERFACE,
+                                             						&error);
 	if (error != NULL) {
 		g_error("Unable to get property proxy: %s", error->message);
 		return 1;
 	}
 
-/*    g_test_add_func("/test-indicator-sound-dbus/test-fetch-mute", test_fetch_mute);*/
-/*    g_test_add_func("/test-indicator-sound-dbus/test-fetch-volume", test_fetch_volume);*/
-/*    g_test_add_func("/test-indicator-sound-dbus/test-fetch-availability", test_fetch_availability);*/
-/*    g_test_queue_free(proxy);*/
-/*    return g_test_run();*/
-
-    test_fetch_mute(proxy);
-    test_fetch_volume(proxy);    
-    test_fetch_availability(proxy);    
+  test_fetch_mute(proxy);
+  test_fetch_availability(proxy);    
 
 	g_timeout_add_seconds(2, kill_func, NULL);
 

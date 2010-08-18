@@ -50,7 +50,6 @@ main (gint argc, gchar * argv[])
 
     // Set the mute value
     sound_service_dbus_update_sink_mute(dbus_interface, TEST_MUTE_VALUE);
-    sound_service_dbus_update_sink_volume(dbus_interface, TEST_VOLUME_VALUE);
     sound_service_dbus_update_sink_availability(dbus_interface, TEST_AVAILABLE_VALUE);
 
     g_timeout_add_seconds(4, kill_func, NULL);

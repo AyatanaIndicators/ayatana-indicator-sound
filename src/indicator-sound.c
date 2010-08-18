@@ -32,11 +32,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-bindings.h>
 
-#include <libindicator/indicator.h>
-#include <libindicator/indicator-object.h>
-#include <libindicator/indicator-service-manager.h>
-#include <libindicator/indicator-image-helper.h>
-
 #include "indicator-sound.h"
 #include "transport-widget.h"
 #include "metadata-widget.h"

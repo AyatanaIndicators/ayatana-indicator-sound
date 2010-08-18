@@ -150,8 +150,8 @@ metadata_widget_init (MetadataWidget *self)
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
 	                 G_CALLBACK(metadata_widget_property_update), self);
 	gtk_widget_show_all (priv->hbox);
-  gtk_container_add (GTK_CONTAINER (self), hbox);
-	
+	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 60); 
+  gtk_container_add (GTK_CONTAINER (self), hbox);	
 }
 
 static gboolean
