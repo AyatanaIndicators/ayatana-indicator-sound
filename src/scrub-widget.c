@@ -174,7 +174,7 @@ scrub_widget_check_play_state(ScrubWidget* self)
 	ScrubWidgetPrivate * priv = SCRUB_WIDGET_GET_PRIVATE(self);
 	gint play_state = dbusmenu_menuitem_property_get_int(priv->twin_item,
 	                                                     DBUSMENU_SCRUB_MENUITEM_PLAY_STATE);
-	
+	g_debug("play-state = %i", play_state);
 	if(play_state == 0){
 		g_debug("START TIMELINE");
 		ido_timeline_start(priv->time_line);

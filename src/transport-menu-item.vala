@@ -45,7 +45,7 @@ public class TransportMenuitem : PlayerItem
 		int input = input_value.get_int();
 		debug("handle_event with value %s", input.to_string());
 		debug("transport owner name = %s", this.owner.name);
-		this.owner.mpris_adaptor.transport_event((action)input);
+		this.owner.mpris_bridge.transport_update((action)input);
 	}	
 
 	public static HashSet<string> attributes_format()

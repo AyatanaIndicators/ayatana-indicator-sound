@@ -35,6 +35,9 @@ public class TitleMenuitem : PlayerItem
 		{
 			this.owner.instantiate();
 		}
+		else if(this.owner.current_state == PlayerController.state.CONNECTED){
+			this.owner.mpris_bridge.expose();
+		}		
 	}
 	
 
