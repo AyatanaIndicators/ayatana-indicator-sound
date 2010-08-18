@@ -208,10 +208,11 @@ public class Mpris2Controller : GLib.Object
 			warning("Can't fetch the duration of the track therefore cant set the position");
 			return;
 		}
-		uint32 total_time = time_value.get_uint();
+		// work in microseconds (scale up by 10 TTP-of 3)
+		uint32 total_time = time_value.get_uint() * 1000;
 		debug("total time of track = %i", (int)total_time);				
 		double new_time_position = total_time * position/100.0;
-		debug("new position = %f", (new_time_position * 1000));		
+		debug("new position = %f", (new_time_position));		
 
 		Value? v = this.player.Metadata.lookup("trackid");
 		if(v != null){
@@ -219,11 +220,11 @@ public class Mpris2Controller : GLib.Object
 				debug("the trackid = %s", v.get_string());
 				DBus.ObjectPath path = new ObjectPath(v.get_string());
 				try{
-					this.player.SetPosition(path, (int64)(new_time_position * 1000));
+					//this.player.SetPosition(path, (int64)(new_time_position));
 				}
-				catch(DBus.Error error){
-					warning("DBus Error calling the player objects SetPosition method %s",
-						      error.message);
+				catch(DBus.Error e){
+					error("DBus Error calling the player objects SetPosition method %s",
+						     e.message);
 				}							
 			}
 		}			        

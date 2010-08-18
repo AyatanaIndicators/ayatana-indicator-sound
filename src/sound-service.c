@@ -25,7 +25,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 static GMainLoop *mainloop = NULL;
 
-
 /**********************************************************************************************************************/
 //    Init and exit functions
 /**********************************************************************************************************************/
@@ -42,8 +41,8 @@ service_shutdown (IndicatorService *service, gpointer user_data)
   if (mainloop != NULL) {
     g_debug("Service shutdown !");
     // TODO: uncomment for release !!
-    //close_pulse_activites();
-    //g_main_loop_quit(mainloop);
+    close_pulse_activites();
+    g_main_loop_quit(mainloop);
   }
   return;
 }
