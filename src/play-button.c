@@ -28,7 +28,7 @@ Uses code from ctk
 #include "play-button.h"
 
 #define RECT_WIDTH 130.0f
-#define Y 5.0f
+#define Y 7.0f
 #define X	37.0f
 #define INNER_RADIUS 12.5
 #define	MIDDLE_RADIUS 13.5f
@@ -42,16 +42,16 @@ Uses code from ctk
 #define TRI_HEIGHT 13.0f
 #define TRI_OFFSET  6.0f
 #define PREV_X 35.0f
-#define PREV_Y 11.0f
+#define PREV_Y 13.0f
 #define NEXT_X 113.0f
-#define NEXT_Y 11.0f //prev_y
+#define NEXT_Y 13.0f //prev_y
 #define PAUSE_WIDTH 21.0f
 #define PAUSE_HEIGHT 27.0f
 #define BAR_WIDTH 4.5f
 #define BAR_HEIGHT 24.0f
 #define BAR_OFFSET 10.0f
 #define PAUSE_X 78.0f
-#define	PAUSE_Y 5.0f
+#define	PAUSE_Y 7.0f
 #define PLAY_WIDTH 28.0f
 #define PLAY_HEIGHT 29.0f
 #define PLAY_PADDING 5.0f
@@ -454,29 +454,8 @@ void
 play_button_toggle_play_pause(GtkWidget* button, PlayButtonState update)
 {
 	PlayButtonPrivate* priv = PLAY_BUTTON_GET_PRIVATE(button);
-	gboolean changed  = priv->current_state != update; 
 	priv->current_state = update;
 	g_debug("PlayButton::toggle play state : %i", priv->current_state); 
-
-	if(changed == TRUE){
-		g_debug("Toggle play pause - changed of state detected - redraw button");
-		cairo_t *cr;
-	
-		cr = gdk_cairo_create (button->window);
-
-		GList* list = g_hash_table_lookup(priv->command_coordinates,
-			                                GINT_TO_POINTER(TRANSPORT_PLAY_PAUSE));
-
-		cairo_rectangle(cr,
-			              GPOINTER_TO_INT(g_list_nth_data(list, 0)),
-			              GPOINTER_TO_INT(g_list_nth_data(list, 1)),
-										GPOINTER_TO_INT(g_list_nth_data(list, 2)),	               	
-										GPOINTER_TO_INT(g_list_nth_data(list, 3)));
-
-		cairo_clip(cr);
-		draw (button, cr);
-		cairo_destroy (cr);
-	}
 }
 
 

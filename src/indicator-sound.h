@@ -23,10 +23,37 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <libindicator/indicator.h>
+#include <libindicator/indicator-object.h>
+#include <libindicator/indicator-service-manager.h>
+#include <libindicator/indicator-image-helper.h>
 
-// Essentially these are all exported to faciltiate testing
+#define INDICATOR_SOUND_TYPE            (indicator_sound_get_type ())
+#define INDICATOR_SOUND(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), INDICATOR_SOUND_TYPE, IndicatorSound))
+#define INDICATOR_SOUND_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), INDICATOR_SOUND_TYPE, IndicatorSoundClass))
+#define IS_INDICATOR_SOUND(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), INDICATOR_SOUND_TYPE))
+#define IS_INDICATOR_SOUND_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), INDICATOR_SOUND_TYPE))
+#define INDICATOR_SOUND_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), INDICATOR_SOUND_TYPE, IndicatorSoundClass))
+
+typedef struct _IndicatorSound      IndicatorSound;
+typedef struct _IndicatorSoundClass IndicatorSoundClass;
+
+//GObject class struct
+struct _IndicatorSoundClass {
+  IndicatorObjectClass parent_class;
+};
+
+//GObject instance struct
+struct _IndicatorSound {
+  IndicatorObject parent;
+  IndicatorServiceManager *service;
+};
+
+// GObject Boiler plate
+GType indicator_sound_get_type (void);
+
 void prepare_state_machine();
-void determine_state_from_volume(gdouble volume_percent);
+extern void determine_state_from_volume(gdouble volume_percent);
 gint get_state();
 gchar* get_state_image_name(gint state);
 void prepare_for_tests(IndicatorObject * io);

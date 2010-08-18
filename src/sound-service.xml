@@ -1,16 +1,6 @@
 <!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
 <node name="/org/ayatana/indicator/sound">
   <interface name="org.ayatana.indicator.sound">
-    <method name = "SetSinkVolume">
-        <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_set_sink_volume"/>
-        <arg type='u' name='volume_percent' direction="in"/>
-    </method>
-
-    <method name = "GetSinkVolume">
-        <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_get_sink_volume"/>
-        <arg type='d' name='volume_percent_input' direction="out"/>
-    </method>
-
     <method name = "GetSinkMute">
         <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_get_sink_mute"/>
         <arg type='b' name='mute_input' direction="out"/>
@@ -28,10 +18,6 @@ Our respective UI element should listen to this and therefore will be updated wi
       <arg name="block_value" type="b" direction="out"/>
     </signal>
     
-    <signal name="SinkVolumeUpdate">
-      <arg name="volume_percent" type="u" direction="out"/>
-    </signal>
-
     <signal name="SinkMuteUpdate">
       <arg name="mute_value" type="b" direction="out"/>
     </signal>

@@ -25,6 +25,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 DbusmenuMenuitem* dbus_menu_manager_setup();
 void dbus_menu_manager_teardown();
+void dbus_menu_manager_update_volume(gdouble volume);
 void dbus_menu_manager_update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_muted, gdouble current_vol);
 // TODO update pa_state should incorporate the method below !
 void dbus_menu_manager_update_mute_ui(gboolean incoming_mute_value);
