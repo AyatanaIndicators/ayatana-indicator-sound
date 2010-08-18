@@ -63,7 +63,6 @@ public class MprisController : GLib.Object
 		                            MetadataMenuitem.attributes_format());
 		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.mpris_player.GetMetadata(),
 		                        ScrubMenuitem.attributes_format());		
-		// temporary fix
 		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
 		scrub.update_position(this.mpris_player.PositionGet());		
 	}
@@ -124,17 +123,23 @@ public class MprisController : GLib.Object
 	private void onTrackChange(dynamic DBus.Object mpris_client, HashTable<string,Value?> ht)
 	{
 		debug("onTrackChange");
+		
 		this.owner.custom_items[PlayerController.widget_order.METADATA].reset(MetadataMenuitem.attributes_format());
 		this.owner.custom_items[PlayerController.widget_order.SCRUB].reset(ScrubMenuitem.attributes_format());
+		//HashTable<string, Value?> status_hash = new HashTable<string, Value?>(str_hash, str_equal);
+
+		status st = this.mpris_player.GetStatus();
+		int play_state =  st.playback;
+		debug("GetStatusChange, about to update scrub with play state - %i", play_state);
+
+		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
+		scrub.update_playstate(play_state);
+		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.mpris_player.GetMetadata(),
+		                        ScrubMenuitem.attributes_format());		
 		this.owner.custom_items[PlayerController.widget_order.METADATA].update(ht,
 		                            MetadataMenuitem.attributes_format());
 		debug("about to update the duration on the scrub bar");
-		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.mpris_player.GetMetadata(),
-		                        ScrubMenuitem.attributes_format());		
 		// temporary fix
-		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
 		scrub.update_position(this.mpris_player.PositionGet());
 	}
-		
-	
 }

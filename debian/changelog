@@ -1,3 +1,9 @@
+indicator-sound (0.4.0-0ubuntu1) maverick; urgency=low
+
+  * New upstream release using mpris2 now (lp: #617367)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 18 Aug 2010 15:51:03 +0200
+
 indicator-sound (0.3.9-0ubuntu2) maverick; urgency=low
 
   * Backport upstream commit to fix the indicator crashing when rhythmbox starts

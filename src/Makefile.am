@@ -20,6 +20,8 @@ libsoundmenu_la_SOURCES = \
 	title-widget.h \
 	scrub-widget.c \
 	scrub-widget.h \
+	volume-widget.c \
+	volume-widget.h \
 	dbus-shared-names.h \
   sound-service-client.h 
 
@@ -63,13 +65,15 @@ music_bridge_VALASOURCES = \
 	scrub-menu-item.vala \
 	title-menu-item.vala \
 	player-controller.vala \
-	mpris-controller-v2.vala \
+	mpris-bridge.vala \
 	mpris-controller.vala \
+	mpris2-controller.vala \
 	player-item.vala \
 	familiar-players-db.vala
 
 music_bridge_VALAFLAGS = \
   --ccode \
+  --disable-dbus-transformation \
   -H music-player-bridge.h -d . \
   --vapidir=$(top_srcdir)/vapi/ \
   --vapidir=./ \
@@ -79,7 +83,8 @@ music_bridge_VALAFLAGS = \
   --pkg Dbusmenu-Glib-0.2 \
   --pkg common-defs \
 	--pkg dbus-glib-1 \
-	--pkg gio-unix-2.0 
+	--pkg gio-unix-2.0
+	 
  $(MAINTAINER_VALAFLAGS)
 
 music_bridge_APIFILES = \

@@ -55,53 +55,6 @@ G_BEGIN_DECLS
 #endif /* !G_ENABLE_DEBUG */
 
 
-/* BOOLEAN:UINT,POINTER */
-extern void dbus_glib_marshal__sound_service_server_BOOLEAN__UINT_POINTER (GClosure     *closure,
-                                                                           GValue       *return_value,
-                                                                           guint         n_param_values,
-                                                                           const GValue *param_values,
-                                                                           gpointer      invocation_hint,
-                                                                           gpointer      marshal_data);
-void
-dbus_glib_marshal__sound_service_server_BOOLEAN__UINT_POINTER (GClosure     *closure,
-                                                               GValue       *return_value G_GNUC_UNUSED,
-                                                               guint         n_param_values,
-                                                               const GValue *param_values,
-                                                               gpointer      invocation_hint G_GNUC_UNUSED,
-                                                               gpointer      marshal_data)
-{
-  typedef gboolean (*GMarshalFunc_BOOLEAN__UINT_POINTER) (gpointer     data1,
-                                                          guint        arg_1,
-                                                          gpointer     arg_2,
-                                                          gpointer     data2);
-  register GMarshalFunc_BOOLEAN__UINT_POINTER callback;
-  register GCClosure *cc = (GCClosure*) closure;
-  register gpointer data1, data2;
-  gboolean v_return;
-
-  g_return_if_fail (return_value != NULL);
-  g_return_if_fail (n_param_values == 3);
-
-  if (G_CCLOSURE_SWAP_DATA (closure))
-    {
-      data1 = closure->data;
-      data2 = g_value_peek_pointer (param_values + 0);
-    }
-  else
-    {
-      data1 = g_value_peek_pointer (param_values + 0);
-      data2 = closure->data;
-    }
-  callback = (GMarshalFunc_BOOLEAN__UINT_POINTER) (marshal_data ? marshal_data : cc->callback);
-
-  v_return = callback (data1,
-                       g_marshal_value_peek_uint (param_values + 1),
-                       g_marshal_value_peek_pointer (param_values + 2),
-                       data2);
-
-  g_value_set_boolean (return_value, v_return);
-}
-
 /* BOOLEAN:POINTER,POINTER */
 extern void dbus_glib_marshal__sound_service_server_BOOLEAN__POINTER_POINTER (GClosure     *closure,
                                                                               GValue       *return_value,
@@ -155,18 +108,16 @@ G_END_DECLS
 
 #include <dbus/dbus-glib.h>
 static const DBusGMethodInfo dbus_glib__sound_service_server_methods[] = {
-  { (GCallback) sound_service_dbus_set_sink_volume, dbus_glib_marshal__sound_service_server_BOOLEAN__UINT_POINTER, 0 },
-  { (GCallback) sound_service_dbus_get_sink_volume, dbus_glib_marshal__sound_service_server_BOOLEAN__POINTER_POINTER, 64 },
-  { (GCallback) sound_service_dbus_get_sink_mute, dbus_glib_marshal__sound_service_server_BOOLEAN__POINTER_POINTER, 138 },
-  { (GCallback) sound_service_dbus_get_sink_availability, dbus_glib_marshal__sound_service_server_BOOLEAN__POINTER_POINTER, 200 },
+  { (GCallback) sound_service_dbus_get_sink_mute, dbus_glib_marshal__sound_service_server_BOOLEAN__POINTER_POINTER, 0 },
+  { (GCallback) sound_service_dbus_get_sink_availability, dbus_glib_marshal__sound_service_server_BOOLEAN__POINTER_POINTER, 62 },
 };
 
 const DBusGObjectInfo dbus_glib__sound_service_server_object_info = {
   0,
   dbus_glib__sound_service_server_methods,
-  4,
-"org.ayatana.indicator.sound\0SetSinkVolume\0S\0volume_percent\0I\0u\0\0org.ayatana.indicator.sound\0GetSinkVolume\0S\0volume_percent_input\0O\0F\0N\0d\0\0org.ayatana.indicator.sound\0GetSinkMute\0S\0mute_input\0O\0F\0N\0b\0\0org.ayatana.indicator.sound\0GetSinkAvailability\0S\0availability_input\0O\0F\0N\0b\0\0\0",
-"org.ayatana.indicator.sound\0SinkInputWhileMuted\0org.ayatana.indicator.sound\0SinkVolumeUpdate\0org.ayatana.indicator.sound\0SinkMuteUpdate\0org.ayatana.indicator.sound\0SinkAvailableUpdate\0\0",
+  2,
+"org.ayatana.indicator.sound\0GetSinkMute\0S\0mute_input\0O\0F\0N\0b\0\0org.ayatana.indicator.sound\0GetSinkAvailability\0S\0availability_input\0O\0F\0N\0b\0\0\0",
+"org.ayatana.indicator.sound\0SinkInputWhileMuted\0org.ayatana.indicator.sound\0SinkMuteUpdate\0org.ayatana.indicator.sound\0SinkAvailableUpdate\0\0",
 "\0"
 };
 
