@@ -375,8 +375,6 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
 
 			g_return_if_fail(IS_INDICATOR_SOUND(userdata));
 			
-      // Ensure we are in a coherent state with the service at start up.
-      // Preserve ordering!
     }
   }
   return;
@@ -464,12 +462,7 @@ tidy_up_hash()
 static void
 update_state(const gint state)
 {
-  /*    g_debug("update state beginning - previous_state = %i", previous_state);*/
-
   previous_state = current_state;
-
-  /*    g_debug("update state 3rd line - previous_state = %i", previous_state);*/
-
   current_state = state;
   gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
   indicator_image_helper_update(speaker_image, image_name);
@@ -479,7 +472,6 @@ update_state(const gint state)
 void
 determine_state_from_volume(gdouble volume_percent)
 {
-  /*    g_debug("determine_state_from_volume - previous_state = %i", previous_state);*/
   if (device_available == FALSE)
     return;
   gint state = previous_state;

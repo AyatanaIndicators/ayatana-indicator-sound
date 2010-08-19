@@ -119,13 +119,14 @@ public class Mpris2Controller : GLib.Object
 		Value? meta_v = changed_properties.lookup("Metadata");
 		if(meta_v != null){
 			debug("metadata is not empty");
-			debug("artist : %s", this.player.Metadata.lookup("artist").get_string());			
+			debug("artist : %s", this.player.Metadata.lookup("artist").get_string());	
+			
 			this.owner.custom_items[PlayerController.widget_order.METADATA].reset(MetadataMenuitem.attributes_format());			
 			this.owner.custom_items[PlayerController.widget_order.METADATA].update(this.player.Metadata,
 			                          																						 MetadataMenuitem.attributes_format());			
 			this.owner.custom_items[PlayerController.widget_order.SCRUB].reset(ScrubMenuitem.attributes_format());	
 			if((int)this.player.Metadata.lookup("artist").get_string().len() > 0 ||
-			   (int)this.player.Metadata.lookup("artist").get_string().len() > 0){
+			   (int)this.player.Metadata.lookup("title").get_string().len() > 0){
 				this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.player.Metadata,
 					                    																							ScrubMenuitem.attributes_format());			
 			}
@@ -208,19 +209,20 @@ public class Mpris2Controller : GLib.Object
 			warning("Can't fetch the duration of the track therefore cant set the position");
 			return;
 		}
-		// work in microseconds (scale up by 10 TTP-of 3)
-		uint32 total_time = time_value.get_uint() * 1000;
+		// work in microseconds (scale up by 10 TTP-of 6)
+		uint32 total_time = time_value.get_uint() * 1000000;
 		debug("total time of track = %i", (int)total_time);				
-		double new_time_position = total_time * position/100.0;
+		double new_time_position = total_time * (position/100.0);
 		debug("new position = %f", (new_time_position));		
 
 		Value? v = this.player.Metadata.lookup("trackid");
 		if(v != null){
 			if(v.holds (typeof (string))){
-				debug("the trackid = %s", v.get_string());
 				DBus.ObjectPath path = new ObjectPath(v.get_string());
 				try{
-					//this.player.SetPosition(path, (int64)(new_time_position));
+					this.player.SetPosition(path, (int64)(new_time_position));
+					ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
+					scrub.update_position(((int32)new_time_position) / 1000);			
 				}
 				catch(DBus.Error e){
 					error("DBus Error calling the player objects SetPosition method %s",
