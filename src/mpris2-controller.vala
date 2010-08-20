@@ -120,8 +120,16 @@ public class Mpris2Controller : GLib.Object
 		if(meta_v != null){
 			debug("metadata is not empty");
 			debug("artist : %s", this.player.Metadata.lookup("artist").get_string());	
+			debug("arturl: %s", this.player.Metadata.lookup("arturl").get_string());
+			/*try{
+				debug("arturl : %s", this.player.Metadata.lookup("arturl").get_string());
+			}
+			catch(GLib.Error e){
+				warning("NO ART URL");
+			}*/
 			
-			this.owner.custom_items[PlayerController.widget_order.METADATA].reset(MetadataMenuitem.attributes_format());			
+			this.owner.custom_items[PlayerController.widget_order.METADATA].reset(MetadataMenuitem.attributes_format());
+			debug("After the reset the arturl = %i", this.owner.custom_items[PlayerController.widget_order.METADATA].property_get_int("x-canonical-sound-menu-player-metadata-arturl"));
 			this.owner.custom_items[PlayerController.widget_order.METADATA].update(this.player.Metadata,
 			                          																						 MetadataMenuitem.attributes_format());			
 			this.owner.custom_items[PlayerController.widget_order.SCRUB].reset(ScrubMenuitem.attributes_format());	
