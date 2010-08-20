@@ -233,14 +233,155 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	}		
 }
 
+
+static cairo_surface_t *
+surface_from_pixbuf (GdkPixbuf *pixbuf)
+{
+        cairo_surface_t *surface;
+        cairo_t         *cr;
+
+        surface = cairo_image_surface_create (gdk_pixbuf_get_has_alpha (pixbuf) ?
+                                              CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24,
+                                              gdk_pixbuf_get_width (pixbuf),
+                                              gdk_pixbuf_get_height (pixbuf));
+        cr = cairo_create (surface);
+        gdk_cairo_set_source_pixbuf (cr, pixbuf, 0, 0);
+        cairo_paint (cr);
+        cairo_destroy (cr);
+
+        return surface;
+}
+
+static void
+rounded_rectangle (cairo_t *cr,
+                   gdouble  aspect,
+                   gdouble  x,
+                   gdouble  y,
+                   gdouble  corner_radius,
+                   gdouble  width,
+                   gdouble  height)
+{
+        gdouble radius;
+        gdouble degrees;
+
+        radius = corner_radius / aspect;
+        degrees = G_PI / 180.0;
+
+        cairo_new_sub_path (cr);
+        cairo_arc (cr,
+                   x + width - radius,
+                   y + radius,
+                   radius,
+                   -90 * degrees,
+                   0 * degrees);
+        cairo_arc (cr,
+                   x + width - radius,
+                   y + height - radius,
+                   radius,
+                   0 * degrees,
+                   90 * degrees);
+        cairo_arc (cr,
+                   x + radius,
+                   y + height - radius,
+                   radius,
+                   90 * degrees,
+                   180 * degrees);
+        cairo_arc (cr,
+                   x + radius,
+                   y + radius,
+                   radius,
+                   180 * degrees,
+                   270 * degrees);
+        cairo_close_path (cr);
+}
+
+static void
+image_set_from_pixbuf (GtkImage  *image,
+                       GdkPixbuf *source)
+{
+        cairo_t         *cr;
+        cairo_t         *cr_mask;
+        cairo_surface_t *surface;
+        GdkPixmap       *pixmap;
+        GdkPixmap       *bitmask;
+        int              w;
+        int              h;
+        int              frame_width;
+        double           radius;
+        GdkColor         color;
+        double           r;
+        double           g;
+        double           b;
+
+        frame_width = 5;
+
+        w = gdk_pixbuf_get_width (source) + frame_width * 2;
+        h = gdk_pixbuf_get_height (source) + frame_width * 2;
+
+        radius = w / 10;
+
+        pixmap = gdk_pixmap_new (gtk_widget_get_window (GTK_WIDGET (image)), w, h, -1);
+        bitmask = gdk_pixmap_new (gtk_widget_get_window (GTK_WIDGET (image)), w, h, 1);
+
+	if (gtk_widget_get_window (GTK_WIDGET (image)) == NULL)
+		return;
+
+        cr = gdk_cairo_create (pixmap);
+        cr_mask = gdk_cairo_create (bitmask);
+
+        /* setup mask */
+        cairo_rectangle (cr_mask, 0, 0, w, h);
+        cairo_set_operator (cr_mask, CAIRO_OPERATOR_CLEAR);
+        cairo_fill (cr_mask);
+
+        rounded_rectangle (cr_mask, 1.0, 0.5, 0.5, radius, w - 1, h - 1);
+        cairo_set_operator (cr_mask, CAIRO_OPERATOR_OVER);
+        cairo_set_source_rgb (cr_mask, 1, 1, 1);
+        cairo_fill (cr_mask);
+
+        color = gtk_widget_get_style (GTK_WIDGET (image))->bg [GTK_STATE_NORMAL];
+        r = (float)color.red / 65535.0;
+        g = (float)color.green / 65535.0;
+        b = (float)color.blue / 65535.0;
+
+        /* set up image */
+        cairo_rectangle (cr, 0, 0, w, h);
+        cairo_set_source_rgb (cr, r, g, b);
+        cairo_fill (cr);
+
+        rounded_rectangle (cr,
+                           1.0,
+                           frame_width + 0.5,
+                           frame_width + 0.5,
+                           radius,
+                           w - frame_width * 2 - 1,
+                           h - frame_width * 2 - 1);
+        cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.3);
+        cairo_fill_preserve (cr);
+
+        surface = surface_from_pixbuf (source);
+        cairo_set_source_surface (cr, surface, frame_width, frame_width);
+        cairo_fill (cr);
+
+        gtk_image_set_from_pixmap (image, pixmap, bitmask);
+
+        cairo_surface_destroy (surface);
+
+        g_object_unref (bitmask);
+        g_object_unref (pixmap);
+
+        cairo_destroy (cr_mask);
+        cairo_destroy (cr);
+}
+
 static void
 update_album_art(MetadataWidget* self){
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);	
 	GdkPixbuf* pixbuf;
 	pixbuf = gdk_pixbuf_new_from_file(priv->image_path, NULL);
-  pixbuf = gdk_pixbuf_scale_simple(pixbuf,60, 60, GDK_INTERP_BILINEAR);
+	pixbuf = gdk_pixbuf_scale_simple(pixbuf,60, 60, GDK_INTERP_BILINEAR);
 	g_debug("attempting to set the image with path %s", priv->image_path);
-	gtk_image_set_from_pixbuf(GTK_IMAGE(priv->album_art), pixbuf);
+	image_set_from_pixbuf (GTK_IMAGE(priv->album_art), pixbuf);
 	g_object_unref(pixbuf);	
 }
 
