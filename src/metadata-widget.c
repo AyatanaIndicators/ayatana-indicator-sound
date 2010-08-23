@@ -236,7 +236,8 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	pango_cairo_show_layout(cr, layout);
 
 	g_object_unref(layout);	
-
+	g_object_unref(p_context);
+	g_string_free (string);
 	cairo_destroy (cr);	
 	
 	return TRUE;
