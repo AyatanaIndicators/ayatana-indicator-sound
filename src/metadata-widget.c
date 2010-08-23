@@ -173,6 +173,28 @@ metadata_widget_finalize (GObject *object)
 	G_OBJECT_CLASS (metadata_widget_parent_class)->finalize (object);
 }
 
+/*
+static void
+_setup (cairo_t**         cr,
+				cairo_surface_t** surf,
+				gint              width,
+				gint              height)
+{
+	if (!cr || !surf)
+		return;
+
+	*surf = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width, height);
+	*cr = cairo_create (*surf);
+	cairo_scale (*cr, 1.0f, 1.0f);
+	cairo_set_operator (*cr, CAIRO_OPERATOR_CLEAR);
+	cairo_paint (*cr);
+	cairo_set_operator (*cr, CAIRO_OPERATOR_OVER);
+}*/
+
+/**
+ * We override the expose method to enable primitive drawing of the 
+ * empty album art image (and soon rounded rectangles on the album art)
+ */
 static gboolean
 metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user_data)
 {
@@ -180,26 +202,68 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	MetadataWidget* widget = METADATA_WIDGET(user_data);
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);	
 
-	if(priv->image_path->len == 0){
-		g_debug("yeah image path is null this should be blank");
-		cairo_t *cr;
-		cr = gdk_cairo_create (metadata->window);
-		g_debug("metatdata EXPOSE-> dimensions x = %f, y = %f, width = %f, height = %f",
-		      event->area.x,
-		      event->area.y,
-          event->area.width,
-		      event->area.height);		      
-		cairo_rectangle (cr,
-	                   0, 0,
-	                   60, 60);
+	if(priv->image_path->len > 0){
+			return FALSE;	
+	}
+	
+	cairo_t *cr;
+	cairo_surface_t*  surf = NULL;
+	
+	cr = gdk_cairo_create (metadata->window);
+	GtkAllocation alloc;
+	gtk_widget_get_allocation (metadata, &alloc);
+	//_setup(&cr, &surf, alloc.width, alloc.height); 
+	
+	g_debug("metatdata EXPOSE-> dimensions x = %i, y = %i, width = %i, height = %i",
+					alloc.x,
+	        alloc.y,
+	        alloc.width,
+	        alloc.height);
+	
+	cairo_rectangle (cr,
+                   alloc.x, alloc.y,
+                   alloc.width, alloc.height);
+	cairo_clip(cr);
 
-		cairo_clip(cr);
-		//draw (button, cr);
-		cairo_destroy (cr);	
-		
-		return TRUE;
-	}		
-	return FALSE;	
+	cairo_move_to (cr, alloc.x , alloc.y);
+	cairo_line_to(cr, alloc.x + alloc.width,
+	              alloc.y);
+	cairo_line_to(cr, alloc.x + alloc.width,
+	              alloc.y + alloc.height);
+	cairo_line_to(cr, alloc.x, alloc.y + alloc.height);
+	cairo_line_to(cr, alloc.x, alloc.y);
+
+	cairo_close_path (cr);
+
+	cairo_set_source_rgba (cr, 123.0f / 255.0f, 123.0f / 255.0f, 120.0f / 255.0f, .8f);		
+	cairo_set_line_width (cr, 2.0);
+	
+	cairo_stroke (cr);						
+
+	// Draw the eight note
+	PangoLayout *layout;
+	PangoFontDescription *desc;
+	layout = pango_cairo_create_layout(cr);
+
+	GString* string = g_string_new("");
+	gssize size = -1;
+	gunichar code = g_utf8_get_char_validated("0x266B", size);	
+	g_string_append_unichar (string, code);
+	
+	pango_layout_set_text(layout, string->str, -1);
+	desc = pango_font_description_from_string("Sans Bold 12");
+	pango_layout_set_font_description(layout, desc);
+	pango_font_description_free(desc);
+
+	cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+	pango_cairo_update_layout(cr, layout);
+	pango_cairo_show_layout(cr, layout);
+
+	g_object_unref(layout);	
+
+	cairo_destroy (cr);	
+	
+	return TRUE;
 }
 
 /* Suppress/consume keyevents */
