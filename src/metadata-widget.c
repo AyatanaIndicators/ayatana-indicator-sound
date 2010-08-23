@@ -244,19 +244,22 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	PangoLayout *layout;
 	PangoFontDescription *desc;
 	layout = pango_cairo_create_layout(cr);
+	PangoContext* pcontext = pango_cairo_create_context(cr); 
+	pango_cairo_context_set_resolution (pcontext, 96);
 
 	GString* string = g_string_new("");
 	gssize size = -1;
-	gunichar code = g_utf8_get_char_validated("0x266B", size);	
+	gunichar code = g_utf8_get_char_validated("\342\231\253", size);	
 	g_string_append_unichar (string, code);
 	
 	pango_layout_set_text(layout, string->str, -1);
-	desc = pango_font_description_from_string("Sans Bold 12");
+	desc = pango_font_description_from_string("Sans Bold 30");
 	pango_layout_set_font_description(layout, desc);
 	pango_font_description_free(desc);
 
-	cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.8);
 	pango_cairo_update_layout(cr, layout);
+	cairo_move_to (cr, alloc.x + alloc.width/6, alloc.y);	
 	pango_cairo_show_layout(cr, layout);
 
 	g_object_unref(layout);	
@@ -323,33 +326,6 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	}		
 }
 
-static void metadata_widget_draw_album_art_placeholder(MetadataWidget* self)
-{
-	/*MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);			
-	cairo_t *cr;	
-	cr = gdk_cairo_create (GTK_WIDGET(self)->window);
-	PangoLayout *layout;
-	PangoFontDescription *desc;
-	layout = pango_cairo_create_layout(cr);
-
-	GString* string = g_string_new("");
-	gssize size = -1;
-	gunichar code = g_utf8_get_char_validated("0x266B", size);	
-	g_string_append_unichar (string, code);
-
-	pango_layout_set_text(layout, string->str, -1);
-	desc = pango_font_description_from_string("Sans Bold 12");
-	pango_layout_set_font_description(layout, desc);
-	pango_font_description_free(desc);
-
-	cairo_set_source_rgb(cr, 0.0, 0.0, 1.0);
-	pango_cairo_update_layout(cr, layout);
-	pango_cairo_show_layout(cr, layout);
-
-	g_object_unref(layout);	
-	cairo_destroy (cr);	
-	*/
-}
 
 static void
 metadata_widget_update_album_art(MetadataWidget* self){
