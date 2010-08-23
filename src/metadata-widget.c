@@ -65,8 +65,6 @@ static void metadata_widget_style_title_text(MetadataWidget* self);
 static void metadata_widget_style_artist_and_album_label(MetadataWidget* self,
                                                          GtkLabel* label);
 
-static void metadata_widget_draw_album_art_placeholder(MetadataWidget* self);
-
 void metadata_widget_set_style(GtkWidget* button, GtkStyle* style);
 
 
@@ -113,16 +111,16 @@ metadata_widget_init (MetadataWidget *self)
 	gtk_box_pack_start (GTK_BOX (priv->hbox), priv->album_art, FALSE, FALSE, 0);	
 	
 	GtkWidget* vbox = gtk_vbox_new(FALSE, 0);
-	gtk_container_set_border_width(GTK_CONTAINER(vbox), 10);
 	
 	// artist
 	GtkWidget* artist;
 	artist = gtk_label_new(dbusmenu_menuitem_property_get(twin_item,
 	                                                      DBUSMENU_METADATA_MENUITEM_ARTIST));
 	gtk_misc_set_alignment(GTK_MISC(artist), (gfloat)0, (gfloat)0);
+	gtk_misc_set_padding (GTK_MISC(artist), (gfloat)10, (gfloat)0);
 	gtk_label_set_width_chars(GTK_LABEL(artist), 15);	
 	gtk_label_set_ellipsize(GTK_LABEL(artist), PANGO_ELLIPSIZE_MIDDLE);	
-	metadata_widget_style_artist_and_album_label(self, artist);
+	metadata_widget_style_artist_and_album_label(self, GTK_LABEL(artist));
 	priv->artist_label = artist;
 	
 	// title
@@ -130,6 +128,7 @@ metadata_widget_init (MetadataWidget *self)
 	piece = gtk_label_new(dbusmenu_menuitem_property_get(twin_item,
 	                                                     DBUSMENU_METADATA_MENUITEM_TITLE));
 	gtk_misc_set_alignment(GTK_MISC(piece), (gfloat)0, (gfloat)0);
+	gtk_misc_set_padding (GTK_MISC(piece), (gfloat)10, (gfloat)0);
 	gtk_label_set_width_chars(GTK_LABEL(piece), 15);
 	gtk_label_set_ellipsize(GTK_LABEL(piece), PANGO_ELLIPSIZE_MIDDLE);
 	priv->piece_label =  piece;
@@ -140,9 +139,10 @@ metadata_widget_init (MetadataWidget *self)
 	container = gtk_label_new(dbusmenu_menuitem_property_get(twin_item,
 	                                                         DBUSMENU_METADATA_MENUITEM_ALBUM));
 	gtk_misc_set_alignment(GTK_MISC(container), (gfloat)0, (gfloat)0);
+	gtk_misc_set_padding (GTK_MISC(container), (gfloat)10, (gfloat)0);	
 	gtk_label_set_width_chars(GTK_LABEL(container), 15);		
 	gtk_label_set_ellipsize(GTK_LABEL(container), PANGO_ELLIPSIZE_MIDDLE);	
-	metadata_widget_style_artist_and_album_label(self, container);
+	metadata_widget_style_artist_and_album_label(self, GTK_LABEL(container));
 	priv->container_label = container;
 
 	gtk_box_pack_start (GTK_BOX (vbox), priv->piece_label, FALSE, FALSE, 0);	
@@ -173,24 +173,6 @@ metadata_widget_finalize (GObject *object)
 	G_OBJECT_CLASS (metadata_widget_parent_class)->finalize (object);
 }
 
-/*
-static void
-_setup (cairo_t**         cr,
-				cairo_surface_t** surf,
-				gint              width,
-				gint              height)
-{
-	if (!cr || !surf)
-		return;
-
-	*surf = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width, height);
-	*cr = cairo_create (*surf);
-	cairo_scale (*cr, 1.0f, 1.0f);
-	cairo_set_operator (*cr, CAIRO_OPERATOR_CLEAR);
-	cairo_paint (*cr);
-	cairo_set_operator (*cr, CAIRO_OPERATOR_OVER);
-}*/
-
 /**
  * We override the expose method to enable primitive drawing of the 
  * empty album art image (and soon rounded rectangles on the album art)
@@ -198,7 +180,7 @@ _setup (cairo_t**         cr,
 static gboolean
 metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user_data)
 {
-	g_return_if_fail(IS_METADATA_WIDGET(user_data));
+	g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
 	MetadataWidget* widget = METADATA_WIDGET(user_data);
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);	
 
@@ -206,20 +188,11 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 			return FALSE;	
 	}
 	
-	cairo_t *cr;
-	cairo_surface_t*  surf = NULL;
-	
+	cairo_t *cr;	
 	cr = gdk_cairo_create (metadata->window);
 	GtkAllocation alloc;
 	gtk_widget_get_allocation (metadata, &alloc);
-	//_setup(&cr, &surf, alloc.width, alloc.height); 
-	
-	g_debug("metatdata EXPOSE-> dimensions x = %i, y = %i, width = %i, height = %i",
-					alloc.x,
-	        alloc.y,
-	        alloc.width,
-	        alloc.height);
-	
+		
 	cairo_rectangle (cr,
                    alloc.x, alloc.y,
                    alloc.width, alloc.height);
@@ -275,12 +248,12 @@ metadata_widget_button_press_event (GtkWidget *menuitem,
                                   GdkEventButton *event)
 {
 	GtkClipboard* board = gtk_clipboard_get (GDK_NONE);	
-	gchar* title = dbusmenu_menuitem_property_get(twin_item,
-	                                              DBUSMENU_METADATA_MENUITEM_TITLE);
-	gchar* artist = dbusmenu_menuitem_property_get(twin_item,
-	                                              DBUSMENU_METADATA_MENUITEM_ARTIST);
-	gchar* album = dbusmenu_menuitem_property_get(twin_item,
-	                                              DBUSMENU_METADATA_MENUITEM_ALBUM);
+	gchar* title = g_strdup(dbusmenu_menuitem_property_get(twin_item,
+	                                              DBUSMENU_METADATA_MENUITEM_TITLE));
+	gchar* artist = g_strdup(dbusmenu_menuitem_property_get(twin_item,
+	                                              DBUSMENU_METADATA_MENUITEM_ARTIST));
+	gchar* album = g_strdup(dbusmenu_menuitem_property_get(twin_item,
+	                                              DBUSMENU_METADATA_MENUITEM_ALBUM));
 	gchar* contents = g_strdup_printf("artist: %s \ntitle: %s \nalbum: %s", artist, title, album);
 	g_debug("contents to be copied will be : %s", contents);	
 	gtk_clipboard_set_text (board, contents, -1);
@@ -326,7 +299,6 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	}		
 }
 
-
 static void
 metadata_widget_update_album_art(MetadataWidget* self){
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);	
@@ -340,7 +312,6 @@ metadata_widget_update_album_art(MetadataWidget* self){
 }
 
 // TODO refactor next 3 methods into one once the style has been 
-// "signed off" by design
 static void
 metadata_widget_style_artist_and_album_label(MetadataWidget* self, GtkLabel* label)
 {
