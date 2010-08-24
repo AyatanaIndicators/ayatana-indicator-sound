@@ -236,8 +236,8 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	pango_cairo_show_layout(cr, layout);
 
 	g_object_unref(layout);	
-	g_object_unref(p_context);
-	g_string_free (string);
+	g_object_unref(pcontext);
+	g_string_free (string, TRUE);
 	cairo_destroy (cr);	
 	
 	return TRUE;
@@ -260,6 +260,9 @@ metadata_widget_button_press_event (GtkWidget *menuitem,
 	gtk_clipboard_set_text (board, contents, -1);
 	gtk_clipboard_store (board);
 	g_free(contents);
+	g_free(title);
+	g_free(artist);
+	g_free(album);
 	return FALSE;
 }
 
@@ -295,7 +298,7 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	}	
 	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_ARTURL, property) == 0){
 		g_string_erase(priv->image_path, 0, -1);
-		g_string_overwrite(priv->image_path, 0, g_value_dup_string(value)); 
+		g_string_overwrite(priv->image_path, 0, g_value_get_string (value)); 
 		metadata_widget_update_album_art(mitem);			
 	}		
 }

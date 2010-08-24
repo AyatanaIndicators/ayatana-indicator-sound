@@ -29,6 +29,20 @@ public class MetadataMenuitem : PlayerItem
 		reset(attributes_format());
 	}
 
+	public bool needs_reset(GLib.HashTable<string, Value?> updates)
+	{
+		if(this.property_exist(MENUITEM_ARTURL) == false){
+			return true;
+		}
+		if(this.property_get_int(MENUITEM_ARTURL) == EMPTY){
+			return true;
+		}
+		if(strcmp(updates.lookup("xesam:artist").get_string() ,this.property_get(MENUITEM_ARTURL)) != 0){
+			return true;
+		}
+		return false;
+	}
+	
 	public static HashSet<string> attributes_format()
 	{
 		HashSet<string> attrs = new HashSet<string>();		
