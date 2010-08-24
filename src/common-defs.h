@@ -34,16 +34,16 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE  "x-canonical-sound-menu-player-transport-state"
 
 #define DBUSMENU_METADATA_MENUITEM_TYPE  				"x-canonical-sound-menu-player-metadata-type"
-#define DBUSMENU_METADATA_MENUITEM_ARTIST  			"x-canonical-sound-menu-player-metadata-artist"
-#define DBUSMENU_METADATA_MENUITEM_TITLE  			"x-canonical-sound-menu-player-metadata-title"
-#define DBUSMENU_METADATA_MENUITEM_ALBUM   			"x-canonical-sound-menu-player-metadata-album"
-#define DBUSMENU_METADATA_MENUITEM_ARTURL  			"x-canonical-sound-menu-player-metadata-arturl"
+#define DBUSMENU_METADATA_MENUITEM_ARTIST  			"x-canonical-sound-menu-player-metadata-xesam:artist"
+#define DBUSMENU_METADATA_MENUITEM_TITLE  			"x-canonical-sound-menu-player-metadata-xesam:title"
+#define DBUSMENU_METADATA_MENUITEM_ALBUM   			"x-canonical-sound-menu-player-metadata-xesam:album"
+#define DBUSMENU_METADATA_MENUITEM_ARTURL  			"x-canonical-sound-menu-player-metadata-mpris:artUrl"
 
 #define DBUSMENU_TITLE_MENUITEM_TYPE          	"x-canonical-sound-menu-player-title-type"
 #define DBUSMENU_TITLE_MENUITEM_NAME       			"x-canonical-sound-menu-player-title-name"
 
 #define DBUSMENU_SCRUB_MENUITEM_TYPE						"x-canonical-sound-menu-player-scrub-type"
-#define DBUSMENU_SCRUB_MENUITEM_DURATION				"x-canonical-sound-menu-player-scrub-time"
+#define DBUSMENU_SCRUB_MENUITEM_DURATION				"x-canonical-sound-menu-player-scrub-mpris:length"
 #define DBUSMENU_SCRUB_MENUITEM_POSITION				"x-canonical-sound-menu-player-scrub-position"
 #define DBUSMENU_SCRUB_MENUITEM_PLAY_STATE			"x-canonical-sound-menu-player-scrub-play-state"
 

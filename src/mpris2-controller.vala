@@ -19,6 +19,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using DBus;
 
+
 [DBus (name = "org.mpris.MediaPlayer2")]
 public interface MprisRoot : DBus.Object {
 	// properties
@@ -89,7 +90,7 @@ public class Mpris2Controller : GLib.Object
 			this.properties_interface.PropertiesChanged += property_changed_cb;			
 			
 		} catch (DBus.Error e) {
-      error("Problems connecting to the session bus - %s", e.message);
+      	error("Problems connecting to the session bus - %s", e.message);
     }		
 	}
 
@@ -118,21 +119,40 @@ public class Mpris2Controller : GLib.Object
 
 		Value? meta_v = changed_properties.lookup("Metadata");
 		if(meta_v != null){
-			debug("metadata is not empty");
-			debug("artist : %s", this.player.Metadata.lookup("artist").get_string());			
-			this.owner.custom_items[PlayerController.widget_order.METADATA].reset(MetadataMenuitem.attributes_format());			
-			this.owner.custom_items[PlayerController.widget_order.METADATA].update(this.player.Metadata,
+			GLib.HashTable<string, Value?> changed_updates = clean_metadata();	
+
+			//MetadataMenuitem meta = this.owner.custom_items[PlayerController.widget_order.METADATA] as MetadataMenuitem;
+			//meta.reset(MetadataMenuitem.attributes_format());					
+			this.owner.custom_items[PlayerController.widget_order.METADATA].reset(MetadataMenuitem.attributes_format());
+			this.owner.custom_items[PlayerController.widget_order.METADATA].update(changed_updates,
 			                          																						 MetadataMenuitem.attributes_format());			
 			this.owner.custom_items[PlayerController.widget_order.SCRUB].reset(ScrubMenuitem.attributes_format());	
-			if((int)this.player.Metadata.lookup("artist").get_string().len() > 0 ||
-			   (int)this.player.Metadata.lookup("artist").get_string().len() > 0){
-				this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.player.Metadata,
-					                    																							ScrubMenuitem.attributes_format());			
-			}
+			this.owner.custom_items[PlayerController.widget_order.SCRUB].update(changed_updates,
+				                    																							ScrubMenuitem.attributes_format());			
+		
 			(this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem).update_playstate(this.determine_play_state(this.player.PlaybackStatus));			
 			
 		}
 	}
+
+	private GLib.HashTable<string, Value?> clean_metadata()
+	{ 
+		GLib.HashTable<string, Value?> changed_updates = this.player.Metadata; 
+    Value? artist_v = this.player.Metadata.lookup("xesam:artist");
+    if(artist_v != null){
+		  string[] artists = (string[])this.player.Metadata.lookup("xesam:artist");
+		  string display_artists = string.joinv(", ", artists);
+		  changed_updates.replace("xesam:artist", display_artists);
+		  debug("artist : %s", display_artists);
+    }
+    Value? length_v = this.player.Metadata.lookup("mpris:length");
+    if(length_v != null){
+		  int64 duration = this.player.Metadata.lookup("mpris:length").get_int64();
+		  changed_updates.replace("mpris:length", duration/1000000); 
+    }
+		return changed_updates;
+	}
+	
 	
 	private int determine_play_state(string status){
 		if(status == null)
@@ -157,9 +177,10 @@ public class Mpris2Controller : GLib.Object
 		debug("initial update - play state %i", status);
 		
 		(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(status);
-		this.owner.custom_items[PlayerController.widget_order.METADATA].update(this.player.Metadata,
+		GLib.HashTable<string, Value?> cleaned_metadata = this.clean_metadata();
+		this.owner.custom_items[PlayerController.widget_order.METADATA].update(cleaned_metadata,
 			                          MetadataMenuitem.attributes_format());
-		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(this.player.Metadata,
+		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(cleaned_metadata,
 			                      ScrubMenuitem.attributes_format());		
 	}
 
@@ -202,25 +223,25 @@ public class Mpris2Controller : GLib.Object
 	public void set_position(double position)
 	{			
 		debug("Set position with pos (0-100) %f", position);
-		HashTable<string, Value?> data = this.player.Metadata;
-		Value? time_value = data.lookup("time");
+		Value? time_value = this.player.Metadata.lookup("mpris:length");
 		if(time_value == null){
 			warning("Can't fetch the duration of the track therefore cant set the position");
 			return;
 		}
-		// work in microseconds (scale up by 10 TTP-of 3)
-		uint32 total_time = time_value.get_uint() * 1000;
+		// work in microseconds (scale up by 10 TTP-of 6)
+		int64 total_time = time_value.get_int64();
 		debug("total time of track = %i", (int)total_time);				
-		double new_time_position = total_time * position/100.0;
+		double new_time_position = total_time * (position/100.0);
 		debug("new position = %f", (new_time_position));		
 
-		Value? v = this.player.Metadata.lookup("trackid");
+		Value? v = this.player.Metadata.lookup("mpris:trackid");
 		if(v != null){
 			if(v.holds (typeof (string))){
-				debug("the trackid = %s", v.get_string());
 				DBus.ObjectPath path = new ObjectPath(v.get_string());
 				try{
-					//this.player.SetPosition(path, (int64)(new_time_position));
+					this.player.SetPosition(path, (int64)(new_time_position));
+					ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
+					scrub.update_position(((int32)new_time_position) / 1000);			
 				}
 				catch(DBus.Error e){
 					error("DBus Error calling the player objects SetPosition method %s",
