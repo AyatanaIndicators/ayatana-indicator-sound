@@ -318,22 +318,10 @@ static void
 metadata_widget_style_labels(MetadataWidget* self, GtkLabel* label)
 {
 	char* markup;
-	markup = g_markup_printf_escaped ("<span size=\"small\">%s</span>",
+	markup = g_markup_printf_escaped ("<span size=\"smaller\">%s</span>",
 	                                  gtk_label_get_text(GTK_LABEL(label)));
 	gtk_label_set_markup (GTK_LABEL (label), markup);
 	g_free(markup);	
-}
-
-static void
-metadata_widget_style_title_text(MetadataWidget* self)
-{
-	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);	
-
-	char* markup;
-	markup = g_markup_printf_escaped ("<span weight=\"bold\" size=\"small\">%s</span>",
-	                                  gtk_label_get_text(GTK_LABEL(priv->piece_label)));
-	gtk_label_set_markup (GTK_LABEL (priv->piece_label), markup);
-	g_free(markup);
 }
 
 void

@@ -160,7 +160,7 @@ title_widget_style_name_text(TitleWidget* self)
 	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(self);
 
 	char* markup;
-	markup = g_markup_printf_escaped ("<span size=\"larger\">%s</span>",
+	markup = g_markup_printf_escaped ("<span size=\"medium\">%s</span>",
 	                                  gtk_label_get_text(GTK_LABEL(priv->name)));
 	gtk_label_set_markup (GTK_LABEL (priv->name), markup);
 	g_free(markup);
