@@ -61,9 +61,8 @@ static void metadata_widget_property_update (DbusmenuMenuitem* item,
                                              gpointer userdata);
 
 static void metadata_widget_update_album_art(MetadataWidget* self);
-static void metadata_widget_style_title_text(MetadataWidget* self);
-static void metadata_widget_style_artist_and_album_label(MetadataWidget* self,
-                                                         GtkLabel* label);
+static void metadata_widget_style_labels(MetadataWidget* self,
+                                         GtkLabel* label);
 
 void metadata_widget_set_style(GtkWidget* button, GtkStyle* style);
 
@@ -83,7 +82,6 @@ metadata_widget_class_init (MetadataWidgetClass *klass)
 
 	gobject_class->dispose = metadata_widget_dispose;
 	gobject_class->finalize = metadata_widget_finalize;
-
 }
 
 static void
@@ -120,7 +118,7 @@ metadata_widget_init (MetadataWidget *self)
 	gtk_misc_set_padding (GTK_MISC(artist), (gfloat)10, (gfloat)0);
 	gtk_label_set_width_chars(GTK_LABEL(artist), 15);	
 	gtk_label_set_ellipsize(GTK_LABEL(artist), PANGO_ELLIPSIZE_MIDDLE);	
-	metadata_widget_style_artist_and_album_label(self, GTK_LABEL(artist));
+	metadata_widget_style_labels(self, GTK_LABEL(artist));
 	priv->artist_label = artist;
 	
 	// title
@@ -131,8 +129,8 @@ metadata_widget_init (MetadataWidget *self)
 	gtk_misc_set_padding (GTK_MISC(piece), (gfloat)10, (gfloat)0);
 	gtk_label_set_width_chars(GTK_LABEL(piece), 15);
 	gtk_label_set_ellipsize(GTK_LABEL(piece), PANGO_ELLIPSIZE_MIDDLE);
+	metadata_widget_style_labels(self, GTK_LABEL(piece));
 	priv->piece_label =  piece;
-	metadata_widget_style_title_text(self);
 
 	// container
 	GtkWidget* container;
@@ -142,7 +140,7 @@ metadata_widget_init (MetadataWidget *self)
 	gtk_misc_set_padding (GTK_MISC(container), (gfloat)10, (gfloat)0);	
 	gtk_label_set_width_chars(GTK_LABEL(container), 15);		
 	gtk_label_set_ellipsize(GTK_LABEL(container), PANGO_ELLIPSIZE_MIDDLE);	
-	metadata_widget_style_artist_and_album_label(self, GTK_LABEL(container));
+	metadata_widget_style_labels(self, GTK_LABEL(container));
 	priv->container_label = container;
 
 	gtk_box_pack_start (GTK_BOX (vbox), priv->piece_label, FALSE, FALSE, 0);	
@@ -286,15 +284,15 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	
 	if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_ARTIST, property) == 0){  
 		gtk_label_set_text(GTK_LABEL(priv->artist_label), g_value_get_string(value));
-		metadata_widget_style_artist_and_album_label(mitem, GTK_LABEL(priv->artist_label));
+		metadata_widget_style_labels(mitem, GTK_LABEL(priv->artist_label));
 	}
 	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TITLE, property) == 0){  
 		gtk_label_set_text(GTK_LABEL(priv->piece_label), g_value_get_string(value));		
-		metadata_widget_style_title_text(mitem);
+		metadata_widget_style_labels(mitem, GTK_LABEL(priv->piece_label));
 	}	
 	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_ALBUM, property) == 0){  
 		gtk_label_set_text(GTK_LABEL(priv->container_label), g_value_get_string(value));
-		metadata_widget_style_artist_and_album_label(mitem, GTK_LABEL(priv->container_label));
+		metadata_widget_style_labels(mitem, GTK_LABEL(priv->container_label));
 	}	
 	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_ARTURL, property) == 0){
 		g_string_erase(priv->image_path, 0, -1);
@@ -317,7 +315,7 @@ metadata_widget_update_album_art(MetadataWidget* self){
 
 // TODO refactor next 3 methods into one once the style has been 
 static void
-metadata_widget_style_artist_and_album_label(MetadataWidget* self, GtkLabel* label)
+metadata_widget_style_labels(MetadataWidget* self, GtkLabel* label)
 {
 	char* markup;
 	markup = g_markup_printf_escaped ("<span size=\"small\">%s</span>",
