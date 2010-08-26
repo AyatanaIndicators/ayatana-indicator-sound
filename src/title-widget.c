@@ -49,10 +49,6 @@ static void title_widget_finalize   (GObject *object);
 // keyevent consumers
 static gboolean title_widget_button_press_event (GtkWidget *menuitem, 
                                   							 GdkEventButton *event);
-static gboolean title_widget_button_release_event (GtkWidget *menuitem, 
-                                  								 GdkEventButton *event);
-static gboolean title_widget_expose_event(GtkWidget* widget, 
-                                          GdkEventExpose* event);
 
 // Dbusmenuitem properties update callback
 static void title_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
@@ -72,8 +68,6 @@ title_widget_class_init (TitleWidgetClass *klass)
   GtkWidgetClass    *widget_class = GTK_WIDGET_CLASS (klass);
 
 	widget_class->button_press_event = title_widget_button_press_event;
-  widget_class->button_release_event = title_widget_button_release_event;
-	widget_class->expose_event = title_widget_expose_event;
 	
 	g_type_class_add_private (klass, sizeof (TitleWidgetPrivate));
 
@@ -124,24 +118,7 @@ title_widget_button_press_event (GtkWidget *menuitem,
 	g_value_set_boolean(&value, TRUE);	
 	dbusmenu_menuitem_handle_event (priv->twin_item, "Title menu event", &value, 0);
 	
-	return TRUE;
-}
-
-static gboolean
-title_widget_button_release_event (GtkWidget *menuitem, 
-                                  GdkEventButton *event)
-{
-	g_debug("TitleWidget::menu_release_event");
-	return TRUE;
-}
-
-static gboolean
-title_widget_expose_event(GtkWidget* widget, GdkEventExpose* event)
-{
-	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(widget);
-		
-	gtk_container_propagate_expose(GTK_CONTAINER(widget), priv->hbox, event); 
-	return TRUE;
+	return FALSE;
 }
 
 static void 
@@ -183,12 +160,12 @@ title_widget_style_name_text(TitleWidget* self)
 	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(self);
 
 	char* markup;
-	markup = g_markup_printf_escaped ("<span weight=\"bold\">%s</span>",
+	markup = g_markup_printf_escaped ("<span size=\"medium\">%s</span>",
 	                                  gtk_label_get_text(GTK_LABEL(priv->name)));
 	gtk_label_set_markup (GTK_LABEL (priv->name), markup);
 	g_free(markup);
 }
-
+ 
  /**
  * transport_new:
  * @returns: a new #TitleWidget.

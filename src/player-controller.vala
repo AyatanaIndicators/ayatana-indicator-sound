@@ -23,13 +23,12 @@ using Gee;
 
 public class PlayerController : GLib.Object
 {
-	public const int WIDGET_QUANTITY = 5;
+	public const int WIDGET_QUANTITY = 4;
 
 	public static enum widget_order{
 		SEPARATOR,
 		TITLE,
 		METADATA,
-		SCRUB,
 		TRANSPORT,
 	}
 
@@ -114,25 +113,19 @@ public class PlayerController : GLib.Object
 		update_state(PlayerController.state.OFFLINE);
 		this.custom_items[widget_order.TRANSPORT].reset(TransportMenuitem.attributes_format());
 		this.custom_items[widget_order.METADATA].reset(MetadataMenuitem.attributes_format());
-		this.custom_items[widget_order.SCRUB].reset(ScrubMenuitem.attributes_format());			
 	}
 
 	public void update_layout()
-	{	
-		
+	{			
 		if(this.current_state != state.CONNECTED){
 			this.custom_items[widget_order.TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE,
 			                                                            false);
-			this.custom_items[widget_order.SCRUB].property_set_bool(MENUITEM_PROP_VISIBLE,
-			                                                        false);
 			this.custom_items[widget_order.METADATA].property_set_bool(MENUITEM_PROP_VISIBLE,
 			                                                           false);
 			return;	
 		}
 		this.custom_items[widget_order.METADATA].property_set_bool(MENUITEM_PROP_VISIBLE,
 			                                                        this.custom_items[widget_order.METADATA].populated(MetadataMenuitem.attributes_format()));		
-		this.custom_items[widget_order.SCRUB].property_set_bool(MENUITEM_PROP_VISIBLE,
-		                                                        this.custom_items[widget_order.SCRUB].populated(ScrubMenuitem.attributes_format()));
 		this.custom_items[widget_order.TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE,
 		                                                            true);
 	}
@@ -149,10 +142,6 @@ public class PlayerController : GLib.Object
 		// Metadata item
 		MetadataMenuitem metadata_item = new MetadataMenuitem();
 		this.custom_items.add(metadata_item);
-
-		// Scrub item
-		ScrubMenuitem scrub_item = new ScrubMenuitem(this);
-		this.custom_items.add(scrub_item);
 
 		// Transport item
 		TransportMenuitem transport_item = new TransportMenuitem(this);
