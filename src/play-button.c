@@ -750,9 +750,9 @@ draw (GtkWidget* button, cairo_t *cr)
                X,
                Y + 2,
                RECT_WIDTH - 4,
-               INNER_RADIUS,
-               INNER_START,
-               INNER_END);
+               MIDDLE_RADIUS,
+               MIDDLE_START,
+               MIDDLE_END);
 
 	if(priv->current_command == TRANSPORT_PREVIOUS){
 		draw_gradient (cr,
@@ -774,35 +774,35 @@ draw (GtkWidget* button, cairo_t *cr)
 	}
 
 	// play/pause-background
-        draw_circle (cr,
-		     X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f,
-		     Y - ((CIRCLE_RADIUS - OUTER_RADIUS)),
-		     CIRCLE_RADIUS,
-		     OUTER_START,
-		     OUTER_END);
-        draw_circle (cr,
-                       X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f + 0.5f,
-                       Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 0.5f,
-                       CIRCLE_RADIUS - 0.75f,
-                       MIDDLE_START,
-                       MIDDLE_END);
+  draw_circle (cr,
+							 X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f,
+							 Y - ((CIRCLE_RADIUS - OUTER_RADIUS)),
+							 CIRCLE_RADIUS,
+							 OUTER_START,
+							 OUTER_END);
+  draw_circle (cr,
+               X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f + 0.5f,
+               Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 0.5f,
+               CIRCLE_RADIUS - 0.75f,
+               MIDDLE_START,
+               MIDDLE_END);
 
-				if(priv->current_command == TRANSPORT_PLAY_PAUSE){
-		      draw_circle (cr,
-		                   X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f + 1.5f,
-		                   Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 1.5f,
-		                   CIRCLE_RADIUS - 1.5f,
-		               		 INNER_COMPRESSED_START,
-		                   INNER_COMPRESSED_END);
-				}
-				else{        
-					draw_circle (cr,
-                     X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f + 1.5f,
-                     Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 1.5f,
-                     CIRCLE_RADIUS - 1.5f,
-                     INNER_START,
-		     						 INNER_END);
-				}					
+	if(priv->current_command == TRANSPORT_PLAY_PAUSE){
+    draw_circle (cr,
+                 X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f + 1.5f,
+                 Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 1.5f,
+                 CIRCLE_RADIUS - 1.5f,
+             		 INNER_COMPRESSED_START,
+                 INNER_COMPRESSED_END);
+	}
+	else{        
+		draw_circle (cr,
+               X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f + 1.5f,
+               Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 1.5f,
+               CIRCLE_RADIUS - 1.5f,
+               MIDDLE_START,
+               MIDDLE_END);
+	}					
 	// draw previous-button drop-shadow
 	_setup (&cr_surf, &surf, PREV_WIDTH, PREV_HEIGHT);
 	_mask_prev (cr_surf,

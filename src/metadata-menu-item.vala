@@ -29,6 +29,7 @@ public class MetadataMenuitem : PlayerItem
 		reset(attributes_format());
 	}
 
+	
 	public static HashSet<string> attributes_format()
 	{
 		HashSet<string> attrs = new HashSet<string>();		
