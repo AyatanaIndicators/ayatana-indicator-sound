@@ -107,31 +107,20 @@ public class Mpris2Controller : GLib.Object
 			debug("new playback state = %s", state);			
 			int p = this.determine_play_state(state);
 			(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(p);			
-			(this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem).update_playstate(p);			
 		}
 		
 		Value? pos_v = changed_properties.lookup("Position");
 		if(pos_v != null){
 			int64 pos = pos_v.get_int64();
 			debug("new position = %i", (int)pos);
-			(this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem).update_position((int32)pos);						
 		}
 
 		Value? meta_v = changed_properties.lookup("Metadata");
 		if(meta_v != null){
 			GLib.HashTable<string, Value?> changed_updates = clean_metadata();	
-
-			//MetadataMenuitem meta = this.owner.custom_items[PlayerController.widget_order.METADATA] as MetadataMenuitem;
-			//meta.reset(MetadataMenuitem.attributes_format());					
 			this.owner.custom_items[PlayerController.widget_order.METADATA].reset(MetadataMenuitem.attributes_format());
 			this.owner.custom_items[PlayerController.widget_order.METADATA].update(changed_updates,
 			                          																						 MetadataMenuitem.attributes_format());			
-			this.owner.custom_items[PlayerController.widget_order.SCRUB].reset(ScrubMenuitem.attributes_format());	
-			this.owner.custom_items[PlayerController.widget_order.SCRUB].update(changed_updates,
-				                    																							ScrubMenuitem.attributes_format());			
-		
-			(this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem).update_playstate(this.determine_play_state(this.player.PlaybackStatus));			
-			
 		}
 	}
 
@@ -180,8 +169,6 @@ public class Mpris2Controller : GLib.Object
 		GLib.HashTable<string, Value?> cleaned_metadata = this.clean_metadata();
 		this.owner.custom_items[PlayerController.widget_order.METADATA].update(cleaned_metadata,
 			                          MetadataMenuitem.attributes_format());
-		this.owner.custom_items[PlayerController.widget_order.SCRUB].update(cleaned_metadata,
-			                      ScrubMenuitem.attributes_format());		
 	}
 
 	public void transport_event(TransportMenuitem.action command)
@@ -240,8 +227,8 @@ public class Mpris2Controller : GLib.Object
 				DBus.ObjectPath path = new ObjectPath(v.get_string());
 				try{
 					this.player.SetPosition(path, (int64)(new_time_position));
-					ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
-					scrub.update_position(((int32)new_time_position) / 1000);			
+					//ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
+					//scrub.update_position(((int32)new_time_position) / 1000);			
 				}
 				catch(DBus.Error e){
 					error("DBus Error calling the player objects SetPosition method %s",
@@ -253,8 +240,8 @@ public class Mpris2Controller : GLib.Object
 
 	public void onSeeked(int64 position){
 		debug("Seeked signal callback with pos = %i", (int)position/1000);
-		ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
-		scrub.update_position((int32)position/1000);			
+		//ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
+		//scrub.update_position((int32)position/1000);			
 	}
 	
 	public bool connected()
