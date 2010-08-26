@@ -20,7 +20,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define __TITLE_WIDGET_H__
 
 #include <gtk/gtkmenuitem.h>
-#include <libdbusmenu-gtk/menu.h>
+#include <libdbusmenu-gtk/menuitem.h>
 
 G_BEGIN_DECLS
 

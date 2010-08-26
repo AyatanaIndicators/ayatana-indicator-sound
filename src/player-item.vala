@@ -79,9 +79,11 @@ public class PlayerItem : Dbusmenu.Menuitem
 				this.property_set_int(property, (int)v.get_uint());
 			}
 			else if(v.holds (typeof (bool))){
+				debug("with value : %s", v.get_boolean().to_string());				
 				this.property_set_bool(property, v.get_boolean());
 			}
 		}
+
 		if(this.property_get_bool(MENUITEM_PROP_VISIBLE) == false){
 			this.property_set_bool(MENUITEM_PROP_VISIBLE, true);
 		}

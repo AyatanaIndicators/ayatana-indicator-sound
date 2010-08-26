@@ -116,10 +116,8 @@ public class MusicPlayerBridge : GLib.Object
 		if(server_is_not_of_interest(type)) return;
 		string client_name = type.split(".")[1];
 		if (root_menu != null && client_name != null){
-			registered_clients[client_name].vanish();
-			registered_clients.remove(client_name);
-			debug("Successively removed menu_item for client %s from registered_clients",
-			      client_name);
+			registered_clients[client_name].hibernate();
+			debug("Successively offlined client %s", client_name);
 		}
 	}
 	

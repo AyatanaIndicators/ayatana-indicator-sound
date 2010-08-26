@@ -150,8 +150,8 @@ metadata_widget_init (MetadataWidget *self)
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
 	                 G_CALLBACK(metadata_widget_property_update), self);
 	gtk_widget_show_all (priv->hbox);
-  gtk_container_add (GTK_CONTAINER (self), hbox);
-	
+	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 60); 
+  gtk_container_add (GTK_CONTAINER (self), hbox);	
 }
 
 static gboolean
@@ -201,11 +201,9 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 
 	if(g_value_get_int(value) == DBUSMENU_PROPERTY_EMPTY){
 		g_debug("Metadata widget: property update - reset");
-		gchar* empty = "";
 		GValue new_value = {0};
   	g_value_init(&new_value, G_TYPE_STRING);		
 		g_value_set_string(&new_value, g_strdup(""));		
-		//g_free(empty);
 		value = &new_value;
 	}
 	
