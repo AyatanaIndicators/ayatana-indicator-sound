@@ -48,6 +48,7 @@ typedef struct _IndicatorSoundPrivate IndicatorSoundPrivate;
 struct _IndicatorSoundPrivate
 {
 	GtkWidget* volume_widget;
+	DbusmenuGtkMenu* menu;
 };
 
 #define INDICATOR_SOUND_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), INDICATOR_SOUND_TYPE, IndicatorSoundPrivate))
@@ -194,8 +195,10 @@ get_label (IndicatorObject * io)
 static GtkImage *
 get_icon (IndicatorObject * io)
 {
-  gchar* current_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
-  g_debug("At start-up attempting to set the image to %s", current_name);
+	gchar* current_name = g_hash_table_lookup(volume_states,
+	                                          GINT_TO_POINTER(current_state));
+  g_debug("At start-up attempting to set the image to %s",
+          current_name);
   speaker_image = indicator_image_helper(current_name);
   gtk_widget_show(GTK_WIDGET(speaker_image));
   return speaker_image;
@@ -207,7 +210,10 @@ get_icon (IndicatorObject * io)
 static GtkMenu *
 get_menu (IndicatorObject * io)
 {
-  DbusmenuGtkMenu *menu = dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT);
+  DbusmenuGtkMenu* menu = dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT);
+	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+	priv->menu = menu;
+				
   DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);
   g_object_set_data (G_OBJECT (client), "indicator", io);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_VOLUME_MENUITEM_TYPE, new_volume_slider_widget);
@@ -215,10 +221,11 @@ get_menu (IndicatorObject * io)
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_METADATA_MENUITEM_TYPE, new_metadata_widget);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TITLE_MENUITEM_TYPE, new_title_widget);
 	dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SCRUB_MENUITEM_TYPE, new_scrub_bar_widget);	
-
 	// register Key-press listening on the menu widget as the slider does not allow this.
   g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), io);
-  return GTK_MENU(menu);
+	priv->menu = menu;	
+
+	return GTK_MENU(menu);
 }
 
 static void
@@ -274,18 +281,31 @@ new_title_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbusmenu
 {
   g_debug("indicator-sound: new_title_widget");
 
-  GtkWidget* title = NULL;
-
   g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
+
+	GtkWidget* title = NULL;
+  IndicatorObject *io = NULL;
 
   title = title_widget_new (newitem);
   GtkMenuItem *menu_title_widget = GTK_MENU_ITEM(title);
 
+	io = g_object_get_data (G_OBJECT (client), "indicator");
+	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+
+	GtkWidget* image_item = gtk_image_menu_item_new();
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(image_item), 
+	                              title_widget_get_player_icon(TITLE_WIDGET(title)));
+
+	gtk_widget_show_all(image_item);
+
+	gtk_menu_append(priv->menu, image_item);
+	
   gtk_widget_show_all(title);
 
-	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_title_widget, parent);
-
+	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client),
+	                                newitem,
+	                                menu_title_widget, parent);	
   return TRUE;
 }
 

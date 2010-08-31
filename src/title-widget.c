@@ -35,6 +35,7 @@ struct _TitleWidgetPrivate
 	GtkWidget* hbox;
 	GtkWidget* name;
 	GtkWidget* player_icon;	
+	GtkWidget* image_item;	
 	DbusmenuMenuitem* twin_item;	
 };
 
@@ -73,7 +74,6 @@ title_widget_class_init (TitleWidgetClass *klass)
 
 	gobject_class->dispose = title_widget_dispose;
 	gobject_class->finalize = title_widget_finalize;
-
 }
 
 static void
@@ -84,12 +84,12 @@ title_widget_init (TitleWidget *self)
 	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(self);
 
 	GtkWidget *hbox;
-
+  
 	hbox = gtk_hbox_new(FALSE, 0);
 	priv->hbox = hbox;
-
 	priv->player_icon = indicator_image_helper("sound_icon");
-	gtk_box_pack_start(GTK_BOX (priv->hbox), priv->player_icon, FALSE, FALSE, 0);		
+
+	//gtk_box_pack_start(GTK_BOX (priv->hbox), priv->image_item, FALSE, FALSE, 0);		
 }
 
 static void
@@ -165,7 +165,13 @@ title_widget_style_name_text(TitleWidget* self)
 	gtk_label_set_markup (GTK_LABEL (priv->name), markup);
 	g_free(markup);
 }
- 
+
+GtkWidget* title_widget_get_player_icon(TitleWidget* self)
+{
+	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(self);
+	return priv->player_icon;
+}
+
  /**
  * transport_new:
  * @returns: a new #TitleWidget.

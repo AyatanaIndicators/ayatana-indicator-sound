@@ -35,16 +35,16 @@ typedef struct _TitleWidget      TitleWidget;
 typedef struct _TitleWidgetClass TitleWidgetClass;
 
 struct _TitleWidgetClass {
-	  GtkMenuItemClass parent_class;
+	GtkMenuItemClass parent_class;
 };
 
 struct _TitleWidget {
-	  GtkMenuItem parent;
+	GtkMenuItem parent;
 };
 
 GType title_widget_get_type (void);
 GtkWidget* title_widget_new(DbusmenuMenuitem *twin_item);
-
+GtkWidget* title_widget_get_player_icon(TitleWidget* self);
 G_END_DECLS
 
 #endif
