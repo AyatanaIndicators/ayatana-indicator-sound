@@ -67,7 +67,9 @@ music_bridge_VALASOURCES = \
 	player-controller.vala \
 	mpris2-controller.vala \
 	player-item.vala \
-	familiar-players-db.vala
+	familiar-players-db.vala \
+	fetch-file.vala
+
 
 music_bridge_VALAFLAGS = \
   --ccode \
@@ -81,7 +83,9 @@ music_bridge_VALAFLAGS = \
   --pkg Dbusmenu-Glib-0.2 \
   --pkg common-defs \
 	--pkg dbus-glib-1 \
-	--pkg gio-unix-2.0
+	--pkg gio-unix-2.0 \
+	--pkg gdk-pixbuf-2.0 
+
 	 
  $(MAINTAINER_VALAFLAGS)
 

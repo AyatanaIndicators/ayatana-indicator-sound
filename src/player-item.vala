@@ -61,14 +61,20 @@ public class PlayerItem : Dbusmenu.Menuitem
 				debug("with value : %s", update);
 				// Special case for the arturl URI's.
 				if(property.contains("mpris:artUrl")){
-					try{
-						update = Filename.from_uri(update.strip());
+					if(update.has_prefix("http://")){
 					}
-					catch(ConvertError e){
-						warning("Problem converting URI %s to file path", update); 
+					else{
+						// The file is local, just parse the string
+						try{
+							update = Filename.from_uri(update.strip());			
+						}
+						catch(ConvertError e){
+							warning("Problem converting URI %s to file path",
+							        update); 
+						}						
 					}
 				}
-				this.property_set(property, update);
+				this.property_set(property, update);							
 			}			    
 			else if (v.holds (typeof (int))){
 				debug("with value : %i", v.get_int());
@@ -101,5 +107,45 @@ public class PlayerItem : Dbusmenu.Menuitem
 		}
 		return false;
 	}
+
+	public fetch_remote_art(uri)
+	{
+		this.fetcher = new FetchFile (uri);
+		this.fetcher.failed.connect (() => { this.on_fetcher_failed ();});
+		this.fetcher.completed.connect (this.on_fetcher_completed);
+		this.fetcher.fetch_data ();		
+	}
+	
+	public string parse_art_url(string update)
+	{		
+		if(update == null)
+			return null;
+		string temp_path = "/home/ronoc/Desktop/tempy.jpg";
+		string local_path = "";
+		string temp_name = "";
+
+		debug("MetadataMenuitem: parse art url - result %s", local_path);
+		return local_path;
+	}
+		
+	public extract_downloaded_file()
+	{
+		try{
+			PixbufLoader loader = new PixbufLoader ();
+			bool write_result = loader.write (update.data, update.len());
+			loader.close ();
+			unowned PixbufFormat format = loader.get_format();
+			debug("the bloody format name is %s", format.get_name());
+			debug("is the format null %s", (format == null).to_string());
+			Pixbuf icon = loader.get_pixbuf ();				
+			temp_name = loader.get_format().get_name();
+			icon.save (temp_path, "jpeg");		
+			local_path = temp_path;
+		}
+	  catch(GLib.Error e){
+			warning("Problem taking file from the interweb - error: %s and name: %s",
+			        e.message,
+			        temp_name);
+		}	
 }
 
