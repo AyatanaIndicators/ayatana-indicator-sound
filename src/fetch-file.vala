@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2010 Canonical, Ltd.
+ *
+ * This library is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License
+ * version 3.0 as published by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License version 3.0 for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library. If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Authors
+ * 			Gordon Allott <gord.allott@canonical.com>
+ *			Conor Curran <conor.curran@canonical.com>
+ */
+
 public class FetchFile : Object
 {
   /* public variables */
@@ -26,7 +47,6 @@ public class FetchFile : Object
 
   public async void fetch_data ()
   {
-    //grab our data from our uri
     try {
       this.stream = new DataInputStream(this.file.read(null));
       this.stream.set_byte_order (DataStreamByteOrder.LITTLE_ENDIAN);

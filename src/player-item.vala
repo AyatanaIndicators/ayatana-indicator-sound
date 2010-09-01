@@ -20,6 +20,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 using Dbusmenu;
 using Gee;
 using Gdk;
+using DbusmenuPlayer;
 
 public class PlayerItem : Dbusmenu.Menuitem
 {
@@ -128,18 +129,16 @@ public class PlayerItem : Dbusmenu.Menuitem
 
 	private void on_fetcher_completed(ByteArray update, string property)
 	{
-		string temp_path = "/home/ronoc/Desktop/tempy";
-			//"/tmp/indicator-sound-remote-image";
 		try{
 			PixbufLoader loader = new PixbufLoader ();
 			loader.write (update.data, update.len);
 			loader.close ();
 			Pixbuf icon = loader.get_pixbuf ();				
-			icon.save (temp_path, loader.get_format().get_name());		
-			this.property_set(property, temp_path);
+			icon.save (ITEM_REMOTE_FILEPATH, loader.get_format().get_name());		
+			this.property_set(property, ITEM_REMOTE_FILEPATH);
 		}
 	  catch(GLib.Error e){
-			warning("Problem taking file from the interweb - error: %s",
+			warning("Problem fetching file from the interweb - error: %s",
 			        e.message);
 		}				
 	}		

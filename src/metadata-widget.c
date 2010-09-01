@@ -105,7 +105,7 @@ metadata_widget_init (MetadataWidget *self)
 	priv->album_art = gtk_image_new();
 	priv->image_path = g_string_new(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_ARTURL));
 	priv->old_image_path = g_string_new("");
-	priv->remote_image_path = g_string_new(DBUSMENU_PLAYERITEM_REMOTE_FILEPATH);
+	priv->remote_image_path = g_string_new(DBUSMENU_PLAYER_ITEM_REMOTE_FILEPATH);
 	g_debug("Metadata::At startup and image path = %s", priv->image_path->str);
 	
   g_signal_connect(priv->album_art, "expose-event", 
@@ -176,10 +176,6 @@ static void
 metadata_widget_finalize (GObject *object)
 {
 	G_OBJECT_CLASS (metadata_widget_parent_class)->finalize (object);
-}
-
-static void metadata_load_new_image(MetadataWidget* self)
-{
 }
 
 /**
@@ -322,10 +318,12 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	}	
 	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_ARTURL, property) == 0){
 		g_string_erase(priv->image_path, 0, -1);
-		//gchar* empty = "";
-		g_string_erase(priv->old_image_path, 0, -1); 		
 		g_string_overwrite(priv->image_path, 0, g_value_get_string (value)); 
-		//g_free(empty);
+		// Basically force expose the reload the image because we have an image update
+		// but we are using remote images i.e. the same file
+		if(g_string_equal(priv->image_path, priv->remote_image_path) == TRUE){
+			g_string_erase(priv->old_image_path, 0, -1);
+		}
 	}		
 }
 
