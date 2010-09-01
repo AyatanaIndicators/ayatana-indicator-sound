@@ -36,6 +36,7 @@ struct _MetadataWidgetPrivate
 	GtkWidget* album_art;
   GString*	 image_path;
   GString*	 old_image_path;
+	GString* 	 remote_image_path;
 	GtkWidget* artist_label;
 	GtkWidget* piece_label;
 	GtkWidget* container_label;	
@@ -104,6 +105,7 @@ metadata_widget_init (MetadataWidget *self)
 	priv->album_art = gtk_image_new();
 	priv->image_path = g_string_new(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_ARTURL));
 	priv->old_image_path = g_string_new("");
+	priv->remote_image_path = g_string_new(DBUSMENU_PLAYERITEM_REMOTE_FILEPATH);
 	g_debug("Metadata::At startup and image path = %s", priv->image_path->str);
 	
   g_signal_connect(priv->album_art, "expose-event", 
@@ -176,6 +178,10 @@ metadata_widget_finalize (GObject *object)
 	G_OBJECT_CLASS (metadata_widget_parent_class)->finalize (object);
 }
 
+static void metadata_load_new_image(MetadataWidget* self)
+{
+}
+
 /**
  * We override the expose method to enable primitive drawing of the 
  * empty album art image (and soon rounded rectangles on the album art)
@@ -188,19 +194,20 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);	
 	
 	if(priv->image_path->len > 0){
-		
-	  if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE){
-
+	  if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE || 
+	     (g_string_equal(priv->image_path, priv->remote_image_path) == TRUE &&
+	      g_string_equal(priv->old_image_path, priv->remote_image_path) == FALSE)){
 			GdkPixbuf* pixbuf;
 			pixbuf = gdk_pixbuf_new_from_file(priv->image_path->str, NULL);
-			g_debug("metadata_widget_expose, album art update -> pixbuf from %s",
-						  priv->image_path->str); 
+			g_debug("metadata_load_new_image -> pixbuf from %s",
+							priv->image_path->str); 
 			pixbuf = gdk_pixbuf_scale_simple(pixbuf,60, 60, GDK_INTERP_BILINEAR);
 			image_set_from_pixbuf (metadata, widget, pixbuf);
 			g_string_erase(priv->old_image_path, 0, -1);
 			g_string_overwrite(priv->old_image_path, 0, priv->image_path->str); 
 
-			g_object_unref(pixbuf);			
+			g_object_unref(pixbuf);				
+
 		}
 		return FALSE;				
 	}
@@ -315,7 +322,10 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	}	
 	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_ARTURL, property) == 0){
 		g_string_erase(priv->image_path, 0, -1);
+		//gchar* empty = "";
+		g_string_erase(priv->old_image_path, 0, -1); 		
 		g_string_overwrite(priv->image_path, 0, g_value_get_string (value)); 
+		//g_free(empty);
 	}		
 }
 

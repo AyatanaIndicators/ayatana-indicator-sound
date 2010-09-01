@@ -2,6 +2,7 @@ public class FetchFile : Object
 {
   /* public variables */
   public string uri {get; construct;}
+	public string intended_property {get; construct;}
 
   /* private variables */
   private DataInputStream stream;
@@ -10,11 +11,11 @@ public class FetchFile : Object
 
   /* public signals */
   public signal void failed ();
-  public signal void completed (ByteArray data);
+  public signal void completed (ByteArray data, string property);
 
-  public FetchFile (string uri)
+  public FetchFile (string uri, string prop)
   {
-    Object (uri: uri);
+    Object (uri: uri, intended_property: prop);
   }
 
   construct
@@ -60,6 +61,6 @@ public class FetchFile : Object
         this.failed ();
       }
     } while (bufsize > 0);
-    this.completed (this.data);
+    this.completed (this.data, this.intended_property);
   }
 }

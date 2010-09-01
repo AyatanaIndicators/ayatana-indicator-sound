@@ -19,7 +19,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Gee;
 using DbusmenuMetadata;
-using Gdk;
 
 public class MetadataMenuitem : PlayerItem
 {

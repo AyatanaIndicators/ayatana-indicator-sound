@@ -25,6 +25,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define SIGNAL_SINK_AVAILABLE_UPDATE 						"SinkAvailableUpdate"
 
 #define DBUSMENU_PROPERTY_EMPTY									-1
+#define DBUSMENU_PLAYERITEM_REMOTE_FILEPATH			"/home/ronoc/Desktop/tempy"
 
 /* DBUS Custom Items */
 #define DBUSMENU_VOLUME_MENUITEM_TYPE          	"x-canonical-ido-volume-type"
