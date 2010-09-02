@@ -57,6 +57,10 @@ static void title_widget_set_twin_item(	TitleWidget* self,
                            							DbusmenuMenuitem* twin_item);
 static void title_widget_style_name_text(TitleWidget* self);
 
+static gboolean title_widget_triangle_draw_cb (GtkWidget *widget,
+                                               GdkEventExpose *event,
+                                               gpointer data);
+
 G_DEFINE_TYPE (TitleWidget, title_widget, GTK_TYPE_IMAGE_MENU_ITEM);
 
 
@@ -104,9 +108,9 @@ title_widget_init (TitleWidget *self)
 															height);
 	gtk_misc_set_alignment(GTK_MISC(icon), 1.0 /* right aligned */, 0.5);
 	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), icon);
-	gtk_widget_show(icon);
-	gtk_widget_show(GTK_WIDGET(self));
+	gtk_widget_show_all(icon);
 	
+	// DEBUG
 	GtkImageType type = gtk_image_get_storage_type(GTK_IMAGE(icon));
 	g_debug("gtk_image_storage_type = %i", type);
 	
@@ -163,6 +167,9 @@ title_widget_set_twin_item(TitleWidget* self,
 	priv->twin_item = twin_item;
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
 	                 G_CALLBACK(title_widget_property_update), self);	
+	g_signal_connect_after(G_OBJECT (self),
+	                       "expose_event", G_CALLBACK (title_widget_triangle_draw_cb), twin_item);
+	
 	// Add the application name
 	priv->name = gtk_label_new(dbusmenu_menuitem_property_get(priv->twin_item, 
 	                                                          DBUSMENU_TITLE_MENUITEM_NAME));
@@ -185,6 +192,53 @@ title_widget_style_name_text(TitleWidget* self)
 	                                  gtk_label_get_text(GTK_LABEL(priv->name)));
 	gtk_label_set_markup (GTK_LABEL (priv->name), markup);
 	g_free(markup);
+}
+
+static gboolean
+title_widget_triangle_draw_cb (GtkWidget *widget, GdkEventExpose *event, gpointer data)
+{
+	GtkStyle *style;
+	cairo_t *cr;
+	int x, y, arrow_width, arrow_height;
+	
+	if (!GTK_IS_WIDGET (widget)) return FALSE;
+	if (!DBUSMENU_IS_MENUITEM (data)) return FALSE;
+
+	/* render the triangle indicator only if the application is running */
+	if (! dbusmenu_menuitem_property_get_bool (DBUSMENU_MENUITEM(data),
+	                                           DBUSMENU_TITLE_MENUITEM_RUNNING)){		
+		return FALSE;
+	}
+	
+	/* get style */
+	style = gtk_widget_get_style (widget);
+
+	/* set arrow position / dimensions */
+	arrow_width = 5; /* the pixel-based reference triangle is 5x9 */
+	arrow_height = 9;
+	x = widget->allocation.x;
+	y = widget->allocation.y + widget->allocation.height/2.0 - (double)arrow_height/2.0;
+
+	/* initialize cairo drawing area */
+	cr = (cairo_t*) gdk_cairo_create (widget->window);
+
+	/* set line width */	
+	cairo_set_line_width (cr, 1.0);
+
+	/* cairo drawing code */
+	cairo_move_to (cr, x, y);
+	cairo_line_to (cr, x, y + arrow_height);
+	cairo_line_to (cr, x + arrow_width, y + (double)arrow_height/2.0);
+	cairo_close_path (cr);
+	cairo_set_source_rgb (cr, style->fg[gtk_widget_get_state(widget)].red/65535.0,
+	                          style->fg[gtk_widget_get_state(widget)].green/65535.0,
+	                          style->fg[gtk_widget_get_state(widget)].blue/65535.0);
+	cairo_fill (cr);
+
+	/* remember to destroy cairo context to avoid leaks */
+	cairo_destroy (cr);
+
+	return FALSE;
 }
 
  /**

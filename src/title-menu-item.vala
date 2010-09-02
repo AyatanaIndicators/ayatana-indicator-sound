@@ -27,6 +27,7 @@ public class TitleMenuitem : PlayerItem
 	{
 		Object(item_type: MENUITEM_TYPE, owner: parent);
 		this.property_set(MENUITEM_NAME, parent.name);		
+		this.property_set_bool(MENUITEM_RUNNING, false);		
 	}
 
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
@@ -39,7 +40,11 @@ public class TitleMenuitem : PlayerItem
 			this.owner.mpris_bridge.expose();
 		}		
 	}
-	
+
+	public void toggle_active_triangle(bool update)
+	{
+		this.property_set_bool(MENUITEM_RUNNING, update);				
+	}
 
 	public static HashSet<string> attributes_format()
 	{
