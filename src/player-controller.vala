@@ -176,6 +176,8 @@ public class PlayerController : GLib.Object
 			this.update_state(state.CONNECTED);
 			TitleMenuitem title = this.custom_items[widget_order.TITLE] as TitleMenuitem;
 			title.toggle_active_triangle(true);			
+			TransportMenuitem transport = this.custom_items[widget_order.TRANSPORT] as TransportMenuitem;
+			transport.change_play_state(TransportMenuitem.state.PAUSED);
 		}
 		else{
 			this.update_state(state.DISCONNECTED);

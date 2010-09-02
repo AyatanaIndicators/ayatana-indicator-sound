@@ -105,7 +105,7 @@ public class Mpris2Controller : GLib.Object
 		if(play_v != null){
 			string state = play_v.get_string();		
 			debug("new playback state = %s", state);			
-			int p = this.determine_play_state(state);
+			TransportMenuitem.state p = (TransportMenuitem.state)this.determine_play_state(state);
 			(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(p);			
 		}
 		
@@ -143,29 +143,29 @@ public class Mpris2Controller : GLib.Object
 	}
 	
 	
-	private int determine_play_state(string status){
+	private TransportMenuitem.state determine_play_state(string status){
 		if(status == null)
-			return 1;
+			return TransportMenuitem.state.PAUSED;
 		
 		if(status != null && status == "Playing"){
 			debug("determine play state - state = %s", status);
-			return 0;
+			return TransportMenuitem.state.PLAYING;
 		}
-		return 1;		
+		return TransportMenuitem.state.PAUSED;		
 	}
 	
 	public void initial_update()
 	{
-		int32 status;
+		TransportMenuitem.state update;
 		if(this.player.PlaybackStatus == null){
-			status = 1;
+			update = TransportMenuitem.state.PAUSED;
 		}
 		else{
-			status = determine_play_state(this.player.PlaybackStatus);
+			update = determine_play_state(this.player.PlaybackStatus);
 		}
-		debug("initial update - play state %i", status);
+		debug("initial update - play state %i", (int)update);
 		
-		(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(status);
+		(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(update);
 		GLib.HashTable<string, Value?> cleaned_metadata = this.clean_metadata();
 		this.owner.custom_items[PlayerController.widget_order.METADATA].update(cleaned_metadata,
 			                          MetadataMenuitem.attributes_format());
@@ -260,7 +260,7 @@ public class Mpris2Controller : GLib.Object
 				this.mpris2_root.Raise();
 			}
 			catch(DBus.Error e){
-				error("Exception thrown while calling root function Raise - %s", e.message);
+				error("Exception thrown while calling function Raise - %s", e.message);
 			}
 		}
 	}
