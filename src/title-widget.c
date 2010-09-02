@@ -58,7 +58,7 @@ static void title_widget_set_twin_item(	TitleWidget* self,
                            							DbusmenuMenuitem* twin_item);
 static void title_widget_style_name_text(TitleWidget* self);
 
-G_DEFINE_TYPE (TitleWidget, title_widget, GTK_TYPE_MENU_ITEM);
+G_DEFINE_TYPE (TitleWidget, title_widget, GTK_TYPE_IMAGE_MENU_ITEM);
 
 
 
@@ -87,8 +87,31 @@ title_widget_init (TitleWidget *self)
   
 	hbox = gtk_hbox_new(FALSE, 0);
 	priv->hbox = hbox;
-	priv->player_icon = indicator_image_helper("sound_icon");
 
+		// Add image to the 'gutter'
+	gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(self), TRUE);
+
+	gint padding = 4;
+	gtk_widget_style_get(GTK_WIDGET(self), "horizontal-padding", &padding, NULL);
+
+	gint width, height;
+	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
+
+	//priv->player_icon = indicator_image_helper("sound_icon");
+	GtkWidget * icon = gtk_image_new_from_icon_name("sound_icon", GTK_ICON_SIZE_MENU);
+	
+	gtk_widget_set_size_request(icon, width
+															+ 5 /* ref triangle is 5x9 pixels */
+															+ 2 /* padding */,
+															height);
+	gtk_misc_set_alignment(GTK_MISC(icon), 1.0 /* right aligned */, 0.5);
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), icon);
+	gtk_widget_show(icon);
+
+	GtkImageType type = gtk_image_get_storage_type(GTK_IMAGE(icon));
+	g_debug("gtk_image_storage_type = %i", type);
+	
+	//gtk_container_add(GTK_CONTAINER(gmi), priv->hbox);	
 	//gtk_box_pack_start(GTK_BOX (priv->hbox), priv->image_item, FALSE, FALSE, 0);		
 }
 
@@ -143,15 +166,16 @@ title_widget_set_twin_item(TitleWidget* self,
 	priv->twin_item = twin_item;
 	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
 	                 G_CALLBACK(title_widget_property_update), self);	
+	// Add the application name
 	priv->name = gtk_label_new(dbusmenu_menuitem_property_get(priv->twin_item, 
 	                                                          DBUSMENU_TITLE_MENUITEM_NAME));
-	gtk_misc_set_padding(GTK_MISC(priv->name), 10, 0);
+	gtk_misc_set_padding(GTK_MISC(priv->name), 0, 0);
 	gtk_box_pack_start (GTK_BOX (priv->hbox), priv->name, FALSE, FALSE, 0);		
 
 	title_widget_style_name_text(self);
 	
-	gtk_widget_show_all (priv->hbox);
-  gtk_container_add (GTK_CONTAINER (self), priv->hbox);	
+  gtk_container_add (GTK_CONTAINER (self), GTK_WIDGET(priv->hbox));	
+	gtk_widget_show_all (priv->hbox);	
 }
                            
 static void

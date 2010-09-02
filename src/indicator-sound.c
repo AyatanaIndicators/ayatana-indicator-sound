@@ -48,7 +48,7 @@ typedef struct _IndicatorSoundPrivate IndicatorSoundPrivate;
 struct _IndicatorSoundPrivate
 {
 	GtkWidget* volume_widget;
-	DbusmenuGtkMenu* menu;
+	//DbusmenuGtkMenu* menu;
 };
 
 #define INDICATOR_SOUND_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), INDICATOR_SOUND_TYPE, IndicatorSoundPrivate))
@@ -211,8 +211,8 @@ static GtkMenu *
 get_menu (IndicatorObject * io)
 {
   DbusmenuGtkMenu* menu = dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT);
-	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
-	priv->menu = menu;
+	//IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+	//priv->menu = menu;
 				
   DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);
   g_object_set_data (G_OBJECT (client), "indicator", io);
@@ -223,7 +223,7 @@ get_menu (IndicatorObject * io)
 	dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SCRUB_MENUITEM_TYPE, new_scrub_bar_widget);	
 	// register Key-press listening on the menu widget as the slider does not allow this.
   g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), io);
-	priv->menu = menu;	
+	//priv->menu = menu;	
 
 	return GTK_MENU(menu);
 }
@@ -279,27 +279,16 @@ new_metadata_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbusm
 static gboolean
 new_title_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
-  g_debug("indicator-sound: new_title_widget");
-
+	g_debug("indicator-sound: new_title_widget");
   g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
+	g_debug ("%s (\"%s\")", __func__, dbusmenu_menuitem_property_get(newitem, DBUSMENU_TITLE_MENUITEM_NAME));
+
 	GtkWidget* title = NULL;
-  IndicatorObject *io = NULL;
 
   title = title_widget_new (newitem);
   GtkMenuItem *menu_title_widget = GTK_MENU_ITEM(title);
-
-	io = g_object_get_data (G_OBJECT (client), "indicator");
-	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
-
-	GtkWidget* image_item = gtk_image_menu_item_new();
-	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(image_item), 
-	                              title_widget_get_player_icon(TITLE_WIDGET(title)));
-
-	gtk_widget_show_all(image_item);
-
-	gtk_menu_append(priv->menu, image_item);
 	
   gtk_widget_show_all(title);
 
