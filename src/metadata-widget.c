@@ -70,7 +70,7 @@ static void image_set_from_pixbuf (GtkWidget  *widget,
 												           MetadataWidget* metadata,
 												           GdkPixbuf *source);
 
-
+static void draw_album_art_placeholder(GtkWidget *metadata);
 
 G_DEFINE_TYPE (MetadataWidget, metadata_widget, GTK_TYPE_MENU_ITEM);
 
@@ -180,7 +180,7 @@ metadata_widget_finalize (GObject *object)
 
 /**
  * We override the expose method to enable primitive drawing of the 
- * empty album art image (and soon rounded rectangles on the album art)
+ * empty album art image and rounded rectangles on the album art.
  */
 static gboolean
 metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user_data)
@@ -188,26 +188,37 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
 	MetadataWidget* widget = METADATA_WIDGET(user_data);
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);	
-	
+	g_debug("expose");
 	if(priv->image_path->len > 0){
 	  if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE || 
 	     (g_string_equal(priv->image_path, priv->remote_image_path) == TRUE &&
-	      g_string_equal(priv->old_image_path, priv->remote_image_path) == FALSE)){
+	      g_string_equal(priv->old_image_path, priv->remote_image_path) == FALSE)){					
+			g_debug("and we are in");
 			GdkPixbuf* pixbuf;
 			pixbuf = gdk_pixbuf_new_from_file(priv->image_path->str, NULL);
 			g_debug("metadata_load_new_image -> pixbuf from %s",
 							priv->image_path->str); 
+			if(GDK_IS_PIXBUF(pixbuf) == FALSE){
+				g_debug("problem loading the downloaded image just use the placeholder instead");
+				draw_album_art_placeholder(metadata);
+				return TRUE;				
+			}
 			pixbuf = gdk_pixbuf_scale_simple(pixbuf,60, 60, GDK_INTERP_BILINEAR);
 			image_set_from_pixbuf (metadata, widget, pixbuf);
 			g_string_erase(priv->old_image_path, 0, -1);
 			g_string_overwrite(priv->old_image_path, 0, priv->image_path->str); 
 
 			g_object_unref(pixbuf);				
-
 		}
 		return FALSE;				
 	}
-	
+	draw_album_art_placeholder(metadata);
+	return TRUE;
+}
+
+static void draw_album_art_placeholder(GtkWidget *metadata)
+{
+		
 	cairo_t *cr;	
 	cr = gdk_cairo_create (metadata->window);
 	GtkAllocation alloc;
@@ -259,8 +270,7 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	g_object_unref(pcontext);
 	g_string_free (string, TRUE);
 	cairo_destroy (cr);	
-	
-	return TRUE;
+
 }
 
 /* Suppress/consume keyevents */
@@ -320,9 +330,10 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 		g_string_erase(priv->image_path, 0, -1);
 		g_string_overwrite(priv->image_path, 0, g_value_get_string (value)); 
 		// Basically force expose the reload the image because we have an image update
-		// but we are using remote images i.e. the same file
+		// but we are using remote images i.e. the same file path but different images
 		if(g_string_equal(priv->image_path, priv->remote_image_path) == TRUE){
 			g_string_erase(priv->old_image_path, 0, -1);
+			gtk_widget_queue_draw(GTK_WIDGET(mitem));
 		}
 	}		
 }
