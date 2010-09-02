@@ -34,7 +34,6 @@ struct _TitleWidgetPrivate
 {
 	GtkWidget* hbox;
 	GtkWidget* name;
-	GtkWidget* player_icon;	
 	GtkWidget* image_item;	
 	DbusmenuMenuitem* twin_item;	
 };
@@ -88,7 +87,7 @@ title_widget_init (TitleWidget *self)
 	hbox = gtk_hbox_new(FALSE, 0);
 	priv->hbox = hbox;
 
-		// Add image to the 'gutter'
+	// Add image to the 'gutter'
 	gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(self), TRUE);
 
 	gint padding = 4;
@@ -97,7 +96,6 @@ title_widget_init (TitleWidget *self)
 	gint width, height;
 	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
 
-	//priv->player_icon = indicator_image_helper("sound_icon");
 	GtkWidget * icon = gtk_image_new_from_icon_name("sound_icon", GTK_ICON_SIZE_MENU);
 	
 	gtk_widget_set_size_request(icon, width
@@ -107,12 +105,11 @@ title_widget_init (TitleWidget *self)
 	gtk_misc_set_alignment(GTK_MISC(icon), 1.0 /* right aligned */, 0.5);
 	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), icon);
 	gtk_widget_show(icon);
-
+	gtk_widget_show(GTK_WIDGET(self));
+	
 	GtkImageType type = gtk_image_get_storage_type(GTK_IMAGE(icon));
 	g_debug("gtk_image_storage_type = %i", type);
 	
-	//gtk_container_add(GTK_CONTAINER(gmi), priv->hbox);	
-	//gtk_box_pack_start(GTK_BOX (priv->hbox), priv->image_item, FALSE, FALSE, 0);		
 }
 
 static void
@@ -188,12 +185,6 @@ title_widget_style_name_text(TitleWidget* self)
 	                                  gtk_label_get_text(GTK_LABEL(priv->name)));
 	gtk_label_set_markup (GTK_LABEL (priv->name), markup);
 	g_free(markup);
-}
-
-GtkWidget* title_widget_get_player_icon(TitleWidget* self)
-{
-	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(self);
-	return priv->player_icon;
 }
 
  /**
