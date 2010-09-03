@@ -38,5 +38,5 @@ public class MetadataMenuitem : PlayerItem
     attrs.add(MENUITEM_ARTURL);
 		return attrs;
 	}
-		
+	
 }

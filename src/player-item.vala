@@ -20,7 +20,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 using Dbusmenu;
 using Gee;
 using Gdk;
-using DbusmenuPlayer;
 
 public class PlayerItem : Dbusmenu.Menuitem
 {
@@ -28,6 +27,7 @@ public class PlayerItem : Dbusmenu.Menuitem
 	public string item_type { get; construct; }
 	private const int EMPTY = -1;
 	private FetchFile fetcher;
+	private string previous_temp_album_art_path;
 
 	public PlayerItem(string type)
 	{		
@@ -36,6 +36,7 @@ public class PlayerItem : Dbusmenu.Menuitem
 	
 	construct {
 		this.property_set(MENUITEM_PROP_TYPE, item_type);
+		this.previous_temp_album_art_path = null;
 	}
 
 	public void reset(HashSet<string> attrs){		
@@ -45,6 +46,12 @@ public class PlayerItem : Dbusmenu.Menuitem
 		}
 	}
 	
+	/**
+	 * update()
+	 * Base update method for playeritems, takes the attributes and the incoming updates
+	 * and attmepts to update the appropriate props on the object. 
+	 * Album art is handled separately to deal with remote and local file paths.
+	 */
 	public void update(HashTable<string, Value?> data, HashSet<string> attributes)
 	{
 		debug("PlayerItem::update()");
@@ -62,25 +69,11 @@ public class PlayerItem : Dbusmenu.Menuitem
 			if (v.holds (typeof (string))){
 				string update = v.get_string().strip();
 				debug("with value : %s", update);
-				// Special case for the arturl URI's.
 				if(property.contains("mpris:artUrl")){
-					if(update.has_prefix("http://")){
-						// This is asyncronous so handle it offline
-					  this.fetch_remote_art(update.strip(), property);
+					  this.fetch_art(update.strip(), property);
 					 	continue;					                     
-					}
-					else{
-						// The file is local, just parse the string
-						try{
-							update = Filename.from_uri(update.strip());			
-						}
-						catch(ConvertError e){
-							warning("Problem converting URI %s to file path",
-							        update); 
-						}						
-					}
 				}
-				this.property_set(property, update);							
+				this.property_set(property, update);											
 			}			    
 			else if (v.holds (typeof (int))){
 				debug("with value : %i", v.get_int());
@@ -95,7 +88,6 @@ public class PlayerItem : Dbusmenu.Menuitem
 				this.property_set_bool(property, v.get_boolean());
 			}
 		}
-
 		if(this.property_get_bool(MENUITEM_PROP_VISIBLE) == false){
 			this.property_set_bool(MENUITEM_PROP_VISIBLE, true);
 		}
@@ -114,14 +106,29 @@ public class PlayerItem : Dbusmenu.Menuitem
 		return false;
 	}
 
-	public void fetch_remote_art(string uri, string prop)
-	{
+	public void fetch_art(string uri, string prop)
+	{		
+		File art_file = File.new_for_uri(uri);
+		if(art_file.is_native() == true){
+			string path;		
+			try{
+				path = Filename.from_uri(uri.strip());			
+				this.property_set(prop, path);			
+			}
+			catch(ConvertError e){
+				warning("Problem converting URI %s to file path",
+					      uri); 
+			}
+			// eitherway return, the artwork was local
+			return;			
+		}
+		// otherwise go remote
 		this.fetcher = new FetchFile (uri, prop);
 		this.fetcher.failed.connect (() => { this.on_fetcher_failed ();});
 		this.fetcher.completed.connect (this.on_fetcher_completed);
 		this.fetcher.fetch_data ();		
 	}
-
+	
 	private void on_fetcher_failed ()
 	{
 		warning("on_fetcher_failed -> could not fetch artwork");	
@@ -134,13 +141,20 @@ public class PlayerItem : Dbusmenu.Menuitem
 			loader.write (update.data, update.len);
 			loader.close ();
 			Pixbuf icon = loader.get_pixbuf ();				
-			icon.save (ITEM_REMOTE_FILEPATH, loader.get_format().get_name());		
-			this.property_set(property, ITEM_REMOTE_FILEPATH);
+ 			string path = Environment.get_user_special_dir(UserDirectory.PICTURES).dup().concat("/indicator-sound-XXXXXX");
+			int r = FileUtils.mkstemp(path);		
+			icon.save (path, loader.get_format().get_name());		
+			if(this.previous_temp_album_art_path != null){
+				FileUtils.remove(this.previous_temp_album_art_path);
+			}			
+			this.previous_temp_album_art_path = path;
+			this.property_set(property, path);
 		}
 	  catch(GLib.Error e){
-			warning("Problem fetching file from the interweb - error: %s",
+			warning("Problem creating file from bytearray fetched from the interweb - error: %s",
 			        e.message);
 		}				
 	}		
+	
 }
 

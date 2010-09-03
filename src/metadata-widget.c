@@ -36,7 +36,6 @@ struct _MetadataWidgetPrivate
 	GtkWidget* album_art;
   GString*	 image_path;
   GString*	 old_image_path;
-	GString* 	 remote_image_path;
 	GtkWidget* artist_label;
 	GtkWidget* piece_label;
 	GtkWidget* container_label;	
@@ -105,7 +104,6 @@ metadata_widget_init (MetadataWidget *self)
 	priv->album_art = gtk_image_new();
 	priv->image_path = g_string_new(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_ARTURL));
 	priv->old_image_path = g_string_new("");
-	priv->remote_image_path = g_string_new(DBUSMENU_PLAYER_ITEM_REMOTE_FILEPATH);
 	g_debug("Metadata::At startup and image path = %s", priv->image_path->str);
 	
   g_signal_connect(priv->album_art, "expose-event", 
@@ -190,9 +188,7 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);	
 	g_debug("expose");
 	if(priv->image_path->len > 0){
-	  if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE || 
-	     (g_string_equal(priv->image_path, priv->remote_image_path) == TRUE &&
-	      g_string_equal(priv->old_image_path, priv->remote_image_path) == FALSE)){					
+	  if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE){					
 			g_debug("and we are in");
 			GdkPixbuf* pixbuf;
 			pixbuf = gdk_pixbuf_new_from_file(priv->image_path->str, NULL);
@@ -328,11 +324,10 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	}	
 	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_ARTURL, property) == 0){
 		g_string_erase(priv->image_path, 0, -1);
-		g_string_overwrite(priv->image_path, 0, g_value_get_string (value)); 
-		// Basically force expose the reload the image because we have an image update
-		// but we are using remote images i.e. the same file path but different images
-		if(g_string_equal(priv->image_path, priv->remote_image_path) == TRUE){
-			g_string_erase(priv->old_image_path, 0, -1);
+		g_string_overwrite(priv->image_path, 0, g_value_get_string (value));
+		// if its a remote image queue a redraw incase the download took too long
+		if (g_str_has_prefix(g_value_get_string (value), get_user_special_dir(GUserDirectory.PICTURES))){
+			g_debug("the image update is a download so redraw");
 			gtk_widget_queue_draw(GTK_WIDGET(mitem));
 		}
 	}		
