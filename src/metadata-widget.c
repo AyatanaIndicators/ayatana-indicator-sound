@@ -187,10 +187,8 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
 	MetadataWidget* widget = METADATA_WIDGET(user_data);
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);	
-	g_debug("expose");
 	if(priv->image_path->len > 0){
 	  if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE){					
-			g_debug("and we are in");
 			GdkPixbuf* pixbuf;
 			pixbuf = gdk_pixbuf_new_from_file(priv->image_path->str, NULL);
 			g_debug("metadata_load_new_image -> pixbuf from %s",
