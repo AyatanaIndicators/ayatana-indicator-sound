@@ -409,11 +409,12 @@ play_button_react_to_button_press(GtkWidget* button, PlayButtonEvent command)
 	g_return_if_fail(IS_PLAY_BUTTON(button));
 	PlayButtonPrivate* priv = PLAY_BUTTON_GET_PRIVATE(button);
 	priv->current_command = command;
-	
+		
 	cairo_t *cr;
 	cr = gdk_cairo_create (button->window);
 
-	GList* list = g_hash_table_lookup(priv->command_coordinates, GINT_TO_POINTER(command));
+	GList* list = g_hash_table_lookup(priv->command_coordinates,
+	                                  GINT_TO_POINTER(priv->current_command));
 	cairo_rectangle(cr,
 	                GPOINTER_TO_INT(g_list_nth_data(list, 0)),
 	                GPOINTER_TO_INT(g_list_nth_data(list, 1)),
@@ -426,10 +427,12 @@ play_button_react_to_button_press(GtkWidget* button, PlayButtonEvent command)
 
 
 void 
-play_button_react_to_button_release(GtkWidget* button)
+play_button_react_to_button_release(GtkWidget* button, PlayButtonEvent command)
 {
 	g_return_if_fail(IS_PLAY_BUTTON(button));
 	PlayButtonPrivate* priv = PLAY_BUTTON_GET_PRIVATE(button);	
+	priv->current_command = command;
+
 	cairo_t *cr;
 	
 	cr = gdk_cairo_create (button->window);
@@ -437,7 +440,7 @@ play_button_react_to_button_release(GtkWidget* button)
 	                                  GINT_TO_POINTER(priv->current_command));
 
 	priv->current_command = TRANSPORT_NADA;
-
+	
 	cairo_rectangle(cr,
 	                GPOINTER_TO_INT(g_list_nth_data(list, 0)),
 	                GPOINTER_TO_INT(g_list_nth_data(list, 1)),
@@ -456,6 +459,7 @@ play_button_toggle_play_pause(GtkWidget* button, PlayButtonState update)
 	PlayButtonPrivate* priv = PLAY_BUTTON_GET_PRIVATE(button);
 	priv->current_state = update;
 	g_debug("PlayButton::toggle play state : %i", priv->current_state); 
+	gtk_widget_queue_draw (GTK_WIDGET(button));
 }
 
 
