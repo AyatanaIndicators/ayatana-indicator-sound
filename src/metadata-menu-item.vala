@@ -23,7 +23,8 @@ using Gdk;
 
 public class MetadataMenuitem : PlayerItem
 {
-	public const string ALBUM_ART_DIR_SUFFIX = "/sound-menu-album-art"; 
+	public const string ALBUM_ART_DIR_SUFFIX = "/indicators/sound/album-art-cache"; 
+	
 	public static string album_art_cache_dir;
 	private static FetchFile fetcher;
 	private string previous_temp_album_art_path;
@@ -42,29 +43,27 @@ public class MetadataMenuitem : PlayerItem
 
 	private static void clean_album_art_temp_dir()
 	{
-		string path = Environment.get_user_special_dir(UserDirectory.PICTURES).dup().concat(ALBUM_ART_DIR_SUFFIX);
+		string path = Environment.get_user_cache_dir().dup().concat(ALBUM_ART_DIR_SUFFIX);
 
 		GLib.File? album_art_dir = GLib.File.new_for_uri(path);
 
-		if(album_art_dir == null || album_art_dir.query_exists(null) == false){
+		/*if(album_art_dir == null || album_art_dir.query_exists(null) == false){
 			warning("here %s %s", (album_art_dir.query_exists(null) == false).to_string(), path);
 			return;
 		}
+		*/
 		
-		if(delete_album_art_contents(album_art_dir) == true)
+		if(delete_album_art_contents(album_art_dir) == false)
 		{
-			if(DirUtils.remove(path) == -1){
-				warning("could not remove the temp album art directory %s", path);
-			}
+			warning("could not remove the temp album art files %s", path);
 		}
 	}
 
 	private static string? create_album_art_temp_dir()
 	{
-		string path = Environment.get_user_special_dir(UserDirectory.PICTURES).dup().concat(ALBUM_ART_DIR_SUFFIX); 
+		string path = Environment.get_user_cache_dir().dup().concat(ALBUM_ART_DIR_SUFFIX); 
 		if(DirUtils.create(path, 0700) == -1){
-			warning("could not create a temp dir for remote album art - that means we are not going to bother with remote art");
-			return null;
+			warning("could not create a temp dir for remote album art, it must have been created already");
 		}
 		return path;
 	}
@@ -79,7 +78,10 @@ public class MetadataMenuitem : PlayerItem
       while (true)
         {
           var file = e.next_file (null);
-          if (file == null)
+
+					debug("file name = %s", file.get_name());
+					
+          if (file == null)					
             break;
 
           var child = dir.get_child (file.get_name ());
