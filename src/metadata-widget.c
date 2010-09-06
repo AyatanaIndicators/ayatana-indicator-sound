@@ -160,7 +160,7 @@ metadata_widget_init (MetadataWidget *self)
 
   g_signal_connect(self, "style-set", G_CALLBACK(metadata_widget_set_style), GTK_WIDGET(self));		
 	
-	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 60); 
+	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 65); 
   gtk_container_add (GTK_CONTAINER (self), hbox);	
 }
 
@@ -348,10 +348,9 @@ rounded_rectangle (cairo_t *cr,
 {
         gdouble radius;
         gdouble degrees;
-
+				
         radius = corner_radius / aspect;
         degrees = G_PI / 180.0;
-
         cairo_new_sub_path (cr);
         cairo_arc (cr,
                    x + width - radius,
@@ -377,6 +376,7 @@ rounded_rectangle (cairo_t *cr,
                    radius,
                    180 * degrees,
                    270 * degrees);
+	
         cairo_close_path (cr);
 }
 
@@ -401,12 +401,12 @@ image_set_from_pixbuf (GtkWidget  *widget,
 	
 	MetadataWidgetPrivate* priv = METADATA_WIDGET_GET_PRIVATE(metadata);	
 	GtkImage* image = GTK_IMAGE(priv->album_art);
-  frame_width = 5;
+  frame_width = 3;
 
   w = gdk_pixbuf_get_width (source) + frame_width * 2;
   h = gdk_pixbuf_get_height (source) + frame_width * 2;
 
-  radius = w / 10;
+  radius = 10;
 
   pixmap = gdk_pixmap_new (gtk_widget_get_window (widget), w, h, -1);
   bitmask = gdk_pixmap_new (gtk_widget_get_window (widget), w, h, 1);

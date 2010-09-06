@@ -495,7 +495,6 @@ start_animation()
 {
   blocked_iter = blocked_animation_list;
   blocked_id = 0;
-  //g_debug("exit from blocked hold start the animation\n");
   animation_id = g_timeout_add(50, fade_back_to_mute_image, NULL);
   return FALSE;
 }
@@ -504,7 +503,6 @@ static gboolean
 fade_back_to_mute_image()
 {
   if (blocked_iter != NULL) {
-    g_debug("in animation 'loop'\n");
     gtk_image_set_from_pixbuf(speaker_image, blocked_iter->data);
     blocked_iter = blocked_iter->next;
     return TRUE;
