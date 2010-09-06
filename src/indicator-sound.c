@@ -48,7 +48,6 @@ typedef struct _IndicatorSoundPrivate IndicatorSoundPrivate;
 struct _IndicatorSoundPrivate
 {
 	GtkWidget* volume_widget;
-	//DbusmenuGtkMenu* menu;
 };
 
 #define INDICATOR_SOUND_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), INDICATOR_SOUND_TYPE, IndicatorSoundPrivate))
@@ -211,8 +210,6 @@ static GtkMenu *
 get_menu (IndicatorObject * io)
 {
   DbusmenuGtkMenu* menu = dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT);
-	//IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
-	//priv->menu = menu;
 				
   DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);
   g_object_set_data (G_OBJECT (client), "indicator", io);
@@ -223,7 +220,6 @@ get_menu (IndicatorObject * io)
 	dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SCRUB_MENUITEM_TYPE, new_scrub_bar_widget);	
 	// register Key-press listening on the menu widget as the slider does not allow this.
   g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), io);
-	//priv->menu = menu;	
 
 	return GTK_MENU(menu);
 }

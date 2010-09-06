@@ -92,28 +92,54 @@ title_widget_init (TitleWidget *self)
 	priv->hbox = hbox;
 
 	// Add image to the 'gutter'
-	gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(self), TRUE);
-
+	gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(self), TRUE);	
+	gtk_image_menu_item_set_use_stock(GTK_IMAGE_MENU_ITEM(self), FALSE);
+	
 	gint padding = 4;
 	gtk_widget_style_get(GTK_WIDGET(self), "horizontal-padding", &padding, NULL);
 
 	gint width, height;
 	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
 
+	g_debug("title widget init - height and weight = %i and %i", height, width);
+
+	GtkImage * image = indicator_image_helper("sound_icon");
+	GdkPixbuf* buf = gtk_image_get_pixbuf (image);
+	g_debug("Is it a pixbuf : %i", GDK_IS_PIXBUF(buf));
 	GtkWidget * icon = gtk_image_new_from_icon_name("sound_icon", GTK_ICON_SIZE_MENU);
+
+	g_debug("title widget init - icon pixel size = %i", gtk_image_get_pixel_size (GTK_IMAGE(icon)));
+	g_debug("title widget init - image pixel size = %i", gtk_image_get_pixel_size  (image));
 	
 	gtk_widget_set_size_request(icon, width
 															+ 5 /* ref triangle is 5x9 pixels */
 															+ 2 /* padding */,
 															height);
 	gtk_misc_set_alignment(GTK_MISC(icon), 1.0 /* right aligned */, 0.5);
-	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), icon);
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(image));
+	
 	gtk_widget_show_all(icon);
+	GtkWidget* returned_image = gtk_image_menu_item_get_image(GTK_IMAGE_MENU_ITEM(self));
+	g_debug("returned image is not null %i", GTK_IS_IMAGE(returned_image));
 	
 	// DEBUG
-	GtkImageType type = gtk_image_get_storage_type(GTK_IMAGE(icon));
-	g_debug("gtk_image_storage_type = %i", type);
+	GtkImageType type;
+	type = gtk_image_get_storage_type(GTK_IMAGE(icon));
+	g_debug("gtk_image_storage_type on widget = %i", type);
+	type = gtk_image_get_storage_type(image);
+	g_debug("gtk_image_storage_type on image = %i", type);	
+
+	gboolean* use_stock;
+  use_stock = g_new0(gboolean, 1);
+	gboolean* show_image;
+  show_image = g_new0(gboolean, 1);
+
+	g_object_get(GTK_WIDGET(self), "use-stock", use_stock, NULL );
+	g_object_get(GTK_WIDGET(self), "always-show-image", show_image, NULL);
 	
+	g_debug("title widget init : use-stock = %i and show image = %i", *use_stock, *show_image);
+	g_free(use_stock);
+	g_free(show_image);	
 }
 
 static void
