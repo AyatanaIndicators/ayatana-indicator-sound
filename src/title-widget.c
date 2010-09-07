@@ -101,34 +101,46 @@ title_widget_init (TitleWidget *self)
 	gint width, height;
 	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
 
-	g_debug("title widget init - height and weight = %i and %i", height, width);
-
 	GtkImage * image = indicator_image_helper("sound_icon");
 	GdkPixbuf* buf = gtk_image_get_pixbuf (image);
-	g_debug("Is it a pixbuf : %i", GDK_IS_PIXBUF(buf));
-	GtkWidget * icon = gtk_image_new_from_icon_name("sound_icon", GTK_ICON_SIZE_MENU);
-
-	g_debug("title widget init - icon pixel size = %i", gtk_image_get_pixel_size (GTK_IMAGE(icon)));
-	g_debug("title widget init - image pixel size = %i", gtk_image_get_pixel_size  (image));
-
+	
+	//GtkWidget * icon = gtk_image_new_from_icon_name("sound_icon", GTK_ICON_SIZE_MENU);
+	GtkWidget * icon = gtk_image_new_from_file("/usr/share/icons/ubuntu-mono-dark/status/16/sound_icon.png");
+	
+	GtkAllocation new_alloc;
+	new_alloc.width = 16;
+	new_alloc.height = 16;
+	new_alloc.x = 16;
+	new_alloc.y = 16;
+	
+	gtk_widget_set_allocation(icon, &new_alloc);
+	
 	gtk_widget_set_size_request(icon, width
 															+ 5 /* ref triangle is 5x9 pixels */
 															+ 2 /* padding */,
 															height);
 	gtk_misc_set_alignment(GTK_MISC(icon), 1.0 /* right aligned */, 0.5);
-
+	
 	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(icon));
 	
 	gtk_widget_show_all(icon);
-	GtkWidget* returned_image = gtk_image_menu_item_get_image(GTK_IMAGE_MENU_ITEM(self));
-	g_debug("returned image is not null %i", GTK_IS_IMAGE(returned_image));
 	
 	// DEBUG
+	g_debug("title widget init - Is there a pixbuf from image loaded with helper : %i", GDK_IS_PIXBUF(buf));
+
+	g_debug("title widget init - icon pixel size = %i", gtk_image_get_pixel_size (GTK_IMAGE(icon)));
+	g_debug("title widget init - image pixel size = %i", gtk_image_get_pixel_size  (image));
+
+	g_debug("title widget init - height and weight = %i and %i", height, width);
+	
 	GtkImageType type;
 	type = gtk_image_get_storage_type(GTK_IMAGE(icon));
-	g_debug("gtk_image_storage_type on widget = %i", type);
+	g_debug("title widget init - gtk_image_storage_type on widget = %i", type);
 	type = gtk_image_get_storage_type(image);
-	g_debug("gtk_image_storage_type on image = %i", type);	
+	g_debug("title widget init - gtk_image_storage_type on image = %i", type);	
+
+	GtkWidget* returned_image = gtk_image_menu_item_get_image(GTK_IMAGE_MENU_ITEM(self));
+	g_debug("title widget init - returned image is not null %i", GTK_IS_IMAGE(returned_image));
 
 	gboolean* use_stock;
   use_stock = g_new0(gboolean, 1);
@@ -137,14 +149,6 @@ title_widget_init (TitleWidget *self)
 
 	g_object_get(GTK_WIDGET(self), "use-stock", use_stock, NULL );
 	g_object_get(GTK_WIDGET(self), "always-show-image", show_image, NULL);
-
-	GtkAllocation new_alloc;
-	new_alloc.width = 16;
-	new_alloc.height = 16;
-	new_alloc.x = 16;
-	new_alloc.y = 16;
-	
-	gtk_widget_set_allocation(icon, &new_alloc);
 	
 	GtkAllocation alloc;
 	gtk_widget_get_allocation(icon, &alloc);
