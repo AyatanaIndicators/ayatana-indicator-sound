@@ -966,7 +966,6 @@ draw (GtkWidget* button, cairo_t *cr)
 	
 }
 
-
 /**
 * play_button_new:
 * @returns: a new #PlayButton.
