@@ -96,7 +96,7 @@ public class Mpris2Controller : GLib.Object
 
 	public void property_changed_cb(string interface_source, HashTable<string, Value?> changed_properties, string[] invalid )
 	{	
-		debug("properties-changed for interface %s", interface_source);
+		debug("properties-changed for interface %s and owner %s", interface_source, this.owner.name.down());
 		if(changed_properties == null || interface_source.has_prefix(this.root_interface) == false){
 			warning("Property-changed hash is null or this is an interface that concerns us");
 			return;
