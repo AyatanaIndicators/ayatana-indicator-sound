@@ -162,9 +162,10 @@ transport_widget_button_release_event (GtkWidget *menuitem,
 		g_value_init(&value, G_TYPE_INT);
 		g_debug("TransportWidget::menu_press_event - going to send value %i", (int)result);
 		g_value_set_int(&value, (int)result);	
-		play_button_react_to_button_release(priv->play_button, result);
 		dbusmenu_menuitem_handle_event (priv->twin_item, "Transport state change", &value, 0);
-	}	
+	}
+	play_button_react_to_button_release(priv->play_button, result);
+	
 	return TRUE;
 }
 

@@ -431,7 +431,14 @@ play_button_react_to_button_release(GtkWidget* button, PlayButtonEvent command)
 {
 	g_return_if_fail(IS_PLAY_BUTTON(button));
 	PlayButtonPrivate* priv = PLAY_BUTTON_GET_PRIVATE(button);	
-	priv->current_command = command;
+	if(priv->current_command == TRANSPORT_NADA){
+		g_debug("returning from the playbutton release because my previous command was nada");
+		return;
+	}
+	else if(priv->current_command != TRANSPORT_NADA &&
+	        command != TRANSPORT_NADA){						
+		priv->current_command = command;
+	}
 
 	cairo_t *cr;
 	
