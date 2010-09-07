@@ -23,7 +23,7 @@ using Gdk;
 
 public class MetadataMenuitem : PlayerItem
 {
-	public const string ALBUM_ART_DIR_SUFFIX = "/indicators/sound/album-art-cache"; 
+	public const string ALBUM_ART_DIR_SUFFIX = "indicators/sound/album-art-cache"; 
 	
 	public static string album_art_cache_dir;
 	private static FetchFile fetcher;
@@ -43,9 +43,9 @@ public class MetadataMenuitem : PlayerItem
 
 	private static void clean_album_art_temp_dir()
 	{
-		string path = Environment.get_user_cache_dir().dup().concat(ALBUM_ART_DIR_SUFFIX);
+		string path = GLib.Path.build_filename(Environment.get_user_cache_dir(), ALBUM_ART_DIR_SUFFIX);
 
-		GLib.File? album_art_dir = GLib.File.new_for_uri(path);
+		GLib.File? album_art_dir = GLib.File.new_for_path(path);
 		
 		if(delete_album_art_contents(album_art_dir) == false)
 		{
@@ -55,7 +55,7 @@ public class MetadataMenuitem : PlayerItem
 
 	private static string? create_album_art_temp_dir()
 	{
-		string path = Environment.get_user_cache_dir().dup().concat(ALBUM_ART_DIR_SUFFIX); 
+		string path = GLib.Path.build_filename(Environment.get_user_cache_dir(), ALBUM_ART_DIR_SUFFIX);
 		if(DirUtils.create(path, 0700) == -1){
 			warning("could not create a temp dir for remote album art, it must have been created already");
 		}

@@ -325,7 +325,7 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 		g_string_erase(priv->image_path, 0, -1);
 		g_string_overwrite(priv->image_path, 0, g_value_get_string (value));
 		// if its a remote image queue a redraw incase the download took too long
-		if (g_str_has_prefix(g_value_get_string (value), g_get_user_special_dir(G_USER_DIRECTORY_PICTURES))){
+		if (g_str_has_prefix(g_value_get_string (value), g_get_user_cache_dir())){
 			g_debug("the image update is a download so redraw");
 			gtk_widget_queue_draw(GTK_WIDGET(mitem));
 		}
