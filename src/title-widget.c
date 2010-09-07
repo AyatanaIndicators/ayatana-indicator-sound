@@ -110,13 +110,14 @@ title_widget_init (TitleWidget *self)
 
 	g_debug("title widget init - icon pixel size = %i", gtk_image_get_pixel_size (GTK_IMAGE(icon)));
 	g_debug("title widget init - image pixel size = %i", gtk_image_get_pixel_size  (image));
-	
+
 	gtk_widget_set_size_request(icon, width
 															+ 5 /* ref triangle is 5x9 pixels */
 															+ 2 /* padding */,
 															height);
 	gtk_misc_set_alignment(GTK_MISC(icon), 1.0 /* right aligned */, 0.5);
-	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(image));
+
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(icon));
 	
 	gtk_widget_show_all(icon);
 	GtkWidget* returned_image = gtk_image_menu_item_get_image(GTK_IMAGE_MENU_ITEM(self));
@@ -136,6 +137,23 @@ title_widget_init (TitleWidget *self)
 
 	g_object_get(GTK_WIDGET(self), "use-stock", use_stock, NULL );
 	g_object_get(GTK_WIDGET(self), "always-show-image", show_image, NULL);
+
+	GtkAllocation new_alloc;
+	new_alloc.width = 16;
+	new_alloc.height = 16;
+	new_alloc.x = 16;
+	new_alloc.y = 16;
+	
+	gtk_widget_set_allocation(icon, &new_alloc);
+	
+	GtkAllocation alloc;
+	gtk_widget_get_allocation(icon, &alloc);
+
+	g_debug("title widget init - alloc for icon: width : %i, height : %i, x : %i and y : %i",
+	        alloc.width,
+	        alloc.height,
+	        alloc.x,
+	        alloc.y); 
 	
 	g_debug("title widget init : use-stock = %i and show image = %i", *use_stock, *show_image);
 	g_free(use_stock);
