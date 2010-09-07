@@ -32,8 +32,6 @@ typedef struct _TitleWidgetPrivate TitleWidgetPrivate;
 
 struct _TitleWidgetPrivate
 {
-	//GtkWidget* hbox;
-	//GtkWidget* name;
 	GtkWidget* image_item;	
 	DbusmenuMenuitem* twin_item;	
 };
@@ -55,8 +53,6 @@ static void title_widget_property_update(DbusmenuMenuitem* item, gchar* property
                                        GValue* value, gpointer userdata);
 static void title_widget_set_twin_item(	TitleWidget* self,
                            							DbusmenuMenuitem* twin_item);
-//static void title_widget_style_name_text(TitleWidget* self);
-
 static gboolean title_widget_triangle_draw_cb (GtkWidget *widget,
                                                GdkEventExpose *event,
                                                gpointer data);
@@ -86,10 +82,6 @@ title_widget_init (TitleWidget *self)
 
 	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(self);
 
-	//GtkWidget *hbox;
-  
-	//hbox = gtk_hbox_new(FALSE, 0);
-	//priv->hbox = hbox;
 
 	// Add image to the 'gutter'
 	gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(self), TRUE);	
@@ -123,7 +115,7 @@ title_widget_init (TitleWidget *self)
 	
 	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(icon));
 	
-	//gtk_widget_show_all(icon);
+	gtk_widget_show_all(icon);
 	
 	// DEBUG
 	g_debug("title widget init - Is there a pixbuf from image loaded with helper : %i", GDK_IS_PIXBUF(buf));
@@ -204,8 +196,6 @@ title_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_NAME, property) == 0){  
   	gtk_menu_item_set_label (GTK_MENU_ITEM(mitem),
                              g_value_get_string(value));    
-		//gtk_label_set_text(GTK_LABEL(priv->name), g_value_get_string(value));
-		//title_widget_style_name_text(mitem);
 	}
 }
 
@@ -220,33 +210,12 @@ title_widget_set_twin_item(TitleWidget* self,
 	g_signal_connect_after(G_OBJECT (self),
 	                       "expose_event", G_CALLBACK (title_widget_triangle_draw_cb), twin_item);
 	
-	// Add the application name
-	//priv->name = gtk_label_new(dbusmenu_menuitem_property_get(priv->twin_item, 
-	//                                                          DBUSMENU_TITLE_MENUITEM_NAME));
-	//gtk_misc_set_padding(GTK_MISC(priv->name), 0, 0);
-	//gtk_box_pack_start (GTK_BOX (priv->hbox), priv->name, FALSE, FALSE, 0);		
-
-	//title_widget_style_name_text(self);
 	gtk_menu_item_set_label (GTK_MENU_ITEM(self), 
                            dbusmenu_menuitem_property_get(priv->twin_item,
-                                                          DBUSMENU_TITLE_MENUITEM_NAME));
-  
-  //gtk_container_add (GTK_CONTAINER (self), GTK_WIDGET(priv->hbox));	
-	gtk_widget_show_all (GTK_WIDGET(self));	
+                                                          DBUSMENU_TITLE_MENUITEM_NAME));  
+	//gtk_widget_show_all (GTK_WIDGET(self));	
 }
                            
-/*static void
-title_widget_style_name_text(TitleWidget* self)
-{
-	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(self);
-
-	char* markup;
-	markup = g_markup_printf_escaped ("<span size=\"medium\">%s</span>",
-	                                  gtk_label_get_text(GTK_LABEL(priv->name)));
-	gtk_label_set_markup (GTK_LABEL (priv->name), markup);
-	g_free(markup);
-}*/
-
 static gboolean
 title_widget_triangle_draw_cb (GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
