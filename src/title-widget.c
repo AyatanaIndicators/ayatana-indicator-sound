@@ -80,9 +80,6 @@ title_widget_init (TitleWidget *self)
 {
 	g_debug("TitleWidget::title_widget_init");
 
-	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(self);
-
-
 	// Add image to the 'gutter'
 	gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(self), TRUE);	
 	gtk_image_menu_item_set_use_stock(GTK_IMAGE_MENU_ITEM(self), FALSE);
@@ -191,7 +188,6 @@ title_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 {
 	g_return_if_fail (IS_TITLE_WIDGET (userdata));	
 	TitleWidget* mitem = TITLE_WIDGET(userdata);
-	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(mitem);
 	
 	if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_NAME, property) == 0){  
   	gtk_menu_item_set_label (GTK_MENU_ITEM(mitem),
