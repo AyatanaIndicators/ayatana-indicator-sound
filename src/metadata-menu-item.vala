@@ -46,12 +46,6 @@ public class MetadataMenuitem : PlayerItem
 		string path = Environment.get_user_cache_dir().dup().concat(ALBUM_ART_DIR_SUFFIX);
 
 		GLib.File? album_art_dir = GLib.File.new_for_uri(path);
-
-		/*if(album_art_dir == null || album_art_dir.query_exists(null) == false){
-			warning("here %s %s", (album_art_dir.query_exists(null) == false).to_string(), path);
-			return;
-		}
-		*/
 		
 		if(delete_album_art_contents(album_art_dir) == false)
 		{
@@ -72,7 +66,7 @@ public class MetadataMenuitem : PlayerItem
   {
 		bool result = true;
     try {
-      var e = dir.enumerate_children (FILE_ATTRIBUTE_STANDARD_NAME + "," + FILE_ATTRIBUTE_STANDARD_TYPE ,
+      var e = dir.enumerate_children (FILE_ATTRIBUTE_STANDARD_NAME,
                                       FileQueryInfoFlags.NOFOLLOW_SYMLINKS,
                                       null);
       while (true)
@@ -117,10 +111,9 @@ public class MetadataMenuitem : PlayerItem
 			// eitherway return, the artwork was local
 			return;			
 		}
-		// If we didn't manage to create the temp dir
-		// don't bother with remote
 		debug("fetch_art -remotely %s", this.album_art_cache_dir);
-
+		// If we didn't manage to create the temp dir
+		// don't bother with remote		
 		if(this.album_art_cache_dir == null){
 			return;
 		}
