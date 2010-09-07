@@ -40,13 +40,12 @@ service_shutdown (IndicatorService *service, gpointer user_data)
 {
   if (mainloop != NULL) {
     g_debug("Service shutdown !");
-    // TODO: uncomment for release !!
-    close_pulse_activites();
-    g_main_loop_quit(mainloop);
+    //TODO: uncomment for release !!
+    //close_pulse_activites();
+    //g_main_loop_quit(mainloop);
   }
   return;
 }
-
 
 /**
 main:
