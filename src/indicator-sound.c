@@ -196,8 +196,10 @@ get_label (IndicatorObject * io)
 static GtkImage *
 get_icon (IndicatorObject * io)
 {
-  gchar* current_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
-  g_debug("At start-up attempting to set the image to %s", current_name);
+	gchar* current_name = g_hash_table_lookup(volume_states,
+	                                          GINT_TO_POINTER(current_state));
+  g_debug("At start-up attempting to set the image to %s",
+          current_name);
   speaker_image = indicator_image_helper(current_name);
   gtk_widget_show(GTK_WIDGET(speaker_image));
   return speaker_image;
@@ -209,7 +211,8 @@ get_icon (IndicatorObject * io)
 static GtkMenu *
 get_menu (IndicatorObject * io)
 {
-  DbusmenuGtkMenu *menu = dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT);
+  DbusmenuGtkMenu* menu = dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT);
+				
   DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);
   g_object_set_data (G_OBJECT (client), "indicator", io);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_VOLUME_MENUITEM_TYPE, new_volume_slider_widget);
@@ -217,10 +220,10 @@ get_menu (IndicatorObject * io)
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_METADATA_MENUITEM_TYPE, new_metadata_widget);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TITLE_MENUITEM_TYPE, new_title_widget);
 	dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SCRUB_MENUITEM_TYPE, new_scrub_bar_widget);	
-
 	// register Key-press listening on the menu widget as the slider does not allow this.
   g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), io);
-  return GTK_MENU(menu);
+
+	return GTK_MENU(menu);
 }
 
 static void
@@ -274,20 +277,22 @@ new_metadata_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbusm
 static gboolean
 new_title_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
-  g_debug("indicator-sound: new_title_widget");
-
-  GtkWidget* title = NULL;
-
+	g_debug("indicator-sound: new_title_widget");
   g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
+	g_debug ("%s (\"%s\")", __func__, dbusmenu_menuitem_property_get(newitem, DBUSMENU_TITLE_MENUITEM_NAME));
+
+	GtkWidget* title = NULL;
+
   title = title_widget_new (newitem);
   GtkMenuItem *menu_title_widget = GTK_MENU_ITEM(title);
-
+	
   gtk_widget_show_all(title);
 
-	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_title_widget, parent);
-
+	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client),
+	                                newitem,
+	                                menu_title_widget, parent);	
   return TRUE;
 }
 

@@ -62,6 +62,8 @@ typedef struct _TransportMenuitemPrivate TransportMenuitemPrivate;
 
 #define TRANSPORT_MENUITEM_TYPE_ACTION (transport_menuitem_action_get_type ())
 
+#define TRANSPORT_MENUITEM_TYPE_STATE (transport_menuitem_state_get_type ())
+
 #define TYPE_PLAYER_CONTROLLER (player_controller_get_type ())
 #define PLAYER_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PLAYER_CONTROLLER, PlayerController))
 #define PLAYER_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PLAYER_CONTROLLER, PlayerControllerClass))
@@ -200,6 +202,11 @@ typedef enum  {
 	TRANSPORT_MENUITEM_ACTION_NEXT
 } TransportMenuitemaction;
 
+typedef enum  {
+	TRANSPORT_MENUITEM_STATE_PLAYING,
+	TRANSPORT_MENUITEM_STATE_PAUSED
+} TransportMenuitemstate;
+
 struct _MetadataMenuitem {
 	PlayerItem parent_instance;
 	MetadataMenuitemPrivate * priv;
@@ -331,10 +338,11 @@ GAppInfo* music_player_bridge_create_app_info (const char* path);
 GType player_item_get_type (void) G_GNUC_CONST;
 GType transport_menuitem_get_type (void) G_GNUC_CONST;
 GType transport_menuitem_action_get_type (void) G_GNUC_CONST;
+GType transport_menuitem_state_get_type (void) G_GNUC_CONST;
 GType player_controller_get_type (void) G_GNUC_CONST;
 TransportMenuitem* transport_menuitem_new (PlayerController* parent);
 TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerController* parent);
-void transport_menuitem_change_play_state (TransportMenuitem* self, gint state);
+void transport_menuitem_change_play_state (TransportMenuitem* self, TransportMenuitemstate update);
 GeeHashSet* transport_menuitem_attributes_format (void);
 GType metadata_menuitem_get_type (void) G_GNUC_CONST;
 extern char* metadata_menuitem_album_art_cache_dir;
@@ -352,6 +360,7 @@ GeeHashSet* scrub_menuitem_attributes_format (void);
 GType title_menuitem_get_type (void) G_GNUC_CONST;
 TitleMenuitem* title_menuitem_new (PlayerController* parent);
 TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* parent);
+void title_menuitem_toggle_active_triangle (TitleMenuitem* self, gboolean update);
 GeeHashSet* title_menuitem_attributes_format (void);
 GType mpris2_controller_get_type (void) G_GNUC_CONST;
 GType player_controller_widget_order_get_type (void) G_GNUC_CONST;
