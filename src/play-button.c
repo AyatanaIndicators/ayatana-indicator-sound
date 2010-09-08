@@ -388,19 +388,20 @@ determine_button_event(GtkWidget* button, GdkEventButton* event)
 	g_debug("event y coordinate = %f", event->y);
 	PlayButtonEvent button_event = TRANSPORT_NADA;
 	// For now very simple rectangular collision detection
-	if(event->x > 55 && event->x < 95
+	if(event->x > 67 && event->x < 112
 	   && event->y > 12 && event->y < 40){
 		button_event = TRANSPORT_PREVIOUS;
 	}
-	else if(event->x > 99 && event->x < 136
+	else if(event->x > 111 && event->x < 153
 	   && event->y > 5 && event->y < 47){
 		button_event = TRANSPORT_PLAY_PAUSE;	
 	}
-	else if(event->x > 137 && event->x < 179
+	else if(event->x > 152 && event->x < 197
 	   && event->y > 12 && event->y < 40){
 		button_event = TRANSPORT_NEXT;
 	}	
 	return button_event;
+  
 }
 
 void 
@@ -719,8 +720,8 @@ draw (GtkWidget* button, cairo_t *cr)
 	cairo_surface_t*  surf = NULL;
 	cairo_t*       cr_surf = NULL;
 
-	double INNER_START[] =  {229.0f/255.0f, 223.0f/255.0f, 215.0f/255.0f, 1.0f};
-	double INNER_END[] = {183.0f / 255.0f, 178.0f / 255.0f, 172.0f / 255.0f, 1.0f};
+	//double INNER_START[] =  {229.0f/255.0f, 223.0f/255.0f, 215.0f/255.0f, 1.0f};
+	//double INNER_END[] = {183.0f / 255.0f, 178.0f / 255.0f, 172.0f / 255.0f, 1.0f};
 	double MIDDLE_START[] = {61.0f / 255.0f, 60.0f / 255.0f, 57.0f / 255.0f, 1.0f};
 	double MIDDLE_END[] = {94.0f / 255.0f,93.0f / 255.0f, 90.0f / 255.0f,1.0f};
 	double OUTER_START[] = {36.0f / 255.0f, 35.0f / 255.0f, 33.0f / 255.0f, 1.0f};

@@ -32,8 +32,7 @@ typedef struct _TitleWidgetPrivate TitleWidgetPrivate;
 
 struct _TitleWidgetPrivate
 {
-	GtkWidget* image_item;	
-	DbusmenuMenuitem* twin_item;	
+	DbusmenuMenuitem* twin_item;
 };
 
 #define TITLE_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TITLE_WIDGET_TYPE, TitleWidgetPrivate))
@@ -52,7 +51,7 @@ static gboolean title_widget_button_press_event (GtkWidget *menuitem,
 static void title_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
                                        GValue* value, gpointer userdata);
 static void title_widget_set_twin_item(	TitleWidget* self,
-                           							DbusmenuMenuitem* twin_item);
+                                        DbusmenuMenuitem* twin_item);
 static gboolean title_widget_triangle_draw_cb (GtkWidget *widget,
                                                GdkEventExpose *event,
                                                gpointer data);
@@ -80,77 +79,22 @@ title_widget_init (TitleWidget *self)
 {
 	g_debug("TitleWidget::title_widget_init");
 
-	// Add image to the 'gutter'
-	gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(self), TRUE);	
-	gtk_image_menu_item_set_use_stock(GTK_IMAGE_MENU_ITEM(self), FALSE);
-	
-	gint padding = 4;
+	gint padding = 0;
 	gtk_widget_style_get(GTK_WIDGET(self), "horizontal-padding", &padding, NULL);
 
 	gint width, height;
 	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
 
-	GtkImage * image = indicator_image_helper("sound_icon");
-	GdkPixbuf* buf = gtk_image_get_pixbuf (image);
-	
-	//GtkWidget * icon = gtk_image_new_from_icon_name("sound_icon", GTK_ICON_SIZE_MENU);
-	GtkWidget * icon = gtk_image_new_from_file("/usr/share/icons/ubuntu-mono-dark/status/16/sound_icon.png");
-	
-	GtkAllocation new_alloc;
-	new_alloc.width = 16;
-	new_alloc.height = 16;
-	new_alloc.x = 16;
-	new_alloc.y = 16;
-	
-	gtk_widget_set_allocation(icon, &new_alloc);
-	
+	GtkWidget * icon = gtk_image_new_from_icon_name("sound_icon", GTK_ICON_SIZE_MENU);
+
 	gtk_widget_set_size_request(icon, width
-															+ 5 /* ref triangle is 5x9 pixels */
-															+ 2 /* padding */,
-															height);
-	gtk_misc_set_alignment(GTK_MISC(icon), 1.0 /* right aligned */, 0.5);
-	
-	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(icon));
-	
-	gtk_widget_show_all(icon);
-	
-	// DEBUG
-	g_debug("title widget init - Is there a pixbuf from image loaded with helper : %i", GDK_IS_PIXBUF(buf));
+                                    + 5 /* ref triangle is 5x9 pixels */
+                                    + 1 /* padding */,
+                                    height);
+	gtk_misc_set_alignment(GTK_MISC(icon), 0.5 /* right aligned */, 0);
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(icon));
+	gtk_widget_show(icon);
 
-	g_debug("title widget init - icon pixel size = %i", gtk_image_get_pixel_size (GTK_IMAGE(icon)));
-	g_debug("title widget init - image pixel size = %i", gtk_image_get_pixel_size  (image));
-
-	g_debug("title widget init - height and weight = %i and %i", height, width);
-	
-	GtkImageType type;
-	type = gtk_image_get_storage_type(GTK_IMAGE(icon));
-	g_debug("title widget init - gtk_image_storage_type on widget = %i", type);
-	type = gtk_image_get_storage_type(image);
-	g_debug("title widget init - gtk_image_storage_type on image = %i", type);	
-
-	GtkWidget* returned_image = gtk_image_menu_item_get_image(GTK_IMAGE_MENU_ITEM(self));
-	g_debug("title widget init - returned image is not null %i", GTK_IS_IMAGE(returned_image));
-
-	gboolean* use_stock;
-  use_stock = g_new0(gboolean, 1);
-	gboolean* show_image;
-  show_image = g_new0(gboolean, 1);
-
-	g_object_get(GTK_WIDGET(self), "use-stock", use_stock, NULL );
-	g_object_get(GTK_WIDGET(self), "always-show-image", show_image, NULL);
-	
-	GtkAllocation alloc;
-	gtk_widget_get_allocation(icon, &alloc);
-
-	g_debug("title widget init - alloc for icon: width : %i, height : %i, x : %i and y : %i",
-	        alloc.width,
-	        alloc.height,
-	        alloc.x,
-	        alloc.y); 
-	
-	g_debug("title widget init : use-stock = %i and show image = %i", *use_stock, *show_image);
-	g_free(use_stock);
-	g_free(show_image);	
 }
 
 static void
@@ -188,10 +132,10 @@ title_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 {
 	g_return_if_fail (IS_TITLE_WIDGET (userdata));	
 	TitleWidget* mitem = TITLE_WIDGET(userdata);
-	
-	if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_NAME, property) == 0){  
-  	gtk_menu_item_set_label (GTK_MENU_ITEM(mitem),
-                             g_value_get_string(value));    
+
+	if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_NAME, property) == 0){
+    gtk_menu_item_set_label (GTK_MENU_ITEM(mitem),
+                             g_value_get_string(value));
 	}
 }
 
@@ -199,17 +143,23 @@ static void
 title_widget_set_twin_item(TitleWidget* self,
                            DbusmenuMenuitem* twin_item)
 {
-	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(self);
-	priv->twin_item = twin_item;
-	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
-	                 G_CALLBACK(title_widget_property_update), self);	
-	g_signal_connect_after(G_OBJECT (self),
-	                       "expose_event", G_CALLBACK (title_widget_triangle_draw_cb), twin_item);
-	
-	gtk_menu_item_set_label (GTK_MENU_ITEM(self), 
+  TitleWidgetPrivate *priv = TITLE_WIDGET_GET_PRIVATE(self);
+
+  priv->twin_item = twin_item;
+
+  g_signal_connect (G_OBJECT (twin_item),
+                    "property-changed",
+                    G_CALLBACK (title_widget_property_update),
+                    self);
+  g_signal_connect_after (G_OBJECT (self),
+                         "expose_event",
+                          G_CALLBACK (title_widget_triangle_draw_cb),
+                          twin_item);
+
+  gtk_menu_item_set_label (GTK_MENU_ITEM(self),
                            dbusmenu_menuitem_property_get(priv->twin_item,
-                                                          DBUSMENU_TITLE_MENUITEM_NAME));  
-	//gtk_widget_show_all (GTK_WIDGET(self));	
+                                                          DBUSMENU_TITLE_MENUITEM_NAME));
+                             
 }
                            
 static gboolean
@@ -266,8 +216,11 @@ title_widget_triangle_draw_cb (GtkWidget *widget, GdkEventExpose *event, gpointe
 GtkWidget* 
 title_widget_new(DbusmenuMenuitem *item)
 {
-	GtkWidget* widget = g_object_new(TITLE_WIDGET_TYPE, NULL);
+	GtkWidget* widget = g_object_new (TITLE_WIDGET_TYPE,
+                                          NULL);
+  gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (widget), TRUE);
 	title_widget_set_twin_item((TitleWidget*)widget, item);
+
 	return widget;
 }
 
