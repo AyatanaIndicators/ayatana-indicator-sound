@@ -91,6 +91,8 @@ typedef struct _Mpris2ControllerPrivate Mpris2ControllerPrivate;
 typedef struct _PlayerController PlayerController;
 typedef struct _PlayerControllerClass PlayerControllerClass;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
+
+#define TRANSPORT_MENUITEM_TYPE_STATE (transport_menuitem_state_get_type ())
 typedef struct _PlayerControllerPrivate PlayerControllerPrivate;
 
 #define TYPE_PLAYER_ITEM (player_item_get_type ())
@@ -189,6 +191,11 @@ struct _Mpris2ControllerPrivate {
 	PlayerController* _owner;
 	FreeDesktopProperties* _properties_interface;
 };
+
+typedef enum  {
+	TRANSPORT_MENUITEM_STATE_PLAYING,
+	TRANSPORT_MENUITEM_STATE_PAUSED
+} TransportMenuitemstate;
 
 struct _PlayerController {
 	GObject parent_instance;
@@ -351,11 +358,12 @@ void mpris2_controller_property_changed_cb (Mpris2Controller* self, const char* 
 PlayerController* mpris2_controller_get_owner (Mpris2Controller* self);
 const char* player_controller_get_name (PlayerController* self);
 static GValue* _g_value_dup (GValue* self);
-static gint mpris2_controller_determine_play_state (Mpris2Controller* self, const char* status);
+GType transport_menuitem_state_get_type (void) G_GNUC_CONST;
+static TransportMenuitemstate mpris2_controller_determine_play_state (Mpris2Controller* self, const char* status);
 GType player_item_get_type (void) G_GNUC_CONST;
 GType player_controller_widget_order_get_type (void) G_GNUC_CONST;
 GType transport_menuitem_get_type (void) G_GNUC_CONST;
-void transport_menuitem_change_play_state (TransportMenuitem* self, gint state);
+void transport_menuitem_change_play_state (TransportMenuitem* self, TransportMenuitemstate update);
 static GHashTable* mpris2_controller_clean_metadata (Mpris2Controller* self);
 void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
 GeeHashSet* metadata_menuitem_attributes_format (void);
@@ -4691,12 +4699,12 @@ void mpris2_controller_property_changed_cb (Mpris2Controller* self, const char* 
 	play_v = __g_value_dup0 ((GValue*) g_hash_table_lookup (changed_properties, "PlaybackStatus"));
 	if (play_v != NULL) {
 		char* state;
-		gint p;
+		TransportMenuitemstate p;
 		PlayerItem* _tmp2_;
 		TransportMenuitem* _tmp3_;
 		state = g_strdup (g_value_get_string (play_v));
 		g_debug ("mpris2-controller.vala:107: new playback state = %s", state);
-		p = mpris2_controller_determine_play_state (self, state);
+		p = (TransportMenuitemstate) mpris2_controller_determine_play_state (self, state);
 		transport_menuitem_change_play_state (_tmp3_ = (_tmp2_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT), IS_TRANSPORT_MENUITEM (_tmp2_) ? ((TransportMenuitem*) _tmp2_) : NULL), p);
 		_g_object_unref0 (_tmp3_);
 		_g_free0 (state);
@@ -4785,13 +4793,13 @@ static GHashTable* mpris2_controller_clean_metadata (Mpris2Controller* self) {
 }
 
 
-static gint mpris2_controller_determine_play_state (Mpris2Controller* self, const char* status) {
-	gint result = 0;
+static TransportMenuitemstate mpris2_controller_determine_play_state (Mpris2Controller* self, const char* status) {
+	TransportMenuitemstate result = 0;
 	gboolean _tmp0_ = FALSE;
 	g_return_val_if_fail (self != NULL, 0);
 	g_return_val_if_fail (status != NULL, 0);
 	if (status == NULL) {
-		result = 1;
+		result = TRANSPORT_MENUITEM_STATE_PAUSED;
 		return result;
 	}
 	if (status != NULL) {
@@ -4801,16 +4809,16 @@ static gint mpris2_controller_determine_play_state (Mpris2Controller* self, cons
 	}
 	if (_tmp0_) {
 		g_debug ("mpris2-controller.vala:151: determine play state - state = %s", status);
-		result = 0;
+		result = TRANSPORT_MENUITEM_STATE_PLAYING;
 		return result;
 	}
-	result = 1;
+	result = TRANSPORT_MENUITEM_STATE_PAUSED;
 	return result;
 }
 
 
 void mpris2_controller_initial_update (Mpris2Controller* self) {
-	gint32 status = 0;
+	TransportMenuitemstate update = 0;
 	char* _tmp0_;
 	gboolean _tmp1_;
 	PlayerItem* _tmp3_;
@@ -4820,14 +4828,14 @@ void mpris2_controller_initial_update (Mpris2Controller* self) {
 	GeeHashSet* _tmp6_;
 	g_return_if_fail (self != NULL);
 	if ((_tmp1_ = (_tmp0_ = mpris_player_get_PlaybackStatus (self->priv->_player)) == NULL, _g_free0 (_tmp0_), _tmp1_)) {
-		status = (gint32) 1;
+		update = TRANSPORT_MENUITEM_STATE_PAUSED;
 	} else {
 		char* _tmp2_;
-		status = (gint32) mpris2_controller_determine_play_state (self, _tmp2_ = mpris_player_get_PlaybackStatus (self->priv->_player));
+		update = mpris2_controller_determine_play_state (self, _tmp2_ = mpris_player_get_PlaybackStatus (self->priv->_player));
 		_g_free0 (_tmp2_);
 	}
-	g_debug ("mpris2-controller.vala:166: initial update - play state %i", (gint) status);
-	transport_menuitem_change_play_state (_tmp4_ = (_tmp3_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT), IS_TRANSPORT_MENUITEM (_tmp3_) ? ((TransportMenuitem*) _tmp3_) : NULL), (gint) status);
+	g_debug ("mpris2-controller.vala:166: initial update - play state %i", (gint) update);
+	transport_menuitem_change_play_state (_tmp4_ = (_tmp3_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT), IS_TRANSPORT_MENUITEM (_tmp3_) ? ((TransportMenuitem*) _tmp3_) : NULL), update);
 	_g_object_unref0 (_tmp4_);
 	cleaned_metadata = mpris2_controller_clean_metadata (self);
 	player_item_update (_tmp5_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA), cleaned_metadata, _tmp6_ = metadata_menuitem_attributes_format ());
@@ -5075,8 +5083,8 @@ void mpris2_controller_expose (Mpris2Controller* self) {
 			e = _inner_error_;
 			_inner_error_ = NULL;
 			{
-				g_error ("mpris2-controller.vala:263: Exception thrown while calling root functi" \
-"on Raise - %s", e->message);
+				g_error ("mpris2-controller.vala:263: Exception thrown while calling function Ra" \
+"ise - %s", e->message);
 				_g_error_free0 (e);
 			}
 		}

@@ -28,6 +28,11 @@ public class TransportMenuitem : PlayerItem
 		PLAY_PAUSE,
 		NEXT
 	}
+
+	public enum state{
+		PLAYING,
+		PAUSED
+	}
 	
 	public TransportMenuitem(PlayerController parent)
   {
@@ -35,9 +40,9 @@ public class TransportMenuitem : PlayerItem
 		this.property_set_int(MENUITEM_PLAY_STATE, 1);		
 	}
 
-	public void change_play_state(int state)
+	public void change_play_state(state update)
 	{
-		this.property_set_int(MENUITEM_PLAY_STATE, state);	
+		this.property_set_int(MENUITEM_PLAY_STATE, update);	
 	}
 	
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
@@ -54,4 +59,6 @@ public class TransportMenuitem : PlayerItem
 		attrs.add(MENUITEM_PLAY_STATE);
 		return attrs;
 	}	
+
+	
 }

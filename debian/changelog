@@ -1,3 +1,9 @@
+indicator-sound (0.4.3-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 08 Sep 2010 17:53:33 +0200
+
 indicator-sound (0.4.2-0ubuntu1) maverick; urgency=low
 
   * New upstream release fixing those issues
