@@ -60,7 +60,7 @@ public class PlayerItem : Dbusmenu.Menuitem
 				string update = v.get_string().strip();
 				debug("with value : %s", update);
 				// Special case for the arturl URI's.
-				if(property.contains("arturl")){
+				if(property.contains("mpris:artUrl")){
 					try{
 						update = Filename.from_uri(update.strip());
 					}
@@ -74,9 +74,9 @@ public class PlayerItem : Dbusmenu.Menuitem
 				debug("with value : %i", v.get_int());
 				this.property_set_int(property, v.get_int());
 			}
-			else if (v.holds (typeof (uint))){
-				debug("with value : %i", (int)v.get_uint());
-				this.property_set_int(property, (int)v.get_uint());
+			else if (v.holds (typeof (int64))){
+				debug("with value : %i", (int)v.get_int64());
+				this.property_set_int(property, (int)v.get_int64());
 			}
 			else if(v.holds (typeof (bool))){
 				debug("with value : %s", v.get_boolean().to_string());				
@@ -92,8 +92,9 @@ public class PlayerItem : Dbusmenu.Menuitem
 	public bool populated(HashSet<string> attrs)
 	{
 		foreach(string prop in attrs){
+			debug("populated ? - prop: %s", prop);
 		  int value_int = property_get_int(prop);
-			debug("populate - prop %s and value %i", prop, value_int);
+			debug("populated ? - prop %s and value %i", prop, value_int);
 			if(property_get_int(prop) != EMPTY){
 				return true;
 			}

@@ -42,7 +42,7 @@ public class ScrubMenuitem : PlayerItem
 
 	public void update_playstate(int state)
 	{
-		this.property_set_int(MENUITEM_PLAY_STATE, state);		
+		this.property_set_int(MENUITEM_PLAY_STATE, state);	
 	}
 	
 	public static HashSet<string> attributes_format()
