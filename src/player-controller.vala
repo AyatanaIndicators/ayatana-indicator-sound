@@ -45,11 +45,14 @@ public class PlayerController : GLib.Object
 	private Dbusmenu.Menuitem root_menu;
 	public string name { get; set;}	
 	public ArrayList<PlayerItem> custom_items;	
-	public MprisBridge mpris_bridge;
+	public Mpris2Controller mpris_bridge;
 	public AppInfo? app_info { get; set;}
 	public int menu_offset { get; set;}
 		
-	public PlayerController(Dbusmenu.Menuitem root, string client_name, int offset, state initial_state)
+	public PlayerController(Dbusmenu.Menuitem root,
+	                        string client_name,
+	                        int offset,
+	                        state initial_state)
 	{
 		this.root_menu = root;
 		this.name = format_client_name(client_name.strip());
@@ -97,7 +100,7 @@ public class PlayerController : GLib.Object
 			debug("establish_mpris_connection - Not ready to connect");
 			return;
 		}		
-		this.mpris_bridge = new MprisBridge(this); 
+		this.mpris_bridge = new Mpris2Controller(this); 
 		this.determine_state();
 	}
 	

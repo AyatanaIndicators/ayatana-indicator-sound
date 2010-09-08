@@ -67,6 +67,8 @@ G_DEFINE_TYPE (IndicatorSound, indicator_sound, INDICATOR_OBJECT_TYPE);
 static GtkLabel * get_label (IndicatorObject * io);
 static GtkImage * get_icon (IndicatorObject * io);
 static GtkMenu *  get_menu (IndicatorObject * io);
+static void				indicator_sound_scroll (IndicatorObject* io, gint delta, IndicatorScrollDirection direction);
+
 
 //Slider related
 static gboolean new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
@@ -135,7 +137,7 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
   io_class->get_label = get_label;
   io_class->get_image = get_icon;
   io_class->get_menu  = get_menu;
-
+  io_class->scroll    = indicator_sound_scroll;
   design_team_size = gtk_icon_size_register("design-team-size", 22, 22);
 
   return;
@@ -493,7 +495,6 @@ start_animation()
 {
   blocked_iter = blocked_animation_list;
   blocked_id = 0;
-  //g_debug("exit from blocked hold start the animation\n");
   animation_id = g_timeout_add(50, fade_back_to_mute_image, NULL);
   return FALSE;
 }
@@ -502,7 +503,6 @@ static gboolean
 fade_back_to_mute_image()
 {
   if (blocked_iter != NULL) {
-    g_debug("in animation 'loop'\n");
     gtk_image_set_from_pixbuf(speaker_image, blocked_iter->data);
     blocked_iter = blocked_iter->next;
     return TRUE;
@@ -709,4 +709,29 @@ style_changed_cb(GtkWidget *widget, gpointer user_data)
   update_state(current_state);
   free_the_animation_list();
   prepare_blocked_animation();
+}
+
+static void
+indicator_sound_scroll (IndicatorObject *io, gint delta, IndicatorScrollDirection direction)
+{
+	g_debug("indicator-sound-scroll - current slider value");
+
+	if (device_available == FALSE || current_state == STATE_MUTED)
+    return;
+
+	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+	
+	GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget)); 
+  GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)slider_widget);
+  GtkRange* range = (GtkRange*)slider;
+  gdouble value = gtk_range_get_value(range);
+  GtkAdjustment *adj = gtk_range_get_adjustment (GTK_RANGE (slider));
+	g_debug("indicator-sound-scroll - current slider value %f", value);
+  if (direction == INDICATOR_OBJECT_SCROLL_UP) {
+    value += adj->step_increment;
+  } else {
+    value -= adj->step_increment;
+  }
+	g_debug("indicator-sound-scroll - update slider with value %f", value);
+	volume_widget_update(VOLUME_WIDGET(priv->volume_widget), value);	
 }
