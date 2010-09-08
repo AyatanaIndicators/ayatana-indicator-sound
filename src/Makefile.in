@@ -39,10 +39,7 @@ libexec_PROGRAMS = indicator-sound-service$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/intltool.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -97,11 +94,10 @@ am__objects_1 = indicator_sound_service-music-player-bridge.$(OBJEXT) \
 	indicator_sound_service-scrub-menu-item.$(OBJEXT) \
 	indicator_sound_service-title-menu-item.$(OBJEXT) \
 	indicator_sound_service-player-controller.$(OBJEXT) \
-	indicator_sound_service-mpris-bridge.$(OBJEXT) \
-	indicator_sound_service-mpris-controller.$(OBJEXT) \
 	indicator_sound_service-mpris2-controller.$(OBJEXT) \
 	indicator_sound_service-player-item.$(OBJEXT) \
-	indicator_sound_service-familiar-players-db.$(OBJEXT)
+	indicator_sound_service-familiar-players-db.$(OBJEXT) \
+	indicator_sound_service-fetch-file.$(OBJEXT)
 am_indicator_sound_service_OBJECTS =  \
 	indicator_sound_service-sound-service.$(OBJEXT) \
 	indicator_sound_service-dbus-menu-manager.$(OBJEXT) \
@@ -345,11 +341,10 @@ music_bridge_VALASOURCES = \
 	scrub-menu-item.vala \
 	title-menu-item.vala \
 	player-controller.vala \
-	mpris-bridge.vala \
-	mpris-controller.vala \
 	mpris2-controller.vala \
 	player-item.vala \
-	familiar-players-db.vala
+	familiar-players-db.vala \
+	fetch-file.vala
 
 music_bridge_VALAFLAGS = \
   --ccode \
@@ -363,7 +358,8 @@ music_bridge_VALAFLAGS = \
   --pkg Dbusmenu-Glib-0.2 \
   --pkg common-defs \
 	--pkg dbus-glib-1 \
-	--pkg gio-unix-2.0
+	--pkg gio-unix-2.0 \
+	--pkg gdk-pixbuf-2.0 
 
 music_bridge_APIFILES = \
   music-player-bridge.h 
@@ -536,9 +532,8 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-dbus-menu-manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-familiar-players-db.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-fetch-file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-metadata-menu-item.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-mpris-bridge.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-mpris-controller.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-mpris2-controller.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-music-player-bridge.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-player-controller.Po@am__quote@
@@ -814,38 +809,6 @@ indicator_sound_service-player-controller.obj: player-controller.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-player-controller.obj `if test -f 'player-controller.c'; then $(CYGPATH_W) 'player-controller.c'; else $(CYGPATH_W) '$(srcdir)/player-controller.c'; fi`
 
-indicator_sound_service-mpris-bridge.o: mpris-bridge.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-mpris-bridge.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-mpris-bridge.Tpo -c -o indicator_sound_service-mpris-bridge.o `test -f 'mpris-bridge.c' || echo '$(srcdir)/'`mpris-bridge.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-mpris-bridge.Tpo $(DEPDIR)/indicator_sound_service-mpris-bridge.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mpris-bridge.c' object='indicator_sound_service-mpris-bridge.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-mpris-bridge.o `test -f 'mpris-bridge.c' || echo '$(srcdir)/'`mpris-bridge.c
-
-indicator_sound_service-mpris-bridge.obj: mpris-bridge.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-mpris-bridge.obj -MD -MP -MF $(DEPDIR)/indicator_sound_service-mpris-bridge.Tpo -c -o indicator_sound_service-mpris-bridge.obj `if test -f 'mpris-bridge.c'; then $(CYGPATH_W) 'mpris-bridge.c'; else $(CYGPATH_W) '$(srcdir)/mpris-bridge.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-mpris-bridge.Tpo $(DEPDIR)/indicator_sound_service-mpris-bridge.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mpris-bridge.c' object='indicator_sound_service-mpris-bridge.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-mpris-bridge.obj `if test -f 'mpris-bridge.c'; then $(CYGPATH_W) 'mpris-bridge.c'; else $(CYGPATH_W) '$(srcdir)/mpris-bridge.c'; fi`
-
-indicator_sound_service-mpris-controller.o: mpris-controller.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-mpris-controller.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-mpris-controller.Tpo -c -o indicator_sound_service-mpris-controller.o `test -f 'mpris-controller.c' || echo '$(srcdir)/'`mpris-controller.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-mpris-controller.Tpo $(DEPDIR)/indicator_sound_service-mpris-controller.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mpris-controller.c' object='indicator_sound_service-mpris-controller.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-mpris-controller.o `test -f 'mpris-controller.c' || echo '$(srcdir)/'`mpris-controller.c
-
-indicator_sound_service-mpris-controller.obj: mpris-controller.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-mpris-controller.obj -MD -MP -MF $(DEPDIR)/indicator_sound_service-mpris-controller.Tpo -c -o indicator_sound_service-mpris-controller.obj `if test -f 'mpris-controller.c'; then $(CYGPATH_W) 'mpris-controller.c'; else $(CYGPATH_W) '$(srcdir)/mpris-controller.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-mpris-controller.Tpo $(DEPDIR)/indicator_sound_service-mpris-controller.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mpris-controller.c' object='indicator_sound_service-mpris-controller.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-mpris-controller.obj `if test -f 'mpris-controller.c'; then $(CYGPATH_W) 'mpris-controller.c'; else $(CYGPATH_W) '$(srcdir)/mpris-controller.c'; fi`
-
 indicator_sound_service-mpris2-controller.o: mpris2-controller.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-mpris2-controller.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-mpris2-controller.Tpo -c -o indicator_sound_service-mpris2-controller.o `test -f 'mpris2-controller.c' || echo '$(srcdir)/'`mpris2-controller.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-mpris2-controller.Tpo $(DEPDIR)/indicator_sound_service-mpris2-controller.Po
@@ -893,6 +856,22 @@ indicator_sound_service-familiar-players-db.obj: familiar-players-db.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='familiar-players-db.c' object='indicator_sound_service-familiar-players-db.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-familiar-players-db.obj `if test -f 'familiar-players-db.c'; then $(CYGPATH_W) 'familiar-players-db.c'; else $(CYGPATH_W) '$(srcdir)/familiar-players-db.c'; fi`
+
+indicator_sound_service-fetch-file.o: fetch-file.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-fetch-file.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-fetch-file.Tpo -c -o indicator_sound_service-fetch-file.o `test -f 'fetch-file.c' || echo '$(srcdir)/'`fetch-file.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-fetch-file.Tpo $(DEPDIR)/indicator_sound_service-fetch-file.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='fetch-file.c' object='indicator_sound_service-fetch-file.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-fetch-file.o `test -f 'fetch-file.c' || echo '$(srcdir)/'`fetch-file.c
+
+indicator_sound_service-fetch-file.obj: fetch-file.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-fetch-file.obj -MD -MP -MF $(DEPDIR)/indicator_sound_service-fetch-file.Tpo -c -o indicator_sound_service-fetch-file.obj `if test -f 'fetch-file.c'; then $(CYGPATH_W) 'fetch-file.c'; else $(CYGPATH_W) '$(srcdir)/fetch-file.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-fetch-file.Tpo $(DEPDIR)/indicator_sound_service-fetch-file.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='fetch-file.c' object='indicator_sound_service-fetch-file.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-fetch-file.obj `if test -f 'fetch-file.c'; then $(CYGPATH_W) 'fetch-file.c'; else $(CYGPATH_W) '$(srcdir)/fetch-file.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
