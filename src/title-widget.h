@@ -19,7 +19,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __TITLE_WIDGET_H__
 #define __TITLE_WIDGET_H__
 
-#include <gtk/gtkmenuitem.h>
+#include <gtk/gtkimagemenuitem.h>
 #include <libdbusmenu-gtk/menuitem.h>
 
 G_BEGIN_DECLS
@@ -35,11 +35,11 @@ typedef struct _TitleWidget      TitleWidget;
 typedef struct _TitleWidgetClass TitleWidgetClass;
 
 struct _TitleWidgetClass {
-	  GtkMenuItemClass parent_class;
+	GtkImageMenuItemClass parent_class;
 };
 
 struct _TitleWidget {
-	  GtkMenuItem parent;
+	GtkImageMenuItem parent;
 };
 
 GType title_widget_get_type (void);
