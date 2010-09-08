@@ -1,3 +1,12 @@
+indicator-sound (0.4.2-0ubuntu1) UNRELEASED; urgency=low
+
+  * New upstream release fixing those issues
+    - Media Buttons should trigger action only on button release (lp: #624610)
+    - Mouse wheel no longer works to change volume (lp: #620858)
+    - Crashes if Rhythmbox is playing from Last.FM (lp: #627505)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 08 Sep 2010 12:24:24 +0200
+
 indicator-sound (0.4.1-0ubuntu1) maverick; urgency=low
 
   * New upstream release.

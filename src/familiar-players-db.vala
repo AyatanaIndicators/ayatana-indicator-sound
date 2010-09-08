@@ -83,7 +83,7 @@ public class FamiliarPlayersDB : GLib.Object
 	private bool load_data_from_key_file(){
 		try{
 			string[] desktops = this.key_file.get_string_list(GROUP_NAME,
-				                                          			KEY_NAME);
+				                                          			KEY_NAME);			
 			foreach(string s in desktops){
 				this.players_DB.set(s, true);
 			}
