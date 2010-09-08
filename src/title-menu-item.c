@@ -134,6 +134,7 @@ GType mpris2_controller_get_type (void) G_GNUC_CONST;
 GType player_controller_state_get_type (void) G_GNUC_CONST;
 void player_controller_instantiate (PlayerController* self);
 void mpris2_controller_expose (Mpris2Controller* self);
+void title_menuitem_toggle_active_triangle (TitleMenuitem* self, gboolean update);
 GeeHashSet* title_menuitem_attributes_format (void);
 
 
@@ -143,6 +144,7 @@ TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* pa
 	g_return_val_if_fail (parent != NULL, NULL);
 	self = (TitleMenuitem*) g_object_new (object_type, "item-type", DBUSMENU_TITLE_MENUITEM_TYPE, "owner", parent, NULL);
 	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_TITLE_MENUITEM_NAME, player_controller_get_name (parent));
+	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_TITLE_MENUITEM_RUNNING, FALSE);
 	return self;
 }
 
@@ -163,6 +165,12 @@ static void title_menuitem_real_handle_event (DbusmenuMenuitem* base, const char
 			mpris2_controller_expose (player_item_get_owner ((PlayerItem*) self)->mpris_bridge);
 		}
 	}
+}
+
+
+void title_menuitem_toggle_active_triangle (TitleMenuitem* self, gboolean update) {
+	g_return_if_fail (self != NULL);
+	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_TITLE_MENUITEM_RUNNING, update);
 }
 
 

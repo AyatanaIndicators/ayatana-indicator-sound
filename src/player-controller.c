@@ -101,6 +101,8 @@ typedef struct _MetadataMenuitemClass MetadataMenuitemClass;
 typedef struct _TransportMenuitem TransportMenuitem;
 typedef struct _TransportMenuitemClass TransportMenuitemClass;
 
+#define TRANSPORT_MENUITEM_TYPE_STATE (transport_menuitem_state_get_type ())
+
 struct _PlayerController {
 	GObject parent_instance;
 	PlayerControllerPrivate * priv;
@@ -134,6 +136,11 @@ typedef enum  {
 	PLAYER_CONTROLLER_STATE_CONNECTED,
 	PLAYER_CONTROLLER_STATE_DISCONNECTED
 } PlayerControllerstate;
+
+typedef enum  {
+	TRANSPORT_MENUITEM_STATE_PLAYING,
+	TRANSPORT_MENUITEM_STATE_PAUSED
+} TransportMenuitemstate;
 
 
 static gpointer player_controller_parent_class = NULL;
@@ -172,12 +179,13 @@ void player_controller_hibernate (PlayerController* self);
 void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
 GeeHashSet* transport_menuitem_attributes_format (void);
 GeeHashSet* metadata_menuitem_attributes_format (void);
+GType title_menuitem_get_type (void) G_GNUC_CONST;
+void title_menuitem_toggle_active_triangle (TitleMenuitem* self, gboolean update);
 gboolean player_item_populated (PlayerItem* self, GeeHashSet* attrs);
 PlayerItem* player_item_new (const char* type);
 PlayerItem* player_item_construct (GType object_type, const char* type);
 TitleMenuitem* title_menuitem_new (PlayerController* parent);
 TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* parent);
-GType title_menuitem_get_type (void) G_GNUC_CONST;
 MetadataMenuitem* metadata_menuitem_new (void);
 MetadataMenuitem* metadata_menuitem_construct (GType object_type);
 GType metadata_menuitem_get_type (void) G_GNUC_CONST;
@@ -186,6 +194,8 @@ TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerContro
 GType transport_menuitem_get_type (void) G_GNUC_CONST;
 gint player_controller_get_menu_offset (PlayerController* self);
 gboolean mpris2_controller_connected (Mpris2Controller* self);
+GType transport_menuitem_state_get_type (void) G_GNUC_CONST;
+void transport_menuitem_change_play_state (TransportMenuitem* self, TransportMenuitemstate update);
 void player_controller_set_app_info (PlayerController* self, GAppInfo* value);
 static void player_controller_finalize (GObject* obj);
 static void player_controller_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
@@ -345,6 +355,8 @@ void player_controller_hibernate (PlayerController* self) {
 	GeeHashSet* _tmp1_;
 	PlayerItem* _tmp2_;
 	GeeHashSet* _tmp3_;
+	PlayerItem* _tmp4_;
+	TitleMenuitem* title;
 	g_return_if_fail (self != NULL);
 	player_controller_update_state (self, PLAYER_CONTROLLER_STATE_OFFLINE);
 	player_item_reset (_tmp0_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT), _tmp1_ = transport_menuitem_attributes_format ());
@@ -353,6 +365,9 @@ void player_controller_hibernate (PlayerController* self) {
 	player_item_reset (_tmp2_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA), _tmp3_ = metadata_menuitem_attributes_format ());
 	_g_object_unref0 (_tmp3_);
 	_g_object_unref0 (_tmp2_);
+	title = (_tmp4_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TITLE), IS_TITLE_MENUITEM (_tmp4_) ? ((TitleMenuitem*) _tmp4_) : NULL);
+	title_menuitem_toggle_active_triangle (title, FALSE);
+	_g_object_unref0 (title);
 }
 
 
@@ -467,7 +482,7 @@ static char* player_controller_format_client_name (const char* client_name) {
 		formatted = (_tmp2_ = g_strconcat (_tmp0_ = g_utf8_strup (client_name, (gssize) 1), _tmp1_ = string_slice (client_name, (glong) 1, g_utf8_strlen (client_name, -1)), NULL), _g_free0 (formatted), _tmp2_);
 		_g_free0 (_tmp1_);
 		_g_free0 (_tmp0_);
-		g_debug ("player-controller.vala:163: PlayerController->format_client_name - : %" \
+		g_debug ("player-controller.vala:165: PlayerController->format_client_name - : %" \
 "s", formatted);
 	}
 	result = formatted;
@@ -478,7 +493,17 @@ static char* player_controller_format_client_name (const char* client_name) {
 void player_controller_determine_state (PlayerController* self) {
 	g_return_if_fail (self != NULL);
 	if (mpris2_controller_connected (self->mpris_bridge) == TRUE) {
+		PlayerItem* _tmp0_;
+		TitleMenuitem* title;
+		PlayerItem* _tmp1_;
+		TransportMenuitem* transport;
 		player_controller_update_state (self, PLAYER_CONTROLLER_STATE_CONNECTED);
+		title = (_tmp0_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TITLE), IS_TITLE_MENUITEM (_tmp0_) ? ((TitleMenuitem*) _tmp0_) : NULL);
+		title_menuitem_toggle_active_triangle (title, TRUE);
+		transport = (_tmp1_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT), IS_TRANSPORT_MENUITEM (_tmp1_) ? ((TransportMenuitem*) _tmp1_) : NULL);
+		transport_menuitem_change_play_state (transport, TRANSPORT_MENUITEM_STATE_PAUSED);
+		_g_object_unref0 (transport);
+		_g_object_unref0 (title);
 	} else {
 		player_controller_update_state (self, PLAYER_CONTROLLER_STATE_DISCONNECTED);
 	}
