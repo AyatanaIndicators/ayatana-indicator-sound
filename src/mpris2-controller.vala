@@ -96,7 +96,7 @@ public class Mpris2Controller : GLib.Object
 
 	public void property_changed_cb(string interface_source, HashTable<string, Value?> changed_properties, string[] invalid )
 	{	
-		debug("properties-changed for interface %s", interface_source);
+		debug("properties-changed for interface %s and owner %s", interface_source, this.owner.name.down());
 		if(changed_properties == null || interface_source.has_prefix(this.root_interface) == false){
 			warning("Property-changed hash is null or this is an interface that concerns us");
 			return;
@@ -171,7 +171,7 @@ public class Mpris2Controller : GLib.Object
 			                          MetadataMenuitem.attributes_format());
 	}
 
-	public void transport_event(TransportMenuitem.action command)
+	public void transport_update(TransportMenuitem.action command)
 	{		
 		debug("transport_event input = %i", (int)command);
 		if(command == TransportMenuitem.action.PLAY_PAUSE){
@@ -207,7 +207,7 @@ public class Mpris2Controller : GLib.Object
 		TODO: SetPosition on the player object is not working with rhythmbox,
 	  runtime error - "dbus function not supported"
 	 */
-	public void set_position(double position)
+	public void set_track_position(double position)
 	{			
 		debug("Set position with pos (0-100) %f", position);
 		Value? time_value = this.player.Metadata.lookup("mpris:length");
@@ -227,8 +227,6 @@ public class Mpris2Controller : GLib.Object
 				DBus.ObjectPath path = new ObjectPath(v.get_string());
 				try{
 					this.player.SetPosition(path, (int64)(new_time_position));
-					//ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
-					//scrub.update_position(((int32)new_time_position) / 1000);			
 				}
 				catch(DBus.Error e){
 					error("DBus Error calling the player objects SetPosition method %s",
@@ -240,8 +238,6 @@ public class Mpris2Controller : GLib.Object
 
 	public void onSeeked(int64 position){
 		debug("Seeked signal callback with pos = %i", (int)position/1000);
-		//ScrubMenuitem scrub = this.owner.custom_items[PlayerController.widget_order.SCRUB] as ScrubMenuitem;
-		//scrub.update_position((int32)position/1000);			
 	}
 	
 	public bool connected()

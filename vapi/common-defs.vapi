@@ -1,6 +1,6 @@
 /*
 Copyright 2010 Canonical Ltd.
-
+ 
 Authors:
     Conor Curran <conor.curran@canonical.com>
 

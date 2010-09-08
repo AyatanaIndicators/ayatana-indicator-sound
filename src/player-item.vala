@@ -25,7 +25,7 @@ public class PlayerItem : Dbusmenu.Menuitem
 	public PlayerController owner {get; construct;}
 	public string item_type { get; construct; }
 	private const int EMPTY = -1;
-	
+
 	public PlayerItem(string type)
 	{		
 		Object(item_type: type);
@@ -42,6 +42,12 @@ public class PlayerItem : Dbusmenu.Menuitem
 		}
 	}
 	
+	/**
+	 * update()
+	 * Base update method for playeritems, takes the attributes and the incoming updates
+	 * and attmepts to update the appropriate props on the object. 
+	 * Album art is handled separately to deal with remote and local file paths.
+	 */
 	public void update(HashTable<string, Value?> data, HashSet<string> attributes)
 	{
 		debug("PlayerItem::update()");
@@ -59,16 +65,14 @@ public class PlayerItem : Dbusmenu.Menuitem
 			if (v.holds (typeof (string))){
 				string update = v.get_string().strip();
 				debug("with value : %s", update);
-				// Special case for the arturl URI's.
-				if(property.contains("mpris:artUrl")){
-					try{
-						update = Filename.from_uri(update.strip());
-					}
-					catch(ConvertError e){
-						warning("Problem converting URI %s to file path", update); 
-					}
+				if(property.contains("mpris:artUrl")){		
+					  // We know its a metadata instance because thats the only
+					  // object with the arturl prop					  
+						MetadataMenuitem metadata = this as MetadataMenuitem;
+					  metadata.fetch_art(update.strip(), property);
+					 	continue;					                     
 				}
-				this.property_set(property, update);
+				this.property_set(property, update);											
 			}			    
 			else if (v.holds (typeof (int))){
 				debug("with value : %i", v.get_int());
@@ -83,7 +87,6 @@ public class PlayerItem : Dbusmenu.Menuitem
 				this.property_set_bool(property, v.get_boolean());
 			}
 		}
-
 		if(this.property_get_bool(MENUITEM_PROP_VISIBLE) == false){
 			this.property_set_bool(MENUITEM_PROP_VISIBLE, true);
 		}
@@ -101,5 +104,6 @@ public class PlayerItem : Dbusmenu.Menuitem
 		}
 		return false;
 	}
+
 }
 

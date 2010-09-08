@@ -1,3 +1,4 @@
+
 /*
 Copyright 2010 Canonical Ltd.
 
@@ -48,6 +49,7 @@ static void volume_widget_set_twin_item( VolumeWidget* self,
                            							DbusmenuMenuitem* twin_item);
 static void volume_widget_property_update( DbusmenuMenuitem* item, gchar* property, 
                                        	  GValue* value, gpointer userdata);
+
 static gboolean volume_widget_change_value_cb (GtkRange     *range,
                                  							GtkScrollType scroll,
                                  							gdouble       value,
@@ -103,7 +105,7 @@ volume_widget_init (VolumeWidget *self)
   g_object_unref(secondary_gicon);
 
   GtkAdjustment *adj = gtk_range_get_adjustment (GTK_RANGE (volume_widget));
-  gtk_adjustment_set_step_increment(adj, 3);
+  gtk_adjustment_set_step_increment(adj, 4);
 }
 
 static void

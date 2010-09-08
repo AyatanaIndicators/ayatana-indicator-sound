@@ -25,6 +25,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "metadata-widget.h"
 #include "common-defs.h"
 #include <gtk/gtk.h>
+#include <glib.h>
 
 static DbusmenuMenuitem* twin_item;
 
@@ -69,7 +70,7 @@ static void image_set_from_pixbuf (GtkWidget  *widget,
 												           MetadataWidget* metadata,
 												           GdkPixbuf *source);
 
-
+static void draw_album_art_placeholder(GtkWidget *metadata);
 
 G_DEFINE_TYPE (MetadataWidget, metadata_widget, GTK_TYPE_MENU_ITEM);
 
@@ -160,7 +161,7 @@ metadata_widget_init (MetadataWidget *self)
 
   g_signal_connect(self, "style-set", G_CALLBACK(metadata_widget_set_style), GTK_WIDGET(self));		
 	
-	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 60); 
+	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 65); 
   gtk_container_add (GTK_CONTAINER (self), hbox);	
 }
 
@@ -178,7 +179,7 @@ metadata_widget_finalize (GObject *object)
 
 /**
  * We override the expose method to enable primitive drawing of the 
- * empty album art image (and soon rounded rectangles on the album art)
+ * empty album art image and rounded rectangles on the album art.
  */
 static gboolean
 metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user_data)
@@ -186,24 +187,33 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
 	MetadataWidget* widget = METADATA_WIDGET(user_data);
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);	
-	
 	if(priv->image_path->len > 0){
-		
-	  if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE){
+	  if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE){					
 			GdkPixbuf* pixbuf;
 			pixbuf = gdk_pixbuf_new_from_file(priv->image_path->str, NULL);
-			g_debug("metadata_widget_expose, album art update -> pixbuf from %s",
-						  priv->image_path->str); 
+			g_debug("metadata_load_new_image -> pixbuf from %s",
+							priv->image_path->str); 
+			if(GDK_IS_PIXBUF(pixbuf) == FALSE){
+				g_debug("problem loading the downloaded image just use the placeholder instead");
+				draw_album_art_placeholder(metadata);
+				return TRUE;				
+			}
 			pixbuf = gdk_pixbuf_scale_simple(pixbuf,60, 60, GDK_INTERP_BILINEAR);
 			image_set_from_pixbuf (metadata, widget, pixbuf);
 			g_string_erase(priv->old_image_path, 0, -1);
 			g_string_overwrite(priv->old_image_path, 0, priv->image_path->str); 
 
-			g_object_unref(pixbuf);			
+			g_object_unref(pixbuf);				
 		}
 		return FALSE;				
 	}
-	
+	draw_album_art_placeholder(metadata);
+	return TRUE;
+}
+
+static void draw_album_art_placeholder(GtkWidget *metadata)
+{
+		
 	cairo_t *cr;	
 	cr = gdk_cairo_create (metadata->window);
 	GtkAllocation alloc;
@@ -255,8 +265,7 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	g_object_unref(pcontext);
 	g_string_free (string, TRUE);
 	cairo_destroy (cr);	
-	
-	return TRUE;
+
 }
 
 /* Suppress/consume keyevents */
@@ -314,7 +323,12 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	}	
 	else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_ARTURL, property) == 0){
 		g_string_erase(priv->image_path, 0, -1);
-		g_string_overwrite(priv->image_path, 0, g_value_get_string (value)); 
+		g_string_overwrite(priv->image_path, 0, g_value_get_string (value));
+		// if its a remote image queue a redraw incase the download took too long
+		if (g_str_has_prefix(g_value_get_string (value), g_get_user_cache_dir())){
+			g_debug("the image update is a download so redraw");
+			gtk_widget_queue_draw(GTK_WIDGET(mitem));
+		}
 	}		
 }
 
@@ -348,10 +362,9 @@ rounded_rectangle (cairo_t *cr,
 {
         gdouble radius;
         gdouble degrees;
-
+				
         radius = corner_radius / aspect;
         degrees = G_PI / 180.0;
-
         cairo_new_sub_path (cr);
         cairo_arc (cr,
                    x + width - radius,
@@ -377,6 +390,7 @@ rounded_rectangle (cairo_t *cr,
                    radius,
                    180 * degrees,
                    270 * degrees);
+	
         cairo_close_path (cr);
 }
 
@@ -401,12 +415,12 @@ image_set_from_pixbuf (GtkWidget  *widget,
 	
 	MetadataWidgetPrivate* priv = METADATA_WIDGET_GET_PRIVATE(metadata);	
 	GtkImage* image = GTK_IMAGE(priv->album_art);
-  frame_width = 5;
+  frame_width = 3;
 
   w = gdk_pixbuf_get_width (source) + frame_width * 2;
   h = gdk_pixbuf_get_height (source) + frame_width * 2;
 
-  radius = w / 10;
+  radius = 10;
 
   pixmap = gdk_pixmap_new (gtk_widget_get_window (widget), w, h, -1);
   bitmask = gdk_pixmap_new (gtk_widget_get_window (widget), w, h, 1);

@@ -44,30 +44,26 @@ public class MusicPlayerBridge : GLib.Object
   }
 
 	private void try_to_add_inactive_familiar_clients(){
-		// TODO handle multple players - just working with one right now
-		int count = 0;
 		foreach(string app in this.playersDB.records()){
-			if(count == 0){
-				if(app == null){
-					warning("App string in keyfile is null therefore moving on to next player");
-					continue;
-				}
-				DesktopAppInfo info = new DesktopAppInfo.from_filename(app);
-				if(info == null){
-					warning("Could not create a desktopappinfo instance from app: %s", app);
-					continue;					
-				}
-				GLib.AppInfo app_info = info as GLib.AppInfo;
-				PlayerController ctrl = new PlayerController(this.root_menu, 
-				                                             app_info.get_name(),
-				                                             calculate_menu_position(),
-				                                             PlayerController.state.OFFLINE);
-				ctrl.set("app_info", app_info);
-				this.registered_clients.set(app_info.get_name().down().strip(), ctrl);					
-				debug("Created a player controller for %s which was found in the cache file", app_info.get_name().down().strip());
-				count += 1;
+			if(app == null){
+				warning("App string in keyfile is null therefore moving on to next player");
+				continue;
 			}
-			break;
+
+			debug("attempting to make an app info from %s", app);
+	
+			DesktopAppInfo info = new DesktopAppInfo.from_filename(app);
+			if(info == null){
+				warning("Could not create a desktopappinfo instance from app: %s", app);
+				continue;					
+			}
+			GLib.AppInfo app_info = info as GLib.AppInfo;
+			PlayerController ctrl = new PlayerController(this.root_menu, 
+					                                         app_info.get_name(),
+					                                         calculate_menu_position(),
+					                                         PlayerController.state.OFFLINE);
+			ctrl.set("app_info", app_info);
+			this.registered_clients.set(app_info.get_name().down().strip(), ctrl);					
 		}
 	}
 
