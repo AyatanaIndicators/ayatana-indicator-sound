@@ -661,6 +661,7 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
 	GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget)); 
   GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)slider_widget);
   GtkRange* range = (GtkRange*)slider;
+  g_return_val_if_fail(GTK_IS_RANGE(range), FALSE);
   gdouble current_value = gtk_range_get_value(range);
   gdouble new_value = current_value;
   const gdouble five_percent = 5;
@@ -729,6 +730,8 @@ indicator_sound_scroll (IndicatorObject *io, gint delta, IndicatorScrollDirectio
 	GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget)); 
   GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)slider_widget);
   GtkRange* range = (GtkRange*)slider;
+  g_return_if_fail(GTK_IS_RANGE(range));
+
   gdouble value = gtk_range_get_value(range);
   GtkAdjustment *adj = gtk_range_get_adjustment (GTK_RANGE (slider));
 	g_debug("indicator-sound-scroll - current slider value %f", value);
