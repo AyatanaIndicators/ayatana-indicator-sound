@@ -116,6 +116,8 @@ public class PlayerController : GLib.Object
 		update_state(PlayerController.state.OFFLINE);
 		this.custom_items[widget_order.TRANSPORT].reset(TransportMenuitem.attributes_format());
 		this.custom_items[widget_order.METADATA].reset(MetadataMenuitem.attributes_format());
+		TitleMenuitem title = this.custom_items[widget_order.TITLE] as TitleMenuitem;
+		title.toggle_active_triangle(false);					
 	}
 
 	public void update_layout()
@@ -172,6 +174,10 @@ public class PlayerController : GLib.Object
 	{
 		if(this.mpris_bridge.connected() == true){
 			this.update_state(state.CONNECTED);
+			TitleMenuitem title = this.custom_items[widget_order.TITLE] as TitleMenuitem;
+			title.toggle_active_triangle(true);			
+			TransportMenuitem transport = this.custom_items[widget_order.TRANSPORT] as TransportMenuitem;
+			transport.change_play_state(TransportMenuitem.state.PAUSED);
 		}
 		else{
 			this.update_state(state.DISCONNECTED);

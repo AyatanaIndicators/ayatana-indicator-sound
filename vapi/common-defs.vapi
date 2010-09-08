@@ -36,6 +36,7 @@ namespace DbusmenuTransport{
 namespace DbusmenuTitle{
 	public const string MENUITEM_TYPE;
 	public const string MENUITEM_NAME;
+	public const string MENUITEM_RUNNING;
 }
 
 [CCode (cheader_filename = "common-defs.h")]

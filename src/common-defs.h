@@ -41,6 +41,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define DBUSMENU_TITLE_MENUITEM_TYPE          	"x-canonical-sound-menu-player-title-type"
 #define DBUSMENU_TITLE_MENUITEM_NAME       			"x-canonical-sound-menu-player-title-name"
+#define DBUSMENU_TITLE_MENUITEM_RUNNING       	"x-canonical-sound-menu-player-title-running"
 
 #define DBUSMENU_SCRUB_MENUITEM_TYPE						"x-canonical-sound-menu-player-scrub-type"
 #define DBUSMENU_SCRUB_MENUITEM_DURATION				"x-canonical-sound-menu-player-scrub-mpris:length"
