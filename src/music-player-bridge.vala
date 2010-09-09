@@ -59,13 +59,26 @@ public class MusicPlayerBridge : GLib.Object
 			}
 			GLib.AppInfo app_info = info as GLib.AppInfo;
 			PlayerController ctrl = new PlayerController(this.root_menu, 
-					                                         app_info.get_name(),
+					                                         truncate_player_name(app_info.get_name()),
 					                                         calculate_menu_position(),
 					                                         PlayerController.state.OFFLINE);
-			ctrl.set("app_info", app_info);
-			this.registered_clients.set(app_info.get_name().down().strip(), ctrl);					
+			ctrl.app_info = app_info;
+			this.registered_clients.set(truncate_player_name(app_info.get_name()), ctrl);					
 		}
 	}
+
+  private static string truncate_player_name(string app_info_name)
+  {
+    string result = app_info_name.down().strip();
+
+    var tokens = result.split(" ");
+
+    if(tokens.length > 1){
+      result = tokens[0];
+    }
+    debug("truncate player name %s", result);
+    return result;
+  }
 
 	private int calculate_menu_position()
 	{

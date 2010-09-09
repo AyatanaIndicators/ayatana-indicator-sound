@@ -733,15 +733,15 @@ draw (GtkWidget* button, cairo_t *cr)
 
 	//double INNER_START[] =  {229.0f/255.0f, 223.0f/255.0f, 215.0f/255.0f, 1.0f};
 	//double INNER_END[] = {183.0f / 255.0f, 178.0f / 255.0f, 172.0f / 255.0f, 1.0f};
-	double MIDDLE_START[] = {61.0f / 255.0f, 60.0f / 255.0f, 57.0f / 255.0f, 1.0f};
-	double MIDDLE_END[] = {94.0f / 255.0f,93.0f / 255.0f, 90.0f / 255.0f,1.0f};
-	double OUTER_START[] = {36.0f / 255.0f, 35.0f / 255.0f, 33.0f / 255.0f, 1.0f};
-	double OUTER_END[] = {123.0f / 255.0f, 123.0f / 255.0f, 120.0f / 255.0f, 1.0f};
-	double BUTTON_START[] = {252.0f / 255.0f, 251.0f / 255.0f, 251.0f / 255.0f,1.0f};
-	double BUTTON_END[] = {186.0f / 255.0f,180.0f / 255.0f, 170.0f / 255.0f, 1.0f};
+	double MIDDLE_END[] = {61.0f / 255.0f, 60.0f / 255.0f, 57.0f / 255.0f, 1.0f};
+	double MIDDLE_START[] = {94.0f / 255.0f,93.0f / 255.0f, 90.0f / 255.0f,1.0f};
+	double OUTER_END[] = {36.0f / 255.0f, 35.0f / 255.0f, 33.0f / 255.0f, 1.0f};
+	double OUTER_START[] = {123.0f / 255.0f, 123.0f / 255.0f, 120.0f / 255.0f, 1.0f};
+	double BUTTON_END[] = {252.0f / 255.0f, 251.0f / 255.0f, 251.0f / 255.0f,1.0f};
+	double BUTTON_START[] = {186.0f / 255.0f,180.0f / 255.0f, 170.0f / 255.0f, 1.0f};
 	double BUTTON_SHADOW[] = {0.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 0.75f};
-	double INNER_COMPRESSED_END[] = {61.0f / 255.0f, 60.0f / 255.0f, 57.0f / 255.0f, 1.0f};
-	double INNER_COMPRESSED_START[] = {36.0f / 255.0f, 35.0f / 255.0f, 33.0f / 255.0f, 1.0f};
+	double INNER_COMPRESSED_START[] = {61.0f / 255.0f, 60.0f / 255.0f, 57.0f / 255.0f, 1.0f};
+	double INNER_COMPRESSED_END[] = {36.0f / 255.0f, 35.0f / 255.0f, 33.0f / 255.0f, 1.0f};
 	
 	// prev/next-background
   draw_gradient (cr,
