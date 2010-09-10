@@ -175,11 +175,6 @@ metadata_widget_finalize (GObject *object)
 	G_OBJECT_CLASS (metadata_widget_parent_class)->finalize (object);
 }
 
-static void metadata_widget_style_changed_cb(GtkWidget *widget,
-                                             gpointer user_data)
-{
-  
-}
 
 /**
  * We override the expose method to enable primitive drawing of the 

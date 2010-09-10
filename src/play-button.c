@@ -796,7 +796,10 @@ _color_rgb_to_hls (gdouble *r,
 		else
 		s = (max-min)/(2-max-min);
 
-		delta = max -min;
+		delta = (max -min) != 0 ? (max -min) : 1;
+    
+    if(delta == 0)
+      delta = 1;
   	if (red == max)
 			h = (green-blue)/delta;
 		else if (green == max)
