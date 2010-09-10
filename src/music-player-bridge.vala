@@ -58,6 +58,8 @@ public class MusicPlayerBridge : GLib.Object
 				continue;					
 			}
 			GLib.AppInfo app_info = info as GLib.AppInfo;
+      // TODO refactor to remove need for further name refactoring in the player controller
+      // truncate should not do a down() on the name
 			PlayerController ctrl = new PlayerController(this.root_menu, 
 					                                         truncate_player_name(app_info.get_name()),
 					                                         calculate_menu_position(),

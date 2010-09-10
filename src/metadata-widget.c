@@ -33,6 +33,7 @@ typedef struct _MetadataWidgetPrivate MetadataWidgetPrivate;
 
 struct _MetadataWidgetPrivate
 {
+  gboolean   theme_change_occured;
 	GtkWidget* hbox;
 	GtkWidget* album_art;
   GString*	 image_path;
@@ -40,18 +41,18 @@ struct _MetadataWidgetPrivate
 	GtkWidget* artist_label;
 	GtkWidget* piece_label;
 	GtkWidget* container_label;	
-	GdkColor   bevel_colour;
-	GdkColor   eight_note_colour;
 };
 
 #define METADATA_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), METADATA_WIDGET_TYPE, MetadataWidgetPrivate))
 
 /* Prototypes */
-static void metadata_widget_class_init (MetadataWidgetClass *klass);
-static void metadata_widget_init       (MetadataWidget *self);
-static void metadata_widget_dispose    (GObject *object);
-static void metadata_widget_finalize   (GObject *object);
-static gboolean metadata_image_expose (GtkWidget *image, GdkEventExpose *event, gpointer user_data);
+static void metadata_widget_class_init    (MetadataWidgetClass *klass);
+static void metadata_widget_init          (MetadataWidget *self);
+static void metadata_widget_dispose       (GObject *object);
+static void metadata_widget_finalize      (GObject *object);
+static gboolean metadata_image_expose     (GtkWidget *image, GdkEventExpose *event, gpointer user_data);
+//static void metadata_widget_style_changed_cb(GtkWidget *widget, gpointer user_data);
+static void metadata_widget_set_style     (GtkWidget* button, GtkStyle* style);
 
 // keyevent consumers
 static gboolean metadata_widget_button_press_event (GtkWidget *menuitem, 
@@ -61,15 +62,11 @@ static void metadata_widget_property_update (DbusmenuMenuitem* item,
                                              gchar* property, 
                                        			 GValue* value,
                                              gpointer userdata);
-
 static void metadata_widget_style_labels(MetadataWidget* self,
                                          GtkLabel* label);
-
-void metadata_widget_set_style(GtkWidget* button, GtkStyle* style);
 static void image_set_from_pixbuf (GtkWidget  *widget,
 												           MetadataWidget* metadata,
 												           GdkPixbuf *source);
-
 static void draw_album_art_placeholder(GtkWidget *metadata);
 
 G_DEFINE_TYPE (MetadataWidget, metadata_widget, GTK_TYPE_MENU_ITEM);
@@ -95,7 +92,6 @@ metadata_widget_init (MetadataWidget *self)
 	g_debug("MetadataWidget::metadata_widget_init");
 
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);
-
 	GtkWidget *hbox;
 
 	hbox = gtk_hbox_new(FALSE, 0);
@@ -114,7 +110,9 @@ metadata_widget_init (MetadataWidget *self)
 	
 	gtk_box_pack_start (GTK_BOX (priv->hbox), priv->album_art, FALSE, FALSE, 0);	
 	
-	GtkWidget* vbox = gtk_vbox_new(FALSE, 0);
+  priv->theme_change_occured = FALSE;
+
+  GtkWidget* vbox = gtk_vbox_new(FALSE, 0);
 	
 	// artist
 	GtkWidget* artist;
@@ -177,6 +175,12 @@ metadata_widget_finalize (GObject *object)
 	G_OBJECT_CLASS (metadata_widget_parent_class)->finalize (object);
 }
 
+static void metadata_widget_style_changed_cb(GtkWidget *widget,
+                                             gpointer user_data)
+{
+  
+}
+
 /**
  * We override the expose method to enable primitive drawing of the 
  * empty album art image and rounded rectangles on the album art.
@@ -188,7 +192,9 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	MetadataWidget* widget = METADATA_WIDGET(user_data);
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);	
 	if(priv->image_path->len > 0){
-	  if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE){					
+	  if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE ||
+       priv->theme_change_occured == TRUE){
+      priv->theme_change_occured = FALSE;         
 			GdkPixbuf* pixbuf;
 			pixbuf = gdk_pixbuf_new_from_file(priv->image_path->str, NULL);
 			g_debug("metadata_load_new_image -> pixbuf from %s",
@@ -216,6 +222,9 @@ static void draw_album_art_placeholder(GtkWidget *metadata)
 		
 	cairo_t *cr;	
 	cr = gdk_cairo_create (metadata->window);
+  GtkStyle *style;
+	style = gtk_widget_get_style (metadata);
+  
 	GtkAllocation alloc;
 	gtk_widget_get_allocation (metadata, &alloc);
 		
@@ -234,7 +243,11 @@ static void draw_album_art_placeholder(GtkWidget *metadata)
 
 	cairo_close_path (cr);
 
-	cairo_set_source_rgba (cr, 123.0f / 255.0f, 123.0f / 255.0f, 120.0f / 255.0f, .8f);		
+  cairo_set_source_rgba (cr,
+                         style->fg[0].red/65535.0, 
+                         style->fg[0].green/65535.0,
+                         style->fg[0].blue/65535.0,
+                         0.6);
 	cairo_set_line_width (cr, 2.0);
 	
 	cairo_stroke (cr);						
@@ -256,7 +269,12 @@ static void draw_album_art_placeholder(GtkWidget *metadata)
 	pango_layout_set_font_description(layout, desc);
 	pango_font_description_free(desc);
 
-	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.8);
+  cairo_set_source_rgba (cr,
+                         style->fg[0].red/65535.0, 
+                         style->fg[0].green/65535.0,
+                         style->fg[0].blue/65535.0,
+                         0.8);
+  
 	pango_cairo_update_layout(cr, layout);
 	cairo_move_to (cr, alloc.x + alloc.width/6, alloc.y);	
 	pango_cairo_show_layout(cr, layout);
@@ -487,21 +505,15 @@ metadata_widget_style_labels(MetadataWidget* self, GtkLabel* label)
 	g_free(markup);	
 }
 
-void
+static void
 metadata_widget_set_style(GtkWidget* metadata, GtkStyle* style)
 {
 	g_return_if_fail(IS_METADATA_WIDGET(metadata));
 	MetadataWidget* widg = METADATA_WIDGET(metadata);
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widg);	
-	if(style == NULL){
-		g_warning("metadata_widget_set_style -> style is NULL!");
-		return;
-	}
-	else{
-		g_debug("metadata_widget: about to set the style colours");
-		priv->eight_note_colour = style->fg[GTK_STATE_NORMAL];
-		priv->bevel_colour = style->bg[GTK_STATE_NORMAL];		
-	}
+  priv->theme_change_occured = TRUE;    
+	gtk_widget_queue_draw(GTK_WIDGET(metadata));  
+	g_debug("metadata_widget: theme change");        
 }
 
  /**
