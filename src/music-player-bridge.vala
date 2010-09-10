@@ -63,6 +63,9 @@ public class MusicPlayerBridge : GLib.Object
 					                                         calculate_menu_position(),
 					                                         PlayerController.state.OFFLINE);
 			ctrl.app_info = app_info;
+      if(ctrl.app_info == null)
+        warning("for some reason the app info is null");
+      
 			this.registered_clients.set(truncate_player_name(app_info.get_name()), ctrl);					
 		}
 	}
