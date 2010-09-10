@@ -4658,6 +4658,18 @@ Mpris2Controller* mpris2_controller_new (PlayerController* ctrl) {
 }
 
 
+static char* bool_to_string (gboolean self) {
+	char* result = NULL;
+	if (self) {
+		result = g_strdup ("true");
+		return result;
+	} else {
+		result = g_strdup ("false");
+		return result;
+	}
+}
+
+
 static GValue* _g_value_dup (GValue* self) {
 	return g_boxed_copy (G_TYPE_VALUE, self);
 }
@@ -4676,23 +4688,27 @@ static void _vala_GValue_free (GValue* self) {
 
 void mpris2_controller_property_changed_cb (Mpris2Controller* self, const char* interface_source, GHashTable* changed_properties, char** invalid, int invalid_length1) {
 	char* _tmp0_;
-	gboolean _tmp1_ = FALSE;
+	char* _tmp1_;
+	gboolean _tmp2_ = FALSE;
 	GValue* play_v;
 	GValue* pos_v;
 	GValue* meta_v;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (interface_source != NULL);
 	g_return_if_fail (changed_properties != NULL);
-	g_debug ("mpris2-controller.vala:99: properties-changed for interface %s and own" \
-"er %s", interface_source, _tmp0_ = g_utf8_strdown (player_controller_get_name (self->priv->_owner), -1));
+	g_debug ("mpris2-controller.vala:100: properties-changed for interface %s and ow" \
+"ner %s", interface_source, _tmp0_ = g_utf8_strdown (player_controller_get_name (self->priv->_owner), -1));
 	_g_free0 (_tmp0_);
+	g_debug ("mpris2-controller.vala:101: is the invalid array null : %s", _tmp1_ = bool_to_string (invalid == NULL));
+	_g_free0 (_tmp1_);
+	g_debug ("mpris2-controller.vala:102: invalid length  : %i", invalid_length1);
 	if (changed_properties == NULL) {
-		_tmp1_ = TRUE;
+		_tmp2_ = TRUE;
 	} else {
-		_tmp1_ = g_str_has_prefix (interface_source, MPRIS2_CONTROLLER_root_interface) == FALSE;
+		_tmp2_ = g_str_has_prefix (interface_source, MPRIS2_CONTROLLER_root_interface) == FALSE;
 	}
-	if (_tmp1_) {
-		g_warning ("mpris2-controller.vala:101: Property-changed hash is null or this is a" \
+	if (_tmp2_) {
+		g_warning ("mpris2-controller.vala:105: Property-changed hash is null or this is a" \
 "n interface that concerns us");
 		return;
 	}
@@ -4700,35 +4716,35 @@ void mpris2_controller_property_changed_cb (Mpris2Controller* self, const char* 
 	if (play_v != NULL) {
 		char* state;
 		TransportMenuitemstate p;
-		PlayerItem* _tmp2_;
-		TransportMenuitem* _tmp3_;
+		PlayerItem* _tmp3_;
+		TransportMenuitem* _tmp4_;
 		state = g_strdup (g_value_get_string (play_v));
-		g_debug ("mpris2-controller.vala:107: new playback state = %s", state);
+		g_debug ("mpris2-controller.vala:111: new playback state = %s", state);
 		p = (TransportMenuitemstate) mpris2_controller_determine_play_state (self, state);
-		transport_menuitem_change_play_state (_tmp3_ = (_tmp2_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT), IS_TRANSPORT_MENUITEM (_tmp2_) ? ((TransportMenuitem*) _tmp2_) : NULL), p);
-		_g_object_unref0 (_tmp3_);
+		transport_menuitem_change_play_state (_tmp4_ = (_tmp3_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT), IS_TRANSPORT_MENUITEM (_tmp3_) ? ((TransportMenuitem*) _tmp3_) : NULL), p);
+		_g_object_unref0 (_tmp4_);
 		_g_free0 (state);
 	}
 	pos_v = __g_value_dup0 ((GValue*) g_hash_table_lookup (changed_properties, "Position"));
 	if (pos_v != NULL) {
 		gint64 pos;
 		pos = g_value_get_int64 (pos_v);
-		g_debug ("mpris2-controller.vala:115: new position = %i", (gint) pos);
+		g_debug ("mpris2-controller.vala:119: new position = %i", (gint) pos);
 	}
 	meta_v = __g_value_dup0 ((GValue*) g_hash_table_lookup (changed_properties, "Metadata"));
 	if (meta_v != NULL) {
 		GHashTable* changed_updates;
-		PlayerItem* _tmp4_;
-		GeeHashSet* _tmp5_;
-		PlayerItem* _tmp6_;
-		GeeHashSet* _tmp7_;
+		PlayerItem* _tmp5_;
+		GeeHashSet* _tmp6_;
+		PlayerItem* _tmp7_;
+		GeeHashSet* _tmp8_;
 		changed_updates = mpris2_controller_clean_metadata (self);
-		player_item_reset (_tmp4_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA), _tmp5_ = metadata_menuitem_attributes_format ());
-		_g_object_unref0 (_tmp5_);
-		_g_object_unref0 (_tmp4_);
-		player_item_update (_tmp6_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA), changed_updates, _tmp7_ = metadata_menuitem_attributes_format ());
-		_g_object_unref0 (_tmp7_);
+		player_item_reset (_tmp5_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA), _tmp6_ = metadata_menuitem_attributes_format ());
 		_g_object_unref0 (_tmp6_);
+		_g_object_unref0 (_tmp5_);
+		player_item_update (_tmp7_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA), changed_updates, _tmp8_ = metadata_menuitem_attributes_format ());
+		_g_object_unref0 (_tmp8_);
+		_g_object_unref0 (_tmp7_);
 		_g_hash_table_unref0 (changed_updates);
 	}
 	__vala_GValue_free0 (meta_v);
@@ -4773,7 +4789,7 @@ static GHashTable* mpris2_controller_clean_metadata (Mpris2Controller* self) {
 		artists = (_tmp5_ = (_tmp4_ = (_tmp3_ = g_value_get_boxed ((GValue*) g_hash_table_lookup (_tmp2_ = mpris_player_get_Metadata (self->priv->_player), "xesam:artist")), (_tmp3_ == NULL) ? ((gpointer) _tmp3_) : _vala_array_dup1 (_tmp3_, g_strv_length (g_value_get_boxed ((GValue*) g_hash_table_lookup (_tmp2_ = mpris_player_get_Metadata (self->priv->_player), "xesam:artist"))))), _g_hash_table_unref0 (_tmp2_), _tmp4_), artists_length1 = g_strv_length (g_value_get_boxed ((GValue*) g_hash_table_lookup (_tmp2_ = mpris_player_get_Metadata (self->priv->_player), "xesam:artist"))), _artists_size_ = artists_length1, _tmp5_);
 		display_artists = g_strjoinv (", ", artists);
 		g_hash_table_replace (changed_updates, g_strdup ("xesam:artist"), (_tmp6_ = g_new0 (GValue, 1), g_value_init (_tmp6_, G_TYPE_STRING), g_value_set_string (_tmp6_, display_artists), _tmp6_));
-		g_debug ("mpris2-controller.vala:135: artist : %s", display_artists);
+		g_debug ("mpris2-controller.vala:139: artist : %s", display_artists);
 		_g_free0 (display_artists);
 		artists = (_vala_array_free (artists, artists_length1, (GDestroyNotify) g_free), NULL);
 	}
@@ -4808,7 +4824,7 @@ static TransportMenuitemstate mpris2_controller_determine_play_state (Mpris2Cont
 		_tmp0_ = FALSE;
 	}
 	if (_tmp0_) {
-		g_debug ("mpris2-controller.vala:151: determine play state - state = %s", status);
+		g_debug ("mpris2-controller.vala:155: determine play state - state = %s", status);
 		result = TRANSPORT_MENUITEM_STATE_PLAYING;
 		return result;
 	}
@@ -4834,7 +4850,7 @@ void mpris2_controller_initial_update (Mpris2Controller* self) {
 		update = mpris2_controller_determine_play_state (self, _tmp2_ = mpris_player_get_PlaybackStatus (self->priv->_player));
 		_g_free0 (_tmp2_);
 	}
-	g_debug ("mpris2-controller.vala:166: initial update - play state %i", (gint) update);
+	g_debug ("mpris2-controller.vala:170: initial update - play state %i", (gint) update);
 	transport_menuitem_change_play_state (_tmp4_ = (_tmp3_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT), IS_TRANSPORT_MENUITEM (_tmp3_) ? ((TransportMenuitem*) _tmp3_) : NULL), update);
 	_g_object_unref0 (_tmp4_);
 	cleaned_metadata = mpris2_controller_clean_metadata (self);
@@ -4848,9 +4864,9 @@ void mpris2_controller_initial_update (Mpris2Controller* self) {
 void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuitemaction command) {
 	GError * _inner_error_ = NULL;
 	g_return_if_fail (self != NULL);
-	g_debug ("mpris2-controller.vala:176: transport_event input = %i", (gint) command);
+	g_debug ("mpris2-controller.vala:180: transport_event input = %i", (gint) command);
 	if (command == TRANSPORT_MENUITEM_ACTION_PLAY_PAUSE) {
-		g_debug ("mpris2-controller.vala:178: transport_event PLAY_PAUSE");
+		g_debug ("mpris2-controller.vala:182: transport_event PLAY_PAUSE");
 		{
 			mpris_player_PlayPause (self->priv->_player, &_inner_error_);
 			if (_inner_error_ != NULL) {
@@ -4869,7 +4885,7 @@ void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuit
 			_error_ = _inner_error_;
 			_inner_error_ = NULL;
 			{
-				g_warning ("mpris2-controller.vala:183: DBus Error calling the player objects Play" \
+				g_warning ("mpris2-controller.vala:187: DBus Error calling the player objects Play" \
 "Pause method %s", _error_->message);
 				_g_error_free0 (_error_);
 			}
@@ -4900,7 +4916,7 @@ void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuit
 				_error_ = _inner_error_;
 				_inner_error_ = NULL;
 				{
-					g_warning ("mpris2-controller.vala:192: DBus Error calling the player objects Prev" \
+					g_warning ("mpris2-controller.vala:196: DBus Error calling the player objects Prev" \
 "ious method %s", _error_->message);
 					_g_error_free0 (_error_);
 				}
@@ -4931,7 +4947,7 @@ void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuit
 					_error_ = _inner_error_;
 					_inner_error_ = NULL;
 					{
-						g_warning ("mpris2-controller.vala:201: DBus Error calling the player objects Next" \
+						g_warning ("mpris2-controller.vala:205: DBus Error calling the player objects Next" \
 " method %s", _error_->message);
 						_g_error_free0 (_error_);
 					}
@@ -4963,18 +4979,18 @@ void mpris2_controller_set_track_position (Mpris2Controller* self, double positi
 	GValue* v;
 	GError * _inner_error_ = NULL;
 	g_return_if_fail (self != NULL);
-	g_debug ("mpris2-controller.vala:212: Set position with pos (0-100) %f", position);
+	g_debug ("mpris2-controller.vala:216: Set position with pos (0-100) %f", position);
 	time_value = (_tmp1_ = __g_value_dup0 ((GValue*) g_hash_table_lookup (_tmp0_ = mpris_player_get_Metadata (self->priv->_player), "mpris:length")), _g_hash_table_unref0 (_tmp0_), _tmp1_);
 	if (time_value == NULL) {
-		g_warning ("mpris2-controller.vala:215: Can't fetch the duration of the track ther" \
+		g_warning ("mpris2-controller.vala:219: Can't fetch the duration of the track ther" \
 "efore cant set the position");
 		__vala_GValue_free0 (time_value);
 		return;
 	}
 	total_time = g_value_get_int64 (time_value);
-	g_debug ("mpris2-controller.vala:220: total time of track = %i", (gint) total_time);
+	g_debug ("mpris2-controller.vala:224: total time of track = %i", (gint) total_time);
 	new_time_position = total_time * (position / 100.0);
-	g_debug ("mpris2-controller.vala:222: new position = %f", new_time_position);
+	g_debug ("mpris2-controller.vala:226: new position = %f", new_time_position);
 	v = (_tmp3_ = __g_value_dup0 ((GValue*) g_hash_table_lookup (_tmp2_ = mpris_player_get_Metadata (self->priv->_player), "mpris:trackid")), _g_hash_table_unref0 (_tmp2_), _tmp3_);
 	if (v != NULL) {
 		if (G_VALUE_HOLDS (v, G_TYPE_STRING)) {
@@ -5001,7 +5017,7 @@ void mpris2_controller_set_track_position (Mpris2Controller* self, double positi
 				e = _inner_error_;
 				_inner_error_ = NULL;
 				{
-					g_error ("mpris2-controller.vala:232: DBus Error calling the player objects SetP" \
+					g_error ("mpris2-controller.vala:236: DBus Error calling the player objects SetP" \
 "osition method %s", e->message);
 					_g_error_free0 (e);
 				}
@@ -5025,7 +5041,7 @@ void mpris2_controller_set_track_position (Mpris2Controller* self, double positi
 
 void mpris2_controller_onSeeked (Mpris2Controller* self, gint64 position) {
 	g_return_if_fail (self != NULL);
-	g_debug ("mpris2-controller.vala:240: Seeked signal callback with pos = %i", ((gint) position) / 1000);
+	g_debug ("mpris2-controller.vala:244: Seeked signal callback with pos = %i", ((gint) position) / 1000);
 }
 
 
@@ -5083,7 +5099,7 @@ void mpris2_controller_expose (Mpris2Controller* self) {
 			e = _inner_error_;
 			_inner_error_ = NULL;
 			{
-				g_error ("mpris2-controller.vala:263: Exception thrown while calling function Ra" \
+				g_error ("mpris2-controller.vala:267: Exception thrown while calling function Ra" \
 "ise - %s", e->message);
 				_g_error_free0 (e);
 			}
@@ -5255,7 +5271,7 @@ static GObject * mpris2_controller_constructor (GType type, guint n_construct_pr
 			e = _inner_error_;
 			_inner_error_ = NULL;
 			{
-				g_error ("mpris2-controller.vala:93: Problems connecting to the session bus - %s", e->message);
+				g_error ("mpris2-controller.vala:94: Problems connecting to the session bus - %s", e->message);
 				_g_error_free0 (e);
 			}
 		}
