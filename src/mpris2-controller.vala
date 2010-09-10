@@ -53,7 +53,9 @@ public interface MprisPlayer : DBus.Object {
 [DBus (name = "org.freedesktop.DBus.Properties")]
 public interface FreeDesktopProperties : DBus.Object{
 	// signals
-	public signal void PropertiesChanged(string source, HashTable<string, Value?> changed_properties, string[] invalid);
+	public signal void PropertiesChanged(string source, HashTable<string,
+                                       Value?> changed_properties,
+                                       string[] invalid);
 }
 
 /*
@@ -85,8 +87,7 @@ public class Mpris2Controller : GLib.Object
 			this.player.Seeked += onSeeked;
 
 			this.properties_interface = (FreeDesktopProperties) connection.get_object(root_interface.concat(".").concat(this.owner.name.down()),
-			                                                                          "/org/mpris/MediaPlayer2",
-			                                                                          "org.freedesktop.DBus.Properties");
+			                                                                          "/org/mpris/MediaPlayer2");
 			this.properties_interface.PropertiesChanged += property_changed_cb;			
 			
 		} catch (DBus.Error e) {
@@ -97,7 +98,10 @@ public class Mpris2Controller : GLib.Object
 	public void property_changed_cb(string interface_source, HashTable<string, Value?> changed_properties, string[] invalid )
 	{	
 		debug("properties-changed for interface %s and owner %s", interface_source, this.owner.name.down());
-		if(changed_properties == null || interface_source.has_prefix(this.root_interface) == false){
+    debug("is the invalid array null : %s", (invalid == null).to_string());
+    debug("invalid length  : %i", invalid.length);
+    
+		if(changed_properties == null || interface_source.has_prefix(this.root_interface) == false ){
 			warning("Property-changed hash is null or this is an interface that concerns us");
 			return;
 		}

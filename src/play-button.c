@@ -55,6 +55,18 @@ Uses code from ctk
 #define PLAY_WIDTH 28.0f
 #define PLAY_HEIGHT 29.0f
 #define PLAY_PADDING 5.0f
+#define INNER_START_SHADE 0.98
+#define INNER_END_SHADE 0.98
+#define MIDDLE_START_SHADE 0.7
+#define MIDDLE_END_SHADE 1.4
+#define OUTER_START_SHADE 0.96
+#define OUTER_END_SHADE 0.96
+#define BUTTON_START_SHADE 1.1
+#define BUTTON_END_SHADE 0.9
+#define BUTTON_SHADOW_SHADE 0.8
+#define INNER_COMPRESSED_START_SHADE 0.95
+#define INNER_COMPRESSED_END_SHADE 1.05
+
 
 typedef struct _PlayButtonPrivate PlayButtonPrivate;
 
@@ -69,6 +81,14 @@ struct _PlayButtonPrivate
 	PlayButtonState current_state;
 	GHashTable* 		command_coordinates;	
 };
+
+typedef struct
+{
+	double r;
+	double g;
+	double b;
+} CairoColorRGB;
+
 
 #define PLAY_BUTTON_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), PLAY_BUTTON_TYPE, PlayButtonPrivate))
 
@@ -723,6 +743,201 @@ _finalize (cairo_t*          cr,
 }
 
 static void
+_color_rgb_to_hls (gdouble *r,
+                   gdouble *g,
+                   gdouble *b)
+{
+	gdouble min;
+	gdouble max;
+	gdouble red;
+	gdouble green;
+	gdouble blue;
+	gdouble h, l, s;
+	gdouble delta;
+
+	red = *r;
+	green = *g;
+	blue = *b;
+
+	if (red > green)
+	{
+		if (red > blue)
+			max = red;
+		else
+			max = blue;
+
+		if (green < blue)
+			min = green;
+		else
+		min = blue;
+	}
+	else
+	{
+		if (green > blue)
+			max = green;
+		else
+		max = blue;
+
+		if (red < blue)
+			min = red;
+		else
+			min = blue;
+	}
+	l = (max+min)/2;
+  if (fabs (max-min) < 0.0001)
+  {
+		h = 0;
+		s = 0;
+	}
+	else
+  {
+		if (l <= 0.5)
+		s = (max-min)/(max+min);
+		else
+		s = (max-min)/(2-max-min);
+
+		delta = (max -min) != 0 ? (max -min) : 1;
+    
+    if(delta == 0)
+      delta = 1;
+  	if (red == max)
+			h = (green-blue)/delta;
+		else if (green == max)
+			h = 2+(blue-red)/delta;
+		else if (blue == max)
+			h = 4+(red-green)/delta;
+
+		h *= 60;
+		if (h < 0.0)
+			h += 360;
+	}
+
+	*r = h;
+	*g = l;
+	*b = s;
+}
+
+static void
+_color_hls_to_rgb (gdouble *h,
+                   gdouble *l,
+                   gdouble *s)
+{
+	gdouble hue;
+	gdouble lightness;
+	gdouble saturation;
+	gdouble m1, m2;
+	gdouble r, g, b;
+
+	lightness = *l;
+	saturation = *s;
+
+	if (lightness <= 0.5)
+		m2 = lightness*(1+saturation);
+	else
+		m2 = lightness+saturation-lightness*saturation;
+
+	m1 = 2*lightness-m2;
+
+	if (saturation == 0)
+	{
+		*h = lightness;
+		*l = lightness;
+		*s = lightness;
+	}
+	else
+	{
+		hue = *h+120;
+		while (hue > 360)
+			hue -= 360;
+		while (hue < 0)
+			hue += 360;
+
+		if (hue < 60)
+			r = m1+(m2-m1)*hue/60;
+		else if (hue < 180)
+			r = m2;
+		else if (hue < 240)
+  		r = m1+(m2-m1)*(240-hue)/60;
+		else
+			r = m1;
+
+		hue = *h;
+		while (hue > 360)
+			hue -= 360;
+		while (hue < 0)
+			hue += 360;
+
+		if (hue < 60)
+			g = m1+(m2-m1)*hue/60;
+		else if (hue < 180)
+			g = m2;
+		else if (hue < 240)
+			g = m1+(m2-m1)*(240-hue)/60;
+		else
+			g = m1;
+
+		hue = *h-120;
+		while (hue > 360)
+			hue -= 360;
+		while (hue < 0)
+			hue += 360;
+
+		if (hue < 60)
+			b = m1+(m2-m1)*hue/60;
+		else if (hue < 180)
+			b = m2;
+		else if (hue < 240)
+			b = m1+(m2-m1)*(240-hue)/60;
+		else
+			b = m1;
+
+		*h = r;
+		*l = g;
+		*s = b;
+	}
+}
+
+static void
+_color_shade (const CairoColorRGB *a, float k, CairoColorRGB *b)
+{
+	double red;
+	double green;
+	double blue;
+
+	red   = a->r;
+	green = a->g;
+	blue  = a->b;
+
+	if (k == 1.0)
+	{
+		b->r = red;
+		b->g = green;
+		b->b = blue;
+		return;
+	}
+
+	_color_rgb_to_hls (&red, &green, &blue);
+
+	green *= k;
+	if (green > 1.0)
+		green = 1.0;
+	else if (green < 0.0)
+		green = 0.0;
+
+	blue *= k;
+	if (blue > 1.0)
+		blue = 1.0;
+	else if (blue < 0.0)
+		blue = 0.0;
+
+	_color_hls_to_rgb (&red, &green, &blue);
+
+	b->r = red;
+	b->g = green;
+	b->b = blue;
+}
+
+static void
 draw (GtkWidget* button, cairo_t *cr)
 {
 	g_return_if_fail(IS_PLAY_BUTTON(button));
@@ -731,18 +946,43 @@ draw (GtkWidget* button, cairo_t *cr)
 	cairo_surface_t*  surf = NULL;
 	cairo_t*       cr_surf = NULL;
 
-	//double INNER_START[] =  {229.0f/255.0f, 223.0f/255.0f, 215.0f/255.0f, 1.0f};
-	//double INNER_END[] = {183.0f / 255.0f, 178.0f / 255.0f, 172.0f / 255.0f, 1.0f};
-	double MIDDLE_START[] = {61.0f / 255.0f, 60.0f / 255.0f, 57.0f / 255.0f, 1.0f};
-	double MIDDLE_END[] = {94.0f / 255.0f,93.0f / 255.0f, 90.0f / 255.0f,1.0f};
-	double OUTER_START[] = {36.0f / 255.0f, 35.0f / 255.0f, 33.0f / 255.0f, 1.0f};
-	double OUTER_END[] = {123.0f / 255.0f, 123.0f / 255.0f, 120.0f / 255.0f, 1.0f};
-	double BUTTON_START[] = {252.0f / 255.0f, 251.0f / 255.0f, 251.0f / 255.0f,1.0f};
-	double BUTTON_END[] = {186.0f / 255.0f,180.0f / 255.0f, 170.0f / 255.0f, 1.0f};
-	double BUTTON_SHADOW[] = {0.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 0.75f};
-	double INNER_COMPRESSED_END[] = {61.0f / 255.0f, 60.0f / 255.0f, 57.0f / 255.0f, 1.0f};
-	double INNER_COMPRESSED_START[] = {36.0f / 255.0f, 35.0f / 255.0f, 33.0f / 255.0f, 1.0f};
-	
+  GtkStyle *style;
+
+  CairoColorRGB bg_normal, fg_normal;
+	CairoColorRGB color_inner[2], color_middle[2], color_outer[2], color_button[3], color_inner_compressed[2];
+
+	style = gtk_widget_get_style (button);
+
+	bg_normal.r = style->bg[0].red/65535.0;
+	bg_normal.g = style->bg[0].green/65535.0;
+	bg_normal.b = style->bg[0].blue/65535.0;
+
+  fg_normal.r = style->fg[0].red/65535.0;
+	fg_normal.g = style->fg[0].green/65535.0;
+	fg_normal.b = style->fg[0].blue/65535.0;
+
+	_color_shade (&bg_normal, INNER_START_SHADE, &color_inner[0]);
+	_color_shade (&bg_normal, INNER_END_SHADE, &color_inner[1]);
+  _color_shade (&bg_normal, MIDDLE_START_SHADE, &color_middle[0]);
+	_color_shade (&bg_normal, MIDDLE_END_SHADE, &color_middle[1]);
+	_color_shade (&bg_normal, OUTER_START_SHADE, &color_outer[0]);
+	_color_shade (&bg_normal, OUTER_END_SHADE, &color_outer[1]);
+	_color_shade (&fg_normal, BUTTON_START_SHADE, &color_button[0]);
+	_color_shade (&fg_normal, BUTTON_END_SHADE, &color_button[1]);
+	_color_shade (&bg_normal, BUTTON_SHADOW_SHADE, &color_button[2]);
+	_color_shade (&bg_normal, INNER_COMPRESSED_START_SHADE, &color_inner_compressed[0]);
+	_color_shade (&bg_normal, INNER_COMPRESSED_END_SHADE, &color_inner_compressed[1]);
+
+	double MIDDLE_END[] = {color_middle[0].r, color_middle[0].g, color_middle[0].b, 1.0f};
+	double MIDDLE_START[] = {color_middle[1].r, color_middle[1].g, color_middle[1].b, 1.0f};
+	double OUTER_END[] = {color_outer[0].r, color_outer[0].g, color_outer[0].b, 1.0f};
+	double OUTER_START[] = {color_outer[1].r, color_outer[1].g, color_outer[1].b, 1.0f};
+	double BUTTON_END[] = {color_button[0].r, color_button[0].g, color_button[0].b, 1.0f};
+	double BUTTON_START[] = {color_button[1].r, color_button[1].g, color_button[1].b, 1.0f};
+	double BUTTON_SHADOW[] = {color_button[2].r, color_button[2].g, color_button[2].b, 0.75f};
+	double INNER_COMPRESSED_END[] = {color_inner_compressed[1].r, color_inner_compressed[1].g, color_inner_compressed[1].b, 1.0f};
+	double INNER_COMPRESSED_START[] = {color_inner_compressed[0].r, color_inner_compressed[0].g, color_inner_compressed[0].b, 1.0f};  
+ 
 	// prev/next-background
   draw_gradient (cr,
                  X,
