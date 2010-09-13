@@ -1,5 +1,4 @@
 /*
-This service primarily controls PulseAudio and is driven by the sound indicator menu on the panel.
 Copyright 2010 Canonical Ltd.
 
 Authors:
@@ -86,8 +85,9 @@ public class Mpris2Controller : GLib.Object
 				                                               root_interface.concat(".Player"));						
 			this.player.Seeked += onSeeked;
 
-			this.properties_interface = (FreeDesktopProperties) connection.get_object(root_interface.concat(".").concat(this.owner.name.down()),
+			this.properties_interface = (FreeDesktopProperties) connection.get_object("org.freedesktop.Properties.PropertiesChanged",//root_interface.concat(".").concat(this.owner.name.down()),
 			                                                                          "/org/mpris/MediaPlayer2");
+                                                                                
 			this.properties_interface.PropertiesChanged += property_changed_cb;			
 			
 		} catch (DBus.Error e) {
@@ -102,7 +102,7 @@ public class Mpris2Controller : GLib.Object
     debug("invalid length  : %i", invalid.length);
     
 		if(changed_properties == null || interface_source.has_prefix(this.root_interface) == false ){
-			warning("Property-changed hash is null or this is an interface that concerns us");
+			warning("Property-changed hash is null or this is an interface that doesn't concerns us");
 			return;
 		}
 		Value? play_v = changed_properties.lookup("PlaybackStatus");
