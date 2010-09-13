@@ -107,7 +107,7 @@ public class Mpris2Controller : GLib.Object
 		}
 		Value? play_v = changed_properties.lookup("PlaybackStatus");
 		if(play_v != null){
-			string state = play_v.get_string();		
+			string state = this.player.PlaybackStatus;		
 			debug("new playback state = %s", state);			
 			TransportMenuitem.state p = (TransportMenuitem.state)this.determine_play_state(state);
 			(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(p);			
