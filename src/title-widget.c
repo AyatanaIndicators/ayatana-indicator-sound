@@ -85,7 +85,7 @@ title_widget_init (TitleWidget *self)
 	gint width, height;
 	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
 
-	GtkWidget * icon = gtk_image_new_from_icon_name("sound_icon", GTK_ICON_SIZE_MENU);
+	GtkWidget * icon = gtk_image_new_from_icon_name("sound-icon", GTK_ICON_SIZE_MENU);
 
 	gtk_widget_set_size_request(icon, width
                                     + 5 /* ref triangle is 5x9 pixels */
