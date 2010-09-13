@@ -135,6 +135,9 @@ AC_OUTPUT([
 Makefile
 src/Makefile
 data/Makefile
+data/icons/Makefile
+data/icons/scalable/Makefile
+data/icons/scalable/status/Makefile
 tests/Makefile
 po/Makefile.in
 ])
