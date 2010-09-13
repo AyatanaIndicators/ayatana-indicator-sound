@@ -18,8 +18,6 @@ libsoundmenu_la_SOURCES = \
 	indicator-sound.c \
 	title-widget.c \
 	title-widget.h \
-	scrub-widget.c \
-	scrub-widget.h \
 	volume-widget.c \
 	volume-widget.h \
 	dbus-shared-names.h \
