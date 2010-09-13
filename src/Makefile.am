@@ -62,7 +62,6 @@ music_bridge_VALASOURCES = \
 	music-player-bridge.vala \
 	transport-menu-item.vala \
 	metadata-menu-item.vala \
-	scrub-menu-item.vala \
 	title-menu-item.vala \
 	player-controller.vala \
 	mpris2-controller.vala \
