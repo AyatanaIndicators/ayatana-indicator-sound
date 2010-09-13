@@ -1,5 +1,4 @@
 /*
-This service primarily controls PulseAudio and is driven by the sound indicator menu on the panel.
 Copyright 2010 Canonical Ltd.
 
 Authors:
@@ -84,10 +83,8 @@ public class Mpris2Controller : GLib.Object
 			this.player = (MprisPlayer) connection.get_object (root_interface.concat(".").concat(this.owner.name.down()),
 				                                               "/org/mpris/MediaPlayer2",
 				                                               root_interface.concat(".Player"));						
-			this.player.Seeked += onSeeked;
-
-			this.properties_interface = (FreeDesktopProperties) connection.get_object(root_interface.concat(".").concat(this.owner.name.down()),
-			                                                                          "/org/mpris/MediaPlayer2");
+			this.properties_interface = (FreeDesktopProperties) connection.get_object("org.freedesktop.Properties.PropertiesChanged",//root_interface.concat(".").concat(this.owner.name.down()),
+			                                                                          "/org/mpris/MediaPlayer2");                                                                                
 			this.properties_interface.PropertiesChanged += property_changed_cb;			
 			
 		} catch (DBus.Error e) {
@@ -98,16 +95,14 @@ public class Mpris2Controller : GLib.Object
 	public void property_changed_cb(string interface_source, HashTable<string, Value?> changed_properties, string[] invalid )
 	{	
 		debug("properties-changed for interface %s and owner %s", interface_source, this.owner.name.down());
-    debug("is the invalid array null : %s", (invalid == null).to_string());
-    debug("invalid length  : %i", invalid.length);
     
 		if(changed_properties == null || interface_source.has_prefix(this.root_interface) == false ){
-			warning("Property-changed hash is null or this is an interface that concerns us");
+			warning("Property-changed hash is null or this is an interface that doesn't concerns us");
 			return;
 		}
 		Value? play_v = changed_properties.lookup("PlaybackStatus");
 		if(play_v != null){
-			string state = play_v.get_string();		
+			string state = this.player.PlaybackStatus;		
 			debug("new playback state = %s", state);			
 			TransportMenuitem.state p = (TransportMenuitem.state)this.determine_play_state(state);
 			(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(p);			
@@ -206,42 +201,6 @@ public class Mpris2Controller : GLib.Object
 				      	error.message);
 			}								
 		}	
-	}
-	/**
-		TODO: SetPosition on the player object is not working with rhythmbox,
-	  runtime error - "dbus function not supported"
-	 */
-	public void set_track_position(double position)
-	{			
-		debug("Set position with pos (0-100) %f", position);
-		Value? time_value = this.player.Metadata.lookup("mpris:length");
-		if(time_value == null){
-			warning("Can't fetch the duration of the track therefore cant set the position");
-			return;
-		}
-		// work in microseconds (scale up by 10 TTP-of 6)
-		int64 total_time = time_value.get_int64();
-		debug("total time of track = %i", (int)total_time);				
-		double new_time_position = total_time * (position/100.0);
-		debug("new position = %f", (new_time_position));		
-
-		Value? v = this.player.Metadata.lookup("mpris:trackid");
-		if(v != null){
-			if(v.holds (typeof (string))){
-				DBus.ObjectPath path = new ObjectPath(v.get_string());
-				try{
-					this.player.SetPosition(path, (int64)(new_time_position));
-				}
-				catch(DBus.Error e){
-					error("DBus Error calling the player objects SetPosition method %s",
-						     e.message);
-				}							
-			}
-		}			        
-	}
-
-	public void onSeeked(int64 position){
-		debug("Seeked signal callback with pos = %i", (int)position/1000);
 	}
 	
 	public bool connected()
