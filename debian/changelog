@@ -1,6 +1,6 @@
-indicator-sound (0.4.4-0ubuntu1) UNRELEASED; urgency=low
+indicator-sound (0.4.4-0ubuntu1) maverick; urgency=low
 
-  * New upstream release.
+  * New upstream release, fix crash in gtk_range_get_value() (lp: #615277)
 
  -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 10 Sep 2010 17:49:49 +0200
 
