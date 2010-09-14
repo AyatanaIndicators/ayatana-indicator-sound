@@ -61,6 +61,7 @@ static void volume_widget_parent_changed (GtkWidget *widget, gpointer user_data)
 
 G_DEFINE_TYPE (VolumeWidget, volume_widget, G_TYPE_OBJECT);
 
+
 static void
 volume_widget_class_init (VolumeWidgetClass *klass)
 {
@@ -201,8 +202,6 @@ volume_widget_update(VolumeWidget* self, gdouble update)
   dbusmenu_menuitem_handle_event (priv->twin_item, "update", &value, 0);
 }
 
-
-
 GtkWidget*
 volume_widget_get_ido_slider(VolumeWidget* self)
 {
@@ -232,6 +231,24 @@ volume_widget_slider_released(GtkWidget *widget, gpointer user_data)
 	VolumeWidget* mitem = VOLUME_WIDGET(user_data);
 	VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(mitem);
 	priv->grabbed = FALSE;
+}
+
+void
+volume_widget_tidy_up (GtkWidget *widget)
+{
+  VolumeWidget* mitem = VOLUME_WIDGET(widget);
+	VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(mitem);
+  gtk_widget_destroy (priv->ido_volume_slider);
+}
+
+gdouble
+volume_widget_get_current_volume ( GtkWidget *widget )
+{
+  VolumeWidget* mitem = VOLUME_WIDGET(widget);
+	VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(mitem);
+  gdouble vol = g_value_get_double (  dbusmenu_menuitem_property_get_value( priv->twin_item,
+	                                                                          DBUSMENU_VOLUME_MENUITEM_LEVEL));  
+  return vol;
 }
 
 /**
