@@ -53,7 +53,6 @@ static gboolean idle_routine (gpointer data);
 static void rebuild_sound_menu(DbusmenuMenuitem *root,
                                SoundServiceDbus *service);
 static void refresh_menu();
-static void remove_previous_children(gpointer obj, gpointer user_data);
 
 
 /*-------------------------------------------------------------------------*/
@@ -74,22 +73,9 @@ DbusmenuMenuitem* dbus_menu_manager_setup()
 
   DbusmenuServer *server = dbusmenu_server_new(INDICATOR_SOUND_DBUS_OBJECT);
   dbusmenu_server_set_root(server, root_menuitem);
-
-  /*GList* previous_children = dbusmenu_menuitem_get_children(root_menuitem);
-  if(previous_children != NULL){
-    g_list_foreach(previous_children, remove_previous_children, NULL);
-  }*/
   establish_pulse_activities(dbus_interface);
   return root_menuitem;
 }
-
-/*static void remove_previous_children(gpointer obj, gpointer user_data)
-{  
-  DbusmenuMenuitem *child = (DbusmenuMenuitem*)obj;
-  if(child != NULL){
-    dbusmenu_menuitem_child_delete(root_menuitem, child);
-  }
-}*/
 
 void dbus_menu_manager_update_volume(gdouble  volume)
 {
