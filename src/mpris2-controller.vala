@@ -28,8 +28,8 @@ public interface MprisRoot : DBus.Object {
 	public abstract string Identity{owned get; set;}
 	public abstract string DesktopEntry{owned get; set;}	
 	// methods
-	public abstract void Quit() throws DBus.Error;
-	public abstract void Raise() throws DBus.Error;
+	public abstract async void Quit() throws DBus.Error;
+	public abstract async void Raise() throws DBus.Error;
 }
 
 [DBus (name = "org.mpris.MediaPlayer2.Player")]
@@ -215,12 +215,12 @@ public class Mpris2Controller : GLib.Object
 		}
 		return true;
 	}
-
+  
 	public void expose()
 	{
 		if(this.connected() == true){
 			try{
-				this.mpris2_root.Raise();
+				this.mpris2_root.Raise.begin();
 			}
 			catch(DBus.Error e){
 				error("Exception thrown while calling function Raise - %s", e.message);
