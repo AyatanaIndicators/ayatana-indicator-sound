@@ -50,8 +50,11 @@ static gdouble volume_percent = 0.0;
 
 static void set_global_mute_from_ui();
 static gboolean idle_routine (gpointer data);
-static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service);
+static void rebuild_sound_menu(DbusmenuMenuitem *root,
+                               SoundServiceDbus *service);
 static void refresh_menu();
+static void remove_previous_children(gpointer obj, gpointer user_data);
+
 
 /*-------------------------------------------------------------------------*/
 //                          Public Methods
@@ -71,10 +74,22 @@ DbusmenuMenuitem* dbus_menu_manager_setup()
 
   DbusmenuServer *server = dbusmenu_server_new(INDICATOR_SOUND_DBUS_OBJECT);
   dbusmenu_server_set_root(server, root_menuitem);
+
+  /*GList* previous_children = dbusmenu_menuitem_get_children(root_menuitem);
+  if(previous_children != NULL){
+    g_list_foreach(previous_children, remove_previous_children, NULL);
+  }*/
   establish_pulse_activities(dbus_interface);
   return root_menuitem;
 }
 
+/*static void remove_previous_children(gpointer obj, gpointer user_data)
+{  
+  DbusmenuMenuitem *child = (DbusmenuMenuitem*)obj;
+  if(child != NULL){
+    dbusmenu_menuitem_child_delete(root_menuitem, child);
+  }
+}*/
 
 void dbus_menu_manager_update_volume(gdouble  volume)
 {
@@ -213,7 +228,7 @@ static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service
   // Sound preferences dialog
   DbusmenuMenuitem *settings_mi = dbusmenu_menuitem_new();
   dbusmenu_menuitem_property_set(settings_mi, DBUSMENU_MENUITEM_PROP_LABEL, _("Sound Preferences..."));
-//_("Sound Preferences..."));
+  //_("Sound Preferences..."));
   dbusmenu_menuitem_child_append(root, settings_mi);
   g_signal_connect(G_OBJECT(settings_mi), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED,
                    G_CALLBACK(show_sound_settings_dialog), NULL);
