@@ -119,8 +119,10 @@ public class Mpris2Controller : GLib.Object
 			GLib.HashTable<string, Value?> changed_updates = clean_metadata();	
 			this.owner.custom_items[PlayerController.widget_order.METADATA].reset(MetadataMenuitem.attributes_format());
 			this.owner.custom_items[PlayerController.widget_order.METADATA].update(changed_updates,
-			                          																						 MetadataMenuitem.attributes_format());			
-		}
+			                          																						 MetadataMenuitem.attributes_format());	
+      MetadataMenuitem metadata_item = this.owner.custom_items[PlayerController.widget_order.METADATA] as MetadataMenuitem;      
+      metadata_item.determine_visibility();
+    }
 	}
 
 	private GLib.HashTable<string, Value?> clean_metadata()

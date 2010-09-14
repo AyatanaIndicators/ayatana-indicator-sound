@@ -19,6 +19,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Gee;
 using DbusmenuMetadata;
+using Dbusmenu;
 using Gdk;
 
 public class MetadataMenuitem : PlayerItem
@@ -93,6 +94,29 @@ public class MetadataMenuitem : PlayerItem
 			result = false;
     }
 		return result;
+  }
+
+  public void determine_visibility()
+  {
+    try{
+      if(property_get_int(MENUITEM_TITLE) == -1){
+        this.property_set_bool(MENUITEM_PROP_VISIBLE, false);
+        return;
+      }
+    }
+    catch(Error e){
+      warning("determine_visibility - %s", e.message); 
+    }    
+    try{
+      string title = property_get(MENUITEM_TITLE);
+      if(title.length == 0){
+        this.property_set_bool(MENUITEM_PROP_VISIBLE, false);
+        return;
+      }
+    }
+    catch(Error e){
+      warning("determine_visibility - %s", e.message); 
+    }
   }
 
 	public void fetch_art(string uri, string prop)
