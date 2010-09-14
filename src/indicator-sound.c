@@ -36,7 +36,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "transport-widget.h"
 #include "metadata-widget.h"
 #include "title-widget.h"
-#include "scrub-widget.h"
 #include "volume-widget.h"
 
 #include "dbus-shared-names.h"
@@ -79,7 +78,6 @@ static void style_changed_cb(GtkWidget *widget, gpointer user_data);
 static gboolean new_transport_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 static gboolean new_metadata_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 static gboolean new_title_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
-static gboolean new_scrub_bar_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 
 // DBUS communication
 static DBusGProxy *sound_dbus_proxy = NULL;
@@ -158,7 +156,9 @@ indicator_sound_init (IndicatorSound *self)
 	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
 	priv->volume_widget = NULL;
 
-	g_signal_connect(G_OBJECT(self->service), INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE, G_CALLBACK(connection_changed), self);
+	g_signal_connect(G_OBJECT(self->service),
+                   INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE,
+                   G_CALLBACK(connection_changed), self);
   return;
 }
 
@@ -219,7 +219,6 @@ get_menu (IndicatorObject * io)
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TRANSPORT_MENUITEM_TYPE, new_transport_widget);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_METADATA_MENUITEM_TYPE, new_metadata_widget);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TITLE_MENUITEM_TYPE, new_title_widget);
-	dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_SCRUB_MENUITEM_TYPE, new_scrub_bar_widget);	
 	// register Key-press listening on the menu widget as the slider does not allow this.
   g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), io);
 
@@ -297,26 +296,6 @@ new_title_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbusmenu
 }
 
 static gboolean
-new_scrub_bar_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
-{
-  g_debug("indicator-sound: new_scrub_bar_widget");
-
-  GtkWidget* scrub_bar = NULL;
-
-  g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
-  g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
-
-  scrub_bar = scrub_widget_new (newitem);
-  GtkMenuItem *menu_scrub_widget = GTK_MENU_ITEM(scrub_widget_get_ido_bar(SCRUB_WIDGET(scrub_bar)));
-
-  gtk_widget_show_all(scrub_widget_get_ido_bar(SCRUB_WIDGET(scrub_bar)));
-
-	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_scrub_widget, parent);
-
-  return TRUE;
-}
-
-static gboolean
 new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
   g_debug("indicator-sound: new_volume_slider_widget");
@@ -330,7 +309,7 @@ new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, 
   volume_widget = volume_widget_new (newitem);	
 	io = g_object_get_data (G_OBJECT (client), "indicator");
 	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
-	priv->volume_widget = volume_widget;
+  priv->volume_widget = volume_widget;
 
 	GtkWidget* ido_slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));
 
@@ -344,47 +323,65 @@ new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, 
 	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client),
 	                                newitem,
 	                                menu_volume_item,
-	                                parent);
-	
-	fetch_mute_value_from_dbus();
-  fetch_sink_availability_from_dbus(INDICATOR_SOUND (io));
-	
+	                                parent);		
   return TRUE;	
 }
 
 
 static void
-connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer userdata)
+connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer user_data)
 {
   if (connected) {
-    if (sound_dbus_proxy == NULL) {
-      GError * error = NULL;
-
-      DBusGConnection * sbus = dbus_g_bus_get(DBUS_BUS_SESSION, NULL);
-
-      sound_dbus_proxy = dbus_g_proxy_new_for_name_owner(sbus,
-                         INDICATOR_SOUND_DBUS_NAME,
-                         INDICATOR_SOUND_SERVICE_DBUS_OBJECT,
-                         INDICATOR_SOUND_SERVICE_DBUS_INTERFACE,
-                         &error);
-
-      if (error != NULL) {
-        g_warning("Unable to get status proxy: %s", error->message);
-        g_error_free(error);
-      }
-      g_debug("about to connect to the signals");
-      dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_TYPE_BOOLEAN, G_TYPE_INVALID);
-      dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_CALLBACK(catch_signal_sink_input_while_muted), NULL, NULL);
-      dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_MUTE_UPDATE, G_TYPE_BOOLEAN, G_TYPE_INVALID);
-      dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_MUTE_UPDATE, G_CALLBACK(catch_signal_sink_mute_update), userdata, NULL);
-      dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_AVAILABLE_UPDATE, G_TYPE_BOOLEAN, G_TYPE_INVALID);
-      dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_AVAILABLE_UPDATE, G_CALLBACK(catch_signal_sink_availability_update), NULL, NULL);
-
-			g_return_if_fail(IS_INDICATOR_SOUND(userdata));
-			
+    gboolean service_restart = FALSE;
+    if (sound_dbus_proxy != NULL) {
+      g_object_unref (sound_dbus_proxy);
+      sound_dbus_proxy = NULL;
+      service_restart = TRUE;
     }
+    GError * error = NULL;
+
+    DBusGConnection * sbus = dbus_g_bus_get(DBUS_BUS_SESSION, NULL);
+
+    sound_dbus_proxy = dbus_g_proxy_new_for_name_owner(sbus,
+                       INDICATOR_SOUND_DBUS_NAME,
+                       INDICATOR_SOUND_SERVICE_DBUS_OBJECT,
+                       INDICATOR_SOUND_SERVICE_DBUS_INTERFACE,
+                       &error);
+
+    if (error != NULL) {
+      g_warning("Unable to get status proxy: %s", error->message);
+      g_error_free(error);
+    }
+    g_debug("about to connect to the signals");
+    dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_TYPE_BOOLEAN, G_TYPE_INVALID);
+    dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_CALLBACK(catch_signal_sink_input_while_muted), NULL, NULL);
+    dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_MUTE_UPDATE, G_TYPE_BOOLEAN, G_TYPE_INVALID);
+    dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_MUTE_UPDATE, G_CALLBACK(catch_signal_sink_mute_update), user_data, NULL);
+    dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_AVAILABLE_UPDATE, G_TYPE_BOOLEAN, G_TYPE_INVALID);
+    dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_AVAILABLE_UPDATE, G_CALLBACK(catch_signal_sink_availability_update), NULL, NULL);	
+    if( service_restart == TRUE){
+      fetch_mute_value_from_dbus();
+      // Ensure UI is in sync with service again.
+      IndicatorSound* indicator = INDICATOR_SOUND(user_data);
+      fetch_sink_availability_from_dbus(indicator);    
+  	  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
+      determine_state_from_volume (volume_widget_get_current_volume(priv->volume_widget));
+    }
+  }  
+  else{
+    g_warning("Indicator has been disconnected from the service -> SHOCK HORROR");
+    IndicatorSound* indicator = INDICATOR_SOUND(user_data);
+	  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
+    
+    if(priv->volume_widget != NULL){
+      g_warning("indicator still has a slider, service must have crashed");
+      volume_widget_tidy_up(priv->volume_widget);
+      g_object_unref(G_OBJECT(priv->volume_widget));
+      priv->volume_widget = NULL;
+    }  
+    device_available = FALSE;
+    update_state(STATE_SINKS_NONE);
   }
-  return;
 }
 
 /*

@@ -50,8 +50,8 @@ static pa_cvolume construct_mono_volume(const pa_cvolume* vol);
 
 /**
 Future Refactoring notes
- - Push all UI updates out through update PA state in the service.
- - Collapse 3 update_sink_info into one. The essentially do the same thing from different contexts.
+ - rewrite in vala.
+ - make sure all state is kept in the service for volume icon switching.
 **/
 
 /**
@@ -147,7 +147,7 @@ static gboolean determine_sink_availability()
   // Firstly check to see if we have any sinks
   // if not get the hell out of here !
   if (g_hash_table_size(sink_hash) < 1) {
-    /*        g_debug("Sink_available returning false because sinks_hash is empty !!!");    */
+    g_debug("Sink_available returning false because sinks_hash is empty !!!");   
     DEFAULT_SINK_INDEX = -1;
     return FALSE;
   }
@@ -163,7 +163,7 @@ static gboolean determine_sink_availability()
 
   // Thirdly ensure the default sink index does not have the name "auto_null"
   sink_info* s = g_hash_table_lookup(sink_hash, GINT_TO_POINTER(DEFAULT_SINK_INDEX));
-  // Up until now the most rebust method to test this is to manually remove the available sink device
+  // Up until now the most robust method to test this is to manually remove the available sink device
   // kernel module and then reload (rmmod & modprobe).
   // TODO: Edge case of dynamic loading and unloading of sinks should be handled also.
   /*    g_debug("About to test for to see if the available sink is null - s->name = %s", s->name);*/
@@ -211,7 +211,6 @@ static void mute_each_sink(gpointer key, gpointer value, gpointer user_data)
   if (GPOINTER_TO_INT(user_data) == 1) {
     sound_service_dbus_update_sink_mute(dbus_service, TRUE);
   } else {
-    //sound_service_dbus_update_sink_volume(dbus_service, get_default_sink_volume());
 		dbus_menu_manager_update_volume(get_default_sink_volume());
   }
 
@@ -411,7 +410,6 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
           pa_volume_t vol = pa_cvolume_max(&s->volume);
           gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
           /*                    g_debug("Updating volume from PA manager with volume = %f", volume_percent);*/
-          //sound_service_dbus_update_sink_volume(dbus_service, volume_percent);
 	        dbus_menu_manager_update_volume(volume_percent);
         }
       }
