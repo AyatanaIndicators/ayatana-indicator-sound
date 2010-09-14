@@ -40,11 +40,9 @@ public interface MprisPlayer : DBus.Object {
 	public abstract int32 Position{owned get; set;}
 	public abstract string PlaybackStatus{owned get; set;}	
 	// methods
-	public abstract void SetPosition(DBus.ObjectPath path, int64 pos) throws DBus.Error;
-	public abstract void PlayPause() throws DBus.Error;
-	public abstract void Pause() throws DBus.Error;
-	public abstract void Next() throws DBus.Error;
-	public abstract void Previous() throws DBus.Error;
+	public abstract async void PlayPause() throws DBus.Error;
+	public abstract async void Next() throws DBus.Error;
+	public abstract async void Previous() throws DBus.Error;
 	// signals
 	public signal void Seeked(int64 new_position);
 }
@@ -176,7 +174,7 @@ public class Mpris2Controller : GLib.Object
 		if(command == TransportMenuitem.action.PLAY_PAUSE){
 			debug("transport_event PLAY_PAUSE");
 			try{
-				this.player.PlayPause();							
+				this.player.PlayPause.begin();							
 			}
 			catch(DBus.Error error){
 				warning("DBus Error calling the player objects PlayPause method %s",
@@ -185,7 +183,7 @@ public class Mpris2Controller : GLib.Object
 		}
 		else if(command == TransportMenuitem.action.PREVIOUS){
 			try{
-				this.player.Previous();
+				this.player.Previous.begin();
 			}
 			catch(DBus.Error error){
 				warning("DBus Error calling the player objects Previous method %s",
@@ -194,7 +192,7 @@ public class Mpris2Controller : GLib.Object
 		}
 		else if(command == TransportMenuitem.action.NEXT){
 			try{
-				this.player.Next();
+				this.player.Next.begin();
 			}
 			catch(DBus.Error error){
 				warning("DBus Error calling the player objects Next method %s",
