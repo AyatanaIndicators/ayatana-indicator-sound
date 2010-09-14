@@ -2,7 +2,6 @@
  * generated from mpris2-controller.vala, do not modify */
 
 /*
-This service primarily controls PulseAudio and is driven by the sound indicator menu on the panel.
 Copyright 2010 Canonical Ltd.
 
 Authors:
@@ -25,6 +24,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib-object.h>
 #include <dbus/dbus-glib-lowlevel.h>
 #include <dbus/dbus-glib.h>
+#include <gio/gio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <dbus/dbus.h>
@@ -33,8 +33,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <libdbusmenu-glib/menuitem-proxy.h>
 #include <libdbusmenu-glib/menuitem.h>
 #include <libdbusmenu-glib/server.h>
-#include <float.h>
-#include <math.h>
 
 
 #define TYPE_MPRIS_ROOT (mpris_root_get_type ())
@@ -48,6 +46,8 @@ typedef struct _DBusObjectVTable _DBusObjectVTable;
 #define _g_free0(var) (var = (g_free (var), NULL))
 typedef struct _MprisRootDBusProxy MprisRootDBusProxy;
 typedef DBusGProxyClass MprisRootDBusProxyClass;
+typedef struct _MprisRootDBusProxyQuitData MprisRootDBusProxyQuitData;
+typedef struct _MprisRootDBusProxyRaiseData MprisRootDBusProxyRaiseData;
 
 #define TYPE_MPRIS_PLAYER (mpris_player_get_type ())
 #define MPRIS_PLAYER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_MPRIS_PLAYER, MprisPlayer))
@@ -59,6 +59,9 @@ typedef struct _MprisPlayerIface MprisPlayerIface;
 #define _g_hash_table_unref0(var) ((var == NULL) ? NULL : (var = (g_hash_table_unref (var), NULL)))
 typedef struct _MprisPlayerDBusProxy MprisPlayerDBusProxy;
 typedef DBusGProxyClass MprisPlayerDBusProxyClass;
+typedef struct _MprisPlayerDBusProxyPlayPauseData MprisPlayerDBusProxyPlayPauseData;
+typedef struct _MprisPlayerDBusProxyNextData MprisPlayerDBusProxyNextData;
+typedef struct _MprisPlayerDBusProxyPreviousData MprisPlayerDBusProxyPreviousData;
 
 #define TYPE_FREE_DESKTOP_PROPERTIES (free_desktop_properties_get_type ())
 #define FREE_DESKTOP_PROPERTIES(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_FREE_DESKTOP_PROPERTIES, FreeDesktopProperties))
@@ -124,8 +127,10 @@ typedef struct _TransportMenuitemClass TransportMenuitemClass;
 
 struct _MprisRootIface {
 	GTypeInterface parent_iface;
-	void (*Quit) (MprisRoot* self, GError** error);
-	void (*Raise) (MprisRoot* self, GError** error);
+	void (*Quit) (MprisRoot* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+	void (*Quit_finish) (MprisRoot* self, GAsyncResult* _res_, GError** error);
+	void (*Raise) (MprisRoot* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+	void (*Raise_finish) (MprisRoot* self, GAsyncResult* _res_, GError** error);
 	gboolean (*get_HasTracklist) (MprisRoot* self);
 	void (*set_HasTracklist) (MprisRoot* self, gboolean value);
 	gboolean (*get_CanQuit) (MprisRoot* self);
@@ -147,13 +152,26 @@ struct _MprisRootDBusProxy {
 	gboolean disposed;
 };
 
+struct _MprisRootDBusProxyQuitData {
+	GAsyncReadyCallback _callback_;
+	gpointer _user_data_;
+	DBusPendingCall* pending;
+};
+
+struct _MprisRootDBusProxyRaiseData {
+	GAsyncReadyCallback _callback_;
+	gpointer _user_data_;
+	DBusPendingCall* pending;
+};
+
 struct _MprisPlayerIface {
 	GTypeInterface parent_iface;
-	void (*SetPosition) (MprisPlayer* self, const char* path, gint64 pos, GError** error);
-	void (*PlayPause) (MprisPlayer* self, GError** error);
-	void (*Pause) (MprisPlayer* self, GError** error);
-	void (*Next) (MprisPlayer* self, GError** error);
-	void (*Previous) (MprisPlayer* self, GError** error);
+	void (*PlayPause) (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+	void (*PlayPause_finish) (MprisPlayer* self, GAsyncResult* _res_, GError** error);
+	void (*Next) (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+	void (*Next_finish) (MprisPlayer* self, GAsyncResult* _res_, GError** error);
+	void (*Previous) (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+	void (*Previous_finish) (MprisPlayer* self, GAsyncResult* _res_, GError** error);
 	GHashTable* (*get_Metadata) (MprisPlayer* self);
 	void (*set_Metadata) (MprisPlayer* self, GHashTable* value);
 	gint32 (*get_Position) (MprisPlayer* self);
@@ -165,6 +183,24 @@ struct _MprisPlayerIface {
 struct _MprisPlayerDBusProxy {
 	DBusGProxy parent_instance;
 	gboolean disposed;
+};
+
+struct _MprisPlayerDBusProxyPlayPauseData {
+	GAsyncReadyCallback _callback_;
+	gpointer _user_data_;
+	DBusPendingCall* pending;
+};
+
+struct _MprisPlayerDBusProxyNextData {
+	GAsyncReadyCallback _callback_;
+	gpointer _user_data_;
+	DBusPendingCall* pending;
+};
+
+struct _MprisPlayerDBusProxyPreviousData {
+	GAsyncReadyCallback _callback_;
+	gpointer _user_data_;
+	DBusPendingCall* pending;
 };
 
 struct _FreeDesktopPropertiesIface {
@@ -227,8 +263,10 @@ static gpointer mpris2_controller_parent_class = NULL;
 
 MprisRoot* mpris_root_dbus_proxy_new (DBusGConnection* connection, const char* name, const char* path);
 GType mpris_root_get_type (void) G_GNUC_CONST;
-void mpris_root_Quit (MprisRoot* self, GError** error);
-void mpris_root_Raise (MprisRoot* self, GError** error);
+void mpris_root_Quit (MprisRoot* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+void mpris_root_Quit_finish (MprisRoot* self, GAsyncResult* _res_, GError** error);
+void mpris_root_Raise (MprisRoot* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+void mpris_root_Raise_finish (MprisRoot* self, GAsyncResult* _res_, GError** error);
 gboolean mpris_root_get_HasTracklist (MprisRoot* self);
 void mpris_root_set_HasTracklist (MprisRoot* self, gboolean value);
 gboolean mpris_root_get_CanQuit (MprisRoot* self);
@@ -249,7 +287,9 @@ static DBusHandlerResult _dbus_mpris_root_property_get (MprisRoot* self, DBusCon
 static DBusHandlerResult _dbus_mpris_root_property_set (MprisRoot* self, DBusConnection* connection, DBusMessage* message);
 static DBusHandlerResult _dbus_mpris_root_property_get_all (MprisRoot* self, DBusConnection* connection, DBusMessage* message);
 static DBusHandlerResult _dbus_mpris_root_Quit (MprisRoot* self, DBusConnection* connection, DBusMessage* message);
+static void _dbus_mpris_root_Quit_ready (GObject * source_object, GAsyncResult * _res_, gpointer * _user_data_);
 static DBusHandlerResult _dbus_mpris_root_Raise (MprisRoot* self, DBusConnection* connection, DBusMessage* message);
+static void _dbus_mpris_root_Raise_ready (GObject * source_object, GAsyncResult * _res_, gpointer * _user_data_);
 GType mpris_root_dbus_proxy_get_type (void) G_GNUC_CONST;
 DBusHandlerResult mpris_root_dbus_proxy_filter (DBusConnection* connection, DBusMessage* message, void* user_data);
 enum  {
@@ -260,8 +300,12 @@ enum  {
 	MPRIS_ROOT_DBUS_PROXY_IDENTITY,
 	MPRIS_ROOT_DBUS_PROXY_DESKTOP_ENTRY
 };
-static void mpris_root_dbus_proxy_Quit (MprisRoot* self, GError** error);
-static void mpris_root_dbus_proxy_Raise (MprisRoot* self, GError** error);
+static void mpris_root_dbus_proxy_Quit_async (MprisRoot* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+static void mpris_root_dbus_proxy_Quit_ready (DBusPendingCall* pending, void* user_data);
+static void mpris_root_dbus_proxy_Quit_finish (MprisRoot* self, GAsyncResult* _res_, GError** error);
+static void mpris_root_dbus_proxy_Raise_async (MprisRoot* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+static void mpris_root_dbus_proxy_Raise_ready (DBusPendingCall* pending, void* user_data);
+static void mpris_root_dbus_proxy_Raise_finish (MprisRoot* self, GAsyncResult* _res_, GError** error);
 static gboolean mpris_root_dbus_proxy_get_HasTracklist (MprisRoot* self);
 static void mpris_root_dbus_proxy_set_HasTracklist (MprisRoot* self, gboolean value);
 static gboolean mpris_root_dbus_proxy_get_CanQuit (MprisRoot* self);
@@ -277,11 +321,12 @@ static void mpris_root_dbus_proxy_get_property (GObject * object, guint property
 static void mpris_root_dbus_proxy_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
 MprisPlayer* mpris_player_dbus_proxy_new (DBusGConnection* connection, const char* name, const char* path);
 GType mpris_player_get_type (void) G_GNUC_CONST;
-void mpris_player_SetPosition (MprisPlayer* self, const char* path, gint64 pos, GError** error);
-void mpris_player_PlayPause (MprisPlayer* self, GError** error);
-void mpris_player_Pause (MprisPlayer* self, GError** error);
-void mpris_player_Next (MprisPlayer* self, GError** error);
-void mpris_player_Previous (MprisPlayer* self, GError** error);
+void mpris_player_PlayPause (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+void mpris_player_PlayPause_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
+void mpris_player_Next (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+void mpris_player_Next_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
+void mpris_player_Previous (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+void mpris_player_Previous_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
 GHashTable* mpris_player_get_Metadata (MprisPlayer* self);
 void mpris_player_set_Metadata (MprisPlayer* self, GHashTable* value);
 gint32 mpris_player_get_Position (MprisPlayer* self);
@@ -295,11 +340,12 @@ static DBusHandlerResult _dbus_mpris_player_introspect (MprisPlayer* self, DBusC
 static DBusHandlerResult _dbus_mpris_player_property_get (MprisPlayer* self, DBusConnection* connection, DBusMessage* message);
 static DBusHandlerResult _dbus_mpris_player_property_set (MprisPlayer* self, DBusConnection* connection, DBusMessage* message);
 static DBusHandlerResult _dbus_mpris_player_property_get_all (MprisPlayer* self, DBusConnection* connection, DBusMessage* message);
-static DBusHandlerResult _dbus_mpris_player_SetPosition (MprisPlayer* self, DBusConnection* connection, DBusMessage* message);
 static DBusHandlerResult _dbus_mpris_player_PlayPause (MprisPlayer* self, DBusConnection* connection, DBusMessage* message);
-static DBusHandlerResult _dbus_mpris_player_Pause (MprisPlayer* self, DBusConnection* connection, DBusMessage* message);
+static void _dbus_mpris_player_PlayPause_ready (GObject * source_object, GAsyncResult * _res_, gpointer * _user_data_);
 static DBusHandlerResult _dbus_mpris_player_Next (MprisPlayer* self, DBusConnection* connection, DBusMessage* message);
+static void _dbus_mpris_player_Next_ready (GObject * source_object, GAsyncResult * _res_, gpointer * _user_data_);
 static DBusHandlerResult _dbus_mpris_player_Previous (MprisPlayer* self, DBusConnection* connection, DBusMessage* message);
+static void _dbus_mpris_player_Previous_ready (GObject * source_object, GAsyncResult * _res_, gpointer * _user_data_);
 static void _dbus_mpris_player_seeked (GObject* _sender, gint64 new_position, DBusConnection* _connection);
 GType mpris_player_dbus_proxy_get_type (void) G_GNUC_CONST;
 static void _dbus_handle_mpris_player_seeked (MprisPlayer* self, DBusConnection* connection, DBusMessage* message);
@@ -310,11 +356,15 @@ enum  {
 	MPRIS_PLAYER_DBUS_PROXY_POSITION,
 	MPRIS_PLAYER_DBUS_PROXY_PLAYBACK_STATUS
 };
-static void mpris_player_dbus_proxy_SetPosition (MprisPlayer* self, const char* path, gint64 pos, GError** error);
-static void mpris_player_dbus_proxy_PlayPause (MprisPlayer* self, GError** error);
-static void mpris_player_dbus_proxy_Pause (MprisPlayer* self, GError** error);
-static void mpris_player_dbus_proxy_Next (MprisPlayer* self, GError** error);
-static void mpris_player_dbus_proxy_Previous (MprisPlayer* self, GError** error);
+static void mpris_player_dbus_proxy_PlayPause_async (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+static void mpris_player_dbus_proxy_PlayPause_ready (DBusPendingCall* pending, void* user_data);
+static void mpris_player_dbus_proxy_PlayPause_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
+static void mpris_player_dbus_proxy_Next_async (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+static void mpris_player_dbus_proxy_Next_ready (DBusPendingCall* pending, void* user_data);
+static void mpris_player_dbus_proxy_Next_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
+static void mpris_player_dbus_proxy_Previous_async (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+static void mpris_player_dbus_proxy_Previous_ready (DBusPendingCall* pending, void* user_data);
+static void mpris_player_dbus_proxy_Previous_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
 static GHashTable* mpris_player_dbus_proxy_get_Metadata (MprisPlayer* self);
 static void mpris_player_dbus_proxy_set_Metadata (MprisPlayer* self, GHashTable* value);
 static gint32 mpris_player_dbus_proxy_get_Position (MprisPlayer* self);
@@ -358,6 +408,7 @@ void mpris2_controller_property_changed_cb (Mpris2Controller* self, const char* 
 PlayerController* mpris2_controller_get_owner (Mpris2Controller* self);
 const char* player_controller_get_name (PlayerController* self);
 static GValue* _g_value_dup (GValue* self);
+MprisPlayer* mpris2_controller_get_player (Mpris2Controller* self);
 GType transport_menuitem_state_get_type (void) G_GNUC_CONST;
 static TransportMenuitemstate mpris2_controller_determine_play_state (Mpris2Controller* self, const char* status);
 GType player_item_get_type (void) G_GNUC_CONST;
@@ -369,13 +420,10 @@ void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
 GeeHashSet* metadata_menuitem_attributes_format (void);
 void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes);
 static void _vala_GValue_free (GValue* self);
-MprisPlayer* mpris2_controller_get_player (Mpris2Controller* self);
 static char** _vala_array_dup1 (char** self, int length);
 void mpris2_controller_initial_update (Mpris2Controller* self);
 GType transport_menuitem_action_get_type (void) G_GNUC_CONST;
 void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuitemaction command);
-void mpris2_controller_set_track_position (Mpris2Controller* self, double position);
-void mpris2_controller_onSeeked (Mpris2Controller* self, gint64 position);
 gboolean mpris2_controller_connected (Mpris2Controller* self);
 MprisRoot* mpris2_controller_get_mpris2_root (Mpris2Controller* self);
 gboolean mpris2_controller_was_successfull (Mpris2Controller* self);
@@ -385,7 +433,6 @@ static void mpris2_controller_set_player (Mpris2Controller* self, MprisPlayer* v
 static void mpris2_controller_set_owner (Mpris2Controller* self, PlayerController* value);
 FreeDesktopProperties* mpris2_controller_get_properties_interface (Mpris2Controller* self);
 static void mpris2_controller_set_properties_interface (Mpris2Controller* self, FreeDesktopProperties* value);
-static void _mpris2_controller_onSeeked_mpris_player_seeked (MprisPlayer* _sender, gint64 new_position, gpointer self);
 static void _mpris2_controller_property_changed_cb_free_desktop_properties_properties_changed (FreeDesktopProperties* _sender, const char* source, GHashTable* changed_properties, char** invalid, int invalid_length1, gpointer self);
 static GObject * mpris2_controller_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
 static void mpris2_controller_finalize (GObject* obj);
@@ -405,13 +452,23 @@ static const _DBusObjectVTable _free_desktop_properties_dbus_vtable = {free_desk
 static void g_cclosure_user_marshal_VOID__INT64 (GClosure * closure, GValue * return_value, guint n_param_values, const GValue * param_values, gpointer invocation_hint, gpointer marshal_data);
 static void g_cclosure_user_marshal_VOID__STRING_BOXED_BOXED_INT (GClosure * closure, GValue * return_value, guint n_param_values, const GValue * param_values, gpointer invocation_hint, gpointer marshal_data);
 
-void mpris_root_Quit (MprisRoot* self, GError** error) {
-	MPRIS_ROOT_GET_INTERFACE (self)->Quit (self, error);
+void mpris_root_Quit (MprisRoot* self, GAsyncReadyCallback _callback_, gpointer _user_data_) {
+	MPRIS_ROOT_GET_INTERFACE (self)->Quit (self, _callback_, _user_data_);
 }
 
 
-void mpris_root_Raise (MprisRoot* self, GError** error) {
-	MPRIS_ROOT_GET_INTERFACE (self)->Raise (self, error);
+void mpris_root_Quit_finish (MprisRoot* self, GAsyncResult* _res_, GError** error) {
+	MPRIS_ROOT_GET_INTERFACE (self)->Quit_finish (self, _res_, error);
+}
+
+
+void mpris_root_Raise (MprisRoot* self, GAsyncReadyCallback _callback_, gpointer _user_data_) {
+	MPRIS_ROOT_GET_INTERFACE (self)->Raise (self, _callback_, _user_data_);
+}
+
+
+void mpris_root_Raise_finish (MprisRoot* self, GAsyncResult* _res_, GError** error) {
+	MPRIS_ROOT_GET_INTERFACE (self)->Raise_finish (self, _res_, error);
 }
 
 
@@ -767,14 +824,29 @@ static DBusHandlerResult _dbus_mpris_root_property_get_all (MprisRoot* self, DBu
 
 static DBusHandlerResult _dbus_mpris_root_Quit (MprisRoot* self, DBusConnection* connection, DBusMessage* message) {
 	DBusMessageIter iter;
-	GError* error;
-	DBusMessage* reply;
-	error = NULL;
+	gpointer * _user_data_;
 	if (strcmp (dbus_message_get_signature (message), "")) {
 		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 	}
 	dbus_message_iter_init (message, &iter);
-	mpris_root_Quit (self, &error);
+	_user_data_ = g_new0 (gpointer, 2);
+	_user_data_[0] = dbus_connection_ref (connection);
+	_user_data_[1] = dbus_message_ref (message);
+	mpris_root_Quit (self, (GAsyncReadyCallback) _dbus_mpris_root_Quit_ready, _user_data_);
+	return DBUS_HANDLER_RESULT_HANDLED;
+}
+
+
+static void _dbus_mpris_root_Quit_ready (GObject * source_object, GAsyncResult * _res_, gpointer * _user_data_) {
+	DBusConnection * connection;
+	DBusMessage * message;
+	DBusMessageIter iter;
+	GError* error;
+	DBusMessage* reply;
+	connection = _user_data_[0];
+	message = _user_data_[1];
+	error = NULL;
+	mpris_root_Quit_finish ((MprisRoot*) source_object, _res_, &error);
 	if (error) {
 		if (error->domain == DBUS_GERROR) {
 			switch (error->code) {
@@ -881,30 +953,43 @@ static DBusHandlerResult _dbus_mpris_root_Quit (MprisRoot* self, DBusConnection*
 		}
 		dbus_connection_send (connection, reply, NULL);
 		dbus_message_unref (reply);
-		return DBUS_HANDLER_RESULT_HANDLED;
+		return;
 	}
 	reply = dbus_message_new_method_return (message);
 	dbus_message_iter_init_append (reply, &iter);
-	if (reply) {
-		dbus_connection_send (connection, reply, NULL);
-		dbus_message_unref (reply);
-		return DBUS_HANDLER_RESULT_HANDLED;
-	} else {
-		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-	}
+	dbus_connection_send (connection, reply, NULL);
+	dbus_message_unref (reply);
+	dbus_connection_unref (connection);
+	dbus_message_unref (message);
+	g_free (_user_data_);
 }
 
 
 static DBusHandlerResult _dbus_mpris_root_Raise (MprisRoot* self, DBusConnection* connection, DBusMessage* message) {
 	DBusMessageIter iter;
-	GError* error;
-	DBusMessage* reply;
-	error = NULL;
+	gpointer * _user_data_;
 	if (strcmp (dbus_message_get_signature (message), "")) {
 		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 	}
 	dbus_message_iter_init (message, &iter);
-	mpris_root_Raise (self, &error);
+	_user_data_ = g_new0 (gpointer, 2);
+	_user_data_[0] = dbus_connection_ref (connection);
+	_user_data_[1] = dbus_message_ref (message);
+	mpris_root_Raise (self, (GAsyncReadyCallback) _dbus_mpris_root_Raise_ready, _user_data_);
+	return DBUS_HANDLER_RESULT_HANDLED;
+}
+
+
+static void _dbus_mpris_root_Raise_ready (GObject * source_object, GAsyncResult * _res_, gpointer * _user_data_) {
+	DBusConnection * connection;
+	DBusMessage * message;
+	DBusMessageIter iter;
+	GError* error;
+	DBusMessage* reply;
+	connection = _user_data_[0];
+	message = _user_data_[1];
+	error = NULL;
+	mpris_root_Raise_finish ((MprisRoot*) source_object, _res_, &error);
 	if (error) {
 		if (error->domain == DBUS_GERROR) {
 			switch (error->code) {
@@ -1011,17 +1096,15 @@ static DBusHandlerResult _dbus_mpris_root_Raise (MprisRoot* self, DBusConnection
 		}
 		dbus_connection_send (connection, reply, NULL);
 		dbus_message_unref (reply);
-		return DBUS_HANDLER_RESULT_HANDLED;
+		return;
 	}
 	reply = dbus_message_new_method_return (message);
 	dbus_message_iter_init_append (reply, &iter);
-	if (reply) {
-		dbus_connection_send (connection, reply, NULL);
-		dbus_message_unref (reply);
-		return DBUS_HANDLER_RESULT_HANDLED;
-	} else {
-		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-	}
+	dbus_connection_send (connection, reply, NULL);
+	dbus_message_unref (reply);
+	dbus_connection_unref (connection);
+	dbus_message_unref (message);
+	g_free (_user_data_);
 }
 
 
@@ -1148,22 +1231,50 @@ static void mpris_root_dbus_proxy_init (MprisRootDBusProxy* self) {
 }
 
 
-static void mpris_root_dbus_proxy_Quit (MprisRoot* self, GError** error) {
-	DBusError _dbus_error;
+static void mpris_root_dbus_proxy_Quit_async (MprisRoot* self, GAsyncReadyCallback _callback_, gpointer _user_data_) {
 	DBusGConnection *_connection;
-	DBusMessage *_message, *_reply;
+	DBusMessage *_message;
+	DBusPendingCall *_pending;
 	DBusMessageIter _iter;
-	if (((MprisRootDBusProxy*) self)->disposed) {
-		g_set_error (error, DBUS_GERROR, DBUS_GERROR_DISCONNECTED, "%s", "Connection is closed");
-		return;
-	}
+	MprisRootDBusProxyQuitData* _data_;
 	_message = dbus_message_new_method_call (dbus_g_proxy_get_bus_name ((DBusGProxy*) self), dbus_g_proxy_get_path ((DBusGProxy*) self), "org.mpris.MediaPlayer2", "Quit");
 	dbus_message_iter_init_append (_message, &_iter);
 	g_object_get (self, "connection", &_connection, NULL);
-	dbus_error_init (&_dbus_error);
-	_reply = dbus_connection_send_with_reply_and_block (dbus_g_connection_get_connection (_connection), _message, -1, &_dbus_error);
+	dbus_connection_send_with_reply (dbus_g_connection_get_connection (_connection), _message, &_pending, -1);
 	dbus_g_connection_unref (_connection);
 	dbus_message_unref (_message);
+	_data_ = g_slice_new0 (MprisRootDBusProxyQuitData);
+	_data_->_callback_ = _callback_;
+	_data_->_user_data_ = _user_data_;
+	_data_->pending = _pending;
+	dbus_pending_call_set_notify (_pending, mpris_root_dbus_proxy_Quit_ready, _data_, NULL);
+}
+
+
+static void mpris_root_dbus_proxy_Quit_ready (DBusPendingCall* pending, void* user_data) {
+	MprisRootDBusProxyQuitData* _data_;
+	GObject * _obj_;
+	GSimpleAsyncResult * _res_;
+	_data_ = user_data;
+	_obj_ = g_object_newv (G_TYPE_OBJECT, 0, NULL);
+	_res_ = g_simple_async_result_new (_obj_, _data_->_callback_, _data_->_user_data_, _data_);
+	g_simple_async_result_complete (_res_);
+	g_object_unref (_obj_);
+	g_object_unref (_res_);
+	g_slice_free (MprisRootDBusProxyQuitData, _data_);
+	dbus_pending_call_unref (pending);
+}
+
+
+static void mpris_root_dbus_proxy_Quit_finish (MprisRoot* self, GAsyncResult* _res_, GError** error) {
+	MprisRootDBusProxyQuitData* _data_;
+	DBusError _dbus_error;
+	DBusMessage *_reply;
+	DBusMessageIter _iter;
+	_data_ = g_simple_async_result_get_source_tag ((GSimpleAsyncResult *) _res_);
+	dbus_error_init (&_dbus_error);
+	_reply = dbus_pending_call_steal_reply (_data_->pending);
+	dbus_set_error_from_message (&_dbus_error, _reply);
 	if (dbus_error_is_set (&_dbus_error)) {
 		GQuark _edomain;
 		gint _ecode;
@@ -1253,22 +1364,50 @@ static void mpris_root_dbus_proxy_Quit (MprisRoot* self, GError** error) {
 }
 
 
-static void mpris_root_dbus_proxy_Raise (MprisRoot* self, GError** error) {
-	DBusError _dbus_error;
+static void mpris_root_dbus_proxy_Raise_async (MprisRoot* self, GAsyncReadyCallback _callback_, gpointer _user_data_) {
 	DBusGConnection *_connection;
-	DBusMessage *_message, *_reply;
+	DBusMessage *_message;
+	DBusPendingCall *_pending;
 	DBusMessageIter _iter;
-	if (((MprisRootDBusProxy*) self)->disposed) {
-		g_set_error (error, DBUS_GERROR, DBUS_GERROR_DISCONNECTED, "%s", "Connection is closed");
-		return;
-	}
+	MprisRootDBusProxyRaiseData* _data_;
 	_message = dbus_message_new_method_call (dbus_g_proxy_get_bus_name ((DBusGProxy*) self), dbus_g_proxy_get_path ((DBusGProxy*) self), "org.mpris.MediaPlayer2", "Raise");
 	dbus_message_iter_init_append (_message, &_iter);
 	g_object_get (self, "connection", &_connection, NULL);
-	dbus_error_init (&_dbus_error);
-	_reply = dbus_connection_send_with_reply_and_block (dbus_g_connection_get_connection (_connection), _message, -1, &_dbus_error);
+	dbus_connection_send_with_reply (dbus_g_connection_get_connection (_connection), _message, &_pending, -1);
 	dbus_g_connection_unref (_connection);
 	dbus_message_unref (_message);
+	_data_ = g_slice_new0 (MprisRootDBusProxyRaiseData);
+	_data_->_callback_ = _callback_;
+	_data_->_user_data_ = _user_data_;
+	_data_->pending = _pending;
+	dbus_pending_call_set_notify (_pending, mpris_root_dbus_proxy_Raise_ready, _data_, NULL);
+}
+
+
+static void mpris_root_dbus_proxy_Raise_ready (DBusPendingCall* pending, void* user_data) {
+	MprisRootDBusProxyRaiseData* _data_;
+	GObject * _obj_;
+	GSimpleAsyncResult * _res_;
+	_data_ = user_data;
+	_obj_ = g_object_newv (G_TYPE_OBJECT, 0, NULL);
+	_res_ = g_simple_async_result_new (_obj_, _data_->_callback_, _data_->_user_data_, _data_);
+	g_simple_async_result_complete (_res_);
+	g_object_unref (_obj_);
+	g_object_unref (_res_);
+	g_slice_free (MprisRootDBusProxyRaiseData, _data_);
+	dbus_pending_call_unref (pending);
+}
+
+
+static void mpris_root_dbus_proxy_Raise_finish (MprisRoot* self, GAsyncResult* _res_, GError** error) {
+	MprisRootDBusProxyRaiseData* _data_;
+	DBusError _dbus_error;
+	DBusMessage *_reply;
+	DBusMessageIter _iter;
+	_data_ = g_simple_async_result_get_source_tag ((GSimpleAsyncResult *) _res_);
+	dbus_error_init (&_dbus_error);
+	_reply = dbus_pending_call_steal_reply (_data_->pending);
+	dbus_set_error_from_message (&_dbus_error, _reply);
 	if (dbus_error_is_set (&_dbus_error)) {
 		GQuark _edomain;
 		gint _ecode;
@@ -1804,8 +1943,10 @@ static void mpris_root_dbus_proxy_set_DesktopEntry (MprisRoot* self, const char*
 
 
 static void mpris_root_dbus_proxy_mpris_root__interface_init (MprisRootIface* iface) {
-	iface->Quit = mpris_root_dbus_proxy_Quit;
-	iface->Raise = mpris_root_dbus_proxy_Raise;
+	iface->Quit = mpris_root_dbus_proxy_Quit_async;
+	iface->Quit_finish = mpris_root_dbus_proxy_Quit_finish;
+	iface->Raise = mpris_root_dbus_proxy_Raise_async;
+	iface->Raise_finish = mpris_root_dbus_proxy_Raise_finish;
 	iface->get_HasTracklist = mpris_root_dbus_proxy_get_HasTracklist;
 	iface->set_HasTracklist = mpris_root_dbus_proxy_set_HasTracklist;
 	iface->get_CanQuit = mpris_root_dbus_proxy_get_CanQuit;
@@ -1827,28 +1968,33 @@ static void mpris_root_dbus_proxy_set_property (GObject * object, guint property
 }
 
 
-void mpris_player_SetPosition (MprisPlayer* self, const char* path, gint64 pos, GError** error) {
-	MPRIS_PLAYER_GET_INTERFACE (self)->SetPosition (self, path, pos, error);
+void mpris_player_PlayPause (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_) {
+	MPRIS_PLAYER_GET_INTERFACE (self)->PlayPause (self, _callback_, _user_data_);
 }
 
 
-void mpris_player_PlayPause (MprisPlayer* self, GError** error) {
-	MPRIS_PLAYER_GET_INTERFACE (self)->PlayPause (self, error);
+void mpris_player_PlayPause_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error) {
+	MPRIS_PLAYER_GET_INTERFACE (self)->PlayPause_finish (self, _res_, error);
 }
 
 
-void mpris_player_Pause (MprisPlayer* self, GError** error) {
-	MPRIS_PLAYER_GET_INTERFACE (self)->Pause (self, error);
+void mpris_player_Next (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_) {
+	MPRIS_PLAYER_GET_INTERFACE (self)->Next (self, _callback_, _user_data_);
 }
 
 
-void mpris_player_Next (MprisPlayer* self, GError** error) {
-	MPRIS_PLAYER_GET_INTERFACE (self)->Next (self, error);
+void mpris_player_Next_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error) {
+	MPRIS_PLAYER_GET_INTERFACE (self)->Next_finish (self, _res_, error);
 }
 
 
-void mpris_player_Previous (MprisPlayer* self, GError** error) {
-	MPRIS_PLAYER_GET_INTERFACE (self)->Previous (self, error);
+void mpris_player_Previous (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_) {
+	MPRIS_PLAYER_GET_INTERFACE (self)->Previous (self, _callback_, _user_data_);
+}
+
+
+void mpris_player_Previous_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error) {
+	MPRIS_PLAYER_GET_INTERFACE (self)->Previous_finish (self, _res_, error);
 }
 
 
@@ -1895,7 +2041,7 @@ static DBusHandlerResult _dbus_mpris_player_introspect (MprisPlayer* self, DBusC
 	reply = dbus_message_new_method_return (message);
 	dbus_message_iter_init_append (reply, &iter);
 	xml_data = g_string_new ("<!DOCTYPE node PUBLIC \"-//freedesktop//DTD D-BUS Object Introspection 1.0//EN\" \"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd\">\n");
-	g_string_append (xml_data, "<node>\n<interface name=\"org.freedesktop.DBus.Introspectable\">\n  <method name=\"Introspect\">\n    <arg name=\"data\" direction=\"out\" type=\"s\"/>\n  </method>\n</interface>\n<interface name=\"org.freedesktop.DBus.Properties\">\n  <method name=\"Get\">\n    <arg name=\"interface\" direction=\"in\" type=\"s\"/>\n    <arg name=\"propname\" direction=\"in\" type=\"s\"/>\n    <arg name=\"value\" direction=\"out\" type=\"v\"/>\n  </method>\n  <method name=\"Set\">\n    <arg name=\"interface\" direction=\"in\" type=\"s\"/>\n    <arg name=\"propname\" direction=\"in\" type=\"s\"/>\n    <arg name=\"value\" direction=\"in\" type=\"v\"/>\n  </method>\n  <method name=\"GetAll\">\n    <arg name=\"interface\" direction=\"in\" type=\"s\"/>\n    <arg name=\"props\" direction=\"out\" type=\"a{sv}\"/>\n  </method>\n</interface>\n<interface name=\"org.mpris.MediaPlayer2.Player\">\n  <method name=\"SetPosition\">\n    <arg name=\"path\" type=\"o\" direction=\"in\"/>\n    <arg name=\"pos\" type=\"x\" direction=\"in\"/>\n  </method>\n  <method name=\"PlayPause\">\n  </method>\n  <method name=\"Pause\">\n  </method>\n  <method name=\"Next\">\n  </method>\n  <method name=\"Previous\">\n  </method>\n  <property name=\"Metadata\" type=\"a{sv}\" access=\"readwrite\"/>\n  <property name=\"Position\" type=\"i\" access=\"readwrite\"/>\n  <property name=\"PlaybackStatus\" type=\"s\" access=\"readwrite\"/>\n  <signal name=\"Seeked\">\n    <arg name=\"new_position\" type=\"x\"/>\n  </signal>\n</interface>\n");
+	g_string_append (xml_data, "<node>\n<interface name=\"org.freedesktop.DBus.Introspectable\">\n  <method name=\"Introspect\">\n    <arg name=\"data\" direction=\"out\" type=\"s\"/>\n  </method>\n</interface>\n<interface name=\"org.freedesktop.DBus.Properties\">\n  <method name=\"Get\">\n    <arg name=\"interface\" direction=\"in\" type=\"s\"/>\n    <arg name=\"propname\" direction=\"in\" type=\"s\"/>\n    <arg name=\"value\" direction=\"out\" type=\"v\"/>\n  </method>\n  <method name=\"Set\">\n    <arg name=\"interface\" direction=\"in\" type=\"s\"/>\n    <arg name=\"propname\" direction=\"in\" type=\"s\"/>\n    <arg name=\"value\" direction=\"in\" type=\"v\"/>\n  </method>\n  <method name=\"GetAll\">\n    <arg name=\"interface\" direction=\"in\" type=\"s\"/>\n    <arg name=\"props\" direction=\"out\" type=\"a{sv}\"/>\n  </method>\n</interface>\n<interface name=\"org.mpris.MediaPlayer2.Player\">\n  <method name=\"PlayPause\">\n  </method>\n  <method name=\"Next\">\n  </method>\n  <method name=\"Previous\">\n  </method>\n  <property name=\"Metadata\" type=\"a{sv}\" access=\"readwrite\"/>\n  <property name=\"Position\" type=\"i\" access=\"readwrite\"/>\n  <property name=\"PlaybackStatus\" type=\"s\" access=\"readwrite\"/>\n  <signal name=\"Seeked\">\n    <arg name=\"new_position\" type=\"x\"/>\n  </signal>\n</interface>\n");
 	dbus_connection_list_registered (connection, g_object_get_data ((GObject *) self, "dbus_object_path"), &children);
 	for (i = 0; children[i]; i++) {
 		g_string_append_printf (xml_data, "<node name=\"%s\"/>\n", children[i]);
@@ -2369,287 +2515,31 @@ static DBusHandlerResult _dbus_mpris_player_property_get_all (MprisPlayer* self,
 }
 
 
-static DBusHandlerResult _dbus_mpris_player_SetPosition (MprisPlayer* self, DBusConnection* connection, DBusMessage* message) {
-	DBusMessageIter iter;
-	GError* error;
-	char* path = NULL;
-	const char* _tmp70_;
-	gint64 pos = 0LL;
-	dbus_int64_t _tmp71_;
-	DBusMessage* reply;
-	error = NULL;
-	if (strcmp (dbus_message_get_signature (message), "ox")) {
-		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-	}
-	dbus_message_iter_init (message, &iter);
-	dbus_message_iter_get_basic (&iter, &_tmp70_);
-	dbus_message_iter_next (&iter);
-	path = g_strdup (_tmp70_);
-	dbus_message_iter_get_basic (&iter, &_tmp71_);
-	dbus_message_iter_next (&iter);
-	pos = _tmp71_;
-	mpris_player_SetPosition (self, path, pos, &error);
-	if (error) {
-		if (error->domain == DBUS_GERROR) {
-			switch (error->code) {
-				case DBUS_GERROR_FAILED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.Failed", error->message);
-				break;
-				case DBUS_GERROR_NO_MEMORY:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.NoMemory", error->message);
-				break;
-				case DBUS_GERROR_SERVICE_UNKNOWN:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.ServiceUnknown", error->message);
-				break;
-				case DBUS_GERROR_NAME_HAS_NO_OWNER:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.NameHasNoOwner", error->message);
-				break;
-				case DBUS_GERROR_NO_REPLY:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.NoReply", error->message);
-				break;
-				case DBUS_GERROR_IO_ERROR:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.IOError", error->message);
-				break;
-				case DBUS_GERROR_BAD_ADDRESS:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.BadAddress", error->message);
-				break;
-				case DBUS_GERROR_NOT_SUPPORTED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.NotSupported", error->message);
-				break;
-				case DBUS_GERROR_LIMITS_EXCEEDED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.LimitsExceeded", error->message);
-				break;
-				case DBUS_GERROR_ACCESS_DENIED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.AccessDenied", error->message);
-				break;
-				case DBUS_GERROR_AUTH_FAILED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.AuthFailed", error->message);
-				break;
-				case DBUS_GERROR_NO_SERVER:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.NoServer", error->message);
-				break;
-				case DBUS_GERROR_TIMEOUT:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.Timeout", error->message);
-				break;
-				case DBUS_GERROR_NO_NETWORK:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.NoNetwork", error->message);
-				break;
-				case DBUS_GERROR_ADDRESS_IN_USE:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.AddressInUse", error->message);
-				break;
-				case DBUS_GERROR_DISCONNECTED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.Disconnected", error->message);
-				break;
-				case DBUS_GERROR_INVALID_ARGS:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.InvalidArgs", error->message);
-				break;
-				case DBUS_GERROR_FILE_NOT_FOUND:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.FileNotFound", error->message);
-				break;
-				case DBUS_GERROR_FILE_EXISTS:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.FileExists", error->message);
-				break;
-				case DBUS_GERROR_UNKNOWN_METHOD:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.UnknownMethod", error->message);
-				break;
-				case DBUS_GERROR_TIMED_OUT:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.TimedOut", error->message);
-				break;
-				case DBUS_GERROR_MATCH_RULE_NOT_FOUND:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.MatchRuleNotFound", error->message);
-				break;
-				case DBUS_GERROR_MATCH_RULE_INVALID:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.MatchRuleInvalid", error->message);
-				break;
-				case DBUS_GERROR_SPAWN_EXEC_FAILED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.Spawn.ExecFailed", error->message);
-				break;
-				case DBUS_GERROR_SPAWN_FORK_FAILED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.Spawn.ForkFailed", error->message);
-				break;
-				case DBUS_GERROR_SPAWN_CHILD_EXITED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.Spawn.ChildExited", error->message);
-				break;
-				case DBUS_GERROR_SPAWN_CHILD_SIGNALED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.Spawn.ChildSignaled", error->message);
-				break;
-				case DBUS_GERROR_SPAWN_FAILED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.Spawn.Failed", error->message);
-				break;
-				case DBUS_GERROR_UNIX_PROCESS_ID_UNKNOWN:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.UnixProcessIdUnknown", error->message);
-				break;
-				case DBUS_GERROR_INVALID_SIGNATURE:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.InvalidSignature", error->message);
-				break;
-				case DBUS_GERROR_INVALID_FILE_CONTENT:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.InvalidFileContent", error->message);
-				break;
-				case DBUS_GERROR_SELINUX_SECURITY_CONTEXT_UNKNOWN:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.SELinuxSecurityContextUnknown", error->message);
-				break;
-				case DBUS_GERROR_REMOTE_EXCEPTION:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.RemoteException", error->message);
-				break;
-			}
-		}
-		dbus_connection_send (connection, reply, NULL);
-		dbus_message_unref (reply);
-		return DBUS_HANDLER_RESULT_HANDLED;
-	}
-	reply = dbus_message_new_method_return (message);
-	dbus_message_iter_init_append (reply, &iter);
-	_g_free0 (path);
-	if (reply) {
-		dbus_connection_send (connection, reply, NULL);
-		dbus_message_unref (reply);
-		return DBUS_HANDLER_RESULT_HANDLED;
-	} else {
-		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-	}
-}
-
-
 static DBusHandlerResult _dbus_mpris_player_PlayPause (MprisPlayer* self, DBusConnection* connection, DBusMessage* message) {
 	DBusMessageIter iter;
-	GError* error;
-	DBusMessage* reply;
-	error = NULL;
+	gpointer * _user_data_;
 	if (strcmp (dbus_message_get_signature (message), "")) {
 		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 	}
 	dbus_message_iter_init (message, &iter);
-	mpris_player_PlayPause (self, &error);
-	if (error) {
-		if (error->domain == DBUS_GERROR) {
-			switch (error->code) {
-				case DBUS_GERROR_FAILED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.Failed", error->message);
-				break;
-				case DBUS_GERROR_NO_MEMORY:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.NoMemory", error->message);
-				break;
-				case DBUS_GERROR_SERVICE_UNKNOWN:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.ServiceUnknown", error->message);
-				break;
-				case DBUS_GERROR_NAME_HAS_NO_OWNER:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.NameHasNoOwner", error->message);
-				break;
-				case DBUS_GERROR_NO_REPLY:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.NoReply", error->message);
-				break;
-				case DBUS_GERROR_IO_ERROR:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.IOError", error->message);
-				break;
-				case DBUS_GERROR_BAD_ADDRESS:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.BadAddress", error->message);
-				break;
-				case DBUS_GERROR_NOT_SUPPORTED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.NotSupported", error->message);
-				break;
-				case DBUS_GERROR_LIMITS_EXCEEDED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.LimitsExceeded", error->message);
-				break;
-				case DBUS_GERROR_ACCESS_DENIED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.AccessDenied", error->message);
-				break;
-				case DBUS_GERROR_AUTH_FAILED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.AuthFailed", error->message);
-				break;
-				case DBUS_GERROR_NO_SERVER:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.NoServer", error->message);
-				break;
-				case DBUS_GERROR_TIMEOUT:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.Timeout", error->message);
-				break;
-				case DBUS_GERROR_NO_NETWORK:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.NoNetwork", error->message);
-				break;
-				case DBUS_GERROR_ADDRESS_IN_USE:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.AddressInUse", error->message);
-				break;
-				case DBUS_GERROR_DISCONNECTED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.Disconnected", error->message);
-				break;
-				case DBUS_GERROR_INVALID_ARGS:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.InvalidArgs", error->message);
-				break;
-				case DBUS_GERROR_FILE_NOT_FOUND:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.FileNotFound", error->message);
-				break;
-				case DBUS_GERROR_FILE_EXISTS:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.FileExists", error->message);
-				break;
-				case DBUS_GERROR_UNKNOWN_METHOD:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.UnknownMethod", error->message);
-				break;
-				case DBUS_GERROR_TIMED_OUT:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.TimedOut", error->message);
-				break;
-				case DBUS_GERROR_MATCH_RULE_NOT_FOUND:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.MatchRuleNotFound", error->message);
-				break;
-				case DBUS_GERROR_MATCH_RULE_INVALID:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.MatchRuleInvalid", error->message);
-				break;
-				case DBUS_GERROR_SPAWN_EXEC_FAILED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.Spawn.ExecFailed", error->message);
-				break;
-				case DBUS_GERROR_SPAWN_FORK_FAILED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.Spawn.ForkFailed", error->message);
-				break;
-				case DBUS_GERROR_SPAWN_CHILD_EXITED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.Spawn.ChildExited", error->message);
-				break;
-				case DBUS_GERROR_SPAWN_CHILD_SIGNALED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.Spawn.ChildSignaled", error->message);
-				break;
-				case DBUS_GERROR_SPAWN_FAILED:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.Spawn.Failed", error->message);
-				break;
-				case DBUS_GERROR_UNIX_PROCESS_ID_UNKNOWN:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.UnixProcessIdUnknown", error->message);
-				break;
-				case DBUS_GERROR_INVALID_SIGNATURE:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.InvalidSignature", error->message);
-				break;
-				case DBUS_GERROR_INVALID_FILE_CONTENT:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.InvalidFileContent", error->message);
-				break;
-				case DBUS_GERROR_SELINUX_SECURITY_CONTEXT_UNKNOWN:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.SELinuxSecurityContextUnknown", error->message);
-				break;
-				case DBUS_GERROR_REMOTE_EXCEPTION:
-				reply = dbus_message_new_error (message, "org.freedesktop.DBus.Error.RemoteException", error->message);
-				break;
-			}
-		}
-		dbus_connection_send (connection, reply, NULL);
-		dbus_message_unref (reply);
-		return DBUS_HANDLER_RESULT_HANDLED;
-	}
-	reply = dbus_message_new_method_return (message);
-	dbus_message_iter_init_append (reply, &iter);
-	if (reply) {
-		dbus_connection_send (connection, reply, NULL);
-		dbus_message_unref (reply);
-		return DBUS_HANDLER_RESULT_HANDLED;
-	} else {
-		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-	}
+	_user_data_ = g_new0 (gpointer, 2);
+	_user_data_[0] = dbus_connection_ref (connection);
+	_user_data_[1] = dbus_message_ref (message);
+	mpris_player_PlayPause (self, (GAsyncReadyCallback) _dbus_mpris_player_PlayPause_ready, _user_data_);
+	return DBUS_HANDLER_RESULT_HANDLED;
 }
 
 
-static DBusHandlerResult _dbus_mpris_player_Pause (MprisPlayer* self, DBusConnection* connection, DBusMessage* message) {
+static void _dbus_mpris_player_PlayPause_ready (GObject * source_object, GAsyncResult * _res_, gpointer * _user_data_) {
+	DBusConnection * connection;
+	DBusMessage * message;
 	DBusMessageIter iter;
 	GError* error;
 	DBusMessage* reply;
+	connection = _user_data_[0];
+	message = _user_data_[1];
 	error = NULL;
-	if (strcmp (dbus_message_get_signature (message), "")) {
-		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-	}
-	dbus_message_iter_init (message, &iter);
-	mpris_player_Pause (self, &error);
+	mpris_player_PlayPause_finish ((MprisPlayer*) source_object, _res_, &error);
 	if (error) {
 		if (error->domain == DBUS_GERROR) {
 			switch (error->code) {
@@ -2756,30 +2646,43 @@ static DBusHandlerResult _dbus_mpris_player_Pause (MprisPlayer* self, DBusConnec
 		}
 		dbus_connection_send (connection, reply, NULL);
 		dbus_message_unref (reply);
-		return DBUS_HANDLER_RESULT_HANDLED;
+		return;
 	}
 	reply = dbus_message_new_method_return (message);
 	dbus_message_iter_init_append (reply, &iter);
-	if (reply) {
-		dbus_connection_send (connection, reply, NULL);
-		dbus_message_unref (reply);
-		return DBUS_HANDLER_RESULT_HANDLED;
-	} else {
-		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-	}
+	dbus_connection_send (connection, reply, NULL);
+	dbus_message_unref (reply);
+	dbus_connection_unref (connection);
+	dbus_message_unref (message);
+	g_free (_user_data_);
 }
 
 
 static DBusHandlerResult _dbus_mpris_player_Next (MprisPlayer* self, DBusConnection* connection, DBusMessage* message) {
 	DBusMessageIter iter;
-	GError* error;
-	DBusMessage* reply;
-	error = NULL;
+	gpointer * _user_data_;
 	if (strcmp (dbus_message_get_signature (message), "")) {
 		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 	}
 	dbus_message_iter_init (message, &iter);
-	mpris_player_Next (self, &error);
+	_user_data_ = g_new0 (gpointer, 2);
+	_user_data_[0] = dbus_connection_ref (connection);
+	_user_data_[1] = dbus_message_ref (message);
+	mpris_player_Next (self, (GAsyncReadyCallback) _dbus_mpris_player_Next_ready, _user_data_);
+	return DBUS_HANDLER_RESULT_HANDLED;
+}
+
+
+static void _dbus_mpris_player_Next_ready (GObject * source_object, GAsyncResult * _res_, gpointer * _user_data_) {
+	DBusConnection * connection;
+	DBusMessage * message;
+	DBusMessageIter iter;
+	GError* error;
+	DBusMessage* reply;
+	connection = _user_data_[0];
+	message = _user_data_[1];
+	error = NULL;
+	mpris_player_Next_finish ((MprisPlayer*) source_object, _res_, &error);
 	if (error) {
 		if (error->domain == DBUS_GERROR) {
 			switch (error->code) {
@@ -2886,30 +2789,43 @@ static DBusHandlerResult _dbus_mpris_player_Next (MprisPlayer* self, DBusConnect
 		}
 		dbus_connection_send (connection, reply, NULL);
 		dbus_message_unref (reply);
-		return DBUS_HANDLER_RESULT_HANDLED;
+		return;
 	}
 	reply = dbus_message_new_method_return (message);
 	dbus_message_iter_init_append (reply, &iter);
-	if (reply) {
-		dbus_connection_send (connection, reply, NULL);
-		dbus_message_unref (reply);
-		return DBUS_HANDLER_RESULT_HANDLED;
-	} else {
-		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-	}
+	dbus_connection_send (connection, reply, NULL);
+	dbus_message_unref (reply);
+	dbus_connection_unref (connection);
+	dbus_message_unref (message);
+	g_free (_user_data_);
 }
 
 
 static DBusHandlerResult _dbus_mpris_player_Previous (MprisPlayer* self, DBusConnection* connection, DBusMessage* message) {
 	DBusMessageIter iter;
-	GError* error;
-	DBusMessage* reply;
-	error = NULL;
+	gpointer * _user_data_;
 	if (strcmp (dbus_message_get_signature (message), "")) {
 		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 	}
 	dbus_message_iter_init (message, &iter);
-	mpris_player_Previous (self, &error);
+	_user_data_ = g_new0 (gpointer, 2);
+	_user_data_[0] = dbus_connection_ref (connection);
+	_user_data_[1] = dbus_message_ref (message);
+	mpris_player_Previous (self, (GAsyncReadyCallback) _dbus_mpris_player_Previous_ready, _user_data_);
+	return DBUS_HANDLER_RESULT_HANDLED;
+}
+
+
+static void _dbus_mpris_player_Previous_ready (GObject * source_object, GAsyncResult * _res_, gpointer * _user_data_) {
+	DBusConnection * connection;
+	DBusMessage * message;
+	DBusMessageIter iter;
+	GError* error;
+	DBusMessage* reply;
+	connection = _user_data_[0];
+	message = _user_data_[1];
+	error = NULL;
+	mpris_player_Previous_finish ((MprisPlayer*) source_object, _res_, &error);
 	if (error) {
 		if (error->domain == DBUS_GERROR) {
 			switch (error->code) {
@@ -3016,17 +2932,15 @@ static DBusHandlerResult _dbus_mpris_player_Previous (MprisPlayer* self, DBusCon
 		}
 		dbus_connection_send (connection, reply, NULL);
 		dbus_message_unref (reply);
-		return DBUS_HANDLER_RESULT_HANDLED;
+		return;
 	}
 	reply = dbus_message_new_method_return (message);
 	dbus_message_iter_init_append (reply, &iter);
-	if (reply) {
-		dbus_connection_send (connection, reply, NULL);
-		dbus_message_unref (reply);
-		return DBUS_HANDLER_RESULT_HANDLED;
-	} else {
-		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-	}
+	dbus_connection_send (connection, reply, NULL);
+	dbus_message_unref (reply);
+	dbus_connection_unref (connection);
+	dbus_message_unref (message);
+	g_free (_user_data_);
 }
 
 
@@ -3041,12 +2955,8 @@ DBusHandlerResult mpris_player_dbus_message (DBusConnection* connection, DBusMes
 		result = _dbus_mpris_player_property_set (object, connection, message);
 	} else if (dbus_message_is_method_call (message, "org.freedesktop.DBus.Properties", "GetAll")) {
 		result = _dbus_mpris_player_property_get_all (object, connection, message);
-	} else if (dbus_message_is_method_call (message, "org.mpris.MediaPlayer2.Player", "SetPosition")) {
-		result = _dbus_mpris_player_SetPosition (object, connection, message);
 	} else if (dbus_message_is_method_call (message, "org.mpris.MediaPlayer2.Player", "PlayPause")) {
 		result = _dbus_mpris_player_PlayPause (object, connection, message);
-	} else if (dbus_message_is_method_call (message, "org.mpris.MediaPlayer2.Player", "Pause")) {
-		result = _dbus_mpris_player_Pause (object, connection, message);
 	} else if (dbus_message_is_method_call (message, "org.mpris.MediaPlayer2.Player", "Next")) {
 		result = _dbus_mpris_player_Next (object, connection, message);
 	} else if (dbus_message_is_method_call (message, "org.mpris.MediaPlayer2.Player", "Previous")) {
@@ -3064,12 +2974,12 @@ static void _dbus_mpris_player_seeked (GObject* _sender, gint64 new_position, DB
 	const char * _path;
 	DBusMessage *_message;
 	DBusMessageIter _iter;
-	dbus_int64_t _tmp72_;
+	dbus_int64_t _tmp70_;
 	_path = g_object_get_data (_sender, "dbus_object_path");
 	_message = dbus_message_new_signal (_path, "org.mpris.MediaPlayer2.Player", "Seeked");
 	dbus_message_iter_init_append (_message, &_iter);
-	_tmp72_ = new_position;
-	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_INT64, &_tmp72_);
+	_tmp70_ = new_position;
+	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_INT64, &_tmp70_);
 	dbus_connection_send (_connection, _message, NULL);
 	dbus_message_unref (_message);
 }
@@ -3191,28 +3101,316 @@ static void mpris_player_dbus_proxy_init (MprisPlayerDBusProxy* self) {
 }
 
 
-static void mpris_player_dbus_proxy_SetPosition (MprisPlayer* self, const char* path, gint64 pos, GError** error) {
-	DBusError _dbus_error;
+static void mpris_player_dbus_proxy_PlayPause_async (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_) {
 	DBusGConnection *_connection;
-	DBusMessage *_message, *_reply;
+	DBusMessage *_message;
+	DBusPendingCall *_pending;
 	DBusMessageIter _iter;
-	const char* _tmp33_;
-	dbus_int64_t _tmp34_;
-	if (((MprisPlayerDBusProxy*) self)->disposed) {
-		g_set_error (error, DBUS_GERROR, DBUS_GERROR_DISCONNECTED, "%s", "Connection is closed");
-		return;
-	}
-	_message = dbus_message_new_method_call (dbus_g_proxy_get_bus_name ((DBusGProxy*) self), dbus_g_proxy_get_path ((DBusGProxy*) self), "org.mpris.MediaPlayer2.Player", "SetPosition");
+	MprisPlayerDBusProxyPlayPauseData* _data_;
+	_message = dbus_message_new_method_call (dbus_g_proxy_get_bus_name ((DBusGProxy*) self), dbus_g_proxy_get_path ((DBusGProxy*) self), "org.mpris.MediaPlayer2.Player", "PlayPause");
 	dbus_message_iter_init_append (_message, &_iter);
-	_tmp33_ = path;
-	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_OBJECT_PATH, &_tmp33_);
-	_tmp34_ = pos;
-	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_INT64, &_tmp34_);
 	g_object_get (self, "connection", &_connection, NULL);
-	dbus_error_init (&_dbus_error);
-	_reply = dbus_connection_send_with_reply_and_block (dbus_g_connection_get_connection (_connection), _message, -1, &_dbus_error);
+	dbus_connection_send_with_reply (dbus_g_connection_get_connection (_connection), _message, &_pending, -1);
 	dbus_g_connection_unref (_connection);
 	dbus_message_unref (_message);
+	_data_ = g_slice_new0 (MprisPlayerDBusProxyPlayPauseData);
+	_data_->_callback_ = _callback_;
+	_data_->_user_data_ = _user_data_;
+	_data_->pending = _pending;
+	dbus_pending_call_set_notify (_pending, mpris_player_dbus_proxy_PlayPause_ready, _data_, NULL);
+}
+
+
+static void mpris_player_dbus_proxy_PlayPause_ready (DBusPendingCall* pending, void* user_data) {
+	MprisPlayerDBusProxyPlayPauseData* _data_;
+	GObject * _obj_;
+	GSimpleAsyncResult * _res_;
+	_data_ = user_data;
+	_obj_ = g_object_newv (G_TYPE_OBJECT, 0, NULL);
+	_res_ = g_simple_async_result_new (_obj_, _data_->_callback_, _data_->_user_data_, _data_);
+	g_simple_async_result_complete (_res_);
+	g_object_unref (_obj_);
+	g_object_unref (_res_);
+	g_slice_free (MprisPlayerDBusProxyPlayPauseData, _data_);
+	dbus_pending_call_unref (pending);
+}
+
+
+static void mpris_player_dbus_proxy_PlayPause_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error) {
+	MprisPlayerDBusProxyPlayPauseData* _data_;
+	DBusError _dbus_error;
+	DBusMessage *_reply;
+	DBusMessageIter _iter;
+	_data_ = g_simple_async_result_get_source_tag ((GSimpleAsyncResult *) _res_);
+	dbus_error_init (&_dbus_error);
+	_reply = dbus_pending_call_steal_reply (_data_->pending);
+	dbus_set_error_from_message (&_dbus_error, _reply);
+	if (dbus_error_is_set (&_dbus_error)) {
+		GQuark _edomain;
+		gint _ecode;
+		if (strstr (_dbus_error.name, "org.freedesktop.DBus.Error") == _dbus_error.name) {
+			const char* _tmp33_;
+			_edomain = DBUS_GERROR;
+			_tmp33_ = _dbus_error.name + 27;
+			if (strcmp (_tmp33_, "Failed") == 0) {
+				_ecode = DBUS_GERROR_FAILED;
+			} else if (strcmp (_tmp33_, "NoMemory") == 0) {
+				_ecode = DBUS_GERROR_NO_MEMORY;
+			} else if (strcmp (_tmp33_, "ServiceUnknown") == 0) {
+				_ecode = DBUS_GERROR_SERVICE_UNKNOWN;
+			} else if (strcmp (_tmp33_, "NameHasNoOwner") == 0) {
+				_ecode = DBUS_GERROR_NAME_HAS_NO_OWNER;
+			} else if (strcmp (_tmp33_, "NoReply") == 0) {
+				_ecode = DBUS_GERROR_NO_REPLY;
+			} else if (strcmp (_tmp33_, "IOError") == 0) {
+				_ecode = DBUS_GERROR_IO_ERROR;
+			} else if (strcmp (_tmp33_, "BadAddress") == 0) {
+				_ecode = DBUS_GERROR_BAD_ADDRESS;
+			} else if (strcmp (_tmp33_, "NotSupported") == 0) {
+				_ecode = DBUS_GERROR_NOT_SUPPORTED;
+			} else if (strcmp (_tmp33_, "LimitsExceeded") == 0) {
+				_ecode = DBUS_GERROR_LIMITS_EXCEEDED;
+			} else if (strcmp (_tmp33_, "AccessDenied") == 0) {
+				_ecode = DBUS_GERROR_ACCESS_DENIED;
+			} else if (strcmp (_tmp33_, "AuthFailed") == 0) {
+				_ecode = DBUS_GERROR_AUTH_FAILED;
+			} else if (strcmp (_tmp33_, "NoServer") == 0) {
+				_ecode = DBUS_GERROR_NO_SERVER;
+			} else if (strcmp (_tmp33_, "Timeout") == 0) {
+				_ecode = DBUS_GERROR_TIMEOUT;
+			} else if (strcmp (_tmp33_, "NoNetwork") == 0) {
+				_ecode = DBUS_GERROR_NO_NETWORK;
+			} else if (strcmp (_tmp33_, "AddressInUse") == 0) {
+				_ecode = DBUS_GERROR_ADDRESS_IN_USE;
+			} else if (strcmp (_tmp33_, "Disconnected") == 0) {
+				_ecode = DBUS_GERROR_DISCONNECTED;
+			} else if (strcmp (_tmp33_, "InvalidArgs") == 0) {
+				_ecode = DBUS_GERROR_INVALID_ARGS;
+			} else if (strcmp (_tmp33_, "FileNotFound") == 0) {
+				_ecode = DBUS_GERROR_FILE_NOT_FOUND;
+			} else if (strcmp (_tmp33_, "FileExists") == 0) {
+				_ecode = DBUS_GERROR_FILE_EXISTS;
+			} else if (strcmp (_tmp33_, "UnknownMethod") == 0) {
+				_ecode = DBUS_GERROR_UNKNOWN_METHOD;
+			} else if (strcmp (_tmp33_, "TimedOut") == 0) {
+				_ecode = DBUS_GERROR_TIMED_OUT;
+			} else if (strcmp (_tmp33_, "MatchRuleNotFound") == 0) {
+				_ecode = DBUS_GERROR_MATCH_RULE_NOT_FOUND;
+			} else if (strcmp (_tmp33_, "MatchRuleInvalid") == 0) {
+				_ecode = DBUS_GERROR_MATCH_RULE_INVALID;
+			} else if (strcmp (_tmp33_, "Spawn.ExecFailed") == 0) {
+				_ecode = DBUS_GERROR_SPAWN_EXEC_FAILED;
+			} else if (strcmp (_tmp33_, "Spawn.ForkFailed") == 0) {
+				_ecode = DBUS_GERROR_SPAWN_FORK_FAILED;
+			} else if (strcmp (_tmp33_, "Spawn.ChildExited") == 0) {
+				_ecode = DBUS_GERROR_SPAWN_CHILD_EXITED;
+			} else if (strcmp (_tmp33_, "Spawn.ChildSignaled") == 0) {
+				_ecode = DBUS_GERROR_SPAWN_CHILD_SIGNALED;
+			} else if (strcmp (_tmp33_, "Spawn.Failed") == 0) {
+				_ecode = DBUS_GERROR_SPAWN_FAILED;
+			} else if (strcmp (_tmp33_, "UnixProcessIdUnknown") == 0) {
+				_ecode = DBUS_GERROR_UNIX_PROCESS_ID_UNKNOWN;
+			} else if (strcmp (_tmp33_, "InvalidSignature") == 0) {
+				_ecode = DBUS_GERROR_INVALID_SIGNATURE;
+			} else if (strcmp (_tmp33_, "InvalidFileContent") == 0) {
+				_ecode = DBUS_GERROR_INVALID_FILE_CONTENT;
+			} else if (strcmp (_tmp33_, "SELinuxSecurityContextUnknown") == 0) {
+				_ecode = DBUS_GERROR_SELINUX_SECURITY_CONTEXT_UNKNOWN;
+			} else if (strcmp (_tmp33_, "RemoteException") == 0) {
+				_ecode = DBUS_GERROR_REMOTE_EXCEPTION;
+			}
+		}
+		g_set_error (error, _edomain, _ecode, "%s", _dbus_error.message);
+		dbus_error_free (&_dbus_error);
+		return;
+	}
+	if (strcmp (dbus_message_get_signature (_reply), "")) {
+		g_set_error (error, DBUS_GERROR, DBUS_GERROR_INVALID_SIGNATURE, "Invalid signature, expected \"%s\", got \"%s\"", "", dbus_message_get_signature (_reply));
+		dbus_message_unref (_reply);
+		return;
+	}
+	dbus_message_iter_init (_reply, &_iter);
+	dbus_message_unref (_reply);
+}
+
+
+static void mpris_player_dbus_proxy_Next_async (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_) {
+	DBusGConnection *_connection;
+	DBusMessage *_message;
+	DBusPendingCall *_pending;
+	DBusMessageIter _iter;
+	MprisPlayerDBusProxyNextData* _data_;
+	_message = dbus_message_new_method_call (dbus_g_proxy_get_bus_name ((DBusGProxy*) self), dbus_g_proxy_get_path ((DBusGProxy*) self), "org.mpris.MediaPlayer2.Player", "Next");
+	dbus_message_iter_init_append (_message, &_iter);
+	g_object_get (self, "connection", &_connection, NULL);
+	dbus_connection_send_with_reply (dbus_g_connection_get_connection (_connection), _message, &_pending, -1);
+	dbus_g_connection_unref (_connection);
+	dbus_message_unref (_message);
+	_data_ = g_slice_new0 (MprisPlayerDBusProxyNextData);
+	_data_->_callback_ = _callback_;
+	_data_->_user_data_ = _user_data_;
+	_data_->pending = _pending;
+	dbus_pending_call_set_notify (_pending, mpris_player_dbus_proxy_Next_ready, _data_, NULL);
+}
+
+
+static void mpris_player_dbus_proxy_Next_ready (DBusPendingCall* pending, void* user_data) {
+	MprisPlayerDBusProxyNextData* _data_;
+	GObject * _obj_;
+	GSimpleAsyncResult * _res_;
+	_data_ = user_data;
+	_obj_ = g_object_newv (G_TYPE_OBJECT, 0, NULL);
+	_res_ = g_simple_async_result_new (_obj_, _data_->_callback_, _data_->_user_data_, _data_);
+	g_simple_async_result_complete (_res_);
+	g_object_unref (_obj_);
+	g_object_unref (_res_);
+	g_slice_free (MprisPlayerDBusProxyNextData, _data_);
+	dbus_pending_call_unref (pending);
+}
+
+
+static void mpris_player_dbus_proxy_Next_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error) {
+	MprisPlayerDBusProxyNextData* _data_;
+	DBusError _dbus_error;
+	DBusMessage *_reply;
+	DBusMessageIter _iter;
+	_data_ = g_simple_async_result_get_source_tag ((GSimpleAsyncResult *) _res_);
+	dbus_error_init (&_dbus_error);
+	_reply = dbus_pending_call_steal_reply (_data_->pending);
+	dbus_set_error_from_message (&_dbus_error, _reply);
+	if (dbus_error_is_set (&_dbus_error)) {
+		GQuark _edomain;
+		gint _ecode;
+		if (strstr (_dbus_error.name, "org.freedesktop.DBus.Error") == _dbus_error.name) {
+			const char* _tmp34_;
+			_edomain = DBUS_GERROR;
+			_tmp34_ = _dbus_error.name + 27;
+			if (strcmp (_tmp34_, "Failed") == 0) {
+				_ecode = DBUS_GERROR_FAILED;
+			} else if (strcmp (_tmp34_, "NoMemory") == 0) {
+				_ecode = DBUS_GERROR_NO_MEMORY;
+			} else if (strcmp (_tmp34_, "ServiceUnknown") == 0) {
+				_ecode = DBUS_GERROR_SERVICE_UNKNOWN;
+			} else if (strcmp (_tmp34_, "NameHasNoOwner") == 0) {
+				_ecode = DBUS_GERROR_NAME_HAS_NO_OWNER;
+			} else if (strcmp (_tmp34_, "NoReply") == 0) {
+				_ecode = DBUS_GERROR_NO_REPLY;
+			} else if (strcmp (_tmp34_, "IOError") == 0) {
+				_ecode = DBUS_GERROR_IO_ERROR;
+			} else if (strcmp (_tmp34_, "BadAddress") == 0) {
+				_ecode = DBUS_GERROR_BAD_ADDRESS;
+			} else if (strcmp (_tmp34_, "NotSupported") == 0) {
+				_ecode = DBUS_GERROR_NOT_SUPPORTED;
+			} else if (strcmp (_tmp34_, "LimitsExceeded") == 0) {
+				_ecode = DBUS_GERROR_LIMITS_EXCEEDED;
+			} else if (strcmp (_tmp34_, "AccessDenied") == 0) {
+				_ecode = DBUS_GERROR_ACCESS_DENIED;
+			} else if (strcmp (_tmp34_, "AuthFailed") == 0) {
+				_ecode = DBUS_GERROR_AUTH_FAILED;
+			} else if (strcmp (_tmp34_, "NoServer") == 0) {
+				_ecode = DBUS_GERROR_NO_SERVER;
+			} else if (strcmp (_tmp34_, "Timeout") == 0) {
+				_ecode = DBUS_GERROR_TIMEOUT;
+			} else if (strcmp (_tmp34_, "NoNetwork") == 0) {
+				_ecode = DBUS_GERROR_NO_NETWORK;
+			} else if (strcmp (_tmp34_, "AddressInUse") == 0) {
+				_ecode = DBUS_GERROR_ADDRESS_IN_USE;
+			} else if (strcmp (_tmp34_, "Disconnected") == 0) {
+				_ecode = DBUS_GERROR_DISCONNECTED;
+			} else if (strcmp (_tmp34_, "InvalidArgs") == 0) {
+				_ecode = DBUS_GERROR_INVALID_ARGS;
+			} else if (strcmp (_tmp34_, "FileNotFound") == 0) {
+				_ecode = DBUS_GERROR_FILE_NOT_FOUND;
+			} else if (strcmp (_tmp34_, "FileExists") == 0) {
+				_ecode = DBUS_GERROR_FILE_EXISTS;
+			} else if (strcmp (_tmp34_, "UnknownMethod") == 0) {
+				_ecode = DBUS_GERROR_UNKNOWN_METHOD;
+			} else if (strcmp (_tmp34_, "TimedOut") == 0) {
+				_ecode = DBUS_GERROR_TIMED_OUT;
+			} else if (strcmp (_tmp34_, "MatchRuleNotFound") == 0) {
+				_ecode = DBUS_GERROR_MATCH_RULE_NOT_FOUND;
+			} else if (strcmp (_tmp34_, "MatchRuleInvalid") == 0) {
+				_ecode = DBUS_GERROR_MATCH_RULE_INVALID;
+			} else if (strcmp (_tmp34_, "Spawn.ExecFailed") == 0) {
+				_ecode = DBUS_GERROR_SPAWN_EXEC_FAILED;
+			} else if (strcmp (_tmp34_, "Spawn.ForkFailed") == 0) {
+				_ecode = DBUS_GERROR_SPAWN_FORK_FAILED;
+			} else if (strcmp (_tmp34_, "Spawn.ChildExited") == 0) {
+				_ecode = DBUS_GERROR_SPAWN_CHILD_EXITED;
+			} else if (strcmp (_tmp34_, "Spawn.ChildSignaled") == 0) {
+				_ecode = DBUS_GERROR_SPAWN_CHILD_SIGNALED;
+			} else if (strcmp (_tmp34_, "Spawn.Failed") == 0) {
+				_ecode = DBUS_GERROR_SPAWN_FAILED;
+			} else if (strcmp (_tmp34_, "UnixProcessIdUnknown") == 0) {
+				_ecode = DBUS_GERROR_UNIX_PROCESS_ID_UNKNOWN;
+			} else if (strcmp (_tmp34_, "InvalidSignature") == 0) {
+				_ecode = DBUS_GERROR_INVALID_SIGNATURE;
+			} else if (strcmp (_tmp34_, "InvalidFileContent") == 0) {
+				_ecode = DBUS_GERROR_INVALID_FILE_CONTENT;
+			} else if (strcmp (_tmp34_, "SELinuxSecurityContextUnknown") == 0) {
+				_ecode = DBUS_GERROR_SELINUX_SECURITY_CONTEXT_UNKNOWN;
+			} else if (strcmp (_tmp34_, "RemoteException") == 0) {
+				_ecode = DBUS_GERROR_REMOTE_EXCEPTION;
+			}
+		}
+		g_set_error (error, _edomain, _ecode, "%s", _dbus_error.message);
+		dbus_error_free (&_dbus_error);
+		return;
+	}
+	if (strcmp (dbus_message_get_signature (_reply), "")) {
+		g_set_error (error, DBUS_GERROR, DBUS_GERROR_INVALID_SIGNATURE, "Invalid signature, expected \"%s\", got \"%s\"", "", dbus_message_get_signature (_reply));
+		dbus_message_unref (_reply);
+		return;
+	}
+	dbus_message_iter_init (_reply, &_iter);
+	dbus_message_unref (_reply);
+}
+
+
+static void mpris_player_dbus_proxy_Previous_async (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_) {
+	DBusGConnection *_connection;
+	DBusMessage *_message;
+	DBusPendingCall *_pending;
+	DBusMessageIter _iter;
+	MprisPlayerDBusProxyPreviousData* _data_;
+	_message = dbus_message_new_method_call (dbus_g_proxy_get_bus_name ((DBusGProxy*) self), dbus_g_proxy_get_path ((DBusGProxy*) self), "org.mpris.MediaPlayer2.Player", "Previous");
+	dbus_message_iter_init_append (_message, &_iter);
+	g_object_get (self, "connection", &_connection, NULL);
+	dbus_connection_send_with_reply (dbus_g_connection_get_connection (_connection), _message, &_pending, -1);
+	dbus_g_connection_unref (_connection);
+	dbus_message_unref (_message);
+	_data_ = g_slice_new0 (MprisPlayerDBusProxyPreviousData);
+	_data_->_callback_ = _callback_;
+	_data_->_user_data_ = _user_data_;
+	_data_->pending = _pending;
+	dbus_pending_call_set_notify (_pending, mpris_player_dbus_proxy_Previous_ready, _data_, NULL);
+}
+
+
+static void mpris_player_dbus_proxy_Previous_ready (DBusPendingCall* pending, void* user_data) {
+	MprisPlayerDBusProxyPreviousData* _data_;
+	GObject * _obj_;
+	GSimpleAsyncResult * _res_;
+	_data_ = user_data;
+	_obj_ = g_object_newv (G_TYPE_OBJECT, 0, NULL);
+	_res_ = g_simple_async_result_new (_obj_, _data_->_callback_, _data_->_user_data_, _data_);
+	g_simple_async_result_complete (_res_);
+	g_object_unref (_obj_);
+	g_object_unref (_res_);
+	g_slice_free (MprisPlayerDBusProxyPreviousData, _data_);
+	dbus_pending_call_unref (pending);
+}
+
+
+static void mpris_player_dbus_proxy_Previous_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error) {
+	MprisPlayerDBusProxyPreviousData* _data_;
+	DBusError _dbus_error;
+	DBusMessage *_reply;
+	DBusMessageIter _iter;
+	_data_ = g_simple_async_result_get_source_tag ((GSimpleAsyncResult *) _res_);
+	dbus_error_init (&_dbus_error);
+	_reply = dbus_pending_call_steal_reply (_data_->pending);
+	dbus_set_error_from_message (&_dbus_error, _reply);
 	if (dbus_error_is_set (&_dbus_error)) {
 		GQuark _edomain;
 		gint _ecode;
@@ -3302,446 +3500,26 @@ static void mpris_player_dbus_proxy_SetPosition (MprisPlayer* self, const char* 
 }
 
 
-static void mpris_player_dbus_proxy_PlayPause (MprisPlayer* self, GError** error) {
-	DBusError _dbus_error;
-	DBusGConnection *_connection;
-	DBusMessage *_message, *_reply;
-	DBusMessageIter _iter;
-	if (((MprisPlayerDBusProxy*) self)->disposed) {
-		g_set_error (error, DBUS_GERROR, DBUS_GERROR_DISCONNECTED, "%s", "Connection is closed");
-		return;
-	}
-	_message = dbus_message_new_method_call (dbus_g_proxy_get_bus_name ((DBusGProxy*) self), dbus_g_proxy_get_path ((DBusGProxy*) self), "org.mpris.MediaPlayer2.Player", "PlayPause");
-	dbus_message_iter_init_append (_message, &_iter);
-	g_object_get (self, "connection", &_connection, NULL);
-	dbus_error_init (&_dbus_error);
-	_reply = dbus_connection_send_with_reply_and_block (dbus_g_connection_get_connection (_connection), _message, -1, &_dbus_error);
-	dbus_g_connection_unref (_connection);
-	dbus_message_unref (_message);
-	if (dbus_error_is_set (&_dbus_error)) {
-		GQuark _edomain;
-		gint _ecode;
-		if (strstr (_dbus_error.name, "org.freedesktop.DBus.Error") == _dbus_error.name) {
-			const char* _tmp36_;
-			_edomain = DBUS_GERROR;
-			_tmp36_ = _dbus_error.name + 27;
-			if (strcmp (_tmp36_, "Failed") == 0) {
-				_ecode = DBUS_GERROR_FAILED;
-			} else if (strcmp (_tmp36_, "NoMemory") == 0) {
-				_ecode = DBUS_GERROR_NO_MEMORY;
-			} else if (strcmp (_tmp36_, "ServiceUnknown") == 0) {
-				_ecode = DBUS_GERROR_SERVICE_UNKNOWN;
-			} else if (strcmp (_tmp36_, "NameHasNoOwner") == 0) {
-				_ecode = DBUS_GERROR_NAME_HAS_NO_OWNER;
-			} else if (strcmp (_tmp36_, "NoReply") == 0) {
-				_ecode = DBUS_GERROR_NO_REPLY;
-			} else if (strcmp (_tmp36_, "IOError") == 0) {
-				_ecode = DBUS_GERROR_IO_ERROR;
-			} else if (strcmp (_tmp36_, "BadAddress") == 0) {
-				_ecode = DBUS_GERROR_BAD_ADDRESS;
-			} else if (strcmp (_tmp36_, "NotSupported") == 0) {
-				_ecode = DBUS_GERROR_NOT_SUPPORTED;
-			} else if (strcmp (_tmp36_, "LimitsExceeded") == 0) {
-				_ecode = DBUS_GERROR_LIMITS_EXCEEDED;
-			} else if (strcmp (_tmp36_, "AccessDenied") == 0) {
-				_ecode = DBUS_GERROR_ACCESS_DENIED;
-			} else if (strcmp (_tmp36_, "AuthFailed") == 0) {
-				_ecode = DBUS_GERROR_AUTH_FAILED;
-			} else if (strcmp (_tmp36_, "NoServer") == 0) {
-				_ecode = DBUS_GERROR_NO_SERVER;
-			} else if (strcmp (_tmp36_, "Timeout") == 0) {
-				_ecode = DBUS_GERROR_TIMEOUT;
-			} else if (strcmp (_tmp36_, "NoNetwork") == 0) {
-				_ecode = DBUS_GERROR_NO_NETWORK;
-			} else if (strcmp (_tmp36_, "AddressInUse") == 0) {
-				_ecode = DBUS_GERROR_ADDRESS_IN_USE;
-			} else if (strcmp (_tmp36_, "Disconnected") == 0) {
-				_ecode = DBUS_GERROR_DISCONNECTED;
-			} else if (strcmp (_tmp36_, "InvalidArgs") == 0) {
-				_ecode = DBUS_GERROR_INVALID_ARGS;
-			} else if (strcmp (_tmp36_, "FileNotFound") == 0) {
-				_ecode = DBUS_GERROR_FILE_NOT_FOUND;
-			} else if (strcmp (_tmp36_, "FileExists") == 0) {
-				_ecode = DBUS_GERROR_FILE_EXISTS;
-			} else if (strcmp (_tmp36_, "UnknownMethod") == 0) {
-				_ecode = DBUS_GERROR_UNKNOWN_METHOD;
-			} else if (strcmp (_tmp36_, "TimedOut") == 0) {
-				_ecode = DBUS_GERROR_TIMED_OUT;
-			} else if (strcmp (_tmp36_, "MatchRuleNotFound") == 0) {
-				_ecode = DBUS_GERROR_MATCH_RULE_NOT_FOUND;
-			} else if (strcmp (_tmp36_, "MatchRuleInvalid") == 0) {
-				_ecode = DBUS_GERROR_MATCH_RULE_INVALID;
-			} else if (strcmp (_tmp36_, "Spawn.ExecFailed") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_EXEC_FAILED;
-			} else if (strcmp (_tmp36_, "Spawn.ForkFailed") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_FORK_FAILED;
-			} else if (strcmp (_tmp36_, "Spawn.ChildExited") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_CHILD_EXITED;
-			} else if (strcmp (_tmp36_, "Spawn.ChildSignaled") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_CHILD_SIGNALED;
-			} else if (strcmp (_tmp36_, "Spawn.Failed") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_FAILED;
-			} else if (strcmp (_tmp36_, "UnixProcessIdUnknown") == 0) {
-				_ecode = DBUS_GERROR_UNIX_PROCESS_ID_UNKNOWN;
-			} else if (strcmp (_tmp36_, "InvalidSignature") == 0) {
-				_ecode = DBUS_GERROR_INVALID_SIGNATURE;
-			} else if (strcmp (_tmp36_, "InvalidFileContent") == 0) {
-				_ecode = DBUS_GERROR_INVALID_FILE_CONTENT;
-			} else if (strcmp (_tmp36_, "SELinuxSecurityContextUnknown") == 0) {
-				_ecode = DBUS_GERROR_SELINUX_SECURITY_CONTEXT_UNKNOWN;
-			} else if (strcmp (_tmp36_, "RemoteException") == 0) {
-				_ecode = DBUS_GERROR_REMOTE_EXCEPTION;
-			}
-		}
-		g_set_error (error, _edomain, _ecode, "%s", _dbus_error.message);
-		dbus_error_free (&_dbus_error);
-		return;
-	}
-	if (strcmp (dbus_message_get_signature (_reply), "")) {
-		g_set_error (error, DBUS_GERROR, DBUS_GERROR_INVALID_SIGNATURE, "Invalid signature, expected \"%s\", got \"%s\"", "", dbus_message_get_signature (_reply));
-		dbus_message_unref (_reply);
-		return;
-	}
-	dbus_message_iter_init (_reply, &_iter);
-	dbus_message_unref (_reply);
-}
-
-
-static void mpris_player_dbus_proxy_Pause (MprisPlayer* self, GError** error) {
-	DBusError _dbus_error;
-	DBusGConnection *_connection;
-	DBusMessage *_message, *_reply;
-	DBusMessageIter _iter;
-	if (((MprisPlayerDBusProxy*) self)->disposed) {
-		g_set_error (error, DBUS_GERROR, DBUS_GERROR_DISCONNECTED, "%s", "Connection is closed");
-		return;
-	}
-	_message = dbus_message_new_method_call (dbus_g_proxy_get_bus_name ((DBusGProxy*) self), dbus_g_proxy_get_path ((DBusGProxy*) self), "org.mpris.MediaPlayer2.Player", "Pause");
-	dbus_message_iter_init_append (_message, &_iter);
-	g_object_get (self, "connection", &_connection, NULL);
-	dbus_error_init (&_dbus_error);
-	_reply = dbus_connection_send_with_reply_and_block (dbus_g_connection_get_connection (_connection), _message, -1, &_dbus_error);
-	dbus_g_connection_unref (_connection);
-	dbus_message_unref (_message);
-	if (dbus_error_is_set (&_dbus_error)) {
-		GQuark _edomain;
-		gint _ecode;
-		if (strstr (_dbus_error.name, "org.freedesktop.DBus.Error") == _dbus_error.name) {
-			const char* _tmp37_;
-			_edomain = DBUS_GERROR;
-			_tmp37_ = _dbus_error.name + 27;
-			if (strcmp (_tmp37_, "Failed") == 0) {
-				_ecode = DBUS_GERROR_FAILED;
-			} else if (strcmp (_tmp37_, "NoMemory") == 0) {
-				_ecode = DBUS_GERROR_NO_MEMORY;
-			} else if (strcmp (_tmp37_, "ServiceUnknown") == 0) {
-				_ecode = DBUS_GERROR_SERVICE_UNKNOWN;
-			} else if (strcmp (_tmp37_, "NameHasNoOwner") == 0) {
-				_ecode = DBUS_GERROR_NAME_HAS_NO_OWNER;
-			} else if (strcmp (_tmp37_, "NoReply") == 0) {
-				_ecode = DBUS_GERROR_NO_REPLY;
-			} else if (strcmp (_tmp37_, "IOError") == 0) {
-				_ecode = DBUS_GERROR_IO_ERROR;
-			} else if (strcmp (_tmp37_, "BadAddress") == 0) {
-				_ecode = DBUS_GERROR_BAD_ADDRESS;
-			} else if (strcmp (_tmp37_, "NotSupported") == 0) {
-				_ecode = DBUS_GERROR_NOT_SUPPORTED;
-			} else if (strcmp (_tmp37_, "LimitsExceeded") == 0) {
-				_ecode = DBUS_GERROR_LIMITS_EXCEEDED;
-			} else if (strcmp (_tmp37_, "AccessDenied") == 0) {
-				_ecode = DBUS_GERROR_ACCESS_DENIED;
-			} else if (strcmp (_tmp37_, "AuthFailed") == 0) {
-				_ecode = DBUS_GERROR_AUTH_FAILED;
-			} else if (strcmp (_tmp37_, "NoServer") == 0) {
-				_ecode = DBUS_GERROR_NO_SERVER;
-			} else if (strcmp (_tmp37_, "Timeout") == 0) {
-				_ecode = DBUS_GERROR_TIMEOUT;
-			} else if (strcmp (_tmp37_, "NoNetwork") == 0) {
-				_ecode = DBUS_GERROR_NO_NETWORK;
-			} else if (strcmp (_tmp37_, "AddressInUse") == 0) {
-				_ecode = DBUS_GERROR_ADDRESS_IN_USE;
-			} else if (strcmp (_tmp37_, "Disconnected") == 0) {
-				_ecode = DBUS_GERROR_DISCONNECTED;
-			} else if (strcmp (_tmp37_, "InvalidArgs") == 0) {
-				_ecode = DBUS_GERROR_INVALID_ARGS;
-			} else if (strcmp (_tmp37_, "FileNotFound") == 0) {
-				_ecode = DBUS_GERROR_FILE_NOT_FOUND;
-			} else if (strcmp (_tmp37_, "FileExists") == 0) {
-				_ecode = DBUS_GERROR_FILE_EXISTS;
-			} else if (strcmp (_tmp37_, "UnknownMethod") == 0) {
-				_ecode = DBUS_GERROR_UNKNOWN_METHOD;
-			} else if (strcmp (_tmp37_, "TimedOut") == 0) {
-				_ecode = DBUS_GERROR_TIMED_OUT;
-			} else if (strcmp (_tmp37_, "MatchRuleNotFound") == 0) {
-				_ecode = DBUS_GERROR_MATCH_RULE_NOT_FOUND;
-			} else if (strcmp (_tmp37_, "MatchRuleInvalid") == 0) {
-				_ecode = DBUS_GERROR_MATCH_RULE_INVALID;
-			} else if (strcmp (_tmp37_, "Spawn.ExecFailed") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_EXEC_FAILED;
-			} else if (strcmp (_tmp37_, "Spawn.ForkFailed") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_FORK_FAILED;
-			} else if (strcmp (_tmp37_, "Spawn.ChildExited") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_CHILD_EXITED;
-			} else if (strcmp (_tmp37_, "Spawn.ChildSignaled") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_CHILD_SIGNALED;
-			} else if (strcmp (_tmp37_, "Spawn.Failed") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_FAILED;
-			} else if (strcmp (_tmp37_, "UnixProcessIdUnknown") == 0) {
-				_ecode = DBUS_GERROR_UNIX_PROCESS_ID_UNKNOWN;
-			} else if (strcmp (_tmp37_, "InvalidSignature") == 0) {
-				_ecode = DBUS_GERROR_INVALID_SIGNATURE;
-			} else if (strcmp (_tmp37_, "InvalidFileContent") == 0) {
-				_ecode = DBUS_GERROR_INVALID_FILE_CONTENT;
-			} else if (strcmp (_tmp37_, "SELinuxSecurityContextUnknown") == 0) {
-				_ecode = DBUS_GERROR_SELINUX_SECURITY_CONTEXT_UNKNOWN;
-			} else if (strcmp (_tmp37_, "RemoteException") == 0) {
-				_ecode = DBUS_GERROR_REMOTE_EXCEPTION;
-			}
-		}
-		g_set_error (error, _edomain, _ecode, "%s", _dbus_error.message);
-		dbus_error_free (&_dbus_error);
-		return;
-	}
-	if (strcmp (dbus_message_get_signature (_reply), "")) {
-		g_set_error (error, DBUS_GERROR, DBUS_GERROR_INVALID_SIGNATURE, "Invalid signature, expected \"%s\", got \"%s\"", "", dbus_message_get_signature (_reply));
-		dbus_message_unref (_reply);
-		return;
-	}
-	dbus_message_iter_init (_reply, &_iter);
-	dbus_message_unref (_reply);
-}
-
-
-static void mpris_player_dbus_proxy_Next (MprisPlayer* self, GError** error) {
-	DBusError _dbus_error;
-	DBusGConnection *_connection;
-	DBusMessage *_message, *_reply;
-	DBusMessageIter _iter;
-	if (((MprisPlayerDBusProxy*) self)->disposed) {
-		g_set_error (error, DBUS_GERROR, DBUS_GERROR_DISCONNECTED, "%s", "Connection is closed");
-		return;
-	}
-	_message = dbus_message_new_method_call (dbus_g_proxy_get_bus_name ((DBusGProxy*) self), dbus_g_proxy_get_path ((DBusGProxy*) self), "org.mpris.MediaPlayer2.Player", "Next");
-	dbus_message_iter_init_append (_message, &_iter);
-	g_object_get (self, "connection", &_connection, NULL);
-	dbus_error_init (&_dbus_error);
-	_reply = dbus_connection_send_with_reply_and_block (dbus_g_connection_get_connection (_connection), _message, -1, &_dbus_error);
-	dbus_g_connection_unref (_connection);
-	dbus_message_unref (_message);
-	if (dbus_error_is_set (&_dbus_error)) {
-		GQuark _edomain;
-		gint _ecode;
-		if (strstr (_dbus_error.name, "org.freedesktop.DBus.Error") == _dbus_error.name) {
-			const char* _tmp38_;
-			_edomain = DBUS_GERROR;
-			_tmp38_ = _dbus_error.name + 27;
-			if (strcmp (_tmp38_, "Failed") == 0) {
-				_ecode = DBUS_GERROR_FAILED;
-			} else if (strcmp (_tmp38_, "NoMemory") == 0) {
-				_ecode = DBUS_GERROR_NO_MEMORY;
-			} else if (strcmp (_tmp38_, "ServiceUnknown") == 0) {
-				_ecode = DBUS_GERROR_SERVICE_UNKNOWN;
-			} else if (strcmp (_tmp38_, "NameHasNoOwner") == 0) {
-				_ecode = DBUS_GERROR_NAME_HAS_NO_OWNER;
-			} else if (strcmp (_tmp38_, "NoReply") == 0) {
-				_ecode = DBUS_GERROR_NO_REPLY;
-			} else if (strcmp (_tmp38_, "IOError") == 0) {
-				_ecode = DBUS_GERROR_IO_ERROR;
-			} else if (strcmp (_tmp38_, "BadAddress") == 0) {
-				_ecode = DBUS_GERROR_BAD_ADDRESS;
-			} else if (strcmp (_tmp38_, "NotSupported") == 0) {
-				_ecode = DBUS_GERROR_NOT_SUPPORTED;
-			} else if (strcmp (_tmp38_, "LimitsExceeded") == 0) {
-				_ecode = DBUS_GERROR_LIMITS_EXCEEDED;
-			} else if (strcmp (_tmp38_, "AccessDenied") == 0) {
-				_ecode = DBUS_GERROR_ACCESS_DENIED;
-			} else if (strcmp (_tmp38_, "AuthFailed") == 0) {
-				_ecode = DBUS_GERROR_AUTH_FAILED;
-			} else if (strcmp (_tmp38_, "NoServer") == 0) {
-				_ecode = DBUS_GERROR_NO_SERVER;
-			} else if (strcmp (_tmp38_, "Timeout") == 0) {
-				_ecode = DBUS_GERROR_TIMEOUT;
-			} else if (strcmp (_tmp38_, "NoNetwork") == 0) {
-				_ecode = DBUS_GERROR_NO_NETWORK;
-			} else if (strcmp (_tmp38_, "AddressInUse") == 0) {
-				_ecode = DBUS_GERROR_ADDRESS_IN_USE;
-			} else if (strcmp (_tmp38_, "Disconnected") == 0) {
-				_ecode = DBUS_GERROR_DISCONNECTED;
-			} else if (strcmp (_tmp38_, "InvalidArgs") == 0) {
-				_ecode = DBUS_GERROR_INVALID_ARGS;
-			} else if (strcmp (_tmp38_, "FileNotFound") == 0) {
-				_ecode = DBUS_GERROR_FILE_NOT_FOUND;
-			} else if (strcmp (_tmp38_, "FileExists") == 0) {
-				_ecode = DBUS_GERROR_FILE_EXISTS;
-			} else if (strcmp (_tmp38_, "UnknownMethod") == 0) {
-				_ecode = DBUS_GERROR_UNKNOWN_METHOD;
-			} else if (strcmp (_tmp38_, "TimedOut") == 0) {
-				_ecode = DBUS_GERROR_TIMED_OUT;
-			} else if (strcmp (_tmp38_, "MatchRuleNotFound") == 0) {
-				_ecode = DBUS_GERROR_MATCH_RULE_NOT_FOUND;
-			} else if (strcmp (_tmp38_, "MatchRuleInvalid") == 0) {
-				_ecode = DBUS_GERROR_MATCH_RULE_INVALID;
-			} else if (strcmp (_tmp38_, "Spawn.ExecFailed") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_EXEC_FAILED;
-			} else if (strcmp (_tmp38_, "Spawn.ForkFailed") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_FORK_FAILED;
-			} else if (strcmp (_tmp38_, "Spawn.ChildExited") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_CHILD_EXITED;
-			} else if (strcmp (_tmp38_, "Spawn.ChildSignaled") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_CHILD_SIGNALED;
-			} else if (strcmp (_tmp38_, "Spawn.Failed") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_FAILED;
-			} else if (strcmp (_tmp38_, "UnixProcessIdUnknown") == 0) {
-				_ecode = DBUS_GERROR_UNIX_PROCESS_ID_UNKNOWN;
-			} else if (strcmp (_tmp38_, "InvalidSignature") == 0) {
-				_ecode = DBUS_GERROR_INVALID_SIGNATURE;
-			} else if (strcmp (_tmp38_, "InvalidFileContent") == 0) {
-				_ecode = DBUS_GERROR_INVALID_FILE_CONTENT;
-			} else if (strcmp (_tmp38_, "SELinuxSecurityContextUnknown") == 0) {
-				_ecode = DBUS_GERROR_SELINUX_SECURITY_CONTEXT_UNKNOWN;
-			} else if (strcmp (_tmp38_, "RemoteException") == 0) {
-				_ecode = DBUS_GERROR_REMOTE_EXCEPTION;
-			}
-		}
-		g_set_error (error, _edomain, _ecode, "%s", _dbus_error.message);
-		dbus_error_free (&_dbus_error);
-		return;
-	}
-	if (strcmp (dbus_message_get_signature (_reply), "")) {
-		g_set_error (error, DBUS_GERROR, DBUS_GERROR_INVALID_SIGNATURE, "Invalid signature, expected \"%s\", got \"%s\"", "", dbus_message_get_signature (_reply));
-		dbus_message_unref (_reply);
-		return;
-	}
-	dbus_message_iter_init (_reply, &_iter);
-	dbus_message_unref (_reply);
-}
-
-
-static void mpris_player_dbus_proxy_Previous (MprisPlayer* self, GError** error) {
-	DBusError _dbus_error;
-	DBusGConnection *_connection;
-	DBusMessage *_message, *_reply;
-	DBusMessageIter _iter;
-	if (((MprisPlayerDBusProxy*) self)->disposed) {
-		g_set_error (error, DBUS_GERROR, DBUS_GERROR_DISCONNECTED, "%s", "Connection is closed");
-		return;
-	}
-	_message = dbus_message_new_method_call (dbus_g_proxy_get_bus_name ((DBusGProxy*) self), dbus_g_proxy_get_path ((DBusGProxy*) self), "org.mpris.MediaPlayer2.Player", "Previous");
-	dbus_message_iter_init_append (_message, &_iter);
-	g_object_get (self, "connection", &_connection, NULL);
-	dbus_error_init (&_dbus_error);
-	_reply = dbus_connection_send_with_reply_and_block (dbus_g_connection_get_connection (_connection), _message, -1, &_dbus_error);
-	dbus_g_connection_unref (_connection);
-	dbus_message_unref (_message);
-	if (dbus_error_is_set (&_dbus_error)) {
-		GQuark _edomain;
-		gint _ecode;
-		if (strstr (_dbus_error.name, "org.freedesktop.DBus.Error") == _dbus_error.name) {
-			const char* _tmp39_;
-			_edomain = DBUS_GERROR;
-			_tmp39_ = _dbus_error.name + 27;
-			if (strcmp (_tmp39_, "Failed") == 0) {
-				_ecode = DBUS_GERROR_FAILED;
-			} else if (strcmp (_tmp39_, "NoMemory") == 0) {
-				_ecode = DBUS_GERROR_NO_MEMORY;
-			} else if (strcmp (_tmp39_, "ServiceUnknown") == 0) {
-				_ecode = DBUS_GERROR_SERVICE_UNKNOWN;
-			} else if (strcmp (_tmp39_, "NameHasNoOwner") == 0) {
-				_ecode = DBUS_GERROR_NAME_HAS_NO_OWNER;
-			} else if (strcmp (_tmp39_, "NoReply") == 0) {
-				_ecode = DBUS_GERROR_NO_REPLY;
-			} else if (strcmp (_tmp39_, "IOError") == 0) {
-				_ecode = DBUS_GERROR_IO_ERROR;
-			} else if (strcmp (_tmp39_, "BadAddress") == 0) {
-				_ecode = DBUS_GERROR_BAD_ADDRESS;
-			} else if (strcmp (_tmp39_, "NotSupported") == 0) {
-				_ecode = DBUS_GERROR_NOT_SUPPORTED;
-			} else if (strcmp (_tmp39_, "LimitsExceeded") == 0) {
-				_ecode = DBUS_GERROR_LIMITS_EXCEEDED;
-			} else if (strcmp (_tmp39_, "AccessDenied") == 0) {
-				_ecode = DBUS_GERROR_ACCESS_DENIED;
-			} else if (strcmp (_tmp39_, "AuthFailed") == 0) {
-				_ecode = DBUS_GERROR_AUTH_FAILED;
-			} else if (strcmp (_tmp39_, "NoServer") == 0) {
-				_ecode = DBUS_GERROR_NO_SERVER;
-			} else if (strcmp (_tmp39_, "Timeout") == 0) {
-				_ecode = DBUS_GERROR_TIMEOUT;
-			} else if (strcmp (_tmp39_, "NoNetwork") == 0) {
-				_ecode = DBUS_GERROR_NO_NETWORK;
-			} else if (strcmp (_tmp39_, "AddressInUse") == 0) {
-				_ecode = DBUS_GERROR_ADDRESS_IN_USE;
-			} else if (strcmp (_tmp39_, "Disconnected") == 0) {
-				_ecode = DBUS_GERROR_DISCONNECTED;
-			} else if (strcmp (_tmp39_, "InvalidArgs") == 0) {
-				_ecode = DBUS_GERROR_INVALID_ARGS;
-			} else if (strcmp (_tmp39_, "FileNotFound") == 0) {
-				_ecode = DBUS_GERROR_FILE_NOT_FOUND;
-			} else if (strcmp (_tmp39_, "FileExists") == 0) {
-				_ecode = DBUS_GERROR_FILE_EXISTS;
-			} else if (strcmp (_tmp39_, "UnknownMethod") == 0) {
-				_ecode = DBUS_GERROR_UNKNOWN_METHOD;
-			} else if (strcmp (_tmp39_, "TimedOut") == 0) {
-				_ecode = DBUS_GERROR_TIMED_OUT;
-			} else if (strcmp (_tmp39_, "MatchRuleNotFound") == 0) {
-				_ecode = DBUS_GERROR_MATCH_RULE_NOT_FOUND;
-			} else if (strcmp (_tmp39_, "MatchRuleInvalid") == 0) {
-				_ecode = DBUS_GERROR_MATCH_RULE_INVALID;
-			} else if (strcmp (_tmp39_, "Spawn.ExecFailed") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_EXEC_FAILED;
-			} else if (strcmp (_tmp39_, "Spawn.ForkFailed") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_FORK_FAILED;
-			} else if (strcmp (_tmp39_, "Spawn.ChildExited") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_CHILD_EXITED;
-			} else if (strcmp (_tmp39_, "Spawn.ChildSignaled") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_CHILD_SIGNALED;
-			} else if (strcmp (_tmp39_, "Spawn.Failed") == 0) {
-				_ecode = DBUS_GERROR_SPAWN_FAILED;
-			} else if (strcmp (_tmp39_, "UnixProcessIdUnknown") == 0) {
-				_ecode = DBUS_GERROR_UNIX_PROCESS_ID_UNKNOWN;
-			} else if (strcmp (_tmp39_, "InvalidSignature") == 0) {
-				_ecode = DBUS_GERROR_INVALID_SIGNATURE;
-			} else if (strcmp (_tmp39_, "InvalidFileContent") == 0) {
-				_ecode = DBUS_GERROR_INVALID_FILE_CONTENT;
-			} else if (strcmp (_tmp39_, "SELinuxSecurityContextUnknown") == 0) {
-				_ecode = DBUS_GERROR_SELINUX_SECURITY_CONTEXT_UNKNOWN;
-			} else if (strcmp (_tmp39_, "RemoteException") == 0) {
-				_ecode = DBUS_GERROR_REMOTE_EXCEPTION;
-			}
-		}
-		g_set_error (error, _edomain, _ecode, "%s", _dbus_error.message);
-		dbus_error_free (&_dbus_error);
-		return;
-	}
-	if (strcmp (dbus_message_get_signature (_reply), "")) {
-		g_set_error (error, DBUS_GERROR, DBUS_GERROR_INVALID_SIGNATURE, "Invalid signature, expected \"%s\", got \"%s\"", "", dbus_message_get_signature (_reply));
-		dbus_message_unref (_reply);
-		return;
-	}
-	dbus_message_iter_init (_reply, &_iter);
-	dbus_message_unref (_reply);
-}
-
-
 static GHashTable* mpris_player_dbus_proxy_get_Metadata (MprisPlayer* self) {
 	DBusError _dbus_error;
 	DBusGConnection *_connection;
 	DBusMessage *_message, *_reply;
 	DBusMessageIter _iter, _subiter;
-	const char* _tmp40_;
-	const char* _tmp41_;
+	const char* _tmp36_;
+	const char* _tmp37_;
 	GHashTable* _result;
-	GHashTable* _tmp42_;
-	DBusMessageIter _tmp43_;
-	DBusMessageIter _tmp44_;
+	GHashTable* _tmp38_;
+	DBusMessageIter _tmp39_;
+	DBusMessageIter _tmp40_;
 	if (((MprisPlayerDBusProxy*) self)->disposed) {
 		return NULL;
 	}
 	_message = dbus_message_new_method_call (dbus_g_proxy_get_bus_name ((DBusGProxy*) self), dbus_g_proxy_get_path ((DBusGProxy*) self), "org.freedesktop.DBus.Properties", "Get");
 	dbus_message_iter_init_append (_message, &_iter);
-	_tmp40_ = "org.mpris.MediaPlayer2.Player";
-	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp40_);
-	_tmp41_ = "Metadata";
-	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp41_);
+	_tmp36_ = "org.mpris.MediaPlayer2.Player";
+	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp36_);
+	_tmp37_ = "Metadata";
+	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp37_);
 	g_object_get (self, "connection", &_connection, NULL);
 	dbus_error_init (&_dbus_error);
 	_reply = dbus_connection_send_with_reply_and_block (dbus_g_connection_get_connection (_connection), _message, -1, &_dbus_error);
@@ -3764,111 +3542,111 @@ static GHashTable* mpris_player_dbus_proxy_get_Metadata (MprisPlayer* self) {
 		dbus_message_unref (_reply);
 		return NULL;
 	}
-	_tmp42_ = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-	dbus_message_iter_recurse (&_subiter, &_tmp43_);
-	while (dbus_message_iter_get_arg_type (&_tmp43_)) {
+	_tmp38_ = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+	dbus_message_iter_recurse (&_subiter, &_tmp39_);
+	while (dbus_message_iter_get_arg_type (&_tmp39_)) {
 		char* _key;
 		GValue* _value;
-		const char* _tmp45_;
-		GValue _tmp46_ = {0};
-		DBusMessageIter _tmp47_;
-		dbus_message_iter_recurse (&_tmp43_, &_tmp44_);
-		dbus_message_iter_get_basic (&_tmp44_, &_tmp45_);
-		dbus_message_iter_next (&_tmp44_);
-		_key = g_strdup (_tmp45_);
-		dbus_message_iter_recurse (&_tmp44_, &_tmp47_);
-		if (dbus_message_iter_get_arg_type (&_tmp47_) == DBUS_TYPE_BYTE) {
-			guint8 _tmp48_;
-			dbus_message_iter_get_basic (&_tmp47_, &_tmp48_);
-			g_value_init (&_tmp46_, G_TYPE_UCHAR);
-			g_value_set_uchar (&_tmp46_, _tmp48_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp47_) == DBUS_TYPE_BOOLEAN) {
-			dbus_bool_t _tmp49_;
-			dbus_message_iter_get_basic (&_tmp47_, &_tmp49_);
-			g_value_init (&_tmp46_, G_TYPE_BOOLEAN);
-			g_value_set_boolean (&_tmp46_, _tmp49_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp47_) == DBUS_TYPE_INT16) {
-			dbus_int16_t _tmp50_;
-			dbus_message_iter_get_basic (&_tmp47_, &_tmp50_);
-			g_value_init (&_tmp46_, G_TYPE_INT);
-			g_value_set_int (&_tmp46_, _tmp50_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp47_) == DBUS_TYPE_UINT16) {
-			dbus_uint16_t _tmp51_;
-			dbus_message_iter_get_basic (&_tmp47_, &_tmp51_);
-			g_value_init (&_tmp46_, G_TYPE_UINT);
-			g_value_set_uint (&_tmp46_, _tmp51_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp47_) == DBUS_TYPE_INT32) {
-			dbus_int32_t _tmp52_;
-			dbus_message_iter_get_basic (&_tmp47_, &_tmp52_);
-			g_value_init (&_tmp46_, G_TYPE_INT);
-			g_value_set_int (&_tmp46_, _tmp52_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp47_) == DBUS_TYPE_UINT32) {
-			dbus_uint32_t _tmp53_;
-			dbus_message_iter_get_basic (&_tmp47_, &_tmp53_);
-			g_value_init (&_tmp46_, G_TYPE_UINT);
-			g_value_set_uint (&_tmp46_, _tmp53_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp47_) == DBUS_TYPE_INT64) {
-			dbus_int64_t _tmp54_;
-			dbus_message_iter_get_basic (&_tmp47_, &_tmp54_);
-			g_value_init (&_tmp46_, G_TYPE_INT64);
-			g_value_set_int64 (&_tmp46_, _tmp54_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp47_) == DBUS_TYPE_UINT64) {
-			dbus_uint64_t _tmp55_;
-			dbus_message_iter_get_basic (&_tmp47_, &_tmp55_);
-			g_value_init (&_tmp46_, G_TYPE_UINT64);
-			g_value_set_uint64 (&_tmp46_, _tmp55_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp47_) == DBUS_TYPE_DOUBLE) {
-			double _tmp56_;
-			dbus_message_iter_get_basic (&_tmp47_, &_tmp56_);
-			g_value_init (&_tmp46_, G_TYPE_DOUBLE);
-			g_value_set_double (&_tmp46_, _tmp56_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp47_) == DBUS_TYPE_STRING) {
-			const char* _tmp57_;
-			dbus_message_iter_get_basic (&_tmp47_, &_tmp57_);
-			g_value_init (&_tmp46_, G_TYPE_STRING);
-			g_value_take_string (&_tmp46_, g_strdup (_tmp57_));
-		} else if (dbus_message_iter_get_arg_type (&_tmp47_) == DBUS_TYPE_OBJECT_PATH) {
-			const char* _tmp58_;
-			dbus_message_iter_get_basic (&_tmp47_, &_tmp58_);
-			g_value_init (&_tmp46_, G_TYPE_STRING);
-			g_value_take_string (&_tmp46_, g_strdup (_tmp58_));
-		} else if (dbus_message_iter_get_arg_type (&_tmp47_) == DBUS_TYPE_SIGNATURE) {
-			const char* _tmp59_;
-			dbus_message_iter_get_basic (&_tmp47_, &_tmp59_);
-			g_value_init (&_tmp46_, G_TYPE_STRING);
-			g_value_take_string (&_tmp46_, g_strdup (_tmp59_));
-		} else if ((dbus_message_iter_get_arg_type (&_tmp47_) == DBUS_TYPE_ARRAY) && (dbus_message_iter_get_element_type (&_tmp47_) == DBUS_TYPE_STRING)) {
-			const char** _tmp60_;
-			int _tmp60__length;
-			int _tmp60__size;
-			int _tmp60__length1;
-			DBusMessageIter _tmp61_;
-			_tmp60_ = g_new (const char*, 5);
-			_tmp60__length = 0;
-			_tmp60__size = 4;
-			_tmp60__length1 = 0;
-			dbus_message_iter_recurse (&_tmp47_, &_tmp61_);
-			for (; dbus_message_iter_get_arg_type (&_tmp61_); _tmp60__length1++) {
-				const char* _tmp62_;
-				if (_tmp60__size == _tmp60__length) {
-					_tmp60__size = 2 * _tmp60__size;
-					_tmp60_ = g_renew (const char*, _tmp60_, _tmp60__size + 1);
+		const char* _tmp41_;
+		GValue _tmp42_ = {0};
+		DBusMessageIter _tmp43_;
+		dbus_message_iter_recurse (&_tmp39_, &_tmp40_);
+		dbus_message_iter_get_basic (&_tmp40_, &_tmp41_);
+		dbus_message_iter_next (&_tmp40_);
+		_key = g_strdup (_tmp41_);
+		dbus_message_iter_recurse (&_tmp40_, &_tmp43_);
+		if (dbus_message_iter_get_arg_type (&_tmp43_) == DBUS_TYPE_BYTE) {
+			guint8 _tmp44_;
+			dbus_message_iter_get_basic (&_tmp43_, &_tmp44_);
+			g_value_init (&_tmp42_, G_TYPE_UCHAR);
+			g_value_set_uchar (&_tmp42_, _tmp44_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp43_) == DBUS_TYPE_BOOLEAN) {
+			dbus_bool_t _tmp45_;
+			dbus_message_iter_get_basic (&_tmp43_, &_tmp45_);
+			g_value_init (&_tmp42_, G_TYPE_BOOLEAN);
+			g_value_set_boolean (&_tmp42_, _tmp45_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp43_) == DBUS_TYPE_INT16) {
+			dbus_int16_t _tmp46_;
+			dbus_message_iter_get_basic (&_tmp43_, &_tmp46_);
+			g_value_init (&_tmp42_, G_TYPE_INT);
+			g_value_set_int (&_tmp42_, _tmp46_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp43_) == DBUS_TYPE_UINT16) {
+			dbus_uint16_t _tmp47_;
+			dbus_message_iter_get_basic (&_tmp43_, &_tmp47_);
+			g_value_init (&_tmp42_, G_TYPE_UINT);
+			g_value_set_uint (&_tmp42_, _tmp47_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp43_) == DBUS_TYPE_INT32) {
+			dbus_int32_t _tmp48_;
+			dbus_message_iter_get_basic (&_tmp43_, &_tmp48_);
+			g_value_init (&_tmp42_, G_TYPE_INT);
+			g_value_set_int (&_tmp42_, _tmp48_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp43_) == DBUS_TYPE_UINT32) {
+			dbus_uint32_t _tmp49_;
+			dbus_message_iter_get_basic (&_tmp43_, &_tmp49_);
+			g_value_init (&_tmp42_, G_TYPE_UINT);
+			g_value_set_uint (&_tmp42_, _tmp49_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp43_) == DBUS_TYPE_INT64) {
+			dbus_int64_t _tmp50_;
+			dbus_message_iter_get_basic (&_tmp43_, &_tmp50_);
+			g_value_init (&_tmp42_, G_TYPE_INT64);
+			g_value_set_int64 (&_tmp42_, _tmp50_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp43_) == DBUS_TYPE_UINT64) {
+			dbus_uint64_t _tmp51_;
+			dbus_message_iter_get_basic (&_tmp43_, &_tmp51_);
+			g_value_init (&_tmp42_, G_TYPE_UINT64);
+			g_value_set_uint64 (&_tmp42_, _tmp51_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp43_) == DBUS_TYPE_DOUBLE) {
+			double _tmp52_;
+			dbus_message_iter_get_basic (&_tmp43_, &_tmp52_);
+			g_value_init (&_tmp42_, G_TYPE_DOUBLE);
+			g_value_set_double (&_tmp42_, _tmp52_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp43_) == DBUS_TYPE_STRING) {
+			const char* _tmp53_;
+			dbus_message_iter_get_basic (&_tmp43_, &_tmp53_);
+			g_value_init (&_tmp42_, G_TYPE_STRING);
+			g_value_take_string (&_tmp42_, g_strdup (_tmp53_));
+		} else if (dbus_message_iter_get_arg_type (&_tmp43_) == DBUS_TYPE_OBJECT_PATH) {
+			const char* _tmp54_;
+			dbus_message_iter_get_basic (&_tmp43_, &_tmp54_);
+			g_value_init (&_tmp42_, G_TYPE_STRING);
+			g_value_take_string (&_tmp42_, g_strdup (_tmp54_));
+		} else if (dbus_message_iter_get_arg_type (&_tmp43_) == DBUS_TYPE_SIGNATURE) {
+			const char* _tmp55_;
+			dbus_message_iter_get_basic (&_tmp43_, &_tmp55_);
+			g_value_init (&_tmp42_, G_TYPE_STRING);
+			g_value_take_string (&_tmp42_, g_strdup (_tmp55_));
+		} else if ((dbus_message_iter_get_arg_type (&_tmp43_) == DBUS_TYPE_ARRAY) && (dbus_message_iter_get_element_type (&_tmp43_) == DBUS_TYPE_STRING)) {
+			const char** _tmp56_;
+			int _tmp56__length;
+			int _tmp56__size;
+			int _tmp56__length1;
+			DBusMessageIter _tmp57_;
+			_tmp56_ = g_new (const char*, 5);
+			_tmp56__length = 0;
+			_tmp56__size = 4;
+			_tmp56__length1 = 0;
+			dbus_message_iter_recurse (&_tmp43_, &_tmp57_);
+			for (; dbus_message_iter_get_arg_type (&_tmp57_); _tmp56__length1++) {
+				const char* _tmp58_;
+				if (_tmp56__size == _tmp56__length) {
+					_tmp56__size = 2 * _tmp56__size;
+					_tmp56_ = g_renew (const char*, _tmp56_, _tmp56__size + 1);
 				}
-				dbus_message_iter_get_basic (&_tmp61_, &_tmp62_);
-				dbus_message_iter_next (&_tmp61_);
-				_tmp60_[_tmp60__length++] = g_strdup (_tmp62_);
+				dbus_message_iter_get_basic (&_tmp57_, &_tmp58_);
+				dbus_message_iter_next (&_tmp57_);
+				_tmp56_[_tmp56__length++] = g_strdup (_tmp58_);
 			}
-			_tmp60_[_tmp60__length] = NULL;
-			g_value_init (&_tmp46_, G_TYPE_STRV);
-			g_value_take_boxed (&_tmp46_, _tmp60_);
+			_tmp56_[_tmp56__length] = NULL;
+			g_value_init (&_tmp42_, G_TYPE_STRV);
+			g_value_take_boxed (&_tmp42_, _tmp56_);
 		}
-		dbus_message_iter_next (&_tmp44_);
-		_value = g_memdup (&_tmp46_, sizeof (GValue));
-		g_hash_table_insert (_tmp42_, _key, _value);
-		dbus_message_iter_next (&_tmp43_);
+		dbus_message_iter_next (&_tmp40_);
+		_value = g_memdup (&_tmp42_, sizeof (GValue));
+		g_hash_table_insert (_tmp38_, _key, _value);
+		dbus_message_iter_next (&_tmp39_);
 	}
 	dbus_message_iter_next (&_subiter);
-	_result = _tmp42_;
+	_result = _tmp38_;
 	dbus_message_unref (_reply);
 	return _result;
 }
@@ -3879,100 +3657,100 @@ static void mpris_player_dbus_proxy_set_Metadata (MprisPlayer* self, GHashTable*
 	DBusGConnection *_connection;
 	DBusMessage *_message, *_reply;
 	DBusMessageIter _iter, _subiter;
-	const char* _tmp63_;
-	const char* _tmp64_;
-	DBusMessageIter _tmp65_, _tmp66_;
-	GHashTableIter _tmp67_;
-	gpointer _tmp68_, _tmp69_;
+	const char* _tmp59_;
+	const char* _tmp60_;
+	DBusMessageIter _tmp61_, _tmp62_;
+	GHashTableIter _tmp63_;
+	gpointer _tmp64_, _tmp65_;
 	if (((MprisPlayerDBusProxy*) self)->disposed) {
 		return;
 	}
 	_message = dbus_message_new_method_call (dbus_g_proxy_get_bus_name ((DBusGProxy*) self), dbus_g_proxy_get_path ((DBusGProxy*) self), "org.freedesktop.DBus.Properties", "Set");
 	dbus_message_iter_init_append (_message, &_iter);
-	_tmp63_ = "org.mpris.MediaPlayer2.Player";
-	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp63_);
-	_tmp64_ = "Metadata";
-	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp64_);
+	_tmp59_ = "org.mpris.MediaPlayer2.Player";
+	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp59_);
+	_tmp60_ = "Metadata";
+	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp60_);
 	dbus_message_iter_open_container (&_iter, DBUS_TYPE_VARIANT, "a{sv}", &_subiter);
-	dbus_message_iter_open_container (&_subiter, DBUS_TYPE_ARRAY, "{sv}", &_tmp65_);
-	g_hash_table_iter_init (&_tmp67_, value);
-	while (g_hash_table_iter_next (&_tmp67_, &_tmp68_, &_tmp69_)) {
+	dbus_message_iter_open_container (&_subiter, DBUS_TYPE_ARRAY, "{sv}", &_tmp61_);
+	g_hash_table_iter_init (&_tmp63_, value);
+	while (g_hash_table_iter_next (&_tmp63_, &_tmp64_, &_tmp65_)) {
 		char* _key;
 		GValue* _value;
-		const char* _tmp70_;
-		DBusMessageIter _tmp71_;
-		dbus_message_iter_open_container (&_tmp65_, DBUS_TYPE_DICT_ENTRY, NULL, &_tmp66_);
-		_key = (char*) _tmp68_;
-		_value = (GValue*) _tmp69_;
-		_tmp70_ = _key;
-		dbus_message_iter_append_basic (&_tmp66_, DBUS_TYPE_STRING, &_tmp70_);
+		const char* _tmp66_;
+		DBusMessageIter _tmp67_;
+		dbus_message_iter_open_container (&_tmp61_, DBUS_TYPE_DICT_ENTRY, NULL, &_tmp62_);
+		_key = (char*) _tmp64_;
+		_value = (GValue*) _tmp65_;
+		_tmp66_ = _key;
+		dbus_message_iter_append_basic (&_tmp62_, DBUS_TYPE_STRING, &_tmp66_);
 		if (G_VALUE_TYPE (_value) == G_TYPE_UCHAR) {
-			guint8 _tmp72_;
-			dbus_message_iter_open_container (&_tmp66_, DBUS_TYPE_VARIANT, "y", &_tmp71_);
-			_tmp72_ = g_value_get_uchar (_value);
-			dbus_message_iter_append_basic (&_tmp71_, DBUS_TYPE_BYTE, &_tmp72_);
-			dbus_message_iter_close_container (&_tmp66_, &_tmp71_);
+			guint8 _tmp68_;
+			dbus_message_iter_open_container (&_tmp62_, DBUS_TYPE_VARIANT, "y", &_tmp67_);
+			_tmp68_ = g_value_get_uchar (_value);
+			dbus_message_iter_append_basic (&_tmp67_, DBUS_TYPE_BYTE, &_tmp68_);
+			dbus_message_iter_close_container (&_tmp62_, &_tmp67_);
 		} else if (G_VALUE_TYPE (_value) == G_TYPE_BOOLEAN) {
-			dbus_bool_t _tmp73_;
-			dbus_message_iter_open_container (&_tmp66_, DBUS_TYPE_VARIANT, "b", &_tmp71_);
-			_tmp73_ = g_value_get_boolean (_value);
-			dbus_message_iter_append_basic (&_tmp71_, DBUS_TYPE_BOOLEAN, &_tmp73_);
-			dbus_message_iter_close_container (&_tmp66_, &_tmp71_);
+			dbus_bool_t _tmp69_;
+			dbus_message_iter_open_container (&_tmp62_, DBUS_TYPE_VARIANT, "b", &_tmp67_);
+			_tmp69_ = g_value_get_boolean (_value);
+			dbus_message_iter_append_basic (&_tmp67_, DBUS_TYPE_BOOLEAN, &_tmp69_);
+			dbus_message_iter_close_container (&_tmp62_, &_tmp67_);
 		} else if (G_VALUE_TYPE (_value) == G_TYPE_INT) {
-			dbus_int32_t _tmp74_;
-			dbus_message_iter_open_container (&_tmp66_, DBUS_TYPE_VARIANT, "i", &_tmp71_);
-			_tmp74_ = g_value_get_int (_value);
-			dbus_message_iter_append_basic (&_tmp71_, DBUS_TYPE_INT32, &_tmp74_);
-			dbus_message_iter_close_container (&_tmp66_, &_tmp71_);
+			dbus_int32_t _tmp70_;
+			dbus_message_iter_open_container (&_tmp62_, DBUS_TYPE_VARIANT, "i", &_tmp67_);
+			_tmp70_ = g_value_get_int (_value);
+			dbus_message_iter_append_basic (&_tmp67_, DBUS_TYPE_INT32, &_tmp70_);
+			dbus_message_iter_close_container (&_tmp62_, &_tmp67_);
 		} else if (G_VALUE_TYPE (_value) == G_TYPE_UINT) {
-			dbus_uint32_t _tmp75_;
-			dbus_message_iter_open_container (&_tmp66_, DBUS_TYPE_VARIANT, "u", &_tmp71_);
-			_tmp75_ = g_value_get_uint (_value);
-			dbus_message_iter_append_basic (&_tmp71_, DBUS_TYPE_UINT32, &_tmp75_);
-			dbus_message_iter_close_container (&_tmp66_, &_tmp71_);
+			dbus_uint32_t _tmp71_;
+			dbus_message_iter_open_container (&_tmp62_, DBUS_TYPE_VARIANT, "u", &_tmp67_);
+			_tmp71_ = g_value_get_uint (_value);
+			dbus_message_iter_append_basic (&_tmp67_, DBUS_TYPE_UINT32, &_tmp71_);
+			dbus_message_iter_close_container (&_tmp62_, &_tmp67_);
 		} else if (G_VALUE_TYPE (_value) == G_TYPE_INT64) {
-			dbus_int64_t _tmp76_;
-			dbus_message_iter_open_container (&_tmp66_, DBUS_TYPE_VARIANT, "x", &_tmp71_);
-			_tmp76_ = g_value_get_int64 (_value);
-			dbus_message_iter_append_basic (&_tmp71_, DBUS_TYPE_INT64, &_tmp76_);
-			dbus_message_iter_close_container (&_tmp66_, &_tmp71_);
+			dbus_int64_t _tmp72_;
+			dbus_message_iter_open_container (&_tmp62_, DBUS_TYPE_VARIANT, "x", &_tmp67_);
+			_tmp72_ = g_value_get_int64 (_value);
+			dbus_message_iter_append_basic (&_tmp67_, DBUS_TYPE_INT64, &_tmp72_);
+			dbus_message_iter_close_container (&_tmp62_, &_tmp67_);
 		} else if (G_VALUE_TYPE (_value) == G_TYPE_UINT64) {
-			dbus_uint64_t _tmp77_;
-			dbus_message_iter_open_container (&_tmp66_, DBUS_TYPE_VARIANT, "t", &_tmp71_);
-			_tmp77_ = g_value_get_uint64 (_value);
-			dbus_message_iter_append_basic (&_tmp71_, DBUS_TYPE_UINT64, &_tmp77_);
-			dbus_message_iter_close_container (&_tmp66_, &_tmp71_);
+			dbus_uint64_t _tmp73_;
+			dbus_message_iter_open_container (&_tmp62_, DBUS_TYPE_VARIANT, "t", &_tmp67_);
+			_tmp73_ = g_value_get_uint64 (_value);
+			dbus_message_iter_append_basic (&_tmp67_, DBUS_TYPE_UINT64, &_tmp73_);
+			dbus_message_iter_close_container (&_tmp62_, &_tmp67_);
 		} else if (G_VALUE_TYPE (_value) == G_TYPE_DOUBLE) {
-			double _tmp78_;
-			dbus_message_iter_open_container (&_tmp66_, DBUS_TYPE_VARIANT, "d", &_tmp71_);
-			_tmp78_ = g_value_get_double (_value);
-			dbus_message_iter_append_basic (&_tmp71_, DBUS_TYPE_DOUBLE, &_tmp78_);
-			dbus_message_iter_close_container (&_tmp66_, &_tmp71_);
+			double _tmp74_;
+			dbus_message_iter_open_container (&_tmp62_, DBUS_TYPE_VARIANT, "d", &_tmp67_);
+			_tmp74_ = g_value_get_double (_value);
+			dbus_message_iter_append_basic (&_tmp67_, DBUS_TYPE_DOUBLE, &_tmp74_);
+			dbus_message_iter_close_container (&_tmp62_, &_tmp67_);
 		} else if (G_VALUE_TYPE (_value) == G_TYPE_STRING) {
-			const char* _tmp79_;
-			dbus_message_iter_open_container (&_tmp66_, DBUS_TYPE_VARIANT, "s", &_tmp71_);
-			_tmp79_ = g_value_get_string (_value);
-			dbus_message_iter_append_basic (&_tmp71_, DBUS_TYPE_STRING, &_tmp79_);
-			dbus_message_iter_close_container (&_tmp66_, &_tmp71_);
+			const char* _tmp75_;
+			dbus_message_iter_open_container (&_tmp62_, DBUS_TYPE_VARIANT, "s", &_tmp67_);
+			_tmp75_ = g_value_get_string (_value);
+			dbus_message_iter_append_basic (&_tmp67_, DBUS_TYPE_STRING, &_tmp75_);
+			dbus_message_iter_close_container (&_tmp62_, &_tmp67_);
 		} else if (G_VALUE_TYPE (_value) == G_TYPE_STRV) {
-			const char** _tmp80_;
-			DBusMessageIter _tmp81_;
-			int _tmp82_;
-			dbus_message_iter_open_container (&_tmp66_, DBUS_TYPE_VARIANT, "as", &_tmp71_);
-			_tmp80_ = g_value_get_boxed (_value);
-			dbus_message_iter_open_container (&_tmp71_, DBUS_TYPE_ARRAY, "s", &_tmp81_);
-			for (_tmp82_ = 0; _tmp82_ < g_strv_length (g_value_get_boxed (_value)); _tmp82_++) {
-				const char* _tmp83_;
-				_tmp83_ = *_tmp80_;
-				dbus_message_iter_append_basic (&_tmp81_, DBUS_TYPE_STRING, &_tmp83_);
-				_tmp80_++;
+			const char** _tmp76_;
+			DBusMessageIter _tmp77_;
+			int _tmp78_;
+			dbus_message_iter_open_container (&_tmp62_, DBUS_TYPE_VARIANT, "as", &_tmp67_);
+			_tmp76_ = g_value_get_boxed (_value);
+			dbus_message_iter_open_container (&_tmp67_, DBUS_TYPE_ARRAY, "s", &_tmp77_);
+			for (_tmp78_ = 0; _tmp78_ < g_strv_length (g_value_get_boxed (_value)); _tmp78_++) {
+				const char* _tmp79_;
+				_tmp79_ = *_tmp76_;
+				dbus_message_iter_append_basic (&_tmp77_, DBUS_TYPE_STRING, &_tmp79_);
+				_tmp76_++;
 			}
-			dbus_message_iter_close_container (&_tmp71_, &_tmp81_);
-			dbus_message_iter_close_container (&_tmp66_, &_tmp71_);
+			dbus_message_iter_close_container (&_tmp67_, &_tmp77_);
+			dbus_message_iter_close_container (&_tmp62_, &_tmp67_);
 		}
-		dbus_message_iter_close_container (&_tmp65_, &_tmp66_);
+		dbus_message_iter_close_container (&_tmp61_, &_tmp62_);
 	}
-	dbus_message_iter_close_container (&_subiter, &_tmp65_);
+	dbus_message_iter_close_container (&_subiter, &_tmp61_);
 	dbus_message_iter_close_container (&_iter, &_subiter);
 	g_object_get (self, "connection", &_connection, NULL);
 	dbus_error_init (&_dbus_error);
@@ -3999,19 +3777,19 @@ static gint32 mpris_player_dbus_proxy_get_Position (MprisPlayer* self) {
 	DBusGConnection *_connection;
 	DBusMessage *_message, *_reply;
 	DBusMessageIter _iter, _subiter;
-	const char* _tmp84_;
-	const char* _tmp85_;
+	const char* _tmp80_;
+	const char* _tmp81_;
 	gint32 _result;
-	dbus_int32_t _tmp86_;
+	dbus_int32_t _tmp82_;
 	if (((MprisPlayerDBusProxy*) self)->disposed) {
 		return 0;
 	}
 	_message = dbus_message_new_method_call (dbus_g_proxy_get_bus_name ((DBusGProxy*) self), dbus_g_proxy_get_path ((DBusGProxy*) self), "org.freedesktop.DBus.Properties", "Get");
 	dbus_message_iter_init_append (_message, &_iter);
-	_tmp84_ = "org.mpris.MediaPlayer2.Player";
-	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp84_);
-	_tmp85_ = "Position";
-	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp85_);
+	_tmp80_ = "org.mpris.MediaPlayer2.Player";
+	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp80_);
+	_tmp81_ = "Position";
+	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp81_);
 	g_object_get (self, "connection", &_connection, NULL);
 	dbus_error_init (&_dbus_error);
 	_reply = dbus_connection_send_with_reply_and_block (dbus_g_connection_get_connection (_connection), _message, -1, &_dbus_error);
@@ -4034,9 +3812,9 @@ static gint32 mpris_player_dbus_proxy_get_Position (MprisPlayer* self) {
 		dbus_message_unref (_reply);
 		return 0;
 	}
-	dbus_message_iter_get_basic (&_subiter, &_tmp86_);
+	dbus_message_iter_get_basic (&_subiter, &_tmp82_);
 	dbus_message_iter_next (&_subiter);
-	_result = _tmp86_;
+	_result = _tmp82_;
 	dbus_message_unref (_reply);
 	return _result;
 }
@@ -4047,21 +3825,21 @@ static void mpris_player_dbus_proxy_set_Position (MprisPlayer* self, gint32 valu
 	DBusGConnection *_connection;
 	DBusMessage *_message, *_reply;
 	DBusMessageIter _iter, _subiter;
-	const char* _tmp87_;
-	const char* _tmp88_;
-	dbus_int32_t _tmp89_;
+	const char* _tmp83_;
+	const char* _tmp84_;
+	dbus_int32_t _tmp85_;
 	if (((MprisPlayerDBusProxy*) self)->disposed) {
 		return;
 	}
 	_message = dbus_message_new_method_call (dbus_g_proxy_get_bus_name ((DBusGProxy*) self), dbus_g_proxy_get_path ((DBusGProxy*) self), "org.freedesktop.DBus.Properties", "Set");
 	dbus_message_iter_init_append (_message, &_iter);
-	_tmp87_ = "org.mpris.MediaPlayer2.Player";
-	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp87_);
-	_tmp88_ = "Position";
-	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp88_);
+	_tmp83_ = "org.mpris.MediaPlayer2.Player";
+	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp83_);
+	_tmp84_ = "Position";
+	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp84_);
 	dbus_message_iter_open_container (&_iter, DBUS_TYPE_VARIANT, "i", &_subiter);
-	_tmp89_ = value;
-	dbus_message_iter_append_basic (&_subiter, DBUS_TYPE_INT32, &_tmp89_);
+	_tmp85_ = value;
+	dbus_message_iter_append_basic (&_subiter, DBUS_TYPE_INT32, &_tmp85_);
 	dbus_message_iter_close_container (&_iter, &_subiter);
 	g_object_get (self, "connection", &_connection, NULL);
 	dbus_error_init (&_dbus_error);
@@ -4088,19 +3866,19 @@ static char* mpris_player_dbus_proxy_get_PlaybackStatus (MprisPlayer* self) {
 	DBusGConnection *_connection;
 	DBusMessage *_message, *_reply;
 	DBusMessageIter _iter, _subiter;
-	const char* _tmp90_;
-	const char* _tmp91_;
+	const char* _tmp86_;
+	const char* _tmp87_;
 	char* _result;
-	const char* _tmp92_;
+	const char* _tmp88_;
 	if (((MprisPlayerDBusProxy*) self)->disposed) {
 		return NULL;
 	}
 	_message = dbus_message_new_method_call (dbus_g_proxy_get_bus_name ((DBusGProxy*) self), dbus_g_proxy_get_path ((DBusGProxy*) self), "org.freedesktop.DBus.Properties", "Get");
 	dbus_message_iter_init_append (_message, &_iter);
-	_tmp90_ = "org.mpris.MediaPlayer2.Player";
-	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp90_);
-	_tmp91_ = "PlaybackStatus";
-	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp91_);
+	_tmp86_ = "org.mpris.MediaPlayer2.Player";
+	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp86_);
+	_tmp87_ = "PlaybackStatus";
+	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp87_);
 	g_object_get (self, "connection", &_connection, NULL);
 	dbus_error_init (&_dbus_error);
 	_reply = dbus_connection_send_with_reply_and_block (dbus_g_connection_get_connection (_connection), _message, -1, &_dbus_error);
@@ -4123,9 +3901,9 @@ static char* mpris_player_dbus_proxy_get_PlaybackStatus (MprisPlayer* self) {
 		dbus_message_unref (_reply);
 		return NULL;
 	}
-	dbus_message_iter_get_basic (&_subiter, &_tmp92_);
+	dbus_message_iter_get_basic (&_subiter, &_tmp88_);
 	dbus_message_iter_next (&_subiter);
-	_result = g_strdup (_tmp92_);
+	_result = g_strdup (_tmp88_);
 	dbus_message_unref (_reply);
 	return _result;
 }
@@ -4136,21 +3914,21 @@ static void mpris_player_dbus_proxy_set_PlaybackStatus (MprisPlayer* self, const
 	DBusGConnection *_connection;
 	DBusMessage *_message, *_reply;
 	DBusMessageIter _iter, _subiter;
-	const char* _tmp93_;
-	const char* _tmp94_;
-	const char* _tmp95_;
+	const char* _tmp89_;
+	const char* _tmp90_;
+	const char* _tmp91_;
 	if (((MprisPlayerDBusProxy*) self)->disposed) {
 		return;
 	}
 	_message = dbus_message_new_method_call (dbus_g_proxy_get_bus_name ((DBusGProxy*) self), dbus_g_proxy_get_path ((DBusGProxy*) self), "org.freedesktop.DBus.Properties", "Set");
 	dbus_message_iter_init_append (_message, &_iter);
-	_tmp93_ = "org.mpris.MediaPlayer2.Player";
-	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp93_);
-	_tmp94_ = "PlaybackStatus";
-	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp94_);
+	_tmp89_ = "org.mpris.MediaPlayer2.Player";
+	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp89_);
+	_tmp90_ = "PlaybackStatus";
+	dbus_message_iter_append_basic (&_iter, DBUS_TYPE_STRING, &_tmp90_);
 	dbus_message_iter_open_container (&_iter, DBUS_TYPE_VARIANT, "s", &_subiter);
-	_tmp95_ = value;
-	dbus_message_iter_append_basic (&_subiter, DBUS_TYPE_STRING, &_tmp95_);
+	_tmp91_ = value;
+	dbus_message_iter_append_basic (&_subiter, DBUS_TYPE_STRING, &_tmp91_);
 	dbus_message_iter_close_container (&_iter, &_subiter);
 	g_object_get (self, "connection", &_connection, NULL);
 	dbus_error_init (&_dbus_error);
@@ -4173,11 +3951,12 @@ static void mpris_player_dbus_proxy_set_PlaybackStatus (MprisPlayer* self, const
 
 
 static void mpris_player_dbus_proxy_mpris_player__interface_init (MprisPlayerIface* iface) {
-	iface->SetPosition = mpris_player_dbus_proxy_SetPosition;
-	iface->PlayPause = mpris_player_dbus_proxy_PlayPause;
-	iface->Pause = mpris_player_dbus_proxy_Pause;
-	iface->Next = mpris_player_dbus_proxy_Next;
-	iface->Previous = mpris_player_dbus_proxy_Previous;
+	iface->PlayPause = mpris_player_dbus_proxy_PlayPause_async;
+	iface->PlayPause_finish = mpris_player_dbus_proxy_PlayPause_finish;
+	iface->Next = mpris_player_dbus_proxy_Next_async;
+	iface->Next_finish = mpris_player_dbus_proxy_Next_finish;
+	iface->Previous = mpris_player_dbus_proxy_Previous_async;
+	iface->Previous_finish = mpris_player_dbus_proxy_Previous_finish;
 	iface->get_Metadata = mpris_player_dbus_proxy_get_Metadata;
 	iface->set_Metadata = mpris_player_dbus_proxy_set_Metadata;
 	iface->get_Position = mpris_player_dbus_proxy_get_Position;
@@ -4447,151 +4226,151 @@ static GObject* free_desktop_properties_dbus_proxy_construct (GType gtype, guint
 static void _dbus_handle_free_desktop_properties_properties_changed (FreeDesktopProperties* self, DBusConnection* connection, DBusMessage* message) {
 	DBusMessageIter iter;
 	char* source = NULL;
-	const char* _tmp96_;
+	const char* _tmp92_;
 	GHashTable* changed_properties = NULL;
-	GHashTable* _tmp97_;
-	DBusMessageIter _tmp98_;
-	DBusMessageIter _tmp99_;
+	GHashTable* _tmp93_;
+	DBusMessageIter _tmp94_;
+	DBusMessageIter _tmp95_;
 	char** invalid = NULL;
 	int invalid_length1;
-	char** _tmp118_;
-	int _tmp118__length;
-	int _tmp118__size;
-	int _tmp118__length1;
-	DBusMessageIter _tmp119_;
+	char** _tmp114_;
+	int _tmp114__length;
+	int _tmp114__size;
+	int _tmp114__length1;
+	DBusMessageIter _tmp115_;
 	DBusMessage* reply;
 	if (strcmp (dbus_message_get_signature (message), "sa{sv}as")) {
 		return;
 	}
 	dbus_message_iter_init (message, &iter);
-	dbus_message_iter_get_basic (&iter, &_tmp96_);
+	dbus_message_iter_get_basic (&iter, &_tmp92_);
 	dbus_message_iter_next (&iter);
-	source = g_strdup (_tmp96_);
-	_tmp97_ = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-	dbus_message_iter_recurse (&iter, &_tmp98_);
-	while (dbus_message_iter_get_arg_type (&_tmp98_)) {
+	source = g_strdup (_tmp92_);
+	_tmp93_ = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+	dbus_message_iter_recurse (&iter, &_tmp94_);
+	while (dbus_message_iter_get_arg_type (&_tmp94_)) {
 		char* _key;
 		GValue* _value;
-		const char* _tmp100_;
-		GValue _tmp101_ = {0};
-		DBusMessageIter _tmp102_;
-		dbus_message_iter_recurse (&_tmp98_, &_tmp99_);
-		dbus_message_iter_get_basic (&_tmp99_, &_tmp100_);
-		dbus_message_iter_next (&_tmp99_);
-		_key = g_strdup (_tmp100_);
-		dbus_message_iter_recurse (&_tmp99_, &_tmp102_);
-		if (dbus_message_iter_get_arg_type (&_tmp102_) == DBUS_TYPE_BYTE) {
-			guint8 _tmp103_;
-			dbus_message_iter_get_basic (&_tmp102_, &_tmp103_);
-			g_value_init (&_tmp101_, G_TYPE_UCHAR);
-			g_value_set_uchar (&_tmp101_, _tmp103_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp102_) == DBUS_TYPE_BOOLEAN) {
-			dbus_bool_t _tmp104_;
-			dbus_message_iter_get_basic (&_tmp102_, &_tmp104_);
-			g_value_init (&_tmp101_, G_TYPE_BOOLEAN);
-			g_value_set_boolean (&_tmp101_, _tmp104_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp102_) == DBUS_TYPE_INT16) {
-			dbus_int16_t _tmp105_;
-			dbus_message_iter_get_basic (&_tmp102_, &_tmp105_);
-			g_value_init (&_tmp101_, G_TYPE_INT);
-			g_value_set_int (&_tmp101_, _tmp105_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp102_) == DBUS_TYPE_UINT16) {
-			dbus_uint16_t _tmp106_;
-			dbus_message_iter_get_basic (&_tmp102_, &_tmp106_);
-			g_value_init (&_tmp101_, G_TYPE_UINT);
-			g_value_set_uint (&_tmp101_, _tmp106_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp102_) == DBUS_TYPE_INT32) {
-			dbus_int32_t _tmp107_;
-			dbus_message_iter_get_basic (&_tmp102_, &_tmp107_);
-			g_value_init (&_tmp101_, G_TYPE_INT);
-			g_value_set_int (&_tmp101_, _tmp107_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp102_) == DBUS_TYPE_UINT32) {
-			dbus_uint32_t _tmp108_;
-			dbus_message_iter_get_basic (&_tmp102_, &_tmp108_);
-			g_value_init (&_tmp101_, G_TYPE_UINT);
-			g_value_set_uint (&_tmp101_, _tmp108_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp102_) == DBUS_TYPE_INT64) {
-			dbus_int64_t _tmp109_;
-			dbus_message_iter_get_basic (&_tmp102_, &_tmp109_);
-			g_value_init (&_tmp101_, G_TYPE_INT64);
-			g_value_set_int64 (&_tmp101_, _tmp109_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp102_) == DBUS_TYPE_UINT64) {
-			dbus_uint64_t _tmp110_;
-			dbus_message_iter_get_basic (&_tmp102_, &_tmp110_);
-			g_value_init (&_tmp101_, G_TYPE_UINT64);
-			g_value_set_uint64 (&_tmp101_, _tmp110_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp102_) == DBUS_TYPE_DOUBLE) {
-			double _tmp111_;
-			dbus_message_iter_get_basic (&_tmp102_, &_tmp111_);
-			g_value_init (&_tmp101_, G_TYPE_DOUBLE);
-			g_value_set_double (&_tmp101_, _tmp111_);
-		} else if (dbus_message_iter_get_arg_type (&_tmp102_) == DBUS_TYPE_STRING) {
-			const char* _tmp112_;
-			dbus_message_iter_get_basic (&_tmp102_, &_tmp112_);
-			g_value_init (&_tmp101_, G_TYPE_STRING);
-			g_value_take_string (&_tmp101_, g_strdup (_tmp112_));
-		} else if (dbus_message_iter_get_arg_type (&_tmp102_) == DBUS_TYPE_OBJECT_PATH) {
-			const char* _tmp113_;
-			dbus_message_iter_get_basic (&_tmp102_, &_tmp113_);
-			g_value_init (&_tmp101_, G_TYPE_STRING);
-			g_value_take_string (&_tmp101_, g_strdup (_tmp113_));
-		} else if (dbus_message_iter_get_arg_type (&_tmp102_) == DBUS_TYPE_SIGNATURE) {
-			const char* _tmp114_;
-			dbus_message_iter_get_basic (&_tmp102_, &_tmp114_);
-			g_value_init (&_tmp101_, G_TYPE_STRING);
-			g_value_take_string (&_tmp101_, g_strdup (_tmp114_));
-		} else if ((dbus_message_iter_get_arg_type (&_tmp102_) == DBUS_TYPE_ARRAY) && (dbus_message_iter_get_element_type (&_tmp102_) == DBUS_TYPE_STRING)) {
-			const char** _tmp115_;
-			int _tmp115__length;
-			int _tmp115__size;
-			int _tmp115__length1;
-			DBusMessageIter _tmp116_;
-			_tmp115_ = g_new (const char*, 5);
-			_tmp115__length = 0;
-			_tmp115__size = 4;
-			_tmp115__length1 = 0;
-			dbus_message_iter_recurse (&_tmp102_, &_tmp116_);
-			for (; dbus_message_iter_get_arg_type (&_tmp116_); _tmp115__length1++) {
-				const char* _tmp117_;
-				if (_tmp115__size == _tmp115__length) {
-					_tmp115__size = 2 * _tmp115__size;
-					_tmp115_ = g_renew (const char*, _tmp115_, _tmp115__size + 1);
+		const char* _tmp96_;
+		GValue _tmp97_ = {0};
+		DBusMessageIter _tmp98_;
+		dbus_message_iter_recurse (&_tmp94_, &_tmp95_);
+		dbus_message_iter_get_basic (&_tmp95_, &_tmp96_);
+		dbus_message_iter_next (&_tmp95_);
+		_key = g_strdup (_tmp96_);
+		dbus_message_iter_recurse (&_tmp95_, &_tmp98_);
+		if (dbus_message_iter_get_arg_type (&_tmp98_) == DBUS_TYPE_BYTE) {
+			guint8 _tmp99_;
+			dbus_message_iter_get_basic (&_tmp98_, &_tmp99_);
+			g_value_init (&_tmp97_, G_TYPE_UCHAR);
+			g_value_set_uchar (&_tmp97_, _tmp99_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp98_) == DBUS_TYPE_BOOLEAN) {
+			dbus_bool_t _tmp100_;
+			dbus_message_iter_get_basic (&_tmp98_, &_tmp100_);
+			g_value_init (&_tmp97_, G_TYPE_BOOLEAN);
+			g_value_set_boolean (&_tmp97_, _tmp100_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp98_) == DBUS_TYPE_INT16) {
+			dbus_int16_t _tmp101_;
+			dbus_message_iter_get_basic (&_tmp98_, &_tmp101_);
+			g_value_init (&_tmp97_, G_TYPE_INT);
+			g_value_set_int (&_tmp97_, _tmp101_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp98_) == DBUS_TYPE_UINT16) {
+			dbus_uint16_t _tmp102_;
+			dbus_message_iter_get_basic (&_tmp98_, &_tmp102_);
+			g_value_init (&_tmp97_, G_TYPE_UINT);
+			g_value_set_uint (&_tmp97_, _tmp102_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp98_) == DBUS_TYPE_INT32) {
+			dbus_int32_t _tmp103_;
+			dbus_message_iter_get_basic (&_tmp98_, &_tmp103_);
+			g_value_init (&_tmp97_, G_TYPE_INT);
+			g_value_set_int (&_tmp97_, _tmp103_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp98_) == DBUS_TYPE_UINT32) {
+			dbus_uint32_t _tmp104_;
+			dbus_message_iter_get_basic (&_tmp98_, &_tmp104_);
+			g_value_init (&_tmp97_, G_TYPE_UINT);
+			g_value_set_uint (&_tmp97_, _tmp104_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp98_) == DBUS_TYPE_INT64) {
+			dbus_int64_t _tmp105_;
+			dbus_message_iter_get_basic (&_tmp98_, &_tmp105_);
+			g_value_init (&_tmp97_, G_TYPE_INT64);
+			g_value_set_int64 (&_tmp97_, _tmp105_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp98_) == DBUS_TYPE_UINT64) {
+			dbus_uint64_t _tmp106_;
+			dbus_message_iter_get_basic (&_tmp98_, &_tmp106_);
+			g_value_init (&_tmp97_, G_TYPE_UINT64);
+			g_value_set_uint64 (&_tmp97_, _tmp106_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp98_) == DBUS_TYPE_DOUBLE) {
+			double _tmp107_;
+			dbus_message_iter_get_basic (&_tmp98_, &_tmp107_);
+			g_value_init (&_tmp97_, G_TYPE_DOUBLE);
+			g_value_set_double (&_tmp97_, _tmp107_);
+		} else if (dbus_message_iter_get_arg_type (&_tmp98_) == DBUS_TYPE_STRING) {
+			const char* _tmp108_;
+			dbus_message_iter_get_basic (&_tmp98_, &_tmp108_);
+			g_value_init (&_tmp97_, G_TYPE_STRING);
+			g_value_take_string (&_tmp97_, g_strdup (_tmp108_));
+		} else if (dbus_message_iter_get_arg_type (&_tmp98_) == DBUS_TYPE_OBJECT_PATH) {
+			const char* _tmp109_;
+			dbus_message_iter_get_basic (&_tmp98_, &_tmp109_);
+			g_value_init (&_tmp97_, G_TYPE_STRING);
+			g_value_take_string (&_tmp97_, g_strdup (_tmp109_));
+		} else if (dbus_message_iter_get_arg_type (&_tmp98_) == DBUS_TYPE_SIGNATURE) {
+			const char* _tmp110_;
+			dbus_message_iter_get_basic (&_tmp98_, &_tmp110_);
+			g_value_init (&_tmp97_, G_TYPE_STRING);
+			g_value_take_string (&_tmp97_, g_strdup (_tmp110_));
+		} else if ((dbus_message_iter_get_arg_type (&_tmp98_) == DBUS_TYPE_ARRAY) && (dbus_message_iter_get_element_type (&_tmp98_) == DBUS_TYPE_STRING)) {
+			const char** _tmp111_;
+			int _tmp111__length;
+			int _tmp111__size;
+			int _tmp111__length1;
+			DBusMessageIter _tmp112_;
+			_tmp111_ = g_new (const char*, 5);
+			_tmp111__length = 0;
+			_tmp111__size = 4;
+			_tmp111__length1 = 0;
+			dbus_message_iter_recurse (&_tmp98_, &_tmp112_);
+			for (; dbus_message_iter_get_arg_type (&_tmp112_); _tmp111__length1++) {
+				const char* _tmp113_;
+				if (_tmp111__size == _tmp111__length) {
+					_tmp111__size = 2 * _tmp111__size;
+					_tmp111_ = g_renew (const char*, _tmp111_, _tmp111__size + 1);
 				}
-				dbus_message_iter_get_basic (&_tmp116_, &_tmp117_);
-				dbus_message_iter_next (&_tmp116_);
-				_tmp115_[_tmp115__length++] = g_strdup (_tmp117_);
+				dbus_message_iter_get_basic (&_tmp112_, &_tmp113_);
+				dbus_message_iter_next (&_tmp112_);
+				_tmp111_[_tmp111__length++] = g_strdup (_tmp113_);
 			}
-			_tmp115_[_tmp115__length] = NULL;
-			g_value_init (&_tmp101_, G_TYPE_STRV);
-			g_value_take_boxed (&_tmp101_, _tmp115_);
+			_tmp111_[_tmp111__length] = NULL;
+			g_value_init (&_tmp97_, G_TYPE_STRV);
+			g_value_take_boxed (&_tmp97_, _tmp111_);
 		}
-		dbus_message_iter_next (&_tmp99_);
-		_value = g_memdup (&_tmp101_, sizeof (GValue));
-		g_hash_table_insert (_tmp97_, _key, _value);
-		dbus_message_iter_next (&_tmp98_);
+		dbus_message_iter_next (&_tmp95_);
+		_value = g_memdup (&_tmp97_, sizeof (GValue));
+		g_hash_table_insert (_tmp93_, _key, _value);
+		dbus_message_iter_next (&_tmp94_);
 	}
 	dbus_message_iter_next (&iter);
-	changed_properties = _tmp97_;
+	changed_properties = _tmp93_;
 	invalid_length1 = 0;
-	_tmp118_ = g_new (char*, 5);
-	_tmp118__length = 0;
-	_tmp118__size = 4;
-	_tmp118__length1 = 0;
-	dbus_message_iter_recurse (&iter, &_tmp119_);
-	for (; dbus_message_iter_get_arg_type (&_tmp119_); _tmp118__length1++) {
-		const char* _tmp120_;
-		if (_tmp118__size == _tmp118__length) {
-			_tmp118__size = 2 * _tmp118__size;
-			_tmp118_ = g_renew (char*, _tmp118_, _tmp118__size + 1);
+	_tmp114_ = g_new (char*, 5);
+	_tmp114__length = 0;
+	_tmp114__size = 4;
+	_tmp114__length1 = 0;
+	dbus_message_iter_recurse (&iter, &_tmp115_);
+	for (; dbus_message_iter_get_arg_type (&_tmp115_); _tmp114__length1++) {
+		const char* _tmp116_;
+		if (_tmp114__size == _tmp114__length) {
+			_tmp114__size = 2 * _tmp114__size;
+			_tmp114_ = g_renew (char*, _tmp114_, _tmp114__size + 1);
 		}
-		dbus_message_iter_get_basic (&_tmp119_, &_tmp120_);
-		dbus_message_iter_next (&_tmp119_);
-		_tmp118_[_tmp118__length++] = g_strdup (_tmp120_);
+		dbus_message_iter_get_basic (&_tmp115_, &_tmp116_);
+		dbus_message_iter_next (&_tmp115_);
+		_tmp114_[_tmp114__length++] = g_strdup (_tmp116_);
 	}
-	invalid_length1 = _tmp118__length1;
-	_tmp118_[_tmp118__length] = NULL;
+	invalid_length1 = _tmp114__length1;
+	_tmp114_[_tmp114__length] = NULL;
 	dbus_message_iter_next (&iter);
-	invalid = _tmp118_;
+	invalid = _tmp114_;
 	g_signal_emit_by_name (self, "properties-changed", source, changed_properties, invalid, invalid_length1);
 	_g_free0 (source);
 	_g_hash_table_unref0 (changed_properties);
@@ -4658,18 +4437,6 @@ Mpris2Controller* mpris2_controller_new (PlayerController* ctrl) {
 }
 
 
-static char* bool_to_string (gboolean self) {
-	char* result = NULL;
-	if (self) {
-		result = g_strdup ("true");
-		return result;
-	} else {
-		result = g_strdup ("false");
-		return result;
-	}
-}
-
-
 static GValue* _g_value_dup (GValue* self) {
 	return g_boxed_copy (G_TYPE_VALUE, self);
 }
@@ -4688,63 +4455,59 @@ static void _vala_GValue_free (GValue* self) {
 
 void mpris2_controller_property_changed_cb (Mpris2Controller* self, const char* interface_source, GHashTable* changed_properties, char** invalid, int invalid_length1) {
 	char* _tmp0_;
-	char* _tmp1_;
-	gboolean _tmp2_ = FALSE;
+	gboolean _tmp1_ = FALSE;
 	GValue* play_v;
 	GValue* pos_v;
 	GValue* meta_v;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (interface_source != NULL);
 	g_return_if_fail (changed_properties != NULL);
-	g_debug ("mpris2-controller.vala:100: properties-changed for interface %s and ow" \
-"ner %s", interface_source, _tmp0_ = g_utf8_strdown (player_controller_get_name (self->priv->_owner), -1));
+	g_debug ("mpris2-controller.vala:95: properties-changed for interface %s and own" \
+"er %s", interface_source, _tmp0_ = g_utf8_strdown (player_controller_get_name (self->priv->_owner), -1));
 	_g_free0 (_tmp0_);
-	g_debug ("mpris2-controller.vala:101: is the invalid array null : %s", _tmp1_ = bool_to_string (invalid == NULL));
-	_g_free0 (_tmp1_);
-	g_debug ("mpris2-controller.vala:102: invalid length  : %i", invalid_length1);
 	if (changed_properties == NULL) {
-		_tmp2_ = TRUE;
+		_tmp1_ = TRUE;
 	} else {
-		_tmp2_ = g_str_has_prefix (interface_source, MPRIS2_CONTROLLER_root_interface) == FALSE;
+		_tmp1_ = g_str_has_prefix (interface_source, MPRIS2_CONTROLLER_root_interface) == FALSE;
 	}
-	if (_tmp2_) {
-		g_warning ("mpris2-controller.vala:105: Property-changed hash is null or this is a" \
-"n interface that concerns us");
+	if (_tmp1_) {
+		g_warning ("mpris2-controller.vala:98: Property-changed hash is null or this is an" \
+" interface that doesn't concerns us");
 		return;
 	}
 	play_v = __g_value_dup0 ((GValue*) g_hash_table_lookup (changed_properties, "PlaybackStatus"));
 	if (play_v != NULL) {
 		char* state;
 		TransportMenuitemstate p;
-		PlayerItem* _tmp3_;
-		TransportMenuitem* _tmp4_;
-		state = g_strdup (g_value_get_string (play_v));
-		g_debug ("mpris2-controller.vala:111: new playback state = %s", state);
+		PlayerItem* _tmp2_;
+		TransportMenuitem* _tmp3_;
+		state = mpris_player_get_PlaybackStatus (self->priv->_player);
+		g_debug ("mpris2-controller.vala:104: new playback state = %s", state);
 		p = (TransportMenuitemstate) mpris2_controller_determine_play_state (self, state);
-		transport_menuitem_change_play_state (_tmp4_ = (_tmp3_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT), IS_TRANSPORT_MENUITEM (_tmp3_) ? ((TransportMenuitem*) _tmp3_) : NULL), p);
-		_g_object_unref0 (_tmp4_);
+		transport_menuitem_change_play_state (_tmp3_ = (_tmp2_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT), IS_TRANSPORT_MENUITEM (_tmp2_) ? ((TransportMenuitem*) _tmp2_) : NULL), p);
+		_g_object_unref0 (_tmp3_);
 		_g_free0 (state);
 	}
 	pos_v = __g_value_dup0 ((GValue*) g_hash_table_lookup (changed_properties, "Position"));
 	if (pos_v != NULL) {
 		gint64 pos;
 		pos = g_value_get_int64 (pos_v);
-		g_debug ("mpris2-controller.vala:119: new position = %i", (gint) pos);
+		g_debug ("mpris2-controller.vala:112: new position = %i", (gint) pos);
 	}
 	meta_v = __g_value_dup0 ((GValue*) g_hash_table_lookup (changed_properties, "Metadata"));
 	if (meta_v != NULL) {
 		GHashTable* changed_updates;
-		PlayerItem* _tmp5_;
-		GeeHashSet* _tmp6_;
-		PlayerItem* _tmp7_;
-		GeeHashSet* _tmp8_;
+		PlayerItem* _tmp4_;
+		GeeHashSet* _tmp5_;
+		PlayerItem* _tmp6_;
+		GeeHashSet* _tmp7_;
 		changed_updates = mpris2_controller_clean_metadata (self);
-		player_item_reset (_tmp5_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA), _tmp6_ = metadata_menuitem_attributes_format ());
-		_g_object_unref0 (_tmp6_);
+		player_item_reset (_tmp4_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA), _tmp5_ = metadata_menuitem_attributes_format ());
 		_g_object_unref0 (_tmp5_);
-		player_item_update (_tmp7_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA), changed_updates, _tmp8_ = metadata_menuitem_attributes_format ());
-		_g_object_unref0 (_tmp8_);
+		_g_object_unref0 (_tmp4_);
+		player_item_update (_tmp6_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA), changed_updates, _tmp7_ = metadata_menuitem_attributes_format ());
 		_g_object_unref0 (_tmp7_);
+		_g_object_unref0 (_tmp6_);
 		_g_hash_table_unref0 (changed_updates);
 	}
 	__vala_GValue_free0 (meta_v);
@@ -4789,7 +4552,7 @@ static GHashTable* mpris2_controller_clean_metadata (Mpris2Controller* self) {
 		artists = (_tmp5_ = (_tmp4_ = (_tmp3_ = g_value_get_boxed ((GValue*) g_hash_table_lookup (_tmp2_ = mpris_player_get_Metadata (self->priv->_player), "xesam:artist")), (_tmp3_ == NULL) ? ((gpointer) _tmp3_) : _vala_array_dup1 (_tmp3_, g_strv_length (g_value_get_boxed ((GValue*) g_hash_table_lookup (_tmp2_ = mpris_player_get_Metadata (self->priv->_player), "xesam:artist"))))), _g_hash_table_unref0 (_tmp2_), _tmp4_), artists_length1 = g_strv_length (g_value_get_boxed ((GValue*) g_hash_table_lookup (_tmp2_ = mpris_player_get_Metadata (self->priv->_player), "xesam:artist"))), _artists_size_ = artists_length1, _tmp5_);
 		display_artists = g_strjoinv (", ", artists);
 		g_hash_table_replace (changed_updates, g_strdup ("xesam:artist"), (_tmp6_ = g_new0 (GValue, 1), g_value_init (_tmp6_, G_TYPE_STRING), g_value_set_string (_tmp6_, display_artists), _tmp6_));
-		g_debug ("mpris2-controller.vala:139: artist : %s", display_artists);
+		g_debug ("mpris2-controller.vala:132: artist : %s", display_artists);
 		_g_free0 (display_artists);
 		artists = (_vala_array_free (artists, artists_length1, (GDestroyNotify) g_free), NULL);
 	}
@@ -4824,7 +4587,7 @@ static TransportMenuitemstate mpris2_controller_determine_play_state (Mpris2Cont
 		_tmp0_ = FALSE;
 	}
 	if (_tmp0_) {
-		g_debug ("mpris2-controller.vala:155: determine play state - state = %s", status);
+		g_debug ("mpris2-controller.vala:148: determine play state - state = %s", status);
 		result = TRANSPORT_MENUITEM_STATE_PLAYING;
 		return result;
 	}
@@ -4850,7 +4613,7 @@ void mpris2_controller_initial_update (Mpris2Controller* self) {
 		update = mpris2_controller_determine_play_state (self, _tmp2_ = mpris_player_get_PlaybackStatus (self->priv->_player));
 		_g_free0 (_tmp2_);
 	}
-	g_debug ("mpris2-controller.vala:170: initial update - play state %i", (gint) update);
+	g_debug ("mpris2-controller.vala:163: initial update - play state %i", (gint) update);
 	transport_menuitem_change_play_state (_tmp4_ = (_tmp3_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT), IS_TRANSPORT_MENUITEM (_tmp3_) ? ((TransportMenuitem*) _tmp3_) : NULL), update);
 	_g_object_unref0 (_tmp4_);
 	cleaned_metadata = mpris2_controller_clean_metadata (self);
@@ -4864,19 +4627,11 @@ void mpris2_controller_initial_update (Mpris2Controller* self) {
 void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuitemaction command) {
 	GError * _inner_error_ = NULL;
 	g_return_if_fail (self != NULL);
-	g_debug ("mpris2-controller.vala:180: transport_event input = %i", (gint) command);
+	g_debug ("mpris2-controller.vala:173: transport_event input = %i", (gint) command);
 	if (command == TRANSPORT_MENUITEM_ACTION_PLAY_PAUSE) {
-		g_debug ("mpris2-controller.vala:182: transport_event PLAY_PAUSE");
+		g_debug ("mpris2-controller.vala:175: transport_event PLAY_PAUSE");
 		{
-			mpris_player_PlayPause (self->priv->_player, &_inner_error_);
-			if (_inner_error_ != NULL) {
-				if (_inner_error_->domain == DBUS_GERROR) {
-					goto __catch5_dbus_gerror;
-				}
-				g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
-				g_clear_error (&_inner_error_);
-				return;
-			}
+			mpris_player_PlayPause (self->priv->_player, NULL, NULL);
 		}
 		goto __finally5;
 		__catch5_dbus_gerror:
@@ -4885,7 +4640,7 @@ void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuit
 			_error_ = _inner_error_;
 			_inner_error_ = NULL;
 			{
-				g_warning ("mpris2-controller.vala:187: DBus Error calling the player objects Play" \
+				g_warning ("mpris2-controller.vala:180: DBus Error calling the player objects Play" \
 "Pause method %s", _error_->message);
 				_g_error_free0 (_error_);
 			}
@@ -4899,15 +4654,7 @@ void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuit
 	} else {
 		if (command == TRANSPORT_MENUITEM_ACTION_PREVIOUS) {
 			{
-				mpris_player_Previous (self->priv->_player, &_inner_error_);
-				if (_inner_error_ != NULL) {
-					if (_inner_error_->domain == DBUS_GERROR) {
-						goto __catch6_dbus_gerror;
-					}
-					g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
-					g_clear_error (&_inner_error_);
-					return;
-				}
+				mpris_player_Previous (self->priv->_player, NULL, NULL);
 			}
 			goto __finally6;
 			__catch6_dbus_gerror:
@@ -4916,7 +4663,7 @@ void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuit
 				_error_ = _inner_error_;
 				_inner_error_ = NULL;
 				{
-					g_warning ("mpris2-controller.vala:196: DBus Error calling the player objects Prev" \
+					g_warning ("mpris2-controller.vala:189: DBus Error calling the player objects Prev" \
 "ious method %s", _error_->message);
 					_g_error_free0 (_error_);
 				}
@@ -4930,15 +4677,7 @@ void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuit
 		} else {
 			if (command == TRANSPORT_MENUITEM_ACTION_NEXT) {
 				{
-					mpris_player_Next (self->priv->_player, &_inner_error_);
-					if (_inner_error_ != NULL) {
-						if (_inner_error_->domain == DBUS_GERROR) {
-							goto __catch7_dbus_gerror;
-						}
-						g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
-						g_clear_error (&_inner_error_);
-						return;
-					}
+					mpris_player_Next (self->priv->_player, NULL, NULL);
 				}
 				goto __finally7;
 				__catch7_dbus_gerror:
@@ -4947,7 +4686,7 @@ void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuit
 					_error_ = _inner_error_;
 					_inner_error_ = NULL;
 					{
-						g_warning ("mpris2-controller.vala:205: DBus Error calling the player objects Next" \
+						g_warning ("mpris2-controller.vala:198: DBus Error calling the player objects Next" \
 " method %s", _error_->message);
 						_g_error_free0 (_error_);
 					}
@@ -4961,87 +4700,6 @@ void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuit
 			}
 		}
 	}
-}
-
-
-/**
-TODO: SetPosition on the player object is not working with rhythmbox,
-  runtime error - "dbus function not supported"
- */
-void mpris2_controller_set_track_position (Mpris2Controller* self, double position) {
-	GHashTable* _tmp0_;
-	GValue* _tmp1_;
-	GValue* time_value;
-	gint64 total_time;
-	double new_time_position;
-	GHashTable* _tmp2_;
-	GValue* _tmp3_;
-	GValue* v;
-	GError * _inner_error_ = NULL;
-	g_return_if_fail (self != NULL);
-	g_debug ("mpris2-controller.vala:216: Set position with pos (0-100) %f", position);
-	time_value = (_tmp1_ = __g_value_dup0 ((GValue*) g_hash_table_lookup (_tmp0_ = mpris_player_get_Metadata (self->priv->_player), "mpris:length")), _g_hash_table_unref0 (_tmp0_), _tmp1_);
-	if (time_value == NULL) {
-		g_warning ("mpris2-controller.vala:219: Can't fetch the duration of the track ther" \
-"efore cant set the position");
-		__vala_GValue_free0 (time_value);
-		return;
-	}
-	total_time = g_value_get_int64 (time_value);
-	g_debug ("mpris2-controller.vala:224: total time of track = %i", (gint) total_time);
-	new_time_position = total_time * (position / 100.0);
-	g_debug ("mpris2-controller.vala:226: new position = %f", new_time_position);
-	v = (_tmp3_ = __g_value_dup0 ((GValue*) g_hash_table_lookup (_tmp2_ = mpris_player_get_Metadata (self->priv->_player), "mpris:trackid")), _g_hash_table_unref0 (_tmp2_), _tmp3_);
-	if (v != NULL) {
-		if (G_VALUE_HOLDS (v, G_TYPE_STRING)) {
-			char* path;
-			path = g_strdup (g_value_get_string (v));
-			{
-				mpris_player_SetPosition (self->priv->_player, path, (gint64) new_time_position, &_inner_error_);
-				if (_inner_error_ != NULL) {
-					if (_inner_error_->domain == DBUS_GERROR) {
-						goto __catch8_dbus_gerror;
-					}
-					_g_free0 (path);
-					__vala_GValue_free0 (v);
-					__vala_GValue_free0 (time_value);
-					g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
-					g_clear_error (&_inner_error_);
-					return;
-				}
-			}
-			goto __finally8;
-			__catch8_dbus_gerror:
-			{
-				GError * e;
-				e = _inner_error_;
-				_inner_error_ = NULL;
-				{
-					g_error ("mpris2-controller.vala:236: DBus Error calling the player objects SetP" \
-"osition method %s", e->message);
-					_g_error_free0 (e);
-				}
-			}
-			__finally8:
-			if (_inner_error_ != NULL) {
-				_g_free0 (path);
-				__vala_GValue_free0 (v);
-				__vala_GValue_free0 (time_value);
-				g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
-				g_clear_error (&_inner_error_);
-				return;
-			}
-			_g_free0 (path);
-		}
-	}
-	__vala_GValue_free0 (v);
-	__vala_GValue_free0 (time_value);
-}
-
-
-void mpris2_controller_onSeeked (Mpris2Controller* self, gint64 position) {
-	g_return_if_fail (self != NULL);
-	g_debug ("mpris2-controller.vala:244: Seeked signal callback with pos = %i", ((gint) position) / 1000);
 }
 
 
@@ -5082,29 +4740,21 @@ void mpris2_controller_expose (Mpris2Controller* self) {
 	g_return_if_fail (self != NULL);
 	if (mpris2_controller_connected (self) == TRUE) {
 		{
-			mpris_root_Raise (self->priv->_mpris2_root, &_inner_error_);
-			if (_inner_error_ != NULL) {
-				if (_inner_error_->domain == DBUS_GERROR) {
-					goto __catch9_dbus_gerror;
-				}
-				g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
-				g_clear_error (&_inner_error_);
-				return;
-			}
+			mpris_root_Raise (self->priv->_mpris2_root, NULL, NULL);
 		}
-		goto __finally9;
-		__catch9_dbus_gerror:
+		goto __finally8;
+		__catch8_dbus_gerror:
 		{
 			GError * e;
 			e = _inner_error_;
 			_inner_error_ = NULL;
 			{
-				g_error ("mpris2-controller.vala:267: Exception thrown while calling function Ra" \
+				g_error ("mpris2-controller.vala:224: Exception thrown while calling function Ra" \
 "ise - %s", e->message);
 				_g_error_free0 (e);
 			}
 		}
-		__finally9:
+		__finally8:
 		if (_inner_error_ != NULL) {
 			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -5183,11 +4833,6 @@ static void mpris2_controller_set_properties_interface (Mpris2Controller* self, 
 }
 
 
-static void _mpris2_controller_onSeeked_mpris_player_seeked (MprisPlayer* _sender, gint64 new_position, gpointer self) {
-	mpris2_controller_onSeeked (self, new_position);
-}
-
-
 static void _mpris2_controller_property_changed_cb_free_desktop_properties_properties_changed (FreeDesktopProperties* _sender, const char* source, GHashTable* changed_properties, char** invalid, int invalid_length1, gpointer self) {
 	mpris2_controller_property_changed_cb (self, source, changed_properties, invalid, invalid_length1);
 }
@@ -5220,17 +4865,11 @@ static GObject * mpris2_controller_constructor (GType type, guint n_construct_pr
 			char* _tmp12_;
 			char* _tmp13_;
 			MprisPlayer* _tmp14_;
-			char* _tmp15_;
-			char* _tmp16_;
-			char* _tmp17_;
-			char* _tmp18_;
-			char* _tmp19_;
-			char* _tmp20_;
-			FreeDesktopProperties* _tmp21_;
+			FreeDesktopProperties* _tmp15_;
 			connection = dbus_g_bus_get (DBUS_BUS_SESSION, &_inner_error_);
 			if (_inner_error_ != NULL) {
 				if (_inner_error_->domain == DBUS_GERROR) {
-					goto __catch10_dbus_gerror;
+					goto __catch9_dbus_gerror;
 				}
 				g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 				g_clear_error (&_inner_error_);
@@ -5252,30 +4891,23 @@ static GObject * mpris2_controller_constructor (GType type, guint n_construct_pr
 			_g_free0 (_tmp9_);
 			_g_free0 (_tmp8_);
 			_g_free0 (_tmp7_);
-			g_signal_connect_object (self->priv->_player, "seeked", (GCallback) _mpris2_controller_onSeeked_mpris_player_seeked, self, 0);
-			mpris2_controller_set_properties_interface (self, _tmp21_ = free_desktop_properties_dbus_proxy_new (connection, _tmp20_ = g_strconcat (_tmp18_ = g_strconcat (MPRIS2_CONTROLLER_root_interface, ".", NULL), _tmp19_ = g_utf8_strdown (player_controller_get_name (self->priv->_owner), -1), NULL), "/org/mpris/MediaPlayer2"));
-			_g_object_unref0 (_tmp21_);
-			_g_free0 (_tmp20_);
-			_g_free0 (_tmp19_);
-			_g_free0 (_tmp18_);
-			_g_free0 (_tmp17_);
-			_g_free0 (_tmp16_);
-			_g_free0 (_tmp15_);
+			mpris2_controller_set_properties_interface (self, _tmp15_ = free_desktop_properties_dbus_proxy_new (connection, "org.freedesktop.Properties.PropertiesChanged", "/org/mpris/MediaPlayer2"));
+			_g_object_unref0 (_tmp15_);
 			g_signal_connect_object (self->priv->_properties_interface, "properties-changed", (GCallback) _mpris2_controller_property_changed_cb_free_desktop_properties_properties_changed, self, 0);
 			_dbus_g_connection_unref0 (connection);
 		}
-		goto __finally10;
-		__catch10_dbus_gerror:
+		goto __finally9;
+		__catch9_dbus_gerror:
 		{
 			GError * e;
 			e = _inner_error_;
 			_inner_error_ = NULL;
 			{
-				g_error ("mpris2-controller.vala:94: Problems connecting to the session bus - %s", e->message);
+				g_error ("mpris2-controller.vala:89: Problems connecting to the session bus - %s", e->message);
 				_g_error_free0 (e);
 			}
 		}
-		__finally10:
+		__finally9:
 		if (_inner_error_ != NULL) {
 			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);

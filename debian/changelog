@@ -1,3 +1,13 @@
+indicator-sound (0.4.5-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    - service crashes on last fm playback with rb (LP: #633654)
+    - sound_icon for indicator-sound missing for ubuntu-light (LP: #628896)
+    - indicator-sound-service crashed with signal 5 in dbusmenu_menuitem_handle_event() (LP: #633897)
+    - mpris2 playback status behaving as if it were static (LP: #631893)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 14 Sep 2010 15:13:50 -0400
+
 indicator-sound (0.4.4-0ubuntu1) maverick; urgency=low
 
   * New upstream release, fix crash in gtk_range_get_value() (lp: #615277)

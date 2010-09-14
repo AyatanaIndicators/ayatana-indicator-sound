@@ -1,3 +1,5 @@
+SUBDIRS = icons
+
 dbus_servicesdir = $(DBUSSERVICEDIR)
 service_in_files =  indicator-sound.service.in 
 dbus_services_DATA = $(service_in_files:.service.in=.service)

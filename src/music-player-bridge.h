@@ -21,8 +21,6 @@
 #include <gee.h>
 #include <dbus/dbus-glib-lowlevel.h>
 #include <dbus/dbus-glib.h>
-#include <float.h>
-#include <math.h>
 
 G_BEGIN_DECLS
 
@@ -84,17 +82,6 @@ typedef struct _PlayerControllerClass PlayerControllerClass;
 typedef struct _MetadataMenuitem MetadataMenuitem;
 typedef struct _MetadataMenuitemClass MetadataMenuitemClass;
 typedef struct _MetadataMenuitemPrivate MetadataMenuitemPrivate;
-
-#define TYPE_SCRUB_MENUITEM (scrub_menuitem_get_type ())
-#define SCRUB_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_SCRUB_MENUITEM, ScrubMenuitem))
-#define SCRUB_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_SCRUB_MENUITEM, ScrubMenuitemClass))
-#define IS_SCRUB_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_SCRUB_MENUITEM))
-#define IS_SCRUB_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_SCRUB_MENUITEM))
-#define SCRUB_MENUITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_SCRUB_MENUITEM, ScrubMenuitemClass))
-
-typedef struct _ScrubMenuitem ScrubMenuitem;
-typedef struct _ScrubMenuitemClass ScrubMenuitemClass;
-typedef struct _ScrubMenuitemPrivate ScrubMenuitemPrivate;
 
 #define TYPE_TITLE_MENUITEM (title_menuitem_get_type ())
 #define TITLE_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_TITLE_MENUITEM, TitleMenuitem))
@@ -216,15 +203,6 @@ struct _MetadataMenuitemClass {
 	PlayerItemClass parent_class;
 };
 
-struct _ScrubMenuitem {
-	PlayerItem parent_instance;
-	ScrubMenuitemPrivate * priv;
-};
-
-struct _ScrubMenuitemClass {
-	PlayerItemClass parent_class;
-};
-
 struct _TitleMenuitem {
 	PlayerItem parent_instance;
 	TitleMenuitemPrivate * priv;
@@ -263,8 +241,10 @@ typedef enum  {
 
 struct _MprisRootIface {
 	GTypeInterface parent_iface;
-	void (*Quit) (MprisRoot* self, GError** error);
-	void (*Raise) (MprisRoot* self, GError** error);
+	void (*Quit) (MprisRoot* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+	void (*Quit_finish) (MprisRoot* self, GAsyncResult* _res_, GError** error);
+	void (*Raise) (MprisRoot* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+	void (*Raise_finish) (MprisRoot* self, GAsyncResult* _res_, GError** error);
 	gboolean (*get_HasTracklist) (MprisRoot* self);
 	void (*set_HasTracklist) (MprisRoot* self, gboolean value);
 	gboolean (*get_CanQuit) (MprisRoot* self);
@@ -279,11 +259,12 @@ struct _MprisRootIface {
 
 struct _MprisPlayerIface {
 	GTypeInterface parent_iface;
-	void (*SetPosition) (MprisPlayer* self, const char* path, gint64 pos, GError** error);
-	void (*PlayPause) (MprisPlayer* self, GError** error);
-	void (*Pause) (MprisPlayer* self, GError** error);
-	void (*Next) (MprisPlayer* self, GError** error);
-	void (*Previous) (MprisPlayer* self, GError** error);
+	void (*PlayPause) (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+	void (*PlayPause_finish) (MprisPlayer* self, GAsyncResult* _res_, GError** error);
+	void (*Next) (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+	void (*Next_finish) (MprisPlayer* self, GAsyncResult* _res_, GError** error);
+	void (*Previous) (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+	void (*Previous_finish) (MprisPlayer* self, GAsyncResult* _res_, GError** error);
 	GHashTable* (*get_Metadata) (MprisPlayer* self);
 	void (*set_Metadata) (MprisPlayer* self, GHashTable* value);
 	gint32 (*get_Position) (MprisPlayer* self);
@@ -351,12 +332,6 @@ MetadataMenuitem* metadata_menuitem_new (void);
 MetadataMenuitem* metadata_menuitem_construct (GType object_type);
 void metadata_menuitem_fetch_art (MetadataMenuitem* self, const char* uri, const char* prop);
 GeeHashSet* metadata_menuitem_attributes_format (void);
-GType scrub_menuitem_get_type (void) G_GNUC_CONST;
-ScrubMenuitem* scrub_menuitem_new (PlayerController* parent);
-ScrubMenuitem* scrub_menuitem_construct (GType object_type, PlayerController* parent);
-void scrub_menuitem_update_position (ScrubMenuitem* self, gint32 new_position);
-void scrub_menuitem_update_playstate (ScrubMenuitem* self, gint state);
-GeeHashSet* scrub_menuitem_attributes_format (void);
 GType title_menuitem_get_type (void) G_GNUC_CONST;
 TitleMenuitem* title_menuitem_new (PlayerController* parent);
 TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* parent);
@@ -383,8 +358,10 @@ gint player_controller_get_menu_offset (PlayerController* self);
 void player_controller_set_menu_offset (PlayerController* self, gint value);
 MprisRoot* mpris_root_dbus_proxy_new (DBusGConnection* connection, const char* name, const char* path);
 GType mpris_root_get_type (void) G_GNUC_CONST;
-void mpris_root_Quit (MprisRoot* self, GError** error);
-void mpris_root_Raise (MprisRoot* self, GError** error);
+void mpris_root_Quit (MprisRoot* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+void mpris_root_Quit_finish (MprisRoot* self, GAsyncResult* _res_, GError** error);
+void mpris_root_Raise (MprisRoot* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+void mpris_root_Raise_finish (MprisRoot* self, GAsyncResult* _res_, GError** error);
 gboolean mpris_root_get_HasTracklist (MprisRoot* self);
 void mpris_root_set_HasTracklist (MprisRoot* self, gboolean value);
 gboolean mpris_root_get_CanQuit (MprisRoot* self);
@@ -397,11 +374,12 @@ char* mpris_root_get_DesktopEntry (MprisRoot* self);
 void mpris_root_set_DesktopEntry (MprisRoot* self, const char* value);
 MprisPlayer* mpris_player_dbus_proxy_new (DBusGConnection* connection, const char* name, const char* path);
 GType mpris_player_get_type (void) G_GNUC_CONST;
-void mpris_player_SetPosition (MprisPlayer* self, const char* path, gint64 pos, GError** error);
-void mpris_player_PlayPause (MprisPlayer* self, GError** error);
-void mpris_player_Pause (MprisPlayer* self, GError** error);
-void mpris_player_Next (MprisPlayer* self, GError** error);
-void mpris_player_Previous (MprisPlayer* self, GError** error);
+void mpris_player_PlayPause (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+void mpris_player_PlayPause_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
+void mpris_player_Next (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+void mpris_player_Next_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
+void mpris_player_Previous (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+void mpris_player_Previous_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
 GHashTable* mpris_player_get_Metadata (MprisPlayer* self);
 void mpris_player_set_Metadata (MprisPlayer* self, GHashTable* value);
 gint32 mpris_player_get_Position (MprisPlayer* self);
@@ -416,8 +394,6 @@ Mpris2Controller* mpris2_controller_construct (GType object_type, PlayerControll
 void mpris2_controller_property_changed_cb (Mpris2Controller* self, const char* interface_source, GHashTable* changed_properties, char** invalid, int invalid_length1);
 void mpris2_controller_initial_update (Mpris2Controller* self);
 void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuitemaction command);
-void mpris2_controller_set_track_position (Mpris2Controller* self, double position);
-void mpris2_controller_onSeeked (Mpris2Controller* self, gint64 position);
 gboolean mpris2_controller_connected (Mpris2Controller* self);
 gboolean mpris2_controller_was_successfull (Mpris2Controller* self);
 void mpris2_controller_expose (Mpris2Controller* self);

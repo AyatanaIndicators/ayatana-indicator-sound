@@ -46,7 +46,6 @@ static void transport_widget_finalize   (GObject *object);
 
 static void transport_widget_set_twin_item(TransportWidget* self,
                            								 DbusmenuMenuitem* twin_item);
-
 static gboolean transport_widget_expose_event(GtkWidget* widget,
                                               GdkEventExpose* event);
 
