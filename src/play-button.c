@@ -99,6 +99,7 @@ static void play_button_dispose    (GObject *object);
 static void play_button_finalize   (GObject *object);
 
 static gboolean play_button_expose (GtkWidget *button, GdkEventExpose *event);
+
 static void draw (GtkWidget* button, cairo_t *cr);
 
 G_DEFINE_TYPE (PlayButton, play_button, GTK_TYPE_DRAWING_AREA);
@@ -370,6 +371,7 @@ play_button_init (PlayButton *self)
                       next_list);
 	
 	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 50); 
+  
 }
 
 static void
@@ -395,6 +397,7 @@ play_button_expose (GtkWidget *button, GdkEventExpose *event)
                    event->area.width, event->area.height);
 
 	cairo_clip(cr);
+  
 	draw (button, cr);
 	cairo_destroy (cr);
 	return FALSE;
