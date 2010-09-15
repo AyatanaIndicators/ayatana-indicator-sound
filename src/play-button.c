@@ -370,7 +370,7 @@ play_button_init (PlayButton *self)
                       GINT_TO_POINTER(TRANSPORT_NEXT),
                       next_list);
 	
-	gtk_widget_set_size_request(GTK_WIDGET(self), 100, 50); 
+	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 50); 
   
 }
 
@@ -397,6 +397,7 @@ play_button_expose (GtkWidget *button, GdkEventExpose *event)
                    event->area.width, event->area.height);
 
 	cairo_clip(cr);
+  
 	draw (button, cr);
 	cairo_destroy (cr);
 	return FALSE;
