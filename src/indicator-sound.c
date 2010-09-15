@@ -365,7 +365,9 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
       IndicatorSound* indicator = INDICATOR_SOUND(user_data);
       fetch_sink_availability_from_dbus(indicator);    
   	  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
-      determine_state_from_volume (volume_widget_get_current_volume(priv->volume_widget));
+      if(priv->volume_widget != NULL){
+        determine_state_from_volume (volume_widget_get_current_volume(priv->volume_widget));
+      }
     }
   }  
   else{
@@ -557,8 +559,11 @@ fetch_sink_availability_from_dbus(IndicatorSound* self)
   }
 
 	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
-	GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));	
-  gtk_widget_set_sensitive(slider_widget, device_available);
+
+  if(priv->volume_widget != NULL){
+    GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));	
+    gtk_widget_set_sensitive(slider_widget, device_available);
+  }
 
   g_free(available_input);
   g_debug("IndicatorSound::fetch_sink_availability_from_dbus ->%i", device_available);
