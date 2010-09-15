@@ -1,3 +1,12 @@
+indicator-sound (0.4.6-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    - indicator crashes in the event of the service crashing (LP: #638891)
+    - metadata widget should remain hidden if there is no track 
+      data (LP: #637031)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 15 Sep 2010 08:47:49 -0400
+
 indicator-sound (0.4.5-0ubuntu1) maverick; urgency=low
 
   * New upstream release.
