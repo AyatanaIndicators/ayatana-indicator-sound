@@ -140,10 +140,10 @@ static gboolean familiar_players_db_create_key_file (FamiliarPlayersDB* self) {
 			_tmp1_ = g_key_file_load_from_file (self->priv->key_file, self->priv->file_name, G_KEY_FILE_NONE, &_inner_error_);
 			if (_inner_error_ != NULL) {
 				if (_inner_error_->domain == G_KEY_FILE_ERROR) {
-					goto __catch10_g_key_file_error;
+					goto __catch6_g_key_file_error;
 				}
 				if (_inner_error_->domain == G_FILE_ERROR) {
-					goto __catch10_g_file_error;
+					goto __catch6_g_file_error;
 				}
 				g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 				g_clear_error (&_inner_error_);
@@ -151,8 +151,8 @@ static gboolean familiar_players_db_create_key_file (FamiliarPlayersDB* self) {
 			}
 			_result_ = _tmp1_;
 		}
-		goto __finally10;
-		__catch10_g_key_file_error:
+		goto __finally6;
+		__catch6_g_key_file_error:
 		{
 			GError * e;
 			e = _inner_error_;
@@ -163,8 +163,8 @@ static gboolean familiar_players_db_create_key_file (FamiliarPlayersDB* self) {
 				_g_error_free0 (e);
 			}
 		}
-		goto __finally10;
-		__catch10_g_file_error:
+		goto __finally6;
+		__catch6_g_file_error:
 		{
 			GError * e;
 			e = _inner_error_;
@@ -175,7 +175,7 @@ static gboolean familiar_players_db_create_key_file (FamiliarPlayersDB* self) {
 				_g_error_free0 (e);
 			}
 		}
-		__finally10:
+		__finally6:
 		if (_inner_error_ != NULL) {
 			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -196,7 +196,7 @@ static gboolean familiar_players_db_check_for_keys (FamiliarPlayersDB* self) {
 		_tmp0_ = g_key_file_has_key (self->priv->key_file, FAMILIAR_PLAYERS_DB_GROUP_NAME, FAMILIAR_PLAYERS_DB_KEY_NAME, &_inner_error_);
 		if (_inner_error_ != NULL) {
 			if (_inner_error_->domain == G_KEY_FILE_ERROR) {
-				goto __catch11_g_key_file_error;
+				goto __catch7_g_key_file_error;
 			}
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -207,8 +207,8 @@ static gboolean familiar_players_db_check_for_keys (FamiliarPlayersDB* self) {
 			return result;
 		}
 	}
-	goto __finally11;
-	__catch11_g_key_file_error:
+	goto __finally7;
+	__catch7_g_key_file_error:
 	{
 		GError * e;
 		e = _inner_error_;
@@ -219,7 +219,7 @@ static gboolean familiar_players_db_check_for_keys (FamiliarPlayersDB* self) {
 			return result;
 		}
 	}
-	__finally11:
+	__finally7:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -245,7 +245,7 @@ static gboolean familiar_players_db_load_data_from_key_file (FamiliarPlayersDB* 
 		desktops = (_tmp1_ = g_key_file_get_string_list (self->priv->key_file, FAMILIAR_PLAYERS_DB_GROUP_NAME, FAMILIAR_PLAYERS_DB_KEY_NAME, &_tmp0_, &_inner_error_), desktops_length1 = _tmp0_, _desktops_size_ = desktops_length1, _tmp1_);
 		if (_inner_error_ != NULL) {
 			if (_inner_error_->domain == G_KEY_FILE_ERROR) {
-				goto __catch12_g_key_file_error;
+				goto __catch8_g_key_file_error;
 			}
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -270,8 +270,8 @@ static gboolean familiar_players_db_load_data_from_key_file (FamiliarPlayersDB* 
 		desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
 		return result;
 	}
-	goto __finally12;
-	__catch12_g_key_file_error:
+	goto __finally8;
+	__catch8_g_key_file_error:
 	{
 		GError * _error_;
 		_error_ = _inner_error_;
@@ -283,7 +283,7 @@ static gboolean familiar_players_db_load_data_from_key_file (FamiliarPlayersDB* 
 			return result;
 		}
 	}
-	__finally12:
+	__finally8:
 	{
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -338,8 +338,8 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 		char* _tmp4_;
 		data = (_tmp4_ = g_key_file_to_data (keyfile, &data_length, NULL), _g_free0 (data), _tmp4_);
 	}
-	goto __finally13;
-	__catch13_g_key_file_error:
+	goto __finally9;
+	__catch9_g_key_file_error:
 	{
 		GError * e;
 		e = _inner_error_;
@@ -354,7 +354,7 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 			return result;
 		}
 	}
-	__finally13:
+	__finally9:
 	if (_inner_error_ != NULL) {
 		_g_free0 (data);
 		desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
@@ -376,7 +376,7 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 		_tmp5_ = g_file_set_contents (self->priv->file_name, data, (gssize) data_length, &_inner_error_);
 		if (_inner_error_ != NULL) {
 			if (_inner_error_->domain == G_FILE_ERROR) {
-				goto __catch14_g_file_error;
+				goto __catch10_g_file_error;
 			}
 			_g_free0 (data);
 			desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
@@ -389,8 +389,8 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 			g_warning ("familiar-players-db.vala:125: Unable to write out file '%s'", self->priv->file_name);
 		}
 	}
-	goto __finally14;
-	__catch14_g_file_error:
+	goto __finally10;
+	__catch10_g_file_error:
 	{
 		GError * err;
 		err = _inner_error_;
@@ -400,7 +400,7 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 			_g_error_free0 (err);
 		}
 	}
-	__finally14:
+	__finally10:
 	if (_inner_error_ != NULL) {
 		_g_free0 (data);
 		desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
