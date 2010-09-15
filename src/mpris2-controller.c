@@ -122,8 +122,8 @@ typedef struct _TransportMenuitemClass TransportMenuitemClass;
 #define __vala_GValue_free0(var) ((var == NULL) ? NULL : (var = (_vala_GValue_free (var), NULL)))
 
 #define TRANSPORT_MENUITEM_TYPE_ACTION (transport_menuitem_action_get_type ())
-#define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 #define _dbus_g_connection_unref0(var) ((var == NULL) ? NULL : (var = (dbus_g_connection_unref (var), NULL)))
+#define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 
 struct _MprisRootIface {
 	GTypeInterface parent_iface;
@@ -419,6 +419,7 @@ static GHashTable* mpris2_controller_clean_metadata (Mpris2Controller* self);
 void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
 GeeHashSet* metadata_menuitem_attributes_format (void);
 void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes);
+gboolean player_item_populated (PlayerItem* self, GeeHashSet* attrs);
 static void _vala_GValue_free (GValue* self);
 static char** _vala_array_dup1 (char** self, int length);
 void mpris2_controller_initial_update (Mpris2Controller* self);
@@ -4457,7 +4458,6 @@ void mpris2_controller_property_changed_cb (Mpris2Controller* self, const char* 
 	char* _tmp0_;
 	gboolean _tmp1_ = FALSE;
 	GValue* play_v;
-	GValue* pos_v;
 	GValue* meta_v;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (interface_source != NULL);
@@ -4482,36 +4482,30 @@ void mpris2_controller_property_changed_cb (Mpris2Controller* self, const char* 
 		PlayerItem* _tmp2_;
 		TransportMenuitem* _tmp3_;
 		state = mpris_player_get_PlaybackStatus (self->priv->_player);
-		g_debug ("mpris2-controller.vala:104: new playback state = %s", state);
 		p = (TransportMenuitemstate) mpris2_controller_determine_play_state (self, state);
 		transport_menuitem_change_play_state (_tmp3_ = (_tmp2_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT), IS_TRANSPORT_MENUITEM (_tmp2_) ? ((TransportMenuitem*) _tmp2_) : NULL), p);
 		_g_object_unref0 (_tmp3_);
 		_g_free0 (state);
 	}
-	pos_v = __g_value_dup0 ((GValue*) g_hash_table_lookup (changed_properties, "Position"));
-	if (pos_v != NULL) {
-		gint64 pos;
-		pos = g_value_get_int64 (pos_v);
-		g_debug ("mpris2-controller.vala:112: new position = %i", (gint) pos);
-	}
 	meta_v = __g_value_dup0 ((GValue*) g_hash_table_lookup (changed_properties, "Metadata"));
 	if (meta_v != NULL) {
 		GHashTable* changed_updates;
-		PlayerItem* _tmp4_;
+		PlayerItem* metadata;
+		GeeHashSet* _tmp4_;
 		GeeHashSet* _tmp5_;
-		PlayerItem* _tmp6_;
-		GeeHashSet* _tmp7_;
+		GeeHashSet* _tmp6_;
 		changed_updates = mpris2_controller_clean_metadata (self);
-		player_item_reset (_tmp4_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA), _tmp5_ = metadata_menuitem_attributes_format ());
-		_g_object_unref0 (_tmp5_);
+		metadata = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
+		player_item_reset (metadata, _tmp4_ = metadata_menuitem_attributes_format ());
 		_g_object_unref0 (_tmp4_);
-		player_item_update (_tmp6_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA), changed_updates, _tmp7_ = metadata_menuitem_attributes_format ());
-		_g_object_unref0 (_tmp7_);
+		player_item_update (metadata, changed_updates, _tmp5_ = metadata_menuitem_attributes_format ());
+		_g_object_unref0 (_tmp5_);
+		dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) metadata, DBUSMENU_MENUITEM_PROP_VISIBLE, player_item_populated (metadata, _tmp6_ = metadata_menuitem_attributes_format ()));
 		_g_object_unref0 (_tmp6_);
+		_g_object_unref0 (metadata);
 		_g_hash_table_unref0 (changed_updates);
 	}
 	__vala_GValue_free0 (meta_v);
-	__vala_GValue_free0 (pos_v);
 	__vala_GValue_free0 (play_v);
 }
 
@@ -4552,7 +4546,7 @@ static GHashTable* mpris2_controller_clean_metadata (Mpris2Controller* self) {
 		artists = (_tmp5_ = (_tmp4_ = (_tmp3_ = g_value_get_boxed ((GValue*) g_hash_table_lookup (_tmp2_ = mpris_player_get_Metadata (self->priv->_player), "xesam:artist")), (_tmp3_ == NULL) ? ((gpointer) _tmp3_) : _vala_array_dup1 (_tmp3_, g_strv_length (g_value_get_boxed ((GValue*) g_hash_table_lookup (_tmp2_ = mpris_player_get_Metadata (self->priv->_player), "xesam:artist"))))), _g_hash_table_unref0 (_tmp2_), _tmp4_), artists_length1 = g_strv_length (g_value_get_boxed ((GValue*) g_hash_table_lookup (_tmp2_ = mpris_player_get_Metadata (self->priv->_player), "xesam:artist"))), _artists_size_ = artists_length1, _tmp5_);
 		display_artists = g_strjoinv (", ", artists);
 		g_hash_table_replace (changed_updates, g_strdup ("xesam:artist"), (_tmp6_ = g_new0 (GValue, 1), g_value_init (_tmp6_, G_TYPE_STRING), g_value_set_string (_tmp6_, display_artists), _tmp6_));
-		g_debug ("mpris2-controller.vala:132: artist : %s", display_artists);
+		g_debug ("mpris2-controller.vala:128: artist : %s", display_artists);
 		_g_free0 (display_artists);
 		artists = (_vala_array_free (artists, artists_length1, (GDestroyNotify) g_free), NULL);
 	}
@@ -4587,7 +4581,6 @@ static TransportMenuitemstate mpris2_controller_determine_play_state (Mpris2Cont
 		_tmp0_ = FALSE;
 	}
 	if (_tmp0_) {
-		g_debug ("mpris2-controller.vala:148: determine play state - state = %s", status);
 		result = TRANSPORT_MENUITEM_STATE_PLAYING;
 		return result;
 	}
@@ -4613,7 +4606,6 @@ void mpris2_controller_initial_update (Mpris2Controller* self) {
 		update = mpris2_controller_determine_play_state (self, _tmp2_ = mpris_player_get_PlaybackStatus (self->priv->_player));
 		_g_free0 (_tmp2_);
 	}
-	g_debug ("mpris2-controller.vala:163: initial update - play state %i", (gint) update);
 	transport_menuitem_change_play_state (_tmp4_ = (_tmp3_ = (PlayerItem*) gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT), IS_TRANSPORT_MENUITEM (_tmp3_) ? ((TransportMenuitem*) _tmp3_) : NULL), update);
 	_g_object_unref0 (_tmp4_);
 	cleaned_metadata = mpris2_controller_clean_metadata (self);
@@ -4625,78 +4617,16 @@ void mpris2_controller_initial_update (Mpris2Controller* self) {
 
 
 void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuitemaction command) {
-	GError * _inner_error_ = NULL;
 	g_return_if_fail (self != NULL);
-	g_debug ("mpris2-controller.vala:173: transport_event input = %i", (gint) command);
+	g_debug ("mpris2-controller.vala:165: transport_event input = %i", (gint) command);
 	if (command == TRANSPORT_MENUITEM_ACTION_PLAY_PAUSE) {
-		g_debug ("mpris2-controller.vala:175: transport_event PLAY_PAUSE");
-		{
-			mpris_player_PlayPause (self->priv->_player, NULL, NULL);
-		}
-		goto __finally5;
-		__catch5_dbus_gerror:
-		{
-			GError * _error_;
-			_error_ = _inner_error_;
-			_inner_error_ = NULL;
-			{
-				g_warning ("mpris2-controller.vala:180: DBus Error calling the player objects Play" \
-"Pause method %s", _error_->message);
-				_g_error_free0 (_error_);
-			}
-		}
-		__finally5:
-		if (_inner_error_ != NULL) {
-			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
-			g_clear_error (&_inner_error_);
-			return;
-		}
+		mpris_player_PlayPause (self->priv->_player, NULL, NULL);
 	} else {
 		if (command == TRANSPORT_MENUITEM_ACTION_PREVIOUS) {
-			{
-				mpris_player_Previous (self->priv->_player, NULL, NULL);
-			}
-			goto __finally6;
-			__catch6_dbus_gerror:
-			{
-				GError * _error_;
-				_error_ = _inner_error_;
-				_inner_error_ = NULL;
-				{
-					g_warning ("mpris2-controller.vala:189: DBus Error calling the player objects Prev" \
-"ious method %s", _error_->message);
-					_g_error_free0 (_error_);
-				}
-			}
-			__finally6:
-			if (_inner_error_ != NULL) {
-				g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
-				g_clear_error (&_inner_error_);
-				return;
-			}
+			mpris_player_Previous (self->priv->_player, NULL, NULL);
 		} else {
 			if (command == TRANSPORT_MENUITEM_ACTION_NEXT) {
-				{
-					mpris_player_Next (self->priv->_player, NULL, NULL);
-				}
-				goto __finally7;
-				__catch7_dbus_gerror:
-				{
-					GError * _error_;
-					_error_ = _inner_error_;
-					_inner_error_ = NULL;
-					{
-						g_warning ("mpris2-controller.vala:198: DBus Error calling the player objects Next" \
-" method %s", _error_->message);
-						_g_error_free0 (_error_);
-					}
-				}
-				__finally7:
-				if (_inner_error_ != NULL) {
-					g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
-					g_clear_error (&_inner_error_);
-					return;
-				}
+				mpris_player_Next (self->priv->_player, NULL, NULL);
 			}
 		}
 	}
@@ -4736,30 +4666,9 @@ gboolean mpris2_controller_was_successfull (Mpris2Controller* self) {
 
 
 void mpris2_controller_expose (Mpris2Controller* self) {
-	GError * _inner_error_ = NULL;
 	g_return_if_fail (self != NULL);
 	if (mpris2_controller_connected (self) == TRUE) {
-		{
-			mpris_root_Raise (self->priv->_mpris2_root, NULL, NULL);
-		}
-		goto __finally8;
-		__catch8_dbus_gerror:
-		{
-			GError * e;
-			e = _inner_error_;
-			_inner_error_ = NULL;
-			{
-				g_error ("mpris2-controller.vala:224: Exception thrown while calling function Ra" \
-"ise - %s", e->message);
-				_g_error_free0 (e);
-			}
-		}
-		__finally8:
-		if (_inner_error_ != NULL) {
-			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
-			g_clear_error (&_inner_error_);
-			return;
-		}
+		mpris_root_Raise (self->priv->_mpris2_root, NULL, NULL);
 	}
 }
 
@@ -4869,7 +4778,7 @@ static GObject * mpris2_controller_constructor (GType type, guint n_construct_pr
 			connection = dbus_g_bus_get (DBUS_BUS_SESSION, &_inner_error_);
 			if (_inner_error_ != NULL) {
 				if (_inner_error_->domain == DBUS_GERROR) {
-					goto __catch9_dbus_gerror;
+					goto __catch5_dbus_gerror;
 				}
 				g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 				g_clear_error (&_inner_error_);
@@ -4896,8 +4805,8 @@ static GObject * mpris2_controller_constructor (GType type, guint n_construct_pr
 			g_signal_connect_object (self->priv->_properties_interface, "properties-changed", (GCallback) _mpris2_controller_property_changed_cb_free_desktop_properties_properties_changed, self, 0);
 			_dbus_g_connection_unref0 (connection);
 		}
-		goto __finally9;
-		__catch9_dbus_gerror:
+		goto __finally5;
+		__catch5_dbus_gerror:
 		{
 			GError * e;
 			e = _inner_error_;
@@ -4907,7 +4816,7 @@ static GObject * mpris2_controller_constructor (GType type, guint n_construct_pr
 				_g_error_free0 (e);
 			}
 		}
-		__finally9:
+		__finally5:
 		if (_inner_error_ != NULL) {
 			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);

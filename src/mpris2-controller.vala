@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using DBus;
-
+using Dbusmenu;
 
 [DBus (name = "org.mpris.MediaPlayer2")]
 public interface MprisRoot : DBus.Object {
@@ -81,7 +81,7 @@ public class Mpris2Controller : GLib.Object
 			this.player = (MprisPlayer) connection.get_object (root_interface.concat(".").concat(this.owner.name.down()),
 				                                               "/org/mpris/MediaPlayer2",
 				                                               root_interface.concat(".Player"));						
-			this.properties_interface = (FreeDesktopProperties) connection.get_object("org.freedesktop.Properties.PropertiesChanged",//root_interface.concat(".").concat(this.owner.name.down()),
+			this.properties_interface = (FreeDesktopProperties) connection.get_object("org.freedesktop.Properties.PropertiesChanged",
 			                                                                          "/org/mpris/MediaPlayer2");                                                                                
 			this.properties_interface.PropertiesChanged += property_changed_cb;			
 			
@@ -101,24 +101,20 @@ public class Mpris2Controller : GLib.Object
 		Value? play_v = changed_properties.lookup("PlaybackStatus");
 		if(play_v != null){
 			string state = this.player.PlaybackStatus;		
-			debug("new playback state = %s", state);			
 			TransportMenuitem.state p = (TransportMenuitem.state)this.determine_play_state(state);
 			(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(p);			
 		}
 		
-		Value? pos_v = changed_properties.lookup("Position");
-		if(pos_v != null){
-			int64 pos = pos_v.get_int64();
-			debug("new position = %i", (int)pos);
-		}
-
 		Value? meta_v = changed_properties.lookup("Metadata");
 		if(meta_v != null){
-			GLib.HashTable<string, Value?> changed_updates = clean_metadata();	
-			this.owner.custom_items[PlayerController.widget_order.METADATA].reset(MetadataMenuitem.attributes_format());
-			this.owner.custom_items[PlayerController.widget_order.METADATA].update(changed_updates,
-			                          																						 MetadataMenuitem.attributes_format());			
-		}
+			GLib.HashTable<string, Value?> changed_updates = clean_metadata();
+      PlayerItem metadata = this.owner.custom_items[PlayerController.widget_order.METADATA];
+			metadata.reset(MetadataMenuitem.attributes_format());
+			metadata.update(changed_updates, 
+                      MetadataMenuitem.attributes_format());	
+		  metadata.property_set_bool(MENUITEM_PROP_VISIBLE,
+                                 metadata.populated(MetadataMenuitem.attributes_format()));		      
+    }
 	}
 
 	private GLib.HashTable<string, Value?> clean_metadata()
@@ -139,13 +135,11 @@ public class Mpris2Controller : GLib.Object
 		return changed_updates;
 	}
 	
-	
 	private TransportMenuitem.state determine_play_state(string status){
 		if(status == null)
 			return TransportMenuitem.state.PAUSED;
 		
 		if(status != null && status == "Playing"){
-			debug("determine play state - state = %s", status);
 			return TransportMenuitem.state.PLAYING;
 		}
 		return TransportMenuitem.state.PAUSED;		
@@ -159,9 +153,7 @@ public class Mpris2Controller : GLib.Object
 		}
 		else{
 			update = determine_play_state(this.player.PlaybackStatus);
-		}
-		debug("initial update - play state %i", (int)update);
-		
+		}		
 		(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(update);
 		GLib.HashTable<string, Value?> cleaned_metadata = this.clean_metadata();
 		this.owner.custom_items[PlayerController.widget_order.METADATA].update(cleaned_metadata,
@@ -172,32 +164,13 @@ public class Mpris2Controller : GLib.Object
 	{		
 		debug("transport_event input = %i", (int)command);
 		if(command == TransportMenuitem.action.PLAY_PAUSE){
-			debug("transport_event PLAY_PAUSE");
-			try{
-				this.player.PlayPause.begin();							
-			}
-			catch(DBus.Error error){
-				warning("DBus Error calling the player objects PlayPause method %s",
-				        error.message);
-			}			
+			this.player.PlayPause.begin();							
 		}
 		else if(command == TransportMenuitem.action.PREVIOUS){
-			try{
-				this.player.Previous.begin();
-			}
-			catch(DBus.Error error){
-				warning("DBus Error calling the player objects Previous method %s",
-				        error.message);
-			}							
+			this.player.Previous.begin();
 		}
 		else if(command == TransportMenuitem.action.NEXT){
-			try{
-				this.player.Next.begin();
-			}
-			catch(DBus.Error error){
-				warning("DBus Error calling the player objects Next method %s",
-				      	error.message);
-			}								
+			this.player.Next.begin();
 		}	
 	}
 	
@@ -208,7 +181,7 @@ public class Mpris2Controller : GLib.Object
 
 		
 	public bool was_successfull(){
-		if(this.mpris2_root == null ||this.player == null){
+		if(this.mpris2_root == null || this.player == null){
 			return false;
 		}
 		return true;
@@ -217,12 +190,7 @@ public class Mpris2Controller : GLib.Object
 	public void expose()
 	{
 		if(this.connected() == true){
-			try{
-				this.mpris2_root.Raise.begin();
-			}
-			catch(DBus.Error e){
-				error("Exception thrown while calling function Raise - %s", e.message);
-			}
+			this.mpris2_root.Raise.begin();
 		}
 	}
 }
