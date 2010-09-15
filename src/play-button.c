@@ -370,7 +370,7 @@ play_button_init (PlayButton *self)
                       GINT_TO_POINTER(TRANSPORT_NEXT),
                       next_list);
 	
-	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 50); 
+	gtk_widget_set_size_request(GTK_WIDGET(self), 100, 50); 
   
 }
 
