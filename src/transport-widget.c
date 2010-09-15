@@ -54,10 +54,15 @@ static gboolean transport_widget_button_press_event 	(GtkWidget      *menuitem,
                                                   		GdkEventButton  *event);
 static gboolean transport_widget_button_release_event (GtkWidget      *menuitem,
                                                     	GdkEventButton  *event);                                          
-static void transport_widget_property_update(DbusmenuMenuitem* item,
+static void transport_widget_property_update( DbusmenuMenuitem* item,
                                        				gchar * property, 
                                        				GValue * value,
-                                       				gpointer userdata);
+                                       				gpointer userdata );
+static void transport_widget_menu_hidden ( GtkWidget        *menu,
+                                           TransportWidget *transport);
+static void transport_widget_notify ( TransportWidget *item,
+                                      GParamSpec       *pspec,
+                                      gpointer          user_data );
 
 
 G_DEFINE_TYPE (TransportWidget, transport_widget, GTK_TYPE_MENU_ITEM);
@@ -100,6 +105,11 @@ transport_widget_init (TransportWidget *self)
 	gtk_container_add (GTK_CONTAINER (self), priv->hbox);
 
   gtk_widget_show_all (priv->hbox);
+
+  g_signal_connect (G_OBJECT(self),
+                    "notify",
+                    G_CALLBACK (transport_widget_notify),
+                    NULL);  
 }
 
 static void
@@ -128,6 +138,37 @@ static void transport_widget_set_twin_item(TransportWidget* self,
 	g_signal_connect(G_OBJECT(priv->twin_item), "property-changed", 
 	                 G_CALLBACK(transport_widget_property_update), self);
 }
+
+static void
+transport_widget_notify (TransportWidget *item,
+                         GParamSpec       *pspec,
+                         gpointer          user_data)
+{
+  
+  if (g_strcmp0 (pspec->name, "parent"))
+    {
+      GtkWidget *parent = gtk_widget_get_parent (GTK_WIDGET (item));
+
+      if (parent)
+        {
+          g_signal_connect (parent, "hide",
+                            G_CALLBACK (transport_widget_menu_hidden),
+                            item);
+        }
+    }
+}
+
+static void
+transport_widget_menu_hidden ( GtkWidget        *menu,
+                               TransportWidget *transport)
+{
+  g_debug("Transport Widget's menu hidden method called");
+	g_return_val_if_fail(IS_TRANSPORT_WIDGET(transport), FALSE);
+	TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE(TRANSPORT_WIDGET(transport));
+	play_button_react_to_button_release(priv->play_button, TRANSPORT_NADA);
+    
+}
+
 
 /* keyevents */
 static gboolean
