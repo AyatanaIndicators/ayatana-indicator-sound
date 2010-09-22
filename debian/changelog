@@ -1,9 +1,9 @@
-indicator-sound (0.4.7-0ubuntu2) UNRELEASED; urgency=low
+indicator-sound (0.4.7-0ubuntu2) libindicator; urgency=low
 
   * Rebuild for libindicator ABI change (LP: #637692)
   * debian/control: depends on latest libindicator-dev 
 
- -- Didier Roche <didrocks@ubuntu.com>  Wed, 22 Sep 2010 11:17:45 +0200
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 22 Sep 2010 18:40:25 +0200
 
 indicator-sound (0.4.7-0ubuntu1) maverick; urgency=low
 
