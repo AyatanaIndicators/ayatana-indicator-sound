@@ -102,7 +102,7 @@ static gboolean play_button_expose (GtkWidget *button, GdkEventExpose *event);
 
 static void draw (GtkWidget* button, cairo_t *cr);
 
-G_DEFINE_TYPE (PlayButton, play_button, GTK_TYPE_DRAWING_AREA);
+G_DEFINE_TYPE (PlayButton, play_button, GTK_TYPE_EVENT_BOX);
 
 /// internal helper functions //////////////////////////////////////////////////
 
@@ -371,6 +371,7 @@ play_button_init (PlayButton *self)
                       next_list);
 	
 	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 50); 
+  gtk_event_box_set_visible_window (GTK_EVENT_BOX(self), FALSE);
   
 }
 
@@ -392,11 +393,11 @@ play_button_expose (GtkWidget *button, GdkEventExpose *event)
 	cairo_t *cr;
 	cr = gdk_cairo_create (button->window);
 
-	cairo_rectangle (cr,
+	/*cairo_rectangle (cr,
                    event->area.x, event->area.y,
                    event->area.width, event->area.height);
 
-	cairo_clip(cr);
+	cairo_clip(cr);*/
   
 	draw (button, cr);
 	cairo_destroy (cr);

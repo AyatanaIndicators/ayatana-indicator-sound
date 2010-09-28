@@ -46,11 +46,11 @@ typedef enum {
 }PlayButtonState;
 
 struct _PlayButtonClass {
-	  GtkDrawingAreaClass parent_class;
+	  GtkEventBoxClass parent_class;
 };
 
 struct _PlayButton {
-	  GtkDrawingArea parent;
+	  GtkEventBox parent;
 };
 
 GType play_button_get_type (void);
