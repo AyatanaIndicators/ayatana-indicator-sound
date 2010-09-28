@@ -165,8 +165,7 @@ transport_widget_menu_hidden ( GtkWidget        *menu,
   g_debug("Transport Widget's menu hidden method called");
 	g_return_if_fail(IS_TRANSPORT_WIDGET(transport));
 	TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE(TRANSPORT_WIDGET(transport));
-	play_button_react_to_button_release(priv->play_button, TRANSPORT_NADA);
-    
+	play_button_react_to_button_release(priv->play_button, TRANSPORT_NADA);    
 }
 
 
@@ -226,8 +225,7 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 		TransportWidgetPrivate *priv = TRANSPORT_WIDGET_GET_PRIVATE(bar);
 		int update_value = g_value_get_int(value);
 		g_debug("transport_widget_update_state - with value  %i", update_value);  
-		play_button_toggle_play_pause(priv->play_button, (PlayButtonState)update_value);
-		
+		play_button_toggle_play_pause(priv->play_button, (PlayButtonState)update_value);		
 	}
 }
 

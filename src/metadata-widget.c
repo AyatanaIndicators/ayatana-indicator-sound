@@ -51,7 +51,6 @@ static void metadata_widget_init          (MetadataWidget *self);
 static void metadata_widget_dispose       (GObject *object);
 static void metadata_widget_finalize      (GObject *object);
 static gboolean metadata_image_expose     (GtkWidget *image, GdkEventExpose *event, gpointer user_data);
-//static void metadata_widget_style_changed_cb(GtkWidget *widget, gpointer user_data);
 static void metadata_widget_set_style     (GtkWidget* button, GtkStyle* style);
 
 // keyevent consumers

@@ -371,6 +371,7 @@ play_button_init (PlayButton *self)
                       next_list);
 	
 	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 50); 
+  GtkA
   gtk_event_box_set_visible_window (GTK_EVENT_BOX(self), FALSE);
   
 }
@@ -393,11 +394,15 @@ play_button_expose (GtkWidget *button, GdkEventExpose *event)
 	cairo_t *cr;
 	cr = gdk_cairo_create (button->window);
 
-	/*cairo_rectangle (cr,
+	//GtkAllocation alloc;
+	//gtk_widget_get_allocation (metadata, &alloc);
+  
+  g_debug("In the playbutton's expose method, x = %i, y=%i and width: %i and height: %i'")
+	cairo_rectangle (cr,
                    event->area.x, event->area.y,
                    event->area.width, event->area.height);
 
-	cairo_clip(cr);*/
+	cairo_clip(cr);
   
 	draw (button, cr);
 	cairo_destroy (cr);
