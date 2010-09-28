@@ -20,7 +20,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 Uses code from ctk
 */
 
-#ifdef HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H	int x = button->allocation.x + X;
 #include "config.h"
 #endif
 
@@ -28,8 +28,8 @@ Uses code from ctk
 #include "play-button.h"
 
 #define RECT_WIDTH 130.0f
-#define Y 7.0f
-#define X	37.0f
+/*#define Y 7.0f*/
+/*#define X 37.0f*/
 #define INNER_RADIUS 12.5
 #define	MIDDLE_RADIUS 13.5f
 #define OUTER_RADIUS  14.5f
@@ -371,7 +371,6 @@ play_button_init (PlayButton *self)
                       next_list);
 	
 	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 50); 
-  GtkA
   gtk_event_box_set_visible_window (GTK_EVENT_BOX(self), FALSE);
   
 }
@@ -396,15 +395,15 @@ play_button_expose (GtkWidget *button, GdkEventExpose *event)
 
 	//GtkAllocation alloc;
 	//gtk_widget_get_allocation (metadata, &alloc);
-  
-  g_debug("In the playbutton's expose method, x = %i, y=%i and width: %i and height: %i'")
-	cairo_rectangle (cr,
-                   event->area.x, event->area.y,
-                   event->area.width, event->area.height);
+/*  */
+/*  g_debug("In the playbutton's expose method, x = %i, y=%i and width: %i and height: %i'");*/
+/*	cairo_rectangle (cr,*/
+/*                   event->area.x, event->area.y,*/
+/*                   event->area.width, event->area.height);*/
 
-	cairo_clip(cr);
-  
+/*	cairo_clip(cr);*/
 	draw (button, cr);
+
 	cairo_destroy (cr);
 	return FALSE;
 }
@@ -443,14 +442,6 @@ play_button_react_to_button_press(GtkWidget* button, PlayButtonEvent command)
 	cairo_t *cr;
 	cr = gdk_cairo_create (button->window);
 
-	GList* list = g_hash_table_lookup(priv->command_coordinates,
-	                                  GINT_TO_POINTER(priv->current_command));
-	cairo_rectangle(cr,
-	                GPOINTER_TO_INT(g_list_nth_data(list, 0)),
-	                GPOINTER_TO_INT(g_list_nth_data(list, 1)),
-									GPOINTER_TO_INT(g_list_nth_data(list, 2)),	               	
-									GPOINTER_TO_INT(g_list_nth_data(list, 3)));
-	cairo_clip(cr);
 	draw (button, cr);
 	cairo_destroy (cr);
 }
@@ -473,21 +464,11 @@ play_button_react_to_button_release(GtkWidget* button, PlayButtonEvent command)
 	cairo_t *cr;
 	
 	cr = gdk_cairo_create (button->window);
-	GList* list = g_hash_table_lookup(priv->command_coordinates,
-	                                  GINT_TO_POINTER(priv->current_command));
 
 	priv->current_command = TRANSPORT_NADA;
-	
-	cairo_rectangle(cr,
-	                GPOINTER_TO_INT(g_list_nth_data(list, 0)),
-	                GPOINTER_TO_INT(g_list_nth_data(list, 1)),
-									GPOINTER_TO_INT(g_list_nth_data(list, 2)),	               	
-									GPOINTER_TO_INT(g_list_nth_data(list, 3)));
 
-	cairo_clip(cr);
 	draw (button, cr);
 	cairo_destroy (cr);
-	
 }    
 
 void
@@ -955,9 +936,14 @@ draw (GtkWidget* button, cairo_t *cr)
 	cairo_surface_t*  surf = NULL;
 	cairo_t*       cr_surf = NULL;
 
-  GtkStyle *style;
+	cairo_translate (cr, button->allocation.x, button->allocation.y);
+	
+	g_debug("button x allocation = %i", button->allocation.x);
+	g_debug("button y allocation = %i", button->allocation.y);
 
-  CairoColorRGB bg_normal, fg_normal;
+	GtkStyle *style;
+
+	CairoColorRGB bg_normal, fg_normal;
 	CairoColorRGB color_inner[2], color_middle[2], color_outer[2], color_button[3], color_inner_compressed[2];
 
 	style = gtk_widget_get_style (button);
@@ -966,13 +952,13 @@ draw (GtkWidget* button, cairo_t *cr)
 	bg_normal.g = style->bg[0].green/65535.0;
 	bg_normal.b = style->bg[0].blue/65535.0;
 
-  fg_normal.r = style->fg[0].red/65535.0;
+	fg_normal.r = style->fg[0].red/65535.0;
 	fg_normal.g = style->fg[0].green/65535.0;
 	fg_normal.b = style->fg[0].blue/65535.0;
 
 	_color_shade (&bg_normal, INNER_START_SHADE, &color_inner[0]);
 	_color_shade (&bg_normal, INNER_END_SHADE, &color_inner[1]);
-  _color_shade (&bg_normal, MIDDLE_START_SHADE, &color_middle[0]);
+	_color_shade (&bg_normal, MIDDLE_START_SHADE, &color_middle[0]);
 	_color_shade (&bg_normal, MIDDLE_END_SHADE, &color_middle[1]);
 	_color_shade (&bg_normal, OUTER_START_SHADE, &color_outer[0]);
 	_color_shade (&bg_normal, OUTER_END_SHADE, &color_outer[1]);
@@ -993,20 +979,20 @@ draw (GtkWidget* button, cairo_t *cr)
 	double INNER_COMPRESSED_START[] = {color_inner_compressed[0].r, color_inner_compressed[0].g, color_inner_compressed[0].b, 1.0f};  
  
 	// prev/next-background
-  draw_gradient (cr,
-                 X,
-                 Y,
-                 RECT_WIDTH,
-                 OUTER_RADIUS,
-                 OUTER_START,
-                 OUTER_END);
-  draw_gradient (cr,
-                 X,
-                 Y + 1,
-                 RECT_WIDTH - 2,
-                 MIDDLE_RADIUS,
-                 MIDDLE_START,
-                 MIDDLE_END);
+	draw_gradient (cr,
+		 X,
+		 Y,
+		 RECT_WIDTH,
+		 OUTER_RADIUS,
+		 OUTER_START,
+		 OUTER_END);
+	draw_gradient (cr,
+		 X,
+		 Y + 1,
+		 RECT_WIDTH - 2,
+		 MIDDLE_RADIUS,
+		 MIDDLE_START,
+		 MIDDLE_END);
 	draw_gradient (cr,
                X,
                Y + 2,
@@ -1035,26 +1021,26 @@ draw (GtkWidget* button, cairo_t *cr)
 	}
 
 	// play/pause-background
-  draw_circle (cr,
-							 X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f,
-							 Y - ((CIRCLE_RADIUS - OUTER_RADIUS)),
-							 CIRCLE_RADIUS,
-							 OUTER_START,
-							 OUTER_END);
-  draw_circle (cr,
-               X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f + 0.5f,
-               Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 0.5f,
-               CIRCLE_RADIUS - 0.75f,
-               MIDDLE_START,
-               MIDDLE_END);
+	draw_circle (cr,
+			X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f,
+			Y - ((CIRCLE_RADIUS - OUTER_RADIUS)),
+			CIRCLE_RADIUS,
+			OUTER_START,
+			OUTER_END);
+	draw_circle (cr,
+	               X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f + 0.5f,
+	               Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 0.5f,
+	               CIRCLE_RADIUS - 0.75f,
+	               MIDDLE_START,
+	               MIDDLE_END);
 
 	if(priv->current_command == TRANSPORT_PLAY_PAUSE){
-    draw_circle (cr,
-                 X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f + 1.5f,
-                 Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 1.5f,
-                 CIRCLE_RADIUS - 1.5f,
-             		 INNER_COMPRESSED_START,
-                 INNER_COMPRESSED_END);
+	    draw_circle (cr,
+			 X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f + 1.5f,
+			 Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 1.5f,
+			 CIRCLE_RADIUS - 1.5f,
+		     		 INNER_COMPRESSED_START,
+			 INNER_COMPRESSED_END);
 	}
 	else{        
 		draw_circle (cr,
@@ -1213,7 +1199,6 @@ draw (GtkWidget* button, cairo_t *cr)
 			     FALSE);
 		_finalize (cr, &cr_surf, &surf, PAUSE_X-0.5f, PAUSE_Y);
 	}
-	
 }
 
 /**
