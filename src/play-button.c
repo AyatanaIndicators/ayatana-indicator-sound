@@ -28,8 +28,8 @@ Uses code from ctk
 #include "play-button.h"
 
 #define RECT_WIDTH 130.0f
-/*#define Y 7.0f*/
-/*#define X 37.0f*/
+#define Y 7.0f
+#define X 37.0f
 #define INNER_RADIUS 12.5
 #define	MIDDLE_RADIUS 13.5f
 #define OUTER_RADIUS  14.5f
@@ -102,7 +102,7 @@ static gboolean play_button_expose (GtkWidget *button, GdkEventExpose *event);
 
 static void draw (GtkWidget* button, cairo_t *cr);
 
-G_DEFINE_TYPE (PlayButton, play_button, GTK_TYPE_EVENT_BOX);
+G_DEFINE_TYPE (PlayButton, play_button, GTK_TYPE_MENU_ITEM);
 
 /// internal helper functions //////////////////////////////////////////////////
 
@@ -370,8 +370,7 @@ play_button_init (PlayButton *self)
                       GINT_TO_POINTER(TRANSPORT_NEXT),
                       next_list);
 	
-	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 50); 
-  gtk_event_box_set_visible_window (GTK_EVENT_BOX(self), FALSE);
+	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 50);
   
 }
 
