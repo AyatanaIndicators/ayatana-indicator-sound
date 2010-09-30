@@ -32,7 +32,7 @@ typedef struct _TitleWidgetPrivate TitleWidgetPrivate;
 
 struct _TitleWidgetPrivate
 {
-	DbusmenuMenuitem* twin_item;
+	DbusmenuMenuitem* twin_item;  
 };
 
 #define TITLE_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TITLE_WIDGET_TYPE, TitleWidgetPrivate))
