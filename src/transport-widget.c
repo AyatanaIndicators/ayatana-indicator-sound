@@ -31,7 +31,7 @@ Uses code from ctk
 
 #define RECT_WIDTH 130.0f
 #define Y 7.0f
-#define X 37.0f
+#define X 80.0f
 #define INNER_RADIUS 12.5
 #define	MIDDLE_RADIUS 13.5f
 #define OUTER_RADIUS  14.5f
@@ -43,16 +43,16 @@ Uses code from ctk
 #define TRI_WIDTH  11.0f
 #define TRI_HEIGHT 13.0f
 #define TRI_OFFSET  6.0f
-#define PREV_X 35.0f
+#define PREV_X 78.0f
 #define PREV_Y 13.0f
-#define NEXT_X 113.0f
+#define NEXT_X 156.0f
 #define NEXT_Y 13.0f //prev_y
 #define PAUSE_WIDTH 21.0f
 #define PAUSE_HEIGHT 27.0f
 #define BAR_WIDTH 4.5f
 #define BAR_HEIGHT 24.0f
 #define BAR_OFFSET 10.0f
-#define PAUSE_X 78.0f
+#define PAUSE_X 121.0f
 #define	PAUSE_Y 7.0f
 #define PLAY_WIDTH 28.0f
 #define PLAY_HEIGHT 29.0f
@@ -207,7 +207,7 @@ transport_widget_expose (GtkWidget *button, GdkEventExpose *event)
 	cairo_t *cr;
 	cr = gdk_cairo_create (button->window);
 
-   g_debug("In the playbutton's expose method, x = %i, y=%i and width: %i and height: %i'");
+    //g_debug("In the playbutton's expose method, x = %i, y=%i and width: %i and height: %i'");
 	cairo_rectangle (cr,
                      event->area.x, event->area.y,
                      event->area.width, event->area.height);
@@ -250,7 +250,7 @@ transport_widget_menu_hidden ( GtkWidget        *menu,
 {
     g_debug("Transport Widget's menu hidden method called");
 	g_return_if_fail(IS_TRANSPORT_WIDGET(transport));
-	play_button_react_to_button_release(transport, TRANSPORT_NADA); 
+	transport_widget_react_to_button_release(transport, TRANSPORT_NADA); 
 }
 
 /* keyevents */
@@ -258,17 +258,17 @@ static gboolean
 transport_widget_button_press_event (GtkWidget *menuitem, 
                                   	GdkEventButton *event)
 {
-	g_return_val_if_fail(IS_TRANSPORT_WIDGET(menuitem), FALSE);
-	TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(button);
+	g_return_val_if_fail ( IS_TRANSPORT_WIDGET(menuitem), FALSE );
+	TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE ( TRANSPORT_WIDGET(menuitem) );
 
-  	TransportButtonEvent result = transport_widget_determine_button_event ( TRANSPORT_WIDGET(menuitem),
-                                                                       event);
+  	TransportWidgetEvent result = transport_widget_determine_button_event ( TRANSPORT_WIDGET(menuitem),
+                                                                            event);
 	if(result != TRANSPORT_NADA){
         priv->current_command = result;
 	    cairo_t *cr;
 	    cr = gdk_cairo_create (menuitem->window);
-	    draw (button, cr);
-	    cairo_destroy (cr);
+	    draw ( menuitem, cr );
+	    cairo_destroy ( cr );
     }
 	return TRUE;
 }
@@ -282,7 +282,7 @@ transport_widget_button_release_event (GtkWidget *menuitem,
     TransportWidget* transport = TRANSPORT_WIDGET(menuitem);
     TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );	
 
-    TransportButtonEvent result = transport_widget_determine_button_event ( transport,
+    TransportWidgetEvent result = transport_widget_determine_button_event ( transport,
                                                                             event );
     if(result != TRANSPORT_NADA){
         GValue value = {0};
@@ -301,8 +301,8 @@ transport_widget_button_release_event (GtkWidget *menuitem,
 }
 
 static TransportWidgetEvent
-transport_widget_determine_button_event(GtkWidget* button,
-                                        GdkEventButton* event)
+transport_widget_determine_button_event( TransportWidget* button,
+                                         GdkEventButton* event )
 {
 	g_debug("event x coordinate = %f", event->x);
 	g_debug("event y coordinate = %f", event->y);
@@ -325,8 +325,8 @@ transport_widget_determine_button_event(GtkWidget* button,
 
 
 static void 
-transport_widget_react_to_button_release(GtkWidget* button,
-                                         TransportWidgetEvent command)
+transport_widget_react_to_button_release ( TransportWidget* button,
+                                           TransportWidgetEvent command )
 {
 	g_return_if_fail(IS_TRANSPORT_WIDGET(button));
 	TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(button);	
@@ -339,10 +339,10 @@ transport_widget_react_to_button_release(GtkWidget* button,
 		priv->current_command = command;
 	}
 	cairo_t *cr;	
-	cr = gdk_cairo_create (button->window);
+	cr = gdk_cairo_create ( GTK_WIDGET(button)->window );
 	priv->current_command = TRANSPORT_NADA;
 
-	draw (button, cr);
+	draw ( GTK_WIDGET(button), cr );
 	cairo_destroy (cr);
 }    
 
@@ -1287,7 +1287,6 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 
 	if(g_ascii_strcasecmp(DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE, property) == 0)
 	{
-		TransportWidgetPrivate *priv = TRANSPORT_WIDGET_GET_PRIVATE(bar);
 		int update_value = g_value_get_int(value);
 		g_debug("transport_widget_update_state - with value  %i", update_value);  
 		transport_widget_toggle_play_pause(bar,
@@ -1302,10 +1301,11 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 * @returns: a new #TransportWidget.
 **/
 GtkWidget* 
-transport_widget_new()
+transport_widget_new ( DbusmenuMenuitem *item )
 {	
 	GtkWidget* widget =	g_object_new(TRANSPORT_WIDGET_TYPE, NULL);
 	gtk_widget_set_app_paintable (widget, TRUE);	
+	transport_widget_set_twin_item((TransportWidget*)widget, item);  
 	return widget;
 }
 

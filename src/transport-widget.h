@@ -56,7 +56,7 @@ struct _TransportWidget {
 };
 
 GType transport_widget_get_type (void);
-GtkWidget* transport_widget_new();
+GtkWidget* transport_widget_new ( DbusmenuMenuitem *item );
 
 G_END_DECLS
 
