@@ -184,9 +184,9 @@ transport_widget_init (TransportWidget *self)
 	
 	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 50);
     g_signal_connect (G_OBJECT(self),
-                    "notify",
-                    G_CALLBACK (transport_widget_notify),
-                    NULL);    
+                      "notify::parent",
+                      G_CALLBACK (transport_widget_notify),
+                      NULL);    
 }
 
 static void
