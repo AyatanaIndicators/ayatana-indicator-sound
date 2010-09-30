@@ -229,10 +229,10 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	}
 }
 
- /**
- * transport_new:
- * @returns: a new #TransportWidget.
- **/
+/**
+* transport_new:
+* @returns: a new #TransportWidget.
+**/
 GtkWidget* 
 transport_widget_new(DbusmenuMenuitem *item)
 {

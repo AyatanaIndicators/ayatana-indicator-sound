@@ -63,15 +63,15 @@ G_DEFINE_TYPE (TitleWidget, title_widget, GTK_TYPE_IMAGE_MENU_ITEM);
 static void
 title_widget_class_init (TitleWidgetClass *klass)
 {
-	GObjectClass 			*gobject_class = G_OBJECT_CLASS (klass);
-  GtkWidgetClass    *widget_class = GTK_WIDGET_CLASS (klass);
+    GObjectClass 			*gobject_class = G_OBJECT_CLASS (klass);
+    GtkWidgetClass    *widget_class = GTK_WIDGET_CLASS (klass);
 
-	widget_class->button_press_event = title_widget_button_press_event;
-	
-	g_type_class_add_private (klass, sizeof (TitleWidgetPrivate));
+    widget_class->button_press_event = title_widget_button_press_event;
 
-	gobject_class->dispose = title_widget_dispose;
-	gobject_class->finalize = title_widget_finalize;
+    g_type_class_add_private (klass, sizeof (TitleWidgetPrivate));
+
+    gobject_class->dispose = title_widget_dispose;
+    gobject_class->finalize = title_widget_finalize;
 }
 
 static void
@@ -92,7 +92,7 @@ title_widget_init (TitleWidget *self)
                                     + 1 /* padding */,
                                     height);
 	gtk_misc_set_alignment(GTK_MISC(icon), 0.5 /* right aligned */, 0);
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(icon));
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(icon));
 	gtk_widget_show(icon);
 
 }
@@ -118,7 +118,7 @@ title_widget_button_press_event (GtkWidget *menuitem,
 	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(menuitem);
 	
 	GValue value = {0};
-  g_value_init(&value, G_TYPE_BOOLEAN);
+    g_value_init(&value, G_TYPE_BOOLEAN);
 
 	g_value_set_boolean(&value, TRUE);	
 	dbusmenu_menuitem_handle_event (priv->twin_item, "Title menu event", &value, 0);
@@ -134,8 +134,8 @@ title_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	TitleWidget* mitem = TITLE_WIDGET(userdata);
 
 	if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_NAME, property) == 0){
-    gtk_menu_item_set_label (GTK_MENU_ITEM(mitem),
-                             g_value_get_string(value));
+        gtk_menu_item_set_label (GTK_MENU_ITEM(mitem),
+                                g_value_get_string(value));
 	}
 }
 
@@ -158,8 +158,7 @@ title_widget_set_twin_item(TitleWidget* self,
 
   gtk_menu_item_set_label (GTK_MENU_ITEM(self),
                            dbusmenu_menuitem_property_get(priv->twin_item,
-                                                          DBUSMENU_TITLE_MENUITEM_NAME));
-                             
+                                                          DBUSMENU_TITLE_MENUITEM_NAME));                             
 }
                            
 static gboolean
@@ -218,7 +217,7 @@ title_widget_new(DbusmenuMenuitem *item)
 {
 	GtkWidget* widget = g_object_new (TITLE_WIDGET_TYPE,
                                           NULL);
-  gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (widget), TRUE);
+    gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (widget), TRUE);
 	title_widget_set_twin_item((TitleWidget*)widget, item);
 
 	return widget;
