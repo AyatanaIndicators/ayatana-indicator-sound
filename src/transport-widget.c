@@ -225,7 +225,7 @@ transport_widget_toggle_play_pause(TransportWidget* button,
 {
 	TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(button);
 	priv->current_state = update;
-	g_debug("TransportWidget::toggle play state : %i", priv->current_state); 
+	//g_debug("TransportWidget::toggle play state : %i", priv->current_state); 
 	gtk_widget_queue_draw (GTK_WIDGET(button));
 }
 
@@ -248,7 +248,7 @@ static void
 transport_widget_menu_hidden ( GtkWidget        *menu,
                                TransportWidget *transport)
 {
-    g_debug("Transport Widget's menu hidden method called");
+    //g_debug("Transport Widget's menu hidden method called");
 	g_return_if_fail(IS_TRANSPORT_WIDGET(transport));
 	transport_widget_react_to_button_release(transport, TRANSPORT_NADA); 
 }
@@ -277,7 +277,7 @@ static gboolean
 transport_widget_button_release_event (GtkWidget *menuitem, 
                                        GdkEventButton *event)
 {
-    g_debug("TransportWidget::menu_release_event");
+    //g_debug("TransportWidget::menu_release_event");
     g_return_val_if_fail(IS_TRANSPORT_WIDGET(menuitem), FALSE);
     TransportWidget* transport = TRANSPORT_WIDGET(menuitem);
     TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );	
@@ -287,7 +287,7 @@ transport_widget_button_release_event (GtkWidget *menuitem,
     if(result != TRANSPORT_NADA){
         GValue value = {0};
         g_value_init(&value, G_TYPE_INT);
-        g_debug("TransportWidget::menu_press_event - going to send value %i", (int)result);
+        //g_debug("TransportWidget::menu_press_event - going to send value %i", (int)result);
         g_value_set_int(&value, (int)result);	
         dbusmenu_menuitem_handle_event ( priv->twin_item,
                                          "Transport state change",
@@ -304,8 +304,8 @@ static TransportWidgetEvent
 transport_widget_determine_button_event( TransportWidget* button,
                                          GdkEventButton* event )
 {
-	g_debug("event x coordinate = %f", event->x);
-	g_debug("event y coordinate = %f", event->y);
+	//g_debug("event x coordinate = %f", event->x);
+	//g_debug("event y coordinate = %f", event->y);
 	TransportWidgetEvent button_event = TRANSPORT_NADA;
 	// For now very simple rectangular collision detection
 	if(event->x > 67 && event->x < 112
@@ -331,7 +331,7 @@ transport_widget_react_to_button_release ( TransportWidget* button,
 	g_return_if_fail(IS_TRANSPORT_WIDGET(button));
 	TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(button);	
 	if(priv->current_command == TRANSPORT_NADA){
-		g_debug("returning from the playbutton release because my previous command was nada");
+		//g_debug("returning from the playbutton release because my previous command was nada");
 		return;
 	}
 	else if(priv->current_command != TRANSPORT_NADA &&
@@ -1001,8 +1001,8 @@ draw (GtkWidget* button, cairo_t *cr)
 
 	cairo_translate (cr, button->allocation.x, button->allocation.y);
 	
-	g_debug("button x allocation = %i", button->allocation.x);
-	g_debug("button y allocation = %i", button->allocation.y);
+	//g_debug("button x allocation = %i", button->allocation.x);
+	//g_debug("button y allocation = %i", button->allocation.y);
 
 	GtkStyle *style;
 
@@ -1281,14 +1281,14 @@ static void
 transport_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
                                  GValue* value, gpointer userdata)
 {
-	g_debug("transport_widget_update_state - with property  %s", property);
+	//g_debug("transport_widget_update_state - with property  %s", property);
 	TransportWidget* bar = (TransportWidget*)userdata;
 	g_return_if_fail(IS_TRANSPORT_WIDGET(bar));
 
 	if(g_ascii_strcasecmp(DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE, property) == 0)
 	{
 		int update_value = g_value_get_int(value);
-		g_debug("transport_widget_update_state - with value  %i", update_value);  
+		//g_debug("transport_widget_update_state - with value  %i", update_value);  
 		transport_widget_toggle_play_pause(bar,
                                            (TransportWidgetState)update_value);		
 	}
