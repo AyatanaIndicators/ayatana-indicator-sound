@@ -534,7 +534,6 @@ static void context_state_callback(pa_context *c, void *userdata)
   case PA_CONTEXT_FAILED:
     g_warning("FAILED to retrieve context - Is PulseAudio Daemon running ?");
     pa_server_available = FALSE;
-    reconnect_to_pulse();
     break;
   case PA_CONTEXT_TERMINATED:
     /*			g_debug("context terminated");*/
