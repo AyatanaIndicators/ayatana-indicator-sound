@@ -198,8 +198,8 @@ get_icon (IndicatorObject * io)
 {
 	gchar* current_name = g_hash_table_lookup(volume_states,
 	                                          GINT_TO_POINTER(current_state));
-  g_debug("At start-up attempting to set the image to %s",
-          current_name);
+  //g_debug("At start-up attempting to set the image to %s",
+  //        current_name);
   speaker_image = indicator_image_helper(current_name);
   gtk_widget_show(GTK_WIDGET(speaker_image));
   return speaker_image;
@@ -238,7 +238,7 @@ free_the_animation_list()
 static gboolean
 new_transport_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
-  g_debug("indicator-sound: new_transport_bar() called ");
+  //g_debug("indicator-sound: new_transport_bar() called ");
 
   GtkWidget* bar = NULL;
 
@@ -257,7 +257,7 @@ new_transport_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbus
 static gboolean
 new_metadata_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
-  g_debug("indicator-sound: new_metadata_widget");
+  //g_debug("indicator-sound: new_metadata_widget");
 
   GtkWidget* metadata = NULL;
 
@@ -276,11 +276,11 @@ new_metadata_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbusm
 static gboolean
 new_title_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
-	g_debug("indicator-sound: new_title_widget");
+	//g_debug("indicator-sound: new_title_widget");
   g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
-	g_debug ("%s (\"%s\")", __func__, dbusmenu_menuitem_property_get(newitem, DBUSMENU_TITLE_MENUITEM_NAME));
+	//g_debug ("%s (\"%s\")", __func__, dbusmenu_menuitem_property_get(newitem, DBUSMENU_TITLE_MENUITEM_NAME));
 
 	GtkWidget* title = NULL;
 
@@ -298,7 +298,7 @@ new_title_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbusmenu
 static gboolean
 new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
-  g_debug("indicator-sound: new_volume_slider_widget");
+  //g_debug("indicator-sound: new_volume_slider_widget");
 
   GtkWidget* volume_widget = NULL;
   IndicatorObject *io = NULL;
@@ -352,7 +352,7 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
       g_warning("Unable to get status proxy: %s", error->message);
       g_error_free(error);
     }
-    g_debug("about to connect to the signals");
+    //g_debug("about to connect to the signals");
     dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_TYPE_BOOLEAN, G_TYPE_INVALID);
     dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_INPUT_WHILE_MUTED, G_CALLBACK(catch_signal_sink_input_while_muted), NULL, NULL);
     dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_MUTE_UPDATE, G_TYPE_BOOLEAN, G_TYPE_INVALID);
@@ -420,7 +420,7 @@ prepare_blocked_animation()
   GdkPixbuf* blocked_buf = gtk_image_get_pixbuf(temp_image);
 
   if (mute_buf == NULL || blocked_buf == NULL) {
-    g_debug("Don bother with the animation, the theme aint got the goods !");
+    //g_debug("Don bother with the animation, the theme aint got the goods !");
     return;
   }
 
@@ -512,7 +512,7 @@ fade_back_to_mute_image()
     return TRUE;
   } else {
     animation_id = 0;
-    g_debug("exit from animation now\n");
+    //g_debug("exit from animation now\n");
     return FALSE;
   }
 }
@@ -521,12 +521,12 @@ static void
 reset_mute_blocking_animation()
 {
   if (animation_id != 0) {
-    g_debug("about to remove the animation_id callback from the mainloop!!**");
+    //g_debug("about to remove the animation_id callback from the mainloop!!**");
     g_source_remove(animation_id);
     animation_id = 0;
   }
   if (blocked_id != 0) {
-    g_debug("about to remove the blocked_id callback from the mainloop!!**");
+    //g_debug("about to remove the blocked_id callback from the mainloop!!**");
     g_source_remove(blocked_id);
     blocked_id = 0;
   }
@@ -555,7 +555,7 @@ fetch_sink_availability_from_dbus(IndicatorSound* self)
   device_available = *available_input;
   if (device_available == FALSE) {
     update_state(STATE_SINKS_NONE);
-    g_debug("NO DEVICE AVAILABLE");
+    //g_debug("NO DEVICE AVAILABLE");
   }
 
 	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
@@ -566,7 +566,7 @@ fetch_sink_availability_from_dbus(IndicatorSound* self)
   }
 
   g_free(available_input);
-  g_debug("IndicatorSound::fetch_sink_availability_from_dbus ->%i", device_available);
+  //g_debug("IndicatorSound::fetch_sink_availability_from_dbus ->%i", device_available);
 }
 
 
@@ -587,7 +587,7 @@ fetch_mute_value_from_dbus()
   if (initial_mute == TRUE)
     update_state(STATE_MUTED);
   g_free(mute_input);
-  g_debug("at the indicator start up and the MUTE returned from dbus method is %i", initial_mute);
+  //g_debug("at the indicator start up and the MUTE returned from dbus method is %i", initial_mute);
 }
 
 /*******************************************************************/
@@ -596,7 +596,7 @@ fetch_mute_value_from_dbus()
 static void
 catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean block_value, gpointer userdata)
 {
-  g_debug("signal caught - sink input while muted with value %i", block_value);
+  //g_debug("signal caught - sink input while muted with value %i", block_value);
   if (block_value == 1 && blocked_id == 0 && animation_id == 0 && blocked_animation_list != NULL) {
     gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
     indicator_image_helper_update(speaker_image, image_name);
@@ -616,7 +616,7 @@ catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer u
   } else {
     reset_mute_blocking_animation();
   }
-  g_debug("signal caught - sink mute update with mute value: %i", mute_value);
+  //g_debug("signal caught - sink mute update with mute value: %i", mute_value);
 	g_return_if_fail(IS_INDICATOR_SOUND(userdata));
 	IndicatorSound* indicator = INDICATOR_SOUND(userdata);
 	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
@@ -636,7 +636,7 @@ catch_signal_sink_availability_update(DBusGProxy *proxy, gboolean available_valu
   if (device_available == FALSE) {
     update_state(STATE_SINKS_NONE);
   }
-  g_debug("signal caught - sink availability update with  value: %i", available_value);
+  //g_debug("signal caught - sink availability update with  value: %i", available_value);
 }
 
 /*******************************************************************/
@@ -701,7 +701,7 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
     }
     new_value = CLAMP(new_value, 0, 100);
     if (new_value != current_value && current_state != STATE_MUTED) {
-      g_debug("Attempting to set the range from the key listener to %f", new_value);
+      //g_debug("Attempting to set the range from the key listener to %f", new_value);
 			volume_widget_update(VOLUME_WIDGET(priv->volume_widget), new_value);
     }
   }
@@ -711,7 +711,7 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
 static void
 style_changed_cb(GtkWidget *widget, gpointer user_data)
 {
-  g_debug("Just caught a style change event");
+  //g_debug("Just caught a style change event");
   update_state(current_state);
   reset_mute_blocking_animation();
   update_state(current_state);
@@ -722,7 +722,7 @@ style_changed_cb(GtkWidget *widget, gpointer user_data)
 static void
 indicator_sound_scroll (IndicatorObject *io, gint delta, IndicatorScrollDirection direction)
 {
-	g_debug("indicator-sound-scroll - current slider value");
+	//g_debug("indicator-sound-scroll - current slider value");
 
 	if (device_available == FALSE || current_state == STATE_MUTED)
     return;
@@ -736,12 +736,12 @@ indicator_sound_scroll (IndicatorObject *io, gint delta, IndicatorScrollDirectio
 
   gdouble value = gtk_range_get_value(range);
   GtkAdjustment *adj = gtk_range_get_adjustment (GTK_RANGE (slider));
-	g_debug("indicator-sound-scroll - current slider value %f", value);
+	//g_debug("indicator-sound-scroll - current slider value %f", value);
   if (direction == INDICATOR_OBJECT_SCROLL_UP) {
     value += adj->step_increment;
   } else {
     value -= adj->step_increment;
   }
-	g_debug("indicator-sound-scroll - update slider with value %f", value);
+	//g_debug("indicator-sound-scroll - update slider with value %f", value);
 	volume_widget_update(VOLUME_WIDGET(priv->volume_widget), value);	
 }

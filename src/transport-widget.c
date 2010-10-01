@@ -77,7 +77,7 @@ struct _TransportWidgetPrivate
 	TransportWidgetEvent current_command;
 	TransportWidgetState current_state;
 	GHashTable* 		 command_coordinates;	
-  	DbusmenuMenuitem*    twin_item;		
+  DbusmenuMenuitem*    twin_item;		
 };
 
 typedef struct
@@ -234,14 +234,14 @@ transport_widget_notify (TransportWidget *item,
                          GParamSpec       *pspec,
                          gpointer          user_data)
 {
-    if (g_strcmp0 (pspec->name, "parent")){
-        GtkWidget *parent = gtk_widget_get_parent (GTK_WIDGET (item));
-        if (parent){
-            g_signal_connect ( parent, "hide",
-                               G_CALLBACK (transport_widget_menu_hidden),
-                               item);
-        }
+  if (g_strcmp0 (pspec->name, "parent")){
+    GtkWidget *parent = gtk_widget_get_parent (GTK_WIDGET (item));
+    if (parent){
+      g_signal_connect ( parent, "hide",
+                         G_CALLBACK (transport_widget_menu_hidden),
+                         item);
     }
+  }
 }
 
 static void
@@ -261,15 +261,15 @@ transport_widget_button_press_event (GtkWidget *menuitem,
 	g_return_val_if_fail ( IS_TRANSPORT_WIDGET(menuitem), FALSE );
 	TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE ( TRANSPORT_WIDGET(menuitem) );
 
-  	TransportWidgetEvent result = transport_widget_determine_button_event ( TRANSPORT_WIDGET(menuitem),
+  TransportWidgetEvent result = transport_widget_determine_button_event ( TRANSPORT_WIDGET(menuitem),
                                                                             event);
 	if(result != TRANSPORT_NADA){
-        priv->current_command = result;
-	    cairo_t *cr;
-	    cr = gdk_cairo_create (menuitem->window);
-	    draw ( menuitem, cr );
-	    cairo_destroy ( cr );
-    }
+    priv->current_command = result;
+    cairo_t *cr;
+    cr = gdk_cairo_create (menuitem->window);
+    draw ( menuitem, cr );
+    cairo_destroy ( cr );
+  }
 	return TRUE;
 }
                               
@@ -278,26 +278,26 @@ transport_widget_button_release_event (GtkWidget *menuitem,
                                        GdkEventButton *event)
 {
     //g_debug("TransportWidget::menu_release_event");
-    g_return_val_if_fail(IS_TRANSPORT_WIDGET(menuitem), FALSE);
-    TransportWidget* transport = TRANSPORT_WIDGET(menuitem);
-    TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );	
+  g_return_val_if_fail(IS_TRANSPORT_WIDGET(menuitem), FALSE);
+  TransportWidget* transport = TRANSPORT_WIDGET(menuitem);
+  TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );	
 
-    TransportWidgetEvent result = transport_widget_determine_button_event ( transport,
-                                                                            event );
-    if(result != TRANSPORT_NADA){
-        GValue value = {0};
-        g_value_init(&value, G_TYPE_INT);
-        //g_debug("TransportWidget::menu_press_event - going to send value %i", (int)result);
-        g_value_set_int(&value, (int)result);	
-        dbusmenu_menuitem_handle_event ( priv->twin_item,
-                                         "Transport state change",
-                                         &value,
-                                         0 );
-    }
-  
-    transport_widget_react_to_button_release ( transport,
-                                               result );
-    return TRUE;
+  TransportWidgetEvent result = transport_widget_determine_button_event ( transport,
+                                                                          event );
+  if(result != TRANSPORT_NADA){
+    GValue value = {0};
+    g_value_init(&value, G_TYPE_INT);
+    //g_debug("TransportWidget::menu_press_event - going to send value %i", (int)result);
+    g_value_set_int(&value, (int)result);	
+    dbusmenu_menuitem_handle_event ( priv->twin_item,
+                                     "Transport state change",
+                                     &value,
+                                     0 );
+  }
+
+  transport_widget_react_to_button_release ( transport,
+                                             result );
+  return TRUE;
 }
 
 static TransportWidgetEvent
@@ -1264,7 +1264,8 @@ draw (GtkWidget* button, cairo_t *cr)
 	}
 }
 
-static void transport_widget_set_twin_item(TransportWidget* self,
+static void 
+transport_widget_set_twin_item(TransportWidget* self,
            								 DbusmenuMenuitem* twin_item)
 {
     TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(self);
@@ -1293,7 +1294,6 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
                                            (TransportWidgetState)update_value);		
 	}
 }
-
 
 
 /**

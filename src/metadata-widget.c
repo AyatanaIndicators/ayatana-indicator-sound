@@ -27,7 +27,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <gtk/gtk.h>
 #include <glib.h>
 
-static DbusmenuMenuitem* twin_item;
 
 typedef struct _MetadataWidgetPrivate MetadataWidgetPrivate;
 
@@ -40,7 +39,8 @@ struct _MetadataWidgetPrivate
   GString*	 old_image_path;
 	GtkWidget* artist_label;
 	GtkWidget* piece_label;
-	GtkWidget* container_label;	
+	GtkWidget* container_label;
+  DbusmenuMenuitem* twin_item;		  
 };
 
 #define METADATA_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), METADATA_WIDGET_TYPE, MetadataWidgetPrivate))
@@ -52,6 +52,7 @@ static void metadata_widget_dispose       (GObject *object);
 static void metadata_widget_finalize      (GObject *object);
 static gboolean metadata_image_expose     (GtkWidget *image, GdkEventExpose *event, gpointer user_data);
 static void metadata_widget_set_style     (GtkWidget* button, GtkStyle* style);
+static void metadata_widget_set_twin_item (MetadataWidget* self, DbusmenuMenuitem* twin_item);
 
 // keyevent consumers
 static gboolean metadata_widget_button_press_event (GtkWidget *menuitem, 
@@ -88,7 +89,7 @@ metadata_widget_class_init (MetadataWidgetClass *klass)
 static void
 metadata_widget_init (MetadataWidget *self)
 {
-	g_debug("MetadataWidget::metadata_widget_init");
+	//g_debug("MetadataWidget::metadata_widget_init");
 
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);
 	GtkWidget *hbox;
@@ -98,9 +99,9 @@ metadata_widget_init (MetadataWidget *self)
 
 	// image
 	priv->album_art = gtk_image_new();
-	priv->image_path = g_string_new(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_ARTURL));
+	priv->image_path = g_string_new(dbusmenu_menuitem_property_get(priv->twin_item, DBUSMENU_METADATA_MENUITEM_ARTURL));
 	priv->old_image_path = g_string_new("");
-	g_debug("Metadata::At startup and image path = %s", priv->image_path->str);
+	//g_debug("Metadata::At startup and image path = %s", priv->image_path->str);
 	
   g_signal_connect(priv->album_art, "expose-event", 
                    G_CALLBACK(metadata_image_expose),
@@ -115,7 +116,7 @@ metadata_widget_init (MetadataWidget *self)
 	
 	// artist
 	GtkWidget* artist;
-	artist = gtk_label_new(dbusmenu_menuitem_property_get(twin_item,
+	artist = gtk_label_new(dbusmenu_menuitem_property_get(priv->twin_item,
 	                                                      DBUSMENU_METADATA_MENUITEM_ARTIST));
 	gtk_misc_set_alignment(GTK_MISC(artist), (gfloat)0, (gfloat)0);
 	gtk_misc_set_padding (GTK_MISC(artist), (gfloat)10, (gfloat)0);
@@ -126,8 +127,8 @@ metadata_widget_init (MetadataWidget *self)
 	
 	// title
 	GtkWidget* piece;
-	piece = gtk_label_new(dbusmenu_menuitem_property_get(twin_item,
-	                                                     DBUSMENU_METADATA_MENUITEM_TITLE));
+	piece = gtk_label_new(dbusmenu_menuitem_property_get( priv->twin_item,
+	                                                      DBUSMENU_METADATA_MENUITEM_TITLE) );
 	gtk_misc_set_alignment(GTK_MISC(piece), (gfloat)0, (gfloat)0);
 	gtk_misc_set_padding (GTK_MISC(piece), (gfloat)10, (gfloat)0);
 	gtk_label_set_width_chars(GTK_LABEL(piece), 15);
@@ -137,8 +138,8 @@ metadata_widget_init (MetadataWidget *self)
 
 	// container
 	GtkWidget* container;
-	container = gtk_label_new(dbusmenu_menuitem_property_get(twin_item,
-	                                                         DBUSMENU_METADATA_MENUITEM_ALBUM));
+	container = gtk_label_new(dbusmenu_menuitem_property_get( priv->twin_item,
+	                                                          DBUSMENU_METADATA_MENUITEM_ALBUM) );
 	gtk_misc_set_alignment(GTK_MISC(container), (gfloat)0, (gfloat)0);
 	gtk_misc_set_padding (GTK_MISC(container), (gfloat)10, (gfloat)0);	
 	gtk_label_set_width_chars(GTK_LABEL(container), 15);		
@@ -152,8 +153,6 @@ metadata_widget_init (MetadataWidget *self)
 	
 	gtk_box_pack_start (GTK_BOX (priv->hbox), vbox, FALSE, FALSE, 0);	
 
-	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
-	                 G_CALLBACK(metadata_widget_property_update), self);
 	gtk_widget_show_all (priv->hbox);
 
   g_signal_connect(self, "style-set", G_CALLBACK(metadata_widget_set_style), GTK_WIDGET(self));		
@@ -191,10 +190,10 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
       priv->theme_change_occured = FALSE;         
 			GdkPixbuf* pixbuf;
 			pixbuf = gdk_pixbuf_new_from_file(priv->image_path->str, NULL);
-			g_debug("metadata_load_new_image -> pixbuf from %s",
-							priv->image_path->str); 
+			//g_debug("metadata_load_new_image -> pixbuf from %s",
+			//				priv->image_path->str); 
 			if(GDK_IS_PIXBUF(pixbuf) == FALSE){
-				g_debug("problem loading the downloaded image just use the placeholder instead");
+				//g_debug("problem loading the downloaded image just use the placeholder instead");
 				draw_album_art_placeholder(metadata);
 				return TRUE;				
 			}
@@ -211,9 +210,9 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	return TRUE;
 }
 
-static void draw_album_art_placeholder(GtkWidget *metadata)
-{
-		
+static void
+draw_album_art_placeholder(GtkWidget *metadata)
+{		
 	cairo_t *cr;	
 	cr = gdk_cairo_create (metadata->window);
   GtkStyle *style;
@@ -286,20 +285,20 @@ metadata_widget_button_press_event (GtkWidget *menuitem,
                                   GdkEventButton *event)
 {
 	GtkClipboard* board = gtk_clipboard_get (GDK_NONE);	
-	gchar* title = g_strdup(dbusmenu_menuitem_property_get(twin_item,
-	                                              DBUSMENU_METADATA_MENUITEM_TITLE));
-	gchar* artist = g_strdup(dbusmenu_menuitem_property_get(twin_item,
-	                                              DBUSMENU_METADATA_MENUITEM_ARTIST));
-	gchar* album = g_strdup(dbusmenu_menuitem_property_get(twin_item,
-	                                              DBUSMENU_METADATA_MENUITEM_ALBUM));
-	gchar* contents = g_strdup_printf("artist: %s \ntitle: %s \nalbum: %s", artist, title, album);
-	g_debug("contents to be copied will be : %s", contents);	
+
+  MetadataWidgetPrivate* priv = METADATA_WIDGET_GET_PRIVATE(METADATA_WIDGET(menuitem));	
+  
+	gchar* contents = g_strdup_printf("artist: %s \ntitle: %s \nalbum: %s",
+                                    dbusmenu_menuitem_property_get(priv->twin_item,
+	                                                      DBUSMENU_METADATA_MENUITEM_ARTIST),
+                                    dbusmenu_menuitem_property_get(priv->twin_item,
+	                                                      DBUSMENU_METADATA_MENUITEM_TITLE),
+                                    dbusmenu_menuitem_property_get(priv->twin_item,
+	                                                      DBUSMENU_METADATA_MENUITEM_ALBUM));
+	//g_debug("contents to be copied will be : %s", contents);	
 	gtk_clipboard_set_text (board, contents, -1);
 	gtk_clipboard_store (board);
 	g_free(contents);
-	g_free(title);
-	g_free(artist);
-	g_free(album);
 	return FALSE;
 }
 
@@ -311,7 +310,7 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	g_return_if_fail (IS_METADATA_WIDGET (userdata));	
 
 	if(g_value_get_int(value) == DBUSMENU_PROPERTY_EMPTY){
-		g_debug("Metadata widget: property update - reset");
+		//g_debug("Metadata widget: property update - reset");
 		GValue new_value = {0};
   	g_value_init(&new_value, G_TYPE_STRING);		
 		g_value_set_string(&new_value, g_strdup(""));		
@@ -338,7 +337,7 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 		g_string_overwrite(priv->image_path, 0, g_value_get_string (value));
 		// if its a remote image queue a redraw incase the download took too long
 		if (g_str_has_prefix(g_value_get_string (value), g_get_user_cache_dir())){
-			g_debug("the image update is a download so redraw");
+			//g_debug("the image update is a download so redraw");
 			gtk_widget_queue_draw(GTK_WIDGET(mitem));
 		}
 	}		
@@ -488,7 +487,6 @@ image_set_from_pixbuf (GtkWidget  *widget,
   cairo_destroy (cr);
 }
 
-// TODO refactor next 3 methods into one once the style has been 
 static void
 metadata_widget_style_labels(MetadataWidget* self, GtkLabel* label)
 {
@@ -507,8 +505,19 @@ metadata_widget_set_style(GtkWidget* metadata, GtkStyle* style)
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widg);	
   priv->theme_change_occured = TRUE;    
 	gtk_widget_queue_draw(GTK_WIDGET(metadata));  
-	g_debug("metadata_widget: theme change");        
+	//g_debug("metadata_widget: theme change");        
 }
+
+static void
+metadata_widget_set_twin_item(MetadataWidget* self,
+           								    DbusmenuMenuitem* twin_item)
+{
+    MetadataWidgetPrivate* priv = METADATA_WIDGET_GET_PRIVATE(self);
+    priv->twin_item = twin_item;
+    g_signal_connect(G_OBJECT(priv->twin_item), "property-changed", 
+                              G_CALLBACK(metadata_widget_property_update), self);
+}
+
 
  /**
  * transport_new:
@@ -517,7 +526,10 @@ metadata_widget_set_style(GtkWidget* metadata, GtkStyle* style)
 GtkWidget* 
 metadata_widget_new(DbusmenuMenuitem *item)
 {
-	twin_item = item;
-	return g_object_new(METADATA_WIDGET_TYPE, NULL);
+
+  GtkWidget* widget =	 g_object_new(METADATA_WIDGET_TYPE, NULL);
+  metadata_widget_set_twin_item ( METADATA_WIDGET(widget),
+                                  item );
+  return widget;                  
 }
 
