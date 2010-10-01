@@ -27,7 +27,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <gtk/gtk.h>
 #include <glib.h>
 
-static DbusmenuMenuitem* twin_item;
 
 typedef struct _MetadataWidgetPrivate MetadataWidgetPrivate;
 
@@ -40,7 +39,8 @@ struct _MetadataWidgetPrivate
   GString*	 old_image_path;
 	GtkWidget* artist_label;
 	GtkWidget* piece_label;
-	GtkWidget* container_label;	
+	GtkWidget* container_label;
+  DbusmenuMenuitem* twin_item;		  
 };
 
 #define METADATA_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), METADATA_WIDGET_TYPE, MetadataWidgetPrivate))
@@ -52,6 +52,7 @@ static void metadata_widget_dispose       (GObject *object);
 static void metadata_widget_finalize      (GObject *object);
 static gboolean metadata_image_expose     (GtkWidget *image, GdkEventExpose *event, gpointer user_data);
 static void metadata_widget_set_style     (GtkWidget* button, GtkStyle* style);
+static void metadata_widget_set_twin_item (MetadataWidget* self, DbusmenuMenuitem* twin_item);
 
 // keyevent consumers
 static gboolean metadata_widget_button_press_event (GtkWidget *menuitem, 
@@ -98,7 +99,7 @@ metadata_widget_init (MetadataWidget *self)
 
 	// image
 	priv->album_art = gtk_image_new();
-	priv->image_path = g_string_new(dbusmenu_menuitem_property_get(twin_item, DBUSMENU_METADATA_MENUITEM_ARTURL));
+	priv->image_path = g_string_new(dbusmenu_menuitem_property_get(priv->twin_item, DBUSMENU_METADATA_MENUITEM_ARTURL));
 	priv->old_image_path = g_string_new("");
 	g_debug("Metadata::At startup and image path = %s", priv->image_path->str);
 	
@@ -115,7 +116,7 @@ metadata_widget_init (MetadataWidget *self)
 	
 	// artist
 	GtkWidget* artist;
-	artist = gtk_label_new(dbusmenu_menuitem_property_get(twin_item,
+	artist = gtk_label_new(dbusmenu_menuitem_property_get(priv->twin_item,
 	                                                      DBUSMENU_METADATA_MENUITEM_ARTIST));
 	gtk_misc_set_alignment(GTK_MISC(artist), (gfloat)0, (gfloat)0);
 	gtk_misc_set_padding (GTK_MISC(artist), (gfloat)10, (gfloat)0);
@@ -126,8 +127,8 @@ metadata_widget_init (MetadataWidget *self)
 	
 	// title
 	GtkWidget* piece;
-	piece = gtk_label_new(dbusmenu_menuitem_property_get(twin_item,
-	                                                     DBUSMENU_METADATA_MENUITEM_TITLE));
+	piece = gtk_label_new(dbusmenu_menuitem_property_get( priv->twin_item,
+	                                                      DBUSMENU_METADATA_MENUITEM_TITLE) );
 	gtk_misc_set_alignment(GTK_MISC(piece), (gfloat)0, (gfloat)0);
 	gtk_misc_set_padding (GTK_MISC(piece), (gfloat)10, (gfloat)0);
 	gtk_label_set_width_chars(GTK_LABEL(piece), 15);
@@ -137,8 +138,8 @@ metadata_widget_init (MetadataWidget *self)
 
 	// container
 	GtkWidget* container;
-	container = gtk_label_new(dbusmenu_menuitem_property_get(twin_item,
-	                                                         DBUSMENU_METADATA_MENUITEM_ALBUM));
+	container = gtk_label_new(dbusmenu_menuitem_property_get( priv->twin_item,
+	                                                          DBUSMENU_METADATA_MENUITEM_ALBUM) );
 	gtk_misc_set_alignment(GTK_MISC(container), (gfloat)0, (gfloat)0);
 	gtk_misc_set_padding (GTK_MISC(container), (gfloat)10, (gfloat)0);	
 	gtk_label_set_width_chars(GTK_LABEL(container), 15);		
@@ -152,8 +153,6 @@ metadata_widget_init (MetadataWidget *self)
 	
 	gtk_box_pack_start (GTK_BOX (priv->hbox), vbox, FALSE, FALSE, 0);	
 
-	g_signal_connect(G_OBJECT(twin_item), "property-changed", 
-	                 G_CALLBACK(metadata_widget_property_update), self);
 	gtk_widget_show_all (priv->hbox);
 
   g_signal_connect(self, "style-set", G_CALLBACK(metadata_widget_set_style), GTK_WIDGET(self));		
@@ -211,9 +210,9 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	return TRUE;
 }
 
-static void draw_album_art_placeholder(GtkWidget *metadata)
-{
-		
+static void
+draw_album_art_placeholder(GtkWidget *metadata)
+{		
 	cairo_t *cr;	
 	cr = gdk_cairo_create (metadata->window);
   GtkStyle *style;
@@ -286,20 +285,20 @@ metadata_widget_button_press_event (GtkWidget *menuitem,
                                   GdkEventButton *event)
 {
 	GtkClipboard* board = gtk_clipboard_get (GDK_NONE);	
-	gchar* title = g_strdup(dbusmenu_menuitem_property_get(twin_item,
-	                                              DBUSMENU_METADATA_MENUITEM_TITLE));
-	gchar* artist = g_strdup(dbusmenu_menuitem_property_get(twin_item,
-	                                              DBUSMENU_METADATA_MENUITEM_ARTIST));
-	gchar* album = g_strdup(dbusmenu_menuitem_property_get(twin_item,
-	                                              DBUSMENU_METADATA_MENUITEM_ALBUM));
-	gchar* contents = g_strdup_printf("artist: %s \ntitle: %s \nalbum: %s", artist, title, album);
+
+  MetadataWidgetPrivate* priv = METADATA_WIDGET_GET_PRIVATE(METADATA_WIDGET(menuitem));	
+  
+	gchar* contents = g_strdup_printf("artist: %s \ntitle: %s \nalbum: %s",
+                                    dbusmenu_menuitem_property_get(priv->twin_item,
+	                                                      DBUSMENU_METADATA_MENUITEM_ARTIST),
+                                    dbusmenu_menuitem_property_get(priv->twin_item,
+	                                                      DBUSMENU_METADATA_MENUITEM_TITLE),
+                                    dbusmenu_menuitem_property_get(priv->twin_item,
+	                                                      DBUSMENU_METADATA_MENUITEM_ALBUM));
 	g_debug("contents to be copied will be : %s", contents);	
 	gtk_clipboard_set_text (board, contents, -1);
 	gtk_clipboard_store (board);
 	g_free(contents);
-	g_free(title);
-	g_free(artist);
-	g_free(album);
 	return FALSE;
 }
 
@@ -510,6 +509,17 @@ metadata_widget_set_style(GtkWidget* metadata, GtkStyle* style)
 	g_debug("metadata_widget: theme change");        
 }
 
+static void
+metadata_widget_set_twin_item(MetadataWidget* self,
+           								    DbusmenuMenuitem* twin_item)
+{
+    MetadataWidgetPrivate* priv = METADATA_WIDGET_GET_PRIVATE(self);
+    priv->twin_item = twin_item;
+    g_signal_connect(G_OBJECT(priv->twin_item), "property-changed", 
+                              G_CALLBACK(metadata_widget_property_update), self);
+}
+
+
  /**
  * transport_new:
  * @returns: a new #MetadataWidget.
@@ -517,7 +527,10 @@ metadata_widget_set_style(GtkWidget* metadata, GtkStyle* style)
 GtkWidget* 
 metadata_widget_new(DbusmenuMenuitem *item)
 {
-	twin_item = item;
-	return g_object_new(METADATA_WIDGET_TYPE, NULL);
+
+  GtkWidget* widget =	 g_object_new(METADATA_WIDGET_TYPE, NULL);
+  metadata_widget_set_twin_item ( METADATA_WIDGET(widget),
+                                  item );
+  return widget;                  
 }
 
