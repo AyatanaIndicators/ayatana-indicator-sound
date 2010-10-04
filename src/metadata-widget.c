@@ -120,7 +120,6 @@ metadata_widget_init (MetadataWidget *self)
 	                                                      DBUSMENU_METADATA_MENUITEM_ARTIST));
 	gtk_misc_set_alignment(GTK_MISC(artist), (gfloat)0, (gfloat)0);
 	gtk_misc_set_padding (GTK_MISC(artist), (gfloat)10, (gfloat)0);
-	//gtk_label_set_width_chars(GTK_LABEL(artist), 15);
   gtk_widget_set_size_request (artist, 140, 15);
   gtk_label_set_ellipsize(GTK_LABEL(artist), PANGO_ELLIPSIZE_MIDDLE);	
 	metadata_widget_style_labels(self, GTK_LABEL(artist));
@@ -132,7 +131,6 @@ metadata_widget_init (MetadataWidget *self)
 	                                                      DBUSMENU_METADATA_MENUITEM_TITLE) );
 	gtk_misc_set_alignment(GTK_MISC(piece), (gfloat)0, (gfloat)0);
 	gtk_misc_set_padding (GTK_MISC(piece), (gfloat)10, (gfloat)0);
-	//gtk_label_set_width_chars(GTK_LABEL(piece), 15);
   gtk_widget_set_size_request (piece, 140, 15);
   gtk_label_set_ellipsize(GTK_LABEL(piece), PANGO_ELLIPSIZE_MIDDLE);
 	metadata_widget_style_labels(self, GTK_LABEL(piece));
@@ -144,7 +142,6 @@ metadata_widget_init (MetadataWidget *self)
 	                                                          DBUSMENU_METADATA_MENUITEM_ALBUM) );
 	gtk_misc_set_alignment(GTK_MISC(container), (gfloat)0, (gfloat)0);
 	gtk_misc_set_padding (GTK_MISC(container), (gfloat)10, (gfloat)0);	
-	//gtk_label_set_width_chars(GTK_LABEL(container), 15);
   gtk_widget_set_size_request (container, 140, 15);
 	gtk_label_set_ellipsize(GTK_LABEL(container), PANGO_ELLIPSIZE_MIDDLE);	
 	metadata_widget_style_labels(self, GTK_LABEL(container));
