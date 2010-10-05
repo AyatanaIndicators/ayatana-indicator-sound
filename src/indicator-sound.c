@@ -68,7 +68,6 @@ static GtkImage * get_icon (IndicatorObject * io);
 static GtkMenu *  get_menu (IndicatorObject * io);
 static void				indicator_sound_scroll (IndicatorObject* io, gint delta, IndicatorScrollDirection direction);
 
-
 //Slider related
 static gboolean new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
@@ -196,12 +195,13 @@ get_label (IndicatorObject * io)
 static GtkImage *
 get_icon (IndicatorObject * io)
 {
-	gchar* current_name = g_hash_table_lookup(volume_states,
+  gchar* current_name = g_hash_table_lookup(volume_states,
 	                                          GINT_TO_POINTER(current_state));
   //g_debug("At start-up attempting to set the image to %s",
   //        current_name);
   speaker_image = indicator_image_helper(current_name);
   gtk_widget_show(GTK_WIDGET(speaker_image));
+    
   return speaker_image;
 }
 
@@ -324,6 +324,8 @@ new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, 
 	                                newitem,
 	                                menu_volume_item,
 	                                parent);		
+  fetch_mute_value_from_dbus();
+  fetch_sink_availability_from_dbus(INDICATOR_SOUND (io));      
   return TRUE;	
 }
 
@@ -359,6 +361,7 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
     dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_MUTE_UPDATE, G_CALLBACK(catch_signal_sink_mute_update), user_data, NULL);
     dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_AVAILABLE_UPDATE, G_TYPE_BOOLEAN, G_TYPE_INVALID);
     dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_AVAILABLE_UPDATE, G_CALLBACK(catch_signal_sink_availability_update), NULL, NULL);	
+
     if( service_restart == TRUE){
       fetch_mute_value_from_dbus();
       // Ensure UI is in sync with service again.
@@ -584,10 +587,11 @@ fetch_mute_value_from_dbus()
     return;
   }
   initial_mute = *mute_input;
-  if (initial_mute == TRUE)
+  if (initial_mute == TRUE){
     update_state(STATE_MUTED);
+  }
   g_free(mute_input);
-  //g_debug("at the indicator start up and the MUTE returned from dbus method is %i", initial_mute);
+  g_debug("at the indicator start up and the MUTE returned from dbus method is %i", initial_mute);
 }
 
 /*******************************************************************/
