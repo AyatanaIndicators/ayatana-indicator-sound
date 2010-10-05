@@ -43,7 +43,6 @@ static void pulse_server_info_callback(pa_context *c, const pa_server_info *info
 static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, void *userdata);
 static void destroy_sink_info(void *value);
 static gboolean determine_sink_availability();
-static void reconnect_to_pulse();
 
 static gboolean has_volume_changed(const pa_sink_info* new_sink, sink_info* cached_sink);
 static pa_cvolume construct_mono_volume(const pa_cvolume* vol);
@@ -97,35 +96,6 @@ void close_pulse_activites()
   pa_glib_mainloop_free(pa_main_loop);
   pa_main_loop = NULL;
   /*    g_debug("I just closed communication with Pulse");*/
-}
-
-/**
-reconnect_to_pulse()
-In the event of Pulseaudio flapping in the wind handle gracefully without
-memory leaks !
-*/
-static void reconnect_to_pulse()
-{
-  // reset
-  if (pulse_context != NULL) {
-    g_debug("freeing the pulse context");
-    pa_context_unref(pulse_context);
-    pulse_context = NULL;
-  }
-
-  if (sink_hash != NULL) {
-    g_hash_table_destroy(sink_hash);
-    sink_hash = NULL;
-  }
-
-  // reconnect
-  pulse_context = pa_context_new(pa_glib_mainloop_get_api(pa_main_loop), "ayatana.indicator.sound");
-  g_assert(pulse_context);
-  sink_hash = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, destroy_sink_info);
-  // Establish event callback registration
-  pa_context_set_state_callback(pulse_context, context_state_callback, NULL);
-  dbus_menu_manager_update_pa_state(FALSE, FALSE, FALSE, 0);
-  pa_context_connect(pulse_context, NULL, PA_CONTEXT_NOFAIL, NULL);
 }
 
 /**
