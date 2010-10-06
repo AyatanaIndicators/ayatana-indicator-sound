@@ -99,42 +99,58 @@ public class MusicPlayerBridge : GLib.Object
   {
     debug("MusicPlayerBridge -> on_server_added with value %s", type);
 		if(server_is_not_of_interest(type)) return;
-		string client_name = type.split(".")[1];
-		if (root_menu != null && client_name != null){
-			// If we have an instance already for this player, ensure it is switched to active
-			if(this.registered_clients.keys.contains(client_name)){
-				debug("It figured out that it already has an instance for this player already");
-				this.registered_clients[client_name].update_state(PlayerController.state.READY);
-				this.registered_clients[client_name].activate();
-			}
-			else{			
-				//else init a new one				
-				PlayerController ctrl = new PlayerController(root_menu,
-				                                             client_name,
-				                                             calculate_menu_position(),
-				                                             PlayerController.state.READY);
-				registered_clients.set(client_name, ctrl); 				
-				debug("New Client of name %s has successfully registered with us", client_name);
-			}
-			// irregardless check that it has a desktop file if not kick off a request for it
-			if(this.registered_clients[client_name].app_info == null){
-				listener_get_server_property_cb cb = (listener_get_server_property_cb)desktop_info_callback;
-				this.listener.server_get_desktop(object, cb, this);					
-			}			
+		if ( this.root_menu != null ){
+			listener_get_server_property_cb cb = (listener_get_server_property_cb)desktop_info_callback_on_addition;
+			this.listener.server_get_desktop(object, cb, this);					
 		}
   }
 
+  private void desktop_info_callback_on_addition ( Indicate.ListenerServer server,
+	                                 	                owned string path,
+                                                    void* data )                                                  	                                  
+	{
+		MusicPlayerBridge bridge = data as MusicPlayerBridge;
+		AppInfo? app_info = create_app_info(path);
+    var name = truncate_player_name(app_info.get_name());
+		if(path.contains("/") && bridge.playersDB.already_familiar(path) == false){
+			debug("About to store desktop file path: %s", path);
+			bridge.playersDB.insert(path);
+			PlayerController ctrl = new PlayerController(bridge.root_menu,
+			                                             name,
+			                                             bridge.calculate_menu_position(),
+			                                             PlayerController.state.READY);
+			ctrl.set("app_info", app_info);
+      bridge.registered_clients.set(name, ctrl);        
+      debug("successfully created appinfo and instance from path and set it on the respective instance");				
+		}
+		else{
+		  bridge.registered_clients[name].update_state(PlayerController.state.READY);
+			bridge.registered_clients[name].activate();      
+			debug("Ignoring desktop file path callback because the db cache file has it already: %s", path);
+		}
+	}
+  
   public void on_server_removed(Indicate.ListenerServer object, string type)
   {
     debug("MusicPlayerBridge -> on_server_removed with value %s", type);
 		if(server_is_not_of_interest(type)) return;
-		string client_name = type.split(".")[1];
-		if (root_menu != null && client_name != null){
-			registered_clients[client_name].hibernate();
-			debug("Successively offlined client %s", client_name);
+		if (root_menu != null){
+			listener_get_server_property_cb cb = (listener_get_server_property_cb)desktop_info_callback_on_removal;
+			this.listener.server_get_desktop(object, cb, this);					
 		}
 	}
-	
+
+  private void desktop_info_callback_on_removal ( Indicate.ListenerServer server,
+	                                 	              owned string path,
+                                                  void* data )	                                  
+  {
+		MusicPlayerBridge bridge = data as MusicPlayerBridge;
+		AppInfo? app_info = create_app_info(path);
+    var name = truncate_player_name(app_info.get_name());
+	  registered_clients[name].hibernate();
+		debug("Successively offlined client %s", name);    
+  }
+  
 	private bool server_is_not_of_interest(string type){
     if (type == null) return true;
     if (type.contains("music") == false) {
@@ -144,25 +160,6 @@ public class MusicPlayerBridge : GLib.Object
 		return false;
 	}
 		
-	private void desktop_info_callback(Indicate.ListenerServer server,
-	                                 	owned string path, void* data)	                                  
-	{
-		MusicPlayerBridge bridge = data as MusicPlayerBridge;
-		if(path.contains("/") && bridge.playersDB.already_familiar(path) == false){
-			debug("About to store desktop file path: %s", path);
-			bridge.playersDB.insert(path);
-			AppInfo? app_info = create_app_info(path);
-			if(app_info != null){
-				PlayerController ctrl = bridge.registered_clients[app_info.get_name().down().strip()];				
-				ctrl.set("app_info", app_info);
-				debug("successfully created appinfo from path and set it on the respective instance");				
-			}	
-		}
-		else{
-			debug("Ignoring desktop file path because its either invalid of the db cache file has it already: %s", path);
-		}
-	}
-
   public void set_root_menu_item(Dbusmenu.Menuitem menu)
   {
 		this.root_menu = menu;
