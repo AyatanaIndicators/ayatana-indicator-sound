@@ -135,10 +135,7 @@ public class Mpris2Controller : GLib.Object
 		return changed_updates;
 	}
 	
-	private TransportMenuitem.state determine_play_state(string status){
-		if(status == null)
-			return TransportMenuitem.state.PAUSED;
-		
+	private TransportMenuitem.state determine_play_state(string status){	
 		if(status != null && status == "Playing"){
 			return TransportMenuitem.state.PLAYING;
 		}
