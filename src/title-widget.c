@@ -77,7 +77,7 @@ title_widget_class_init (TitleWidgetClass *klass)
 static void
 title_widget_init (TitleWidget *self)
 {
-	g_debug("TitleWidget::title_widget_init");
+	//g_debug("TitleWidget::title_widget_init");
 
 	gint padding = 0;
 	gtk_widget_style_get(GTK_WIDGET(self), "horizontal-padding", &padding, NULL);
@@ -114,7 +114,7 @@ static gboolean
 title_widget_button_press_event (GtkWidget *menuitem, 
                                   GdkEventButton *event)
 {
-	g_debug("TitleWidget::menu_press_event");
+	//g_debug("TitleWidget::menu_press_event");
 	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(menuitem);
 	
 	GValue value = {0};

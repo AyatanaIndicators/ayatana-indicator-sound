@@ -591,7 +591,7 @@ fetch_mute_value_from_dbus()
     update_state(STATE_MUTED);
   }
   g_free(mute_input);
-  g_debug("at the indicator start up and the MUTE returned from dbus method is %i", initial_mute);
+  //g_debug("at the indicator start up and the MUTE returned from dbus method is %i", initial_mute);
 }
 
 /*******************************************************************/
