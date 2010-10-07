@@ -1,3 +1,18 @@
+indicator-sound (0.4.8-0ubuntu1) maverick-proposed; urgency=low
+
+  * New upstream release.
+    - indicator-sound-service eating CPU on second user login (LP: #581173)
+    - Right border of transport control is different colour while using 
+      Ambiance (LP: #632774)
+    - Incorrect ellipsing (LP: #637580)
+    - always show unmuted at startup (LP: #648238)
+    - click or enter on metadata widget does not copy contents to 
+      clipboard (LP: #651246)
+    - Sound menu has two Rhythmbox elements when using 
+      translations (LP: #654140)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 07 Oct 2010 10:08:19 -0400
+
 indicator-sound (0.4.7-0ubuntu2) maverick; urgency=low
 
   * Rebuild for libindicator ABI change (LP: #637692)
