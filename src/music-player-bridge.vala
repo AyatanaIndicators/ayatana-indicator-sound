@@ -35,12 +35,8 @@ public class MusicPlayerBridge : GLib.Object
 		playersDB = new FamiliarPlayersDB();
 		registered_clients = new HashMap<string, PlayerController> ();
     listener = Listener.ref_default();
-    listener.indicator_added += on_indicator_added;
-    listener.indicator_removed.connect(on_indicator_removed);
-    listener.indicator_modified.connect(on_indicator_modified);
     listener.server_added.connect(on_server_added);
     listener.server_removed.connect(on_server_removed);
-    listener.server_count_changed.connect(on_server_count_changed);
   }
 
 	private void try_to_add_inactive_familiar_clients(){
@@ -53,13 +49,13 @@ public class MusicPlayerBridge : GLib.Object
 			debug("attempting to make an app info from %s", app);
 	
 			DesktopAppInfo info = new DesktopAppInfo.from_filename(app);
-			if(info == null){
+
+      if(info == null){
 				warning("Could not create a desktopappinfo instance from app: %s", app);
 				continue;					
 			}
+      
 			GLib.AppInfo app_info = info as GLib.AppInfo;
-      // TODO refactor to remove need for further name refactoring in the player controller
-      // truncate should not do a down() on the name
 			PlayerController ctrl = new PlayerController(this.root_menu, 
 					                                         truncate_player_name(app_info.get_name()),
 					                                         calculate_menu_position(),
@@ -67,8 +63,7 @@ public class MusicPlayerBridge : GLib.Object
 			ctrl.app_info = app_info;
       if(ctrl.app_info == null)
         warning("for some reason the app info is null");
-      
-			this.registered_clients.set(truncate_player_name(app_info.get_name()), ctrl);					
+			this.registered_clients.set(determine_key(app), ctrl);					
 		}
 	}
 
@@ -85,6 +80,20 @@ public class MusicPlayerBridge : GLib.Object
     return result;
   }
 
+  private static string? determine_key(string path)
+  {
+    var tokens = path.split("/");
+    if ( tokens.length < 2) return null;
+    var filename = tokens[tokens.length - 1];
+    var result = filename.split(".")[0];
+    var temp = result.split("-");
+    if (temp.length > 1){
+      result = temp[0];
+    }
+    debug("determine key result = %s", result);
+    return result;        
+  }
+  
 	private int calculate_menu_position()
 	{
 		if(this.registered_clients.size == 0){
@@ -100,12 +109,12 @@ public class MusicPlayerBridge : GLib.Object
     debug("MusicPlayerBridge -> on_server_added with value %s", type);
 		if(server_is_not_of_interest(type)) return;
 		if ( this.root_menu != null ){
-			listener_get_server_property_cb cb = (listener_get_server_property_cb)desktop_info_callback_on_addition;
+			listener_get_server_property_cb cb = (listener_get_server_property_cb)desktop_info_callback;
 			this.listener.server_get_desktop(object, cb, this);					
 		}
   }
 
-  private void desktop_info_callback_on_addition ( Indicate.ListenerServer server,
+  private void desktop_info_callback ( Indicate.ListenerServer server,
 	                                 	                owned string path,
                                                     void* data )                                                  	                                  
 	{
@@ -120,12 +129,13 @@ public class MusicPlayerBridge : GLib.Object
 			                                             bridge.calculate_menu_position(),
 			                                             PlayerController.state.READY);
 			ctrl.set("app_info", app_info);
-      bridge.registered_clients.set(name, ctrl);        
+      bridge.registered_clients.set(determine_key(path), ctrl);        
       debug("successfully created appinfo and instance from path and set it on the respective instance");				
 		}
 		else{
-		  bridge.registered_clients[name].update_state(PlayerController.state.READY);
-			bridge.registered_clients[name].activate();      
+      var key = determine_key(path);
+		  bridge.registered_clients[key].update_state(PlayerController.state.READY);
+			bridge.registered_clients[key].activate();      
 			debug("Ignoring desktop file path callback because the db cache file has it already: %s", path);
 		}
 	}
@@ -135,21 +145,14 @@ public class MusicPlayerBridge : GLib.Object
     debug("MusicPlayerBridge -> on_server_removed with value %s", type);
 		if(server_is_not_of_interest(type)) return;
 		if (root_menu != null){
-			listener_get_server_property_cb cb = (listener_get_server_property_cb)desktop_info_callback_on_removal;
-			this.listener.server_get_desktop(object, cb, this);					
+      var tmp = type.split(".");
+      debug("attempt to remove %s", tmp[tmp.length-1]);
+      if(tmp.length > 0){
+			  registered_clients[tmp[tmp.length - 1]].hibernate();
+			  debug("Successively offlined client %s", tmp[tmp.length - 1]);       
+      }
 		}
 	}
-
-  private void desktop_info_callback_on_removal ( Indicate.ListenerServer server,
-	                                 	              owned string path,
-                                                  void* data )	                                  
-  {
-		MusicPlayerBridge bridge = data as MusicPlayerBridge;
-		AppInfo? app_info = create_app_info(path);
-    var name = truncate_player_name(app_info.get_name());
-	  registered_clients[name].hibernate();
-		debug("Successively offlined client %s", name);    
-  }
   
 	private bool server_is_not_of_interest(string type){
     if (type == null) return true;
@@ -166,25 +169,6 @@ public class MusicPlayerBridge : GLib.Object
 		try_to_add_inactive_familiar_clients();
   }
 
-	public void on_server_count_changed(Indicate.ListenerServer object, uint i)
-  {
-    debug("MusicPlayerBridge-> on_server_count_changed with value %u", i);
-  }
-  public void on_indicator_added(ListenerServer object, ListenerIndicator p0)
-  {
-    debug("MusicPlayerBridge-> on_indicator_added");
-  }
-
-  public void on_indicator_removed(Indicate.ListenerServer object, Indicate.ListenerIndicator p0)
-  {
-    debug("MusicPlayerBridge -> on_indicator_removed");
-  }
-
-  public void on_indicator_modified(Indicate.ListenerServer object, Indicate.ListenerIndicator p0, string s)
-  {
-    debug("MusicPlayerBridge -> indicator_modified with vale %s", s );
-  }
-
 	public static AppInfo? create_app_info(string path)
 	{
 		DesktopAppInfo info = new DesktopAppInfo.from_filename(path);
@@ -195,7 +179,6 @@ public class MusicPlayerBridge : GLib.Object
 		GLib.AppInfo app_info = info as GLib.AppInfo;		
 		return app_info;
 	}
-
 }
 
 
