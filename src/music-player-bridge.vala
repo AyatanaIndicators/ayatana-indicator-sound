@@ -66,33 +66,6 @@ public class MusicPlayerBridge : GLib.Object
 			this.registered_clients.set(determine_key(app), ctrl);					
 		}
 	}
-
-  private static string truncate_player_name(string app_info_name)
-  {
-    string result = app_info_name.down().strip();
-
-    var tokens = result.split(" ");
-
-    if(tokens.length > 1){
-      result = tokens[0];
-    }
-    debug("truncate player name %s", result);
-    return result;
-  }
-
-  private static string? determine_key(string path)
-  {
-    var tokens = path.split("/");
-    if ( tokens.length < 2) return null;
-    var filename = tokens[tokens.length - 1];
-    var result = filename.split(".")[0];
-    var temp = result.split("-");
-    if (temp.length > 1){
-      result = temp[0];
-    }
-    debug("determine key result = %s", result);
-    return result;        
-  }
   
 	private int calculate_menu_position()
 	{
@@ -179,6 +152,34 @@ public class MusicPlayerBridge : GLib.Object
 		GLib.AppInfo app_info = info as GLib.AppInfo;		
 		return app_info;
 	}
+
+  private static string truncate_player_name(owned string app_info_name)
+  {
+    string result = app_info_name.down().strip();
+
+    var tokens = result.split(" ");
+
+    if(tokens.length > 1){
+      result = tokens[0];
+    }
+    debug("truncate player name %s", result);
+    return result;
+  }
+
+  private static string? determine_key(owned string path)
+  {
+    var tokens = path.split("/");
+    if ( tokens.length < 2) return null;
+    var filename = tokens[tokens.length - 1];
+    var result = filename.split(".")[0];
+    var temp = result.split("-");
+    if (temp.length > 1){
+      result = temp[0];
+    }
+    debug("determine key result = %s", result);
+    return result;        
+  }
+  
 }
 
 
