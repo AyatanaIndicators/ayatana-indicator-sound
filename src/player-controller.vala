@@ -160,8 +160,8 @@ public class PlayerController : GLib.Object
 	private static string format_client_name(string client_name)
 	{
 		string formatted = client_name;
-		if(formatted.len() > 1){
-			formatted = client_name.up(1).concat(client_name.slice(1, client_name.len()));
+		if(formatted.length > 1){
+			formatted = client_name.up(1).concat(client_name.slice(1, client_name.length));
 			debug("PlayerController->format_client_name - : %s", formatted);
 		}		
 		return formatted;
