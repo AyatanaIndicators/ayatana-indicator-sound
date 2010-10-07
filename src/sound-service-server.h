@@ -112,8 +112,7 @@ static const DBusGMethodInfo dbus_glib__sound_service_server_methods[] = {
   { (GCallback) sound_service_dbus_get_sink_availability, dbus_glib_marshal__sound_service_server_BOOLEAN__POINTER_POINTER, 62 },
 };
 
-const DBusGObjectInfo dbus_glib__sound_service_server_object_info = {
-  0,
+const DBusGObjectInfo dbus_glib__sound_service_server_object_info = {  1,
   dbus_glib__sound_service_server_methods,
   2,
 "org.ayatana.indicator.sound\0GetSinkMute\0S\0mute_input\0O\0F\0N\0b\0\0org.ayatana.indicator.sound\0GetSinkAvailability\0S\0availability_input\0O\0F\0N\0b\0\0\0",
