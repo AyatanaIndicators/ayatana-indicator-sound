@@ -135,12 +135,12 @@ transport_widget_class_init (TransportWidgetClass *klass)
 
 	g_type_class_add_private (klass, sizeof (TransportWidgetPrivate));
 
-    widget_class->button_press_event = transport_widget_button_press_event;
-    widget_class->button_release_event = transport_widget_button_release_event;	
+  widget_class->button_press_event = transport_widget_button_press_event;
+  widget_class->button_release_event = transport_widget_button_release_event;	
  	widget_class->expose_event = transport_widget_expose;
   
 	gobject_class->dispose = transport_widget_dispose;
-    gobject_class->finalize = transport_widget_finalize;
+  gobject_class->finalize = transport_widget_finalize;
 }
 
 static void
@@ -158,7 +158,7 @@ transport_widget_init (TransportWidget *self)
 	previous_list = g_list_insert(previous_list, GINT_TO_POINTER(5), 1);
 	previous_list = g_list_insert(previous_list, GINT_TO_POINTER(60), 2);
 	previous_list = g_list_insert(previous_list, GINT_TO_POINTER(34), 3);
-    g_hash_table_insert(priv->command_coordinates,
+  g_hash_table_insert(priv->command_coordinates,
                       GINT_TO_POINTER(TRANSPORT_PREVIOUS),
                       previous_list);
                      
@@ -182,11 +182,11 @@ transport_widget_init (TransportWidget *self)
                       GINT_TO_POINTER(TRANSPORT_NEXT),
                       next_list);
 	
-	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 50);
-    g_signal_connect (G_OBJECT(self),
-                      "notify::parent",
-                      G_CALLBACK (transport_widget_notify),
-                      NULL);    
+	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 43);
+  g_signal_connect (G_OBJECT(self),
+                    "notify::parent",
+                    G_CALLBACK (transport_widget_notify),
+                    NULL);    
 }
 
 static void
