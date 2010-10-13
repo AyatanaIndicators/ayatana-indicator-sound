@@ -62,12 +62,10 @@ static void metadata_widget_property_update (DbusmenuMenuitem* item,
                                              gchar* property, 
                                        			 GValue* value,
                                              gpointer userdata);
-static void metadata_widget_style_labels(MetadataWidget* self,
-                                         GtkLabel* label);
-static void image_set_from_pixbuf (GtkWidget  *widget,
-												           MetadataWidget* metadata,
-												           GdkPixbuf *source);
-static void draw_album_art_placeholder(GtkWidget *metadata);
+static void metadata_widget_style_labels ( MetadataWidget* self,
+                                           GtkLabel* label);
+static void draw_album_art_placeholder ( GtkWidget *metadata);
+static void draw_album_border ( GtkWidget *metadata);
 
 G_DEFINE_TYPE (MetadataWidget, metadata_widget, GTK_TYPE_MENU_ITEM);
 
@@ -183,7 +181,8 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 {
 	g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
 	MetadataWidget* widget = METADATA_WIDGET(user_data);
-	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);	
+	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);	  
+  draw_album_border(metadata);  
 	if(priv->image_path->len > 0){
 	  if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE ||
        priv->theme_change_occured == TRUE){
@@ -196,9 +195,9 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 				//g_debug("problem loading the downloaded image just use the placeholder instead");
 				draw_album_art_placeholder(metadata);
 				return TRUE;				
-			}
+			}         
 			pixbuf = gdk_pixbuf_scale_simple(pixbuf,60, 60, GDK_INTERP_BILINEAR);
-			image_set_from_pixbuf (metadata, widget, pixbuf);
+    	gtk_image_set_from_pixbuf(GTK_IMAGE(priv->album_art), pixbuf);
 			g_string_erase(priv->old_image_path, 0, -1);
 			g_string_overwrite(priv->old_image_path, 0, priv->image_path->str); 
 
@@ -211,8 +210,8 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 }
 
 static void
-draw_album_art_placeholder(GtkWidget *metadata)
-{		
+draw_album_border(GtkWidget *metadata)
+{
 	cairo_t *cr;	
 	cr = gdk_cairo_create (metadata->window);
   GtkStyle *style;
@@ -220,7 +219,13 @@ draw_album_art_placeholder(GtkWidget *metadata)
   
 	GtkAllocation alloc;
 	gtk_widget_get_allocation (metadata, &alloc);
-		
+  gint offset = 2;
+  
+  alloc.width = alloc.width + (offset * 2);
+  alloc.height = alloc.height + (offset * 2);
+  alloc.x = alloc.x - offset;
+  alloc.y = alloc.y - offset;
+    
 	cairo_rectangle (cr,
                    alloc.x, alloc.y,
                    alloc.width, alloc.height);
@@ -234,6 +239,7 @@ draw_album_art_placeholder(GtkWidget *metadata)
 	cairo_line_to(cr, alloc.x, alloc.y + alloc.height);
 	cairo_line_to(cr, alloc.x, alloc.y);
 
+
 	cairo_close_path (cr);
 
   cairo_set_source_rgba (cr,
@@ -243,8 +249,20 @@ draw_album_art_placeholder(GtkWidget *metadata)
                          0.6);
 	cairo_set_line_width (cr, 2.0);
 	
-	cairo_stroke (cr);						
+	cairo_stroke (cr);						  
+}
 
+static void
+draw_album_art_placeholder(GtkWidget *metadata)
+{		
+	cairo_t *cr;	
+	cr = gdk_cairo_create (metadata->window);
+  GtkStyle *style;
+	style = gtk_widget_get_style (metadata);
+  
+	GtkAllocation alloc;
+	gtk_widget_get_allocation (metadata, &alloc);
+  
 	// Draw the eight note
 	PangoLayout *layout;
 	PangoFontDescription *desc;
@@ -405,87 +423,6 @@ rounded_rectangle (cairo_t *cr,
         cairo_close_path (cr);
 }
 
-static void
-image_set_from_pixbuf (GtkWidget  *widget,
-                       MetadataWidget* metadata,
-                       GdkPixbuf *source)
-{
-  cairo_t         *cr;
-  cairo_t         *cr_mask;
-  cairo_surface_t *surface;
-  GdkPixmap       *pixmap;
-  GdkPixmap       *bitmask;
-  int              w;
-  int              h;
-  int              frame_width;
-  double           radius;
-  GdkColor         color;
-  double           r;
-  double           g;
-  double           b;
-	
-	MetadataWidgetPrivate* priv = METADATA_WIDGET_GET_PRIVATE(metadata);	
-	GtkImage* image = GTK_IMAGE(priv->album_art);
-  frame_width = 3;
-
-  w = gdk_pixbuf_get_width (source) + frame_width * 2;
-  h = gdk_pixbuf_get_height (source) + frame_width * 2;
-
-  radius = 10;
-
-  pixmap = gdk_pixmap_new (gtk_widget_get_window (widget), w, h, -1);
-  bitmask = gdk_pixmap_new (gtk_widget_get_window (widget), w, h, 1);
-
-	if (gtk_widget_get_window (widget) == NULL)
-		return;
-
-  cr = gdk_cairo_create (pixmap);
-  cr_mask = gdk_cairo_create (bitmask);
-
-  /* setup mask */
-  cairo_rectangle (cr_mask, 0, 0, w, h);
-  cairo_set_operator (cr_mask, CAIRO_OPERATOR_CLEAR);
-  cairo_fill (cr_mask);
-
-  rounded_rectangle (cr_mask, 1.0, 0.5, 0.5, radius, w - 1, h - 1);
-  cairo_set_operator (cr_mask, CAIRO_OPERATOR_OVER);
-  cairo_set_source_rgb (cr_mask, 1, 1, 1);
-  cairo_fill (cr_mask);
-
-  color = gtk_widget_get_style (GTK_WIDGET (image))->bg [GTK_STATE_NORMAL];
-  r = (float)color.red / 65535.0;
-  g = (float)color.green / 65535.0;
-  b = (float)color.blue / 65535.0;
-
-  /* set up image */
-  cairo_rectangle (cr, 0, 0, w, h);
-  cairo_set_source_rgb (cr, r, g, b);
-  cairo_fill (cr);
-
-  rounded_rectangle (cr,
-                     1.0,
-                     frame_width + 0.5,
-                     frame_width + 0.5,
-                     radius,
-                     w - frame_width * 2 - 1,
-                     h - frame_width * 2 - 1);
-  cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.3);
-  cairo_fill_preserve (cr);
-
-  surface = surface_from_pixbuf (source);
-  cairo_set_source_surface (cr, surface, frame_width, frame_width);
-  cairo_fill (cr);
-
-  gtk_image_set_from_pixmap (image, pixmap, bitmask);
-
-  cairo_surface_destroy (surface);
-
-  g_object_unref (bitmask);
-  g_object_unref (pixmap);
-
-  cairo_destroy (cr_mask);
-  cairo_destroy (cr);
-}
 
 static void
 metadata_widget_style_labels(MetadataWidget* self, GtkLabel* label)
@@ -516,7 +453,6 @@ metadata_widget_set_twin_item(MetadataWidget* self,
     g_signal_connect(G_OBJECT(priv->twin_item), "property-changed", 
                               G_CALLBACK(metadata_widget_property_update), self);
 }
-
 
  /**
  * transport_new:
