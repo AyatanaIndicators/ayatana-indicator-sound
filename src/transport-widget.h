@@ -19,6 +19,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __TRANSPORT_WIDGET_H__
 #define __TRANSPORT_WIDGET_H__
 
+#include <gtk/gtk.h>
 #include <gtk/gtkmenuitem.h>
 #include <libdbusmenu-gtk/menuitem.h>
 
@@ -34,6 +35,18 @@ G_BEGIN_DECLS
 typedef struct _TransportWidget      TransportWidget;
 typedef struct _TransportWidgetClass TransportWidgetClass;
 
+typedef enum {
+	TRANSPORT_PREVIOUS,
+	TRANSPORT_PLAY_PAUSE,
+	TRANSPORT_NEXT,
+	TRANSPORT_NADA
+}TransportWidgetEvent;
+
+typedef enum {
+	PLAY,
+	PAUSE	
+}TransportWidgetState;
+
 struct _TransportWidgetClass {
 	  GtkMenuItemClass parent_class;
 };
@@ -43,7 +56,7 @@ struct _TransportWidget {
 };
 
 GType transport_widget_get_type (void);
-GtkWidget* transport_widget_new(DbusmenuMenuitem *twin_item);
+GtkWidget* transport_widget_new ( DbusmenuMenuitem *item );
 
 G_END_DECLS
 

@@ -76,7 +76,7 @@ volume_widget_class_init (VolumeWidgetClass *klass)
 static void
 volume_widget_init (VolumeWidget *self)
 {
-	g_debug("VolumeWidget::volume_widget_init");
+	//g_debug("VolumeWidget::volume_widget_init");
 	VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(self);
 
   priv->ido_volume_slider = ido_scale_menu_item_new_with_range ("VOLUME", IDO_RANGE_STYLE_DEFAULT,  0, 0, 100, 1);
@@ -128,13 +128,13 @@ volume_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	g_return_if_fail (IS_VOLUME_WIDGET (userdata));	
 	VolumeWidget* mitem = VOLUME_WIDGET(userdata);
 	VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(mitem);
-	g_debug("scrub-widget::property_update for prop %s", property); 
+	//g_debug("scrub-widget::property_update for prop %s", property); 
 	if(g_ascii_strcasecmp(DBUSMENU_VOLUME_MENUITEM_LEVEL, property) == 0){
 		if(priv->grabbed == FALSE){
 			GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
 			GtkRange *range = (GtkRange*)slider;
 			gdouble update = g_value_get_double (value);
-			g_debug("volume-widget - update level with value %f", update);
+			//g_debug("volume-widget - update level with value %f", update);
 			gtk_range_set_value(range, update);
   		determine_state_from_volume(update);			
 		}
@@ -152,7 +152,7 @@ volume_widget_set_twin_item(VolumeWidget* self,
 	                 G_CALLBACK(volume_widget_property_update), self);
 	gdouble initial_level = g_value_get_double (dbusmenu_menuitem_property_get_value(twin_item,
 	                                            DBUSMENU_VOLUME_MENUITEM_LEVEL));
-	g_debug("volume_widget_set_twin_item initial level = %f", initial_level);
+	//g_debug("volume_widget_set_twin_item initial level = %f", initial_level);
   GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
   GtkRange *range = (GtkRange*)slider;
  	gtk_range_set_value(range, initial_level);
@@ -214,7 +214,7 @@ volume_widget_parent_changed (GtkWidget *widget,
                        				gpointer   user_data)
 {
   gtk_widget_set_size_request (widget, 200, -1);
-  g_debug("volume_widget_parent_changed");
+  //g_debug("volume_widget_parent_changed");
 }
 
 static void
