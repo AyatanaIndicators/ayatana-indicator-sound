@@ -1,3 +1,10 @@
+indicator-sound (0.4.9-0ubuntu1) maverick-proposed; urgency=low
+
+  * New upstream release.
+    - fixes tranlation mpris name regression (LP: #654140)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 14 Oct 2010 10:40:13 -0400
+
 indicator-sound (0.4.8-0ubuntu1) maverick-proposed; urgency=low
 
   * New upstream release.
