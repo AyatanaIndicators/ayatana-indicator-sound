@@ -58,6 +58,7 @@ public class MusicPlayerBridge : GLib.Object
 			GLib.AppInfo app_info = info as GLib.AppInfo;
 			PlayerController ctrl = new PlayerController(this.root_menu, 
 					                                         truncate_player_name(app_info.get_name()),
+                                                   determine_key(app),
 					                                         calculate_menu_position(),
 					                                         PlayerController.state.OFFLINE);
 			ctrl.app_info = app_info;
@@ -99,6 +100,7 @@ public class MusicPlayerBridge : GLib.Object
 			bridge.playersDB.insert(path);
 			PlayerController ctrl = new PlayerController(bridge.root_menu,
 			                                             name,
+                                                   determine_key(path),
 			                                             bridge.calculate_menu_position(),
 			                                             PlayerController.state.READY);
 			ctrl.set("app_info", app_info);
