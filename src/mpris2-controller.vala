@@ -75,10 +75,10 @@ public class Mpris2Controller : GLib.Object
 	construct{
     try {
       var connection = DBus.Bus.get (DBus.BusType.SESSION);
-			this.mpris2_root = (MprisRoot) connection.get_object (root_interface.concat(".").concat(this.owner.name.down()),
+			this.mpris2_root = (MprisRoot) connection.get_object (root_interface.concat(".").concat(this.owner.mpris_name),
 				                                             "/org/mpris/MediaPlayer2",
 				                                             root_interface);						
-			this.player = (MprisPlayer) connection.get_object (root_interface.concat(".").concat(this.owner.name.down()),
+			this.player = (MprisPlayer) connection.get_object (root_interface.concat(".").concat(this.owner.mpris_name),
 				                                               "/org/mpris/MediaPlayer2",
 				                                               root_interface.concat(".Player"));						
 			this.properties_interface = (FreeDesktopProperties) connection.get_object("org.freedesktop.Properties.PropertiesChanged",
@@ -92,7 +92,7 @@ public class Mpris2Controller : GLib.Object
 
 	public void property_changed_cb(string interface_source, HashTable<string, Value?> changed_properties, string[] invalid )
 	{	
-		debug("properties-changed for interface %s and owner %s", interface_source, this.owner.name.down());
+		debug("properties-changed for interface %s and owner %s", interface_source, this.owner.mpris_name);
     
 		if(changed_properties == null || interface_source.has_prefix(this.root_interface) == false ){
 			warning("Property-changed hash is null or this is an interface that doesn't concerns us");
@@ -135,10 +135,7 @@ public class Mpris2Controller : GLib.Object
 		return changed_updates;
 	}
 	
-	private TransportMenuitem.state determine_play_state(string status){
-		if(status == null)
-			return TransportMenuitem.state.PAUSED;
-		
+	private TransportMenuitem.state determine_play_state(string status){	
 		if(status != null && status == "Playing"){
 			return TransportMenuitem.state.PLAYING;
 		}

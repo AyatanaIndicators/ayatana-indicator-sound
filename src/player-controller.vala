@@ -44,6 +44,7 @@ public class PlayerController : GLib.Object
 		
 	private Dbusmenu.Menuitem root_menu;
 	public string name { get; set;}	
+	public string mpris_name { get; set;}	  
 	public ArrayList<PlayerItem> custom_items;	
 	public Mpris2Controller mpris_bridge;
 	public AppInfo? app_info { get; set;}
@@ -51,11 +52,13 @@ public class PlayerController : GLib.Object
 		
 	public PlayerController(Dbusmenu.Menuitem root,
 	                        string client_name,
+                          string mpris_name,
 	                        int offset,
 	                        state initial_state)
 	{
 		this.root_menu = root;
 		this.name = format_client_name(client_name.strip());
+    this.mpris_name = mpris_name;
 		this.custom_items = new ArrayList<PlayerItem>();
 		this.current_state = initial_state;
 		this.menu_offset = offset;
@@ -160,8 +163,8 @@ public class PlayerController : GLib.Object
 	private static string format_client_name(string client_name)
 	{
 		string formatted = client_name;
-		if(formatted.len() > 1){
-			formatted = client_name.up(1).concat(client_name.slice(1, client_name.len()));
+		if(formatted.length > 1){
+			formatted = client_name.up(1).concat(client_name.slice(1, client_name.length));
 			debug("PlayerController->format_client_name - : %s", formatted);
 		}		
 		return formatted;

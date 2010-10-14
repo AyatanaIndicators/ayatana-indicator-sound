@@ -7,21 +7,19 @@ libexec_PROGRAMS = indicator-sound-service
 soundmenulibdir = $(INDICATORDIR)
 soundmenulib_LTLIBRARIES = libsoundmenu.la
 libsoundmenu_la_SOURCES = \
-        common-defs.h \
-	indicator-sound.h \
-	transport-widget.c \
-	transport-widget.h \
-	metadata-widget.c \
-	metadata-widget.h \
-	play-button.c \
-	play-button.h \
-	indicator-sound.c \
-	title-widget.c \
-	title-widget.h \
-	volume-widget.c \
-	volume-widget.h \
-	dbus-shared-names.h \
-  sound-service-client.h 
+            common-defs.h \
+            indicator-sound.h \
+            transport-widget.c \
+            transport-widget.h \
+            metadata-widget.c \
+            metadata-widget.h \
+            indicator-sound.c \
+            title-widget.c \
+            title-widget.h \
+            volume-widget.c \
+            volume-widget.h \
+            dbus-shared-names.h \
+            sound-service-client.h 
 
 libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -DG_LOG_DOMAIN=\"Indicator-Sound\"
 libsoundmenu_la_LIBADD = $(APPLET_LIBS)
