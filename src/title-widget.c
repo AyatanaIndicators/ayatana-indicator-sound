@@ -135,6 +135,9 @@ title_widget_property_update(DbusmenuMenuitem* item, gchar* property,
         gtk_menu_item_set_label (GTK_MENU_ITEM(mitem),
                                 g_value_get_string(value));
 	}
+	/*else(g_ascii_strcasecmp(DBUSMENU_MENUITEM_PROP_ICON_DATA, property) == 0){
+    g_debug("changing the icon data on the title");
+	}*/
 }
 
 static void

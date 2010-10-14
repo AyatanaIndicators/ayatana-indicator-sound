@@ -19,6 +19,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 using Dbusmenu;
+using DbusmenuGtk;
 using Gee;
 
 public class PlayerController : GLib.Object
@@ -62,6 +63,7 @@ public class PlayerController : GLib.Object
 		construct_widgets();
 		establish_mpris_connection();
 		this.update_layout();
+    
 	}
 
 	public void update_state(state new_state)
@@ -167,6 +169,20 @@ public class PlayerController : GLib.Object
 		return formatted;
 	}
 
+  public void set_icon_path()
+  {
+    if(this.app_info != null){
+      /*Gtk.IconTheme icon_t = Gtk.IconTheme.get_default();
+      Gtk.IconInfo iconInfo = icon_t.lookup_icon(app_info.get_icon(),
+                                                 getIconSize(),
+                                                 Gtk.ICON_LOOKUP_USE_BUILTIN);*/
+      //return iconInfo.load_icon();      
+      dbusmenu_menuitem_property_set_image(this.custom_items[widget_order.TITLE],
+                                           MENUITEM_PROP_ICON_DATA,                                                                                     
+                                           app_info.get_icon());
+    }
+  }
+  
 	// Temporarily we will need to handle to different mpris implemenations
 	// Do it for now - a couple of weeks should see this messy carry on out of
 	// the codebase.

@@ -24,7 +24,6 @@ using GLib;
 
 public class MusicPlayerBridge : GLib.Object
 {
-
   private Listener listener;
   private Dbusmenu.Menuitem root_menu;
 	private HashMap<string, PlayerController> registered_clients;  
@@ -61,8 +60,12 @@ public class MusicPlayerBridge : GLib.Object
 					                                         calculate_menu_position(),
 					                                         PlayerController.state.OFFLINE);
 			ctrl.app_info = app_info;
-      if(ctrl.app_info == null)
+      if(ctrl.app_info == null){
         warning("for some reason the app info is null");
+      }
+      else{
+        ctrl.set_icon_path();
+      }
 			this.registered_clients.set(determine_key(app), ctrl);					
 		}
 	}
@@ -102,6 +105,13 @@ public class MusicPlayerBridge : GLib.Object
 			                                             bridge.calculate_menu_position(),
 			                                             PlayerController.state.READY);
 			ctrl.set("app_info", app_info);
+      if(ctrl.app_info == null){
+        warning("for some reason the app info is null");
+      }
+      else{
+        ctrl.set_icon_path();
+      }
+      
       bridge.registered_clients.set(determine_key(path), ctrl);        
       debug("successfully created appinfo and instance from path and set it on the respective instance");				
 		}

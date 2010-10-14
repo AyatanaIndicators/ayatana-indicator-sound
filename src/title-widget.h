@@ -21,6 +21,8 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtk/gtkimagemenuitem.h>
 #include <libdbusmenu-gtk/menuitem.h>
+#include <libdbusmenu-glib/menuitem.h>
+
 
 G_BEGIN_DECLS
 
