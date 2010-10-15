@@ -20,7 +20,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define __TITLE_WIDGET_H__
 
 #include <gtk/gtkimagemenuitem.h>
-#include <libdbusmenu-gtk/menuitem.h>
 #include <libdbusmenu-glib/menuitem.h>
 
 

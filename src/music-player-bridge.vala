@@ -56,17 +56,12 @@ public class MusicPlayerBridge : GLib.Object
       
 			GLib.AppInfo app_info = info as GLib.AppInfo;
 			PlayerController ctrl = new PlayerController(this.root_menu, 
-					                                         truncate_player_name(app_info.get_name()),
+                                                   app_info,
+                                                   playersDB.fetch_icon_name(app),
 					                                         calculate_menu_position(),
 					                                         PlayerController.state.OFFLINE);
 			ctrl.app_info = app_info;
-      if(ctrl.app_info == null){
-        warning("for some reason the app info is null");
-      }
-      else{
-        ctrl.set_icon_path();
-      }
-			this.registered_clients.set(determine_key(app), ctrl);					
+  		this.registered_clients.set(determine_key(app), ctrl);					
 		}
 	}
   
@@ -96,22 +91,14 @@ public class MusicPlayerBridge : GLib.Object
 	{
 		MusicPlayerBridge bridge = data as MusicPlayerBridge;
 		AppInfo? app_info = create_app_info(path);
-    var name = truncate_player_name(app_info.get_name());
 		if(path.contains("/") && bridge.playersDB.already_familiar(path) == false){
 			debug("About to store desktop file path: %s", path);
 			bridge.playersDB.insert(path);
 			PlayerController ctrl = new PlayerController(bridge.root_menu,
-			                                             name,
+                                                   app_info,
+                                                   playersDB.fetch_icon_name(path),
 			                                             bridge.calculate_menu_position(),
 			                                             PlayerController.state.READY);
-			ctrl.set("app_info", app_info);
-      if(ctrl.app_info == null){
-        warning("for some reason the app info is null");
-      }
-      else{
-        ctrl.set_icon_path();
-      }
-      
       bridge.registered_clients.set(determine_key(path), ctrl);        
       debug("successfully created appinfo and instance from path and set it on the respective instance");				
 		}
@@ -162,19 +149,6 @@ public class MusicPlayerBridge : GLib.Object
 		GLib.AppInfo app_info = info as GLib.AppInfo;		
 		return app_info;
 	}
-
-  private static string truncate_player_name(owned string app_info_name)
-  {
-    string result = app_info_name.down().strip();
-
-    var tokens = result.split(" ");
-
-    if(tokens.length > 1){
-      result = tokens[0];
-    }
-    debug("truncate player name %s", result);
-    return result;
-  }
 
   private static string? determine_key(owned string path)
   {

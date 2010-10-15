@@ -49,21 +49,24 @@ public class PlayerController : GLib.Object
 	public Mpris2Controller mpris_bridge;
 	public AppInfo? app_info { get; set;}
 	public int menu_offset { get; set;}
+  public string icon_name { get; set; }
 		
 	public PlayerController(Dbusmenu.Menuitem root,
-	                        string client_name,
+                          AppInfo app_info,
+                          string icon_name,
 	                        int offset,
 	                        state initial_state)
 	{
 		this.root_menu = root;
-		this.name = format_client_name(client_name.strip());
+    this.app_info = app_info;
+    this.icon_name = icon_name;
+		this.name = format_client_name(truncate_player_name(app_info.get_name()));
 		this.custom_items = new ArrayList<PlayerItem>();
 		this.current_state = initial_state;
 		this.menu_offset = offset;
 		construct_widgets();
 		establish_mpris_connection();
-		this.update_layout();
-    
+		this.update_layout();   
 	}
 
 	public void update_state(state new_state)
@@ -168,20 +171,6 @@ public class PlayerController : GLib.Object
 		}		
 		return formatted;
 	}
-
-  public void set_icon_path()
-  {
-    if(this.app_info != null){
-      /*Gtk.IconTheme icon_t = Gtk.IconTheme.get_default();
-      Gtk.IconInfo iconInfo = icon_t.lookup_icon(app_info.get_icon(),
-                                                 getIconSize(),
-                                                 Gtk.ICON_LOOKUP_USE_BUILTIN);*/
-      //return iconInfo.load_icon();      
-      dbusmenu_menuitem_property_set_image(this.custom_items[widget_order.TITLE],
-                                           MENUITEM_PROP_ICON_DATA,                                                                                     
-                                           app_info.get_icon());
-    }
-  }
   
 	// Temporarily we will need to handle to different mpris implemenations
 	// Do it for now - a couple of weeks should see this messy carry on out of
@@ -199,4 +188,18 @@ public class PlayerController : GLib.Object
 			this.update_state(state.DISCONNECTED);
 		}
 	}
+
+  private static string truncate_player_name(owned string app_info_name)
+  {
+    string result = app_info_name.down().strip();
+
+    var tokens = result.split(" ");
+
+    if(tokens.length > 1){
+      result = tokens[0];
+    }
+    debug("truncate player name %s", result);
+    return result;
+  }
+  
 }

@@ -76,14 +76,23 @@ static void
 title_widget_init (TitleWidget *self)
 {
 	//g_debug("TitleWidget::title_widget_init");
+}
 
-	gint padding = 0;
+static void 
+title_widget_set_icon(TitleWidget *self)
+{
+  TitleWidgetPrivate *priv = TITLE_WIDGET_GET_PRIVATE(self);
+
+  gchar* icon_name = dbusmenu_menuitem_property_get(priv->twin_item,
+                                                    DBUSMENU_TITLE_MENUITEM_ICON);
+  gint padding = 0;
 	gtk_widget_style_get(GTK_WIDGET(self), "horizontal-padding", &padding, NULL);
 
 	gint width, height;
 	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
 
-	GtkWidget * icon = gtk_image_new_from_icon_name("sound-icon", GTK_ICON_SIZE_MENU);
+	GtkWidget * icon = gtk_image_new_from_icon_name(icon_name,
+                                                  GTK_ICON_SIZE_MENU);
 
 	gtk_widget_set_size_request(icon, width
                                     + 5 /* ref triangle is 5x9 pixels */
@@ -91,8 +100,7 @@ title_widget_init (TitleWidget *self)
                                     height);
 	gtk_misc_set_alignment(GTK_MISC(icon), 0.5 /* right aligned */, 0);
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(icon));
-	gtk_widget_show(icon);
-
+	gtk_widget_show(icon);  
 }
 
 static void
@@ -130,14 +138,19 @@ title_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 {
 	g_return_if_fail (IS_TITLE_WIDGET (userdata));	
 	TitleWidget* mitem = TITLE_WIDGET(userdata);
-
+  g_debug("PROPERTY UPDATE FOR THE TITLE");
 	if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_NAME, property) == 0){
         gtk_menu_item_set_label (GTK_MENU_ITEM(mitem),
                                 g_value_get_string(value));
 	}
-	/*else(g_ascii_strcasecmp(DBUSMENU_MENUITEM_PROP_ICON_DATA, property) == 0){
-    g_debug("changing the icon data on the title");
-	}*/
+	else if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_ICON, property) == 0){
+    g_debug("changing the icon data on the title - %s",
+            g_value_get_string(value));
+	  GtkWidget * icon = gtk_image_new_from_icon_name(g_value_get_string(value),
+                                                    GTK_ICON_SIZE_MENU);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(mitem), GTK_WIDGET(icon));
+    
+	}
 }
 
 static void
@@ -160,6 +173,7 @@ title_widget_set_twin_item(TitleWidget* self,
   gtk_menu_item_set_label (GTK_MENU_ITEM(self),
                            dbusmenu_menuitem_property_get(priv->twin_item,
                                                           DBUSMENU_TITLE_MENUITEM_NAME));                             
+  title_widget_set_icon(self);
 }
                            
 static gboolean
