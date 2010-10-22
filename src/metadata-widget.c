@@ -3,6 +3,7 @@ Copyright 2010 Canonical Ltd.
 
 Authors:
     Conor Curran <conor.curran@canonical.com>
+    Mirco Müller <mirco.mueller@canonical.com>
 
 This program is free software: you can redistribute it and/or modify it 
 under the terms of the GNU General Public License version 3, as published 
@@ -26,7 +27,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "common-defs.h"
 #include <gtk/gtk.h>
 #include <glib.h>
-
+#include "transport-widget.h"
 
 typedef struct _MetadataWidgetPrivate MetadataWidgetPrivate;
 
@@ -41,6 +42,7 @@ struct _MetadataWidgetPrivate
 	GtkWidget* piece_label;
 	GtkWidget* container_label;
   DbusmenuMenuitem* twin_item;		  
+  gint artwork_offset;
 };
 
 #define METADATA_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), METADATA_WIDGET_TYPE, MetadataWidgetPrivate))
@@ -99,6 +101,7 @@ metadata_widget_init (MetadataWidget *self)
 	priv->album_art = gtk_image_new();
 	priv->image_path = g_string_new(dbusmenu_menuitem_property_get(priv->twin_item, DBUSMENU_METADATA_MENUITEM_ARTURL));
 	priv->old_image_path = g_string_new("");
+  priv->artwork_offset = 2;
 	//g_debug("Metadata::At startup and image path = %s", priv->image_path->str);
 	
   g_signal_connect(priv->album_art, "expose-event", 
@@ -106,7 +109,11 @@ metadata_widget_init (MetadataWidget *self)
                    GTK_WIDGET(self));		
 	gtk_widget_set_size_request(GTK_WIDGET(priv->album_art), 60, 60); 
 	
-	gtk_box_pack_start (GTK_BOX (priv->hbox), priv->album_art, FALSE, FALSE, 0);	
+	gtk_box_pack_start (GTK_BOX (priv->hbox),
+                      priv->album_art,
+                      FALSE,
+                      FALSE,
+                      priv->artwork_offset * 2);	
 	
   priv->theme_change_occured = FALSE;
 
@@ -156,7 +163,7 @@ metadata_widget_init (MetadataWidget *self)
   g_signal_connect(self, "style-set", G_CALLBACK(metadata_widget_set_style), GTK_WIDGET(self));		
 	
 	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 65); 
-  gtk_container_add (GTK_CONTAINER (self), hbox);	
+  gtk_container_add (GTK_CONTAINER (self), hbox);
 }
 
 static void
@@ -209,6 +216,56 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	return TRUE;
 }
 
+
+static void
+draw_gradient (cairo_t* cr,
+               GtkAllocation alloc,
+               double*  rgba_start,
+               double*  rgba_end)
+{
+	cairo_pattern_t* pattern = NULL;
+  cairo_rectangle (cr,
+                   alloc.x, alloc.y,
+                   alloc.width, alloc.height);
+  
+	cairo_clip(cr);
+
+	cairo_move_to (cr, alloc.x , alloc.y);
+	cairo_line_to(cr, alloc.x + alloc.width,
+	              alloc.y);
+	cairo_line_to(cr, alloc.x + alloc.width,
+	              alloc.y + alloc.height);
+	cairo_line_to(cr, alloc.x, alloc.y + alloc.height);
+	cairo_line_to(cr, alloc.x, alloc.y);
+
+	cairo_close_path (cr);
+
+  cairo_set_line_width (cr, 3.0);
+  CairoColorRGB darkened_top_color;
+  
+  _color_shade (&rgba_end, 0.8, &color_button[2]);
+  
+	pattern = cairo_pattern_create_linear (alloc.x, 
+                                         alloc.y,
+                                         alloc.x,
+                                         alloc.y + alloc.height);
+	cairo_pattern_add_color_stop_rgba (pattern,
+	                                   0.0f,
+	                                   rgba_start[0],
+	                                   rgba_start[1],
+	                                   rgba_start[2],
+	                                   rgba_start[3]);
+	cairo_pattern_add_color_stop_rgba (pattern,
+	                                   1.0f,
+	                                   rgba_end[0],
+	                                   rgba_end[1],
+	                                   rgba_end[2],
+	                                   rgba_end[3]);
+	cairo_set_source (cr, pattern);
+	cairo_stroke (cr);
+	cairo_pattern_destroy (pattern);
+}
+
 static void
 draw_album_border(GtkWidget *metadata)
 {
@@ -225,8 +282,23 @@ draw_album_border(GtkWidget *metadata)
   alloc.height = alloc.height + (offset * 2);
   alloc.x = alloc.x - offset;
   alloc.y = alloc.y - offset;
-    
-	cairo_rectangle (cr,
+
+  double start_colour[] = { style->bg[0].red/65535.0,
+                            style->bg[0].green/65535.0,
+                            style->bg[0].blue/65535.0,
+                            1.0f  };
+
+  double end_colour[] = {   style->fg[0].red/65535.0,
+                            style->fg[0].green/65535.0,
+                            style->fg[0].blue/65535.0,
+                            1.0f};
+
+  draw_gradient(cr,
+                alloc,
+                start_colour,
+                end_colour);
+                  
+	/*cairo_rectangle (cr,
                    alloc.x, alloc.y,
                    alloc.width, alloc.height);
 	cairo_clip(cr);
@@ -249,7 +321,7 @@ draw_album_border(GtkWidget *metadata)
                          0.6);
 	cairo_set_line_width (cr, 2.0);
 	
-	cairo_stroke (cr);						  
+	cairo_stroke (cr);*/						  
 }
 
 static void

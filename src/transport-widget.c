@@ -69,7 +69,6 @@ Uses code from ctk
 #define INNER_COMPRESSED_START_SHADE 0.95
 #define INNER_COMPRESSED_END_SHADE 1.05
 
-
 typedef struct _TransportWidgetPrivate TransportWidgetPrivate;
 
 struct _TransportWidgetPrivate
@@ -79,14 +78,6 @@ struct _TransportWidgetPrivate
 	GHashTable* 		 command_coordinates;	
   DbusmenuMenuitem*    twin_item;		
 };
-
-typedef struct
-{
-	double r;
-	double g;
-	double b;
-} CairoColorRGB;
-
 
 #define TRANSPORT_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TRANSPORT_WIDGET_TYPE, TransportWidgetPrivate))
 
@@ -117,7 +108,6 @@ static void transport_widget_menu_hidden ( GtkWidget        *menu,
 static void transport_widget_notify ( TransportWidget *item,
                                       GParamSpec       *pspec,
                                       gpointer          user_data );
-
 static TransportWidgetEvent transport_widget_determine_button_event ( TransportWidget* button,
                                                                       GdkEventButton* event);
 static void transport_widget_react_to_button_release ( TransportWidget* button,
@@ -743,7 +733,7 @@ _color_hls_to_rgb (gdouble *h,
 	}
 }
 
-static void
+void
 _color_shade (const CairoColorRGB *a, float k, CairoColorRGB *b)
 {
 	double red;
