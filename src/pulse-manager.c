@@ -20,7 +20,6 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include <pulse/glib-mainloop.h>
 #include <pulse/error.h>
 #include <pulse/gccmacro.h>
@@ -28,14 +27,18 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "pulse-manager.h"
 #include "dbus-menu-manager.h"
 
+#define RECONNECT_DELAY 5
+
 static GHashTable *sink_hash = NULL;
 static SoundServiceDbus *dbus_service = NULL;
 static gint DEFAULT_SINK_INDEX = -1;
 static gboolean pa_server_available = FALSE;
-// PA related
+static gint reconnect_idle_id = 0;
 static pa_context *pulse_context = NULL;
 static pa_glib_mainloop *pa_main_loop = NULL;
+
 static void context_state_callback(pa_context *c, void *userdata);
+static gboolean reconnect_to_pulse();
 static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink_info, int eol, void *userdata);
 static void context_success_callback(pa_context *c, int success, void *userdata);
 static void pulse_sink_input_info_callback(pa_context *c, const pa_sink_input_info *info, int eol, void *userdata);
@@ -61,15 +64,19 @@ void establish_pulse_activities(SoundServiceDbus *service)
   dbus_service = service;
   pa_main_loop = pa_glib_mainloop_new(g_main_context_default());
   g_assert(pa_main_loop);
-  pulse_context = pa_context_new(pa_glib_mainloop_get_api(pa_main_loop), "ayatana.indicator.sound");
+  pulse_context = pa_context_new(pa_glib_mainloop_get_api(pa_main_loop),
+                                 "ayatana.indicator.sound");
   g_assert(pulse_context);
 
-  sink_hash = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, destroy_sink_info);
+  sink_hash = g_hash_table_new_full(g_direct_hash,
+                                    g_direct_equal,
+                                    NULL,
+                                    destroy_sink_info);
 
   // Establish event callback registration
-  pa_context_set_state_callback(pulse_context, context_state_callback, NULL);
-  dbus_menu_manager_update_pa_state(FALSE, FALSE, FALSE, 0);
-  pa_context_connect(pulse_context, NULL, PA_CONTEXT_NOFAIL, NULL);
+  pa_context_set_state_callback (pulse_context, context_state_callback, NULL);
+  dbus_menu_manager_update_pa_state (FALSE, FALSE, FALSE, 0);
+  pa_context_connect (pulse_context, NULL, PA_CONTEXT_NOFAIL, NULL);
 }
 
 /**
@@ -79,6 +86,39 @@ Needed for testing - bah!
 pa_context* get_context()
 {
   return pulse_context;
+}
+
+static gboolean
+reconnect_to_pulse()
+{
+  // reset
+  if (pulse_context != NULL) {
+    g_debug("freeing the pulse context");
+    pa_context_unref(pulse_context);
+    pulse_context = NULL;
+  }
+
+  if (sink_hash != NULL) {
+   g_hash_table_destroy(sink_hash);
+    sink_hash = NULL;
+  }
+
+  // reconnect
+  pulse_context = pa_context_new(pa_glib_mainloop_get_api(pa_main_loop),
+                                 "ayatana.indicator.sound");
+  g_assert(pulse_context);
+  sink_hash = g_hash_table_new_full(g_direct_hash, g_direct_equal,
+                                    NULL,
+                                    destroy_sink_info);
+  // Establish event callback registration
+  pa_context_set_state_callback (pulse_context, context_state_callback, NULL);
+  int result = pa_context_connect (pulse_context, NULL, PA_CONTEXT_NOFAIL, NULL);
+  if (result < 0) {
+    g_warning ("Failed to connect context: %s",
+               pa_strerror (pa_context_errno (pulse_context)));
+  }
+  reconnect_idle_id = 0;  
+  return FALSE;
 }
 
 /**
@@ -294,9 +334,6 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
 static void pulse_default_sink_info_callback(pa_context *c, const pa_sink_info *info, int eol, void *userdata)
 {
   if (eol > 0) {
-    if (pa_context_errno(c) == PA_ERR_NOENTITY)
-      return;
-    g_warning("Default Sink info callback failure");
     return;
   } else {
     DEFAULT_SINK_INDEX = info->index;
@@ -416,7 +453,9 @@ static gboolean has_volume_changed(const pa_sink_info* new_sink, sink_info* cach
 }
 
 
-static void pulse_server_info_callback(pa_context *c, const pa_server_info *info, void *userdata)
+static void pulse_server_info_callback(pa_context *c,
+                                       const pa_server_info *info,
+                                       void *userdata)
 {
   /*    g_debug("server info callback");*/
   pa_operation *operation;
@@ -428,7 +467,10 @@ static void pulse_server_info_callback(pa_context *c, const pa_server_info *info
   }
   pa_server_available = TRUE;
   if (info->default_sink_name != NULL) {
-    if (!(operation = pa_context_get_sink_info_by_name(c, info->default_sink_name, pulse_default_sink_info_callback, userdata))) {
+    if (!(operation = pa_context_get_sink_info_by_name(c,
+                                                       info->default_sink_name,
+                                                       pulse_default_sink_info_callback,
+                                                       userdata))) {
       g_warning("pa_context_get_sink_info_by_name() failed");
     } else {
       pa_operation_unref(operation);
@@ -504,6 +546,17 @@ static void context_state_callback(pa_context *c, void *userdata)
   case PA_CONTEXT_FAILED:
     g_warning("FAILED to retrieve context - Is PulseAudio Daemon running ?");
     pa_server_available = FALSE;
+    dbus_menu_manager_update_pa_state(TRUE,
+                                      pa_server_available,
+                                      default_sink_is_muted(),
+                                      get_default_sink_volume());
+      
+    if (reconnect_idle_id == 0){
+      reconnect_idle_id = g_timeout_add_seconds (RECONNECT_DELAY,
+                                                 reconnect_to_pulse,
+                                                 NULL);      
+                                                
+    }     
     break;
   case PA_CONTEXT_TERMINATED:
     /*			g_debug("context terminated");*/
