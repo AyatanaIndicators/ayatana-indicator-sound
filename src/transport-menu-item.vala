@@ -62,5 +62,4 @@ public class TransportMenuitem : PlayerItem
 		return attrs;
 	}	
 
-	
 }
