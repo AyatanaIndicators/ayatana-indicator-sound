@@ -490,10 +490,10 @@ static void context_state_callback(pa_context *c, void *userdata)
 {
   switch (pa_context_get_state(c)) {
   case PA_CONTEXT_UNCONNECTED:
-    /*			g_debug("unconnected");*/
+    			g_debug("unconnected");
     break;
   case PA_CONTEXT_CONNECTING:
-    /*			g_debug("connecting - waiting for the server to become available");*/
+    			g_debug("connecting - waiting for the server to become available");
     break;
   case PA_CONTEXT_AUTHORIZING:
     /*			g_debug("authorizing");*/

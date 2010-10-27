@@ -66,8 +66,11 @@ static void metadata_widget_property_update (DbusmenuMenuitem* item,
 static void metadata_widget_style_labels ( MetadataWidget* self,
                                            GtkLabel* label);
 static void draw_album_art_placeholder ( GtkWidget *metadata);
-static void draw_album_border ( GtkWidget *metadata);
-
+static void draw_album_border ( GtkWidget *metadata, gboolean selected);
+static void metadata_widget_selection_received_event_callback( GtkWidget        *widget,
+                                                                GtkSelectionData *data,
+                                                                guint             time,
+                                                                gpointer          user_data);
 G_DEFINE_TYPE (MetadataWidget, metadata_widget, GTK_TYPE_MENU_ITEM);
 
 
@@ -154,8 +157,11 @@ metadata_widget_init (MetadataWidget *self)
 	
 	gtk_box_pack_start (GTK_BOX (priv->hbox), vbox, FALSE, FALSE, 0);	
 
-  g_signal_connect(self, "style-set", G_CALLBACK(metadata_widget_set_style), GTK_WIDGET(self));		
-	
+  g_signal_connect(self, "style-set", 
+                   G_CALLBACK(metadata_widget_set_style), GTK_WIDGET(self));		
+	g_signal_connect (self, "selection-received",
+                   G_CALLBACK(metadata_widget_selection_received_event_callback),
+                   GTK_WIDGET(self));		
 	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 75); 
   gtk_container_add (GTK_CONTAINER (self), hbox);
 }
@@ -183,7 +189,7 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
 	MetadataWidget* widget = METADATA_WIDGET(user_data);
 	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);	  
-  draw_album_border(metadata);  
+  draw_album_border(metadata, FALSE);  
 	if(priv->image_path->len > 0){
 	  if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE ||
        priv->theme_change_occured == TRUE){
@@ -209,6 +215,7 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	draw_album_art_placeholder(metadata);
 	return TRUE;
 }
+
 
 
 static void
@@ -264,7 +271,7 @@ draw_gradient (cairo_t* cr,
 }
 
 static void
-draw_album_border(GtkWidget *metadata)
+draw_album_border(GtkWidget *metadata, gboolean selected)
 {
 	cairo_t *cr;	
 	cr = gdk_cairo_create (metadata->window);
@@ -286,10 +293,11 @@ draw_album_border(GtkWidget *metadata)
 	bg_normal.g = style->bg[0].green/65535.0;
 	bg_normal.b = style->bg[0].blue/65535.0;
 
-	fg_normal.r = style->fg[0].red/65535.0;
-	fg_normal.g = style->fg[0].green/65535.0;
-	fg_normal.b = style->fg[0].blue/65535.0;
-
+  gint state = selected ? 5 : 0;
+  
+	fg_normal.r = style->fg[state].red/65535.0;
+	fg_normal.g = style->fg[state].green/65535.0;
+	fg_normal.b = style->fg[state].blue/65535.0;
 
   draw_gradient(cr,
                 alloc,
@@ -341,6 +349,20 @@ draw_album_art_placeholder(GtkWidget *metadata)
 
 }
 
+static void
+metadata_widget_selection_received_event_callback (  GtkWidget        *widget,
+                                                     GtkSelectionData *data,
+                                                     guint             time,
+                                                     gpointer          user_data )
+
+{
+	//g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
+	//MetadataWidget* widget = METADATA_WIDGET(user_data);
+	//MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);	  
+  g_debug("metadata_widget_selection_request_event_callback");
+  draw_album_border(widget, TRUE);    
+}
+
 /* Suppress/consume keyevents */
 static gboolean
 metadata_widget_button_press_event (GtkWidget *menuitem, 
@@ -357,7 +379,6 @@ metadata_widget_button_press_event (GtkWidget *menuitem,
 	                                                      DBUSMENU_METADATA_MENUITEM_TITLE),
                                     dbusmenu_menuitem_property_get(priv->twin_item,
 	                                                      DBUSMENU_METADATA_MENUITEM_ALBUM));
-	//g_debug("contents to be copied will be : %s", contents);	
 	gtk_clipboard_set_text (board, contents, -1);
 	gtk_clipboard_store (board);
 	g_free(contents);
@@ -404,8 +425,6 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 		}
 	}		
 }
-
-
 
 static void
 metadata_widget_style_labels(MetadataWidget* self, GtkLabel* label)
