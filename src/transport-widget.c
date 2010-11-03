@@ -1272,6 +1272,11 @@ transport_widget_set_twin_item(TransportWidget* self,
     priv->twin_item = twin_item;
     g_signal_connect(G_OBJECT(priv->twin_item), "property-changed", 
                               G_CALLBACK(transport_widget_property_update), self);
+	  gint initial_state = dbusmenu_menuitem_property_get_int( twin_item,
+                                                             DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE );
+    g_debug("TRANSPORT WIDGET - INITIAL UPDATE = %i", initial_state);
+		transport_widget_toggle_play_pause( self,
+                                        (TransportWidgetState)initial_state);		    
 }
 
 /**
@@ -1290,8 +1295,7 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 	{
 		int update_value = g_value_get_int(value);
 		//g_debug("transport_widget_update_state - with value  %i", update_value);  
-		transport_widget_toggle_play_pause(bar,
-                                           (TransportWidgetState)update_value);		
+		transport_widget_toggle_play_pause(bar, (TransportWidgetState)update_value);		
 	}
 }
 
