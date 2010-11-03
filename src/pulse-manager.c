@@ -91,9 +91,9 @@ pa_context* get_context()
 static gboolean
 reconnect_to_pulse()
 {
+  g_debug("Attempt to reconnect to pulse");
   // reset
   if (pulse_context != NULL) {
-    g_debug("freeing the pulse context");
     pa_context_unref(pulse_context);
     pulse_context = NULL;
   }
@@ -102,21 +102,23 @@ reconnect_to_pulse()
    g_hash_table_destroy(sink_hash);
     sink_hash = NULL;
   }
-
-  // reconnect
-  pulse_context = pa_context_new(pa_glib_mainloop_get_api(pa_main_loop),
-                                 "ayatana.indicator.sound");
+  pulse_context = pa_context_new( pa_glib_mainloop_get_api( pa_main_loop ),
+                                  "ayatana.indicator.sound" );
   g_assert(pulse_context);
-  sink_hash = g_hash_table_new_full(g_direct_hash, g_direct_equal,
-                                    NULL,
-                                    destroy_sink_info);
+  sink_hash = g_hash_table_new_full( g_direct_hash, g_direct_equal,
+                                     NULL,
+                                     destroy_sink_info );
   // Establish event callback registration
   pa_context_set_state_callback (pulse_context, context_state_callback, NULL);
   int result = pa_context_connect (pulse_context, NULL, PA_CONTEXT_NOFAIL, NULL);
+
   if (result < 0) {
     g_warning ("Failed to connect context: %s",
                pa_strerror (pa_context_errno (pulse_context)));
   }
+  // we always want to cancel any continious callbacks with the existing timeout
+  // if the connection failed the new context created above will catch any updates
+  // to do with the state of pulse and thus take care of business.
   reconnect_idle_id = 0;  
   return FALSE;
 }
@@ -544,7 +546,7 @@ static void context_state_callback(pa_context *c, void *userdata)
     /*			g_debug("context setting name");*/
     break;
   case PA_CONTEXT_FAILED:
-    g_warning("FAILED to retrieve context - Is PulseAudio Daemon running ?");
+    g_warning("PA_CONTEXT_FAILED - Is PulseAudio Daemon running ?");
     pa_server_available = FALSE;
     dbus_menu_manager_update_pa_state(TRUE,
                                       pa_server_available,
@@ -554,17 +556,16 @@ static void context_state_callback(pa_context *c, void *userdata)
     if (reconnect_idle_id == 0){
       reconnect_idle_id = g_timeout_add_seconds (RECONNECT_DELAY,
                                                  reconnect_to_pulse,
-                                                 NULL);      
-                                                
+                                                 NULL);                                                      
     }     
     break;
   case PA_CONTEXT_TERMINATED:
     /*			g_debug("context terminated");*/
     break;
   case PA_CONTEXT_READY:
-    g_debug("PA daemon is ready");
+    g_debug("PA_CONTEXT_READY");
     pa_operation *o;
-
+            
     pa_context_set_subscribe_callback(c, subscribed_events_callback, userdata);
 
     if (!(o = pa_context_subscribe(c, (pa_subscription_mask_t)
