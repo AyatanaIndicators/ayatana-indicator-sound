@@ -114,7 +114,7 @@ static void transport_widget_property_update ( DbusmenuMenuitem* item,
                                        		   gpointer userdata );
 static void transport_widget_menu_hidden ( GtkWidget        *menu,
                                            TransportWidget *transport);
-static void transport_widget_notify ( TransportWidget *item,
+static void transport_widget_notify ( GObject *item,
                                       GParamSpec       *pspec,
                                       gpointer          user_data );
 
@@ -135,12 +135,12 @@ transport_widget_class_init (TransportWidgetClass *klass)
 
 	g_type_class_add_private (klass, sizeof (TransportWidgetPrivate));
 
-    widget_class->button_press_event = transport_widget_button_press_event;
-    widget_class->button_release_event = transport_widget_button_release_event;	
+  widget_class->button_press_event = transport_widget_button_press_event;
+  widget_class->button_release_event = transport_widget_button_release_event;	
  	widget_class->expose_event = transport_widget_expose;
   
 	gobject_class->dispose = transport_widget_dispose;
-    gobject_class->finalize = transport_widget_finalize;
+  gobject_class->finalize = transport_widget_finalize;
 }
 
 static void
@@ -158,9 +158,9 @@ transport_widget_init (TransportWidget *self)
 	previous_list = g_list_insert(previous_list, GINT_TO_POINTER(5), 1);
 	previous_list = g_list_insert(previous_list, GINT_TO_POINTER(60), 2);
 	previous_list = g_list_insert(previous_list, GINT_TO_POINTER(34), 3);
-    g_hash_table_insert(priv->command_coordinates,
-                      GINT_TO_POINTER(TRANSPORT_PREVIOUS),
-                      previous_list);
+  g_hash_table_insert(priv->command_coordinates,
+                    GINT_TO_POINTER(TRANSPORT_PREVIOUS),
+                    previous_list);
                      
 	GList* play_list = NULL;
 	play_list = g_list_insert(play_list, GINT_TO_POINTER(58), 0);
@@ -183,10 +183,10 @@ transport_widget_init (TransportWidget *self)
                       next_list);
 	
 	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 50);
-    g_signal_connect (G_OBJECT(self),
-                      "notify::parent",
-                      G_CALLBACK (transport_widget_notify),
-                      NULL);    
+  g_signal_connect (G_OBJECT(self),
+                    "notify",
+                    G_CALLBACK (transport_widget_notify),
+                    NULL);    
 }
 
 static void
@@ -213,7 +213,7 @@ transport_widget_expose (GtkWidget *button, GdkEventExpose *event)
                      event->area.width, event->area.height);
 
 	cairo_clip(cr);
-	draw (button, cr);
+  draw (button, cr);
 
 	cairo_destroy (cr);
 	return FALSE;
@@ -230,16 +230,16 @@ transport_widget_toggle_play_pause(TransportWidget* button,
 }
 
 static void
-transport_widget_notify (TransportWidget *item,
-                         GParamSpec       *pspec,
-                         gpointer          user_data)
+transport_widget_notify ( GObject *item,
+                          GParamSpec       *pspec,
+                          gpointer          user_data )
 {
   if (g_strcmp0 (pspec->name, "parent")){
     GtkWidget *parent = gtk_widget_get_parent (GTK_WIDGET (item));
     if (parent){
       g_signal_connect ( parent, "hide",
                          G_CALLBACK (transport_widget_menu_hidden),
-                         item);
+                         item );
     }
   }
 }
@@ -248,7 +248,6 @@ static void
 transport_widget_menu_hidden ( GtkWidget        *menu,
                                TransportWidget *transport)
 {
-    //g_debug("Transport Widget's menu hidden method called");
 	g_return_if_fail(IS_TRANSPORT_WIDGET(transport));
 	transport_widget_react_to_button_release(transport, TRANSPORT_NADA); 
 }
@@ -1274,7 +1273,7 @@ transport_widget_set_twin_item(TransportWidget* self,
                               G_CALLBACK(transport_widget_property_update), self);
 	  gint initial_state = dbusmenu_menuitem_property_get_int( twin_item,
                                                              DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE );
-    g_debug("TRANSPORT WIDGET - INITIAL UPDATE = %i", initial_state);
+    //g_debug("TRANSPORT WIDGET - INITIAL UPDATE = %i", initial_state);
 		transport_widget_toggle_play_pause( self,
                                         (TransportWidgetState)initial_state);		    
 }
