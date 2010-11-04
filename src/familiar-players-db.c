@@ -70,12 +70,13 @@ enum  {
 };
 #define FAMILIAR_PLAYERS_DB_GROUP_NAME "Seen Database"
 #define FAMILIAR_PLAYERS_DB_KEY_NAME "DesktopFiles"
+#define FAMILIAR_PLAYERS_DB_DEFAULT_APP_DESKTOP "/usr/share/applications/rhythmbox.desktop"
 FamiliarPlayersDB* familiar_players_db_new (void);
 FamiliarPlayersDB* familiar_players_db_construct (GType object_type);
 static gboolean familiar_players_db_create_key_file (FamiliarPlayersDB* self);
+static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self);
 static gboolean familiar_players_db_check_for_keys (FamiliarPlayersDB* self);
 static gboolean familiar_players_db_load_data_from_key_file (FamiliarPlayersDB* self);
-static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self);
 static void _vala_array_add1 (char*** array, int* length, int* size, char* value);
 void familiar_players_db_insert (FamiliarPlayersDB* self, const char* desktop);
 gboolean familiar_players_db_already_familiar (FamiliarPlayersDB* self, const char* desktop);
@@ -97,6 +98,10 @@ FamiliarPlayersDB* familiar_players_db_construct (GType object_type) {
 	self = (FamiliarPlayersDB*) g_object_new (object_type, NULL);
 	self->priv->write_id = (guint) 0;
 	self->priv->players_DB = (_tmp0_ = gee_hash_map_new (G_TYPE_STRING, (GBoxedCopyFunc) g_strdup, g_free, G_TYPE_BOOLEAN, NULL, NULL, NULL, NULL, NULL), _g_object_unref0 (self->priv->players_DB), _tmp0_);
+	if (!familiar_players_db_create_key_file (self)) {
+		gee_abstract_map_set ((GeeAbstractMap*) self->priv->players_DB, FAMILIAR_PLAYERS_DB_DEFAULT_APP_DESKTOP, GINT_TO_POINTER (TRUE));
+		familiar_players_db_write_db (self);
+	}
 	self->priv->dir_name = (_tmp1_ = g_build_filename (g_get_user_cache_dir (), "indicators", "sound", NULL), _g_free0 (self->priv->dir_name), _tmp1_);
 	self->priv->file_name = (_tmp2_ = g_build_filename (self->priv->dir_name, "familiar-players-db.keyfile", NULL), _g_free0 (self->priv->file_name), _tmp2_);
 	if (familiar_players_db_create_key_file (self)) {
@@ -110,11 +115,11 @@ FamiliarPlayersDB* familiar_players_db_construct (GType object_type) {
 		_tmp3_ = FALSE;
 	}
 	if (_tmp3_) {
-		g_debug ("familiar-players-db.vala:45: keyfiles in place and ready for action");
+		g_debug ("familiar-players-db.vala:51: keyfiles in place and ready for action");
 	} else {
 		GKeyFile* _tmp5_;
 		self->priv->key_file = (_tmp5_ = NULL, _g_key_file_free0 (self->priv->key_file), _tmp5_);
-		g_warning ("familiar-players-db.vala:49: FamiliarPlayersDB:: problems loading key " \
+		g_warning ("familiar-players-db.vala:55: FamiliarPlayersDB:: problems loading key " \
 "file - can't go any further");
 	}
 	return self;
@@ -158,7 +163,7 @@ static gboolean familiar_players_db_create_key_file (FamiliarPlayersDB* self) {
 			e = _inner_error_;
 			_inner_error_ = NULL;
 			{
-				g_warning ("familiar-players-db.vala:61: FamiliarPlayersDB::create_key_file() - Ke" \
+				g_warning ("familiar-players-db.vala:67: FamiliarPlayersDB::create_key_file() - Ke" \
 "yFileError");
 				_g_error_free0 (e);
 			}
@@ -170,7 +175,7 @@ static gboolean familiar_players_db_create_key_file (FamiliarPlayersDB* self) {
 			e = _inner_error_;
 			_inner_error_ = NULL;
 			{
-				g_warning ("familiar-players-db.vala:64: FamiliarPlayersDB::create_key_file() - Fi" \
+				g_warning ("familiar-players-db.vala:70: FamiliarPlayersDB::create_key_file() - Fi" \
 "leError");
 				_g_error_free0 (e);
 			}
@@ -225,7 +230,7 @@ static gboolean familiar_players_db_check_for_keys (FamiliarPlayersDB* self) {
 		g_clear_error (&_inner_error_);
 		return FALSE;
 	}
-	g_warning ("familiar-players-db.vala:79: Seen DB '%s' does not have key '%s' in gr" \
+	g_warning ("familiar-players-db.vala:85: Seen DB '%s' does not have key '%s' in gr" \
 "oup '%s'", self->priv->file_name, FAMILIAR_PLAYERS_DB_KEY_NAME, FAMILIAR_PLAYERS_DB_GROUP_NAME);
 	result = FALSE;
 	return result;
@@ -277,7 +282,7 @@ static gboolean familiar_players_db_load_data_from_key_file (FamiliarPlayersDB* 
 		_error_ = _inner_error_;
 		_inner_error_ = NULL;
 		{
-			g_warning ("familiar-players-db.vala:93: Error loading the Desktop string list");
+			g_warning ("familiar-players-db.vala:99: Error loading the Desktop string list");
 			result = FALSE;
 			_g_error_free0 (_error_);
 			return result;
@@ -345,7 +350,7 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 		e = _inner_error_;
 		_inner_error_ = NULL;
 		{
-			g_warning ("familiar-players-db.vala:114: Problems dumping keyfile to a string");
+			g_warning ("familiar-players-db.vala:120: Problems dumping keyfile to a string");
 			result = FALSE;
 			_g_error_free0 (e);
 			_g_free0 (data);
@@ -364,7 +369,7 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 		return FALSE;
 	}
 	if (g_mkdir_with_parents (self->priv->dir_name, 0700) != 0) {
-		g_warning ("familiar-players-db.vala:119: Unable to make directory: %s", self->priv->dir_name);
+		g_warning ("familiar-players-db.vala:125: Unable to make directory: %s", self->priv->dir_name);
 		result = FALSE;
 		_g_free0 (data);
 		desktops = (_vala_array_free (desktops, desktops_length1, (GDestroyNotify) g_free), NULL);
@@ -386,7 +391,7 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 			return FALSE;
 		}
 		if (_tmp5_ == FALSE) {
-			g_warning ("familiar-players-db.vala:125: Unable to write out file '%s'", self->priv->file_name);
+			g_warning ("familiar-players-db.vala:131: Unable to write out file '%s'", self->priv->file_name);
 		}
 	}
 	goto __finally10;
@@ -396,7 +401,7 @@ static gboolean familiar_players_db_write_db (FamiliarPlayersDB* self) {
 		err = _inner_error_;
 		_inner_error_ = NULL;
 		{
-			g_warning ("familiar-players-db.vala:129: Unable to write out file '%s'", self->priv->file_name);
+			g_warning ("familiar-players-db.vala:135: Unable to write out file '%s'", self->priv->file_name);
 			_g_error_free0 (err);
 		}
 	}
@@ -460,7 +465,7 @@ gboolean familiar_players_db_already_familiar (FamiliarPlayersDB* self, const ch
 	gboolean _tmp3_;
 	g_return_val_if_fail (self != NULL, FALSE);
 	g_return_val_if_fail (desktop != NULL, FALSE);
-	g_debug ("familiar-players-db.vala:148: playerDB->already_familiar - result %s", _tmp1_ = bool_to_string (gee_collection_contains ((GeeCollection*) (_tmp0_ = gee_map_get_keys ((GeeMap*) self->priv->players_DB)), desktop)));
+	g_debug ("familiar-players-db.vala:154: playerDB->already_familiar - result %s", _tmp1_ = bool_to_string (gee_collection_contains ((GeeCollection*) (_tmp0_ = gee_map_get_keys ((GeeMap*) self->priv->players_DB)), desktop)));
 	_g_free0 (_tmp1_);
 	_g_object_unref0 (_tmp0_);
 	result = (_tmp3_ = gee_collection_contains ((GeeCollection*) (_tmp2_ = gee_map_get_keys ((GeeMap*) self->priv->players_DB)), desktop), _g_object_unref0 (_tmp2_), _tmp3_);
