@@ -84,7 +84,7 @@ public class Mpris2Controller : GLib.Object
 			this.properties_interface = (FreeDesktopProperties) connection.get_object("org.freedesktop.Properties.PropertiesChanged",
 			                                                                          "/org/mpris/MediaPlayer2");                                                                                
 			this.properties_interface.PropertiesChanged += property_changed_cb;			
-			
+      
 		} catch (DBus.Error e) {
       	error("Problems connecting to the session bus - %s", e.message);
     }		
@@ -150,8 +150,8 @@ public class Mpris2Controller : GLib.Object
 		}
 		else{
 			update = determine_play_state(this.player.PlaybackStatus);
-		}		
-		(this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(update);
+		}		    
+    (this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(update);
 		GLib.HashTable<string, Value?> cleaned_metadata = this.clean_metadata();
 		this.owner.custom_items[PlayerController.widget_order.METADATA].update(cleaned_metadata,
 			                          MetadataMenuitem.attributes_format());

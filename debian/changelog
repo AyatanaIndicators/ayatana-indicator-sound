@@ -1,3 +1,15 @@
+indicator-sound (0.5.0-0ubuntu1) maverick-proposed; urgency=low
+
+  * New upstream release.
+    - Buttons' hover image stays after dragging (LP: #643395)
+    - Sound indicator works incorrect with playing status (LP: #656947)
+    - sound applet volume slider has no effect if pulseaudio is 
+      restarted (LP: #662296)
+    - Default music player should be present in the menu from a clean 
+      install (LP: #664743)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 04 Nov 2010 17:03:08 -0400
+
 indicator-sound (0.4.9-0ubuntu1) maverick-proposed; urgency=low
 
   * New upstream release.

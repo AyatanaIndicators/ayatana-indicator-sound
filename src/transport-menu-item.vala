@@ -42,6 +42,8 @@ public class TransportMenuitem : PlayerItem
 
 	public void change_play_state(state update)
 	{
+    debug("UPDATING THE TRANSPORT DBUSMENUITEM PLAY STATE WITH VALUE %i",
+          (int)update);
 		this.property_set_int(MENUITEM_PLAY_STATE, update);	
 	}
 	
@@ -60,5 +62,4 @@ public class TransportMenuitem : PlayerItem
 		return attrs;
 	}	
 
-	
 }

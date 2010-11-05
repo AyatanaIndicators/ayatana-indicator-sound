@@ -511,10 +511,35 @@ static void
 metadata_widget_set_twin_item(MetadataWidget* self,
            								    DbusmenuMenuitem* twin_item)
 {
-    MetadataWidgetPrivate* priv = METADATA_WIDGET_GET_PRIVATE(self);
-    priv->twin_item = twin_item;
-    g_signal_connect(G_OBJECT(priv->twin_item), "property-changed", 
-                              G_CALLBACK(metadata_widget_property_update), self);
+  MetadataWidgetPrivate* priv = METADATA_WIDGET_GET_PRIVATE(self);
+  priv->twin_item = twin_item;
+  g_signal_connect( G_OBJECT(priv->twin_item), "property-changed", 
+                            G_CALLBACK(metadata_widget_property_update), self);
+  gtk_label_set_text( GTK_LABEL(priv->container_label), 
+                      dbusmenu_menuitem_property_get( priv->twin_item,
+                                                      DBUSMENU_METADATA_MENUITEM_ALBUM));
+	metadata_widget_style_labels( self, GTK_LABEL(priv->container_label));
+
+  gtk_label_set_text( GTK_LABEL(priv->piece_label), 
+                      dbusmenu_menuitem_property_get( priv->twin_item,
+                                                      DBUSMENU_METADATA_MENUITEM_TITLE));
+	metadata_widget_style_labels( self, GTK_LABEL(priv->piece_label));
+  gtk_label_set_text( GTK_LABEL(priv->artist_label), 
+                      dbusmenu_menuitem_property_get( priv->twin_item,
+                                                      DBUSMENU_METADATA_MENUITEM_ARTIST));
+	metadata_widget_style_labels( self, GTK_LABEL(priv->artist_label));
+
+  g_string_erase(priv->image_path, 0, -1);
+	g_string_overwrite( priv->image_path,
+                      0,
+                      dbusmenu_menuitem_property_get( priv->twin_item,
+                                                      DBUSMENU_METADATA_MENUITEM_ARTURL ));
+
+	// if its a remote image queue a redraw incase the download took too long
+	if (g_str_has_prefix (dbusmenu_menuitem_property_get (priv->twin_item, DBUSMENU_METADATA_MENUITEM_ARTURL ),
+                        g_get_user_cache_dir())){
+	  gtk_widget_queue_draw(GTK_WIDGET(self));                                                          
+  }                       
 }
 
 
