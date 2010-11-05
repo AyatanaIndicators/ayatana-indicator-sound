@@ -3,6 +3,7 @@ Copyright 2010 Canonical Ltd.
 
 Authors:
     Conor Curran <conor.curran@canonical.com>
+    Mirco Müller <mirco.mueller@canonical.com>
 
 This program is free software: you can redistribute it and/or modify it 
 under the terms of the GNU General Public License version 3, as published 
@@ -26,7 +27,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "common-defs.h"
 #include <gtk/gtk.h>
 #include <glib.h>
-
+#include "transport-widget.h"
 
 typedef struct _MetadataWidgetPrivate MetadataWidgetPrivate;
 
@@ -62,13 +63,14 @@ static void metadata_widget_property_update (DbusmenuMenuitem* item,
                                              gchar* property, 
                                        			 GValue* value,
                                              gpointer userdata);
-static void metadata_widget_style_labels(MetadataWidget* self,
-                                         GtkLabel* label);
-static void image_set_from_pixbuf (GtkWidget  *widget,
-												           MetadataWidget* metadata,
-												           GdkPixbuf *source);
-static void draw_album_art_placeholder(GtkWidget *metadata);
-
+static void metadata_widget_style_labels ( MetadataWidget* self,
+                                           GtkLabel* label);
+static void draw_album_art_placeholder ( GtkWidget *metadata);
+static void draw_album_border ( GtkWidget *metadata, gboolean selected);
+static void metadata_widget_selection_received_event_callback( GtkWidget        *widget,
+                                                                GtkSelectionData *data,
+                                                                guint             time,
+                                                                gpointer          user_data);
 G_DEFINE_TYPE (MetadataWidget, metadata_widget, GTK_TYPE_MENU_ITEM);
 
 
@@ -99,19 +101,21 @@ metadata_widget_init (MetadataWidget *self)
 
 	// image
 	priv->album_art = gtk_image_new();
-	priv->image_path = g_string_new(dbusmenu_menuitem_property_get(priv->twin_item, DBUSMENU_METADATA_MENUITEM_ARTURL));
+	priv->image_path = g_string_new(dbusmenu_menuitem_property_get(priv->twin_item,
+                                                                 DBUSMENU_METADATA_MENUITEM_ARTURL));
 	priv->old_image_path = g_string_new("");
-	//g_debug("Metadata::At startup and image path = %s", priv->image_path->str);
 	
   g_signal_connect(priv->album_art, "expose-event", 
                    G_CALLBACK(metadata_image_expose),
                    GTK_WIDGET(self));		
 	gtk_widget_set_size_request(GTK_WIDGET(priv->album_art), 60, 60); 
 	
-	gtk_box_pack_start (GTK_BOX (priv->hbox), priv->album_art, FALSE, FALSE, 0);	
-	
+	gtk_box_pack_start (GTK_BOX (priv->hbox),
+                      priv->album_art,
+                      FALSE,
+                      FALSE,
+                      1);	
   priv->theme_change_occured = FALSE;
-
   GtkWidget* vbox = gtk_vbox_new(FALSE, 0);
 	
 	// artist
@@ -130,7 +134,7 @@ metadata_widget_init (MetadataWidget *self)
 	piece = gtk_label_new(dbusmenu_menuitem_property_get( priv->twin_item,
 	                                                      DBUSMENU_METADATA_MENUITEM_TITLE) );
 	gtk_misc_set_alignment(GTK_MISC(piece), (gfloat)0, (gfloat)0);
-	gtk_misc_set_padding (GTK_MISC(piece), (gfloat)10, (gfloat)0);
+	gtk_misc_set_padding (GTK_MISC(piece), (gfloat)10, (gfloat)-5);
   gtk_widget_set_size_request (piece, 140, 15);
   gtk_label_set_ellipsize(GTK_LABEL(piece), PANGO_ELLIPSIZE_MIDDLE);
 	metadata_widget_style_labels(self, GTK_LABEL(piece));
@@ -153,12 +157,13 @@ metadata_widget_init (MetadataWidget *self)
 	
 	gtk_box_pack_start (GTK_BOX (priv->hbox), vbox, FALSE, FALSE, 0);	
 
-	gtk_widget_show_all (priv->hbox);
-
-  g_signal_connect(self, "style-set", G_CALLBACK(metadata_widget_set_style), GTK_WIDGET(self));		
-	
-	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 65); 
-  gtk_container_add (GTK_CONTAINER (self), hbox);	
+  g_signal_connect(self, "style-set", 
+                   G_CALLBACK(metadata_widget_set_style), GTK_WIDGET(self));		
+	g_signal_connect (self, "selection-received",
+                   G_CALLBACK(metadata_widget_selection_received_event_callback),
+                   GTK_WIDGET(self));		
+	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 75); 
+  gtk_container_add (GTK_CONTAINER (self), hbox);
 }
 
 static void
@@ -183,7 +188,8 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 {
 	g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
 	MetadataWidget* widget = METADATA_WIDGET(user_data);
-	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);	
+	MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);	  
+  draw_album_border(metadata, FALSE);  
 	if(priv->image_path->len > 0){
 	  if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE ||
        priv->theme_change_occured == TRUE){
@@ -195,12 +201,12 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 			if(GDK_IS_PIXBUF(pixbuf) == FALSE){
 				//g_debug("problem loading the downloaded image just use the placeholder instead");
 				draw_album_art_placeholder(metadata);
-				return TRUE;				
+				return TRUE;
 			}
 			pixbuf = gdk_pixbuf_scale_simple(pixbuf,60, 60, GDK_INTERP_BILINEAR);
-			image_set_from_pixbuf (metadata, widget, pixbuf);
+    	gtk_image_set_from_pixbuf(GTK_IMAGE(priv->album_art), pixbuf);
 			g_string_erase(priv->old_image_path, 0, -1);
-			g_string_overwrite(priv->old_image_path, 0, priv->image_path->str); 
+			g_string_overwrite(priv->old_image_path, 0, priv->image_path->str);
 
 			g_object_unref(pixbuf);				
 		}
@@ -210,20 +216,19 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	return TRUE;
 }
 
+
+
 static void
-draw_album_art_placeholder(GtkWidget *metadata)
-{		
-	cairo_t *cr;	
-	cr = gdk_cairo_create (metadata->window);
-  GtkStyle *style;
-	style = gtk_widget_get_style (metadata);
-  
-	GtkAllocation alloc;
-	gtk_widget_get_allocation (metadata, &alloc);
-		
-	cairo_rectangle (cr,
+draw_gradient (cairo_t* cr,
+               GtkAllocation alloc,
+               CairoColorRGB  rgba_start,
+               CairoColorRGB  rgba_end)
+{
+	cairo_pattern_t* pattern = NULL;
+  cairo_rectangle (cr,
                    alloc.x, alloc.y,
                    alloc.width, alloc.height);
+  
 	cairo_clip(cr);
 
 	cairo_move_to (cr, alloc.x , alloc.y);
@@ -236,17 +241,82 @@ draw_album_art_placeholder(GtkWidget *metadata)
 
 	cairo_close_path (cr);
 
-  cairo_set_source_rgba (cr,
-                         style->fg[0].red/65535.0, 
-                         style->fg[0].green/65535.0,
-                         style->fg[0].blue/65535.0,
-                         0.6);
-	cairo_set_line_width (cr, 2.0);
-	
-	cairo_stroke (cr);						
+  cairo_set_line_width (cr, 3.0);
+  CairoColorRGB darkened_top_color;
+  CairoColorRGB light_bottom_color;
+  
+  _color_shade (&rgba_start, 0.6, &darkened_top_color);
+  _color_shade (&rgba_end, 0.7, &light_bottom_color);
+  
+	pattern = cairo_pattern_create_linear (alloc.x, 
+                                         alloc.y,
+                                         alloc.x,
+                                         alloc.y + alloc.height);
+  
+	cairo_pattern_add_color_stop_rgba (pattern,
+	                                   0.4f,
+	                                   darkened_top_color.r,
+	                                   darkened_top_color.g,
+	                                   darkened_top_color.b,
+	                                   1.0f);
+	cairo_pattern_add_color_stop_rgba (pattern,
+	                                   1.0f,
+	                                   light_bottom_color.r,
+	                                   light_bottom_color.g,
+	                                   light_bottom_color.b,
+	                                   1.0f);
+	cairo_set_source (cr, pattern);
+	cairo_stroke (cr);
+	cairo_pattern_destroy (pattern);
+}
 
-	// Draw the eight note
-	PangoLayout *layout;
+static void
+draw_album_border(GtkWidget *metadata, gboolean selected)
+{
+	cairo_t *cr;	
+	cr = gdk_cairo_create (metadata->window);
+  GtkStyle *style;
+	style = gtk_widget_get_style (metadata);
+  
+	GtkAllocation alloc;
+	gtk_widget_get_allocation (metadata, &alloc);
+  gint offset = 1;
+  
+  alloc.width = alloc.width + (offset * 2);
+  alloc.height = alloc.height + (offset * 2) - 7;
+  alloc.x = alloc.x - offset;
+  alloc.y = alloc.y - offset + 3;
+
+  CairoColorRGB bg_normal, fg_normal;
+
+  bg_normal.r = style->bg[0].red/65535.0;
+	bg_normal.g = style->bg[0].green/65535.0;
+	bg_normal.b = style->bg[0].blue/65535.0;
+
+  gint state = selected ? 5 : 0;
+  
+	fg_normal.r = style->fg[state].red/65535.0;
+	fg_normal.g = style->fg[state].green/65535.0;
+	fg_normal.b = style->fg[state].blue/65535.0;
+
+  draw_gradient(cr,
+                alloc,
+                bg_normal,
+                fg_normal);                  
+}
+
+static void
+draw_album_art_placeholder(GtkWidget *metadata)
+{		
+	cairo_t *cr;	
+	cr = gdk_cairo_create (metadata->window);
+  GtkStyle *style;
+	style = gtk_widget_get_style (metadata);
+  
+	GtkAllocation alloc;
+	gtk_widget_get_allocation (metadata, &alloc);
+
+  PangoLayout *layout;
 	PangoFontDescription *desc;
 	layout = pango_cairo_create_layout(cr);
 	PangoContext* pcontext = pango_cairo_create_context(cr); 
@@ -269,7 +339,7 @@ draw_album_art_placeholder(GtkWidget *metadata)
                          0.8);
   
 	pango_cairo_update_layout(cr, layout);
-	cairo_move_to (cr, alloc.x + alloc.width/6, alloc.y);	
+	cairo_move_to (cr, alloc.x + alloc.width/6, alloc.y + alloc.height/8);	
 	pango_cairo_show_layout(cr, layout);
 
 	g_object_unref(layout);	
@@ -277,6 +347,20 @@ draw_album_art_placeholder(GtkWidget *metadata)
 	g_string_free (string, TRUE);
 	cairo_destroy (cr);	
 
+}
+
+static void
+metadata_widget_selection_received_event_callback (  GtkWidget        *widget,
+                                                     GtkSelectionData *data,
+                                                     guint             time,
+                                                     gpointer          user_data )
+
+{
+	//g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
+	//MetadataWidget* widget = METADATA_WIDGET(user_data);
+	//MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);	  
+  g_debug("metadata_widget_selection_request_event_callback");
+  draw_album_border(widget, TRUE);    
 }
 
 /* Suppress/consume keyevents */
@@ -295,7 +379,6 @@ metadata_widget_button_press_event (GtkWidget *menuitem,
 	                                                      DBUSMENU_METADATA_MENUITEM_TITLE),
                                     dbusmenu_menuitem_property_get(priv->twin_item,
 	                                                      DBUSMENU_METADATA_MENUITEM_ALBUM));
-	//g_debug("contents to be copied will be : %s", contents);	
 	gtk_clipboard_set_text (board, contents, -1);
 	gtk_clipboard_store (board);
 	g_free(contents);
@@ -341,150 +424,6 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 			gtk_widget_queue_draw(GTK_WIDGET(mitem));
 		}
 	}		
-}
-
-
-static cairo_surface_t *
-surface_from_pixbuf (GdkPixbuf *pixbuf)
-{
-        cairo_surface_t *surface;
-        cairo_t         *cr;
-
-        surface = cairo_image_surface_create (gdk_pixbuf_get_has_alpha (pixbuf) ?
-                                              CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24,
-                                              gdk_pixbuf_get_width (pixbuf),
-                                              gdk_pixbuf_get_height (pixbuf));
-        cr = cairo_create (surface);
-        gdk_cairo_set_source_pixbuf (cr, pixbuf, 0, 0);
-        cairo_paint (cr);
-        cairo_destroy (cr);
-
-        return surface;
-}
-
-static void
-rounded_rectangle (cairo_t *cr,
-                   gdouble  aspect,
-                   gdouble  x,
-                   gdouble  y,
-                   gdouble  corner_radius,
-                   gdouble  width,
-                   gdouble  height)
-{
-        gdouble radius;
-        gdouble degrees;
-				
-        radius = corner_radius / aspect;
-        degrees = G_PI / 180.0;
-        cairo_new_sub_path (cr);
-        cairo_arc (cr,
-                   x + width - radius,
-                   y + radius,
-                   radius,
-                   -90 * degrees,
-                   0 * degrees);
-        cairo_arc (cr,
-                   x + width - radius,
-                   y + height - radius,
-                   radius,
-                   0 * degrees,
-                   90 * degrees);
-        cairo_arc (cr,
-                   x + radius,
-                   y + height - radius,
-                   radius,
-                   90 * degrees,
-                   180 * degrees);
-        cairo_arc (cr,
-                   x + radius,
-                   y + radius,
-                   radius,
-                   180 * degrees,
-                   270 * degrees);
-	
-        cairo_close_path (cr);
-}
-
-static void
-image_set_from_pixbuf (GtkWidget  *widget,
-                       MetadataWidget* metadata,
-                       GdkPixbuf *source)
-{
-  cairo_t         *cr;
-  cairo_t         *cr_mask;
-  cairo_surface_t *surface;
-  GdkPixmap       *pixmap;
-  GdkPixmap       *bitmask;
-  int              w;
-  int              h;
-  int              frame_width;
-  double           radius;
-  GdkColor         color;
-  double           r;
-  double           g;
-  double           b;
-	
-	MetadataWidgetPrivate* priv = METADATA_WIDGET_GET_PRIVATE(metadata);	
-	GtkImage* image = GTK_IMAGE(priv->album_art);
-  frame_width = 3;
-
-  w = gdk_pixbuf_get_width (source) + frame_width * 2;
-  h = gdk_pixbuf_get_height (source) + frame_width * 2;
-
-  radius = 10;
-
-  pixmap = gdk_pixmap_new (gtk_widget_get_window (widget), w, h, -1);
-  bitmask = gdk_pixmap_new (gtk_widget_get_window (widget), w, h, 1);
-
-	if (gtk_widget_get_window (widget) == NULL)
-		return;
-
-  cr = gdk_cairo_create (pixmap);
-  cr_mask = gdk_cairo_create (bitmask);
-
-  /* setup mask */
-  cairo_rectangle (cr_mask, 0, 0, w, h);
-  cairo_set_operator (cr_mask, CAIRO_OPERATOR_CLEAR);
-  cairo_fill (cr_mask);
-
-  rounded_rectangle (cr_mask, 1.0, 0.5, 0.5, radius, w - 1, h - 1);
-  cairo_set_operator (cr_mask, CAIRO_OPERATOR_OVER);
-  cairo_set_source_rgb (cr_mask, 1, 1, 1);
-  cairo_fill (cr_mask);
-
-  color = gtk_widget_get_style (GTK_WIDGET (image))->bg [GTK_STATE_NORMAL];
-  r = (float)color.red / 65535.0;
-  g = (float)color.green / 65535.0;
-  b = (float)color.blue / 65535.0;
-
-  /* set up image */
-  cairo_rectangle (cr, 0, 0, w, h);
-  cairo_set_source_rgb (cr, r, g, b);
-  cairo_fill (cr);
-
-  rounded_rectangle (cr,
-                     1.0,
-                     frame_width + 0.5,
-                     frame_width + 0.5,
-                     radius,
-                     w - frame_width * 2 - 1,
-                     h - frame_width * 2 - 1);
-  cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.3);
-  cairo_fill_preserve (cr);
-
-  surface = surface_from_pixbuf (source);
-  cairo_set_source_surface (cr, surface, frame_width, frame_width);
-  cairo_fill (cr);
-
-  gtk_image_set_from_pixmap (image, pixmap, bitmask);
-
-  cairo_surface_destroy (surface);
-
-  g_object_unref (bitmask);
-  g_object_unref (pixmap);
-
-  cairo_destroy (cr_mask);
-  cairo_destroy (cr);
 }
 
 static void
@@ -541,7 +480,6 @@ metadata_widget_set_twin_item(MetadataWidget* self,
 	  gtk_widget_queue_draw(GTK_WIDGET(self));                                                          
   }                       
 }
-
 
  /**
  * transport_new:
