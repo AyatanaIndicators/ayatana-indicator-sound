@@ -29,7 +29,7 @@ public class FamiliarPlayersDB : GLib.Object
 {
 	private const string GROUP_NAME = "Seen Database";
 	private const string KEY_NAME = "DesktopFiles";	
-  private const string DEFAULT_APP_DESKTOP = "/usr/share/applications/rhythmbox.desktop";
+  private const string DEFAULT_APP_DESKTOP = "/usr/share/applications/banshee-1.desktop";
 	private HashMap<string, bool> players_DB;
 	private string file_name;
 	private string dir_name;
