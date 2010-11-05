@@ -51,13 +51,14 @@ public class PlayerController : GLib.Object
 	public int menu_offset { get; set;}
 		
 	public PlayerController(Dbusmenu.Menuitem root,
-	                        string client_name,
+                          GLib.AppInfo app,
                           string mpris_name,
 	                        int offset,
 	                        state initial_state)
 	{
 		this.root_menu = root;
-		this.name = format_client_name(client_name.strip());
+    this.app_info = app;
+		this.name = format_player_name(this.app_info.get_name());
     this.mpris_name = mpris_name;
 		this.custom_items = new ArrayList<PlayerItem>();
 		this.current_state = initial_state;
@@ -169,6 +170,20 @@ public class PlayerController : GLib.Object
 		}		
 		return formatted;
 	}
+
+  private static string format_player_name(owned string app_info_name)
+  {
+    string result = app_info_name.down().strip();
+    var tokens = result.split(" ");
+    if(tokens.length > 1){
+      result = tokens[0];
+    }
+    if(result.length > 1){
+			result = result.up(1).concat(result.slice(1, result.length));
+			debug("PlayerController->format_player_name - : %s", result);
+		}		
+    return result;
+  }
 
 	// Temporarily we will need to handle to different mpris implemenations
 	// Do it for now - a couple of weeks should see this messy carry on out of
