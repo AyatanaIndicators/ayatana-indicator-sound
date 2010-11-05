@@ -56,15 +56,13 @@ public class MusicPlayerBridge : GLib.Object
 			}
       
 			GLib.AppInfo app_info = info as GLib.AppInfo;
+      var mpris_key = determine_key(app);
 			PlayerController ctrl = new PlayerController(this.root_menu, 
-					                                         truncate_player_name(app_info.get_name()),
-                                                   determine_key(app),
+					                                         app_info,
+                                                   mpris_key,
 					                                         calculate_menu_position(),
 					                                         PlayerController.state.OFFLINE);
-			ctrl.app_info = app_info;
-      if(ctrl.app_info == null)
-        warning("for some reason the app info is null");
-			this.registered_clients.set(determine_key(app), ctrl);					
+			this.registered_clients.set(mpris_key, ctrl);					
 		}
 	}
   
@@ -94,24 +92,27 @@ public class MusicPlayerBridge : GLib.Object
 	{
 		MusicPlayerBridge bridge = data as MusicPlayerBridge;
 		AppInfo? app_info = create_app_info(path);
-    var name = truncate_player_name(app_info.get_name());
-		if(path.contains("/") && bridge.playersDB.already_familiar(path) == false){
-			debug("About to store desktop file path: %s", path);
+    if ( app_info == null ){
+      warning ( "Could not create app_info for path %s \n Getting out of here ", path);
+      return;
+    }
+    
+    var mpris_key = determine_key(path);
+
+		if(bridge.playersDB.already_familiar(path) == false){
+			debug("New client has registered that we have seen before: %s", path);
 			bridge.playersDB.insert(path);
-			PlayerController ctrl = new PlayerController(bridge.root_menu,
-			                                             name,
-                                                   determine_key(path),
-			                                             bridge.calculate_menu_position(),
-			                                             PlayerController.state.READY);
-			ctrl.set("app_info", app_info);
-      bridge.registered_clients.set(determine_key(path), ctrl);        
-      debug("successfully created appinfo and instance from path and set it on the respective instance");				
+			PlayerController ctrl = new PlayerController ( bridge.root_menu,
+			                                               app_info,
+                                                     mpris_key,
+			                                               bridge.calculate_menu_position(),
+			                                               PlayerController.state.READY );
+      bridge.registered_clients.set(mpris_key, ctrl);        
 		}
 		else{
-      var key = determine_key(path);
-		  bridge.registered_clients[key].update_state(PlayerController.state.READY);
-			bridge.registered_clients[key].activate();      
-			debug("Ignoring desktop file path callback because the db cache file has it already: %s", path);
+		  bridge.registered_clients[mpris_key].update_state(PlayerController.state.READY);
+			bridge.registered_clients[mpris_key].activate();      
+			debug("Ignoring desktop file path callback because the db cache file has it already: %s \n", path);
 		}
 	}
   
@@ -154,19 +155,6 @@ public class MusicPlayerBridge : GLib.Object
 		GLib.AppInfo app_info = info as GLib.AppInfo;		
 		return app_info;
 	}
-
-  private static string truncate_player_name(owned string app_info_name)
-  {
-    string result = app_info_name.down().strip();
-
-    var tokens = result.split(" ");
-
-    if(tokens.length > 1){
-      result = tokens[0];
-    }
-    debug("truncate player name %s", result);
-    return result;
-  }
 
   private static string? determine_key(owned string path)
   {
