@@ -49,10 +49,12 @@ public class PlayerController : GLib.Object
 	public Mpris2Controller mpris_bridge;
 	public AppInfo? app_info { get; set;}
 	public int menu_offset { get; set;}
+  public string icon_name { get; set; }
 		
 	public PlayerController(Dbusmenu.Menuitem root,
                           GLib.AppInfo app,
                           string mpris_name,
+                          string icon_name,
 	                        int offset,
 	                        state initial_state)
 	{
@@ -60,12 +62,13 @@ public class PlayerController : GLib.Object
     this.app_info = app;
 		this.name = format_player_name(this.app_info.get_name());
     this.mpris_name = mpris_name;
+    this.icon_name = icon_name;
 		this.custom_items = new ArrayList<PlayerItem>();
 		this.current_state = initial_state;
 		this.menu_offset = offset;
 		construct_widgets();
 		establish_mpris_connection();
-		this.update_layout();
+		this.update_layout();   
 	}
 
 	public void update_state(state new_state)
@@ -161,16 +164,6 @@ public class PlayerController : GLib.Object
 		}
 	}	
 	
-	private static string format_client_name(string client_name)
-	{
-		string formatted = client_name;
-		if(formatted.length > 1){
-			formatted = client_name.up(1).concat(client_name.slice(1, client_name.length));
-			debug("PlayerController->format_client_name - : %s", formatted);
-		}		
-		return formatted;
-	}
-
   private static string format_player_name(owned string app_info_name)
   {
     string result = app_info_name.down().strip();
@@ -199,5 +192,5 @@ public class PlayerController : GLib.Object
 		else{
 			this.update_state(state.DISCONNECTED);
 		}
-	}
+	} 
 }

@@ -24,7 +24,6 @@ using GLib;
 
 public class MusicPlayerBridge : GLib.Object
 {
-
   private Listener listener;
   private Dbusmenu.Menuitem root_menu;
 	private HashMap<string, PlayerController> registered_clients;  
@@ -51,7 +50,7 @@ public class MusicPlayerBridge : GLib.Object
 			DesktopAppInfo info = new DesktopAppInfo.from_filename(app);
 
       if(info == null){
-				warning("Could not create a desktopappinfo instance from app: %s", app);
+				warning("Could not create a desktopappinfo instance from app,: %s , moving on to the next client", app);
 				continue;					
 			}
       
@@ -60,6 +59,7 @@ public class MusicPlayerBridge : GLib.Object
 			PlayerController ctrl = new PlayerController(this.root_menu, 
 					                                         app_info,
                                                    mpris_key,
+                                                   playersDB.fetch_icon_name(app),
 					                                         calculate_menu_position(),
 					                                         PlayerController.state.OFFLINE);
 			this.registered_clients.set(mpris_key, ctrl);					
@@ -105,9 +105,11 @@ public class MusicPlayerBridge : GLib.Object
 			PlayerController ctrl = new PlayerController ( bridge.root_menu,
 			                                               app_info,
                                                      mpris_key,
+                                                     playersDB.fetch_icon_name(path),                                                    
 			                                               bridge.calculate_menu_position(),
 			                                               PlayerController.state.READY );
       bridge.registered_clients.set(mpris_key, ctrl);        
+      debug("successfully created appinfo and instance from path and set it on the respective instance");				
 		}
 		else{
 		  bridge.registered_clients[mpris_key].update_state(PlayerController.state.READY);
