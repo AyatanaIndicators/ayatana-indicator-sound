@@ -192,6 +192,5 @@ public class PlayerController : GLib.Object
 		else{
 			this.update_state(state.DISCONNECTED);
 		}
-	}
-  
+	} 
 }
