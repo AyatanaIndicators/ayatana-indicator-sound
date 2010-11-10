@@ -217,7 +217,7 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 }
 
 
-
+/*
 static void
 draw_gradient (cairo_t* cr,
                GtkAllocation alloc,
@@ -268,7 +268,7 @@ draw_gradient (cairo_t* cr,
 	cairo_set_source (cr, pattern);
 	cairo_stroke (cr);
 	cairo_pattern_destroy (pattern);
-}
+}*/
 
 static void
 draw_album_border(GtkWidget *metadata, gboolean selected)
@@ -299,10 +299,65 @@ draw_album_border(GtkWidget *metadata, gboolean selected)
 	fg_normal.g = style->fg[state].green/65535.0;
 	fg_normal.b = style->fg[state].blue/65535.0;
 
-  draw_gradient(cr,
-                alloc,
-                bg_normal,
-                fg_normal);                  
+  CairoColorRGB dark_top_color;
+  CairoColorRGB light_bottom_color;
+  CairoColorRGB background_color;
+  
+  _color_shade ( &bg_normal, 0.93, &background_color );
+  _color_shade ( &bg_normal, 0.23, &dark_top_color );
+  _color_shade ( &fg_normal, 0.55, &light_bottom_color );
+  
+  cairo_rectangle (cr,
+                   alloc.x, alloc.y,
+                   alloc.width, alloc.height);
+
+  cairo_set_line_width (cr, 1.0);
+  
+	cairo_clip ( cr );
+
+  cairo_move_to (cr, alloc.x, alloc.y );
+	cairo_line_to (cr, alloc.x + alloc.width,
+	              alloc.y );
+  cairo_line_to ( cr, alloc.x + alloc.width,
+	                alloc.y + alloc.height );
+	cairo_line_to ( cr, alloc.x, alloc.y + alloc.height );
+	cairo_line_to ( cr, alloc.x, alloc.y);
+  cairo_close_path (cr);
+
+  cairo_set_source_rgba ( cr,
+                          background_color.r,
+                          background_color.g,
+                          background_color.b,
+                          1.0 );
+  
+  cairo_fill ( cr );
+  
+	cairo_move_to (cr, alloc.x, alloc.y );
+	cairo_line_to (cr, alloc.x + alloc.width,
+	              alloc.y );
+
+  cairo_close_path (cr);
+  cairo_set_source_rgba ( cr,
+                          dark_top_color.r,
+                          dark_top_color.g,
+                          dark_top_color.b,
+                          1.0 );
+  
+  cairo_stroke ( cr );
+  
+	cairo_move_to ( cr, alloc.x + alloc.width,
+	                alloc.y + alloc.height );
+	cairo_line_to ( cr, alloc.x, alloc.y + alloc.height );
+
+	cairo_close_path (cr);
+  cairo_set_source_rgba ( cr,
+                         light_bottom_color.r,
+                         light_bottom_color.g,
+                         light_bottom_color.b,
+                         1.0);
+  
+  cairo_stroke ( cr );
+	cairo_destroy (cr);	  
 }
 
 static void
@@ -332,11 +387,20 @@ draw_album_art_placeholder(GtkWidget *metadata)
 	pango_layout_set_font_description(layout, desc);
 	pango_font_description_free(desc);
 
+  CairoColorRGB fg_normal, light_bottom_color;
+  
+	fg_normal.r = style->fg[0].red/65535.0;
+	fg_normal.g = style->fg[0].green/65535.0;
+	fg_normal.b = style->fg[0].blue/65535.0;
+
+  _color_shade ( &fg_normal, 0.78, &light_bottom_color );
+  
+
   cairo_set_source_rgba (cr,
-                         style->fg[0].red/65535.0, 
-                         style->fg[0].green/65535.0,
-                         style->fg[0].blue/65535.0,
-                         0.8);
+                         light_bottom_color.r, 
+                         light_bottom_color.g,
+                         light_bottom_color.b,
+                         1.0);
   
 	pango_cairo_update_layout(cr, layout);
 	cairo_move_to (cr, alloc.x + alloc.width/6, alloc.y + alloc.height/8);	
