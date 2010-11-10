@@ -216,60 +216,6 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 	return TRUE;
 }
 
-
-/*
-static void
-draw_gradient (cairo_t* cr,
-               GtkAllocation alloc,
-               CairoColorRGB  rgba_start,
-               CairoColorRGB  rgba_end)
-{
-	cairo_pattern_t* pattern = NULL;
-  cairo_rectangle (cr,
-                   alloc.x, alloc.y,
-                   alloc.width, alloc.height);
-  
-	cairo_clip(cr);
-
-	cairo_move_to (cr, alloc.x , alloc.y);
-	cairo_line_to(cr, alloc.x + alloc.width,
-	              alloc.y);
-	cairo_line_to(cr, alloc.x + alloc.width,
-	              alloc.y + alloc.height);
-	cairo_line_to(cr, alloc.x, alloc.y + alloc.height);
-	cairo_line_to(cr, alloc.x, alloc.y);
-
-	cairo_close_path (cr);
-
-  cairo_set_line_width (cr, 3.0);
-  CairoColorRGB darkened_top_color;
-  CairoColorRGB light_bottom_color;
-  
-  _color_shade (&rgba_start, 0.6, &darkened_top_color);
-  _color_shade (&rgba_end, 0.7, &light_bottom_color);
-  
-	pattern = cairo_pattern_create_linear (alloc.x, 
-                                         alloc.y,
-                                         alloc.x,
-                                         alloc.y + alloc.height);
-  
-	cairo_pattern_add_color_stop_rgba (pattern,
-	                                   0.4f,
-	                                   darkened_top_color.r,
-	                                   darkened_top_color.g,
-	                                   darkened_top_color.b,
-	                                   1.0f);
-	cairo_pattern_add_color_stop_rgba (pattern,
-	                                   1.0f,
-	                                   light_bottom_color.r,
-	                                   light_bottom_color.g,
-	                                   light_bottom_color.b,
-	                                   1.0f);
-	cairo_set_source (cr, pattern);
-	cairo_stroke (cr);
-	cairo_pattern_destroy (pattern);
-}*/
-
 static void
 draw_album_border(GtkWidget *metadata, gboolean selected)
 {
