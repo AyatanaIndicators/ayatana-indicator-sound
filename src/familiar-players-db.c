@@ -70,7 +70,7 @@ enum  {
 };
 #define FAMILIAR_PLAYERS_DB_GROUP_NAME "Seen Database"
 #define FAMILIAR_PLAYERS_DB_KEY_NAME "DesktopFiles"
-#define FAMILIAR_PLAYERS_DB_DEFAULT_APP_DESKTOP "/usr/share/applications/rhythmbox.desktop"
+#define FAMILIAR_PLAYERS_DB_DEFAULT_APP_DESKTOP "/usr/share/applications/banshee-1.desktop"
 FamiliarPlayersDB* familiar_players_db_new (void);
 FamiliarPlayersDB* familiar_players_db_construct (GType object_type);
 static gboolean familiar_players_db_create_key_file (FamiliarPlayersDB* self);
@@ -82,6 +82,7 @@ void familiar_players_db_insert (FamiliarPlayersDB* self, const char* desktop);
 gboolean familiar_players_db_already_familiar (FamiliarPlayersDB* self, const char* desktop);
 static gboolean _familiar_players_db_write_db_gsource_func (gpointer self);
 GeeSet* familiar_players_db_records (FamiliarPlayersDB* self);
+char* familiar_players_db_fetch_icon_name (const char* desktop_path);
 static void familiar_players_db_finalize (GObject* obj);
 static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNotify destroy_func);
 static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify destroy_func);
@@ -478,6 +479,84 @@ GeeSet* familiar_players_db_records (FamiliarPlayersDB* self) {
 	g_return_val_if_fail (self != NULL, NULL);
 	result = gee_map_get_keys ((GeeMap*) self->priv->players_DB);
 	return result;
+}
+
+
+char* familiar_players_db_fetch_icon_name (const char* desktop_path) {
+	char* result = NULL;
+	GKeyFile* desktop_keyfile;
+	GError * _inner_error_ = NULL;
+	g_return_val_if_fail (desktop_path != NULL, NULL);
+	desktop_keyfile = g_key_file_new ();
+	{
+		g_key_file_load_from_file (desktop_keyfile, desktop_path, G_KEY_FILE_NONE, &_inner_error_);
+		if (_inner_error_ != NULL) {
+			if (_inner_error_->domain == G_FILE_ERROR) {
+				goto __catch11_g_file_error;
+			}
+			goto __finally11;
+		}
+	}
+	goto __finally11;
+	__catch11_g_file_error:
+	{
+		GError * _error_;
+		_error_ = _inner_error_;
+		_inner_error_ = NULL;
+		{
+			g_warning ("familiar-players-db.vala:170: Error loading keyfile");
+			result = NULL;
+			_g_error_free0 (_error_);
+			_g_key_file_free0 (desktop_keyfile);
+			return result;
+		}
+	}
+	__finally11:
+	if (_inner_error_ != NULL) {
+		_g_key_file_free0 (desktop_keyfile);
+		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+		return NULL;
+	}
+	{
+		char* _tmp0_;
+		_tmp0_ = g_key_file_get_string (desktop_keyfile, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, &_inner_error_);
+		if (_inner_error_ != NULL) {
+			if (_inner_error_->domain == G_KEY_FILE_ERROR) {
+				goto __catch12_g_key_file_error;
+			}
+			_g_key_file_free0 (desktop_keyfile);
+			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+			g_clear_error (&_inner_error_);
+			return NULL;
+		}
+		result = _tmp0_;
+		_g_key_file_free0 (desktop_keyfile);
+		return result;
+	}
+	goto __finally12;
+	__catch12_g_key_file_error:
+	{
+		GError * _error_;
+		_error_ = _inner_error_;
+		_inner_error_ = NULL;
+		{
+			g_warning ("familiar-players-db.vala:178: Error trying to fetch the icon name from" \
+" the keyfile");
+			result = NULL;
+			_g_error_free0 (_error_);
+			_g_key_file_free0 (desktop_keyfile);
+			return result;
+		}
+	}
+	__finally12:
+	{
+		_g_key_file_free0 (desktop_keyfile);
+		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+		return NULL;
+	}
+	_g_key_file_free0 (desktop_keyfile);
 }
 
 

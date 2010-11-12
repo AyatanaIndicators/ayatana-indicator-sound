@@ -27,7 +27,9 @@ public class TitleMenuitem : PlayerItem
 	{
 		Object(item_type: MENUITEM_TYPE, owner: parent);
 		this.property_set(MENUITEM_NAME, parent.name);		
-		this.property_set_bool(MENUITEM_RUNNING, false);		
+    debug("title init - icon name = %s", parent.icon_name);
+    this.property_set(MENUITEM_ICON, parent.icon_name);    
+		this.property_set_bool(MENUITEM_RUNNING, false);		    
 	}
 
 	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
@@ -50,6 +52,8 @@ public class TitleMenuitem : PlayerItem
 	{
 		HashSet<string> attrs = new HashSet<string>();		
 		attrs.add(MENUITEM_NAME);
- 		return attrs;
+		attrs.add(MENUITEM_RUNNING);
+		attrs.add(MENUITEM_ICON);
+    return attrs;
 	}	
 }

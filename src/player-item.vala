@@ -96,7 +96,7 @@ public class PlayerItem : Dbusmenu.Menuitem
 			debug("populated ? - prop: %s", prop);
 		  int value_int = property_get_int(prop);
 			if(property_get_int(prop) != EMPTY){
-  			debug("populated ? - prop %s and value %i", prop, value_int);
+  			debug("populated - prop %s and value %i", prop, value_int);        
 				return true;
 			}
 		}
