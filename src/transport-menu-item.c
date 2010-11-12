@@ -185,6 +185,8 @@ TransportMenuitem* transport_menuitem_new (PlayerController* parent) {
 
 void transport_menuitem_change_play_state (TransportMenuitem* self, TransportMenuitemstate update) {
 	g_return_if_fail (self != NULL);
+	g_debug ("transport-menu-item.vala:45: UPDATING THE TRANSPORT DBUSMENUITEM PLAY " \
+"STATE WITH VALUE %i", (gint) update);
 	dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE, (gint) update);
 }
 
@@ -196,9 +198,9 @@ static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const 
 	self = (TransportMenuitem*) base;
 	g_return_if_fail (name != NULL);
 	input = g_value_get_int (input_value);
-	g_debug ("transport-menu-item.vala:51: handle_event with value %s", _tmp0_ = g_strdup_printf ("%i", input));
+	g_debug ("transport-menu-item.vala:53: handle_event with value %s", _tmp0_ = g_strdup_printf ("%i", input));
 	_g_free0 (_tmp0_);
-	g_debug ("transport-menu-item.vala:52: transport owner name = %s", player_controller_get_name (player_item_get_owner ((PlayerItem*) self)));
+	g_debug ("transport-menu-item.vala:54: transport owner name = %s", player_controller_get_name (player_item_get_owner ((PlayerItem*) self)));
 	mpris2_controller_transport_update (player_item_get_owner ((PlayerItem*) self)->mpris_bridge, (TransportMenuitemaction) input);
 }
 

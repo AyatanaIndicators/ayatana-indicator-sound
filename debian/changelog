@@ -1,3 +1,42 @@
+indicator-sound (0.5.1-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Includes a lot of Design updates collected at UDS.
+      * album art border, now rectangular with a simple top and bottom 1 pixel 
+        border. top dark and bottom light.
+      * Empty album art image now has darker background rather than same 
+        colour as menu background
+      * Application icon now uses application image as opposed to generic 
+        image used in maverick
+      * Banshee is now the default player.
+      * spacing between metadata and transport widget has been resolved plus 
+        the spacing between the transport and the separator below it.
+  * debian/control
+    - Bump standards version to 3.9.1
+    - Changed build depends to valac-0.10, until it is ported to valac-0.12
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 12 Nov 2010 10:14:49 -0500
+
+indicator-sound (0.5.0.1-0ubuntu1) maverick-proposed; urgency=low
+
+  * New upstream release.
+    - Fixed a regression, which would show the metadata widget when the
+      player has no current track (LP: #674016)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 12 Nov 2010 09:40:47 -0500
+
+indicator-sound (0.5.0-0ubuntu1) maverick-proposed; urgency=low
+
+  * New upstream release.
+    - Buttons' hover image stays after dragging (LP: #643395)
+    - Sound indicator works incorrect with playing status (LP: #656947)
+    - sound applet volume slider has no effect if pulseaudio is 
+      restarted (LP: #662296)
+    - Default music player should be present in the menu from a clean 
+      install (LP: #664743)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 04 Nov 2010 17:03:08 -0400
+
 indicator-sound (0.4.9-0ubuntu1) maverick-proposed; urgency=low
 
   * New upstream release.
