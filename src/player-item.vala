@@ -87,9 +87,7 @@ public class PlayerItem : Dbusmenu.Menuitem
 				this.property_set_bool(property, v.get_boolean());
 			}
 		}
-		if(this.property_get_bool(MENUITEM_PROP_VISIBLE) == false){
-			this.property_set_bool(MENUITEM_PROP_VISIBLE, true);
-		}
+    this.property_set_bool(MENUITEM_PROP_VISIBLE, populated(attributes));        
 	}	
 	
 	public bool populated(HashSet<string> attrs)
@@ -97,8 +95,8 @@ public class PlayerItem : Dbusmenu.Menuitem
 		foreach(string prop in attrs){
 			debug("populated ? - prop: %s", prop);
 		  int value_int = property_get_int(prop);
-			debug("populated ? - prop %s and value %i", prop, value_int);
 			if(property_get_int(prop) != EMPTY){
+  			debug("populated ? - prop %s and value %i", prop, value_int);
 				return true;
 			}
 		}

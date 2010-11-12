@@ -285,9 +285,7 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 		}
 		_g_object_unref0 (_property_it);
 	}
-	if (dbusmenu_menuitem_property_get_bool ((DbusmenuMenuitem*) self, DBUSMENU_MENUITEM_PROP_VISIBLE) == FALSE) {
-		dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_MENUITEM_PROP_VISIBLE, TRUE);
-	}
+	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_MENUITEM_PROP_VISIBLE, player_item_populated (self, attributes));
 }
 
 
@@ -305,10 +303,10 @@ gboolean player_item_populated (PlayerItem* self, GeeHashSet* attrs) {
 				break;
 			}
 			prop = (char*) gee_iterator_get (_prop_it);
-			g_debug ("player-item.vala:98: populated ? - prop: %s", prop);
+			g_debug ("player-item.vala:96: populated ? - prop: %s", prop);
 			value_int = dbusmenu_menuitem_property_get_int ((DbusmenuMenuitem*) self, prop);
-			g_debug ("player-item.vala:100: populated ? - prop %s and value %i", prop, value_int);
 			if (dbusmenu_menuitem_property_get_int ((DbusmenuMenuitem*) self, prop) != PLAYER_ITEM_EMPTY) {
+				g_debug ("player-item.vala:99: populated ? - prop %s and value %i", prop, value_int);
 				result = TRUE;
 				_g_free0 (prop);
 				_g_object_unref0 (_prop_it);
