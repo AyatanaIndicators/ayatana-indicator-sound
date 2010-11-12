@@ -128,6 +128,7 @@ GType player_controller_get_type (void) G_GNUC_CONST;
 TitleMenuitem* title_menuitem_new (PlayerController* parent);
 TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* parent);
 const char* player_controller_get_name (PlayerController* self);
+const char* player_controller_get_icon_name (PlayerController* self);
 static void title_menuitem_real_handle_event (DbusmenuMenuitem* base, const char* name, GValue* input_value, guint timestamp);
 PlayerController* player_item_get_owner (PlayerItem* self);
 GType mpris2_controller_get_type (void) G_GNUC_CONST;
@@ -144,6 +145,8 @@ TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* pa
 	g_return_val_if_fail (parent != NULL, NULL);
 	self = (TitleMenuitem*) g_object_new (object_type, "item-type", DBUSMENU_TITLE_MENUITEM_TYPE, "owner", parent, NULL);
 	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_TITLE_MENUITEM_NAME, player_controller_get_name (parent));
+	g_debug ("title-menu-item.vala:30: title init - icon name = %s", player_controller_get_icon_name (parent));
+	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_TITLE_MENUITEM_ICON, player_controller_get_icon_name (parent));
 	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_TITLE_MENUITEM_RUNNING, FALSE);
 	return self;
 }
@@ -179,6 +182,8 @@ GeeHashSet* title_menuitem_attributes_format (void) {
 	GeeHashSet* attrs;
 	attrs = gee_hash_set_new (G_TYPE_STRING, (GBoxedCopyFunc) g_strdup, g_free, NULL, NULL);
 	gee_abstract_collection_add ((GeeAbstractCollection*) attrs, DBUSMENU_TITLE_MENUITEM_NAME);
+	gee_abstract_collection_add ((GeeAbstractCollection*) attrs, DBUSMENU_TITLE_MENUITEM_RUNNING);
+	gee_abstract_collection_add ((GeeAbstractCollection*) attrs, DBUSMENU_TITLE_MENUITEM_ICON);
 	result = attrs;
 	return result;
 }

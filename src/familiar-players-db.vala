@@ -29,6 +29,7 @@ public class FamiliarPlayersDB : GLib.Object
 {
 	private const string GROUP_NAME = "Seen Database";
 	private const string KEY_NAME = "DesktopFiles";	
+  private const string DEFAULT_APP_DESKTOP = "/usr/share/applications/banshee-1.desktop";
 	private HashMap<string, bool> players_DB;
 	private string file_name;
 	private string dir_name;
@@ -38,13 +39,18 @@ public class FamiliarPlayersDB : GLib.Object
 	public FamiliarPlayersDB()
 	{
 		this.write_id = 0;
-		this.players_DB = new HashMap<string, bool>();		
+		this.players_DB = new HashMap<string, bool>();	
+    if ( !create_key_file() ){
+      this.players_DB.set(DEFAULT_APP_DESKTOP, true);
+      this.write_db();
+    }
+    
 		this.dir_name = build_filename(get_user_cache_dir(), "indicators", "sound");
 		this.file_name = build_filename(this.dir_name, "familiar-players-db.keyfile");
 		if(create_key_file() && check_for_keys() && load_data_from_key_file()){
 			debug("keyfiles in place and ready for action");			
 		}
-		else{
+		else{      
 			this.key_file = null;
 			warning("FamiliarPlayersDB:: problems loading key file - can't go any further");
 		}		
@@ -153,5 +159,25 @@ public class FamiliarPlayersDB : GLib.Object
 	{
 		return this.players_DB.keys;		
 	}
-	
+
+  public static string? fetch_icon_name(string desktop_path)
+  {
+    KeyFile desktop_keyfile = new KeyFile ();
+    try{
+      desktop_keyfile.load_from_file (desktop_path, KeyFileFlags.NONE);      
+    }
+    catch(GLib.FileError error){
+      warning("Error loading keyfile");
+      return null;
+    }
+    try{
+      return desktop_keyfile.get_string (KeyFileDesktop.GROUP,
+                                         KeyFileDesktop.KEY_ICON);              
+    }
+    catch(GLib.KeyFileError error){
+      warning("Error trying to fetch the icon name from the keyfile");      
+      return null;
+    } 
+  }
+  
 }
