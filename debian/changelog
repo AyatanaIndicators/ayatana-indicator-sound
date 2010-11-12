@@ -1,3 +1,11 @@
+indicator-sound (0.5.0.1-0ubuntu1) maverick-proposed; urgency=low
+
+  * New upstream release.
+    - Fixed a regression, which would show the metadata widget when the
+      player has no current track (LP: #674016)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 12 Nov 2010 09:40:47 -0500
+
 indicator-sound (0.5.0-0ubuntu1) maverick-proposed; urgency=low
 
   * New upstream release.
