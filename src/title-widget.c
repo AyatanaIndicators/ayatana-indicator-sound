@@ -32,7 +32,7 @@ typedef struct _TitleWidgetPrivate TitleWidgetPrivate;
 
 struct _TitleWidgetPrivate
 {
-	DbusmenuMenuitem* twin_item;  
+	DbusmenuMenuitem* twin_item;
 };
 
 #define TITLE_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TITLE_WIDGET_TYPE, TitleWidgetPrivate))
@@ -83,25 +83,23 @@ title_widget_set_icon(TitleWidget *self)
 {
   TitleWidgetPrivate *priv = TITLE_WIDGET_GET_PRIVATE(self);
 
-  gchar* icon_name = g_strdup(dbusmenu_menuitem_property_get(priv->twin_item,
-                                                   DBUSMENU_TITLE_MENUITEM_ICON));
   gint padding = 0;
 	gtk_widget_style_get(GTK_WIDGET(self), "horizontal-padding", &padding, NULL);
 
 	gint width, height;
 	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
-
-	GtkWidget * icon = gtk_image_new_from_icon_name(icon_name,
-                                                  GTK_ICON_SIZE_MENU);
-
-	gtk_widget_set_size_request(icon, width
+  GString* app_panel = g_string_new ( g_utf8_strdown ( dbusmenu_menuitem_property_get(priv->twin_item, DBUSMENU_TITLE_MENUITEM_NAME),
+                                                      -1 ));
+  g_string_append(app_panel, "-panel");                                                   
+	GtkWidget * icon = gtk_image_new_from_icon_name( g_string_free ( app_panel, FALSE),
+                                                   GTK_ICON_SIZE_MENU );
+  gtk_widget_set_size_request(icon, width
                                     + 5 /* ref triangle is 5x9 pixels */
                                     + 1 /* padding */,
                                     height);
 	gtk_misc_set_alignment(GTK_MISC(icon), 0.5 /* right aligned */, 0);
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(icon));
 	gtk_widget_show(icon);  
-  g_free(icon_name);
 }
 
 static void
