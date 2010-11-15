@@ -270,7 +270,6 @@ transport_widget_button_release_event (GtkWidget *menuitem,
   g_return_val_if_fail(IS_TRANSPORT_WIDGET(menuitem), FALSE);
   TransportWidget* transport = TRANSPORT_WIDGET(menuitem);
   TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );	
-
   TransportWidgetEvent result = transport_widget_determine_button_event ( transport,
                                                                           event );
   if(result != TRANSPORT_NADA){
@@ -287,6 +286,26 @@ transport_widget_button_release_event (GtkWidget *menuitem,
   transport_widget_react_to_button_release ( transport,
                                              result );
   return TRUE;
+}
+
+void
+transport_widget_react_to_key_event ( TransportWidget* transport,
+                                      TransportWidgetEvent transport_event )
+{
+  if(transport_event != TRANSPORT_NADA){
+    TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );	    
+    GValue value = {0};
+    g_value_init(&value, G_TYPE_INT);
+    //g_debug("TransportWidget::menu_press_event - going to send value %i", (int)result);
+    g_value_set_int(&value, (int)transport_event);	
+    dbusmenu_menuitem_handle_event ( priv->twin_item,
+                                     "Transport state change",
+                                     &value,
+                                     0 );
+  }
+
+  transport_widget_react_to_button_release ( transport,
+                                             transport_event );  
 }
 
 static TransportWidgetEvent

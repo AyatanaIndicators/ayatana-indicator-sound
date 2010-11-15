@@ -47,6 +47,7 @@ typedef struct _IndicatorSoundPrivate IndicatorSoundPrivate;
 struct _IndicatorSoundPrivate
 {
 	GtkWidget* volume_widget;
+	GtkWidget* transport_widget;  
 };
 
 #define INDICATOR_SOUND_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), INDICATOR_SOUND_TYPE, IndicatorSoundPrivate))
@@ -241,11 +242,16 @@ new_transport_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbus
   //g_debug("indicator-sound: new_transport_bar() called ");
 
   GtkWidget* bar = NULL;
+  IndicatorObject *io = NULL;
 
   g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
   bar = transport_widget_new(newitem);
+	io = g_object_get_data (G_OBJECT (client), "indicator");
+	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+  priv->transport_widget = bar;
+
   GtkMenuItem *menu_transport_bar = GTK_MENU_ITEM(bar);
 
 	gtk_widget_show_all(bar);
@@ -706,9 +712,34 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
     new_value = CLAMP(new_value, 0, 100);
     if (new_value != current_value && current_state != STATE_MUTED) {
       //g_debug("Attempting to set the range from the key listener to %f", new_value);
-			volume_widget_update(VOLUME_WIDGET(priv->volume_widget), new_value);
+			volume_widget_update(VOLUME_WIDGET(priv->volume_widget), new_value);      
     }
   }
+  if (IS_TRANSPORT_WIDGET(menuitem) == TRUE) {
+    switch (event->keyval) {
+    case GDK_Right:
+      transport_widget_react_to_key_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
+                                            TRANSPORT_NEXT );
+      digested = TRUE;         
+      break;        
+    case GDK_Left:
+      transport_widget_react_to_key_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
+                                            TRANSPORT_PREVIOUS );
+      digested = TRUE;         
+      break;                  
+    case GDK_KEY_space:
+      transport_widget_react_to_key_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
+                                            TRANSPORT_PLAY_PAUSE );        
+      digested = TRUE;         
+      break;
+    case GDK_Up:
+    case GDK_Down:
+      digested = FALSE;     
+      break;
+    default:
+      break;
+    }
+  } 
   return digested;
 }
 
