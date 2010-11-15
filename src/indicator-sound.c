@@ -715,7 +715,7 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
 			volume_widget_update(VOLUME_WIDGET(priv->volume_widget), new_value);      
     }
   }
-  if (IS_TRANSPORT_WIDGET(menuitem) == TRUE) {
+  else if (IS_TRANSPORT_WIDGET(menuitem) == TRUE) {
     switch (event->keyval) {
     case GDK_Right:
       transport_widget_react_to_key_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
@@ -761,7 +761,6 @@ indicator_sound_scroll (IndicatorObject *io, gint delta, IndicatorScrollDirectio
 
 	if (device_available == FALSE || current_state == STATE_MUTED)
     return;
-
 	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
 	
 	GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget)); 
