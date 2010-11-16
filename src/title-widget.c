@@ -83,27 +83,41 @@ title_widget_set_icon(TitleWidget *self)
 {
   TitleWidgetPrivate *priv = TITLE_WIDGET_GET_PRIVATE(self);
 
-  gchar* icon_name = g_strdup(dbusmenu_menuitem_property_get(priv->twin_item,
-                                                   DBUSMENU_TITLE_MENUITEM_ICON));
   gint padding = 0;
 	gtk_widget_style_get(GTK_WIDGET(self), "horizontal-padding", &padding, NULL);
-
 	gint width, height;
 	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
+  
+  GString* banshee_string = g_string_new ( "banshee" );
+  GString* app_panel = g_string_new ( g_utf8_strdown ( dbusmenu_menuitem_property_get(priv->twin_item, DBUSMENU_TITLE_MENUITEM_NAME),
+                                                    -1 ));
+  GtkWidget * icon = NULL;
 
-	GtkWidget * icon = gtk_image_new_from_icon_name(icon_name,
-                                                  GTK_ICON_SIZE_MENU);
+  // Not ideal but apparently we want the banshee icon to be the greyscale one
+  // and any others to be the icon from the desktop file => colour.
+  if ( g_string_equal ( banshee_string, app_panel ) == TRUE &&
+      gtk_icon_theme_has_icon ( gtk_icon_theme_get_default(), app_panel->str ) ){
+    g_string_append ( app_panel, "-panel" );                                                   
+	  icon = gtk_image_new_from_icon_name ( app_panel->str,
+                                          GTK_ICON_SIZE_MENU );    
+  }
+  else{
+    icon = gtk_image_new_from_icon_name ( g_strdup (dbusmenu_menuitem_property_get ( priv->twin_item, DBUSMENU_TITLE_MENUITEM_ICON )),
+                                          GTK_ICON_SIZE_MENU );
+  }
+  g_string_free ( app_panel, FALSE) ;
+  g_string_free ( banshee_string, FALSE) ;
 
-	gtk_widget_set_size_request(icon, width
+  gtk_widget_set_size_request(icon, width
                                     + 5 /* ref triangle is 5x9 pixels */
                                     + 1 /* padding */,
                                     height);
 	gtk_misc_set_alignment(GTK_MISC(icon), 0.5 /* right aligned */, 0);
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(icon));
-	gtk_widget_show(icon);  
-  g_free(icon_name);
+	gtk_widget_show(icon);
 }
 
+  
 static void
 title_widget_dispose (GObject *object)
 {
