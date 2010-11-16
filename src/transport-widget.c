@@ -33,7 +33,7 @@ Uses code from ctk
 #define Y 7.0f
 #define X 80.0f
 #define INNER_RADIUS 12.5
-#define	MIDDLE_RADIUS 13.5f
+#define	MIDDLE_RADIUS 13.0f
 #define OUTER_RADIUS  14.5f
 #define CIRCLE_RADIUS 21.0f
 #define PREV_WIDTH  25.0f
@@ -59,15 +59,18 @@ Uses code from ctk
 #define PLAY_PADDING 5.0f
 #define INNER_START_SHADE 0.98
 #define INNER_END_SHADE 0.98
-#define MIDDLE_START_SHADE 0.7
-#define MIDDLE_END_SHADE 1.4
-#define OUTER_START_SHADE 0.96
-#define OUTER_END_SHADE 0.96
+#define MIDDLE_START_SHADE 1.0
+#define MIDDLE_END_SHADE 1.0
+#define OUTER_START_SHADE 0.75
+#define OUTER_END_SHADE 1.3
+#define SHADOW_BUTTON_SHADE 0.8
+#define OUTER_BUTTON_START_SHADE 0.7
+#define OUTER_BUTTON_END_SHADE 1.38
 #define BUTTON_START_SHADE 1.1
 #define BUTTON_END_SHADE 0.9
 #define BUTTON_SHADOW_SHADE 0.8
-#define INNER_COMPRESSED_START_SHADE 0.95
-#define INNER_COMPRESSED_END_SHADE 1.05
+#define INNER_COMPRESSED_START_SHADE 1.0
+#define INNER_COMPRESSED_END_SHADE 1.0
 
 typedef struct _TransportWidgetPrivate TransportWidgetPrivate;
 
@@ -270,7 +273,6 @@ transport_widget_button_release_event (GtkWidget *menuitem,
   g_return_val_if_fail(IS_TRANSPORT_WIDGET(menuitem), FALSE);
   TransportWidget* transport = TRANSPORT_WIDGET(menuitem);
   TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );	
-
   TransportWidgetEvent result = transport_widget_determine_button_event ( transport,
                                                                           event );
   if(result != TRANSPORT_NADA){
@@ -287,6 +289,26 @@ transport_widget_button_release_event (GtkWidget *menuitem,
   transport_widget_react_to_button_release ( transport,
                                              result );
   return TRUE;
+}
+
+void
+transport_widget_react_to_key_event ( TransportWidget* transport,
+                                      TransportWidgetEvent transport_event )
+{
+  if(transport_event != TRANSPORT_NADA){
+    TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );	    
+    GValue value = {0};
+    g_value_init(&value, G_TYPE_INT);
+    //g_debug("TransportWidget::menu_press_event - going to send value %i", (int)result);
+    g_value_set_int(&value, (int)transport_event);	
+    dbusmenu_menuitem_handle_event ( priv->twin_item,
+                                     "Transport state change",
+                                     &value,
+                                     0 );
+  }
+
+  transport_widget_react_to_button_release ( transport,
+                                             transport_event );  
 }
 
 static TransportWidgetEvent
@@ -348,6 +370,10 @@ draw_gradient (cairo_t* cr,
 {
 	cairo_pattern_t* pattern = NULL;
 
+/*	cairo_set_fill_rule (cr, CAIRO_FILL_RULE_EVEN_ODD);*/
+/*	cairo_save (cr);*/
+/*	cairo_rectangle (cr, x-2.0*r, y, w+2*r, r*2);*/
+/*	cairo_clip (cr);*/
 	cairo_move_to (cr, x, y);
 	cairo_line_to (cr, x + w - 2.0f * r, y);
 	cairo_arc (cr,
@@ -364,6 +390,12 @@ draw_gradient (cairo_t* cr,
 		   90.0f * G_PI / 180.0f,
 		   270.0f * G_PI / 180.0f);
 	cairo_close_path (cr);
+	
+/*		cairo_arc (cr,*/
+/*		   x+(w-2*r)/2+1, y+(CIRCLE_RADIUS)/2+2,*/
+/*		   CIRCLE_RADIUS+1,*/
+/*		   0.0f * G_PI / 180.0f,*/
+/*		   360.0f * G_PI / 180.0f);*/
 
 	pattern = cairo_pattern_create_linear (x, y, x, y + 2.0f * r);
 	cairo_pattern_add_color_stop_rgba (pattern,
@@ -381,6 +413,7 @@ draw_gradient (cairo_t* cr,
 	cairo_set_source (cr, pattern);
 	cairo_fill (cr);
 	cairo_pattern_destroy (pattern);
+/*	cairo_restore(cr);*/
 }
 
 static void
@@ -654,7 +687,7 @@ _color_rgb_to_hls (gdouble *r,
 
 static void
 _color_hls_to_rgb (gdouble *h,
-                   gdouble *l,
+                   gdouble *l, 
                    gdouble *s)
 {
 	gdouble hue;
@@ -995,35 +1028,42 @@ draw (GtkWidget* button, cairo_t *cr)
 
 	GtkStyle *style;
 
-	CairoColorRGB bg_normal, fg_normal;
-	CairoColorRGB color_inner[2], color_middle[2], color_outer[2], color_button[3], color_inner_compressed[2];
+	CairoColorRGB bg_color, fg_color;
+	CairoColorRGB color_inner[2], color_middle[2], color_outer[2], color_button[3], color_button_outer[2], color_button_shadow, color_inner_compressed[2];
 
 	style = gtk_widget_get_style (button);
 
-	bg_normal.r = style->bg[0].red/65535.0;
-	bg_normal.g = style->bg[0].green/65535.0;
-	bg_normal.b = style->bg[0].blue/65535.0;
 
-	fg_normal.r = style->fg[0].red/65535.0;
-	fg_normal.g = style->fg[0].green/65535.0;
-	fg_normal.b = style->fg[0].blue/65535.0;
+	bg_color.r = style->bg[0].red/65535.0;
+	bg_color.g = style->bg[0].green/65535.0;
+	bg_color.b = style->bg[0].blue/65535.0;
 
-	_color_shade (&bg_normal, INNER_START_SHADE, &color_inner[0]);
-	_color_shade (&bg_normal, INNER_END_SHADE, &color_inner[1]);
-	_color_shade (&bg_normal, MIDDLE_START_SHADE, &color_middle[0]);
-	_color_shade (&bg_normal, MIDDLE_END_SHADE, &color_middle[1]);
-	_color_shade (&bg_normal, OUTER_START_SHADE, &color_outer[0]);
-	_color_shade (&bg_normal, OUTER_END_SHADE, &color_outer[1]);
-	_color_shade (&fg_normal, BUTTON_START_SHADE, &color_button[0]);
-	_color_shade (&fg_normal, BUTTON_END_SHADE, &color_button[1]);
-	_color_shade (&bg_normal, BUTTON_SHADOW_SHADE, &color_button[2]);
-	_color_shade (&bg_normal, INNER_COMPRESSED_START_SHADE, &color_inner_compressed[0]);
-	_color_shade (&bg_normal, INNER_COMPRESSED_END_SHADE, &color_inner_compressed[1]);
+	fg_color.r = style->fg[0].red/65535.0;
+	fg_color.g = style->fg[0].green/65535.0;
+	fg_color.b = style->fg[0].blue/65535.0;
+
+	_color_shade (&bg_color, INNER_START_SHADE, &color_inner[0]);
+	_color_shade (&bg_color, INNER_END_SHADE, &color_inner[1]);
+	_color_shade (&bg_color, MIDDLE_START_SHADE, &color_middle[0]);
+	_color_shade (&bg_color, MIDDLE_END_SHADE, &color_middle[1]);
+	_color_shade (&bg_color, OUTER_START_SHADE, &color_outer[0]);
+	_color_shade (&bg_color, OUTER_END_SHADE, &color_outer[1]);
+	_color_shade (&bg_color, OUTER_BUTTON_START_SHADE, &color_button_outer[0]);
+	_color_shade (&bg_color, OUTER_BUTTON_END_SHADE, &color_button_outer[1]);
+	_color_shade (&bg_color, SHADOW_BUTTON_SHADE, &color_button_shadow);
+	_color_shade (&fg_color, BUTTON_START_SHADE, &color_button[0]);
+	_color_shade (&fg_color, BUTTON_END_SHADE, &color_button[1]);
+	_color_shade (&bg_color, BUTTON_SHADOW_SHADE, &color_button[2]);
+	_color_shade (&bg_color, INNER_COMPRESSED_START_SHADE, &color_inner_compressed[0]);
+	_color_shade (&bg_color, INNER_COMPRESSED_END_SHADE, &color_inner_compressed[1]);
 
 	double MIDDLE_END[] = {color_middle[0].r, color_middle[0].g, color_middle[0].b, 1.0f};
 	double MIDDLE_START[] = {color_middle[1].r, color_middle[1].g, color_middle[1].b, 1.0f};
+	double SHADOW_BUTTON[] = {color_button_shadow.r, color_button_shadow.g, color_button_shadow.b, 0.16f};
 	double OUTER_END[] = {color_outer[0].r, color_outer[0].g, color_outer[0].b, 1.0f};
 	double OUTER_START[] = {color_outer[1].r, color_outer[1].g, color_outer[1].b, 1.0f};
+	double OUTER_BUTTON_END[] = {color_button_outer[0].r, color_button_outer[0].g, color_button_outer[0].b, 1.0f};
+	double OUTER_BUTTON_START[] = {color_button_outer[1].r, color_button_outer[1].g, color_button_outer[1].b, 1.0f};
 	double BUTTON_END[] = {color_button[0].r, color_button[0].g, color_button[0].b, 1.0f};
 	double BUTTON_START[] = {color_button[1].r, color_button[1].g, color_button[1].b, 1.0f};
 	double BUTTON_SHADOW[] = {color_button[2].r, color_button[2].g, color_button[2].b, 0.75f};
@@ -1031,6 +1071,15 @@ draw (GtkWidget* button, cairo_t *cr)
 	double INNER_COMPRESSED_START[] = {color_inner_compressed[0].r, color_inner_compressed[0].g, color_inner_compressed[0].b, 1.0f};  
  
 	// prev/next-background
+/*	if(priv->current_command != TRANSPORT_PREVIOUS && priv->current_command != TRANSPORT_NEXT){*/
+/*	draw_gradient (cr,*/
+/*		 X-0.25,*/
+/*		 Y-1,*/
+/*		 RECT_WIDTH+2,*/
+/*		 OUTER_RADIUS+1,*/
+/*		 SHADOW_BUTTON,*/
+/*		 SHADOW_BUTTON);*/
+/*	}*/
 	draw_gradient (cr,
 		 X,
 		 Y,
@@ -1054,54 +1103,99 @@ draw (GtkWidget* button, cairo_t *cr)
                MIDDLE_END);
 
 	if(priv->current_command == TRANSPORT_PREVIOUS){
+	draw_gradient (cr,
+		 X,
+		 Y,
+		 RECT_WIDTH/2,
+		 OUTER_RADIUS,
+		 OUTER_END,
+		 OUTER_START);
+	
+		draw_gradient (cr,
+		               X,
+		               Y + 1,
+		               RECT_WIDTH/2,
+		               MIDDLE_RADIUS,
+		               INNER_COMPRESSED_START,
+		               INNER_COMPRESSED_END);
 		draw_gradient (cr,
 		               X,
 		               Y + 2,
 		               RECT_WIDTH/2,
-		               INNER_RADIUS,
+		               MIDDLE_RADIUS,
 		               INNER_COMPRESSED_START,
 		               INNER_COMPRESSED_END);
 	}	
 	else if(priv->current_command == TRANSPORT_NEXT){
 		draw_gradient (cr,
+		RECT_WIDTH / 2 + X,
+		Y,
+		RECT_WIDTH/2,
+		 OUTER_RADIUS,
+		 OUTER_END,
+		 OUTER_START);
+	
+		draw_gradient (cr,
+		               RECT_WIDTH / 2 + X,
+		               Y + 1,
+		               (RECT_WIDTH - 7)/2,
+		               MIDDLE_RADIUS,
+		               INNER_COMPRESSED_START,
+		               INNER_COMPRESSED_END);	
+		draw_gradient (cr,
 		               RECT_WIDTH / 2 + X,
 		               Y + 2,
 		               (RECT_WIDTH - 7)/2,
-		               INNER_RADIUS,
+		               MIDDLE_RADIUS,
 		               INNER_COMPRESSED_START,
 		               INNER_COMPRESSED_END);		
-	}
+	} 
 
-	// play/pause-background
+	// play/pause shadow
+	if(priv->current_command != TRANSPORT_PLAY_PAUSE){
 	draw_circle (cr,
+			X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f - 1.0f,
+			Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) - 1.0f,
+			CIRCLE_RADIUS + 1.0f,
+			SHADOW_BUTTON,
+			SHADOW_BUTTON);
+	}
+	// play/pause border
+	if(priv->current_command == TRANSPORT_PLAY_PAUSE){
+		draw_circle (cr,
+				X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f,
+				Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) ,
+				CIRCLE_RADIUS,
+				OUTER_BUTTON_END,
+				OUTER_BUTTON_START);
+	}
+	else {
+		draw_circle (cr,
 			X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f,
 			Y - ((CIRCLE_RADIUS - OUTER_RADIUS)),
 			CIRCLE_RADIUS,
-			OUTER_START,
-			OUTER_END);
-	draw_circle (cr,
-	               X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f + 0.5f,
-	               Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 0.5f,
-	               CIRCLE_RADIUS - 0.75f,
-	               MIDDLE_START,
-	               MIDDLE_END);
+			OUTER_BUTTON_START,
+			OUTER_BUTTON_END);
+	}
 
+	// play/pause-background
 	if(priv->current_command == TRANSPORT_PLAY_PAUSE){
 	    draw_circle (cr,
-			 X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f + 1.5f,
-			 Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 1.5f,
-			 CIRCLE_RADIUS - 1.5f,
+	               X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f + 1.25f,
+	               Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 1.25f,
+	               CIRCLE_RADIUS - 1.25,
 		     		 INNER_COMPRESSED_START,
 			 INNER_COMPRESSED_END);
 	}
-	else{        
+	else {
 		draw_circle (cr,
-               X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f + 1.5f,
-               Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 1.5f,
-               CIRCLE_RADIUS - 1.5f,
-               MIDDLE_START,
-               MIDDLE_END);
-	}					
+	               X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f + 1.25f,
+	               Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 1.25f,
+	               CIRCLE_RADIUS - 1.25,
+	               MIDDLE_START,
+	               MIDDLE_END);
+	}
+
 	// draw previous-button drop-shadow
 	_setup (&cr_surf, &surf, PREV_WIDTH, PREV_HEIGHT);
 	_mask_prev (cr_surf,
@@ -1155,7 +1249,7 @@ draw (GtkWidget* button, cairo_t *cr)
 	       BUTTON_SHADOW,
 	       BUTTON_SHADOW,
 	       FALSE);
-	_surface_blur (surf, 1);
+	_surface_blur (surf, 1); 
 	_finalize (cr, &cr_surf, &surf, NEXT_X, NEXT_Y + 1.0f);
 
 	// draw next-button
@@ -1216,7 +1310,7 @@ draw (GtkWidget* button, cairo_t *cr)
 	}
 	else if(priv->current_state == PAUSE){
 		_setup (&cr_surf, &surf, PLAY_WIDTH, PLAY_HEIGHT);
-		_mask_play (cr_surf,
+		_mask_play (cr_surf, 
 		            PLAY_PADDING,
 		            PLAY_PADDING,
 		            PLAY_WIDTH - (2*PLAY_PADDING),
@@ -1271,7 +1365,7 @@ transport_widget_set_twin_item(TransportWidget* self,
 /**
 * transport_widget_update_state()
 * Callback for updates from the other side of dbus
-**/
+**/ 
 static void 
 transport_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
                                  GValue* value, gpointer userdata)
