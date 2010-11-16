@@ -80,6 +80,7 @@ struct _TransportWidgetPrivate
 	TransportWidgetState current_state;
 	GHashTable* 		 command_coordinates;	
   DbusmenuMenuitem*    twin_item;		
+  gboolean has_focus;
 };
 
 #define TRANSPORT_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TRANSPORT_WIDGET_TYPE, TransportWidgetPrivate))
@@ -117,6 +118,9 @@ static void transport_widget_react_to_button_release ( TransportWidget* button,
                                                        TransportWidgetEvent command);
 static void transport_widget_toggle_play_pause ( TransportWidget* button,
                                                  TransportWidgetState update);
+static void transport_widget_select (GtkItem* menu, gpointer Userdata);
+static void transport_widget_deselect (GtkItem* menu, gpointer Userdata);
+
 
 /// Init functions //////////////////////////////////////////////////////////
 
@@ -142,6 +146,7 @@ transport_widget_init (TransportWidget *self)
 	TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(self);	
 	priv->current_command	= TRANSPORT_NADA;
 	priv->current_state = PAUSE;
+  priv->has_focus = FALSE;
 	priv->command_coordinates =  g_hash_table_new_full(g_direct_hash,
 	                                             				g_direct_equal,
 	                                             				NULL,
@@ -174,12 +179,20 @@ transport_widget_init (TransportWidget *self)
 	g_hash_table_insert(priv->command_coordinates,
                       GINT_TO_POINTER(TRANSPORT_NEXT),
                       next_list);
-	
 	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 43);
   g_signal_connect (G_OBJECT(self),
                     "notify",
                     G_CALLBACK (transport_widget_notify),
-                    NULL);    
+                    NULL);
+  g_signal_connect (GTK_ITEM(self),
+                    "select",
+                    G_CALLBACK (transport_widget_select),
+                    NULL);
+  g_signal_connect (GTK_ITEM(self),
+                    "deselect",
+                    G_CALLBACK (transport_widget_deselect),
+                    NULL);
+  
 }
 
 static void
@@ -252,7 +265,6 @@ transport_widget_button_press_event (GtkWidget *menuitem,
 {
 	g_return_val_if_fail ( IS_TRANSPORT_WIDGET(menuitem), FALSE );
 	TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE ( TRANSPORT_WIDGET(menuitem) );
-
   TransportWidgetEvent result = transport_widget_determine_button_event ( TRANSPORT_WIDGET(menuitem),
                                                                             event);
 	if(result != TRANSPORT_NADA){
@@ -285,10 +297,25 @@ transport_widget_button_release_event (GtkWidget *menuitem,
                                      &value,
                                      0 );
   }
-
   transport_widget_react_to_button_release ( transport,
                                              result );
   return TRUE;
+}
+
+static void 
+transport_widget_select (GtkItem* item, gpointer Userdata)
+{
+  TransportWidget* transport = TRANSPORT_WIDGET(item);
+  TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );	
+  priv->has_focus = TRUE;
+}
+
+static void 
+transport_widget_deselect (GtkItem* item, gpointer Userdata)
+{
+  TransportWidget* transport = TRANSPORT_WIDGET(item);
+  TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );	
+  priv->has_focus = FALSE;
 }
 
 void
@@ -309,6 +336,14 @@ transport_widget_react_to_key_event ( TransportWidget* transport,
 
   transport_widget_react_to_button_release ( transport,
                                              transport_event );  
+}
+
+void
+transport_widget_focus_update ( TransportWidget* transport, gboolean focus )
+{
+  TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );	    
+  priv->has_focus = focus;  
+  g_debug("new focus update = %i", focus);
 }
 
 static TransportWidgetEvent
