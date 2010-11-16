@@ -646,6 +646,28 @@ _finalize (cairo_t*          cr,
 }
 
 static void
+_finalize_repaint (cairo_t*          cr,
+	           cairo_t**         cr_surf,
+	           cairo_surface_t** surf,
+	           double            x,
+	           double            y,
+	           int               repaints)
+{
+	if (!cr || !cr_surf || !surf)
+		return;
+
+	while (repaints > 0)
+	{
+		cairo_set_source_surface (cr, *surf, x, y);
+		cairo_paint (cr);
+		repaints--;
+	}
+
+	cairo_surface_destroy (*surf);
+	cairo_destroy (*cr_surf);
+}
+
+static void
 _color_rgb_to_hls (gdouble *r,
                    gdouble *g,
                    gdouble *b)
@@ -1063,8 +1085,8 @@ draw (GtkWidget* button, cairo_t *cr)
 
 	GtkStyle *style;
 
-	CairoColorRGB bg_color, fg_color;
-	CairoColorRGB color_inner[2], color_middle[2], color_outer[2], color_button[3], color_button_outer[2], color_button_shadow, color_inner_compressed[2];
+	CairoColorRGB bg_color, fg_color, bg_selected;
+	CairoColorRGB color_inner[2], color_middle[2], color_outer[2], color_button[4], color_button_outer[2], color_button_shadow, color_inner_compressed[2];
 
 	style = gtk_widget_get_style (button);
 
@@ -1072,6 +1094,10 @@ draw (GtkWidget* button, cairo_t *cr)
 	bg_color.r = style->bg[0].red/65535.0;
 	bg_color.g = style->bg[0].green/65535.0;
 	bg_color.b = style->bg[0].blue/65535.0;
+
+	bg_selected.r = style->bg[GTK_STATE_SELECTED].red/65535.0;
+	bg_selected.g = style->bg[GTK_STATE_SELECTED].green/65535.0;
+	bg_selected.b = style->bg[GTK_STATE_SELECTED].blue/65535.0;
 
 	fg_color.r = style->fg[0].red/65535.0;
 	fg_color.g = style->fg[0].green/65535.0;
@@ -1089,6 +1115,7 @@ draw (GtkWidget* button, cairo_t *cr)
 	_color_shade (&fg_color, BUTTON_START_SHADE, &color_button[0]);
 	_color_shade (&fg_color, BUTTON_END_SHADE, &color_button[1]);
 	_color_shade (&bg_color, BUTTON_SHADOW_SHADE, &color_button[2]);
+	_color_shade (&bg_selected, 1.0, &color_button[3]);
 	_color_shade (&bg_color, INNER_COMPRESSED_START_SHADE, &color_inner_compressed[0]);
 	_color_shade (&bg_color, INNER_COMPRESSED_END_SHADE, &color_inner_compressed[1]);
 
@@ -1102,6 +1129,7 @@ draw (GtkWidget* button, cairo_t *cr)
 	double BUTTON_END[] = {color_button[0].r, color_button[0].g, color_button[0].b, 1.0f};
 	double BUTTON_START[] = {color_button[1].r, color_button[1].g, color_button[1].b, 1.0f};
 	double BUTTON_SHADOW[] = {color_button[2].r, color_button[2].g, color_button[2].b, 0.75f};
+	double BUTTON_SHADOW_FOCUS[] = {color_button[3].r, color_button[3].g, color_button[3].b, 1.0f};
 	double INNER_COMPRESSED_END[] = {color_inner_compressed[1].r, color_inner_compressed[1].g, color_inner_compressed[1].b, 1.0f};
 	double INNER_COMPRESSED_START[] = {color_inner_compressed[0].r, color_inner_compressed[0].g, color_inner_compressed[0].b, 1.0f};  
  
@@ -1195,6 +1223,7 @@ draw (GtkWidget* button, cairo_t *cr)
 			SHADOW_BUTTON,
 			SHADOW_BUTTON);
 	}
+
 	// play/pause border
 	if(priv->current_command == TRANSPORT_PLAY_PAUSE){
 		draw_circle (cr,
@@ -1323,7 +1352,7 @@ draw (GtkWidget* button, cairo_t *cr)
 			     BUTTON_SHADOW,
 			     TRUE);
 		_surface_blur (surf, 1);
-		_finalize (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y + 1.0f);
+		_finalize_repaint (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y + 1.0f, 3);
 
 		// draw pause-button
 		_setup (&cr_surf, &surf, PAUSE_WIDTH, PAUSE_HEIGHT);
@@ -1344,22 +1373,44 @@ draw (GtkWidget* button, cairo_t *cr)
 		_finalize (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y);
 	}
 	else if(priv->current_state == PAUSE){
-		_setup (&cr_surf, &surf, PLAY_WIDTH, PLAY_HEIGHT);
-		_mask_play (cr_surf, 
-		            PLAY_PADDING,
-		            PLAY_PADDING,
-		            PLAY_WIDTH - (2*PLAY_PADDING),
-		            PLAY_HEIGHT - (2*PLAY_PADDING));		            
-		_fill (cr_surf,
-		       PLAY_PADDING,
-		       PLAY_PADDING,
-		       PLAY_WIDTH - (2*PLAY_PADDING),
-		       PLAY_HEIGHT - (2*PLAY_PADDING),
-			     BUTTON_SHADOW,
-			     BUTTON_SHADOW,
-			     FALSE);
-		_surface_blur (surf, 1);
-		_finalize (cr, &cr_surf, &surf, PAUSE_X-0.75f, PAUSE_Y + 1.0f);
+		if (priv->has_focus)
+		{
+			_setup (&cr_surf, &surf, PLAY_WIDTH+6, PLAY_HEIGHT+6);
+			_mask_play (cr_surf, 
+				    PLAY_PADDING,
+				    PLAY_PADDING,
+				    PLAY_WIDTH - (2*PLAY_PADDING),
+				    PLAY_HEIGHT - (2*PLAY_PADDING));		            
+			_fill (cr_surf,
+			       PLAY_PADDING,
+			       PLAY_PADDING,
+			       PLAY_WIDTH - (2*PLAY_PADDING),
+			       PLAY_HEIGHT - (2*PLAY_PADDING),
+				     BUTTON_SHADOW_FOCUS,
+				     BUTTON_SHADOW_FOCUS,
+				     FALSE);
+			_surface_blur (surf, 3);
+			_finalize_repaint (cr, &cr_surf, &surf, PAUSE_X-0.5f, PAUSE_Y + 0.5f, 3);
+		}
+		else
+		{
+			_setup (&cr_surf, &surf, PLAY_WIDTH, PLAY_HEIGHT);
+			_mask_play (cr_surf, 
+				    PLAY_PADDING,
+				    PLAY_PADDING,
+				    PLAY_WIDTH - (2*PLAY_PADDING),
+				    PLAY_HEIGHT - (2*PLAY_PADDING));		            
+			_fill (cr_surf,
+			       PLAY_PADDING,
+			       PLAY_PADDING,
+			       PLAY_WIDTH - (2*PLAY_PADDING),
+			       PLAY_HEIGHT - (2*PLAY_PADDING),
+				     BUTTON_SHADOW,
+				     BUTTON_SHADOW,
+				     FALSE);
+			_surface_blur (surf, 1);
+			_finalize (cr, &cr_surf, &surf, PAUSE_X-0.75f, PAUSE_Y + 1.0f);
+		}
 		// draw play-button
 		_setup (&cr_surf, &surf, PLAY_WIDTH, PLAY_HEIGHT);
 		cairo_set_line_width (cr, 10.5);
