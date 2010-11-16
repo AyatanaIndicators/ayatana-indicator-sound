@@ -1261,23 +1261,46 @@ draw (GtkWidget* button, cairo_t *cr)
 	}
 
 	// draw previous-button drop-shadow
-	_setup (&cr_surf, &surf, PREV_WIDTH, PREV_HEIGHT);
-	_mask_prev (cr_surf,
-		    (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
-		    (PREV_HEIGHT - TRI_HEIGHT) / 2.0f,
-		    TRI_WIDTH,
-		    TRI_HEIGHT,
-		    TRI_OFFSET);
-	_fill (cr_surf,
-               (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
-               (PREV_HEIGHT - TRI_HEIGHT) / 2.0f,
-               (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
-	       (double) TRI_HEIGHT,
-	       BUTTON_SHADOW,
-	       BUTTON_SHADOW,
-	       FALSE);
-	_surface_blur (surf, 1);
-	_finalize (cr, &cr_surf, &surf, PREV_X, PREV_Y + 1.0f);
+	if (priv->has_focus)
+	{
+		_setup (&cr_surf, &surf, PREV_WIDTH+6, PREV_HEIGHT+6);
+		_mask_prev (cr_surf,
+			    (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+			    (PREV_HEIGHT - TRI_HEIGHT) / 2.0f,
+			    TRI_WIDTH,
+			    TRI_HEIGHT,
+			    TRI_OFFSET);
+		_fill (cr_surf,
+		       (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+		       (PREV_HEIGHT - TRI_HEIGHT) / 2.0f,
+		       (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+		       (double) TRI_HEIGHT,
+		       BUTTON_SHADOW_FOCUS,
+		       BUTTON_SHADOW_FOCUS,
+		       FALSE);
+		_surface_blur (surf, 3);
+		_finalize_repaint (cr, &cr_surf, &surf, PREV_X, PREV_Y + 0.5f, 3);
+	}
+	else
+	{
+		_setup (&cr_surf, &surf, PREV_WIDTH, PREV_HEIGHT);
+		_mask_prev (cr_surf,
+			    (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+			    (PREV_HEIGHT - TRI_HEIGHT) / 2.0f,
+			    TRI_WIDTH,
+			    TRI_HEIGHT,
+			    TRI_OFFSET);
+		_fill (cr_surf,
+		       (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+		       (PREV_HEIGHT - TRI_HEIGHT) / 2.0f,
+		       (PREV_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+		       (double) TRI_HEIGHT,
+		       BUTTON_SHADOW,
+		       BUTTON_SHADOW,
+		       FALSE);
+		_surface_blur (surf, 1);
+		_finalize (cr, &cr_surf, &surf, PREV_X, PREV_Y + 1.0f);
+	}
 
 	// draw previous-button
 	_setup (&cr_surf, &surf, PREV_WIDTH, PREV_HEIGHT);
@@ -1298,23 +1321,46 @@ draw (GtkWidget* button, cairo_t *cr)
 	_finalize (cr, &cr_surf, &surf, PREV_X, PREV_Y);
 
 	// draw next-button drop-shadow
-	_setup (&cr_surf, &surf, NEXT_WIDTH, NEXT_HEIGHT);
-	_mask_next (cr_surf,
-		    (NEXT_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
-		    (NEXT_HEIGHT - TRI_HEIGHT) / 2.0f,
-		    TRI_WIDTH,
-		    TRI_HEIGHT,
-		    TRI_OFFSET);
-	_fill (cr_surf,
-	       (NEXT_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
-	       (NEXT_HEIGHT - TRI_HEIGHT) / 2.0f,
-	       (NEXT_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
-	       (double) TRI_HEIGHT,
-	       BUTTON_SHADOW,
-	       BUTTON_SHADOW,
-	       FALSE);
-	_surface_blur (surf, 1); 
-	_finalize (cr, &cr_surf, &surf, NEXT_X, NEXT_Y + 1.0f);
+	if (priv->has_focus)
+	{
+		_setup (&cr_surf, &surf, NEXT_WIDTH+6, NEXT_HEIGHT+6);
+		_mask_next (cr_surf,
+			    (NEXT_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+			    (NEXT_HEIGHT - TRI_HEIGHT) / 2.0f,
+			    TRI_WIDTH,
+			    TRI_HEIGHT,
+			    TRI_OFFSET);
+		_fill (cr_surf,
+		       (NEXT_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+		       (NEXT_HEIGHT - TRI_HEIGHT) / 2.0f,
+		       (NEXT_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+		       (double) TRI_HEIGHT,
+		       BUTTON_SHADOW_FOCUS,
+		       BUTTON_SHADOW_FOCUS,
+		       FALSE);
+		_surface_blur (surf, 3); 
+		_finalize_repaint (cr, &cr_surf, &surf, NEXT_X, NEXT_Y + 0.5f, 3);
+	}
+	else
+	{
+		_setup (&cr_surf, &surf, NEXT_WIDTH, NEXT_HEIGHT);
+		_mask_next (cr_surf,
+			    (NEXT_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+			    (NEXT_HEIGHT - TRI_HEIGHT) / 2.0f,
+			    TRI_WIDTH,
+			    TRI_HEIGHT,
+			    TRI_OFFSET);
+		_fill (cr_surf,
+		       (NEXT_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+		       (NEXT_HEIGHT - TRI_HEIGHT) / 2.0f,
+		       (NEXT_WIDTH - (2.0f * TRI_WIDTH - TRI_OFFSET)) / 2.0f,
+		       (double) TRI_HEIGHT,
+		       BUTTON_SHADOW,
+		       BUTTON_SHADOW,
+		       FALSE);
+		_surface_blur (surf, 1); 
+		_finalize (cr, &cr_surf, &surf, NEXT_X, NEXT_Y + 1.0f);
+	}
 
 	// draw next-button
 	_setup (&cr_surf, &surf, NEXT_WIDTH, NEXT_HEIGHT);
@@ -1336,23 +1382,46 @@ draw (GtkWidget* button, cairo_t *cr)
 
 	// draw pause-button drop-shadow
 	if(priv->current_state == PLAY){
-		_setup (&cr_surf, &surf, PAUSE_WIDTH, PAUSE_HEIGHT);
-		_mask_pause (cr_surf,
-				   (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
-				   (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
-				   BAR_WIDTH,
-				   BAR_HEIGHT - 2.0f * BAR_WIDTH,
-				   BAR_OFFSET);
-		_fill (cr_surf,
-			     (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
-			     (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
-			     (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
-			     (double) BAR_HEIGHT,
-			     BUTTON_SHADOW,
-			     BUTTON_SHADOW,
-			     TRUE);
-		_surface_blur (surf, 1);
-		_finalize_repaint (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y + 1.0f, 3);
+		if (priv->has_focus)
+		{
+			_setup (&cr_surf, &surf, PAUSE_WIDTH+6, PAUSE_HEIGHT+6);
+			_mask_pause (cr_surf,
+					   (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+					   (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
+					   BAR_WIDTH,
+					   BAR_HEIGHT - 2.0f * BAR_WIDTH,
+					   BAR_OFFSET);
+			_fill (cr_surf,
+				     (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+				     (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
+				     (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+				     (double) BAR_HEIGHT,
+				     BUTTON_SHADOW_FOCUS,
+				     BUTTON_SHADOW_FOCUS,
+				     TRUE);
+			_surface_blur (surf, 3);
+			_finalize_repaint (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y + 0.5f, 3);
+		}
+		else
+		{
+			_setup (&cr_surf, &surf, PAUSE_WIDTH, PAUSE_HEIGHT);
+			_mask_pause (cr_surf,
+					   (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+					   (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
+					   BAR_WIDTH,
+					   BAR_HEIGHT - 2.0f * BAR_WIDTH,
+					   BAR_OFFSET);
+			_fill (cr_surf,
+				     (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+				     (PAUSE_HEIGHT - BAR_HEIGHT) / 2.0f,
+				     (PAUSE_WIDTH - (2.0f * BAR_WIDTH + BAR_OFFSET)) / 2.0f,
+				     (double) BAR_HEIGHT,
+				     BUTTON_SHADOW,
+				     BUTTON_SHADOW,
+				     TRUE);
+			_surface_blur (surf, 1);
+			_finalize (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y + 1.0f);
+		}
 
 		// draw pause-button
 		_setup (&cr_surf, &surf, PAUSE_WIDTH, PAUSE_HEIGHT);
