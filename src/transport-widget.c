@@ -1230,7 +1230,7 @@ draw (GtkWidget* button, cairo_t *cr)
 	double OUTER_START[] = {color_outer[1].r, color_outer[1].g, color_outer[1].b, 1.0f};
 	double OUTER_END_PRELIGHT[]   = {color_outer_prelight[0].r, color_outer_prelight[0].g, color_outer_prelight[0].b, 1.0f};
 	double OUTER_START_PRELIGHT[] = {color_outer_prelight[1].r, color_outer_prelight[1].g, color_outer_prelight[1].b, 1.0f};
-	double SHADOW_BUTTON[] = {color_button_shadow.r, color_button_shadow.g, color_button_shadow.b, 0.16f};
+	double SHADOW_BUTTON[] = {color_button_shadow.r, color_button_shadow.g, color_button_shadow.b, 0.3f};
 	double OUTER_PLAY_END[] = {color_play_outer[0].r, color_play_outer[0].g, color_play_outer[0].b, 1.0f};
 	double OUTER_PLAY_START[] = {color_play_outer[1].r, color_play_outer[1].g, color_play_outer[1].b, 1.0f};
 	double OUTER_PLAY_END_PRELIGHT[] = {color_play_outer_prelight[0].r, color_play_outer_prelight[0].g, color_play_outer_prelight[0].b, 1.0f};
@@ -1364,7 +1364,6 @@ draw (GtkWidget* button, cairo_t *cr)
 		               Y,
 		               RECT_WIDTH/2,
 		               OUTER_RADIUS,
-
 		               OUTER_START_PRELIGHT,
 		               OUTER_END_PRELIGHT);
 
@@ -1386,15 +1385,21 @@ draw (GtkWidget* button, cairo_t *cr)
 	}
 
 	// play/pause shadow
-/*	if(priv->current_command != TRANSPORT_PLAY_PAUSE)*/
-/*	{*/
-/*		draw_circle (cr,*/
-/*		             X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f - 1.0f,*/
-/*		             Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) - 1.0f,*/
-/*		             CIRCLE_RADIUS + 1.0f,*/
-/*		             SHADOW_BUTTON,*/
-/*		             SHADOW_BUTTON);*/
-/*	}*/
+	if(priv->current_command != TRANSPORT_PLAY_PAUSE)
+	{
+		cairo_save (cr);
+		cairo_rectangle (cr, X, Y, RECT_WIDTH, MIDDLE_RADIUS*2);
+		cairo_clip (cr);
+
+		draw_circle (cr,
+		             X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f - 1.0f,
+		             Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) - 1.0f,
+		             CIRCLE_RADIUS + 1.0f,
+		             SHADOW_BUTTON,
+		             SHADOW_BUTTON);
+
+		cairo_restore (cr);
+	}
 
 	// play/pause button
 	if(priv->current_command == TRANSPORT_PLAY_PAUSE)
@@ -1415,10 +1420,11 @@ draw (GtkWidget* button, cairo_t *cr)
 	}
 	else if (priv->motion_event == TRANSPORT_PLAY_PAUSE)
 	{
+		/* this subtle offset is to fix alpha borders, should be removed once this draw routine will be refactored */
 		draw_circle (cr,
-		             X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f,
-		             Y - ((CIRCLE_RADIUS - OUTER_RADIUS)),
-		             CIRCLE_RADIUS,
+		             X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f + 0.1,
+		             Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) + 0.1,
+		             CIRCLE_RADIUS - 0.1,
 		             OUTER_PLAY_START_PRELIGHT,
 		             OUTER_PLAY_END_PRELIGHT);
 
