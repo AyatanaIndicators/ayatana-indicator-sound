@@ -77,6 +77,7 @@ typedef struct _TransportWidgetPrivate TransportWidgetPrivate;
 struct _TransportWidgetPrivate
 {
 	TransportWidgetEvent current_command;
+	TransportWidgetEvent key_event;
 	TransportWidgetState current_state;
 	GHashTable* 		 command_coordinates;	
   DbusmenuMenuitem*    twin_item;		
@@ -146,6 +147,7 @@ transport_widget_init (TransportWidget *self)
 	TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(self);	
 	priv->current_command	= TRANSPORT_NADA;
 	priv->current_state = PAUSE;
+	priv->key_event = TRANSPORT_NADA;
   priv->has_focus = FALSE;
 	priv->command_coordinates =  g_hash_table_new_full(g_direct_hash,
 	                                             				g_direct_equal,
@@ -267,6 +269,7 @@ transport_widget_button_press_event (GtkWidget *menuitem,
 	TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE ( TRANSPORT_WIDGET(menuitem) );
   TransportWidgetEvent result = transport_widget_determine_button_event ( TRANSPORT_WIDGET(menuitem),
                                                                             event);
+    
 	if(result != TRANSPORT_NADA){
     priv->current_command = result;
     cairo_t *cr;
@@ -319,8 +322,24 @@ transport_widget_deselect (GtkItem* item, gpointer Userdata)
 }
 
 void
-transport_widget_react_to_key_event ( TransportWidget* transport,
-                                      TransportWidgetEvent transport_event )
+transport_widget_react_to_key_press_event ( TransportWidget* transport,
+                                            TransportWidgetEvent transport_event )
+{
+  if(transport_event != TRANSPORT_NADA){
+    TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );
+    priv->current_command = transport_event;
+    priv->key_event = transport_event;
+
+	cairo_t *cr;
+	cr = gdk_cairo_create ( GTK_WIDGET(transport)->window );
+	draw ( GTK_WIDGET(transport), cr );
+	cairo_destroy (cr);
+  } 
+}
+
+void
+transport_widget_react_to_key_release_event ( TransportWidget* transport,
+                                              TransportWidgetEvent transport_event )
 {
   if(transport_event != TRANSPORT_NADA){
     TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );	    
@@ -378,7 +397,9 @@ transport_widget_react_to_button_release ( TransportWidget* button,
 	TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(button);	
 	if(priv->current_command == TRANSPORT_NADA){
 		//g_debug("returning from the playbutton release because my previous command was nada");
-		return;
+
+		/* Update the drawing in any case, should not hurt :) */
+		// return;
 	}
 	else if(priv->current_command != TRANSPORT_NADA &&
 	        command != TRANSPORT_NADA){						
@@ -386,11 +407,12 @@ transport_widget_react_to_button_release ( TransportWidget* button,
 	}
 	cairo_t *cr;	
 	cr = gdk_cairo_create ( GTK_WIDGET(button)->window );
-	priv->current_command = TRANSPORT_NADA;
 
+	priv->current_command = TRANSPORT_NADA;
+    priv->key_event = TRANSPORT_NADA;
 	draw ( GTK_WIDGET(button), cr );
 	cairo_destroy (cr);
-}    
+}
 
 /// internal helper functions //////////////////////////////////////////////////
 
@@ -1261,7 +1283,7 @@ draw (GtkWidget* button, cairo_t *cr)
 	}
 
 	// draw previous-button drop-shadow
-	if (priv->has_focus)
+	if (priv->has_focus && priv->key_event == TRANSPORT_PREVIOUS)
 	{
 		_setup (&cr_surf, &surf, PREV_WIDTH+6, PREV_HEIGHT+6);
 		_mask_prev (cr_surf,
@@ -1321,7 +1343,7 @@ draw (GtkWidget* button, cairo_t *cr)
 	_finalize (cr, &cr_surf, &surf, PREV_X, PREV_Y);
 
 	// draw next-button drop-shadow
-	if (priv->has_focus)
+	if (priv->has_focus && priv->key_event == TRANSPORT_NEXT)
 	{
 		_setup (&cr_surf, &surf, NEXT_WIDTH+6, NEXT_HEIGHT+6);
 		_mask_next (cr_surf,
@@ -1382,7 +1404,7 @@ draw (GtkWidget* button, cairo_t *cr)
 
 	// draw pause-button drop-shadow
 	if(priv->current_state == PLAY){
-		if (priv->has_focus)
+		if (priv->has_focus && (priv->key_event == TRANSPORT_NADA || priv->key_event == TRANSPORT_PLAY_PAUSE))
 		{
 			_setup (&cr_surf, &surf, PAUSE_WIDTH+6, PAUSE_HEIGHT+6);
 			_mask_pause (cr_surf,
@@ -1442,7 +1464,7 @@ draw (GtkWidget* button, cairo_t *cr)
 		_finalize (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y);
 	}
 	else if(priv->current_state == PAUSE){
-		if (priv->has_focus)
+		if (priv->has_focus && (priv->key_event == TRANSPORT_NADA || priv->key_event == TRANSPORT_PLAY_PAUSE))
 		{
 			_setup (&cr_surf, &surf, PLAY_WIDTH+6, PLAY_HEIGHT+6);
 			_mask_play (cr_surf, 

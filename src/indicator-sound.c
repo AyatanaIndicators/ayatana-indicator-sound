@@ -72,6 +72,7 @@ static void				indicator_sound_scroll (IndicatorObject* io, gint delta, Indicato
 //Slider related
 static gboolean new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
+static gboolean key_release_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
 static void style_changed_cb(GtkWidget *widget, gpointer user_data);
 
 //player widget realisation methods
@@ -222,7 +223,8 @@ get_menu (IndicatorObject * io)
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TITLE_MENUITEM_TYPE, new_title_widget);
 	// register Key-press listening on the menu widget as the slider does not allow this.
   g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), io);
-
+  g_signal_connect(menu, "key-release-event", G_CALLBACK(key_release_cb), io);
+  
 	return GTK_MENU(menu);
 }
 
@@ -718,17 +720,63 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
   else if (IS_TRANSPORT_WIDGET(menuitem) == TRUE) {
     switch (event->keyval) {
     case GDK_Right:
-      transport_widget_react_to_key_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
-                                            TRANSPORT_NEXT );
+      transport_widget_react_to_key_press_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
+                                                  TRANSPORT_NEXT );
       digested = TRUE;         
       break;        
     case GDK_Left:
-      transport_widget_react_to_key_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
-                                            TRANSPORT_PREVIOUS );
+      transport_widget_react_to_key_press_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
+                                                  TRANSPORT_PREVIOUS );
       digested = TRUE;         
       break;                  
     case GDK_KEY_space:
-      transport_widget_react_to_key_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
+      transport_widget_react_to_key_press_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
+                                                  TRANSPORT_PLAY_PAUSE );        
+      digested = TRUE;         
+      break;
+    case GDK_Up:
+    case GDK_Down:
+      digested = FALSE;     
+      break;
+    default:
+      break;
+    }
+  } 
+  return digested;
+}
+
+
+/**
+key_release_cb:
+**/
+static gboolean
+key_release_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
+{
+  gboolean digested = FALSE;
+
+	g_return_val_if_fail(IS_INDICATOR_SOUND(data), FALSE);
+
+	IndicatorSound *indicator = INDICATOR_SOUND (data);
+
+	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
+
+  GtkWidget *menuitem;
+
+  menuitem = GTK_MENU_SHELL (widget)->active_menu_item;
+  if (IS_TRANSPORT_WIDGET(menuitem) == TRUE) {
+    switch (event->keyval) {
+    case GDK_Right:
+      transport_widget_react_to_key_release_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
+                                                    TRANSPORT_NEXT );
+      digested = TRUE;         
+      break;        
+    case GDK_Left:
+      transport_widget_react_to_key_release_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
+                                                    TRANSPORT_PREVIOUS );
+      digested = TRUE;         
+      break;                  
+    case GDK_KEY_space:
+      transport_widget_react_to_key_release_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
                                             TRANSPORT_PLAY_PAUSE );        
       digested = TRUE;         
       break;

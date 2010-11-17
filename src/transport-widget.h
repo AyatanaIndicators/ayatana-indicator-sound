@@ -66,8 +66,10 @@ typedef struct
 void _color_shade (const CairoColorRGB *a, float k, CairoColorRGB *b);
 GType transport_widget_get_type (void);
 GtkWidget* transport_widget_new ( DbusmenuMenuitem *item );
-void transport_widget_react_to_key_event ( TransportWidget* widget,
-                                           TransportWidgetEvent transport_event );
+void transport_widget_react_to_key_press_event ( TransportWidget* widget,
+                                                 TransportWidgetEvent transport_event );
+void transport_widget_react_to_key_release_event ( TransportWidget* widget,
+                                                   TransportWidgetEvent transport_event );
 G_END_DECLS
 
 #endif
