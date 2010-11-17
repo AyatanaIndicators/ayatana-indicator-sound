@@ -1386,15 +1386,15 @@ draw (GtkWidget* button, cairo_t *cr)
 	}
 
 	// play/pause shadow
-	if(priv->current_command != TRANSPORT_PLAY_PAUSE)
-	{
-		draw_circle (cr,
-		             X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f - 1.0f,
-		             Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) - 1.0f,
-		             CIRCLE_RADIUS + 1.0f,
-		             SHADOW_BUTTON,
-		             SHADOW_BUTTON);
-	}
+/*	if(priv->current_command != TRANSPORT_PLAY_PAUSE)*/
+/*	{*/
+/*		draw_circle (cr,*/
+/*		             X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f - 1.0f,*/
+/*		             Y - ((CIRCLE_RADIUS - OUTER_RADIUS)) - 1.0f,*/
+/*		             CIRCLE_RADIUS + 1.0f,*/
+/*		             SHADOW_BUTTON,*/
+/*		             SHADOW_BUTTON);*/
+/*	}*/
 
 	// play/pause button
 	if(priv->current_command == TRANSPORT_PLAY_PAUSE)
