@@ -213,7 +213,7 @@ static gboolean
 transport_widget_expose (GtkWidget *button, GdkEventExpose *event)
 {
 	cairo_t *cr;
-	cr = gdk_cairo_create (button);
+	cr = gdk_cairo_create (button->window);
 
     //g_debug("In the playbutton's expose method, x = %i, y=%i and width: %i and height: %i'");
 	cairo_rectangle (cr,
