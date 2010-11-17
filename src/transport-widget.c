@@ -213,7 +213,7 @@ static gboolean
 transport_widget_expose (GtkWidget *button, GdkEventExpose *event)
 {
 	cairo_t *cr;
-	cr = gdk_cairo_create (button->window);
+	cr = gdk_cairo_create (button);
 
     //g_debug("In the playbutton's expose method, x = %i, y=%i and width: %i and height: %i'");
 	cairo_rectangle (cr,
@@ -329,7 +329,9 @@ transport_widget_react_to_key_press_event ( TransportWidget* transport,
     TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );
     priv->current_command = transport_event;
     priv->key_event = transport_event;
-    printf("transport_widget_react_to_key_press_event: before drawing\n");
+/*    printf("transport_widget_react_to_key_press_event: before drawing\n");*/
+    gtk_widget_realize ( GTK_WIDGET(transport) );
+
     cairo_t *cr;
     cr = gdk_cairo_create ( GTK_WIDGET(transport)->window );
     draw ( GTK_WIDGET(transport), cr );
@@ -352,7 +354,7 @@ transport_widget_react_to_key_release_event ( TransportWidget* transport,
                                      &value,
                                      0 );
   }
-  printf("transport_widget_react_to_key_release_event: before transport_widget_react_to_key_release_event\n");
+/*  printf("transport_widget_react_to_key_release_event: before transport_widget_react_to_key_release_event\n");*/
   transport_widget_react_to_button_release ( transport,
                                              transport_event );  
 }
@@ -397,16 +399,16 @@ transport_widget_react_to_button_release ( TransportWidget* button,
 	TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(button);	
 	if(priv->current_command == TRANSPORT_NADA){
 		//g_debug("returning from the playbutton release because my previous command was nada");
-        printf("transport_widget_react_to_button_release: inside if(priv->current_command == TRANSPORT_NADA)\n");
+/*        printf("transport_widget_react_to_button_release: inside if(priv->current_command == TRANSPORT_NADA)\n");*/
 		/* Update the drawing in any case, should not hurt :) */
 		// return;
 	}
 	else if(priv->current_command != TRANSPORT_NADA &&
 	        command != TRANSPORT_NADA){						
 		priv->current_command = command;
-		printf("transport_widget_react_to_button_release: inside if(priv->current_command != TRANSPORT_NADA && command != TRANSPORT_NADA)\n");
+/*		printf("transport_widget_react_to_button_release: inside if(priv->current_command != TRANSPORT_NADA && command != TRANSPORT_NADA)\n");*/
 	}
-	printf("transport_widget_react_to_button_release: before drawing\n");
+/*	printf("transport_widget_react_to_button_release: before drawing\n");*/
 	cairo_t *cr;	
 	cr = gdk_cairo_create ( GTK_WIDGET(button)->window );
 
