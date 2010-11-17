@@ -474,11 +474,7 @@ transport_widget_react_to_button_release ( TransportWidget* button,
 {
 	g_return_if_fail(IS_TRANSPORT_WIDGET(button));
 	TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(button);	
-	if(priv->current_command == TRANSPORT_NADA){
-		/* Update the drawing in any case, should not hurt :) */
-		// return;
-	}
-	else if(priv->current_command != TRANSPORT_NADA &&
+	if(priv->current_command != TRANSPORT_NADA &&
 	        command != TRANSPORT_NADA){						
 		priv->current_command = command;
 	}
@@ -504,10 +500,6 @@ draw_gradient (cairo_t* cr,
 {
 	cairo_pattern_t* pattern = NULL;
 
-/*	cairo_set_fill_rule (cr, CAIRO_FILL_RULE_EVEN_ODD);*/
-/*	cairo_save (cr);*/
-/*	cairo_rectangle (cr, x-2.0*r, y, w+2*r, r*2);*/
-/*	cairo_clip (cr);*/
 	cairo_move_to (cr, x, y);
 	cairo_line_to (cr, x + w - 2.0f * r, y);
 	cairo_arc (cr,
@@ -525,12 +517,6 @@ draw_gradient (cairo_t* cr,
 		   270.0f * G_PI / 180.0f);
 	cairo_close_path (cr);
 	
-/*		cairo_arc (cr,*/
-/*		   x+(w-2*r)/2+1, y+(CIRCLE_RADIUS)/2+2,*/
-/*		   CIRCLE_RADIUS+1,*/
-/*		   0.0f * G_PI / 180.0f,*/
-/*		   360.0f * G_PI / 180.0f);*/
-
 	pattern = cairo_pattern_create_linear (x, y, x, y + 2.0f * r);
 	cairo_pattern_add_color_stop_rgba (pattern,
 	                                   0.0f,
@@ -547,7 +533,6 @@ draw_gradient (cairo_t* cr,
 	cairo_set_source (cr, pattern);
 	cairo_fill (cr);
 	cairo_pattern_destroy (pattern);
-/*	cairo_restore(cr);*/
 }
 
 static void
@@ -679,8 +664,7 @@ _mask_play (cairo_t* cr,
 	     double   x,
 	     double   y,
 	     double   tri_width,
-	     double   tri_height
-	     /*double   tri_offset*/)
+	     double   tri_height)
 {
 	if (!cr)
 		return;
@@ -1249,17 +1233,6 @@ draw (GtkWidget* button, cairo_t *cr)
 	double INNER_COMPRESSED_END[] = {color_inner_compressed[1].r, color_inner_compressed[1].g, color_inner_compressed[1].b, 1.0f};
 	double INNER_COMPRESSED_START[] = {color_inner_compressed[0].r, color_inner_compressed[0].g, color_inner_compressed[0].b, 1.0f};  
 
-	// prev/next shadow
-/*	if(priv->current_command != TRANSPORT_PREVIOUS && priv->current_command != TRANSPORT_NEXT)*/
-/*	{*/
-/*		draw_gradient (cr,*/
-/*		               X-0.25,*/
-/*		               Y-1,*/
-/*		               RECT_WIDTH+2,*/
-/*		               OUTER_RADIUS+1,*/
-/*		               SHADOW_BUTTON,*/
-/*		               SHADOW_BUTTON);*/
-/*	}*/
 
 	draw_gradient (cr,
 	               X,
