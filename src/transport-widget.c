@@ -330,9 +330,9 @@ transport_widget_react_to_key_press_event ( TransportWidget* transport,
     priv->current_command = transport_event;
     priv->key_event = transport_event;
 
-	cairo_t *cr;
-	cr = gdk_cairo_create ( GTK_WIDGET(transport)->window );
-	draw ( GTK_WIDGET(transport), cr );
+    cairo_t *cr;
+    cr = gdk_cairo_create ( GTK_WIDGET(transport)->window );
+    draw ( GTK_WIDGET(transport), cr );
 	cairo_destroy (cr);
   } 
 }
