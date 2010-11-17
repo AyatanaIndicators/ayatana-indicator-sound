@@ -193,8 +193,9 @@ transport_widget_init (TransportWidget *self)
   g_signal_connect (GTK_ITEM(self),
                     "deselect",
                     G_CALLBACK (transport_widget_deselect),
-                    NULL);
-  
+                    NULL);  
+  gtk_widget_realize ( GTK_WIDGET (self) );
+
 }
 
 static void
@@ -225,6 +226,13 @@ transport_widget_expose (GtkWidget *button, GdkEventExpose *event)
 
 	cairo_destroy (cr);
 	return FALSE;
+}
+
+gboolean
+transport_widget_is_selected ( TransportWidget* widget )
+{
+	TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(widget);
+  return priv->has_focus;
 }
 
 static void
@@ -330,10 +338,14 @@ transport_widget_react_to_key_press_event ( TransportWidget* transport,
     priv->current_command = transport_event;
     priv->key_event = transport_event;
 
+    printf ( "transport widget - react to key press event -> is the window null: %i",
+              gtk_widget_get_window (GTK_WIDGET (transport) ) == NULL );
     cairo_t *cr;
+
+    printf("transport_widget_react_to_key_press_event: before drawing\n");
     cr = gdk_cairo_create ( GTK_WIDGET(transport)->window );
     draw ( GTK_WIDGET(transport), cr );
-	cairo_destroy (cr);
+	  cairo_destroy (cr);
   } 
 }
 
@@ -352,7 +364,7 @@ transport_widget_react_to_key_release_event ( TransportWidget* transport,
                                      &value,
                                      0 );
   }
-
+  printf("transport_widget_react_to_key_release_event: before transport_widget_react_to_key_release_event\n");
   transport_widget_react_to_button_release ( transport,
                                              transport_event );  
 }
@@ -397,14 +409,16 @@ transport_widget_react_to_button_release ( TransportWidget* button,
 	TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(button);	
 	if(priv->current_command == TRANSPORT_NADA){
 		//g_debug("returning from the playbutton release because my previous command was nada");
-
+        printf("transport_widget_react_to_button_release: inside if(priv->current_command == TRANSPORT_NADA)\n");
 		/* Update the drawing in any case, should not hurt :) */
 		// return;
 	}
 	else if(priv->current_command != TRANSPORT_NADA &&
 	        command != TRANSPORT_NADA){						
 		priv->current_command = command;
+		printf("transport_widget_react_to_button_release: inside if(priv->current_command != TRANSPORT_NADA && command != TRANSPORT_NADA)\n");
 	}
+	printf("transport_widget_react_to_button_release: before drawing\n");
 	cairo_t *cr;	
 	cr = gdk_cairo_create ( GTK_WIDGET(button)->window );
 

@@ -70,6 +70,7 @@ void transport_widget_react_to_key_press_event ( TransportWidget* widget,
                                                  TransportWidgetEvent transport_event );
 void transport_widget_react_to_key_release_event ( TransportWidget* widget,
                                                    TransportWidgetEvent transport_event );
+gboolean transport_widget_is_selected ( TransportWidget* widget );
 G_END_DECLS
 
 #endif

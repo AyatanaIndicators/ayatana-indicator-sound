@@ -47,7 +47,7 @@ typedef struct _IndicatorSoundPrivate IndicatorSoundPrivate;
 struct _IndicatorSoundPrivate
 {
 	GtkWidget* volume_widget;
-	GtkWidget* transport_widget;  
+  GList* transport_widgets_list;
 };
 
 #define INDICATOR_SOUND_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), INDICATOR_SOUND_TYPE, IndicatorSoundPrivate))
@@ -156,6 +156,8 @@ indicator_sound_init (IndicatorSound *self)
 	
 	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
 	priv->volume_widget = NULL;
+  GList* t_list = NULL;
+  priv->transport_widgets_list = t_list;
 
 	g_signal_connect(G_OBJECT(self->service),
                    INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE,
@@ -175,6 +177,10 @@ indicator_sound_dispose (GObject *object)
   g_hash_table_destroy(volume_states);
 
   free_the_animation_list();
+
+	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (self));
+
+  g_list_free ( priv->transport_widgets_list );
 
   G_OBJECT_CLASS (indicator_sound_parent_class)->dispose (object);
   return;
@@ -252,7 +258,7 @@ new_transport_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbus
   bar = transport_widget_new(newitem);
 	io = g_object_get_data (G_OBJECT (client), "indicator");
 	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
-  priv->transport_widget = bar;
+  priv->transport_widgets_list = g_list_append ( priv->transport_widgets_list, bar );
 
   GtkMenuItem *menu_transport_bar = GTK_MENU_ITEM(bar);
 
@@ -718,19 +724,28 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
     }
   }
   else if (IS_TRANSPORT_WIDGET(menuitem) == TRUE) {
+    TransportWidget* transport_widget;
+    GList* elem;
+
+    for ( elem = priv->transport_widgets_list; elem; elem = elem->next ) {
+      transport_widget = TRANSPORT_WIDGET ( elem->data );
+      if ( transport_widget_is_selected( transport_widget ) ) 
+        break;
+    }
+
     switch (event->keyval) {
     case GDK_Right:
-      transport_widget_react_to_key_press_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
+      transport_widget_react_to_key_press_event ( transport_widget,
                                                   TRANSPORT_NEXT );
       digested = TRUE;         
       break;        
     case GDK_Left:
-      transport_widget_react_to_key_press_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
+      transport_widget_react_to_key_press_event ( transport_widget,
                                                   TRANSPORT_PREVIOUS );
       digested = TRUE;         
       break;                  
     case GDK_KEY_space:
-      transport_widget_react_to_key_press_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
+      transport_widget_react_to_key_press_event ( transport_widget,
                                                   TRANSPORT_PLAY_PAUSE );        
       digested = TRUE;         
       break;
@@ -764,20 +779,29 @@ key_release_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
 
   menuitem = GTK_MENU_SHELL (widget)->active_menu_item;
   if (IS_TRANSPORT_WIDGET(menuitem) == TRUE) {
+    TransportWidget* transport_widget;
+    GList* elem;
+
+    for(elem = priv->transport_widgets_list; elem; elem = elem->next) {
+      transport_widget = TRANSPORT_WIDGET (elem->data);
+      if ( transport_widget_is_selected( transport_widget ) ) 
+        break;
+    }
+
     switch (event->keyval) {
     case GDK_Right:
-      transport_widget_react_to_key_release_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
+      transport_widget_react_to_key_release_event ( transport_widget,
                                                     TRANSPORT_NEXT );
-      digested = TRUE;         
+      digested = TRUE;
       break;        
     case GDK_Left:
-      transport_widget_react_to_key_release_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
+      transport_widget_react_to_key_release_event ( transport_widget,
                                                     TRANSPORT_PREVIOUS );
       digested = TRUE;         
       break;                  
     case GDK_KEY_space:
-      transport_widget_react_to_key_release_event ( TRANSPORT_WIDGET ( priv->transport_widget ),
-                                            TRANSPORT_PLAY_PAUSE );        
+      transport_widget_react_to_key_release_event ( transport_widget,
+                                                    TRANSPORT_PLAY_PAUSE );        
       digested = TRUE;         
       break;
     case GDK_Up:
