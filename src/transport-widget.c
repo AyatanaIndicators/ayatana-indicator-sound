@@ -1254,6 +1254,30 @@ draw (GtkWidget* button, cairo_t *cr)
 /*		               SHADOW_BUTTON);*/
 /*	}*/
 
+	draw_gradient (cr,
+	               X,
+	               Y,
+	               RECT_WIDTH,
+	               OUTER_RADIUS,
+	               OUTER_START,
+	               OUTER_END);
+
+	draw_gradient (cr,
+	               X,
+	               Y + 1,
+	               RECT_WIDTH - 2,
+	               MIDDLE_RADIUS,
+	               MIDDLE_START,
+	               MIDDLE_END);
+
+	draw_gradient (cr,
+	               X,
+	               Y + 2,
+	               RECT_WIDTH - 4,
+	               MIDDLE_RADIUS,
+	               MIDDLE_START,
+	               MIDDLE_END);
+
 	//prev/next button
 	if(priv->current_command == TRANSPORT_PREVIOUS)
 	{
@@ -1324,6 +1348,7 @@ draw (GtkWidget* button, cairo_t *cr)
 		               MIDDLE_RADIUS,
 		               MIDDLE_START_PRELIGHT,
 		               MIDDLE_END_PRELIGHT);
+
 		draw_gradient (cr,
 		               X,
 		               Y + 2,
@@ -1358,32 +1383,6 @@ draw (GtkWidget* button, cairo_t *cr)
 		               MIDDLE_RADIUS,
 		               MIDDLE_START_PRELIGHT,
 		               MIDDLE_END_PRELIGHT);
-	}
-	else
-	{
-		draw_gradient (cr,
-		               X,
-		               Y,
-		               RECT_WIDTH,
-		               OUTER_RADIUS,
-		               OUTER_START,
-		               OUTER_END);
-
-		draw_gradient (cr,
-		               X,
-		               Y + 1,
-		               RECT_WIDTH - 2,
-		               MIDDLE_RADIUS,
-		               MIDDLE_START,
-		               MIDDLE_END);
-
-		draw_gradient (cr,
-		               X,
-		               Y + 2,
-		               RECT_WIDTH - 4,
-		               MIDDLE_RADIUS,
-		               MIDDLE_START,
-		               MIDDLE_END);
 	}
 
 	// play/pause shadow
