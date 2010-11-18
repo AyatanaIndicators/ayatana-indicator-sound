@@ -167,9 +167,14 @@ public class FamiliarPlayersDB : GLib.Object
       desktop_keyfile.load_from_file (desktop_path, KeyFileFlags.NONE);      
     }
     catch(GLib.FileError error){
-      warning("Error loading keyfile");
+      warning("Error loading keyfile - FileError");
       return null;
     }
+    catch(GLib.KeyFileError error){
+      warning("Error loading keyfile - KeyFileError");      
+      return null;
+    } 
+    
     try{
       return desktop_keyfile.get_string (KeyFileDesktop.GROUP,
                                          KeyFileDesktop.KEY_ICON);              
