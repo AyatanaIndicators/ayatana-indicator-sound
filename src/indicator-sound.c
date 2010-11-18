@@ -47,6 +47,7 @@ typedef struct _IndicatorSoundPrivate IndicatorSoundPrivate;
 struct _IndicatorSoundPrivate
 {
 	GtkWidget* volume_widget;
+  GList* transport_widgets_list;
 };
 
 #define INDICATOR_SOUND_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), INDICATOR_SOUND_TYPE, IndicatorSoundPrivate))
@@ -71,6 +72,7 @@ static void				indicator_sound_scroll (IndicatorObject* io, gint delta, Indicato
 //Slider related
 static gboolean new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
 static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
+static gboolean key_release_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
 static void style_changed_cb(GtkWidget *widget, gpointer user_data);
 
 //player widget realisation methods
@@ -154,6 +156,8 @@ indicator_sound_init (IndicatorSound *self)
 	
 	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
 	priv->volume_widget = NULL;
+  GList* t_list = NULL;
+  priv->transport_widgets_list = t_list;
 
 	g_signal_connect(G_OBJECT(self->service),
                    INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE,
@@ -173,6 +177,10 @@ indicator_sound_dispose (GObject *object)
   g_hash_table_destroy(volume_states);
 
   free_the_animation_list();
+
+	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (self));
+
+  g_list_free ( priv->transport_widgets_list );
 
   G_OBJECT_CLASS (indicator_sound_parent_class)->dispose (object);
   return;
@@ -221,7 +229,8 @@ get_menu (IndicatorObject * io)
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TITLE_MENUITEM_TYPE, new_title_widget);
 	// register Key-press listening on the menu widget as the slider does not allow this.
   g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), io);
-
+  g_signal_connect(menu, "key-release-event", G_CALLBACK(key_release_cb), io);
+  
 	return GTK_MENU(menu);
 }
 
@@ -241,11 +250,16 @@ new_transport_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbus
   //g_debug("indicator-sound: new_transport_bar() called ");
 
   GtkWidget* bar = NULL;
+  IndicatorObject *io = NULL;
 
   g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
   bar = transport_widget_new(newitem);
+	io = g_object_get_data (G_OBJECT (client), "indicator");
+	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+  priv->transport_widgets_list = g_list_append ( priv->transport_widgets_list, bar );
+
   GtkMenuItem *menu_transport_bar = GTK_MENU_ITEM(bar);
 
 	gtk_widget_show_all(bar);
@@ -706,9 +720,98 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
     new_value = CLAMP(new_value, 0, 100);
     if (new_value != current_value && current_state != STATE_MUTED) {
       //g_debug("Attempting to set the range from the key listener to %f", new_value);
-			volume_widget_update(VOLUME_WIDGET(priv->volume_widget), new_value);
+			volume_widget_update(VOLUME_WIDGET(priv->volume_widget), new_value);      
     }
   }
+  else if (IS_TRANSPORT_WIDGET(menuitem) == TRUE) {
+    TransportWidget* transport_widget;
+    GList* elem;
+
+    for ( elem = priv->transport_widgets_list; elem; elem = elem->next ) {
+      transport_widget = TRANSPORT_WIDGET ( elem->data );
+      if ( transport_widget_is_selected( transport_widget ) ) 
+        break;
+    }
+
+    switch (event->keyval) {
+    case GDK_Right:
+      transport_widget_react_to_key_press_event ( transport_widget,
+                                                  TRANSPORT_NEXT );
+      digested = TRUE;         
+      break;        
+    case GDK_Left:
+      transport_widget_react_to_key_press_event ( transport_widget,
+                                                  TRANSPORT_PREVIOUS );
+      digested = TRUE;         
+      break;                  
+    case GDK_KEY_space:
+      transport_widget_react_to_key_press_event ( transport_widget,
+                                                  TRANSPORT_PLAY_PAUSE );        
+      digested = TRUE;         
+      break;
+    case GDK_Up:
+    case GDK_Down:
+      digested = FALSE;     
+      break;
+    default:
+      break;
+    }
+  } 
+  return digested;
+}
+
+
+/**
+key_release_cb:
+**/
+static gboolean
+key_release_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
+{
+  gboolean digested = FALSE;
+
+	g_return_val_if_fail(IS_INDICATOR_SOUND(data), FALSE);
+
+	IndicatorSound *indicator = INDICATOR_SOUND (data);
+
+	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
+
+  GtkWidget *menuitem;
+
+  menuitem = GTK_MENU_SHELL (widget)->active_menu_item;
+  if (IS_TRANSPORT_WIDGET(menuitem) == TRUE) {
+    TransportWidget* transport_widget;
+    GList* elem;
+
+    for(elem = priv->transport_widgets_list; elem; elem = elem->next) {
+      transport_widget = TRANSPORT_WIDGET (elem->data);
+      if ( transport_widget_is_selected( transport_widget ) ) 
+        break;
+    }
+
+    switch (event->keyval) {
+    case GDK_Right:
+      transport_widget_react_to_key_release_event ( transport_widget,
+                                                    TRANSPORT_NEXT );
+      digested = TRUE;
+      break;        
+    case GDK_Left:
+      transport_widget_react_to_key_release_event ( transport_widget,
+                                                    TRANSPORT_PREVIOUS );
+      digested = TRUE;         
+      break;                  
+    case GDK_KEY_space:
+      transport_widget_react_to_key_release_event ( transport_widget,
+                                                    TRANSPORT_PLAY_PAUSE );        
+      digested = TRUE;         
+      break;
+    case GDK_Up:
+    case GDK_Down:
+      digested = FALSE;     
+      break;
+    default:
+      break;
+    }
+  } 
   return digested;
 }
 
@@ -730,7 +833,6 @@ indicator_sound_scroll (IndicatorObject *io, gint delta, IndicatorScrollDirectio
 
 	if (device_available == FALSE || current_state == STATE_MUTED)
     return;
-
 	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
 	
 	GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget)); 
