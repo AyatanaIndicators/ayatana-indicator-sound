@@ -306,7 +306,7 @@ gboolean player_item_populated (PlayerItem* self, GeeHashSet* attrs) {
 			g_debug ("player-item.vala:96: populated ? - prop: %s", prop);
 			value_int = dbusmenu_menuitem_property_get_int ((DbusmenuMenuitem*) self, prop);
 			if (dbusmenu_menuitem_property_get_int ((DbusmenuMenuitem*) self, prop) != PLAYER_ITEM_EMPTY) {
-				g_debug ("player-item.vala:99: populated ? - prop %s and value %i", prop, value_int);
+				g_debug ("player-item.vala:99: populated - prop %s and value %i", prop, value_int);
 				result = TRUE;
 				_g_free0 (prop);
 				_g_object_unref0 (_prop_it);

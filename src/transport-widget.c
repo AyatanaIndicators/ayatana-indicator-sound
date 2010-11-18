@@ -69,7 +69,6 @@ Uses code from ctk
 #define INNER_COMPRESSED_START_SHADE 0.95
 #define INNER_COMPRESSED_END_SHADE 1.05
 
-
 typedef struct _TransportWidgetPrivate TransportWidgetPrivate;
 
 struct _TransportWidgetPrivate
@@ -79,14 +78,6 @@ struct _TransportWidgetPrivate
 	GHashTable* 		 command_coordinates;	
   DbusmenuMenuitem*    twin_item;		
 };
-
-typedef struct
-{
-	double r;
-	double g;
-	double b;
-} CairoColorRGB;
-
 
 #define TRANSPORT_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TRANSPORT_WIDGET_TYPE, TransportWidgetPrivate))
 
@@ -117,7 +108,6 @@ static void transport_widget_menu_hidden ( GtkWidget        *menu,
 static void transport_widget_notify ( GObject *item,
                                       GParamSpec       *pspec,
                                       gpointer          user_data );
-
 static TransportWidgetEvent transport_widget_determine_button_event ( TransportWidget* button,
                                                                       GdkEventButton* event);
 static void transport_widget_react_to_button_release ( TransportWidget* button,
@@ -159,8 +149,8 @@ transport_widget_init (TransportWidget *self)
 	previous_list = g_list_insert(previous_list, GINT_TO_POINTER(60), 2);
 	previous_list = g_list_insert(previous_list, GINT_TO_POINTER(34), 3);
   g_hash_table_insert(priv->command_coordinates,
-                    GINT_TO_POINTER(TRANSPORT_PREVIOUS),
-                    previous_list);
+                      GINT_TO_POINTER(TRANSPORT_PREVIOUS),
+                      previous_list);
                      
 	GList* play_list = NULL;
 	play_list = g_list_insert(play_list, GINT_TO_POINTER(58), 0);
@@ -182,7 +172,7 @@ transport_widget_init (TransportWidget *self)
                       GINT_TO_POINTER(TRANSPORT_NEXT),
                       next_list);
 	
-	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 50);
+	gtk_widget_set_size_request(GTK_WIDGET(self), 200, 43);
   g_signal_connect (G_OBJECT(self),
                     "notify",
                     G_CALLBACK (transport_widget_notify),
@@ -742,7 +732,7 @@ _color_hls_to_rgb (gdouble *h,
 	}
 }
 
-static void
+void
 _color_shade (const CairoColorRGB *a, float k, CairoColorRGB *b)
 {
 	double red;

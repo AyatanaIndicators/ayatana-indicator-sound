@@ -58,43 +58,50 @@ static gboolean title_widget_triangle_draw_cb (GtkWidget *widget,
 
 G_DEFINE_TYPE (TitleWidget, title_widget, GTK_TYPE_IMAGE_MENU_ITEM);
 
-
-
 static void
 title_widget_class_init (TitleWidgetClass *klass)
 {
-    GObjectClass 			*gobject_class = G_OBJECT_CLASS (klass);
-    GtkWidgetClass    *widget_class = GTK_WIDGET_CLASS (klass);
+  GObjectClass 			*gobject_class = G_OBJECT_CLASS (klass);
+  GtkWidgetClass    *widget_class = GTK_WIDGET_CLASS (klass);
 
-    widget_class->button_press_event = title_widget_button_press_event;
+  widget_class->button_press_event = title_widget_button_press_event;
 
-    g_type_class_add_private (klass, sizeof (TitleWidgetPrivate));
+  g_type_class_add_private (klass, sizeof (TitleWidgetPrivate));
 
-    gobject_class->dispose = title_widget_dispose;
-    gobject_class->finalize = title_widget_finalize;
+  gobject_class->dispose = title_widget_dispose;
+  gobject_class->finalize = title_widget_finalize;
 }
 
 static void
 title_widget_init (TitleWidget *self)
 {
 	//g_debug("TitleWidget::title_widget_init");
+}
 
-	gint padding = 0;
+static void 
+title_widget_set_icon(TitleWidget *self)
+{
+  TitleWidgetPrivate *priv = TITLE_WIDGET_GET_PRIVATE(self);
+
+  gchar* icon_name = g_strdup(dbusmenu_menuitem_property_get(priv->twin_item,
+                                                   DBUSMENU_TITLE_MENUITEM_ICON));
+  gint padding = 0;
 	gtk_widget_style_get(GTK_WIDGET(self), "horizontal-padding", &padding, NULL);
 
 	gint width, height;
 	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
 
-	GtkWidget * icon = gtk_image_new_from_icon_name("sound-icon", GTK_ICON_SIZE_MENU);
+	GtkWidget * icon = gtk_image_new_from_icon_name(icon_name,
+                                                  GTK_ICON_SIZE_MENU);
 
 	gtk_widget_set_size_request(icon, width
                                     + 5 /* ref triangle is 5x9 pixels */
                                     + 1 /* padding */,
                                     height);
 	gtk_misc_set_alignment(GTK_MISC(icon), 0.5 /* right aligned */, 0);
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(icon));
-	gtk_widget_show(icon);
-
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(icon));
+	gtk_widget_show(icon);  
+  g_free(icon_name);
 }
 
 static void
@@ -132,10 +139,18 @@ title_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 {
 	g_return_if_fail (IS_TITLE_WIDGET (userdata));	
 	TitleWidget* mitem = TITLE_WIDGET(userdata);
-
+  g_debug("PROPERTY UPDATE FOR THE TITLE");
 	if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_NAME, property) == 0){
         gtk_menu_item_set_label (GTK_MENU_ITEM(mitem),
                                 g_value_get_string(value));
+	}
+	else if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_ICON, property) == 0){
+    g_debug("changing the icon data on the title - %s",
+            g_value_get_string(value));
+	  GtkWidget * icon = gtk_image_new_from_icon_name(g_value_get_string(value),
+                                                    GTK_ICON_SIZE_MENU);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(mitem), GTK_WIDGET(icon));
+    
 	}
 }
 
@@ -159,6 +174,7 @@ title_widget_set_twin_item(TitleWidget* self,
   gtk_menu_item_set_label (GTK_MENU_ITEM(self),
                            dbusmenu_menuitem_property_get(priv->twin_item,
                                                           DBUSMENU_TITLE_MENUITEM_NAME));                             
+  title_widget_set_icon(self);
 }
                            
 static gboolean
@@ -217,7 +233,7 @@ title_widget_new(DbusmenuMenuitem *item)
 {
 	GtkWidget* widget = g_object_new (TITLE_WIDGET_TYPE,
                                           NULL);
-    gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (widget), TRUE);
+  gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (widget), TRUE);
 	title_widget_set_twin_item((TitleWidget*)widget, item);
 
 	return widget;

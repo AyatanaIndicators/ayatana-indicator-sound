@@ -55,6 +55,15 @@ struct _TransportWidget {
 	  GtkMenuItem parent;
 };
 
+typedef struct
+{
+	double r;
+	double g;
+	double b;
+} CairoColorRGB;
+
+
+void _color_shade (const CairoColorRGB *a, float k, CairoColorRGB *b);
 GType transport_widget_get_type (void);
 GtkWidget* transport_widget_new ( DbusmenuMenuitem *item );
 

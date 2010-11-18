@@ -119,6 +119,7 @@ struct _PlayerControllerPrivate {
 	char* _mpris_name;
 	GAppInfo* _app_info;
 	gint _menu_offset;
+	char* _icon_name;
 };
 
 typedef enum  {
@@ -148,16 +149,20 @@ enum  {
 	PLAYER_CONTROLLER_NAME,
 	PLAYER_CONTROLLER_MPRIS_NAME,
 	PLAYER_CONTROLLER_APP_INFO,
-	PLAYER_CONTROLLER_MENU_OFFSET
+	PLAYER_CONTROLLER_MENU_OFFSET,
+	PLAYER_CONTROLLER_ICON_NAME
 };
 GType player_controller_widget_order_get_type (void) G_GNUC_CONST;
 GType player_controller_state_get_type (void) G_GNUC_CONST;
 #define PLAYER_CONTROLLER_WIDGET_QUANTITY 4
-PlayerController* player_controller_new (DbusmenuMenuitem* root, const char* client_name, const char* mpris_name, gint offset, PlayerControllerstate initial_state);
-PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, const char* client_name, const char* mpris_name, gint offset, PlayerControllerstate initial_state);
-static char* player_controller_format_client_name (const char* client_name);
+PlayerController* player_controller_new (DbusmenuMenuitem* root, GAppInfo* app, const char* mpris_name, const char* icon_name, gint offset, PlayerControllerstate initial_state);
+PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, GAppInfo* app, const char* mpris_name, const char* icon_name, gint offset, PlayerControllerstate initial_state);
+void player_controller_set_app_info (PlayerController* self, GAppInfo* value);
+static char* player_controller_format_player_name (char* app_info_name);
+GAppInfo* player_controller_get_app_info (PlayerController* self);
 void player_controller_set_name (PlayerController* self, const char* value);
 void player_controller_set_mpris_name (PlayerController* self, const char* value);
+void player_controller_set_icon_name (PlayerController* self, const char* value);
 void player_controller_set_menu_offset (PlayerController* self, gint value);
 static void player_controller_construct_widgets (PlayerController* self);
 static void player_controller_establish_mpris_connection (PlayerController* self);
@@ -166,7 +171,6 @@ void player_controller_update_state (PlayerController* self, PlayerControllersta
 const char* player_controller_get_name (PlayerController* self);
 void player_controller_activate (PlayerController* self);
 void player_controller_instantiate (PlayerController* self);
-GAppInfo* player_controller_get_app_info (PlayerController* self);
 Mpris2Controller* mpris2_controller_new (PlayerController* ctrl);
 Mpris2Controller* mpris2_controller_construct (GType object_type, PlayerController* ctrl);
 void player_controller_determine_state (PlayerController* self);
@@ -192,10 +196,13 @@ gint player_controller_get_menu_offset (PlayerController* self);
 gboolean mpris2_controller_connected (Mpris2Controller* self);
 void mpris2_controller_initial_update (Mpris2Controller* self);
 const char* player_controller_get_mpris_name (PlayerController* self);
-void player_controller_set_app_info (PlayerController* self, GAppInfo* value);
+const char* player_controller_get_icon_name (PlayerController* self);
 static void player_controller_finalize (GObject* obj);
 static void player_controller_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 static void player_controller_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
+static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNotify destroy_func);
+static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify destroy_func);
+static gint _vala_array_length (gpointer array);
 
 
 
@@ -228,33 +235,23 @@ static gpointer _g_object_ref0 (gpointer self) {
 }
 
 
-static char* string_strip (const char* self) {
-	char* result = NULL;
-	char* _result_;
-	g_return_val_if_fail (self != NULL, NULL);
-	_result_ = g_strdup (self);
-	g_strstrip (_result_);
-	result = _result_;
-	return result;
-}
-
-
-PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, const char* client_name, const char* mpris_name, gint offset, PlayerControllerstate initial_state) {
+PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, GAppInfo* app, const char* mpris_name, const char* icon_name, gint offset, PlayerControllerstate initial_state) {
 	PlayerController * self;
 	DbusmenuMenuitem* _tmp0_;
 	char* _tmp1_;
-	char* _tmp2_;
-	GeeArrayList* _tmp3_;
+	GeeArrayList* _tmp2_;
 	g_return_val_if_fail (root != NULL, NULL);
-	g_return_val_if_fail (client_name != NULL, NULL);
+	g_return_val_if_fail (app != NULL, NULL);
 	g_return_val_if_fail (mpris_name != NULL, NULL);
+	g_return_val_if_fail (icon_name != NULL, NULL);
 	self = (PlayerController*) g_object_new (object_type, NULL);
 	self->priv->root_menu = (_tmp0_ = _g_object_ref0 (root), _g_object_unref0 (self->priv->root_menu), _tmp0_);
-	player_controller_set_name (self, _tmp2_ = player_controller_format_client_name (_tmp1_ = string_strip (client_name)));
-	_g_free0 (_tmp2_);
+	player_controller_set_app_info (self, app);
+	player_controller_set_name (self, _tmp1_ = player_controller_format_player_name (g_strdup (g_app_info_get_name (self->priv->_app_info))));
 	_g_free0 (_tmp1_);
 	player_controller_set_mpris_name (self, mpris_name);
-	self->custom_items = (_tmp3_ = gee_array_list_new (TYPE_PLAYER_ITEM, (GBoxedCopyFunc) g_object_ref, g_object_unref, NULL), _g_object_unref0 (self->custom_items), _tmp3_);
+	player_controller_set_icon_name (self, icon_name);
+	self->custom_items = (_tmp2_ = gee_array_list_new (TYPE_PLAYER_ITEM, (GBoxedCopyFunc) g_object_ref, g_object_unref, NULL), _g_object_unref0 (self->custom_items), _tmp2_);
 	self->current_state = (gint) initial_state;
 	player_controller_set_menu_offset (self, offset);
 	player_controller_construct_widgets (self);
@@ -264,14 +261,14 @@ PlayerController* player_controller_construct (GType object_type, DbusmenuMenuit
 }
 
 
-PlayerController* player_controller_new (DbusmenuMenuitem* root, const char* client_name, const char* mpris_name, gint offset, PlayerControllerstate initial_state) {
-	return player_controller_construct (TYPE_PLAYER_CONTROLLER, root, client_name, mpris_name, offset, initial_state);
+PlayerController* player_controller_new (DbusmenuMenuitem* root, GAppInfo* app, const char* mpris_name, const char* icon_name, gint offset, PlayerControllerstate initial_state) {
+	return player_controller_construct (TYPE_PLAYER_CONTROLLER, root, app, mpris_name, icon_name, offset, initial_state);
 }
 
 
 void player_controller_update_state (PlayerController* self, PlayerControllerstate new_state) {
 	g_return_if_fail (self != NULL);
-	g_debug ("player-controller.vala:72: update_state - player controller %s : new s" \
+	g_debug ("player-controller.vala:76: update_state - player controller %s : new s" \
 "tate %i", self->priv->_name, (gint) new_state);
 	self->current_state = (gint) new_state;
 	player_controller_update_layout (self);
@@ -287,7 +284,7 @@ void player_controller_activate (PlayerController* self) {
 void player_controller_instantiate (PlayerController* self) {
 	GError * _inner_error_ = NULL;
 	g_return_if_fail (self != NULL);
-	g_debug ("player-controller.vala:90: instantiate in player controller for %s", self->priv->_name);
+	g_debug ("player-controller.vala:94: instantiate in player controller for %s", self->priv->_name);
 	{
 		g_app_info_launch (self->priv->_app_info, NULL, NULL, &_inner_error_);
 		if (_inner_error_ != NULL) {
@@ -302,8 +299,8 @@ void player_controller_instantiate (PlayerController* self) {
 		_error_ = _inner_error_;
 		_inner_error_ = NULL;
 		{
-			g_warning ("player-controller.vala:96: Failed to launch app %s with error message:" \
-" %s", self->priv->_name, _error_->message);
+			g_warning ("player-controller.vala:100: Failed to launch app %s with error message" \
+": %s", self->priv->_name, _error_->message);
 			_g_error_free0 (_error_);
 		}
 	}
@@ -320,7 +317,7 @@ static void player_controller_establish_mpris_connection (PlayerController* self
 	Mpris2Controller* _tmp0_;
 	g_return_if_fail (self != NULL);
 	if (self->current_state != PLAYER_CONTROLLER_STATE_READY) {
-		g_debug ("player-controller.vala:103: establish_mpris_connection - Not ready to " \
+		g_debug ("player-controller.vala:107: establish_mpris_connection - Not ready to " \
 "connect");
 		return;
 	}
@@ -427,6 +424,17 @@ static void player_controller_construct_widgets (PlayerController* self) {
 }
 
 
+static char* string_strip (const char* self) {
+	char* result = NULL;
+	char* _result_;
+	g_return_val_if_fail (self != NULL, NULL);
+	_result_ = g_strdup (self);
+	g_strstrip (_result_);
+	result = _result_;
+	return result;
+}
+
+
 static glong string_get_length (const char* self) {
 	glong result;
 	g_return_val_if_fail (self != NULL, 0L);
@@ -468,22 +476,36 @@ static char* string_slice (const char* self, glong start, glong end) {
 }
 
 
-static char* player_controller_format_client_name (const char* client_name) {
+static char* player_controller_format_player_name (char* app_info_name) {
 	char* result = NULL;
-	char* formatted;
-	g_return_val_if_fail (client_name != NULL, NULL);
-	formatted = g_strdup (client_name);
-	if (string_get_length (formatted) > 1) {
-		char* _tmp0_;
-		char* _tmp1_;
-		char* _tmp2_;
-		formatted = (_tmp2_ = g_strconcat (_tmp0_ = g_utf8_strup (client_name, (gssize) 1), _tmp1_ = string_slice (client_name, (glong) 1, string_get_length (client_name)), NULL), _g_free0 (formatted), _tmp2_);
-		_g_free0 (_tmp1_);
-		_g_free0 (_tmp0_);
-		g_debug ("player-controller.vala:168: PlayerController->format_client_name - : %" \
-"s", formatted);
+	char* _tmp0_;
+	char* _tmp1_;
+	char* _result_;
+	gint tokens_length1;
+	gint _tokens_size_;
+	char** _tmp3_;
+	char** _tmp2_;
+	char** tokens;
+	g_return_val_if_fail (app_info_name != NULL, NULL);
+	_result_ = (_tmp1_ = string_strip (_tmp0_ = g_utf8_strdown (app_info_name, -1)), _g_free0 (_tmp0_), _tmp1_);
+	tokens = (_tmp3_ = _tmp2_ = g_strsplit (_result_, " ", 0), tokens_length1 = _vala_array_length (_tmp2_), _tokens_size_ = tokens_length1, _tmp3_);
+	if (tokens_length1 > 1) {
+		char* _tmp4_;
+		_result_ = (_tmp4_ = g_strdup (tokens[0]), _g_free0 (_result_), _tmp4_);
 	}
-	result = formatted;
+	if (string_get_length (_result_) > 1) {
+		char* _tmp5_;
+		char* _tmp6_;
+		char* _tmp7_;
+		_result_ = (_tmp7_ = g_strconcat (_tmp5_ = g_utf8_strup (_result_, (gssize) 1), _tmp6_ = string_slice (_result_, (glong) 1, string_get_length (_result_)), NULL), _g_free0 (_result_), _tmp7_);
+		_g_free0 (_tmp6_);
+		_g_free0 (_tmp5_);
+		g_debug ("player-controller.vala:176: PlayerController->format_player_name - : %" \
+"s", _result_);
+	}
+	result = _result_;
+	tokens = (_vala_array_free (tokens, tokens_length1, (GDestroyNotify) g_free), NULL);
+	_g_free0 (app_info_name);
 	return result;
 }
 
@@ -567,6 +589,22 @@ void player_controller_set_menu_offset (PlayerController* self, gint value) {
 }
 
 
+const char* player_controller_get_icon_name (PlayerController* self) {
+	const char* result;
+	g_return_val_if_fail (self != NULL, NULL);
+	result = self->priv->_icon_name;
+	return result;
+}
+
+
+void player_controller_set_icon_name (PlayerController* self, const char* value) {
+	char* _tmp0_;
+	g_return_if_fail (self != NULL);
+	self->priv->_icon_name = (_tmp0_ = g_strdup (value), _g_free0 (self->priv->_icon_name), _tmp0_);
+	g_object_notify ((GObject *) self, "icon-name");
+}
+
+
 static void player_controller_class_init (PlayerControllerClass * klass) {
 	player_controller_parent_class = g_type_class_peek_parent (klass);
 	g_type_class_add_private (klass, sizeof (PlayerControllerPrivate));
@@ -577,6 +615,7 @@ static void player_controller_class_init (PlayerControllerClass * klass) {
 	g_object_class_install_property (G_OBJECT_CLASS (klass), PLAYER_CONTROLLER_MPRIS_NAME, g_param_spec_string ("mpris-name", "mpris-name", "mpris-name", NULL, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), PLAYER_CONTROLLER_APP_INFO, g_param_spec_object ("app-info", "app-info", "app-info", G_TYPE_APP_INFO, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), PLAYER_CONTROLLER_MENU_OFFSET, g_param_spec_int ("menu-offset", "menu-offset", "menu-offset", G_MININT, G_MAXINT, 0, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE));
+	g_object_class_install_property (G_OBJECT_CLASS (klass), PLAYER_CONTROLLER_ICON_NAME, g_param_spec_string ("icon-name", "icon-name", "icon-name", NULL, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE));
 }
 
 
@@ -595,6 +634,7 @@ static void player_controller_finalize (GObject* obj) {
 	_g_object_unref0 (self->custom_items);
 	_g_object_unref0 (self->mpris_bridge);
 	_g_object_unref0 (self->priv->_app_info);
+	_g_free0 (self->priv->_icon_name);
 	G_OBJECT_CLASS (player_controller_parent_class)->finalize (obj);
 }
 
@@ -627,6 +667,9 @@ static void player_controller_get_property (GObject * object, guint property_id,
 		case PLAYER_CONTROLLER_MENU_OFFSET:
 		g_value_set_int (value, player_controller_get_menu_offset (self));
 		break;
+		case PLAYER_CONTROLLER_ICON_NAME:
+		g_value_set_string (value, player_controller_get_icon_name (self));
+		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 		break;
@@ -650,10 +693,43 @@ static void player_controller_set_property (GObject * object, guint property_id,
 		case PLAYER_CONTROLLER_MENU_OFFSET:
 		player_controller_set_menu_offset (self, g_value_get_int (value));
 		break;
+		case PLAYER_CONTROLLER_ICON_NAME:
+		player_controller_set_icon_name (self, g_value_get_string (value));
+		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 		break;
 	}
+}
+
+
+static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNotify destroy_func) {
+	if ((array != NULL) && (destroy_func != NULL)) {
+		int i;
+		for (i = 0; i < array_length; i = i + 1) {
+			if (((gpointer*) array)[i] != NULL) {
+				destroy_func (((gpointer*) array)[i]);
+			}
+		}
+	}
+}
+
+
+static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify destroy_func) {
+	_vala_array_destroy (array, array_length, destroy_func);
+	g_free (array);
+}
+
+
+static gint _vala_array_length (gpointer array) {
+	int length;
+	length = 0;
+	if (array) {
+		while (((gpointer*) array)[length]) {
+			length++;
+		}
+	}
+	return length;
 }
 
 
