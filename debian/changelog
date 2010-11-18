@@ -1,3 +1,15 @@
+indicator-sound (0.5.2-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - updated to accommodate vala 0.10 to vala 0.12 api changes
+    - grey scale icon for default music player
+    - button and key handling improvements
+  * debian/control
+    - Changed build depends from valac-0.10 to valac, it builds now with 
+      the 0.12 series
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 18 Nov 2010 11:13:32 -0500
+
 indicator-sound (0.5.1-0ubuntu1) natty; urgency=low
 
   * New upstream release.

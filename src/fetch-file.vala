@@ -64,7 +64,7 @@ public class FetchFile : Object
     ssize_t bufsize = 1;
     do {
       try {
-        bufsize = yield this.stream.read_async (buffer, size, GLib.Priority.DEFAULT, null);
+        bufsize = yield this.stream.read_async (buffer, GLib.Priority.DEFAULT, null);
         if (bufsize < 1) { break;}
 
         if (bufsize != size)

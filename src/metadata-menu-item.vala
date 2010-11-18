@@ -133,7 +133,7 @@ public class MetadataMenuitem : PlayerItem
 	{
 		try{
 			PixbufLoader loader = new PixbufLoader ();
-			loader.write (update.data, update.len);
+			loader.write (update.data);
 			loader.close ();
 			Pixbuf icon = loader.get_pixbuf ();				
  			string path = this.album_art_cache_dir.concat("/downloaded-coverart-XXXXXX");
