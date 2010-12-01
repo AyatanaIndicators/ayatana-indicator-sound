@@ -16,11 +16,11 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along 
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-using DBus;
+//using DBus;
 using Dbusmenu;
 
 [DBus (name = "org.mpris.MediaPlayer2")]
-public interface MprisRoot : DBus.Object {
+public interface MprisRoot : Object {
 	// properties
 	public abstract bool HasTracklist{owned get; set;}
 	public abstract bool CanQuit{owned get; set;}
@@ -28,11 +28,11 @@ public interface MprisRoot : DBus.Object {
 	public abstract string Identity{owned get; set;}
 	public abstract string DesktopEntry{owned get; set;}	
 	// methods
-	public abstract async void Quit() throws DBus.Error;
-	public abstract async void Raise() throws DBus.Error;
+	public abstract async void Quit() throws IOError;
+	public abstract async void Raise() throws IOError;
 }
 
-[DBus (name = "org.mpris.MediaPlayer2.Player")]
+/*[DBus (name = "org.mpris.MediaPlayer2.Player")]
 public interface MprisPlayer : DBus.Object {
 
 	// properties
@@ -54,7 +54,7 @@ public interface FreeDesktopProperties : DBus.Object{
                                        Value?> changed_properties,
                                        string[] invalid);
 }
-
+*/
 /*
  This class will entirely replace mpris-controller.vala hence why there is no
  point in trying to get encorporate both into the same object model. 
@@ -63,9 +63,10 @@ public class Mpris2Controller : GLib.Object
 {		
 	public static const string root_interface = "org.mpris.MediaPlayer2" ;	
 	public MprisRoot mpris2_root {get; construct;}		
-	public MprisPlayer player {get; construct;}		
-	public PlayerController owner {get; construct;}
-	public FreeDesktopProperties properties_interface {get; construct;}
+	/*public MprisPlayer player {get; construct;}
+	public FreeDesktopProperties properties_interface {get; construct;}*/
+
+  public PlayerController owner {get; construct;}
 	
 	public Mpris2Controller(PlayerController ctrl)
 	{
@@ -74,23 +75,22 @@ public class Mpris2Controller : GLib.Object
 	
 	construct{
     try {
-      var connection = DBus.Bus.get (DBus.BusType.SESSION);
-			this.mpris2_root = (MprisRoot) connection.get_object (root_interface.concat(".").concat(this.owner.mpris_name),
-				                                             "/org/mpris/MediaPlayer2",
-				                                             root_interface);						
-			this.player = (MprisPlayer) connection.get_object (root_interface.concat(".").concat(this.owner.mpris_name),
+      
+			this.mpris2_root = Bus.get_proxy_sync (BusType.SESSION, root_interface.concat(".").concat(this.owner.mpris_name),
+				                                             "/org/mpris/MediaPlayer2");
+			/*this.player = (MprisPlayer) connection.get_object (root_interface.concat(".").concat(this.owner.mpris_name),
 				                                               "/org/mpris/MediaPlayer2",
 				                                               root_interface.concat(".Player"));						
 			this.properties_interface = (FreeDesktopProperties) connection.get_object("org.freedesktop.Properties.PropertiesChanged",
 			                                                                          "/org/mpris/MediaPlayer2");                                                                                
-			this.properties_interface.PropertiesChanged += property_changed_cb;			
+			this.properties_interface.PropertiesChanged += property_changed_cb;*/			
       
-		} catch (DBus.Error e) {
+		} catch (IOError e) {
       	error("Problems connecting to the session bus - %s", e.message);
     }		
 	}
 
-	public void property_changed_cb(string interface_source, HashTable<string, Value?> changed_properties, string[] invalid )
+	/*public void property_changed_cb(string interface_source, HashTable<string, Value?> changed_properties, string[] invalid )
 	{	
 		debug("properties-changed for interface %s and owner %s", interface_source, this.owner.mpris_name);
     
@@ -115,11 +115,11 @@ public class Mpris2Controller : GLib.Object
 		  metadata.property_set_bool(MENUITEM_PROP_VISIBLE,
                                  metadata.populated(MetadataMenuitem.attributes_format()));		      
     }
-	}
+	}*/
 
-	private GLib.HashTable<string, Value?> clean_metadata()
+	private GLib.HashTable<string, Value?>? clean_metadata()
 	{ 
-		GLib.HashTable<string, Value?> changed_updates = this.player.Metadata; 
+		/*GLib.HashTable<string, Value?> changed_updates = this.player.Metadata; 
     Value? artist_v = this.player.Metadata.lookup("xesam:artist");
     if(artist_v != null){
 		  string[] artists = (string[])this.player.Metadata.lookup("xesam:artist");
@@ -133,9 +133,11 @@ public class Mpris2Controller : GLib.Object
 		  changed_updates.replace("mpris:length", duration/1000000); 
     }
 		return changed_updates;
+    */
+    return null;
 	}
 	
-	private TransportMenuitem.state determine_play_state(string status){	
+	private TransportMenuitem.state determine_play_state(string? status){	
 		if(status != null && status == "Playing"){
 			return TransportMenuitem.state.PLAYING;
 		}
@@ -145,22 +147,22 @@ public class Mpris2Controller : GLib.Object
 	public void initial_update()
 	{
 		TransportMenuitem.state update;
-		if(this.player.PlaybackStatus == null){
+		/*if(this.player.PlaybackStatus == null){
 			update = TransportMenuitem.state.PAUSED;
-		}
-		else{
-			update = determine_play_state(this.player.PlaybackStatus);
-		}		    
-    (this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(update);
-		GLib.HashTable<string, Value?> cleaned_metadata = this.clean_metadata();
-		this.owner.custom_items[PlayerController.widget_order.METADATA].update(cleaned_metadata,
-			                          MetadataMenuitem.attributes_format());
+		}*/
+
+    update = determine_play_state(null);
+				    
+    (this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(TransportMenuitem.state.PAUSED);
+		GLib.HashTable<string, Value?>? cleaned_metadata = this.clean_metadata();
+		//this.owner.custom_items[PlayerController.widget_order.METADATA].update(cleaned_metadata,
+		//	                          MetadataMenuitem.attributes_format());
 	}
 
 	public void transport_update(TransportMenuitem.action command)
 	{		
 		debug("transport_event input = %i", (int)command);
-		if(command == TransportMenuitem.action.PLAY_PAUSE){
+		/*if(command == TransportMenuitem.action.PLAY_PAUSE){
 			this.player.PlayPause.begin();							
 		}
 		else if(command == TransportMenuitem.action.PREVIOUS){
@@ -168,26 +170,23 @@ public class Mpris2Controller : GLib.Object
 		}
 		else if(command == TransportMenuitem.action.NEXT){
 			this.player.Next.begin();
-		}	
+		}*/	
 	}
 	
 	public bool connected()
 	{
-		return (this.player != null && this.mpris2_root != null);
+		return false;
 	}
 
 		
 	public bool was_successfull(){
-		if(this.mpris2_root == null || this.player == null){
 			return false;
-		}
-		return true;
 	}
   
 	public void expose()
 	{
 		if(this.connected() == true){
-			this.mpris2_root.Raise.begin();
+			//this.mpris2_root.Raise.begin();
 		}
 	}
 }

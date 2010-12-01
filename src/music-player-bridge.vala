@@ -17,14 +17,12 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Indicate;
 using Dbusmenu;
 using Gee;
 using GLib;
 
 public class MusicPlayerBridge : GLib.Object
 {
-  private Listener listener;
   private Dbusmenu.Menuitem root_menu;
 	private HashMap<string, PlayerController> registered_clients;  
 	private FamiliarPlayersDB playersDB;
@@ -33,9 +31,6 @@ public class MusicPlayerBridge : GLib.Object
   {
 		playersDB = new FamiliarPlayersDB();
 		registered_clients = new HashMap<string, PlayerController> ();
-    listener = Listener.ref_default();
-    listener.server_added.connect(on_server_added);
-    listener.server_removed.connect(on_server_removed);
   }
 
 	private void try_to_add_inactive_familiar_clients(){
@@ -76,7 +71,7 @@ public class MusicPlayerBridge : GLib.Object
 		}
 	}
 	
-	public void on_server_added(Indicate.ListenerServer object, string type)
+	/*public void on_server_added(Indicate.ListenerServer object, string type)
   {
     debug("MusicPlayerBridge -> on_server_added with value %s", type);
 		if(server_is_not_of_interest(type)) return;
@@ -139,7 +134,7 @@ public class MusicPlayerBridge : GLib.Object
       return true;
     }
 		return false;
-	}
+	}*/
 		
   public void set_root_menu_item(Dbusmenu.Menuitem menu)
   {
@@ -158,6 +153,9 @@ public class MusicPlayerBridge : GLib.Object
 		return app_info;
 	}
 
+  /**
+   TODO: clean up
+  **/
   private static string? determine_key(owned string path)
   {
     var tokens = path.split("/");
