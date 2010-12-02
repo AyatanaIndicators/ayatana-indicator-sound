@@ -19,42 +19,15 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 //using DBus;
 using Dbusmenu;
 
-[DBus (name = "org.mpris.MediaPlayer2")]
-public interface MprisRoot : Object {
-	// properties
-	public abstract bool HasTracklist{owned get; set;}
-	public abstract bool CanQuit{owned get; set;}
-	public abstract bool CanRaise{owned get; set;}
-	public abstract string Identity{owned get; set;}
-	public abstract string DesktopEntry{owned get; set;}	
-	// methods
-	public abstract async void Quit() throws IOError;
-	public abstract async void Raise() throws IOError;
-}
 
-/*[DBus (name = "org.mpris.MediaPlayer2.Player")]
-public interface MprisPlayer : DBus.Object {
-
-	// properties
-	public abstract HashTable<string, Value?> Metadata{owned get; set;}
-	public abstract int32 Position{owned get; set;}
-	public abstract string PlaybackStatus{owned get; set;}	
-	// methods
-	public abstract async void PlayPause() throws DBus.Error;
-	public abstract async void Next() throws DBus.Error;
-	public abstract async void Previous() throws DBus.Error;
-	// signals
-	public signal void Seeked(int64 new_position);
-}
-
-[DBus (name = "org.freedesktop.DBus.Properties")]
-public interface FreeDesktopProperties : DBus.Object{
+/*[DBus (name = "org.freedesktop.DBus.Properties")]
+  public interface FreeDesktopProperties : DBus.Object{
 	// signals
 	public signal void PropertiesChanged(string source, HashTable<string,
                                        Value?> changed_properties,
                                        string[] invalid);
 }
-*/
+
 /*
  This class will entirely replace mpris-controller.vala hence why there is no
  point in trying to get encorporate both into the same object model. 
@@ -63,8 +36,8 @@ public class Mpris2Controller : GLib.Object
 {		
 	public static const string root_interface = "org.mpris.MediaPlayer2" ;	
 	public MprisRoot mpris2_root {get; construct;}		
-	/*public MprisPlayer player {get; construct;}
-	public FreeDesktopProperties properties_interface {get; construct;}*/
+	public MprisPlayer player {get; construct;}
+	//public FreeDesktopProperties properties_interface {get; construct;}
 
   public PlayerController owner {get; construct;}
 	
@@ -75,12 +48,13 @@ public class Mpris2Controller : GLib.Object
 	
 	construct{
     try {
-      
-			this.mpris2_root = Bus.get_proxy_sync (BusType.SESSION, root_interface.concat(".").concat(this.owner.mpris_name),
-				                                             "/org/mpris/MediaPlayer2");
-			/*this.player = (MprisPlayer) connection.get_object (root_interface.concat(".").concat(this.owner.mpris_name),
-				                                               "/org/mpris/MediaPlayer2",
-				                                               root_interface.concat(".Player"));						
+			this.mpris2_root = Bus.get_proxy_sync ( BusType.SESSION,
+                                              root_interface.concat(".").concat(this.owner.mpris_name),
+				                                      "/org/mpris/MediaPlayer2");
+			this.player = Bus.get_proxy_sync ( BusType.SESSION,
+                                         root_interface.concat(".").concat(this.owner.mpris_name),
+				                                 "/org/mpris/MediaPlayer2" );				  
+      /*
 			this.properties_interface = (FreeDesktopProperties) connection.get_object("org.freedesktop.Properties.PropertiesChanged",
 			                                                                          "/org/mpris/MediaPlayer2");                                                                                
 			this.properties_interface.PropertiesChanged += property_changed_cb;*/			
@@ -162,7 +136,7 @@ public class Mpris2Controller : GLib.Object
 	public void transport_update(TransportMenuitem.action command)
 	{		
 		debug("transport_event input = %i", (int)command);
-		/*if(command == TransportMenuitem.action.PLAY_PAUSE){
+		if(command == TransportMenuitem.action.PLAY_PAUSE){
 			this.player.PlayPause.begin();							
 		}
 		else if(command == TransportMenuitem.action.PREVIOUS){
@@ -170,7 +144,7 @@ public class Mpris2Controller : GLib.Object
 		}
 		else if(command == TransportMenuitem.action.NEXT){
 			this.player.Next.begin();
-		}*/	
+		}
 	}
 	
 	public bool connected()

@@ -114,7 +114,7 @@ public class PlayerController : GLib.Object
 	public void vanish()
 	{
 		foreach(Dbusmenu.Menuitem item in this.custom_items){
-			root_menu.child_delete(item);			
+			root_menu.child_delete(item);
 		}
 	}
 

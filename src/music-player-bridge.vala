@@ -26,13 +26,14 @@ public class MusicPlayerBridge : GLib.Object
   private Dbusmenu.Menuitem root_menu;
 	private HashMap<string, PlayerController> registered_clients;  
 	private FamiliarPlayersDB playersDB;
-	
+  private Mpris2Watcher watcher;
+  private const string DESKTOP_PREFIX = "/usr/share/applications/";
   public MusicPlayerBridge()
   {
 		playersDB = new FamiliarPlayersDB();
 		registered_clients = new HashMap<string, PlayerController> ();
   }
-
+  
 	private void try_to_add_inactive_familiar_clients(){
 		foreach(string app in this.playersDB.records()){
 			if(app == null){
@@ -79,41 +80,39 @@ public class MusicPlayerBridge : GLib.Object
 			listener_get_server_property_cb cb = (listener_get_server_property_cb)desktop_info_callback;
 			this.listener.server_get_desktop(object, cb, this);					
 		}
-  }
+  }*/
 
-  private void desktop_info_callback ( Indicate.ListenerServer server,
-	                                 	                owned string path,
-                                                    void* data )                                                  	                                  
-	{
-		MusicPlayerBridge bridge = data as MusicPlayerBridge;
-		AppInfo? app_info = create_app_info(path);
+  public void  client_has_become_available ( string desktop_file_name )
+  {
+    string path = DESKTOP_PREFIX.concat ( desktop_file_name.concat( ".desktop" ) );    
+		AppInfo? app_info = create_app_info ( path );
     if ( app_info == null ){
       warning ( "Could not create app_info for path %s \n Getting out of here ", path);
       return;
     }
     
-    var mpris_key = determine_key(path);
+    var mpris_key = determine_key ( desktop_file_name );
 
-		if(bridge.playersDB.already_familiar(path) == false){
-			debug("New client has registered that we have seen before: %s", path);
-			bridge.playersDB.insert(path);
-			PlayerController ctrl = new PlayerController ( bridge.root_menu,
+		if ( this.playersDB.already_familiar ( path ) == false ){
+			debug("New client has registered that we have not seen before: %s", desktop_file_name );
+			this.playersDB.insert ( path );
+			PlayerController ctrl = new PlayerController ( this.root_menu,
 			                                               app_info,
                                                      mpris_key,
                                                      playersDB.fetch_icon_name(path),                                                    
-			                                               bridge.calculate_menu_position(),
+			                                               this.calculate_menu_position(),
 			                                               PlayerController.state.READY );
-      bridge.registered_clients.set(mpris_key, ctrl);        
-      debug("successfully created appinfo and instance from path and set it on the respective instance");				
+      this.registered_clients.set ( mpris_key, ctrl );        
+      debug ( "successfully created appinfo and instance from path and set it on the respective instance" );				
 		}
 		else{
-		  bridge.registered_clients[mpris_key].update_state(PlayerController.state.READY);
-			bridge.registered_clients[mpris_key].activate();      
+		  this.registered_clients[mpris_key].update_state ( PlayerController.state.READY );
+			this.registered_clients[mpris_key].activate ( );      
 			debug("Ignoring desktop file path callback because the db cache file has it already: %s \n", path);
 		}
 	}
   
-  public void on_server_removed(Indicate.ListenerServer object, string type)
+  /*public void on_server_removed(Indicate.ListenerServer object, string type)
   {
     debug("MusicPlayerBridge -> on_server_removed with value %s", type);
 		if(server_is_not_of_interest(type)) return;
@@ -125,44 +124,31 @@ public class MusicPlayerBridge : GLib.Object
 			  debug("Successively offlined client %s", tmp[tmp.length - 1]);       
       }
 		}
-	}
-  
-	private bool server_is_not_of_interest(string type){
-    if (type == null) return true;
-    if (type.contains("music") == false) {
-      debug("server is of no interest,  it is not an music server");
-      return true;
-    }
-		return false;
 	}*/
+  
 		
   public void set_root_menu_item(Dbusmenu.Menuitem menu)
   {
 		this.root_menu = menu;
-		try_to_add_inactive_familiar_clients();
+		this.try_to_add_inactive_familiar_clients();
+    this.watcher = new Mpris2Watcher (this) ;    
   }
 
-	public static AppInfo? create_app_info(string path)
+	public static AppInfo? create_app_info ( string path )
 	{
-		DesktopAppInfo info = new DesktopAppInfo.from_filename(path);
-		if(path == null){
-			warning("Could not create a desktopappinfo instance from app: %s", path);
+		DesktopAppInfo info = new DesktopAppInfo.from_filename ( path ) ;
+		if ( path == null || info == null ){
+			warning ( "Could not create a desktopappinfo instance from app: %s", path );
 			return null;
 		}
-		GLib.AppInfo app_info = info as GLib.AppInfo;		
+		GLib.AppInfo app_info = info as GLib.AppInfo;
 		return app_info;
 	}
 
-  /**
-   TODO: clean up
-  **/
-  private static string? determine_key(owned string path)
+  private static string? determine_key(owned string name)
   {
-    var tokens = path.split("/");
-    if ( tokens.length < 2) return null;
-    var filename = tokens[tokens.length - 1];
-    var result = filename.split(".")[0];
-    var temp = result.split("-");
+    string result = name;
+    var temp = name.split("-");
     if (temp.length > 1){
       result = temp[0];
     }
