@@ -22,17 +22,15 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 public class Mpris2Watcher : GLib.Object
 {
-  public MusicPlayerBridge the_bridge {get; construct;}	
   const string BANSHEE_BUS_NAME = "org.mpris.MediaPlayer2.banshee";
-	private MprisRoot mpris2_root;
   private DBusConnection connection;
-  
-  public Mpris2Watcher ( MusicPlayerBridge bridge )
+  public signal void clientappeared ( string desktop_name );
+
+  public Mpris2Watcher ()
   {
-    GLib.Object(the_bridge: bridge);
   }
-  
-  construct{
+  construct
+  {  
     try {
       this.connection = Bus.get_sync ( BusType.SESSION );
       GLib.BusNameAppearedCallback banshee_change_cb = (GLib.BusNameAppearedCallback)banshee_appeared;
@@ -46,19 +44,23 @@ public class Mpris2Watcher : GLib.Object
     catch ( IOError e ){
       warning( "Mpris2watcher could not set up a watch for mpris clients appearing on the bus: %s",
                e.message );
-    }    
+    }
   }
 
   private void banshee_appeared ( GLib.DBusConnection connection,
                                   string name,
-                                  string name_owner )
+                                  string name_owner)
   {
     try {
-		  this.mpris2_root = Bus.get_proxy_sync ( BusType.SESSION,
-                                              BANSHEE_BUS_NAME,
-			                                        "/org/mpris/MediaPlayer2" );
-      this.the_bridge.client_has_become_available ( this.mpris2_root.DesktopEntry );
-      debug ( "On Name Appeared - name %s, name_owner %s", this.mpris2_root.DesktopEntry, name_owner );    
+		  MprisRoot mpris2_root = Bus.get_proxy_sync (  BusType.SESSION,
+                                                    BANSHEE_BUS_NAME,
+			                                              "/org/mpris/MediaPlayer2" );
+      //this.the_bridge.client_has_become_available ( mpris2_root.DesktopEntry );
+      debug ( "On Name Appeared - name %s, name_owner %s",
+               mpris2_root.DesktopEntry,
+               name_owner );
+      debug ( "this pointer in banshee appeared callback %i", (int)this);
+      this.clientappeared ( "mpris2_root.DesktopEntry" );
     }
     catch ( IOError e ){
       warning( "Mpris2watcher could not instantiate an mpris root for banshee: %s",
@@ -66,6 +68,12 @@ public class Mpris2Watcher : GLib.Object
     }    
   }
 
+  public void test_signal_emission()
+  {
+    this.clientappeared ( "test signal emission" );
+    debug ( "this pointer in test-signal-emission %i", (int)this);
+  }
+  
   private void banshee_disappeared ( GLib.DBusConnection connection,
                                      string name,
                                      string name_owner )

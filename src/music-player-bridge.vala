@@ -24,54 +24,55 @@ using GLib;
 public class MusicPlayerBridge : GLib.Object
 {
   private Dbusmenu.Menuitem root_menu;
-	private HashMap<string, PlayerController> registered_clients;  
-	private FamiliarPlayersDB playersDB;
+  private HashMap<string, PlayerController> registered_clients;  
+  private FamiliarPlayersDB playersDB;
   private Mpris2Watcher watcher;
   private const string DESKTOP_PREFIX = "/usr/share/applications/";
+
   public MusicPlayerBridge()
   {
-		playersDB = new FamiliarPlayersDB();
-		registered_clients = new HashMap<string, PlayerController> ();
+    playersDB = new FamiliarPlayersDB();
+    registered_clients = new HashMap<string, PlayerController> ();
   }
   
-	private void try_to_add_inactive_familiar_clients(){
-		foreach(string app in this.playersDB.records()){
-			if(app == null){
-				warning("App string in keyfile is null therefore moving on to next player");
-				continue;
-			}
+  private void try_to_add_inactive_familiar_clients(){
+    foreach(string app in this.playersDB.records()){
+      if(app == null){
+        warning("App string in keyfile is null therefore moving on to next player");
+        continue;
+      }
 
-			debug("attempting to make an app info from %s", app);
-	
-			DesktopAppInfo info = new DesktopAppInfo.from_filename(app);
+      debug("attempting to make an app info from %s", app);
+
+      DesktopAppInfo info = new DesktopAppInfo.from_filename(app);
 
       if(info == null){
-				warning("Could not create a desktopappinfo instance from app,: %s , moving on to the next client", app);
-				continue;					
-			}
+        warning("Could not create a desktopappinfo instance from app,: %s , moving on to the next client", app);
+        continue;
+      }
       
-			GLib.AppInfo app_info = info as GLib.AppInfo;
+      GLib.AppInfo app_info = info as GLib.AppInfo;
       var mpris_key = determine_key(app);
-			PlayerController ctrl = new PlayerController(this.root_menu, 
-					                                         app_info,
+      PlayerController ctrl = new PlayerController(this.root_menu, 
+                                                   app_info,
                                                    mpris_key,
                                                    playersDB.fetch_icon_name(app),
-					                                         calculate_menu_position(),
-					                                         PlayerController.state.OFFLINE);
-			this.registered_clients.set(mpris_key, ctrl);					
-		}
-	}
+                                                   calculate_menu_position(),
+                                                   PlayerController.state.OFFLINE);
+      this.registered_clients.set(mpris_key, ctrl);
+      }
+  }
   
-	private int calculate_menu_position()
-	{
-		if(this.registered_clients.size == 0){
-			return 2;
-		}
-		else{
-			return (2 + (this.registered_clients.size * PlayerController.WIDGET_QUANTITY));
-		}
-	}
-	
+  private int calculate_menu_position()
+  {
+    if(this.registered_clients.size == 0){
+      return 2;
+    }
+    else{
+      return (2 + (this.registered_clients.size * PlayerController.WIDGET_QUANTITY));
+    }
+  }
+
 	/*public void on_server_added(Indicate.ListenerServer object, string type)
   {
     debug("MusicPlayerBridge -> on_server_added with value %s", type);
@@ -84,8 +85,9 @@ public class MusicPlayerBridge : GLib.Object
 
   public void  client_has_become_available ( string desktop_file_name )
   {
+    debug ( "client_has_become_available %s", desktop_file_name );
     string path = DESKTOP_PREFIX.concat ( desktop_file_name.concat( ".desktop" ) );    
-		AppInfo? app_info = create_app_info ( path );
+    AppInfo? app_info = create_app_info ( path );
     if ( app_info == null ){
       warning ( "Could not create app_info for path %s \n Getting out of here ", path);
       return;
@@ -93,24 +95,24 @@ public class MusicPlayerBridge : GLib.Object
     
     var mpris_key = determine_key ( desktop_file_name );
 
-		if ( this.playersDB.already_familiar ( path ) == false ){
-			debug("New client has registered that we have not seen before: %s", desktop_file_name );
-			this.playersDB.insert ( path );
-			PlayerController ctrl = new PlayerController ( this.root_menu,
-			                                               app_info,
+    if ( this.playersDB.already_familiar ( path ) == false ){
+      debug("New client has registered that we have not seen before: %s", desktop_file_name );
+      this.playersDB.insert ( path );
+      PlayerController ctrl = new PlayerController ( this.root_menu,
+                                                     app_info,
                                                      mpris_key,
                                                      playersDB.fetch_icon_name(path),                                                    
-			                                               this.calculate_menu_position(),
-			                                               PlayerController.state.READY );
+                                                     this.calculate_menu_position(),
+                                                     PlayerController.state.READY );
       this.registered_clients.set ( mpris_key, ctrl );        
       debug ( "successfully created appinfo and instance from path and set it on the respective instance" );				
-		}
-		else{
-		  this.registered_clients[mpris_key].update_state ( PlayerController.state.READY );
-			this.registered_clients[mpris_key].activate ( );      
-			debug("Ignoring desktop file path callback because the db cache file has it already: %s \n", path);
-		}
-	}
+      }
+      else{
+        this.registered_clients[mpris_key].update_state ( PlayerController.state.READY );
+        this.registered_clients[mpris_key].activate ( );      
+        debug("Ignoring desktop file path callback because the db cache file has it already: %s \n", path);
+      }
+    }
   
   /*public void on_server_removed(Indicate.ListenerServer object, string type)
   {
@@ -126,24 +128,25 @@ public class MusicPlayerBridge : GLib.Object
 		}
 	}*/
   
-		
   public void set_root_menu_item(Dbusmenu.Menuitem menu)
   {
-		this.root_menu = menu;
-		this.try_to_add_inactive_familiar_clients();
-    this.watcher = new Mpris2Watcher (this) ;    
+    this.root_menu = menu;
+    this.try_to_add_inactive_familiar_clients();
+    this.watcher = new Mpris2Watcher ();
+    this.watcher.clientappeared += this.client_has_become_available;
+    this.watcher.test_signal_emission();
   }
 
-	public static AppInfo? create_app_info ( string path )
-	{
-		DesktopAppInfo info = new DesktopAppInfo.from_filename ( path ) ;
-		if ( path == null || info == null ){
-			warning ( "Could not create a desktopappinfo instance from app: %s", path );
-			return null;
-		}
-		GLib.AppInfo app_info = info as GLib.AppInfo;
-		return app_info;
-	}
+  public static AppInfo? create_app_info ( string path )
+  {
+    DesktopAppInfo info = new DesktopAppInfo.from_filename ( path ) ;
+    if ( path == null || info == null ){
+      warning ( "Could not create a desktopappinfo instance from app: %s", path );
+      return null;
+    }
+    GLib.AppInfo app_info = info as GLib.AppInfo;
+    return app_info;
+  }
 
   private static string? determine_key(owned string name)
   {
