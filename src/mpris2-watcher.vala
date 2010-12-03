@@ -47,7 +47,7 @@ public class Mpris2Watcher : GLib.Object
     }
   }
 
-  private void banshee_appeared ( GLib.DBusConnection connection,
+  public void banshee_appeared ( GLib.DBusConnection connection,
                                   string name,
                                   string name_owner)
   {
