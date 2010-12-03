@@ -133,8 +133,8 @@ public class MusicPlayerBridge : GLib.Object
     this.root_menu = menu;
     this.try_to_add_inactive_familiar_clients();
     this.watcher = new Mpris2Watcher ();
-    this.watcher.clientappeared += this.client_has_become_available;
-    this.watcher.test_signal_emission();
+    this.watcher.client_appeared += this.client_has_become_available;
+    //this.watcher.client_appeared += this.client_has_become_available;
   }
 
   public static AppInfo? create_app_info ( string path )

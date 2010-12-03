@@ -17,68 +17,68 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// TODO: Until match rules are properly supported in vala we need to explicitly
-//       watch for each client inorder to facilitate proper registration.
+[DBus (name = "org.freedesktop.DBus")]
+public interface FreeDesktopObject: Object {
+    public abstract signal void name_owner_changed (string name,
+                                                    string old_owner,
+                                                    string new_owner);
+}
 
 public class Mpris2Watcher : GLib.Object
 {
-  const string BANSHEE_BUS_NAME = "org.mpris.MediaPlayer2.banshee";
-  private DBusConnection connection;
-  public signal void clientappeared ( string desktop_name );
+  private const string FREEDESKTOP_SERVICE = "org.freedesktop.DBus";
+  private const string FREEDESKTOP_OBJECT = "/org/freedesktop/DBus";
+  private const string MPRIS_PREFIX = "org.mpris.MediaPlayer2.";
+  private const string MPRIS_MEDIA_PLAYER_PATH = "/org/mpris/MediaPlayer2";
+
+  FreeDesktopObject fdesktop_obj;
+  
+  public signal void client_appeared ( string desktop_name );
+  public signal void client_disappeared ( string desktop_name );
 
   public Mpris2Watcher ()
   {
   }
+  
   construct
   {  
     try {
-      this.connection = Bus.get_sync ( BusType.SESSION );
-      GLib.BusNameAppearedCallback banshee_change_cb = (GLib.BusNameAppearedCallback)banshee_appeared;
-      GLib.BusNameVanishedCallback banshee_gone_cb = (GLib.BusNameVanishedCallback)banshee_disappeared;
-      Bus.watch_name_on_connection ( this.connection, 
-                                     BANSHEE_BUS_NAME,
-                                     BusNameWatcherFlags.AUTO_START,                      
-                                     banshee_change_cb,
-                                     banshee_gone_cb );
+      this.fdesktop_obj = Bus.get_proxy_sync ( BusType.SESSION,
+                                               FREEDESKTOP_SERVICE,
+                                               FREEDESKTOP_OBJECT,
+                                               DBusProxyFlags.DO_NOT_LOAD_PROPERTIES );      
+      this.fdesktop_obj.name_owner_changed.connect (this.name_changes_detected);      
     }
     catch ( IOError e ){
       warning( "Mpris2watcher could not set up a watch for mpris clients appearing on the bus: %s",
-               e.message );
+                e.message );
     }
   }
 
-  public void banshee_appeared ( GLib.DBusConnection connection,
-                                  string name,
-                                  string name_owner)
-  {
-    try {
-		  MprisRoot mpris2_root = Bus.get_proxy_sync (  BusType.SESSION,
-                                                    BANSHEE_BUS_NAME,
-			                                              "/org/mpris/MediaPlayer2" );
-      //this.the_bridge.client_has_become_available ( mpris2_root.DesktopEntry );
-      debug ( "On Name Appeared - name %s, name_owner %s",
-               mpris2_root.DesktopEntry,
-               name_owner );
-      debug ( "this pointer in banshee appeared callback %i", (int)this);
-      this.clientappeared ( "mpris2_root.DesktopEntry" );
+  private void name_changes_detected ( FreeDesktopObject dbus_obj,
+                                       string     name,
+                                       string     previous_owner,
+                                       string     current_owner ) {
+    MprisRoot mpris2_root;                                         
+    if ( name.has_prefix (MPRIS_PREFIX) ){
+      try {
+        mpris2_root = Bus.get_proxy_sync (  BusType.SESSION,
+                                             name,
+                                             MPRIS_MEDIA_PLAYER_PATH );
+      }
+      catch (IOError e){
+        warning( "Mpris2watcher could not create a root interface: %s",
+                  e.message );
+        return;
+      }
+      if (previous_owner != "" && current_owner == "") {
+        debug ("Service '%s' going down", name);
+        client_disappeared (mpris2_root.DesktopEntry);
+      }
+      else if (previous_owner == "" && current_owner != "") {
+        debug ("Service '%s' has appeared", name);
+        client_appeared (mpris2_root.DesktopEntry);
+      }
     }
-    catch ( IOError e ){
-      warning( "Mpris2watcher could not instantiate an mpris root for banshee: %s",
-               e.message );
-    }    
   }
-
-  public void test_signal_emission()
-  {
-    this.clientappeared ( "test signal emission" );
-    debug ( "this pointer in test-signal-emission %i", (int)this);
-  }
-  
-  private void banshee_disappeared ( GLib.DBusConnection connection,
-                                     string name,
-                                     string name_owner )
-  {
-    debug ( "On Name Disappeared - name %s, name_owner %s", name, name_owner );
-  }
-  
 }
