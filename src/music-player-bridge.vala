@@ -52,7 +52,7 @@ public class MusicPlayerBridge : GLib.Object
       }
       
       GLib.AppInfo app_info = info as GLib.AppInfo;
-      var mpris_key = determine_key(app);
+      var mpris_key = determine_key ( app );
       PlayerController ctrl = new PlayerController(this.root_menu, 
                                                    app_info,
                                                    mpris_key,
@@ -93,7 +93,7 @@ public class MusicPlayerBridge : GLib.Object
       return;
     }
     
-    var mpris_key = determine_key ( desktop_file_name );
+    var mpris_key = determine_key ( path );
 
     if ( this.playersDB.already_familiar ( path ) == false ){
       debug("New client has registered that we have not seen before: %s", desktop_file_name );
@@ -148,10 +148,13 @@ public class MusicPlayerBridge : GLib.Object
     return app_info;
   }
 
-  private static string? determine_key(owned string name)
+  private static string? determine_key(owned string path)
   {
-    string result = name;
-    var temp = name.split("-");
+    var tokens = path.split("/");
+    if ( tokens.length < 2) return null;
+    var filename = tokens[tokens.length - 1];
+    var result = filename.split(".")[0];
+    var temp = result.split("-");
     if (temp.length > 1){
       result = temp[0];
     }
