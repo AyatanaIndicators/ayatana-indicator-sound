@@ -48,7 +48,7 @@ public class PlayerItem : Dbusmenu.Menuitem
 	 * and attmepts to update the appropriate props on the object. 
 	 * Album art is handled separately to deal with remote and local file paths.
 	 */
-	public void update(HashTable<string, Value?> data, HashSet<string> attributes)
+	public void update(HashTable<string, Variant?> data, HashSet<string> attributes)
 	{
 		debug("PlayerItem::update()");
 		if(data == null){
@@ -60,29 +60,29 @@ public class PlayerItem : Dbusmenu.Menuitem
 			string[] input_keys = property.split("-");
 			string search_key = input_keys[input_keys.length-1 : input_keys.length][0];
 			debug("search key = %s", search_key);
-			Value? v = data.lookup(search_key);
+			Variant? v = data.lookup(search_key);
 			
-			if (v.holds (typeof (string))){
+			if (v.is_of_type ( VariantType.STRING )){
 				string update = v.get_string().strip();
 				debug("with value : %s", update);
 				if(property.contains("mpris:artUrl")){		
 					  // We know its a metadata instance because thats the only
 					  // object with the arturl prop					  
 						MetadataMenuitem metadata = this as MetadataMenuitem;
-					  metadata.fetch_art(update.strip(), property);
-					 	continue;					                     
+					  metadata.fetch_art ( update, property );
+					 	continue;                     
 				}
 				this.property_set(property, update);											
 			}			    
-			else if (v.holds (typeof (int))){
-				debug("with value : %i", v.get_int());
-				this.property_set_int(property, v.get_int());
+			else if (v.is_of_type (VariantType.INT32 )){
+				debug("with value : %i", v.get_int32());
+				this.property_set_int(property, v.get_int32());
 			}
-			else if (v.holds (typeof (int64))){
+			else if (v.is_of_type (VariantType.INT64 )){
 				debug("with value : %i", (int)v.get_int64());
 				this.property_set_int(property, (int)v.get_int64());
 			}
-			else if(v.holds (typeof (bool))){
+			else if(v.is_of_type ( VariantType.BOOLEAN )){
 				debug("with value : %s", v.get_boolean().to_string());				
 				this.property_set_bool(property, v.get_boolean());
 			}

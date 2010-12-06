@@ -94,10 +94,10 @@ public class Mpris2Controller : GLib.Object
 		GLib.HashTable<string, Variant?> changed_updates = this.player.Metadata; 
     Variant? artist_v = this.player.Metadata.lookup("xesam:artist");
     if(artist_v != null){
-		  string[] artists = (string[])this.player.Metadata.lookup("xesam:artist");
+      string[] artists = (string[])this.player.Metadata.lookup("xesam:artist");
 		  string display_artists = string.joinv(", ", artists);
 		  changed_updates.replace("xesam:artist", display_artists);
-		  debug("artist : %s", display_artists);
+		  debug("artist : %s", (string)changed_updates.lookup("xesam:artist"));
     }
     Variant? length_v = this.player.Metadata.lookup("mpris:length");
     if(length_v != null){
