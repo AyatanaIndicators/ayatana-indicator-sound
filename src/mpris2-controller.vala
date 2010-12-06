@@ -16,7 +16,6 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along 
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-//using DBus;
 using Dbusmenu;
 
 
@@ -106,7 +105,6 @@ public class Mpris2Controller : GLib.Object
 		  changed_updates.replace("mpris:length", duration/1000000); 
     }
 		return changed_updates;
-    //return null;
 	}
 	
   private TransportMenuitem.state determine_play_state(string? status){	
@@ -157,6 +155,3 @@ public class Mpris2Controller : GLib.Object
     }
   }
 }
-
-
-
