@@ -34,7 +34,7 @@ public class Mpris2Watcher : GLib.Object
   FreeDesktopObject fdesktop_obj;
   
   public signal void client_appeared ( string desktop_name );
-  public signal void client_disappeared ( string desktop_name );
+  public signal void client_disappeared ( string mpris_root_interface );
 
   public Mpris2Watcher ()
   {
@@ -72,11 +72,11 @@ public class Mpris2Watcher : GLib.Object
         return;
       }
       if (previous_owner != "" && current_owner == "") {
-        debug ("Service '%s' going down", name);
-        client_disappeared (mpris2_root.DesktopEntry);
+        debug ("Client '%s' gone down", name);
+        client_disappeared (name);
       }
       else if (previous_owner == "" && current_owner != "") {
-        debug ("Service '%s' has appeared", name);
+        debug ("Client '%s' has appeared", name);
         client_appeared (mpris2_root.DesktopEntry);
       }
     }

@@ -114,19 +114,18 @@ public class MusicPlayerBridge : GLib.Object
       }
     }
   
-  /*public void on_server_removed(Indicate.ListenerServer object, string type)
+  public void client_has_vanished ( string mpris_root_interface )
   {
-    debug("MusicPlayerBridge -> on_server_removed with value %s", type);
-		if(server_is_not_of_interest(type)) return;
-		if (root_menu != null){
-      var tmp = type.split(".");
-      debug("attempt to remove %s", tmp[tmp.length-1]);
-      if(tmp.length > 0){
-			  registered_clients[tmp[tmp.length - 1]].hibernate();
-			  debug("Successively offlined client %s", tmp[tmp.length - 1]);       
+    debug("MusicPlayerBridge -> on_server_removed with value %s", mpris_root_interface);
+    if (root_menu != null){
+      debug("attempt to remove %s", mpris_root_interface);
+      var mpris_key = determine_key ( mpris_root_interface );
+      if ( mpris_key != null ){
+        registered_clients[mpris_key].hibernate();
+        debug("Successively offlined client %s", mpris_key);       
       }
-		}
-	}*/
+    }
+  }
   
   public void set_root_menu_item(Dbusmenu.Menuitem menu)
   {
@@ -134,7 +133,7 @@ public class MusicPlayerBridge : GLib.Object
     this.try_to_add_inactive_familiar_clients();
     this.watcher = new Mpris2Watcher ();
     this.watcher.client_appeared += this.client_has_become_available;
-    //this.watcher.client_appeared += this.client_has_become_available;
+    this.watcher.client_disappeared += this.client_has_vanished;
   }
 
   public static AppInfo? create_app_info ( string path )
@@ -150,8 +149,15 @@ public class MusicPlayerBridge : GLib.Object
 
   private static string? determine_key(owned string path)
   {
-    var tokens = path.split("/");
-    if ( tokens.length < 2) return null;
+    var tokens = path.split( "/" );
+    if ( tokens.length < 2 ){
+      // try to split on "."
+      tokens = path.split(".");
+      if ( tokens.length < 2 ){
+        // don't know what this is
+        return null;
+      }
+    }
     var filename = tokens[tokens.length - 1];
     var result = filename.split(".")[0];
     var temp = result.split("-");
