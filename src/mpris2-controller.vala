@@ -31,8 +31,8 @@ using Dbusmenu;
  */
 public class Mpris2Controller : GLib.Object
 {
-  public static const string root_interface = "org.mpris.MediaPlayer2" ;	
-  public MprisRoot mpris2_root {get; construct;}		
+  public static const string root_interface = "org.mpris.MediaPlayer2" ;  
+  public MprisRoot mpris2_root {get; construct;}    
   public MprisPlayer player {get; construct;}
   public FreeDesktopProperties properties_interface {get; construct;}
 
@@ -89,25 +89,25 @@ public class Mpris2Controller : GLib.Object
     }
   }
 
-	private GLib.HashTable<string, Variant?>? clean_metadata()
-	{ 
-		GLib.HashTable<string, Variant?> changed_updates = this.player.Metadata; 
+  private GLib.HashTable<string, Variant?>? clean_metadata()
+  { 
+    GLib.HashTable<string, Variant?> changed_updates = this.player.Metadata; 
     Variant? artist_v = this.player.Metadata.lookup("xesam:artist");
     if(artist_v != null){
       string[] artists = (string[])this.player.Metadata.lookup("xesam:artist");
-		  string display_artists = string.joinv(", ", artists);
-		  changed_updates.replace("xesam:artist", display_artists);
-		  debug("artist : %s", (string)changed_updates.lookup("xesam:artist"));
+      string display_artists = string.joinv(", ", artists);
+      changed_updates.replace("xesam:artist", display_artists);
+      debug("artist : %s", (string)changed_updates.lookup("xesam:artist"));
     }
     Variant? length_v = this.player.Metadata.lookup("mpris:length");
     if(length_v != null){
-		  int64 duration = this.player.Metadata.lookup("mpris:length").get_int64();
-		  changed_updates.replace("mpris:length", duration/1000000); 
+      int64 duration = this.player.Metadata.lookup("mpris:length").get_int64();
+      changed_updates.replace("mpris:length", duration/1000000); 
     }
-		return changed_updates;
-	}
-	
-  private TransportMenuitem.state determine_play_state(string? status){	
+    return changed_updates;
+  }
+  
+  private TransportMenuitem.state determine_play_state(string? status){ 
     if(status != null && status == "Playing"){
       return TransportMenuitem.state.PLAYING;
     }
@@ -133,7 +133,7 @@ public class Mpris2Controller : GLib.Object
   {
     debug("transport_event input = %i", (int)command);
     if(command == TransportMenuitem.action.PLAY_PAUSE){
-      this.player.PlayPause.begin();							
+      this.player.PlayPause.begin();              
     }
     else if(command == TransportMenuitem.action.PREVIOUS){
       this.player.Previous.begin();

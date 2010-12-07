@@ -73,14 +73,14 @@ public class MusicPlayerBridge : GLib.Object
     }
   }
 
-	/*public void on_server_added(Indicate.ListenerServer object, string type)
+  /*public void on_server_added(Indicate.ListenerServer object, string type)
   {
     debug("MusicPlayerBridge -> on_server_added with value %s", type);
-		if(server_is_not_of_interest(type)) return;
-		if ( this.root_menu != null ){
-			listener_get_server_property_cb cb = (listener_get_server_property_cb)desktop_info_callback;
-			this.listener.server_get_desktop(object, cb, this);					
-		}
+    if(server_is_not_of_interest(type)) return;
+    if ( this.root_menu != null ){
+      listener_get_server_property_cb cb = (listener_get_server_property_cb)desktop_info_callback;
+      this.listener.server_get_desktop(object, cb, this);         
+    }
   }*/
 
   public void  client_has_become_available ( string desktop_file_name )
@@ -105,7 +105,7 @@ public class MusicPlayerBridge : GLib.Object
                                                      this.calculate_menu_position(),
                                                      PlayerController.state.READY );
       this.registered_clients.set ( mpris_key, ctrl );        
-      debug ( "successfully created appinfo and instance from path and set it on the respective instance" );				
+      debug ( "successfully created appinfo and instance from path and set it on the respective instance" );        
       }
       else{
         this.registered_clients[mpris_key].update_state ( PlayerController.state.READY );

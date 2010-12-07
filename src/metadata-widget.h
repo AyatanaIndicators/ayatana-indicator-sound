@@ -35,11 +35,11 @@ typedef struct _MetadataWidget      MetadataWidget;
 typedef struct _MetadataWidgetClass MetadataWidgetClass;
 
 struct _MetadataWidgetClass {
-	  GtkMenuItemClass parent_class;
+    GtkMenuItemClass parent_class;
 };
 
 struct _MetadataWidget {
-	  GtkMenuItem parent;
+    GtkMenuItem parent;
 };
 
 GType metadata_widget_get_type (void);

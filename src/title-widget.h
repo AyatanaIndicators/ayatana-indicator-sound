@@ -36,11 +36,11 @@ typedef struct _TitleWidget      TitleWidget;
 typedef struct _TitleWidgetClass TitleWidgetClass;
 
 struct _TitleWidgetClass {
-	GtkImageMenuItemClass parent_class;
+  GtkImageMenuItemClass parent_class;
 };
 
 struct _TitleWidget {
-	GtkImageMenuItem parent;
+  GtkImageMenuItem parent;
 };
 
 GType title_widget_get_type (void);
