@@ -114,7 +114,7 @@ public class PlayerController : GLib.Object
 	public void vanish()
 	{
 		foreach(Dbusmenu.Menuitem item in this.custom_items){
-			root_menu.child_delete(item);			
+			root_menu.child_delete(item);
 		}
 	}
 
@@ -178,9 +178,6 @@ public class PlayerController : GLib.Object
     return result;
   }
 
-	// Temporarily we will need to handle to different mpris implemenations
-	// Do it for now - a couple of weeks should see this messy carry on out of
-	// the codebase.
 	public void determine_state()
 	{
 		if(this.mpris_bridge.connected() == true){
