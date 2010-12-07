@@ -32,15 +32,15 @@ G_BEGIN_DECLS
 #define IS_SCRUB_WIDGET_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), SCRUB_WIDGET_TYPE))
 #define SCRUB_WIDGET_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), SCRUB_WIDGET_TYPE, ScrubWidgetClass))
 
-typedef struct _ScrubWidget	ScrubWidget;
-typedef struct _ScrubWidgetClass	ScrubWidgetClass;
+typedef struct _ScrubWidget ScrubWidget;
+typedef struct _ScrubWidgetClass  ScrubWidgetClass;
 
 struct _ScrubWidgetClass {
   GObjectClass parent_class;
 };
 
 struct _ScrubWidget {
-	GObject parent;
+  GObject parent;
 };
 
 GType scrub_widget_get_type (void) G_GNUC_CONST;

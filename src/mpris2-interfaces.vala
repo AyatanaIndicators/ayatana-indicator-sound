@@ -20,27 +20,27 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 [DBus (name = "org.mpris.MediaPlayer2")]
 public interface MprisRoot : Object {
-	// properties
-	public abstract bool HasTracklist{owned get; set;}
-	public abstract bool CanQuit{owned get; set;}
-	public abstract bool CanRaise{owned get; set;}
-	public abstract string Identity{owned get; set;}
-	public abstract string DesktopEntry{owned get; set;}	
-	// methods
-	public abstract async void Quit() throws IOError;
-	public abstract async void Raise() throws IOError;
+  // properties
+  public abstract bool HasTracklist{owned get; set;}
+  public abstract bool CanQuit{owned get; set;}
+  public abstract bool CanRaise{owned get; set;}
+  public abstract string Identity{owned get; set;}
+  public abstract string DesktopEntry{owned get; set;}  
+  // methods
+  public abstract async void Quit() throws IOError;
+  public abstract async void Raise() throws IOError;
 }
 
 [DBus (name = "org.mpris.MediaPlayer2.Player")]
 public interface MprisPlayer : Object {
-	// properties
-	public abstract HashTable<string, Variant?> Metadata{owned get; set;}
-	public abstract int32 Position{owned get; set;}
-	public abstract string PlaybackStatus{owned get; set;}	
-	// methods
-	public abstract async void PlayPause() throws IOError;
-	public abstract async void Next() throws IOError;
-	public abstract async void Previous() throws IOError;
-	// signals
-	public signal void Seeked(int64 new_position);
+  // properties
+  public abstract HashTable<string, Variant?> Metadata{owned get; set;}
+  public abstract int32 Position{owned get; set;}
+  public abstract string PlaybackStatus{owned get; set;}  
+  // methods
+  public abstract async void PlayPause() throws IOError;
+  public abstract async void Next() throws IOError;
+  public abstract async void Previous() throws IOError;
+  // signals
+  public signal void Seeked(int64 new_position);
 }

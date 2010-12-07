@@ -46,7 +46,7 @@ typedef struct _IndicatorSoundPrivate IndicatorSoundPrivate;
 
 struct _IndicatorSoundPrivate
 {
-	GtkWidget* volume_widget;
+  GtkWidget* volume_widget;
   GList* transport_widgets_list;
 };
 
@@ -67,7 +67,7 @@ G_DEFINE_TYPE (IndicatorSound, indicator_sound, INDICATOR_OBJECT_TYPE);
 static GtkLabel * get_label (IndicatorObject * io);
 static GtkImage * get_icon (IndicatorObject * io);
 static GtkMenu *  get_menu (IndicatorObject * io);
-static void				indicator_sound_scroll (IndicatorObject* io, gint delta, IndicatorScrollDirection direction);
+static void       indicator_sound_scroll (IndicatorObject* io, gint delta, IndicatorScrollDirection direction);
 
 //Slider related
 static gboolean new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
@@ -131,8 +131,8 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
 
   IndicatorObjectClass *io_class = INDICATOR_OBJECT_CLASS(klass);
 
-	g_type_class_add_private (klass, sizeof (IndicatorSoundPrivate));
-	
+  g_type_class_add_private (klass, sizeof (IndicatorSoundPrivate));
+  
   io_class->get_label = get_label;
   io_class->get_image = get_icon;
   io_class->get_menu  = get_menu;
@@ -153,13 +153,13 @@ indicator_sound_init (IndicatorSound *self)
   blocked_id = 0;
   initial_mute = FALSE;
   device_available = TRUE;
-	
-	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
-	priv->volume_widget = NULL;
+  
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
+  priv->volume_widget = NULL;
   GList* t_list = NULL;
   priv->transport_widgets_list = t_list;
 
-	g_signal_connect(G_OBJECT(self->service),
+  g_signal_connect(G_OBJECT(self->service),
                    INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE,
                    G_CALLBACK(connection_changed), self);
   return;
@@ -178,7 +178,7 @@ indicator_sound_dispose (GObject *object)
 
   free_the_animation_list();
 
-	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (self));
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (self));
 
   g_list_free ( priv->transport_widgets_list );
 
@@ -204,7 +204,7 @@ static GtkImage *
 get_icon (IndicatorObject * io)
 {
   gchar* current_name = g_hash_table_lookup(volume_states,
-	                                          GINT_TO_POINTER(current_state));
+                                            GINT_TO_POINTER(current_state));
   //g_debug("At start-up attempting to set the image to %s",
   //        current_name);
   speaker_image = indicator_image_helper(current_name);
@@ -220,18 +220,18 @@ static GtkMenu *
 get_menu (IndicatorObject * io)
 {
   DbusmenuGtkMenu* menu = dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT);
-				
+        
   DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);
   g_object_set_data (G_OBJECT (client), "indicator", io);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_VOLUME_MENUITEM_TYPE, new_volume_slider_widget);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TRANSPORT_MENUITEM_TYPE, new_transport_widget);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_METADATA_MENUITEM_TYPE, new_metadata_widget);
   dbusmenu_client_add_type_handler(DBUSMENU_CLIENT(client), DBUSMENU_TITLE_MENUITEM_TYPE, new_title_widget);
-	// register Key-press listening on the menu widget as the slider does not allow this.
+  // register Key-press listening on the menu widget as the slider does not allow this.
   g_signal_connect(menu, "key-press-event", G_CALLBACK(key_press_cb), io);
   g_signal_connect(menu, "key-release-event", G_CALLBACK(key_release_cb), io);
   
-	return GTK_MENU(menu);
+  return GTK_MENU(menu);
 }
 
 static void
@@ -256,13 +256,13 @@ new_transport_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbus
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
   bar = transport_widget_new(newitem);
-	io = g_object_get_data (G_OBJECT (client), "indicator");
-	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+  io = g_object_get_data (G_OBJECT (client), "indicator");
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
   priv->transport_widgets_list = g_list_append ( priv->transport_widgets_list, bar );
 
   GtkMenuItem *menu_transport_bar = GTK_MENU_ITEM(bar);
 
-	gtk_widget_show_all(bar);
+  gtk_widget_show_all(bar);
   dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_transport_bar, parent);
 
   return TRUE;
@@ -281,7 +281,7 @@ new_metadata_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbusm
   metadata = metadata_widget_new (newitem);
   GtkMenuItem *menu_metadata_widget = GTK_MENU_ITEM(metadata);
 
-	gtk_widget_show_all(metadata);
+  gtk_widget_show_all(metadata);
   dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client), newitem, menu_metadata_widget, parent);
 
   return TRUE;
@@ -290,22 +290,22 @@ new_metadata_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbusm
 static gboolean
 new_title_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
-	//g_debug("indicator-sound: new_title_widget");
+  //g_debug("indicator-sound: new_title_widget");
   g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
-	//g_debug ("%s (\"%s\")", __func__, dbusmenu_menuitem_property_get(newitem, DBUSMENU_TITLE_MENUITEM_NAME));
+  //g_debug ("%s (\"%s\")", __func__, dbusmenu_menuitem_property_get(newitem, DBUSMENU_TITLE_MENUITEM_NAME));
 
-	GtkWidget* title = NULL;
+  GtkWidget* title = NULL;
 
   title = title_widget_new (newitem);
   GtkMenuItem *menu_title_widget = GTK_MENU_ITEM(title);
-	
+  
   gtk_widget_show_all(title);
 
-	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client),
-	                                newitem,
-	                                menu_title_widget, parent);	
+  dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client),
+                                  newitem,
+                                  menu_title_widget, parent); 
   return TRUE;
 }
 
@@ -320,27 +320,27 @@ new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, 
   g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
-  volume_widget = volume_widget_new (newitem);	
-	io = g_object_get_data (G_OBJECT (client), "indicator");
-	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+  volume_widget = volume_widget_new (newitem);  
+  io = g_object_get_data (G_OBJECT (client), "indicator");
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
   priv->volume_widget = volume_widget;
 
-	GtkWidget* ido_slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));
+  GtkWidget* ido_slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));
 
-  g_signal_connect(ido_slider_widget, "style-set", G_CALLBACK(style_changed_cb), NULL);		
-	gtk_widget_set_sensitive(ido_slider_widget,
-	                         !initial_mute);
-	gtk_widget_show_all(ido_slider_widget);
+  g_signal_connect(ido_slider_widget, "style-set", G_CALLBACK(style_changed_cb), NULL);   
+  gtk_widget_set_sensitive(ido_slider_widget,
+                           !initial_mute);
+  gtk_widget_show_all(ido_slider_widget);
 
-	
+  
   GtkMenuItem *menu_volume_item = GTK_MENU_ITEM(ido_slider_widget);
-	dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client),
-	                                newitem,
-	                                menu_volume_item,
-	                                parent);		
+  dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client),
+                                  newitem,
+                                  menu_volume_item,
+                                  parent);    
   fetch_mute_value_from_dbus();
   fetch_sink_availability_from_dbus(INDICATOR_SOUND (io));      
-  return TRUE;	
+  return TRUE;  
 }
 
 
@@ -374,14 +374,14 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
     dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_MUTE_UPDATE, G_TYPE_BOOLEAN, G_TYPE_INVALID);
     dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_MUTE_UPDATE, G_CALLBACK(catch_signal_sink_mute_update), user_data, NULL);
     dbus_g_proxy_add_signal(sound_dbus_proxy, SIGNAL_SINK_AVAILABLE_UPDATE, G_TYPE_BOOLEAN, G_TYPE_INVALID);
-    dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_AVAILABLE_UPDATE, G_CALLBACK(catch_signal_sink_availability_update), NULL, NULL);	
+    dbus_g_proxy_connect_signal(sound_dbus_proxy, SIGNAL_SINK_AVAILABLE_UPDATE, G_CALLBACK(catch_signal_sink_availability_update), NULL, NULL); 
 
     if( service_restart == TRUE){
       fetch_mute_value_from_dbus();
       // Ensure UI is in sync with service again.
       IndicatorSound* indicator = INDICATOR_SOUND(user_data);
       fetch_sink_availability_from_dbus(indicator);    
-  	  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
+      IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
       if(priv->volume_widget != NULL){
         determine_state_from_volume (volume_widget_get_current_volume(priv->volume_widget));
       }
@@ -390,7 +390,7 @@ connection_changed (IndicatorServiceManager * sm, gboolean connected, gpointer u
   else{
     g_warning("Indicator has been disconnected from the service -> SHOCK HORROR");
     IndicatorSound* indicator = INDICATOR_SOUND(user_data);
-	  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
+    IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
     
     if(priv->volume_widget != NULL){
       g_warning("indicator still has a slider, service must have crashed");
@@ -556,8 +556,8 @@ reset_mute_blocking_animation()
 static void
 fetch_sink_availability_from_dbus(IndicatorSound* self)
 {
-	g_return_if_fail(IS_INDICATOR_SOUND(self));
-	
+  g_return_if_fail(IS_INDICATOR_SOUND(self));
+  
   GError * error = NULL;
   gboolean * available_input;
   available_input = g_new0(gboolean, 1);
@@ -568,17 +568,17 @@ fetch_sink_availability_from_dbus(IndicatorSound* self)
     g_free(available_input);
     return;
   }
-	
+  
   device_available = *available_input;
   if (device_available == FALSE) {
     update_state(STATE_SINKS_NONE);
     //g_debug("NO DEVICE AVAILABLE");
   }
 
-	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
 
   if(priv->volume_widget != NULL){
-    GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));	
+    GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));  
     gtk_widget_set_sensitive(slider_widget, device_available);
   }
 
@@ -635,14 +635,14 @@ catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer u
     reset_mute_blocking_animation();
   }
   //g_debug("signal caught - sink mute update with mute value: %i", mute_value);
-	g_return_if_fail(IS_INDICATOR_SOUND(userdata));
-	IndicatorSound* indicator = INDICATOR_SOUND(userdata);
-	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
+  g_return_if_fail(IS_INDICATOR_SOUND(userdata));
+  IndicatorSound* indicator = INDICATOR_SOUND(userdata);
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
 
-	if(priv->volume_widget == NULL){
-		return;
-	}
-	GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget)); 
+  if(priv->volume_widget == NULL){
+    return;
+  }
+  GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget)); 
   gtk_widget_set_sensitive(slider_widget, !mute_value);
 }
 
@@ -669,16 +669,16 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
 {
   gboolean digested = FALSE;
 
-	g_return_val_if_fail(IS_INDICATOR_SOUND(data), FALSE);
+  g_return_val_if_fail(IS_INDICATOR_SOUND(data), FALSE);
 
-	IndicatorSound *indicator = INDICATOR_SOUND (data);
+  IndicatorSound *indicator = INDICATOR_SOUND (data);
 
-	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
-	if(priv->volume_widget == NULL){
-		return FALSE;
-	}
-	
-	GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget)); 
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
+  if(priv->volume_widget == NULL){
+    return FALSE;
+  }
+  
+  GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget)); 
   GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)slider_widget);
   GtkRange* range = (GtkRange*)slider;
   g_return_val_if_fail(GTK_IS_RANGE(range), FALSE);
@@ -720,7 +720,7 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
     new_value = CLAMP(new_value, 0, 100);
     if (new_value != current_value && current_state != STATE_MUTED) {
       //g_debug("Attempting to set the range from the key listener to %f", new_value);
-			volume_widget_update(VOLUME_WIDGET(priv->volume_widget), new_value);      
+      volume_widget_update(VOLUME_WIDGET(priv->volume_widget), new_value);      
     }
   }
   else if (IS_TRANSPORT_WIDGET(menuitem) == TRUE) {
@@ -769,11 +769,11 @@ key_release_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
 {
   gboolean digested = FALSE;
 
-	g_return_val_if_fail(IS_INDICATOR_SOUND(data), FALSE);
+  g_return_val_if_fail(IS_INDICATOR_SOUND(data), FALSE);
 
-	IndicatorSound *indicator = INDICATOR_SOUND (data);
+  IndicatorSound *indicator = INDICATOR_SOUND (data);
 
-	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
 
   GtkWidget *menuitem;
 
@@ -829,25 +829,25 @@ style_changed_cb(GtkWidget *widget, gpointer user_data)
 static void
 indicator_sound_scroll (IndicatorObject *io, gint delta, IndicatorScrollDirection direction)
 {
-	//g_debug("indicator-sound-scroll - current slider value");
+  //g_debug("indicator-sound-scroll - current slider value");
 
-	if (device_available == FALSE || current_state == STATE_MUTED)
+  if (device_available == FALSE || current_state == STATE_MUTED)
     return;
-	IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
-	
-	GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget)); 
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+  
+  GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget)); 
   GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)slider_widget);
   GtkRange* range = (GtkRange*)slider;
   g_return_if_fail(GTK_IS_RANGE(range));
 
   gdouble value = gtk_range_get_value(range);
   GtkAdjustment *adj = gtk_range_get_adjustment (GTK_RANGE (slider));
-	//g_debug("indicator-sound-scroll - current slider value %f", value);
+  //g_debug("indicator-sound-scroll - current slider value %f", value);
   if (direction == INDICATOR_OBJECT_SCROLL_UP) {
     value += adj->step_increment;
   } else {
     value -= adj->step_increment;
   }
-	//g_debug("indicator-sound-scroll - update slider with value %f", value);
-	volume_widget_update(VOLUME_WIDGET(priv->volume_widget), value);	
+  //g_debug("indicator-sound-scroll - update slider with value %f", value);
+  volume_widget_update(VOLUME_WIDGET(priv->volume_widget), value);  
 }

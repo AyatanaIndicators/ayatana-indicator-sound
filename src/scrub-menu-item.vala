@@ -23,34 +23,34 @@ using Gee;
 
 public class ScrubMenuitem : PlayerItem
 {
-	public ScrubMenuitem(PlayerController parent)
-	{
-		Object(item_type: MENUITEM_TYPE, owner: parent);
-		reset(attributes_format());
-	}
+  public ScrubMenuitem(PlayerController parent)
+  {
+    Object(item_type: MENUITEM_TYPE, owner: parent);
+    reset(attributes_format());
+  }
 
-	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
-	{
-		debug("handle_event for owner %s with value: %f", this.owner.name, input_value.get_double());		
-		this.owner.mpris_bridge.set_track_position(input_value.get_double());		
-	}
+  public override void handle_event(string name, GLib.Value input_value, uint timestamp)
+  {
+    debug("handle_event for owner %s with value: %f", this.owner.name, input_value.get_double());   
+    this.owner.mpris_bridge.set_track_position(input_value.get_double());   
+  }
 
-	public void update_position(int32 new_position)
-	{
-		this.property_set_int(MENUITEM_POSITION, new_position);
-	}		
+  public void update_position(int32 new_position)
+  {
+    this.property_set_int(MENUITEM_POSITION, new_position);
+  }   
 
-	public void update_playstate(int state)
-	{
-		this.property_set_int(MENUITEM_PLAY_STATE, state);	
-	}
-	
-	public static HashSet<string> attributes_format()
-	{
-		HashSet<string> attrs = new HashSet<string>();		
-		attrs.add(MENUITEM_DURATION);
-		attrs.add(MENUITEM_POSITION);
-		attrs.add(MENUITEM_PLAY_STATE);		
-		return attrs;
-	}	
+  public void update_playstate(int state)
+  {
+    this.property_set_int(MENUITEM_PLAY_STATE, state);  
+  }
+  
+  public static HashSet<string> attributes_format()
+  {
+    HashSet<string> attrs = new HashSet<string>();    
+    attrs.add(MENUITEM_DURATION);
+    attrs.add(MENUITEM_POSITION);
+    attrs.add(MENUITEM_PLAY_STATE);   
+    return attrs;
+  } 
 }
