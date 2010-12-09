@@ -49,3 +49,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DBUSMENU_SCRUB_MENUITEM_POSITION        "x-canonical-sound-menu-player-scrub-position"
 #define DBUSMENU_SCRUB_MENUITEM_PLAY_STATE      "x-canonical-sound-menu-player-scrub-play-state"
 
+#define DBUSMENU_PLAYLISTS_MENUITEM_TYPE        "x-canonical-sound-menu-player-playlists-type"
+#define DBUSMENU_PLAYLISTS_MENUITEM_TITLE       "x-canonical-sound-menu-player-playlists-title"
+#define DBUSMENU_PLAYLISTS_MENUITEM_PLAYLISTS   "x-canonical-sound-menu-player-playlists-playlists"

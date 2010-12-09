@@ -21,8 +21,8 @@ using Dbusmenu;
 
 [DBus (name = "org.freedesktop.DBus.Properties")]
   public interface FreeDesktopProperties : Object{
-  public signal void PropertiesChanged(string source, HashTable<string, Variant?> changed_properties,
-                                       string[] invalid);
+  public signal void PropertiesChanged (string source, HashTable<string, Variant?> changed_properties,
+                                        string[] invalid );
 }
 
 /*
@@ -34,13 +34,14 @@ public class Mpris2Controller : GLib.Object
   public static const string root_interface = "org.mpris.MediaPlayer2" ;  
   public MprisRoot mpris2_root {get; construct;}    
   public MprisPlayer player {get; construct;}
+  public MprisPlaylists playlists {get; construct;}
   public FreeDesktopProperties properties_interface {get; construct;}
 
   public PlayerController owner {get; construct;}
-  
+
   public Mpris2Controller(PlayerController ctrl)
   {
-    GLib.Object(owner: ctrl);
+    GLib.Object(owner: ctrl);    
   }
 
   construct{
@@ -51,6 +52,9 @@ public class Mpris2Controller : GLib.Object
       this.player = Bus.get_proxy_sync ( BusType.SESSION,
                                          root_interface.concat(".").concat(this.owner.mpris_name),
                                          "/org/mpris/MediaPlayer2" );
+      this.playlists = Bus.get_proxy_sync ( BusType.SESSION,
+                                            root_interface.concat(".").concat(this.owner.mpris_name),
+                                            "/org/mpris/MediaPlayer2" );
       
       this.properties_interface = Bus.get_proxy_sync ( BusType.SESSION,
                                                        "org.freedesktop.Properties.PropertiesChanged",
@@ -127,12 +131,14 @@ public class Mpris2Controller : GLib.Object
     GLib.HashTable<string, Value?>? cleaned_metadata = this.clean_metadata();
     this.owner.custom_items[PlayerController.widget_order.METADATA].update(cleaned_metadata,
                                                                             MetadataMenuitem.attributes_format());
+    this.fetch_playlists();    
   }
 
   public void transport_update(TransportMenuitem.action command)
   {
     debug("transport_event input = %i", (int)command);
     if(command == TransportMenuitem.action.PLAY_PAUSE){
+      this.fetch_playlists();
       this.player.PlayPause.begin();              
     }
     else if(command == TransportMenuitem.action.PREVIOUS){
@@ -140,6 +146,26 @@ public class Mpris2Controller : GLib.Object
     }
     else if(command == TransportMenuitem.action.NEXT){
       this.player.Next.begin();
+    }
+  }
+
+  public void fetch_playlists()
+  {
+    if (this.playlists == null){
+      warning("Playlists object is null");
+      return;
+    }
+    PlaylistDetails[] current_playlists =  this.playlists.GetPlaylists(0, 10, "Alphabetical", false);
+    if( current_playlists != null ){
+      debug( "Size of the playlist array = %i", current_playlists.length );
+      PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
+      playlists_item.update(current_playlists);
+      /*foreach(PlaylistDetails detail in current_playlists){ 
+        debug( "Playlist Name = %s", detail.name);
+        debug( "Playlist path = %s", detail.path);
+        debug( "Playlist icon path = %s", detail.icon_path);
+        debug(" \n \n \n \n \n  ");
+      }*/
     }
   }
 

@@ -23,13 +23,14 @@ using Gee;
 
 public class PlayerController : GLib.Object
 {
-  public const int WIDGET_QUANTITY = 4;
+  public const int WIDGET_QUANTITY = 5;
 
   public static enum widget_order{
     SEPARATOR,
     TITLE,
     METADATA,
     TRANSPORT,
+    PLAYLISTS
   }
 
   public enum state{
@@ -158,7 +159,11 @@ public class PlayerController : GLib.Object
     // Transport item
     TransportMenuitem transport_item = new TransportMenuitem(this);
     this.custom_items.add(transport_item);
-        
+    
+    // Playlist item    
+    PlaylistsMenuitem playlist_menuitem = new PlaylistsMenuitem(this);
+    this.custom_items.add(playlist_menuitem);
+    
     foreach(PlayerItem item in this.custom_items){
       root_menu.child_add_position(item, this.menu_offset + this.custom_items.index_of(item));      
     }
@@ -184,7 +189,7 @@ public class PlayerController : GLib.Object
       this.update_state(state.CONNECTED);
       TitleMenuitem title = this.custom_items[widget_order.TITLE] as TitleMenuitem;
       title.toggle_active_triangle(true); 
-      this.mpris_bridge.initial_update();
+      this.mpris_bridge.initial_update();      
     }
     else{
       this.update_state(state.DISCONNECTED);

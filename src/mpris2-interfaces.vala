@@ -44,3 +44,27 @@ public interface MprisPlayer : Object {
   // signals
   public signal void Seeked(int64 new_position);
 }
+
+
+// Playlist container
+public struct PlaylistDetails{
+  public ObjectPath path;
+  public string name;
+  public string icon_path;
+}
+
+[DBus (name = "org.mpris.MediaPlayer2.Playlists")]
+// TODO: API criticisms
+// get playlists should be able to be async => pass in struct to be populated or pass in callback
+public interface MprisPlaylists : Object {
+  //properties
+  public abstract string[] Orderings{owned get; set;}
+  public abstract uint32 PlaylistCount{owned get; set;}
+
+  //methods
+  public abstract async void ActivatePlaylist(ObjectPath playlist_id) throws IOError;
+  public abstract PlaylistDetails[] GetPlaylists ( uint32 index,
+                                          uint32 max_count,
+                                          string order,
+                                          bool reverse_order ) throws IOError;
+}
