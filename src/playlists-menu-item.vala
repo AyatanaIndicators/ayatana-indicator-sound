@@ -23,14 +23,14 @@ using Gee;
 
 public class PlaylistsMenuitem : PlayerItem
 {
-  
+  private HashMap<int, PlaylistDetails?> current_playlists;    
   public Menuitem root_item;
   public PlaylistsMenuitem ( PlayerController parent )
   {
     Object ( item_type: MENUITEM_TYPE, owner: parent );
   }
   construct{
-    this.property_set ( MENUITEM_PROP_LABEL, "Choose Playlist");    
+    this.current_playlists = new HashMap<int, PlaylistDetails?>();
     this.root_item = new Menuitem();
     this.root_item.property_set ( MENUITEM_PROP_LABEL, "Choose Playlist" );
   }
@@ -43,17 +43,21 @@ public class PlaylistsMenuitem : PlayerItem
       menuitem.property_set (MENUITEM_PROP_ICON_NAME, "source-smart-playlist");
       menuitem.property_set_bool (MENUITEM_PROP_VISIBLE, true);
       menuitem.property_set_bool (MENUITEM_PROP_ENABLED, true);
-
+      this.current_playlists.set( menuitem.id, detail );
       menuitem.item_activated.connect(() => {
         submenu_item_activated (menuitem.id );});
-      
       this.root_item.child_append( menuitem );
     }
   }
   
   private void submenu_item_activated (int menu_item_id)
   {
-    debug("item %i was activated", menu_item_id);    
+    if(!this.current_playlists.has_key(menu_item_id)){
+      warning( "item %i was activated but we don't have a corresponding playlist",
+               menu_item_id );
+      return;
+    }
+    this.owner.mpris_bridge.activate_playlist ( this.current_playlists[menu_item_id].path );
   }
   
   public static HashSet<string> attributes_format()

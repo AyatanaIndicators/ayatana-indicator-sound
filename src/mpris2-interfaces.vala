@@ -55,8 +55,6 @@ public struct PlaylistDetails{
 
 // TODO: API criticisms
 // Get_playlists should be able to be async => pass in callback pointer
-// Lacking the ability to query the current playlist (should be asyncable)
-// - needed to keep client and servers in sync
 // => get_current_playlist -> 
 //    Should return PlaylistDetails struct with each field nil if there is no active playlist.
 //    Otherwise a populated PlaylistDetails

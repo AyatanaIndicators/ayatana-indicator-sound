@@ -180,4 +180,18 @@ public class Mpris2Controller : GLib.Object
       this.mpris2_root.Raise.begin();
     }
   }
+
+  public void activate_playlist (ObjectPath path)
+  {
+    if(this.playlists == null){
+      warning("playlists mpris instance is null !");
+      return;       
+    }
+    try{
+      this.playlists.ActivatePlaylist.begin(path);
+    }
+    catch(IOError e){
+      debug("Could not activate playlist %s because %s", (string)path, e.message);     
+    }
+  } 
 }
