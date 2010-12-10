@@ -1,6 +1,5 @@
 /*
 Copyright 2010 Canonical Ltd.
-
 Authors:
     Conor Curran <conor.curran@canonical.com>
 
@@ -45,7 +44,6 @@ public interface MprisPlayer : Object {
   public signal void Seeked(int64 new_position);
 }
 
-
 // Playlist container
 public struct PlaylistDetails{
   public ObjectPath path;
@@ -54,8 +52,18 @@ public struct PlaylistDetails{
 }
 
 [DBus (name = "org.mpris.MediaPlayer2.Playlists")]
+
 // TODO: API criticisms
-// get playlists should be able to be async => pass in struct to be populated or pass in callback
+// Get_playlists should be able to be async => pass in callback pointer
+// Lacking the ability to query the current playlist (should be asyncable)
+// - needed to keep client and servers in sync
+// => get_current_playlist -> 
+//    Should return PlaylistDetails struct with each field nil if there is no active playlist.
+//    Otherwise a populated PlaylistDetails
+//    should be asyncable.
+// => Need to be able to query get_playlist using ordered by last modified.
+// => Need a signal to inform that the active playlist has changed
+
 public interface MprisPlaylists : Object {
   //properties
   public abstract string[] Orderings{owned get; set;}
@@ -63,8 +71,8 @@ public interface MprisPlaylists : Object {
 
   //methods
   public abstract async void ActivatePlaylist(ObjectPath playlist_id) throws IOError;
-  public abstract PlaylistDetails[] GetPlaylists ( uint32 index,
-                                          uint32 max_count,
-                                          string order,
-                                          bool reverse_order ) throws IOError;
+  public abstract PlaylistDetails[] GetPlaylists (  uint32 index,
+                                                    uint32 max_count,
+                                                    string order,
+                                                    bool reverse_order ) throws IOError;
 }

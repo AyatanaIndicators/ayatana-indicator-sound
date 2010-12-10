@@ -28,7 +28,7 @@ public class PlayerItem : Dbusmenu.Menuitem
 
   public PlayerItem(string type)
   {   
-    Object(item_type: type);
+    Object(item_type: type);    
   }
   
   construct {
@@ -54,7 +54,7 @@ public class PlayerItem : Dbusmenu.Menuitem
     if(data == null){
       debug("PlayerItem::Update -> The hashtable was null - just leave it!");
       return;
-    }   
+    }
     
     foreach(string property in attributes){
       string[] input_keys = property.split("-");

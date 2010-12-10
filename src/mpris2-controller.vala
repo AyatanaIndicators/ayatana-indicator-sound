@@ -138,7 +138,6 @@ public class Mpris2Controller : GLib.Object
   {
     debug("transport_event input = %i", (int)command);
     if(command == TransportMenuitem.action.PLAY_PAUSE){
-      this.fetch_playlists();
       this.player.PlayPause.begin();              
     }
     else if(command == TransportMenuitem.action.PREVIOUS){
@@ -160,12 +159,13 @@ public class Mpris2Controller : GLib.Object
       debug( "Size of the playlist array = %i", current_playlists.length );
       PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
       playlists_item.update(current_playlists);
-      /*foreach(PlaylistDetails detail in current_playlists){ 
+      foreach(PlaylistDetails detail in current_playlists){ 
+        debug(" \n \n ");
         debug( "Playlist Name = %s", detail.name);
         debug( "Playlist path = %s", detail.path);
         debug( "Playlist icon path = %s", detail.icon_path);
-        debug(" \n \n \n \n \n  ");
-      }*/
+        debug(" \n \n ");
+      }
     }
   }
 
