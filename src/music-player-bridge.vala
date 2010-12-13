@@ -25,17 +25,15 @@ public class MusicPlayerBridge : GLib.Object
 {
   private Dbusmenu.Menuitem root_menu;
   private HashMap<string, PlayerController> registered_clients;  
-  private FamiliarPlayersDB playersDB;
   private Mpris2Watcher watcher;
   private const string DESKTOP_PREFIX = "/usr/share/applications/";
 
   public MusicPlayerBridge()
   {
-    playersDB = new FamiliarPlayersDB();
     registered_clients = new HashMap<string, PlayerController> ();
   }
   
-  private void try_to_add_inactive_familiar_clients(){
+  /*private void try_to_add_inactive_familiar_clients(){
     foreach(string app in this.playersDB.records()){
       if(app == null){
         warning("App string in keyfile is null therefore moving on to next player");
@@ -61,7 +59,7 @@ public class MusicPlayerBridge : GLib.Object
                                                    PlayerController.state.OFFLINE);
       this.registered_clients.set(mpris_key, ctrl);
       }
-  }
+  }*/
   
   private int calculate_menu_position()
   {
@@ -73,20 +71,15 @@ public class MusicPlayerBridge : GLib.Object
     }
   }
 
-  /*public void on_server_added(Indicate.ListenerServer object, string type)
+  public void  client_has_become_available ( string desktop, string dbus_name )
   {
-    debug("MusicPlayerBridge -> on_server_added with value %s", type);
-    if(server_is_not_of_interest(type)) return;
-    if ( this.root_menu != null ){
-      listener_get_server_property_cb cb = (listener_get_server_property_cb)desktop_info_callback;
-      this.listener.server_get_desktop(object, cb, this);         
+    if (desktop == null || desktop == ""){
+      warning("Client %s attempting to register without desktop entry being set on the mpris root",
+               dbus_name);
+      return;
     }
-  }*/
-
-  public void  client_has_become_available ( string desktop_file_name )
-  {
-    debug ( "client_has_become_available %s", desktop_file_name );
-    string path = DESKTOP_PREFIX.concat ( desktop_file_name.concat( ".desktop" ) );    
+    debug ( "client_has_become_available %s", desktop );
+    string path = DESKTOP_PREFIX.concat ( desktop.concat( ".desktop" ) );
     AppInfo? app_info = create_app_info ( path );
     if ( app_info == null ){
       warning ( "Could not create app_info for path %s \n Getting out of here ", path);
@@ -94,25 +87,24 @@ public class MusicPlayerBridge : GLib.Object
     }
     
     var mpris_key = determine_key ( path );
-
-    if ( this.playersDB.already_familiar ( path ) == false ){
-      debug("New client has registered that we have not seen before: %s", desktop_file_name );
-      this.playersDB.insert ( path );
+    // Are we sure clients will appear like this with the new registration method in place. 
+    if ( this.registered_clients.has_key (mpris_key) == false ){
+      debug("New client has registered that we have not seen before: %s", desktop );
       PlayerController ctrl = new PlayerController ( this.root_menu,
                                                      app_info,
-                                                     mpris_key,
-                                                     playersDB.fetch_icon_name(path),                                                    
+                                                     dbus_name,
+                                                     this.fetch_icon_name(path),                                                    
                                                      this.calculate_menu_position(),
                                                      PlayerController.state.READY );
-      this.registered_clients.set ( mpris_key, ctrl );        
+      this.registered_clients.set ( mpris_key, ctrl );
       debug ( "successfully created appinfo and instance from path and set it on the respective instance" );        
-      }
-      else{
-        this.registered_clients[mpris_key].update_state ( PlayerController.state.READY );
-        this.registered_clients[mpris_key].activate ( );      
-        debug("Ignoring desktop file path callback because the db cache file has it already: %s \n", path);
-      }
     }
+    else{
+      this.registered_clients[mpris_key].update_state ( PlayerController.state.READY );
+      this.registered_clients[mpris_key].activate ( );
+      debug("Ignoring desktop file path callback because the db cache file has it already: %s \n", path);
+    }
+  }
   
   public void client_has_vanished ( string mpris_root_interface )
   {
@@ -127,16 +119,15 @@ public class MusicPlayerBridge : GLib.Object
     }
   }
   
-  public void set_root_menu_item(Dbusmenu.Menuitem menu)
+  public void set_root_menu_item ( Dbusmenu.Menuitem menu )
   {
     this.root_menu = menu;
-    this.try_to_add_inactive_familiar_clients();
     this.watcher = new Mpris2Watcher ();
     this.watcher.client_appeared += this.client_has_become_available;
     this.watcher.client_disappeared += this.client_has_vanished;
   }
 
-  public static AppInfo? create_app_info ( string path )
+  private static AppInfo? create_app_info ( string path )
   {
     DesktopAppInfo info = new DesktopAppInfo.from_filename ( path ) ;
     if ( path == null || info == null ){
@@ -147,6 +138,35 @@ public class MusicPlayerBridge : GLib.Object
     return app_info;
   }
 
+  private static string? fetch_icon_name(string desktop_path)
+  {
+    KeyFile desktop_keyfile = new KeyFile ();
+    try{
+      desktop_keyfile.load_from_file (desktop_path, KeyFileFlags.NONE);
+    }
+    catch(GLib.FileError error){
+      warning("Error loading keyfile - FileError");
+      return null;
+    }
+    catch(GLib.KeyFileError error){
+      warning("Error loading keyfile - KeyFileError");      
+      return null;
+    } 
+    
+    try{
+      return desktop_keyfile.get_string (KeyFileDesktop.GROUP,
+                                         KeyFileDesktop.KEY_ICON);              
+    }
+    catch(GLib.KeyFileError error){
+      warning("Error trying to fetch the icon name from the keyfile");      
+      return null;
+    } 
+  }
+
+  /*
+   Messy but necessary method to consolidate desktop filesnames and mpris dbus names
+   into the one single word string (used as the key in the players hash).
+   */
   private static string? determine_key(owned string path)
   {
     var tokens = path.split( "/" );

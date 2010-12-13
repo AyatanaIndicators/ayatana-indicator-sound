@@ -20,22 +20,22 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 [DBus (name = "org.freedesktop.DBus")]
 public interface FreeDesktopObject: Object {
   public abstract async string[] list_names() throws IOError;
-  public abstract signal void name_owner_changed (string name,
-                                                    string old_owner,
-                                                    string new_owner);
+  public abstract signal void name_owner_changed ( string name,
+                                                   string old_owner,
+                                                   string new_owner );
 }
 
 public class Mpris2Watcher : GLib.Object
 {
   private const string FREEDESKTOP_SERVICE = "org.freedesktop.DBus";
   private const string FREEDESKTOP_OBJECT = "/org/freedesktop/DBus";
-  private const string MPRIS_PREFIX = "org.mpris.MediaPlayer2.";
+  public  const string MPRIS_PREFIX = "org.mpris.MediaPlayer2.";
   private const string MPRIS_MEDIA_PLAYER_PATH = "/org/mpris/MediaPlayer2";
 
   FreeDesktopObject fdesktop_obj;
   
-  public signal void client_appeared ( string desktop_name );
-  public signal void client_disappeared ( string mpris_root_interface );
+  public signal void client_appeared ( string desktop_file_name, string dbus_name );
+  public signal void client_disappeared ( string dbus_name );
 
   public Mpris2Watcher ()
   {
@@ -72,7 +72,7 @@ public class Mpris2Watcher : GLib.Object
     }
     else if (previous_owner == "" && current_owner != "") {
       debug ("Client '%s' has appeared", name);
-      client_appeared (mpris2_root.DesktopEntry);
+      client_appeared (mpris2_root.DesktopEntry, name);
     }
   }
 
@@ -109,7 +109,7 @@ public class Mpris2Watcher : GLib.Object
       if (address.has_prefix (MPRIS_PREFIX)){
         MprisRoot? mpris2_root = this.create_mpris_root(address);                                         
         if (mpris2_root == null) return;
-        client_appeared (mpris2_root.DesktopEntry);        
+        client_appeared (mpris2_root.DesktopEntry, address);        
       }
     }
   }   

@@ -194,21 +194,23 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
     if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE ||
        priv->theme_change_occured == TRUE){
       priv->theme_change_occured = FALSE;         
-      GdkPixbuf* pixbuf;
-      pixbuf = gdk_pixbuf_new_from_file(priv->image_path->str, NULL);
+      GdkPixbuf* orig_pixbuf;
+      orig_pixbuf = gdk_pixbuf_new_from_file(priv->image_path->str, NULL);
       //g_debug("metadata_load_new_image -> pixbuf from %s",
       //        priv->image_path->str); 
-      if(GDK_IS_PIXBUF(pixbuf) == FALSE){
+      if(GDK_IS_PIXBUF(orig_pixbuf) == FALSE){
         //g_debug("problem loading the downloaded image just use the placeholder instead");
         draw_album_art_placeholder(metadata);
         return TRUE;
       }
-      pixbuf = gdk_pixbuf_scale_simple(pixbuf,60, 60, GDK_INTERP_BILINEAR);
+      GdkPixbuf* pixbuf;         
+      pixbuf = gdk_pixbuf_scale_simple(orig_pixbuf,60, 60, GDK_INTERP_BILINEAR);
       gtk_image_set_from_pixbuf(GTK_IMAGE(priv->album_art), pixbuf);
       g_string_erase(priv->old_image_path, 0, -1);
       g_string_overwrite(priv->old_image_path, 0, priv->image_path->str);
 
       g_object_unref(pixbuf);       
+      g_object_unref(orig_pixbuf);       
     }
     return FALSE;       
   }
