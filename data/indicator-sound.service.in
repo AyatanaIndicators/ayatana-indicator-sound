@@ -1,5 +1,5 @@
 [D-BUS Service]
-Name=org.ayatana.indicator.sound
+Name=com.canonical.indicators.sound
 Exec=@libexecdir@/indicator-sound-service
 
 
