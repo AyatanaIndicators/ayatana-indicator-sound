@@ -27,11 +27,17 @@ public class MusicPlayerBridge : GLib.Object
   private HashMap<string, PlayerController> registered_clients;  
   private Mpris2Watcher watcher;
   private const string DESKTOP_PREFIX = "/usr/share/applications/";
-
+  private Settings settings;
+  
   public MusicPlayerBridge()
   {
-    registered_clients = new HashMap<string, PlayerController> ();
   }
+  
+  construct{
+    this.registered_clients = new HashMap<string, PlayerController> ();
+    this.settings = new Settings("com.canonical.indicators.sound");
+  }
+  
   
   /*private void try_to_add_inactive_familiar_clients(){
     foreach(string app in this.playersDB.records()){
