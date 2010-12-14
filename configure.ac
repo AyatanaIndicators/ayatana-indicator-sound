@@ -90,6 +90,12 @@ AC_SUBST(INDICATORDIR)
 AC_SUBST(INDICATORICONSDIR)
 
 ###########################
+# Grab the GSettings Macros
+###########################
+
+GLIB_GSETTINGS
+
+###########################
 # DBus Service Info
 ###########################
 
