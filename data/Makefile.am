@@ -1,26 +1,20 @@
 SUBDIRS = icons
 
-dbus_servicesdir = $(DBUSSERVICEDIR)
-service_in_files =  indicator-sound.service.in 
-dbus_services_DATA = $(service_in_files:.service.in=.service)
-
-%.service: %.service.in
-  sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
-
-##############################
-# GSettings Schema
-##############################
-
 gsettings_SCHEMAS = \
   com.canonical.indicators.sound.gschema.xml
 @GSETTINGS_RULES@
 
-##############################
+dbus_servicesdir = $(DBUSSERVICEDIR)
+dbus_services_DATA = indicator-sound.service
 
-EXTRA_DIST =          \
-  $(service_in_files)     \
-  $(gsettings_SCHEMAS) 
+%.service: %.service.in
+  sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
 
-CLEANFILES =          \
+
+EXTRA_DIST = \
+  $(gsettings_SCHEMAS) \
+  indicator-sound.service.in
+
+CLEANFILES = \
   $(dbus_services_DATA)
   
