@@ -8,7 +8,7 @@ dbus_servicesdir = $(DBUSSERVICEDIR)
 dbus_services_DATA = indicator-sound.service
 
 %.service: %.service.in
-  sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
+	sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
 
 EXTRA_DIST = \
   $(gsettings_SCHEMAS) \
