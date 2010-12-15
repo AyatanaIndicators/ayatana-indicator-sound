@@ -28,27 +28,27 @@ public class SettingsManager : GLib.Object
   construct{
     this.settings = new Settings ("com.canonical.indicators.sound");
     settings.changed["blacklisted-media-players"].connect (on_blacklist_event);    
-    this.fetch_entries.begin();
   }
    
   public string[] fetch_blacklist()
   {
-    return this.blacklist_updates(this.settings.get_strv ("blacklisted-media-players"));
+    return this.settings.get_strv ("blacklisted-media-players");
   }
 
   public string[] fetch_interested()
   {
-    return this.interested_updates(this.settings.get_strv ("interested-media-players"));
+    return this.settings.get_strv ("interested-media-players");
   }
 
   public bool add_interested(string app_desktop_name)
   {
     string[] already_interested = fetch_interested();
-    already_interested.append ( app_desktop_name );
-    return this.settings.set_strv( already_interested );
+    already_interested += (app_desktop_name);
+    return this.settings.set_strv( "interested-media-players",
+                                    already_interested );
   }
 
-  private on_blacklist_event()
+  private void on_blacklist_event()
   {
     this.blacklist_updates(this.settings.get_strv ("blacklisted-media-players"));        
   }  

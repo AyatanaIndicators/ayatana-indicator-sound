@@ -1,5 +1,5 @@
 <schemalist>
-  <schema id="com.canoncial.indicators.sound" path="/apps/indicators/sound/" gettext-domain="indicator-sound">
+  <schema id="com.canonical.indicators.sound" path="/apps/indicators/sound/" gettext-domain="indicator-sound">
     <key name="blacklisted-media-players" type="as">
       <summary>A list of applications blacklisted from the sound menu</summary>
       <default>[]</default>

@@ -37,42 +37,35 @@ public class MusicPlayerBridge : GLib.Object
   construct{
     this.registered_clients = new HashMap<string, PlayerController> ();
     this.settings_manager = new SettingsManager();
-    this.settings_manager.connect.blacklist_updates (on_blacklist_update);
+    this.settings_manager.blacklist_updates.connect ( this.on_blacklist_update );
   }
   
-  private void on_black_list_updated ( string[] blacklist )
+  private void on_blacklist_update ( string[] blacklist )
   {
     debug("some blacklist update");
   }
-  
-  /*private void try_to_add_inactive_familiar_clients(){
-    foreach(string app in this.playersDB.records()){
-      if(app == null){
-        warning("App string in keyfile is null therefore moving on to next player");
+
+  private void try_to_add_inactive_familiar_clients()
+  {
+    foreach ( string desktop in this.settings_manager.fetch_interested()){
+      debug ( "interested client found : %s", desktop );
+      string path = DESKTOP_PREFIX.concat ( desktop.concat( ".desktop" ) );
+      AppInfo? app_info = create_app_info ( path );
+      if ( app_info == null ){
+        warning ( "Could not create app_info for path %s \n Getting out of here ", path);
         continue;
       }
+      var mpris_key = determine_key ( path );
+      PlayerController ctrl = new PlayerController ( this.root_menu, 
+                                                     app_info,
+                                                     mpris_key,
+                                                     this.fetch_icon_name(path),
+                                                     calculate_menu_position(),
+                                                     PlayerController.state.OFFLINE );
+      this.registered_clients.set(mpris_key, ctrl);      
+    }
+  }
 
-      debug("attempting to make an app info from %s", app);
-
-      DesktopAppInfo info = new DesktopAppInfo.from_filename(app);
-
-      if(info == null){
-        warning("Could not create a desktopappinfo instance from app,: %s , moving on to the next client", app);
-        continue;
-      }
-      
-      GLib.AppInfo app_info = info as GLib.AppInfo;
-      var mpris_key = determine_key ( app );
-      PlayerController ctrl = new PlayerController(this.root_menu, 
-                                                   app_info,
-                                                   mpris_key,
-                                                   playersDB.fetch_icon_name(app),
-                                                   calculate_menu_position(),
-                                                   PlayerController.state.OFFLINE);
-      this.registered_clients.set(mpris_key, ctrl);
-      }
-  }*/
-  
   private int calculate_menu_position()
   {
     if(this.registered_clients.size == 0){
@@ -109,12 +102,14 @@ public class MusicPlayerBridge : GLib.Object
                                                      this.calculate_menu_position(),
                                                      PlayerController.state.READY );
       this.registered_clients.set ( mpris_key, ctrl );
-      debug ( "successfully created appinfo and instance from path and set it on the respective instance" );        
+      debug ( "Have not seen this %s before, new controller created.", desktop );        
+      this.settings_manager.add_interested ( desktop );
+      debug ( "application added to the interested list" );
     }
     else{
       this.registered_clients[mpris_key].update_state ( PlayerController.state.READY );
       this.registered_clients[mpris_key].activate ( );
-      debug("Ignoring desktop file path callback because the db cache file has it already: %s \n", path);
+      debug("Application has already registered - awaken the hibernation: %s \n", path);
     }
   }
   
@@ -137,6 +132,7 @@ public class MusicPlayerBridge : GLib.Object
     this.watcher = new Mpris2Watcher ();
     this.watcher.client_appeared += this.client_has_become_available;
     this.watcher.client_disappeared += this.client_has_vanished;
+    this.try_to_add_inactive_familiar_clients();    
   }
 
   private static AppInfo? create_app_info ( string path )
@@ -176,8 +172,10 @@ public class MusicPlayerBridge : GLib.Object
   }
 
   /*
-   Messy but necessary method to consolidate desktop filesnames and mpris dbus names
-   into the one single word string (used as the key in the players hash).
+    Messy but necessary method to consolidate desktop filesnames and mpris dbus names
+    into the one single word string (used as the key in the players hash).
+    So this means that we can determine the key for the players_hash from the 
+    dbus interface name or the desktop file name.
    */
   private static string? determine_key(owned string path)
   {
