@@ -23,6 +23,7 @@ using GLib;
 
 public class MusicPlayerBridge : GLib.Object
 {
+  private SettingsManager settings_manager;
   private Dbusmenu.Menuitem root_menu;
   private HashMap<string, PlayerController> registered_clients;  
   private Mpris2Watcher watcher;
@@ -35,9 +36,14 @@ public class MusicPlayerBridge : GLib.Object
   
   construct{
     this.registered_clients = new HashMap<string, PlayerController> ();
-    this.settings = new Settings("com.canonical.indicators.sound");
+    this.settings_manager = new SettingsManager();
+    this.settings_manager.connect.blacklist_updates (on_blacklist_update);
   }
   
+  private void on_black_list_updated ( string[] blacklist )
+  {
+    debug("some blacklist update");
+  }
   
   /*private void try_to_add_inactive_familiar_clients(){
     foreach(string app in this.playersDB.records()){
@@ -143,7 +149,7 @@ public class MusicPlayerBridge : GLib.Object
     GLib.AppInfo app_info = info as GLib.AppInfo;
     return app_info;
   }
-
+ 
   private static string? fetch_icon_name(string desktop_path)
   {
     KeyFile desktop_keyfile = new KeyFile ();
