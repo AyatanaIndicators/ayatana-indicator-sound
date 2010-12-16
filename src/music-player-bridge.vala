@@ -58,11 +58,11 @@ public class MusicPlayerBridge : GLib.Object
       var mpris_key = determine_key ( path );
       PlayerController ctrl = new PlayerController ( this.root_menu, 
                                                      app_info,
-                                                     mpris_key,
+                                                     null,
                                                      this.fetch_icon_name(path),
                                                      calculate_menu_position(),
                                                      PlayerController.state.OFFLINE );
-      this.registered_clients.set(mpris_key, ctrl);      
+      this.registered_clients.set(mpris_key, ctrl);  
     }
   }
 
@@ -94,7 +94,7 @@ public class MusicPlayerBridge : GLib.Object
     var mpris_key = determine_key ( path );
     // Are we sure clients will appear like this with the new registration method in place. 
     if ( this.registered_clients.has_key (mpris_key) == false ){
-      debug("New client has registered that we have not seen before: %s", desktop );
+      debug("New client has registered that we have not seen before: %s", dbus_name );
       PlayerController ctrl = new PlayerController ( this.root_menu,
                                                      app_info,
                                                      dbus_name,
@@ -108,8 +108,8 @@ public class MusicPlayerBridge : GLib.Object
     }
     else{
       this.registered_clients[mpris_key].update_state ( PlayerController.state.READY );
-      this.registered_clients[mpris_key].activate ( );
-      debug("Application has already registered - awaken the hibernation: %s \n", path);
+      this.registered_clients[mpris_key].activate ( dbus_name );
+      debug("Application has already registered - awaken the hibernation: %s \n", dbus_name );
     }
   }
   

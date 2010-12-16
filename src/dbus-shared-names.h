@@ -23,7 +23,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #ifndef __DBUS_SHARED_NAMES_H__
-#define __DBUS_SHARED_NAMES_H__ 
+#define __DBUS_SHARED_NAMES_H__ 1
 
 #define INDICATOR_SOUND_DBUS_NAME  "com.canonical.indicators.sound"
 #define INDICATOR_SOUND_DBUS_OBJECT "/com/canonical/indicators/sound/menu"

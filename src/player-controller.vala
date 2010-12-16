@@ -53,7 +53,7 @@ public class PlayerController : GLib.Object
     
   public PlayerController(Dbusmenu.Menuitem root,
                           GLib.AppInfo app,
-                          string dbus_name,
+                          string? dbus_name,
                           string icon_name,
                           int offset,
                           state initial_state)
@@ -78,8 +78,9 @@ public class PlayerController : GLib.Object
     this.update_layout();
   }
   
-  public void activate()
+  public void activate( string dbus_name )
   {
+    this.dbus_name = dbus_name;
     this.establish_mpris_connection();  
   }
 
@@ -103,7 +104,7 @@ public class PlayerController : GLib.Object
   
   private void establish_mpris_connection()
   {   
-    if(this.current_state != state.READY){
+    if(this.current_state != state.READY && this.dbus_name != null ){
       debug("establish_mpris_connection - Not ready to connect");
       return;
     }   

@@ -561,7 +561,7 @@ fetch_sink_availability_from_dbus(IndicatorSound* self)
   GError * error = NULL;
   gboolean * available_input;
   available_input = g_new0(gboolean, 1);
-  org_ayatana_indicator_sound_get_sink_availability(sound_dbus_proxy, available_input, &error);
+  com_canonical_indicators_sound_get_sink_availability(sound_dbus_proxy, available_input, &error);
   if (error != NULL) {
     g_warning("Unable to fetch AVAILABILITY at indicator start up: %s", error->message);
     g_error_free(error);
@@ -593,7 +593,7 @@ fetch_mute_value_from_dbus()
   GError * error = NULL;
   gboolean *mute_input;
   mute_input = g_new0(gboolean, 1);
-  org_ayatana_indicator_sound_get_sink_mute(sound_dbus_proxy, mute_input, &error);
+  com_canonical_indicators_sound_get_sink_mute(sound_dbus_proxy, mute_input, &error);
   if (error != NULL) {
     g_warning("Unable to fetch MUTE at indicator start up: %s", error->message);
     g_error_free(error);

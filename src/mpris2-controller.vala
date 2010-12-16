@@ -46,7 +46,7 @@ public class Mpris2Controller : GLib.Object
     try {
       this.mpris2_root = Bus.get_proxy_sync ( BusType.SESSION,
                                               this.owner.dbus_name,
-                                              "/org/mpris/MediaPlayer2");
+                                              "/org/mpris/MediaPlayer2" );
       this.player = Bus.get_proxy_sync ( BusType.SESSION,
                                          this.owner.dbus_name,
                                          "/org/mpris/MediaPlayer2" );
@@ -73,7 +73,11 @@ public class Mpris2Controller : GLib.Object
     }
     Variant? play_v = changed_properties.lookup("PlaybackStatus");
     if(play_v != null){
+      // Race condition sometimes appears with the playback status 
+      // 200ms timeout ensures we have the correct playback status at all times.
       string state = this.player.PlaybackStatus;
+      //debug("in the property update and the playback status = %s and update = %s", state, (string)play_v);
+      Timeout.add ( 200, ensure_correct_playback_status );
       TransportMenuitem.state p = (TransportMenuitem.state)this.determine_play_state(state);
       (this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(p);
     }
@@ -81,7 +85,7 @@ public class Mpris2Controller : GLib.Object
     if(meta_v != null){
       GLib.HashTable<string, Variant?> changed_updates = clean_metadata();
       PlayerItem metadata = this.owner.custom_items[PlayerController.widget_order.METADATA];
-      metadata.reset( MetadataMenuitem.attributes_format());
+      metadata.reset ( MetadataMenuitem.attributes_format());
       metadata.update ( changed_updates, 
                         MetadataMenuitem.attributes_format());
       metadata.property_set_bool ( MENUITEM_PROP_VISIBLE,
@@ -89,6 +93,13 @@ public class Mpris2Controller : GLib.Object
     }
   }
 
+  private bool ensure_correct_playback_status(){
+    debug("TEST playback status = %s", this.player.PlaybackStatus);
+    TransportMenuitem.state p = (TransportMenuitem.state)this.determine_play_state(this.player.PlaybackStatus);
+    (this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(p);
+    return false;
+  }
+  
   private GLib.HashTable<string, Variant?>? clean_metadata()
   { 
     GLib.HashTable<string, Variant?> changed_updates = this.player.Metadata; 

@@ -65,7 +65,7 @@ void establish_pulse_activities(SoundServiceDbus *service)
   pa_main_loop = pa_glib_mainloop_new(g_main_context_default());
   g_assert(pa_main_loop);
   pulse_context = pa_context_new(pa_glib_mainloop_get_api(pa_main_loop),
-                                 "ayatana.indicator.sound");
+                                 "com.canonical.indicators.sound");
   g_assert(pulse_context);
 
   sink_hash = g_hash_table_new_full(g_direct_hash,
@@ -103,7 +103,7 @@ reconnect_to_pulse()
     sink_hash = NULL;
   }
   pulse_context = pa_context_new( pa_glib_mainloop_get_api( pa_main_loop ),
-                                  "ayatana.indicator.sound" );
+                                  "com.canonical.indicators.sound" );
   g_assert(pulse_context);
   sink_hash = g_hash_table_new_full( g_direct_hash, g_direct_equal,
                                      NULL,
