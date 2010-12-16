@@ -29,7 +29,7 @@ public class PlayerController : GLib.Object
     SEPARATOR,
     TITLE,
     METADATA,
-    TRANSPORT,
+    TRANSPORT
   }
 
   public enum state{
@@ -104,7 +104,7 @@ public class PlayerController : GLib.Object
   
   private void establish_mpris_connection()
   {   
-    if(this.current_state != state.READY && this.dbus_name != null ){
+    if(this.current_state != state.READY || this.dbus_name == null ){
       debug("establish_mpris_connection - Not ready to connect");
       return;
     }   
@@ -179,7 +179,7 @@ public class PlayerController : GLib.Object
     return result;
   }
 
-  public void determine_state()
+  private void determine_state()
   {
     if(this.mpris_bridge.connected() == true){
       this.update_state(state.CONNECTED);
