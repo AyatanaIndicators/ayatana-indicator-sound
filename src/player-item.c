@@ -63,7 +63,7 @@ typedef struct _PlayerControllerClass PlayerControllerClass;
 
 typedef struct _MetadataMenuitem MetadataMenuitem;
 typedef struct _MetadataMenuitemClass MetadataMenuitemClass;
-#define __vala_GValue_free0(var) ((var == NULL) ? NULL : (var = (_vala_GValue_free (var), NULL)))
+#define _g_variant_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_unref (var), NULL)))
 
 struct _PlayerItem {
 	DbusmenuMenuitem parent_instance;
@@ -95,10 +95,8 @@ PlayerItem* player_item_new (const gchar* type);
 PlayerItem* player_item_construct (GType object_type, const gchar* type);
 void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
 void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes);
-static GValue* _g_value_dup (GValue* self);
 GType metadata_menuitem_get_type (void) G_GNUC_CONST;
 void metadata_menuitem_fetch_art (MetadataMenuitem* self, const gchar* uri, const gchar* prop);
-static void _vala_GValue_free (GValue* self);
 gboolean player_item_populated (PlayerItem* self, GeeHashSet* attrs);
 PlayerController* player_item_get_owner (PlayerItem* self);
 static void player_item_set_owner (PlayerItem* self, PlayerController* value);
@@ -154,18 +152,13 @@ void player_item_reset (PlayerItem* self, GeeHashSet* attrs) {
 
 
 /**
- * update()
- * Base update method for playeritems, takes the attributes and the incoming updates
- * and attmepts to update the appropriate props on the object. 
- * Album art is handled separately to deal with remote and local file paths.
- */
-static GValue* _g_value_dup (GValue* self) {
-	return g_boxed_copy (G_TYPE_VALUE, self);
-}
-
-
-static gpointer __g_value_dup0 (gpointer self) {
-	return self ? _g_value_dup (self) : NULL;
+   * update()
+   * Base update method for playeritems, takes the attributes and the incoming updates
+   * and attmepts to update the appropriate props on the object. 
+   * Album art is handled separately to deal with remote and local file paths.
+   */
+static gpointer _g_variant_ref0 (gpointer self) {
+	return self ? g_variant_ref (self) : NULL;
 }
 
 
@@ -198,12 +191,6 @@ static gpointer _g_object_ref0 (gpointer self) {
 }
 
 
-static void _vala_GValue_free (GValue* self) {
-	g_value_unset (self);
-	g_free (self);
-}
-
-
 static gchar* bool_to_string (gboolean self) {
 	gchar* result = NULL;
 	if (self) {
@@ -221,7 +208,7 @@ static gchar* bool_to_string (gboolean self) {
 
 
 void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes) {
-	gboolean _tmp28_;
+	gboolean _tmp26_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (data != NULL);
 	g_return_if_fail (attributes != NULL);
@@ -249,8 +236,8 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 			gchar* _tmp6_;
 			gchar* search_key;
 			gconstpointer _tmp7_ = NULL;
-			GValue* _tmp8_;
-			GValue* v;
+			GVariant* _tmp8_;
+			GVariant* v;
 			gboolean _tmp9_;
 			_tmp1_ = gee_iterator_next (_property_it);
 			if (!_tmp1_) {
@@ -267,15 +254,15 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 			search_key = _tmp6_;
 			g_debug ("player-item.vala:62: search key = %s", search_key);
 			_tmp7_ = g_hash_table_lookup (data, search_key);
-			_tmp8_ = __g_value_dup0 ((GValue*) _tmp7_);
+			_tmp8_ = _g_variant_ref0 ((GVariant*) _tmp7_);
 			v = _tmp8_;
-			_tmp9_ = G_VALUE_HOLDS (v, G_TYPE_STRING);
+			_tmp9_ = g_variant_is_of_type (v, G_VARIANT_TYPE_STRING);
 			if (_tmp9_) {
 				const gchar* _tmp10_ = NULL;
 				gchar* _tmp11_ = NULL;
 				gchar* update;
 				gboolean _tmp12_;
-				_tmp10_ = g_value_get_string (v);
+				_tmp10_ = g_variant_get_string (v, NULL);
 				_tmp11_ = string_strip (_tmp10_);
 				update = _tmp11_;
 				g_debug ("player-item.vala:67: with value : %s", update);
@@ -284,17 +271,12 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 					PlayerItem* _tmp13_;
 					MetadataMenuitem* _tmp14_;
 					MetadataMenuitem* metadata;
-					gchar* _tmp15_ = NULL;
-					gchar* _tmp16_;
 					_tmp14_ = _g_object_ref0 ((_tmp13_ = self, IS_METADATA_MENUITEM (_tmp13_) ? ((MetadataMenuitem*) _tmp13_) : NULL));
 					metadata = _tmp14_;
-					_tmp15_ = string_strip (update);
-					_tmp16_ = _tmp15_;
-					metadata_menuitem_fetch_art (metadata, _tmp16_, property);
-					_g_free0 (_tmp16_);
+					metadata_menuitem_fetch_art (metadata, update, property);
 					_g_object_unref0 (metadata);
 					_g_free0 (update);
-					__vala_GValue_free0 (v);
+					_g_variant_unref0 (v);
 					_g_free0 (search_key);
 					input_keys = (_vala_array_free (input_keys, input_keys_length1, (GDestroyNotify) g_free), NULL);
 					_g_free0 (property);
@@ -303,53 +285,53 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 				dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, property, update);
 				_g_free0 (update);
 			} else {
-				gboolean _tmp17_;
-				_tmp17_ = G_VALUE_HOLDS (v, G_TYPE_INT);
-				if (_tmp17_) {
-					gint _tmp18_;
-					gint _tmp19_;
-					_tmp18_ = g_value_get_int (v);
-					g_debug ("player-item.vala:78: with value : %i", _tmp18_);
-					_tmp19_ = g_value_get_int (v);
-					dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, property, _tmp19_);
+				gboolean _tmp15_;
+				_tmp15_ = g_variant_is_of_type (v, G_VARIANT_TYPE_INT32);
+				if (_tmp15_) {
+					gint32 _tmp16_;
+					gint32 _tmp17_;
+					_tmp16_ = g_variant_get_int32 (v);
+					g_debug ("player-item.vala:78: with value : %i", (gint) _tmp16_);
+					_tmp17_ = g_variant_get_int32 (v);
+					dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, property, (gint) _tmp17_);
 				} else {
-					gboolean _tmp20_;
-					_tmp20_ = G_VALUE_HOLDS (v, G_TYPE_INT64);
-					if (_tmp20_) {
-						gint64 _tmp21_;
-						gint64 _tmp22_;
-						_tmp21_ = g_value_get_int64 (v);
-						g_debug ("player-item.vala:82: with value : %i", (gint) _tmp21_);
-						_tmp22_ = g_value_get_int64 (v);
-						dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, property, (gint) _tmp22_);
+					gboolean _tmp18_;
+					_tmp18_ = g_variant_is_of_type (v, G_VARIANT_TYPE_INT64);
+					if (_tmp18_) {
+						gint64 _tmp19_;
+						gint64 _tmp20_;
+						_tmp19_ = g_variant_get_int64 (v);
+						g_debug ("player-item.vala:82: with value : %i", (gint) _tmp19_);
+						_tmp20_ = g_variant_get_int64 (v);
+						dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, property, (gint) _tmp20_);
 					} else {
-						gboolean _tmp23_;
-						_tmp23_ = G_VALUE_HOLDS (v, G_TYPE_BOOLEAN);
-						if (_tmp23_) {
-							gboolean _tmp24_;
-							gchar* _tmp25_ = NULL;
-							gchar* _tmp26_;
-							gboolean _tmp27_;
-							_tmp24_ = g_value_get_boolean (v);
-							_tmp25_ = bool_to_string (_tmp24_);
-							_tmp26_ = _tmp25_;
-							g_debug ("player-item.vala:86: with value : %s", _tmp26_);
-							_g_free0 (_tmp26_);
-							_tmp27_ = g_value_get_boolean (v);
-							dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, property, _tmp27_);
+						gboolean _tmp21_;
+						_tmp21_ = g_variant_is_of_type (v, G_VARIANT_TYPE_BOOLEAN);
+						if (_tmp21_) {
+							gboolean _tmp22_;
+							gchar* _tmp23_ = NULL;
+							gchar* _tmp24_;
+							gboolean _tmp25_;
+							_tmp22_ = g_variant_get_boolean (v);
+							_tmp23_ = bool_to_string (_tmp22_);
+							_tmp24_ = _tmp23_;
+							g_debug ("player-item.vala:86: with value : %s", _tmp24_);
+							_g_free0 (_tmp24_);
+							_tmp25_ = g_variant_get_boolean (v);
+							dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, property, _tmp25_);
 						}
 					}
 				}
 			}
-			__vala_GValue_free0 (v);
+			_g_variant_unref0 (v);
 			_g_free0 (search_key);
 			input_keys = (_vala_array_free (input_keys, input_keys_length1, (GDestroyNotify) g_free), NULL);
 			_g_free0 (property);
 		}
 		_g_object_unref0 (_property_it);
 	}
-	_tmp28_ = player_item_populated (self, attributes);
-	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_MENUITEM_PROP_VISIBLE, _tmp28_);
+	_tmp26_ = player_item_populated (self, attributes);
+	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_MENUITEM_PROP_VISIBLE, _tmp26_);
 }
 
 

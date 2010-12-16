@@ -206,7 +206,7 @@ static gboolean metadata_menuitem_delete_album_art_contents (GFile* dir) {
 	_tmp0_ = g_file_enumerate_children (dir, G_FILE_ATTRIBUTE_STANDARD_NAME, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL, &_inner_error_);
 	e = _tmp0_;
 	if (_inner_error_ != NULL) {
-		goto __catch0_g_error;
+		goto __catch2_g_error;
 	}
 	while (TRUE) {
 		GFileInfo* _tmp1_ = NULL;
@@ -219,7 +219,7 @@ static gboolean metadata_menuitem_delete_album_art_contents (GFile* dir) {
 		file = _tmp1_;
 		if (_inner_error_ != NULL) {
 			_g_object_unref0 (e);
-			goto __catch0_g_error;
+			goto __catch2_g_error;
 		}
 		_tmp2_ = g_file_info_get_name (file);
 		g_debug ("metadata-menu-item.vala:76: file name = %s", _tmp2_);
@@ -232,10 +232,10 @@ static gboolean metadata_menuitem_delete_album_art_contents (GFile* dir) {
 		child = _tmp4_;
 		g_file_delete (child, NULL, &_inner_error_);
 		if (_inner_error_ != NULL) {
-			goto __catch1_g_error;
+			goto __catch3_g_error;
 		}
-		goto __finally1;
-		__catch1_g_error:
+		goto __finally3;
+		__catch3_g_error:
 		{
 			GError * error_;
 			gchar* _tmp5_ = NULL;
@@ -258,19 +258,19 @@ static gboolean metadata_menuitem_delete_album_art_contents (GFile* dir) {
 			_result_ = FALSE;
 			_g_error_free0 (error_);
 		}
-		__finally1:
+		__finally3:
 		if (_inner_error_ != NULL) {
 			_g_object_unref0 (child);
 			_g_object_unref0 (file);
 			_g_object_unref0 (e);
-			goto __catch0_g_error;
+			goto __catch2_g_error;
 		}
 		_g_object_unref0 (child);
 		_g_object_unref0 (file);
 	}
 	_g_object_unref0 (e);
-	goto __finally0;
-	__catch0_g_error:
+	goto __finally2;
+	__catch2_g_error:
 	{
 		GError * _error_;
 		gchar* _tmp11_ = NULL;
@@ -291,7 +291,7 @@ static gboolean metadata_menuitem_delete_album_art_contents (GFile* dir) {
 		_result_ = FALSE;
 		_g_error_free0 (_error_);
 	}
-	__finally0:
+	__finally2:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -358,7 +358,7 @@ void metadata_menuitem_fetch_art (MetadataMenuitem* self, const gchar* uri, cons
 		_tmp6_ = (_tmp5_ = _tmp4_, _g_free0 (_tmp3_), _tmp5_);
 		if (_inner_error_ != NULL) {
 			if (_inner_error_->domain == G_CONVERT_ERROR) {
-				goto __catch2_g_convert_error;
+				goto __catch4_g_convert_error;
 			}
 			_g_free0 (path);
 			_g_object_unref0 (art_file);
@@ -370,8 +370,8 @@ void metadata_menuitem_fetch_art (MetadataMenuitem* self, const gchar* uri, cons
 		_g_free0 (path);
 		path = _tmp7_;
 		dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, prop, path);
-		goto __finally2;
-		__catch2_g_convert_error:
+		goto __finally4;
+		__catch4_g_convert_error:
 		{
 			GError * e;
 			e = _inner_error_;
@@ -379,7 +379,7 @@ void metadata_menuitem_fetch_art (MetadataMenuitem* self, const gchar* uri, cons
 			g_warning ("metadata-menu-item.vala:108: Problem converting URI %s to file path", uri);
 			_g_error_free0 (e);
 		}
-		__finally2:
+		__finally4:
 		if (_inner_error_ != NULL) {
 			_g_free0 (path);
 			_g_object_unref0 (art_file);
@@ -438,12 +438,12 @@ static void metadata_menuitem_on_fetcher_completed (MetadataMenuitem* self, GByt
 	gdk_pixbuf_loader_write (loader, update->data, (gsize) ((gint) update->len), &_inner_error_);
 	if (_inner_error_ != NULL) {
 		_g_object_unref0 (loader);
-		goto __catch3_g_error;
+		goto __catch5_g_error;
 	}
 	gdk_pixbuf_loader_close (loader, &_inner_error_);
 	if (_inner_error_ != NULL) {
 		_g_object_unref0 (loader);
-		goto __catch3_g_error;
+		goto __catch5_g_error;
 	}
 	_tmp1_ = gdk_pixbuf_loader_get_pixbuf (loader);
 	_tmp2_ = _g_object_ref0 (_tmp1_);
@@ -464,7 +464,7 @@ static void metadata_menuitem_on_fetcher_completed (MetadataMenuitem* self, GByt
 			_g_free0 (path);
 			_g_object_unref0 (icon);
 			_g_object_unref0 (loader);
-			goto __catch3_g_error;
+			goto __catch5_g_error;
 		}
 		dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, property, path);
 		if (self->priv->previous_temp_album_art_path != NULL) {
@@ -478,8 +478,8 @@ static void metadata_menuitem_on_fetcher_completed (MetadataMenuitem* self, GByt
 	_g_free0 (path);
 	_g_object_unref0 (icon);
 	_g_object_unref0 (loader);
-	goto __finally3;
-	__catch3_g_error:
+	goto __finally5;
+	__catch5_g_error:
 	{
 		GError * e;
 		e = _inner_error_;
@@ -488,7 +488,7 @@ static void metadata_menuitem_on_fetcher_completed (MetadataMenuitem* self, GByt
 "hed from the interweb - error: %s", e->message);
 		_g_error_free0 (e);
 	}
-	__finally3:
+	__finally5:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);

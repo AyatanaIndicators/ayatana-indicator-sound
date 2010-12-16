@@ -22,11 +22,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <glib.h>
 #include <glib-object.h>
-#include <libindicate/./indicator-messages.h>
-#include <libindicate/./indicator.h>
-#include <libindicate/./interests.h>
-#include <libindicate/./listener.h>
-#include <libindicate/./server.h>
 #include <libdbusmenu-glib/client.h>
 #include <libdbusmenu-glib/menuitem-proxy.h>
 #include <libdbusmenu-glib/menuitem.h>
@@ -34,8 +29,8 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <gee.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gio/gdesktopappinfo.h>
 #include <gio/gio.h>
+#include <gio/gdesktopappinfo.h>
 
 
 #define TYPE_MUSIC_PLAYER_BRIDGE (music_player_bridge_get_type ())
@@ -49,6 +44,16 @@ typedef struct _MusicPlayerBridge MusicPlayerBridge;
 typedef struct _MusicPlayerBridgeClass MusicPlayerBridgeClass;
 typedef struct _MusicPlayerBridgePrivate MusicPlayerBridgePrivate;
 
+#define TYPE_SETTINGS_MANAGER (settings_manager_get_type ())
+#define SETTINGS_MANAGER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_SETTINGS_MANAGER, SettingsManager))
+#define SETTINGS_MANAGER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_SETTINGS_MANAGER, SettingsManagerClass))
+#define IS_SETTINGS_MANAGER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_SETTINGS_MANAGER))
+#define IS_SETTINGS_MANAGER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_SETTINGS_MANAGER))
+#define SETTINGS_MANAGER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_SETTINGS_MANAGER, SettingsManagerClass))
+
+typedef struct _SettingsManager SettingsManager;
+typedef struct _SettingsManagerClass SettingsManagerClass;
+
 #define TYPE_PLAYER_CONTROLLER (player_controller_get_type ())
 #define PLAYER_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PLAYER_CONTROLLER, PlayerController))
 #define PLAYER_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PLAYER_CONTROLLER, PlayerControllerClass))
@@ -59,19 +64,21 @@ typedef struct _MusicPlayerBridgePrivate MusicPlayerBridgePrivate;
 typedef struct _PlayerController PlayerController;
 typedef struct _PlayerControllerClass PlayerControllerClass;
 
-#define TYPE_FAMILIAR_PLAYERS_DB (familiar_players_db_get_type ())
-#define FAMILIAR_PLAYERS_DB(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_FAMILIAR_PLAYERS_DB, FamiliarPlayersDB))
-#define FAMILIAR_PLAYERS_DB_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_FAMILIAR_PLAYERS_DB, FamiliarPlayersDBClass))
-#define IS_FAMILIAR_PLAYERS_DB(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_FAMILIAR_PLAYERS_DB))
-#define IS_FAMILIAR_PLAYERS_DB_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_FAMILIAR_PLAYERS_DB))
-#define FAMILIAR_PLAYERS_DB_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_FAMILIAR_PLAYERS_DB, FamiliarPlayersDBClass))
+#define TYPE_MPRIS2_WATCHER (mpris2_watcher_get_type ())
+#define MPRIS2_WATCHER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_MPRIS2_WATCHER, Mpris2Watcher))
+#define MPRIS2_WATCHER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_MPRIS2_WATCHER, Mpris2WatcherClass))
+#define IS_MPRIS2_WATCHER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_MPRIS2_WATCHER))
+#define IS_MPRIS2_WATCHER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_MPRIS2_WATCHER))
+#define MPRIS2_WATCHER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_MPRIS2_WATCHER, Mpris2WatcherClass))
 
-typedef struct _FamiliarPlayersDB FamiliarPlayersDB;
-typedef struct _FamiliarPlayersDBClass FamiliarPlayersDBClass;
+typedef struct _Mpris2Watcher Mpris2Watcher;
+typedef struct _Mpris2WatcherClass Mpris2WatcherClass;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 #define _g_free0(var) (var = (g_free (var), NULL))
 
 #define PLAYER_CONTROLLER_TYPE_STATE (player_controller_state_get_type ())
+#define _g_key_file_free0(var) ((var == NULL) ? NULL : (var = (g_key_file_free (var), NULL)))
+#define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 
 struct _MusicPlayerBridge {
 	GObject parent_instance;
@@ -83,10 +90,11 @@ struct _MusicPlayerBridgeClass {
 };
 
 struct _MusicPlayerBridgePrivate {
-	IndicateListener* listener;
+	SettingsManager* settings_manager;
 	DbusmenuMenuitem* root_menu;
 	GeeHashMap* registered_clients;
-	FamiliarPlayersDB* playersDB;
+	Mpris2Watcher* watcher;
+	GSettings* settings;
 };
 
 typedef enum  {
@@ -101,77 +109,51 @@ typedef enum  {
 static gpointer music_player_bridge_parent_class = NULL;
 
 GType music_player_bridge_get_type (void) G_GNUC_CONST;
+GType settings_manager_get_type (void) G_GNUC_CONST;
 GType player_controller_get_type (void) G_GNUC_CONST;
-GType familiar_players_db_get_type (void) G_GNUC_CONST;
+GType mpris2_watcher_get_type (void) G_GNUC_CONST;
 #define MUSIC_PLAYER_BRIDGE_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_MUSIC_PLAYER_BRIDGE, MusicPlayerBridgePrivate))
 enum  {
 	MUSIC_PLAYER_BRIDGE_DUMMY_PROPERTY
 };
+#define MUSIC_PLAYER_BRIDGE_DESKTOP_PREFIX "/usr/share/applications/"
 MusicPlayerBridge* music_player_bridge_new (void);
 MusicPlayerBridge* music_player_bridge_construct (GType object_type);
-FamiliarPlayersDB* familiar_players_db_new (void);
-FamiliarPlayersDB* familiar_players_db_construct (GType object_type);
-void music_player_bridge_on_server_added (MusicPlayerBridge* self, IndicateListenerServer* object, const gchar* type);
-static void _music_player_bridge_on_server_added_indicate_listener_server_added (IndicateListener* _sender, IndicateListenerServer* object, const gchar* p0, gpointer self);
-void music_player_bridge_on_server_removed (MusicPlayerBridge* self, IndicateListenerServer* object, const gchar* type);
-static void _music_player_bridge_on_server_removed_indicate_listener_server_removed (IndicateListener* _sender, IndicateListenerServer* object, const gchar* p0, gpointer self);
+static void music_player_bridge_on_blacklist_update (MusicPlayerBridge* self, gchar** blacklist, int blacklist_length1);
 static void music_player_bridge_try_to_add_inactive_familiar_clients (MusicPlayerBridge* self);
-GeeSet* familiar_players_db_records (FamiliarPlayersDB* self);
+gchar** settings_manager_fetch_interested (SettingsManager* self, int* result_length1);
+static GAppInfo* music_player_bridge_create_app_info (const gchar* path);
 static gchar* music_player_bridge_determine_key (gchar* path);
-gchar* familiar_players_db_fetch_icon_name (const gchar* desktop_path);
+static gchar* music_player_bridge_fetch_icon_name (const gchar* desktop_path);
 static gint music_player_bridge_calculate_menu_position (MusicPlayerBridge* self);
 GType player_controller_state_get_type (void) G_GNUC_CONST;
-PlayerController* player_controller_new (DbusmenuMenuitem* root, GAppInfo* app, const gchar* mpris_name, const gchar* icon_name, gint offset, PlayerControllerstate initial_state);
-PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, GAppInfo* app, const gchar* mpris_name, const gchar* icon_name, gint offset, PlayerControllerstate initial_state);
+PlayerController* player_controller_new (DbusmenuMenuitem* root, GAppInfo* app, const gchar* dbus_name, const gchar* icon_name, gint offset, PlayerControllerstate initial_state);
+PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, GAppInfo* app, const gchar* dbus_name, const gchar* icon_name, gint offset, PlayerControllerstate initial_state);
 #define PLAYER_CONTROLLER_WIDGET_QUANTITY 4
-static gboolean music_player_bridge_server_is_not_of_interest (MusicPlayerBridge* self, const gchar* type);
-static void music_player_bridge_desktop_info_callback (MusicPlayerBridge* self, IndicateListenerServer* server, gchar* path, void* data);
-GAppInfo* music_player_bridge_create_app_info (const gchar* path);
-gboolean familiar_players_db_already_familiar (FamiliarPlayersDB* self, const gchar* desktop);
-void familiar_players_db_insert (FamiliarPlayersDB* self, const gchar* desktop);
+void music_player_bridge_client_has_become_available (MusicPlayerBridge* self, const gchar* desktop, const gchar* dbus_name);
+gboolean settings_manager_add_interested (SettingsManager* self, const gchar* app_desktop_name);
 void player_controller_update_state (PlayerController* self, PlayerControllerstate new_state);
-void player_controller_activate (PlayerController* self);
+void player_controller_activate (PlayerController* self, const gchar* dbus_name);
+void music_player_bridge_client_has_vanished (MusicPlayerBridge* self, const gchar* mpris_root_interface);
 void player_controller_hibernate (PlayerController* self);
 void music_player_bridge_set_root_menu_item (MusicPlayerBridge* self, DbusmenuMenuitem* menu);
+Mpris2Watcher* mpris2_watcher_new (void);
+Mpris2Watcher* mpris2_watcher_construct (GType object_type);
+static void _music_player_bridge_client_has_become_available_mpris2_watcher_client_appeared (Mpris2Watcher* _sender, const gchar* desktop_file_name, const gchar* dbus_name, gpointer self);
+static void _music_player_bridge_client_has_vanished_mpris2_watcher_client_disappeared (Mpris2Watcher* _sender, const gchar* dbus_name, gpointer self);
+static GObject * music_player_bridge_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
+SettingsManager* settings_manager_new (void);
+SettingsManager* settings_manager_construct (GType object_type);
+static void _music_player_bridge_on_blacklist_update_settings_manager_blacklist_updates (SettingsManager* _sender, gchar** new_blacklist, int new_blacklist_length1, gpointer self);
 static void music_player_bridge_finalize (GObject* obj);
 static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNotify destroy_func);
 static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify destroy_func);
 static gint _vala_array_length (gpointer array);
 
 
-static void _music_player_bridge_on_server_added_indicate_listener_server_added (IndicateListener* _sender, IndicateListenerServer* object, const gchar* p0, gpointer self) {
-	music_player_bridge_on_server_added (self, object, p0);
-}
-
-
-static void _music_player_bridge_on_server_removed_indicate_listener_server_removed (IndicateListener* _sender, IndicateListenerServer* object, const gchar* p0, gpointer self) {
-	music_player_bridge_on_server_removed (self, object, p0);
-}
-
-
 MusicPlayerBridge* music_player_bridge_construct (GType object_type) {
 	MusicPlayerBridge * self = NULL;
-	FamiliarPlayersDB* _tmp0_ = NULL;
-	FamiliarPlayersDB* _tmp1_;
-	GeeHashMap* _tmp2_ = NULL;
-	GeeHashMap* _tmp3_;
-	IndicateListener* _tmp4_ = NULL;
-	IndicateListener* _tmp5_;
 	self = (MusicPlayerBridge*) g_object_new (object_type, NULL);
-	_tmp0_ = familiar_players_db_new ();
-	_tmp1_ = _tmp0_;
-	_g_object_unref0 (self->priv->playersDB);
-	self->priv->playersDB = _tmp1_;
-	_tmp2_ = gee_hash_map_new (G_TYPE_STRING, (GBoxedCopyFunc) g_strdup, g_free, TYPE_PLAYER_CONTROLLER, (GBoxedCopyFunc) g_object_ref, g_object_unref, NULL, NULL, NULL);
-	_tmp3_ = _tmp2_;
-	_g_object_unref0 (self->priv->registered_clients);
-	self->priv->registered_clients = _tmp3_;
-	_tmp4_ = indicate_listener_ref_default ();
-	_tmp5_ = _tmp4_;
-	_g_object_unref0 (self->priv->listener);
-	self->priv->listener = _tmp5_;
-	g_signal_connect_object (self->priv->listener, "server-added", (GCallback) _music_player_bridge_on_server_added_indicate_listener_server_added, self, 0);
-	g_signal_connect_object (self->priv->listener, "server-removed", (GCallback) _music_player_bridge_on_server_removed_indicate_listener_server_removed, self, 0);
 	return self;
 }
 
@@ -181,81 +163,77 @@ MusicPlayerBridge* music_player_bridge_new (void) {
 }
 
 
-static gpointer _g_object_ref0 (gpointer self) {
-	return self ? g_object_ref (self) : NULL;
+static void music_player_bridge_on_blacklist_update (MusicPlayerBridge* self, gchar** blacklist, int blacklist_length1) {
+	g_return_if_fail (self != NULL);
+	g_debug ("music-player-bridge.vala:45: some blacklist update");
 }
 
 
 static void music_player_bridge_try_to_add_inactive_familiar_clients (MusicPlayerBridge* self) {
+	gint _tmp0_;
+	gchar** _tmp1_ = NULL;
 	g_return_if_fail (self != NULL);
+	_tmp1_ = settings_manager_fetch_interested (self->priv->settings_manager, &_tmp0_);
 	{
-		GeeSet* _tmp0_ = NULL;
-		GeeSet* _tmp1_;
-		GeeIterator* _tmp2_ = NULL;
-		GeeIterator* _tmp3_;
-		GeeIterator* _app_it;
-		_tmp0_ = familiar_players_db_records (self->priv->playersDB);
-		_tmp1_ = _tmp0_;
-		_tmp2_ = gee_iterable_iterator ((GeeIterable*) _tmp1_);
-		_app_it = (_tmp3_ = _tmp2_, _g_object_unref0 (_tmp1_), _tmp3_);
-		while (TRUE) {
-			gboolean _tmp4_;
-			gpointer _tmp5_ = NULL;
-			gchar* app;
-			GDesktopAppInfo* _tmp6_ = NULL;
-			GDesktopAppInfo* info;
-			GDesktopAppInfo* _tmp7_;
-			GAppInfo* _tmp8_;
-			GAppInfo* app_info;
-			gchar* _tmp9_;
-			gchar* _tmp10_ = NULL;
-			gchar* mpris_key;
-			gchar* _tmp11_ = NULL;
-			gchar* _tmp12_;
-			gint _tmp13_;
-			PlayerController* _tmp14_ = NULL;
-			PlayerController* _tmp15_;
-			PlayerController* ctrl;
-			_tmp4_ = gee_iterator_next (_app_it);
-			if (!_tmp4_) {
-				break;
+		gchar** desktop_collection;
+		int desktop_collection_length1;
+		int desktop_it;
+		desktop_collection = _tmp1_;
+		desktop_collection_length1 = _tmp0_;
+		for (desktop_it = 0; desktop_it < _tmp0_; desktop_it = desktop_it + 1) {
+			gchar* _tmp2_;
+			gchar* desktop;
+			_tmp2_ = g_strdup (desktop_collection[desktop_it]);
+			desktop = _tmp2_;
+			{
+				gchar* _tmp3_ = NULL;
+				gchar* _tmp4_;
+				gchar* _tmp5_ = NULL;
+				gchar* _tmp6_;
+				gchar* path;
+				GAppInfo* _tmp7_ = NULL;
+				GAppInfo* app_info;
+				gchar* _tmp8_;
+				gchar* _tmp9_ = NULL;
+				gchar* mpris_key;
+				gchar* _tmp10_ = NULL;
+				gchar* _tmp11_;
+				gint _tmp12_;
+				PlayerController* _tmp13_ = NULL;
+				PlayerController* _tmp14_;
+				PlayerController* ctrl;
+				g_debug ("music-player-bridge.vala:51: interested client found : %s", desktop);
+				_tmp3_ = g_strconcat (desktop, ".desktop", NULL);
+				_tmp4_ = _tmp3_;
+				_tmp5_ = g_strconcat (MUSIC_PLAYER_BRIDGE_DESKTOP_PREFIX, _tmp4_, NULL);
+				path = (_tmp6_ = _tmp5_, _g_free0 (_tmp4_), _tmp6_);
+				_tmp7_ = music_player_bridge_create_app_info (path);
+				app_info = _tmp7_;
+				if (app_info == NULL) {
+					g_warning ("music-player-bridge.vala:55: Could not create app_info for path %s \n" \
+" Getting out of here ", path);
+					_g_object_unref0 (app_info);
+					_g_free0 (path);
+					_g_free0 (desktop);
+					continue;
+				}
+				_tmp8_ = g_strdup (path);
+				_tmp9_ = music_player_bridge_determine_key (_tmp8_);
+				mpris_key = _tmp9_;
+				_tmp10_ = music_player_bridge_fetch_icon_name (path);
+				_tmp11_ = _tmp10_;
+				_tmp12_ = music_player_bridge_calculate_menu_position (self);
+				_tmp13_ = player_controller_new (self->priv->root_menu, app_info, NULL, _tmp11_, _tmp12_, PLAYER_CONTROLLER_STATE_OFFLINE);
+				ctrl = (_tmp14_ = _tmp13_, _g_free0 (_tmp11_), _tmp14_);
+				gee_abstract_map_set ((GeeAbstractMap*) self->priv->registered_clients, mpris_key, ctrl);
+				_g_object_unref0 (ctrl);
+				_g_free0 (mpris_key);
+				_g_object_unref0 (app_info);
+				_g_free0 (path);
+				_g_free0 (desktop);
 			}
-			_tmp5_ = gee_iterator_get (_app_it);
-			app = (gchar*) _tmp5_;
-			if (app == NULL) {
-				g_warning ("music-player-bridge.vala:44: App string in keyfile is null therefore m" \
-"oving on to next player");
-				_g_free0 (app);
-				continue;
-			}
-			g_debug ("music-player-bridge.vala:48: attempting to make an app info from %s", app);
-			_tmp6_ = g_desktop_app_info_new_from_filename (app);
-			info = _tmp6_;
-			if (info == NULL) {
-				g_warning ("music-player-bridge.vala:53: Could not create a desktopappinfo instanc" \
-"e from app,: %s , moving on to the next client", app);
-				_g_object_unref0 (info);
-				_g_free0 (app);
-				continue;
-			}
-			_tmp8_ = _g_object_ref0 ((_tmp7_ = info, G_IS_APP_INFO (_tmp7_) ? ((GAppInfo*) _tmp7_) : NULL));
-			app_info = _tmp8_;
-			_tmp9_ = g_strdup (app);
-			_tmp10_ = music_player_bridge_determine_key (_tmp9_);
-			mpris_key = _tmp10_;
-			_tmp11_ = familiar_players_db_fetch_icon_name (app);
-			_tmp12_ = _tmp11_;
-			_tmp13_ = music_player_bridge_calculate_menu_position (self);
-			_tmp14_ = player_controller_new (self->priv->root_menu, app_info, mpris_key, _tmp12_, _tmp13_, PLAYER_CONTROLLER_STATE_OFFLINE);
-			ctrl = (_tmp15_ = _tmp14_, _g_free0 (_tmp12_), _tmp15_);
-			gee_abstract_map_set ((GeeAbstractMap*) self->priv->registered_clients, mpris_key, ctrl);
-			_g_object_unref0 (ctrl);
-			_g_free0 (mpris_key);
-			_g_object_unref0 (app_info);
-			_g_object_unref0 (info);
-			_g_free0 (app);
 		}
-		_g_object_unref0 (_app_it);
+		desktop_collection = (_vala_array_free (desktop_collection, desktop_collection_length1, (GDestroyNotify) g_free), NULL);
 	}
 }
 
@@ -277,198 +255,272 @@ static gint music_player_bridge_calculate_menu_position (MusicPlayerBridge* self
 }
 
 
-void music_player_bridge_on_server_added (MusicPlayerBridge* self, IndicateListenerServer* object, const gchar* type) {
-	gboolean _tmp0_;
+void music_player_bridge_client_has_become_available (MusicPlayerBridge* self, const gchar* desktop, const gchar* dbus_name) {
+	gboolean _tmp0_ = FALSE;
+	gchar* _tmp1_ = NULL;
+	gchar* _tmp2_;
+	gchar* _tmp3_ = NULL;
+	gchar* _tmp4_;
+	gchar* path;
+	GAppInfo* _tmp5_ = NULL;
+	GAppInfo* app_info;
+	gchar* _tmp6_;
+	gchar* _tmp7_ = NULL;
+	gchar* mpris_key;
+	gboolean _tmp8_;
 	g_return_if_fail (self != NULL);
-	g_return_if_fail (type != NULL);
-	g_debug ("music-player-bridge.vala:81: MusicPlayerBridge -> on_server_added with" \
-" value %s", type);
-	_tmp0_ = music_player_bridge_server_is_not_of_interest (self, type);
+	g_return_if_fail (desktop != NULL);
+	g_return_if_fail (dbus_name != NULL);
+	if (desktop == NULL) {
+		_tmp0_ = TRUE;
+	} else {
+		_tmp0_ = g_strcmp0 (desktop, "") == 0;
+	}
 	if (_tmp0_) {
+		g_warning ("music-player-bridge.vala:82: Client %s attempting to register without " \
+"desktop entry being set on the mpris root", dbus_name);
 		return;
 	}
-	if (self->priv->root_menu != NULL) {
-		indicate_listener_get_server_property_cb cb;
-		cb = (indicate_listener_get_server_property_cb) music_player_bridge_desktop_info_callback;
-		indicate_listener_server_get_desktop (self->priv->listener, object, cb, self);
-	}
-}
-
-
-static void music_player_bridge_desktop_info_callback (MusicPlayerBridge* self, IndicateListenerServer* server, gchar* path, void* data) {
-	void* _tmp0_;
-	MusicPlayerBridge* _tmp1_;
-	MusicPlayerBridge* bridge;
-	GAppInfo* _tmp2_ = NULL;
-	GAppInfo* app_info;
-	gchar* _tmp3_;
-	gchar* _tmp4_ = NULL;
-	gchar* mpris_key;
-	gboolean _tmp5_;
-	g_return_if_fail (self != NULL);
-	g_return_if_fail (path != NULL);
-	_tmp1_ = _g_object_ref0 ((_tmp0_ = data, IS_MUSIC_PLAYER_BRIDGE (_tmp0_) ? ((MusicPlayerBridge*) _tmp0_) : NULL));
-	bridge = _tmp1_;
-	_tmp2_ = music_player_bridge_create_app_info (path);
-	app_info = _tmp2_;
+	g_debug ("music-player-bridge.vala:86: client_has_become_available %s", desktop);
+	_tmp1_ = g_strconcat (desktop, ".desktop", NULL);
+	_tmp2_ = _tmp1_;
+	_tmp3_ = g_strconcat (MUSIC_PLAYER_BRIDGE_DESKTOP_PREFIX, _tmp2_, NULL);
+	path = (_tmp4_ = _tmp3_, _g_free0 (_tmp2_), _tmp4_);
+	_tmp5_ = music_player_bridge_create_app_info (path);
+	app_info = _tmp5_;
 	if (app_info == NULL) {
-		g_warning ("music-player-bridge.vala:96: Could not create app_info for path %s \n" \
+		g_warning ("music-player-bridge.vala:90: Could not create app_info for path %s \n" \
 " Getting out of here ", path);
 		_g_object_unref0 (app_info);
-		_g_object_unref0 (bridge);
 		_g_free0 (path);
 		return;
 	}
-	_tmp3_ = g_strdup (path);
-	_tmp4_ = music_player_bridge_determine_key (_tmp3_);
-	mpris_key = _tmp4_;
-	_tmp5_ = familiar_players_db_already_familiar (bridge->priv->playersDB, path);
-	if (_tmp5_ == FALSE) {
-		gchar* _tmp6_ = NULL;
-		gchar* _tmp7_;
-		gint _tmp8_;
-		PlayerController* _tmp9_ = NULL;
-		PlayerController* _tmp10_;
+	_tmp6_ = g_strdup (path);
+	_tmp7_ = music_player_bridge_determine_key (_tmp6_);
+	mpris_key = _tmp7_;
+	_tmp8_ = gee_abstract_map_has_key ((GeeAbstractMap*) self->priv->registered_clients, mpris_key);
+	if (_tmp8_ == FALSE) {
+		gchar* _tmp9_ = NULL;
+		gchar* _tmp10_;
+		gint _tmp11_;
+		PlayerController* _tmp12_ = NULL;
+		PlayerController* _tmp13_;
 		PlayerController* ctrl;
-		g_debug ("music-player-bridge.vala:103: New client has registered that we have s" \
-"een before: %s", path);
-		familiar_players_db_insert (bridge->priv->playersDB, path);
-		_tmp6_ = familiar_players_db_fetch_icon_name (path);
-		_tmp7_ = _tmp6_;
-		_tmp8_ = music_player_bridge_calculate_menu_position (bridge);
-		_tmp9_ = player_controller_new (bridge->priv->root_menu, app_info, mpris_key, _tmp7_, _tmp8_, PLAYER_CONTROLLER_STATE_READY);
-		ctrl = (_tmp10_ = _tmp9_, _g_free0 (_tmp7_), _tmp10_);
-		gee_abstract_map_set ((GeeAbstractMap*) bridge->priv->registered_clients, mpris_key, ctrl);
-		g_debug ("music-player-bridge.vala:112: successfully created appinfo and instanc" \
-"e from path and set it on the respective instance");
+		g_debug ("music-player-bridge.vala:97: New client has registered that we have no" \
+"t seen before: %s", dbus_name);
+		_tmp9_ = music_player_bridge_fetch_icon_name (path);
+		_tmp10_ = _tmp9_;
+		_tmp11_ = music_player_bridge_calculate_menu_position (self);
+		_tmp12_ = player_controller_new (self->priv->root_menu, app_info, dbus_name, _tmp10_, _tmp11_, PLAYER_CONTROLLER_STATE_READY);
+		ctrl = (_tmp13_ = _tmp12_, _g_free0 (_tmp10_), _tmp13_);
+		gee_abstract_map_set ((GeeAbstractMap*) self->priv->registered_clients, mpris_key, ctrl);
+		g_debug ("music-player-bridge.vala:105: Have not seen this %s before, new contro" \
+"ller created.", desktop);
+		settings_manager_add_interested (self->priv->settings_manager, desktop);
+		g_debug ("music-player-bridge.vala:107: application added to the interested list");
 		_g_object_unref0 (ctrl);
 	} else {
-		gpointer _tmp11_ = NULL;
-		PlayerController* _tmp12_;
-		gpointer _tmp13_ = NULL;
-		PlayerController* _tmp14_;
-		_tmp11_ = gee_abstract_map_get ((GeeAbstractMap*) bridge->priv->registered_clients, mpris_key);
-		_tmp12_ = (PlayerController*) _tmp11_;
-		player_controller_update_state (_tmp12_, PLAYER_CONTROLLER_STATE_READY);
-		_g_object_unref0 (_tmp12_);
-		_tmp13_ = gee_abstract_map_get ((GeeAbstractMap*) bridge->priv->registered_clients, mpris_key);
-		_tmp14_ = (PlayerController*) _tmp13_;
-		player_controller_activate (_tmp14_);
-		_g_object_unref0 (_tmp14_);
-		g_debug ("music-player-bridge.vala:117: Ignoring desktop file path callback beca" \
-"use the db cache file has it already: %s \n", path);
+		gpointer _tmp14_ = NULL;
+		PlayerController* _tmp15_;
+		gpointer _tmp16_ = NULL;
+		PlayerController* _tmp17_;
+		_tmp14_ = gee_abstract_map_get ((GeeAbstractMap*) self->priv->registered_clients, mpris_key);
+		_tmp15_ = (PlayerController*) _tmp14_;
+		player_controller_update_state (_tmp15_, PLAYER_CONTROLLER_STATE_READY);
+		_g_object_unref0 (_tmp15_);
+		_tmp16_ = gee_abstract_map_get ((GeeAbstractMap*) self->priv->registered_clients, mpris_key);
+		_tmp17_ = (PlayerController*) _tmp16_;
+		player_controller_activate (_tmp17_, dbus_name);
+		_g_object_unref0 (_tmp17_);
+		g_debug ("music-player-bridge.vala:112: Application has already registered - awa" \
+"ken the hibernation: %s \n", dbus_name);
 	}
 	_g_free0 (mpris_key);
 	_g_object_unref0 (app_info);
-	_g_object_unref0 (bridge);
 	_g_free0 (path);
 }
 
 
-void music_player_bridge_on_server_removed (MusicPlayerBridge* self, IndicateListenerServer* object, const gchar* type) {
-	gboolean _tmp0_;
+void music_player_bridge_client_has_vanished (MusicPlayerBridge* self, const gchar* mpris_root_interface) {
 	g_return_if_fail (self != NULL);
-	g_return_if_fail (type != NULL);
-	g_debug ("music-player-bridge.vala:123: MusicPlayerBridge -> on_server_removed w" \
-"ith value %s", type);
-	_tmp0_ = music_player_bridge_server_is_not_of_interest (self, type);
-	if (_tmp0_) {
-		return;
-	}
+	g_return_if_fail (mpris_root_interface != NULL);
+	g_debug ("music-player-bridge.vala:118: MusicPlayerBridge -> on_server_removed w" \
+"ith value %s", mpris_root_interface);
 	if (self->priv->root_menu != NULL) {
-		gchar** _tmp1_;
-		gchar** _tmp2_ = NULL;
-		gint tmp_length1;
-		gint _tmp_size_;
-		gchar** _tmp3_;
-		gchar** tmp;
-		_tmp2_ = _tmp1_ = g_strsplit (type, ".", 0);
-		_tmp3_ = _tmp2_;
-		tmp_length1 = _vala_array_length (_tmp1_);
-		_tmp_size_ = tmp_length1;
-		tmp = _tmp3_;
-		g_debug ("music-player-bridge.vala:127: attempt to remove %s", tmp[tmp_length1 - 1]);
-		if (tmp_length1 > 0) {
-			gpointer _tmp4_ = NULL;
-			PlayerController* _tmp5_;
-			_tmp4_ = gee_abstract_map_get ((GeeAbstractMap*) self->priv->registered_clients, tmp[tmp_length1 - 1]);
-			_tmp5_ = (PlayerController*) _tmp4_;
-			player_controller_hibernate (_tmp5_);
-			_g_object_unref0 (_tmp5_);
-			g_debug ("music-player-bridge.vala:130: Successively offlined client %s", tmp[tmp_length1 - 1]);
+		gchar* _tmp0_;
+		gchar* _tmp1_ = NULL;
+		gchar* mpris_key;
+		g_debug ("music-player-bridge.vala:120: attempt to remove %s", mpris_root_interface);
+		_tmp0_ = g_strdup (mpris_root_interface);
+		_tmp1_ = music_player_bridge_determine_key (_tmp0_);
+		mpris_key = _tmp1_;
+		if (mpris_key != NULL) {
+			gpointer _tmp2_ = NULL;
+			PlayerController* _tmp3_;
+			_tmp2_ = gee_abstract_map_get ((GeeAbstractMap*) self->priv->registered_clients, mpris_key);
+			_tmp3_ = (PlayerController*) _tmp2_;
+			player_controller_hibernate (_tmp3_);
+			_g_object_unref0 (_tmp3_);
+			g_debug ("music-player-bridge.vala:124: Successively offlined client %s", mpris_key);
 		}
-		tmp = (_vala_array_free (tmp, tmp_length1, (GDestroyNotify) g_free), NULL);
+		_g_free0 (mpris_key);
 	}
 }
 
 
-static gboolean string_contains (const gchar* self, const gchar* needle) {
-	gboolean result = FALSE;
-	const gchar* _tmp0_ = NULL;
-	g_return_val_if_fail (self != NULL, FALSE);
-	g_return_val_if_fail (needle != NULL, FALSE);
-	_tmp0_ = strstr (self, needle);
-	result = _tmp0_ != NULL;
-	return result;
+static gpointer _g_object_ref0 (gpointer self) {
+	return self ? g_object_ref (self) : NULL;
 }
 
 
-static gboolean music_player_bridge_server_is_not_of_interest (MusicPlayerBridge* self, const gchar* type) {
-	gboolean result = FALSE;
-	gboolean _tmp0_;
-	g_return_val_if_fail (self != NULL, FALSE);
-	g_return_val_if_fail (type != NULL, FALSE);
-	if (type == NULL) {
-		result = TRUE;
-		return result;
-	}
-	_tmp0_ = string_contains (type, "music");
-	if (_tmp0_ == FALSE) {
-		g_debug ("music-player-bridge.vala:138: server is of no interest,  it is not an " \
-"music server");
-		result = TRUE;
-		return result;
-	}
-	result = FALSE;
-	return result;
+static void _music_player_bridge_client_has_become_available_mpris2_watcher_client_appeared (Mpris2Watcher* _sender, const gchar* desktop_file_name, const gchar* dbus_name, gpointer self) {
+	music_player_bridge_client_has_become_available (self, desktop_file_name, dbus_name);
+}
+
+
+static void _music_player_bridge_client_has_vanished_mpris2_watcher_client_disappeared (Mpris2Watcher* _sender, const gchar* dbus_name, gpointer self) {
+	music_player_bridge_client_has_vanished (self, dbus_name);
 }
 
 
 void music_player_bridge_set_root_menu_item (MusicPlayerBridge* self, DbusmenuMenuitem* menu) {
 	DbusmenuMenuitem* _tmp0_;
 	DbusmenuMenuitem* _tmp1_;
+	Mpris2Watcher* _tmp2_ = NULL;
+	Mpris2Watcher* _tmp3_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (menu != NULL);
 	_tmp0_ = _g_object_ref0 (menu);
 	_tmp1_ = _tmp0_;
 	_g_object_unref0 (self->priv->root_menu);
 	self->priv->root_menu = _tmp1_;
+	_tmp2_ = mpris2_watcher_new ();
+	_tmp3_ = _tmp2_;
+	_g_object_unref0 (self->priv->watcher);
+	self->priv->watcher = _tmp3_;
+	g_signal_connect_object (self->priv->watcher, "client-appeared", (GCallback) _music_player_bridge_client_has_become_available_mpris2_watcher_client_appeared, self, 0);
+	g_signal_connect_object (self->priv->watcher, "client-disappeared", (GCallback) _music_player_bridge_client_has_vanished_mpris2_watcher_client_disappeared, self, 0);
 	music_player_bridge_try_to_add_inactive_familiar_clients (self);
 }
 
 
-GAppInfo* music_player_bridge_create_app_info (const gchar* path) {
+static GAppInfo* music_player_bridge_create_app_info (const gchar* path) {
 	GAppInfo* result = NULL;
 	GDesktopAppInfo* _tmp0_ = NULL;
 	GDesktopAppInfo* info;
-	GDesktopAppInfo* _tmp1_;
-	GAppInfo* _tmp2_;
+	gboolean _tmp1_ = FALSE;
+	GDesktopAppInfo* _tmp2_;
+	GAppInfo* _tmp3_;
 	GAppInfo* app_info;
 	g_return_val_if_fail (path != NULL, NULL);
 	_tmp0_ = g_desktop_app_info_new_from_filename (path);
 	info = _tmp0_;
 	if (path == NULL) {
-		g_warning ("music-player-bridge.vala:154: Could not create a desktopappinfo instan" \
+		_tmp1_ = TRUE;
+	} else {
+		_tmp1_ = info == NULL;
+	}
+	if (_tmp1_) {
+		g_warning ("music-player-bridge.vala:142: Could not create a desktopappinfo instan" \
 "ce from app: %s", path);
 		result = NULL;
 		_g_object_unref0 (info);
 		return result;
 	}
-	_tmp2_ = _g_object_ref0 ((_tmp1_ = info, G_IS_APP_INFO (_tmp1_) ? ((GAppInfo*) _tmp1_) : NULL));
-	app_info = _tmp2_;
+	_tmp3_ = _g_object_ref0 ((_tmp2_ = info, G_IS_APP_INFO (_tmp2_) ? ((GAppInfo*) _tmp2_) : NULL));
+	app_info = _tmp3_;
 	result = app_info;
 	_g_object_unref0 (info);
 	return result;
+}
+
+
+static gchar* music_player_bridge_fetch_icon_name (const gchar* desktop_path) {
+	gchar* result = NULL;
+	GKeyFile* _tmp0_ = NULL;
+	GKeyFile* desktop_keyfile;
+	gchar* _tmp1_ = NULL;
+	gchar* _tmp2_;
+	GError * _inner_error_ = NULL;
+	g_return_val_if_fail (desktop_path != NULL, NULL);
+	_tmp0_ = g_key_file_new ();
+	desktop_keyfile = _tmp0_;
+	g_key_file_load_from_file (desktop_keyfile, desktop_path, G_KEY_FILE_NONE, &_inner_error_);
+	if (_inner_error_ != NULL) {
+		if (_inner_error_->domain == G_FILE_ERROR) {
+			goto __catch0_g_file_error;
+		}
+		if (_inner_error_->domain == G_KEY_FILE_ERROR) {
+			goto __catch0_g_key_file_error;
+		}
+		_g_key_file_free0 (desktop_keyfile);
+		g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+		return NULL;
+	}
+	goto __finally0;
+	__catch0_g_file_error:
+	{
+		GError * _error_;
+		_error_ = _inner_error_;
+		_inner_error_ = NULL;
+		g_warning ("music-player-bridge.vala:156: Error loading keyfile - FileError");
+		result = NULL;
+		_g_error_free0 (_error_);
+		_g_key_file_free0 (desktop_keyfile);
+		return result;
+	}
+	goto __finally0;
+	__catch0_g_key_file_error:
+	{
+		GError * _error_;
+		_error_ = _inner_error_;
+		_inner_error_ = NULL;
+		g_warning ("music-player-bridge.vala:160: Error loading keyfile - KeyFileError");
+		result = NULL;
+		_g_error_free0 (_error_);
+		_g_key_file_free0 (desktop_keyfile);
+		return result;
+	}
+	__finally0:
+	if (_inner_error_ != NULL) {
+		_g_key_file_free0 (desktop_keyfile);
+		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+		return NULL;
+	}
+	_tmp1_ = g_key_file_get_string (desktop_keyfile, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, &_inner_error_);
+	_tmp2_ = _tmp1_;
+	if (_inner_error_ != NULL) {
+		if (_inner_error_->domain == G_KEY_FILE_ERROR) {
+			goto __catch1_g_key_file_error;
+		}
+		_g_key_file_free0 (desktop_keyfile);
+		g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+		return NULL;
+	}
+	result = _tmp2_;
+	_g_key_file_free0 (desktop_keyfile);
+	return result;
+	goto __finally1;
+	__catch1_g_key_file_error:
+	{
+		GError * _error_;
+		_error_ = _inner_error_;
+		_inner_error_ = NULL;
+		g_warning ("music-player-bridge.vala:169: Error trying to fetch the icon name from" \
+" the keyfile");
+		result = NULL;
+		_g_error_free0 (_error_);
+		_g_key_file_free0 (desktop_keyfile);
+		return result;
+	}
+	__finally1:
+	_g_key_file_free0 (desktop_keyfile);
+	g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+	g_clear_error (&_inner_error_);
+	return NULL;
 }
 
 
@@ -480,20 +532,20 @@ static gchar* music_player_bridge_determine_key (gchar* path) {
 	gint _tokens_size_;
 	gchar** _tmp2_;
 	gchar** tokens;
-	gchar* _tmp3_;
+	gchar* _tmp6_;
 	gchar* filename;
-	gchar** _tmp4_;
-	gchar** _tmp5_ = NULL;
-	gchar** _tmp6_;
-	gint _tmp6__length1;
-	gchar* _tmp7_;
-	gchar* _tmp8_;
-	gchar* _result_;
+	gchar** _tmp7_;
+	gchar** _tmp8_ = NULL;
 	gchar** _tmp9_;
-	gchar** _tmp10_ = NULL;
+	gint _tmp9__length1;
+	gchar* _tmp10_;
+	gchar* _tmp11_;
+	gchar* _result_;
+	gchar** _tmp12_;
+	gchar** _tmp13_ = NULL;
 	gint temp_length1;
 	gint _temp_size_;
-	gchar** _tmp11_;
+	gchar** _tmp14_;
 	gchar** temp;
 	g_return_val_if_fail (path != NULL, NULL);
 	_tmp1_ = _tmp0_ = g_strsplit (path, "/", 0);
@@ -502,32 +554,43 @@ static gchar* music_player_bridge_determine_key (gchar* path) {
 	_tokens_size_ = tokens_length1;
 	tokens = _tmp2_;
 	if (tokens_length1 < 2) {
-		result = NULL;
+		gchar** _tmp3_;
+		gchar** _tmp4_ = NULL;
+		gchar** _tmp5_;
+		_tmp4_ = _tmp3_ = g_strsplit (path, ".", 0);
+		_tmp5_ = _tmp4_;
 		tokens = (_vala_array_free (tokens, tokens_length1, (GDestroyNotify) g_free), NULL);
-		_g_free0 (path);
-		return result;
+		tokens_length1 = _vala_array_length (_tmp3_);
+		_tokens_size_ = tokens_length1;
+		tokens = _tmp5_;
+		if (tokens_length1 < 2) {
+			result = NULL;
+			tokens = (_vala_array_free (tokens, tokens_length1, (GDestroyNotify) g_free), NULL);
+			_g_free0 (path);
+			return result;
+		}
 	}
-	_tmp3_ = g_strdup (tokens[tokens_length1 - 1]);
-	filename = _tmp3_;
-	_tmp5_ = _tmp4_ = g_strsplit (filename, ".", 0);
-	_tmp6_ = _tmp5_;
-	_tmp6__length1 = _vala_array_length (_tmp4_);
-	_tmp7_ = g_strdup (_tmp6_[0]);
-	_result_ = (_tmp8_ = _tmp7_, _tmp6_ = (_vala_array_free (_tmp6_, _tmp6__length1, (GDestroyNotify) g_free), NULL), _tmp8_);
-	_tmp10_ = _tmp9_ = g_strsplit (_result_, "-", 0);
-	_tmp11_ = _tmp10_;
-	temp_length1 = _vala_array_length (_tmp9_);
+	_tmp6_ = g_strdup (tokens[tokens_length1 - 1]);
+	filename = _tmp6_;
+	_tmp8_ = _tmp7_ = g_strsplit (filename, ".", 0);
+	_tmp9_ = _tmp8_;
+	_tmp9__length1 = _vala_array_length (_tmp7_);
+	_tmp10_ = g_strdup (_tmp9_[0]);
+	_result_ = (_tmp11_ = _tmp10_, _tmp9_ = (_vala_array_free (_tmp9_, _tmp9__length1, (GDestroyNotify) g_free), NULL), _tmp11_);
+	_tmp13_ = _tmp12_ = g_strsplit (_result_, "-", 0);
+	_tmp14_ = _tmp13_;
+	temp_length1 = _vala_array_length (_tmp12_);
 	_temp_size_ = temp_length1;
-	temp = _tmp11_;
+	temp = _tmp14_;
 	if (temp_length1 > 1) {
-		gchar* _tmp12_;
-		gchar* _tmp13_;
-		_tmp12_ = g_strdup (temp[0]);
-		_tmp13_ = _tmp12_;
+		gchar* _tmp15_;
+		gchar* _tmp16_;
+		_tmp15_ = g_strdup (temp[0]);
+		_tmp16_ = _tmp15_;
 		_g_free0 (_result_);
-		_result_ = _tmp13_;
+		_result_ = _tmp16_;
 	}
-	g_debug ("music-player-bridge.vala:171: determine key result = %s", _result_);
+	g_debug ("music-player-bridge.vala:197: determine key result = %s", _result_);
 	result = _result_;
 	temp = (_vala_array_free (temp, temp_length1, (GDestroyNotify) g_free), NULL);
 	_g_free0 (filename);
@@ -537,9 +600,39 @@ static gchar* music_player_bridge_determine_key (gchar* path) {
 }
 
 
+static void _music_player_bridge_on_blacklist_update_settings_manager_blacklist_updates (SettingsManager* _sender, gchar** new_blacklist, int new_blacklist_length1, gpointer self) {
+	music_player_bridge_on_blacklist_update (self, new_blacklist, new_blacklist_length1);
+}
+
+
+static GObject * music_player_bridge_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties) {
+	GObject * obj;
+	GObjectClass * parent_class;
+	MusicPlayerBridge * self;
+	GeeHashMap* _tmp0_ = NULL;
+	GeeHashMap* _tmp1_;
+	SettingsManager* _tmp2_ = NULL;
+	SettingsManager* _tmp3_;
+	parent_class = G_OBJECT_CLASS (music_player_bridge_parent_class);
+	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
+	self = MUSIC_PLAYER_BRIDGE (obj);
+	_tmp0_ = gee_hash_map_new (G_TYPE_STRING, (GBoxedCopyFunc) g_strdup, g_free, TYPE_PLAYER_CONTROLLER, (GBoxedCopyFunc) g_object_ref, g_object_unref, NULL, NULL, NULL);
+	_tmp1_ = _tmp0_;
+	_g_object_unref0 (self->priv->registered_clients);
+	self->priv->registered_clients = _tmp1_;
+	_tmp2_ = settings_manager_new ();
+	_tmp3_ = _tmp2_;
+	_g_object_unref0 (self->priv->settings_manager);
+	self->priv->settings_manager = _tmp3_;
+	g_signal_connect_object (self->priv->settings_manager, "blacklist-updates", (GCallback) _music_player_bridge_on_blacklist_update_settings_manager_blacklist_updates, self, 0);
+	return obj;
+}
+
+
 static void music_player_bridge_class_init (MusicPlayerBridgeClass * klass) {
 	music_player_bridge_parent_class = g_type_class_peek_parent (klass);
 	g_type_class_add_private (klass, sizeof (MusicPlayerBridgePrivate));
+	G_OBJECT_CLASS (klass)->constructor = music_player_bridge_constructor;
 	G_OBJECT_CLASS (klass)->finalize = music_player_bridge_finalize;
 }
 
@@ -552,10 +645,11 @@ static void music_player_bridge_instance_init (MusicPlayerBridge * self) {
 static void music_player_bridge_finalize (GObject* obj) {
 	MusicPlayerBridge * self;
 	self = MUSIC_PLAYER_BRIDGE (obj);
-	_g_object_unref0 (self->priv->listener);
+	_g_object_unref0 (self->priv->settings_manager);
 	_g_object_unref0 (self->priv->root_menu);
 	_g_object_unref0 (self->priv->registered_clients);
-	_g_object_unref0 (self->priv->playersDB);
+	_g_object_unref0 (self->priv->watcher);
+	_g_object_unref0 (self->priv->settings);
 	G_OBJECT_CLASS (music_player_bridge_parent_class)->finalize (obj);
 }
 

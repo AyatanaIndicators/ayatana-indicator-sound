@@ -1,3 +1,14 @@
+indicator-sound (0.5.3-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Libindicate removed from registration process (LP: #691189)
+    - Vala code now using Gdbus exclusively for mpris interaction 
+    - Fixed memory leak with album art resizing (LP: #689686)
+    - Gconf removed and Gsettings schema added (LP: #656405)
+    - registration process now uses gsettings 
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 16 Dec 2010 15:03:15 -0500
+
 indicator-sound (0.5.2-0ubuntu2) natty; urgency=low
 
   * debian/control

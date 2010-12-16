@@ -1,10 +1,10 @@
 
-AC_INIT(indicator-sound, 0.5.2, conor.curran@canonical.com)
+AC_INIT(indicator-sound, 0.5.3, conor.curran@canonical.com)
 
 AC_PREREQ(2.53)
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(indicator-sound, 0.5.2)
+AM_INIT_AUTOMAKE(indicator-sound, 0.5.3)
 
 AM_MAINTAINER_MODE
 
@@ -88,6 +88,12 @@ else
 fi
 AC_SUBST(INDICATORDIR)
 AC_SUBST(INDICATORICONSDIR)
+
+###########################
+# Grab the GSettings Macros
+###########################
+
+GLIB_GSETTINGS
 
 ###########################
 # DBus Service Info

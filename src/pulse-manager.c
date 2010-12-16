@@ -65,7 +65,7 @@ void establish_pulse_activities(SoundServiceDbus *service)
   pa_main_loop = pa_glib_mainloop_new(g_main_context_default());
   g_assert(pa_main_loop);
   pulse_context = pa_context_new(pa_glib_mainloop_get_api(pa_main_loop),
-                                 "ayatana.indicator.sound");
+                                 "com.canonical.indicators.sound");
   g_assert(pulse_context);
 
   sink_hash = g_hash_table_new_full(g_direct_hash,
@@ -103,7 +103,7 @@ reconnect_to_pulse()
     sink_hash = NULL;
   }
   pulse_context = pa_context_new( pa_glib_mainloop_get_api( pa_main_loop ),
-                                  "ayatana.indicator.sound" );
+                                  "com.canonical.indicators.sound" );
   g_assert(pulse_context);
   sink_hash = g_hash_table_new_full( g_direct_hash, g_direct_equal,
                                      NULL,
@@ -131,7 +131,7 @@ void close_pulse_activites()
 {
   if (pulse_context != NULL) {
     /*        g_debug("freeing the pulse context");*/
- 		pa_context_unref(pulse_context);
+    pa_context_unref(pulse_context);
     pulse_context = NULL;
   }
   g_hash_table_destroy(sink_hash);
@@ -223,7 +223,7 @@ static void mute_each_sink(gpointer key, gpointer value, gpointer user_data)
   if (GPOINTER_TO_INT(user_data) == 1) {
     sound_service_dbus_update_sink_mute(dbus_service, TRUE);
   } else {
-		dbus_menu_manager_update_volume(get_default_sink_volume());
+    dbus_menu_manager_update_volume(get_default_sink_volume());
   }
 
   /*    g_debug("in the pulse manager: mute each sink %i", GPOINTER_TO_INT(user_data));*/
@@ -364,7 +364,7 @@ static void pulse_sink_input_info_callback(pa_context *c, const pa_sink_input_in
       /*            g_warning("\n Sink input info callback : SINK INPUT INFO IS NULL BUT EOL was not POSITIVE!!!");*/
       return;
     }
-    /*		g_debug("\n SINK INPUT INFO sink index : %d \n", info->sink);*/
+    /*    g_debug("\n SINK INPUT INFO sink index : %d \n", info->sink);*/
     check_sink_input_while_muted_event(info->sink);
   }
 }
@@ -419,7 +419,7 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
           pa_volume_t vol = pa_cvolume_max(&s->volume);
           gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
           /*                    g_debug("Updating volume from PA manager with volume = %f", volume_percent);*/
-	        dbus_menu_manager_update_volume(volume_percent);
+          dbus_menu_manager_update_volume(volume_percent);
         }
       }
     }
@@ -505,12 +505,12 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
       }
       /*                g_debug("subscribed_events_callback - Now what is our default sink : %i", DEFAULT_SINK_INDEX);    */
     } else {
-      /*			    g_debug("subscribed_events_callback - PA_SUBSCRIPTION_EVENT_SINK: a generic sink event - will trigger an update");            */
+      /*          g_debug("subscribed_events_callback - PA_SUBSCRIPTION_EVENT_SINK: a generic sink event - will trigger an update");            */
       pa_operation_unref(pa_context_get_sink_info_by_index(c, index, update_sink_info, userdata));
     }
     break;
   case PA_SUBSCRIPTION_EVENT_SINK_INPUT:
-    /*			g_debug("subscribed_events_callback - PA_SUBSCRIPTION_EVENT_SINK_INPUT event triggered!!");*/
+    /*      g_debug("subscribed_events_callback - PA_SUBSCRIPTION_EVENT_SINK_INPUT event triggered!!");*/
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
       //handle the sink input remove event - not relevant for current design
     } else {
@@ -534,16 +534,16 @@ static void context_state_callback(pa_context *c, void *userdata)
 {
   switch (pa_context_get_state(c)) {
   case PA_CONTEXT_UNCONNECTED:
-    			g_debug("unconnected");
+          g_debug("unconnected");
     break;
   case PA_CONTEXT_CONNECTING:
-    			g_debug("connecting - waiting for the server to become available");
+          g_debug("connecting - waiting for the server to become available");
     break;
   case PA_CONTEXT_AUTHORIZING:
-    /*			g_debug("authorizing");*/
+    /*      g_debug("authorizing");*/
     break;
   case PA_CONTEXT_SETTING_NAME:
-    /*			g_debug("context setting name");*/
+    /*      g_debug("context setting name");*/
     break;
   case PA_CONTEXT_FAILED:
     g_warning("PA_CONTEXT_FAILED - Is PulseAudio Daemon running ?");
@@ -560,7 +560,7 @@ static void context_state_callback(pa_context *c, void *userdata)
     }     
     break;
   case PA_CONTEXT_TERMINATED:
-    /*			g_debug("context terminated");*/
+    /*      g_debug("context terminated");*/
     break;
   case PA_CONTEXT_READY:
     g_debug("PA_CONTEXT_READY");

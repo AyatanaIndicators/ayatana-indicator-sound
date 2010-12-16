@@ -32,7 +32,7 @@ typedef struct _TitleWidgetPrivate TitleWidgetPrivate;
 
 struct _TitleWidgetPrivate
 {
-	DbusmenuMenuitem* twin_item;  
+  DbusmenuMenuitem* twin_item;  
 };
 
 #define TITLE_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TITLE_WIDGET_TYPE, TitleWidgetPrivate))
@@ -45,12 +45,12 @@ static void title_widget_finalize   (GObject *object);
 
 // keyevent consumers
 static gboolean title_widget_button_press_event (GtkWidget *menuitem, 
-                                  							 GdkEventButton *event);
+                                                 GdkEventButton *event);
 
 // Dbusmenuitem properties update callback
 static void title_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
                                        GValue* value, gpointer userdata);
-static void title_widget_set_twin_item(	TitleWidget* self,
+static void title_widget_set_twin_item( TitleWidget* self,
                                         DbusmenuMenuitem* twin_item);
 static gboolean title_widget_triangle_draw_cb (GtkWidget *widget,
                                                GdkEventExpose *event,
@@ -61,7 +61,7 @@ G_DEFINE_TYPE (TitleWidget, title_widget, GTK_TYPE_IMAGE_MENU_ITEM);
 static void
 title_widget_class_init (TitleWidgetClass *klass)
 {
-  GObjectClass 			*gobject_class = G_OBJECT_CLASS (klass);
+  GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass    *widget_class = GTK_WIDGET_CLASS (klass);
 
   widget_class->button_press_event = title_widget_button_press_event;
@@ -75,7 +75,7 @@ title_widget_class_init (TitleWidgetClass *klass)
 static void
 title_widget_init (TitleWidget *self)
 {
-	//g_debug("TitleWidget::title_widget_init");
+  //g_debug("TitleWidget::title_widget_init");
 }
 
 static void 
@@ -84,9 +84,9 @@ title_widget_set_icon(TitleWidget *self)
   TitleWidgetPrivate *priv = TITLE_WIDGET_GET_PRIVATE(self);
 
   gint padding = 0;
-	gtk_widget_style_get(GTK_WIDGET(self), "horizontal-padding", &padding, NULL);
-	gint width, height;
-	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
+  gtk_widget_style_get(GTK_WIDGET(self), "horizontal-padding", &padding, NULL);
+  gint width, height;
+  gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
   
   GString* banshee_string = g_string_new ( "banshee" );
   GString* app_panel = g_string_new ( g_utf8_strdown ( dbusmenu_menuitem_property_get(priv->twin_item, DBUSMENU_TITLE_MENUITEM_NAME),
@@ -98,7 +98,7 @@ title_widget_set_icon(TitleWidget *self)
   if ( g_string_equal ( banshee_string, app_panel ) == TRUE &&
       gtk_icon_theme_has_icon ( gtk_icon_theme_get_default(), app_panel->str ) ){
     g_string_append ( app_panel, "-panel" );                                                   
-	  icon = gtk_image_new_from_icon_name ( app_panel->str,
+    icon = gtk_image_new_from_icon_name ( app_panel->str,
                                           GTK_ICON_SIZE_MENU );    
   }
   else{
@@ -112,22 +112,22 @@ title_widget_set_icon(TitleWidget *self)
                                     + 5 /* ref triangle is 5x9 pixels */
                                     + 1 /* padding */,
                                     height);
-	gtk_misc_set_alignment(GTK_MISC(icon), 0.5 /* right aligned */, 0);
+  gtk_misc_set_alignment(GTK_MISC(icon), 0.5 /* right aligned */, 0);
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(icon));
-	gtk_widget_show(icon);
+  gtk_widget_show(icon);
 }
 
   
 static void
 title_widget_dispose (GObject *object)
 {
-	G_OBJECT_CLASS (title_widget_parent_class)->dispose (object);
+  G_OBJECT_CLASS (title_widget_parent_class)->dispose (object);
 }
 
 static void
 title_widget_finalize (GObject *object)
 {
-	G_OBJECT_CLASS (title_widget_parent_class)->finalize (object);
+  G_OBJECT_CLASS (title_widget_parent_class)->finalize (object);
 }
 
 /* Suppress/consume keyevents */
@@ -135,37 +135,37 @@ static gboolean
 title_widget_button_press_event (GtkWidget *menuitem, 
                                   GdkEventButton *event)
 {
-	//g_debug("TitleWidget::menu_press_event");
-	TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(menuitem);
-	
-	GValue value = {0};
+  //g_debug("TitleWidget::menu_press_event");
+  TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(menuitem);
+  
+  GValue value = {0};
     g_value_init(&value, G_TYPE_BOOLEAN);
 
-	g_value_set_boolean(&value, TRUE);	
-	dbusmenu_menuitem_handle_event (priv->twin_item, "Title menu event", &value, 0);
-	
-	return FALSE;
+  g_value_set_boolean(&value, TRUE);  
+  dbusmenu_menuitem_handle_event (priv->twin_item, "Title menu event", &value, 0);
+  
+  return FALSE;
 }
 
 static void 
 title_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
                                        GValue* value, gpointer userdata)
 {
-	g_return_if_fail (IS_TITLE_WIDGET (userdata));	
-	TitleWidget* mitem = TITLE_WIDGET(userdata);
+  g_return_if_fail (IS_TITLE_WIDGET (userdata));  
+  TitleWidget* mitem = TITLE_WIDGET(userdata);
   g_debug("PROPERTY UPDATE FOR THE TITLE");
-	if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_NAME, property) == 0){
+  if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_NAME, property) == 0){
         gtk_menu_item_set_label (GTK_MENU_ITEM(mitem),
                                 g_value_get_string(value));
-	}
-	else if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_ICON, property) == 0){
+  }
+  else if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_ICON, property) == 0){
     g_debug("changing the icon data on the title - %s",
             g_value_get_string(value));
-	  GtkWidget * icon = gtk_image_new_from_icon_name(g_value_get_string(value),
+    GtkWidget * icon = gtk_image_new_from_icon_name(g_value_get_string(value),
                                                     GTK_ICON_SIZE_MENU);
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(mitem), GTK_WIDGET(icon));
     
-	}
+  }
 }
 
 static void
@@ -194,48 +194,48 @@ title_widget_set_twin_item(TitleWidget* self,
 static gboolean
 title_widget_triangle_draw_cb (GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
-	GtkStyle *style;
-	cairo_t *cr;
-	int x, y, arrow_width, arrow_height;
-	
-	if (!GTK_IS_WIDGET (widget)) return FALSE;
-	if (!DBUSMENU_IS_MENUITEM (data)) return FALSE;
+  GtkStyle *style;
+  cairo_t *cr;
+  int x, y, arrow_width, arrow_height;
+  
+  if (!GTK_IS_WIDGET (widget)) return FALSE;
+  if (!DBUSMENU_IS_MENUITEM (data)) return FALSE;
 
-	/* render the triangle indicator only if the application is running */
-	if (! dbusmenu_menuitem_property_get_bool (DBUSMENU_MENUITEM(data),
-	                                           DBUSMENU_TITLE_MENUITEM_RUNNING)){		
-		return FALSE;
-	}
-	
-	/* get style */
-	style = gtk_widget_get_style (widget);
+  /* render the triangle indicator only if the application is running */
+  if (! dbusmenu_menuitem_property_get_bool (DBUSMENU_MENUITEM(data),
+                                             DBUSMENU_TITLE_MENUITEM_RUNNING)){   
+    return FALSE;
+  }
+  
+  /* get style */
+  style = gtk_widget_get_style (widget);
 
-	/* set arrow position / dimensions */
-	arrow_width = 5; /* the pixel-based reference triangle is 5x9 */
-	arrow_height = 9;
-	x = widget->allocation.x;
-	y = widget->allocation.y + widget->allocation.height/2.0 - (double)arrow_height/2.0;
+  /* set arrow position / dimensions */
+  arrow_width = 5; /* the pixel-based reference triangle is 5x9 */
+  arrow_height = 9;
+  x = widget->allocation.x;
+  y = widget->allocation.y + widget->allocation.height/2.0 - (double)arrow_height/2.0;
 
-	/* initialize cairo drawing area */
-	cr = (cairo_t*) gdk_cairo_create (widget->window);
+  /* initialize cairo drawing area */
+  cr = (cairo_t*) gdk_cairo_create (widget->window);
 
-	/* set line width */	
-	cairo_set_line_width (cr, 1.0);
+  /* set line width */  
+  cairo_set_line_width (cr, 1.0);
 
-	/* cairo drawing code */
-	cairo_move_to (cr, x, y);
-	cairo_line_to (cr, x, y + arrow_height);
-	cairo_line_to (cr, x + arrow_width, y + (double)arrow_height/2.0);
-	cairo_close_path (cr);
-	cairo_set_source_rgb (cr, style->fg[gtk_widget_get_state(widget)].red/65535.0,
-	                          style->fg[gtk_widget_get_state(widget)].green/65535.0,
-	                          style->fg[gtk_widget_get_state(widget)].blue/65535.0);
-	cairo_fill (cr);
+  /* cairo drawing code */
+  cairo_move_to (cr, x, y);
+  cairo_line_to (cr, x, y + arrow_height);
+  cairo_line_to (cr, x + arrow_width, y + (double)arrow_height/2.0);
+  cairo_close_path (cr);
+  cairo_set_source_rgb (cr, style->fg[gtk_widget_get_state(widget)].red/65535.0,
+                            style->fg[gtk_widget_get_state(widget)].green/65535.0,
+                            style->fg[gtk_widget_get_state(widget)].blue/65535.0);
+  cairo_fill (cr);
 
-	/* remember to destroy cairo context to avoid leaks */
-	cairo_destroy (cr);
+  /* remember to destroy cairo context to avoid leaks */
+  cairo_destroy (cr);
 
-	return FALSE;
+  return FALSE;
 }
 
  /**
@@ -245,11 +245,11 @@ title_widget_triangle_draw_cb (GtkWidget *widget, GdkEventExpose *event, gpointe
 GtkWidget* 
 title_widget_new(DbusmenuMenuitem *item)
 {
-	GtkWidget* widget = g_object_new (TITLE_WIDGET_TYPE,
+  GtkWidget* widget = g_object_new (TITLE_WIDGET_TYPE,
                                           NULL);
   gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (widget), TRUE);
-	title_widget_set_twin_item((TitleWidget*)widget, item);
+  title_widget_set_twin_item((TitleWidget*)widget, item);
 
-	return widget;
+  return widget;
 }
 

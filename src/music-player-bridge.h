@@ -6,21 +6,14 @@
 
 #include <glib.h>
 #include <glib-object.h>
-#include <libindicate/./indicator-messages.h>
-#include <libindicate/./indicator.h>
-#include <libindicate/./interests.h>
-#include <libindicate/./listener.h>
-#include <libindicate/./server.h>
 #include <stdlib.h>
 #include <string.h>
 #include <libdbusmenu-glib/client.h>
 #include <libdbusmenu-glib/menuitem-proxy.h>
 #include <libdbusmenu-glib/menuitem.h>
 #include <libdbusmenu-glib/server.h>
-#include <gio/gio.h>
 #include <gee.h>
-#include <dbus/dbus-glib-lowlevel.h>
-#include <dbus/dbus-glib.h>
+#include <gio/gio.h>
 
 G_BEGIN_DECLS
 
@@ -117,6 +110,8 @@ typedef struct _Mpris2ControllerClass Mpris2ControllerClass;
 typedef struct _MprisRoot MprisRoot;
 typedef struct _MprisRootIface MprisRootIface;
 
+#define TYPE_MPRIS_ROOT_PROXY (mpris_root_proxy_get_type ())
+
 #define TYPE_MPRIS_PLAYER (mpris_player_get_type ())
 #define MPRIS_PLAYER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_MPRIS_PLAYER, MprisPlayer))
 #define IS_MPRIS_PLAYER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_MPRIS_PLAYER))
@@ -125,6 +120,29 @@ typedef struct _MprisRootIface MprisRootIface;
 typedef struct _MprisPlayer MprisPlayer;
 typedef struct _MprisPlayerIface MprisPlayerIface;
 
+#define TYPE_MPRIS_PLAYER_PROXY (mpris_player_proxy_get_type ())
+
+#define TYPE_FREE_DESKTOP_OBJECT (free_desktop_object_get_type ())
+#define FREE_DESKTOP_OBJECT(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_FREE_DESKTOP_OBJECT, FreeDesktopObject))
+#define IS_FREE_DESKTOP_OBJECT(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_FREE_DESKTOP_OBJECT))
+#define FREE_DESKTOP_OBJECT_GET_INTERFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), TYPE_FREE_DESKTOP_OBJECT, FreeDesktopObjectIface))
+
+typedef struct _FreeDesktopObject FreeDesktopObject;
+typedef struct _FreeDesktopObjectIface FreeDesktopObjectIface;
+
+#define TYPE_FREE_DESKTOP_OBJECT_PROXY (free_desktop_object_proxy_get_type ())
+
+#define TYPE_MPRIS2_WATCHER (mpris2_watcher_get_type ())
+#define MPRIS2_WATCHER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_MPRIS2_WATCHER, Mpris2Watcher))
+#define MPRIS2_WATCHER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_MPRIS2_WATCHER, Mpris2WatcherClass))
+#define IS_MPRIS2_WATCHER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_MPRIS2_WATCHER))
+#define IS_MPRIS2_WATCHER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_MPRIS2_WATCHER))
+#define MPRIS2_WATCHER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_MPRIS2_WATCHER, Mpris2WatcherClass))
+
+typedef struct _Mpris2Watcher Mpris2Watcher;
+typedef struct _Mpris2WatcherClass Mpris2WatcherClass;
+typedef struct _Mpris2WatcherPrivate Mpris2WatcherPrivate;
+
 #define TYPE_FREE_DESKTOP_PROPERTIES (free_desktop_properties_get_type ())
 #define FREE_DESKTOP_PROPERTIES(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_FREE_DESKTOP_PROPERTIES, FreeDesktopProperties))
 #define IS_FREE_DESKTOP_PROPERTIES(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_FREE_DESKTOP_PROPERTIES))
@@ -132,18 +150,20 @@ typedef struct _MprisPlayerIface MprisPlayerIface;
 
 typedef struct _FreeDesktopProperties FreeDesktopProperties;
 typedef struct _FreeDesktopPropertiesIface FreeDesktopPropertiesIface;
+
+#define TYPE_FREE_DESKTOP_PROPERTIES_PROXY (free_desktop_properties_proxy_get_type ())
 typedef struct _Mpris2ControllerPrivate Mpris2ControllerPrivate;
 
-#define TYPE_FAMILIAR_PLAYERS_DB (familiar_players_db_get_type ())
-#define FAMILIAR_PLAYERS_DB(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_FAMILIAR_PLAYERS_DB, FamiliarPlayersDB))
-#define FAMILIAR_PLAYERS_DB_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_FAMILIAR_PLAYERS_DB, FamiliarPlayersDBClass))
-#define IS_FAMILIAR_PLAYERS_DB(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_FAMILIAR_PLAYERS_DB))
-#define IS_FAMILIAR_PLAYERS_DB_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_FAMILIAR_PLAYERS_DB))
-#define FAMILIAR_PLAYERS_DB_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_FAMILIAR_PLAYERS_DB, FamiliarPlayersDBClass))
+#define TYPE_SETTINGS_MANAGER (settings_manager_get_type ())
+#define SETTINGS_MANAGER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_SETTINGS_MANAGER, SettingsManager))
+#define SETTINGS_MANAGER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_SETTINGS_MANAGER, SettingsManagerClass))
+#define IS_SETTINGS_MANAGER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_SETTINGS_MANAGER))
+#define IS_SETTINGS_MANAGER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_SETTINGS_MANAGER))
+#define SETTINGS_MANAGER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_SETTINGS_MANAGER, SettingsManagerClass))
 
-typedef struct _FamiliarPlayersDB FamiliarPlayersDB;
-typedef struct _FamiliarPlayersDBClass FamiliarPlayersDBClass;
-typedef struct _FamiliarPlayersDBPrivate FamiliarPlayersDBPrivate;
+typedef struct _SettingsManager SettingsManager;
+typedef struct _SettingsManagerClass SettingsManagerClass;
+typedef struct _SettingsManagerPrivate SettingsManagerPrivate;
 
 #define TYPE_FETCH_FILE (fetch_file_get_type ())
 #define FETCH_FILE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_FETCH_FILE, FetchFile))
@@ -273,6 +293,21 @@ struct _MprisPlayerIface {
 	void (*set_PlaybackStatus) (MprisPlayer* self, const gchar* value);
 };
 
+struct _FreeDesktopObjectIface {
+	GTypeInterface parent_iface;
+	void (*list_names) (FreeDesktopObject* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+	gchar** (*list_names_finish) (FreeDesktopObject* self, GAsyncResult* _res_, int* result_length1, GError** error);
+};
+
+struct _Mpris2Watcher {
+	GObject parent_instance;
+	Mpris2WatcherPrivate * priv;
+};
+
+struct _Mpris2WatcherClass {
+	GObjectClass parent_class;
+};
+
 struct _FreeDesktopPropertiesIface {
 	GTypeInterface parent_iface;
 };
@@ -286,12 +321,12 @@ struct _Mpris2ControllerClass {
 	GObjectClass parent_class;
 };
 
-struct _FamiliarPlayersDB {
+struct _SettingsManager {
 	GObject parent_instance;
-	FamiliarPlayersDBPrivate * priv;
+	SettingsManagerPrivate * priv;
 };
 
-struct _FamiliarPlayersDBClass {
+struct _SettingsManagerClass {
 	GObjectClass parent_class;
 };
 
@@ -308,10 +343,9 @@ struct _FetchFileClass {
 GType music_player_bridge_get_type (void) G_GNUC_CONST;
 MusicPlayerBridge* music_player_bridge_new (void);
 MusicPlayerBridge* music_player_bridge_construct (GType object_type);
-void music_player_bridge_on_server_added (MusicPlayerBridge* self, IndicateListenerServer* object, const gchar* type);
-void music_player_bridge_on_server_removed (MusicPlayerBridge* self, IndicateListenerServer* object, const gchar* type);
+void music_player_bridge_client_has_become_available (MusicPlayerBridge* self, const gchar* desktop, const gchar* dbus_name);
+void music_player_bridge_client_has_vanished (MusicPlayerBridge* self, const gchar* mpris_root_interface);
 void music_player_bridge_set_root_menu_item (MusicPlayerBridge* self, DbusmenuMenuitem* menu);
-GAppInfo* music_player_bridge_create_app_info (const gchar* path);
 GType player_item_get_type (void) G_GNUC_CONST;
 GType transport_menuitem_get_type (void) G_GNUC_CONST;
 GType transport_menuitem_action_get_type (void) G_GNUC_CONST;
@@ -337,26 +371,26 @@ GType mpris2_controller_get_type (void) G_GNUC_CONST;
 GType player_controller_widget_order_get_type (void) G_GNUC_CONST;
 GType player_controller_state_get_type (void) G_GNUC_CONST;
 #define PLAYER_CONTROLLER_WIDGET_QUANTITY 4
-PlayerController* player_controller_new (DbusmenuMenuitem* root, GAppInfo* app, const gchar* mpris_name, const gchar* icon_name, gint offset, PlayerControllerstate initial_state);
-PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, GAppInfo* app, const gchar* mpris_name, const gchar* icon_name, gint offset, PlayerControllerstate initial_state);
+PlayerController* player_controller_new (DbusmenuMenuitem* root, GAppInfo* app, const gchar* dbus_name, const gchar* icon_name, gint offset, PlayerControllerstate initial_state);
+PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, GAppInfo* app, const gchar* dbus_name, const gchar* icon_name, gint offset, PlayerControllerstate initial_state);
 void player_controller_update_state (PlayerController* self, PlayerControllerstate new_state);
-void player_controller_activate (PlayerController* self);
+void player_controller_activate (PlayerController* self, const gchar* dbus_name);
 void player_controller_instantiate (PlayerController* self);
 void player_controller_vanish (PlayerController* self);
 void player_controller_hibernate (PlayerController* self);
 void player_controller_update_layout (PlayerController* self);
-void player_controller_determine_state (PlayerController* self);
 const gchar* player_controller_get_name (PlayerController* self);
 void player_controller_set_name (PlayerController* self, const gchar* value);
-const gchar* player_controller_get_mpris_name (PlayerController* self);
-void player_controller_set_mpris_name (PlayerController* self, const gchar* value);
+const gchar* player_controller_get_dbus_name (PlayerController* self);
+void player_controller_set_dbus_name (PlayerController* self, const gchar* value);
 GAppInfo* player_controller_get_app_info (PlayerController* self);
 void player_controller_set_app_info (PlayerController* self, GAppInfo* value);
 gint player_controller_get_menu_offset (PlayerController* self);
 void player_controller_set_menu_offset (PlayerController* self, gint value);
 const gchar* player_controller_get_icon_name (PlayerController* self);
 void player_controller_set_icon_name (PlayerController* self, const gchar* value);
-MprisRoot* mpris_root_dbus_proxy_new (DBusGConnection* connection, const char* name, const char* path);
+GType mpris_root_proxy_get_type (void) G_GNUC_CONST;
+guint mpris_root_register_object (void* object, GDBusConnection* connection, const gchar* path, GError** error);
 GType mpris_root_get_type (void) G_GNUC_CONST;
 void mpris_root_Quit (MprisRoot* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
 void mpris_root_Quit_finish (MprisRoot* self, GAsyncResult* _res_, GError** error);
@@ -372,7 +406,8 @@ gchar* mpris_root_get_Identity (MprisRoot* self);
 void mpris_root_set_Identity (MprisRoot* self, const gchar* value);
 gchar* mpris_root_get_DesktopEntry (MprisRoot* self);
 void mpris_root_set_DesktopEntry (MprisRoot* self, const gchar* value);
-MprisPlayer* mpris_player_dbus_proxy_new (DBusGConnection* connection, const char* name, const char* path);
+GType mpris_player_proxy_get_type (void) G_GNUC_CONST;
+guint mpris_player_register_object (void* object, GDBusConnection* connection, const gchar* path, GError** error);
 GType mpris_player_get_type (void) G_GNUC_CONST;
 void mpris_player_PlayPause (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
 void mpris_player_PlayPause_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
@@ -386,21 +421,29 @@ gint32 mpris_player_get_Position (MprisPlayer* self);
 void mpris_player_set_Position (MprisPlayer* self, gint32 value);
 gchar* mpris_player_get_PlaybackStatus (MprisPlayer* self);
 void mpris_player_set_PlaybackStatus (MprisPlayer* self, const gchar* value);
+GType free_desktop_object_proxy_get_type (void) G_GNUC_CONST;
+guint free_desktop_object_register_object (void* object, GDBusConnection* connection, const gchar* path, GError** error);
+GType free_desktop_object_get_type (void) G_GNUC_CONST;
+void free_desktop_object_list_names (FreeDesktopObject* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+gchar** free_desktop_object_list_names_finish (FreeDesktopObject* self, GAsyncResult* _res_, int* result_length1, GError** error);
+GType mpris2_watcher_get_type (void) G_GNUC_CONST;
+#define MPRIS2_WATCHER_MPRIS_PREFIX "org.mpris.MediaPlayer2."
+Mpris2Watcher* mpris2_watcher_new (void);
+Mpris2Watcher* mpris2_watcher_construct (GType object_type);
 GType free_desktop_properties_get_type (void) G_GNUC_CONST;
-FreeDesktopProperties* free_desktop_properties_dbus_proxy_new (DBusGConnection* connection, const char* name, const char* path);
-#define MPRIS2_CONTROLLER_root_interface "org.mpris.MediaPlayer2"
+GType free_desktop_properties_proxy_get_type (void) G_GNUC_CONST;
+guint free_desktop_properties_register_object (void* object, GDBusConnection* connection, const gchar* path, GError** error);
 Mpris2Controller* mpris2_controller_new (PlayerController* ctrl);
 Mpris2Controller* mpris2_controller_construct (GType object_type, PlayerController* ctrl);
 void mpris2_controller_property_changed_cb (Mpris2Controller* self, const gchar* interface_source, GHashTable* changed_properties, gchar** invalid, int invalid_length1);
 void mpris2_controller_initial_update (Mpris2Controller* self);
 void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuitemaction command);
 gboolean mpris2_controller_connected (Mpris2Controller* self);
-gboolean mpris2_controller_was_successfull (Mpris2Controller* self);
 void mpris2_controller_expose (Mpris2Controller* self);
 MprisRoot* mpris2_controller_get_mpris2_root (Mpris2Controller* self);
 MprisPlayer* mpris2_controller_get_player (Mpris2Controller* self);
-PlayerController* mpris2_controller_get_owner (Mpris2Controller* self);
 FreeDesktopProperties* mpris2_controller_get_properties_interface (Mpris2Controller* self);
+PlayerController* mpris2_controller_get_owner (Mpris2Controller* self);
 PlayerItem* player_item_new (const gchar* type);
 PlayerItem* player_item_construct (GType object_type, const gchar* type);
 void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
@@ -408,13 +451,12 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 gboolean player_item_populated (PlayerItem* self, GeeHashSet* attrs);
 PlayerController* player_item_get_owner (PlayerItem* self);
 const gchar* player_item_get_item_type (PlayerItem* self);
-GType familiar_players_db_get_type (void) G_GNUC_CONST;
-FamiliarPlayersDB* familiar_players_db_new (void);
-FamiliarPlayersDB* familiar_players_db_construct (GType object_type);
-void familiar_players_db_insert (FamiliarPlayersDB* self, const gchar* desktop);
-gboolean familiar_players_db_already_familiar (FamiliarPlayersDB* self, const gchar* desktop);
-GeeSet* familiar_players_db_records (FamiliarPlayersDB* self);
-gchar* familiar_players_db_fetch_icon_name (const gchar* desktop_path);
+GType settings_manager_get_type (void) G_GNUC_CONST;
+SettingsManager* settings_manager_new (void);
+SettingsManager* settings_manager_construct (GType object_type);
+gchar** settings_manager_fetch_blacklist (SettingsManager* self, int* result_length1);
+gchar** settings_manager_fetch_interested (SettingsManager* self, int* result_length1);
+gboolean settings_manager_add_interested (SettingsManager* self, const gchar* app_desktop_name);
 GType fetch_file_get_type (void) G_GNUC_CONST;
 FetchFile* fetch_file_new (const gchar* uri, const gchar* prop);
 FetchFile* fetch_file_construct (GType object_type, const gchar* uri, const gchar* prop);
