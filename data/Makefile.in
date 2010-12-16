@@ -80,9 +80,8 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(dbus_servicesdir)" \
-	"$(DESTDIR)$(schemadir)"
-DATA = $(dbus_services_DATA) $(schema_DATA)
+am__installdirs = "$(DESTDIR)$(dbus_servicesdir)"
+DATA = $(dbus_services_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
@@ -154,10 +153,12 @@ GCONF_LIBS = @GCONF_LIBS@
 GCONF_SCHEMA_CONFIG_SOURCE = @GCONF_SCHEMA_CONFIG_SOURCE@
 GCONF_SCHEMA_FILE_DIR = @GCONF_SCHEMA_FILE_DIR@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
+GLIB_COMPILE_SCHEMAS = @GLIB_COMPILE_SCHEMAS@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
 GNOMELOCALEDIR = @GNOMELOCALEDIR@
 GREP = @GREP@
+GSETTINGS_DISABLE_SCHEMAS_COMPILE = @GSETTINGS_DISABLE_SCHEMAS_COMPILE@
 INDICATORDIR = @INDICATORDIR@
 INDICATORICONSDIR = @INDICATORICONSDIR@
 INSTALL = @INSTALL@
@@ -244,6 +245,7 @@ datarootdir = @datarootdir@
 docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
+gsettingsschemadir = @gsettingsschemadir@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -274,32 +276,17 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = icons
+gsettings_SCHEMAS = \
+  com.canonical.indicators.sound.gschema.xml
+
 dbus_servicesdir = $(DBUSSERVICEDIR)
-service_in_files = indicator-sound.service.in 
-dbus_services_DATA = $(service_in_files:.service.in=.service)
-
-##############################
-# GConf Schema
-##############################
-schemadir = \
-	$(GCONF_SCHEMA_FILE_DIR)
-
-schema_in_files = \
-	indicator-sound.schemas.in
-
-schema_DATA = \
-	$(schema_in_files:.schemas.in=.schemas)
-
-
-#$(dbus_services_DATA): $(service_in_files) Makefile
-#	sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
+dbus_services_DATA = indicator-sound.service
 EXTRA_DIST = \
-	$(service_in_files)			\
-	$(schema_in_files)
+  $(gsettings_SCHEMAS) \
+  indicator-sound.service.in
 
 CLEANFILES = \
-	$(dbus_services_DATA)			\
-	$(schema_DATA)
+  $(dbus_services_DATA)
 
 all: all-recursive
 
@@ -360,26 +347,6 @@ uninstall-dbus_servicesDATA:
 	test -n "$$files" || exit 0; \
 	echo " ( cd '$(DESTDIR)$(dbus_servicesdir)' && rm -f" $$files ")"; \
 	cd "$(DESTDIR)$(dbus_servicesdir)" && rm -f $$files
-install-schemaDATA: $(schema_DATA)
-	@$(NORMAL_INSTALL)
-	test -z "$(schemadir)" || $(MKDIR_P) "$(DESTDIR)$(schemadir)"
-	@list='$(schema_DATA)'; test -n "$(schemadir)" || list=; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(schemadir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(schemadir)" || exit $$?; \
-	done
-
-uninstall-schemaDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(schema_DATA)'; test -n "$(schemadir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(schemadir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(schemadir)" && rm -f $$files
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run `make' without going through this Makefile.
@@ -579,7 +546,7 @@ check: check-recursive
 all-am: Makefile $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(dbus_servicesdir)" "$(DESTDIR)$(schemadir)"; do \
+	for dir in "$(DESTDIR)$(dbus_servicesdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -628,8 +595,7 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-data-local install-dbus_servicesDATA \
-	install-schemaDATA
+install-data-am: install-dbus_servicesDATA
 
 install-dvi: install-dvi-recursive
 
@@ -673,7 +639,7 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-dbus_servicesDATA uninstall-schemaDATA
+uninstall-am: uninstall-dbus_servicesDATA
 
 .MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) ctags-recursive \
 	install-am install-strip tags-recursive
@@ -683,27 +649,20 @@ uninstall-am: uninstall-dbus_servicesDATA uninstall-schemaDATA
 	ctags ctags-recursive distclean distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
-	install-data-am install-data-local install-dbus_servicesDATA \
-	install-dvi install-dvi-am install-exec install-exec-am \
-	install-html install-html-am install-info install-info-am \
-	install-man install-pdf install-pdf-am install-ps \
-	install-ps-am install-schemaDATA install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
-	uninstall uninstall-am uninstall-dbus_servicesDATA \
-	uninstall-schemaDATA
+	install-data-am install-dbus_servicesDATA install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
+	ps ps-am tags tags-recursive uninstall uninstall-am \
+	uninstall-dbus_servicesDATA
 
+@GSETTINGS_RULES@
 
 %.service: %.service.in
 	sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
-
-@INTLTOOL_SCHEMAS_RULE@
-
-@GCONF_SCHEMAS_INSTALL_TRUE@install-data-local:
-@GCONF_SCHEMAS_INSTALL_TRUE@	GCONF_CONFIG_SOURCE=$(GCONF_SCHEMA_CONFIG_SOURCE) \
-@GCONF_SCHEMAS_INSTALL_TRUE@		gconftool-2 --makefile-install-rule $(schema_DATA)
-@GCONF_SCHEMAS_INSTALL_FALSE@install-data-local:
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

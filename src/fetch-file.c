@@ -18,8 +18,8 @@
  * <http://www.gnu.org/licenses/>.
  *
  * Authors
- * 			Gordon Allott <gord.allott@canonical.com>
- *			Conor Curran <conor.curran@canonical.com>
+ *      Gordon Allott <gord.allott@canonical.com>
+ *      Conor Curran <conor.curran@canonical.com>
  */
 
 #include <glib.h>
@@ -200,7 +200,7 @@ static gboolean fetch_file_fetch_data_co (FetchFileFetchDataData* data) {
 	data->_tmp0_ = g_file_read (data->self->priv->file, NULL, &data->_inner_error_);
 	data->_tmp1_ = data->_tmp0_;
 	if (data->_inner_error_ != NULL) {
-		goto __catch13_g_error;
+		goto __catch11_g_error;
 	}
 	data->_tmp2_ = data->_tmp1_;
 	data->_tmp3_ = NULL;
@@ -210,15 +210,15 @@ static gboolean fetch_file_fetch_data_co (FetchFileFetchDataData* data) {
 	data->self->priv->stream = data->_tmp4_;
 	_g_object_unref0 (data->_tmp2_);
 	g_data_input_stream_set_byte_order (data->self->priv->stream, G_DATA_STREAM_BYTE_ORDER_LITTLE_ENDIAN);
-	goto __finally13;
-	__catch13_g_error:
+	goto __finally11;
+	__catch11_g_error:
 	{
 		data->e = data->_inner_error_;
 		data->_inner_error_ = NULL;
 		g_signal_emit_by_name (data->self, "failed");
 		_g_error_free0 (data->e);
 	}
-	__finally13:
+	__finally11:
 	if (data->_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, data->_inner_error_->message, g_quark_to_string (data->_inner_error_->domain), data->_inner_error_->code);
 		g_clear_error (&data->_inner_error_);
@@ -302,7 +302,7 @@ static gboolean fetch_file_read_something_async_co (FetchFileReadSomethingAsyncD
 			data->_tmp3_ = g_input_stream_read_finish ((GInputStream*) data->self->priv->stream, data->_res_, &data->_inner_error_);
 			data->_tmp4_ = data->_tmp3_;
 			if (data->_inner_error_ != NULL) {
-				goto __catch14_g_error;
+				goto __catch12_g_error;
 			}
 			data->bufsize = data->_tmp4_;
 			if (data->bufsize < 1) {
@@ -321,15 +321,15 @@ static gboolean fetch_file_read_something_async_co (FetchFileReadSomethingAsyncD
 			} else {
 				g_byte_array_append (data->self->priv->data, data->buffer, data->buffer_length1);
 			}
-			goto __finally14;
-			__catch14_g_error:
+			goto __finally12;
+			__catch12_g_error:
 			{
 				data->e = data->_inner_error_;
 				data->_inner_error_ = NULL;
 				g_signal_emit_by_name (data->self, "failed");
 				_g_error_free0 (data->e);
 			}
-			__finally14:
+			__finally12:
 			if (data->_inner_error_ != NULL) {
 				data->buffer = (g_free (data->buffer), NULL);
 				g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, data->_inner_error_->message, g_quark_to_string (data->_inner_error_->domain), data->_inner_error_->code);

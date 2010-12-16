@@ -32,15 +32,15 @@ G_BEGIN_DECLS
 #define IS_VOLUME_WIDGET_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), VOLUME_WIDGET_TYPE))
 #define VOLUME_WIDGET_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), VOLUME_WIDGET_TYPE, VolumeWidgetClass))
 
-typedef struct _VolumeWidget	VolumeWidget;
-typedef struct _VolumeWidgetClass	VolumeWidgetClass;
+typedef struct _VolumeWidget  VolumeWidget;
+typedef struct _VolumeWidgetClass VolumeWidgetClass;
 
 struct _VolumeWidgetClass {
   GObjectClass parent_class;
 };
 
 struct _VolumeWidget {
-	GObject parent;
+  GObject parent;
 };
 
 GType volume_widget_get_type (void) G_GNUC_CONST;
