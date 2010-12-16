@@ -44,7 +44,7 @@ public class PlayerController : GLib.Object
     
   private Dbusmenu.Menuitem root_menu;
   public string name { get; set;} 
-  public string mpris_name { get; set;}   
+  public string dbus_name { get; set;}
   public ArrayList<PlayerItem> custom_items;  
   public Mpris2Controller mpris_bridge;
   public AppInfo? app_info { get; set;}
@@ -53,21 +53,21 @@ public class PlayerController : GLib.Object
     
   public PlayerController(Dbusmenu.Menuitem root,
                           GLib.AppInfo app,
-                          string mpris_name,
+                          string? dbus_name,
                           string icon_name,
                           int offset,
                           state initial_state)
   {
     this.root_menu = root;
     this.app_info = app;
+    this.dbus_name = dbus_name;
     this.name = format_player_name(this.app_info.get_name());
-    this.mpris_name = mpris_name;
     this.icon_name = icon_name;
     this.custom_items = new ArrayList<PlayerItem>();
     this.current_state = initial_state;
     this.menu_offset = offset;
-    construct_widgets();
-    establish_mpris_connection();
+    this.construct_widgets();
+    this.establish_mpris_connection();
     this.update_layout();   
   }
 
@@ -78,8 +78,9 @@ public class PlayerController : GLib.Object
     this.update_layout();
   }
   
-  public void activate()
+  public void activate( string dbus_name )
   {
+    this.dbus_name = dbus_name;
     this.establish_mpris_connection();  
   }
 
@@ -103,7 +104,7 @@ public class PlayerController : GLib.Object
   
   private void establish_mpris_connection()
   {   
-    if(this.current_state != state.READY){
+    if(this.current_state != state.READY && this.dbus_name != null ){
       debug("establish_mpris_connection - Not ready to connect");
       return;
     }   
@@ -162,7 +163,7 @@ public class PlayerController : GLib.Object
     foreach(PlayerItem item in this.custom_items){
       root_menu.child_add_position(item, this.menu_offset + this.custom_items.index_of(item));      
     }
-  } 
+  }   
   
   private static string format_player_name(owned string app_info_name)
   {
@@ -173,8 +174,8 @@ public class PlayerController : GLib.Object
     }
     if(result.length > 1){
       result = result.up(1).concat(result.slice(1, result.length));
-      debug("PlayerController->format_player_name - : %s", result);
     }   
+    debug("PlayerController->format_player_name - : %s", result);
     return result;
   }
 

@@ -160,29 +160,5 @@ public class FamiliarPlayersDB : GLib.Object
     return this.players_DB.keys;    
   }
 
-  public static string? fetch_icon_name(string desktop_path)
-  {
-    KeyFile desktop_keyfile = new KeyFile ();
-    try{
-      desktop_keyfile.load_from_file (desktop_path, KeyFileFlags.NONE);      
-    }
-    catch(GLib.FileError error){
-      warning("Error loading keyfile - FileError");
-      return null;
-    }
-    catch(GLib.KeyFileError error){
-      warning("Error loading keyfile - KeyFileError");      
-      return null;
-    } 
-    
-    try{
-      return desktop_keyfile.get_string (KeyFileDesktop.GROUP,
-                                         KeyFileDesktop.KEY_ICON);              
-    }
-    catch(GLib.KeyFileError error){
-      warning("Error trying to fetch the icon name from the keyfile");      
-      return null;
-    } 
-  }
   
 }

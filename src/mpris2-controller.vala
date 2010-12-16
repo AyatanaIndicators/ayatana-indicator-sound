@@ -31,7 +31,6 @@ using Dbusmenu;
  */
 public class Mpris2Controller : GLib.Object
 {
-  public static const string root_interface = "org.mpris.MediaPlayer2" ;  
   public MprisRoot mpris2_root {get; construct;}    
   public MprisPlayer player {get; construct;}
   public FreeDesktopProperties properties_interface {get; construct;}
@@ -46,16 +45,16 @@ public class Mpris2Controller : GLib.Object
   construct{
     try {
       this.mpris2_root = Bus.get_proxy_sync ( BusType.SESSION,
-                                              root_interface.concat(".").concat(this.owner.mpris_name),
-                                              "/org/mpris/MediaPlayer2");
+                                              this.owner.dbus_name,
+                                              "/org/mpris/MediaPlayer2" );
       this.player = Bus.get_proxy_sync ( BusType.SESSION,
-                                         root_interface.concat(".").concat(this.owner.mpris_name),
+                                         this.owner.dbus_name,
                                          "/org/mpris/MediaPlayer2" );
       
       this.properties_interface = Bus.get_proxy_sync ( BusType.SESSION,
                                                        "org.freedesktop.Properties.PropertiesChanged",
                                                        "/org/mpris/MediaPlayer2" );                                                                                
-      this.properties_interface.PropertiesChanged += property_changed_cb;
+      this.properties_interface.PropertiesChanged.connect ( property_changed_cb );
     }
     catch (IOError e) {
       error("Problems connecting to the session bus - %s", e.message);
@@ -66,14 +65,19 @@ public class Mpris2Controller : GLib.Object
                                     HashTable<string, Variant?> changed_properties,
                                     string[] invalid )
   {
-    debug("properties-changed for interface %s and owner %s", interface_source, this.owner.mpris_name);
-    if(changed_properties == null || interface_source.has_prefix(this.root_interface) == false ){
+    debug("properties-changed for interface %s and owner %s", interface_source, this.owner.dbus_name);
+    if ( changed_properties == null ||
+        interface_source.has_prefix ( Mpris2Watcher.MPRIS_PREFIX ) == false ){
       warning("Property-changed hash is null or this is an interface that doesn't concerns us");
       return;
     }
     Variant? play_v = changed_properties.lookup("PlaybackStatus");
     if(play_v != null){
+      // Race condition sometimes appears with the playback status 
+      // 200ms timeout ensures we have the correct playback status at all times.
       string state = this.player.PlaybackStatus;
+      //debug("in the property update and the playback status = %s and update = %s", state, (string)play_v);
+      Timeout.add ( 200, ensure_correct_playback_status );
       TransportMenuitem.state p = (TransportMenuitem.state)this.determine_play_state(state);
       (this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(p);
     }
@@ -81,7 +85,7 @@ public class Mpris2Controller : GLib.Object
     if(meta_v != null){
       GLib.HashTable<string, Variant?> changed_updates = clean_metadata();
       PlayerItem metadata = this.owner.custom_items[PlayerController.widget_order.METADATA];
-      metadata.reset( MetadataMenuitem.attributes_format());
+      metadata.reset ( MetadataMenuitem.attributes_format());
       metadata.update ( changed_updates, 
                         MetadataMenuitem.attributes_format());
       metadata.property_set_bool ( MENUITEM_PROP_VISIBLE,
@@ -89,6 +93,13 @@ public class Mpris2Controller : GLib.Object
     }
   }
 
+  private bool ensure_correct_playback_status(){
+    debug("TEST playback status = %s", this.player.PlaybackStatus);
+    TransportMenuitem.state p = (TransportMenuitem.state)this.determine_play_state(this.player.PlaybackStatus);
+    (this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(p);
+    return false;
+  }
+  
   private GLib.HashTable<string, Variant?>? clean_metadata()
   { 
     GLib.HashTable<string, Variant?> changed_updates = this.player.Metadata; 

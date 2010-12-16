@@ -99,10 +99,10 @@ public class MetadataMenuitem : PlayerItem
   {   
     File art_file = File.new_for_uri(uri);
     if(art_file.is_native() == true){
-      string path;    
+      string path;
       try{
-        path = Filename.from_uri(uri.strip());      
-        this.property_set(prop, path);      
+        path = Filename.from_uri ( uri.strip() );      
+        this.property_set ( prop, path );      
       }
       catch(ConvertError e){
         warning("Problem converting URI %s to file path",
