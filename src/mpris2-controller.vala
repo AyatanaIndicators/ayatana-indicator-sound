@@ -18,9 +18,8 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using Dbusmenu;
 
-
 [DBus (name = "org.freedesktop.DBus.Properties")]
-  public interface FreeDesktopProperties : Object{
+public interface FreeDesktopProperties : Object{
   public signal void PropertiesChanged (string source, HashTable<string, Variant?> changed_properties,
                                         string[] invalid );
 }
@@ -91,6 +90,11 @@ public class Mpris2Controller : GLib.Object
       metadata.property_set_bool ( MENUITEM_PROP_VISIBLE,
                                    metadata.populated(MetadataMenuitem.attributes_format()));
     }
+    Variant? playlist_v = changed_properties.lookup("ActivePlaylist");
+    if ( playlist_v != null ){
+      debug (" WE HAVE PLAYLIST CHANGE EVENT DETECTED ");
+      this.fetch_active_playlist();
+    }
   }
 
   private GLib.HashTable<string, Variant?>? clean_metadata()
@@ -131,7 +135,7 @@ public class Mpris2Controller : GLib.Object
     GLib.HashTable<string, Value?>? cleaned_metadata = this.clean_metadata();
     this.owner.custom_items[PlayerController.widget_order.METADATA].update(cleaned_metadata,
                                                                             MetadataMenuitem.attributes_format());
-    this.fetch_playlists();    
+    this.fetch_playlists();
   }
 
   public void transport_update(TransportMenuitem.action command)
@@ -168,6 +172,22 @@ public class Mpris2Controller : GLib.Object
       }
     }
   }
+
+  public void fetch_active_playlist()
+  {
+    if (this.playlists == null && this.playlists.ActivePlaylist.valid == true){
+      warning("Playlists object is null and we have an active playlist");
+      return;
+    }
+    
+    PlaylistDetails active_details = this.playlists.ActivePlaylist.active_playlist;  
+    debug(" \n \n ");
+    debug( "Active Playlist Name = %s", active_details.name);
+    debug( "Active Playlist path = %s", active_details.path);
+    debug( "Active Playlist icon path = %s", active_details.icon_path);
+    debug(" \n \n ");
+  }
+
 
   public bool connected()
   {

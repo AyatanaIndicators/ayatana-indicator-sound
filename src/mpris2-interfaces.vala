@@ -50,23 +50,19 @@ public struct PlaylistDetails{
   public string name;
   public string icon_path;
 }
+// Active playlist property container
+public struct ActivePlaylistContainer{
+  public bool valid;
+  public PlaylistDetails active_playlist;
+}
 
 [DBus (name = "org.mpris.MediaPlayer2.Playlists")]
-
-// TODO: API criticisms
-// Get_playlists should be able to be async => pass in callback pointer
-// => get_current_playlist -> 
-//    Should return PlaylistDetails struct with each field nil if there is no active playlist.
-//    Otherwise a populated PlaylistDetails
-//    should be asyncable.
-// => Need to be able to query get_playlist using ordered by last modified.
-// => Need a signal to inform that the active playlist has changed
-
 public interface MprisPlaylists : Object {
   //properties
   public abstract string[] Orderings{owned get; set;}
   public abstract uint32 PlaylistCount{owned get; set;}
-
+  public abstract ActivePlaylistContainer ActivePlaylist {owned get; set;}
+  
   //methods
   public abstract async void ActivatePlaylist(ObjectPath playlist_id) throws IOError;
   public abstract PlaylistDetails[] GetPlaylists (  uint32 index,
