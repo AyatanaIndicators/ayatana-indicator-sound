@@ -1,6 +1,6 @@
 <!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
-<node name="/org/ayatana/indicator/sound">
-  <interface name="org.ayatana.indicator.sound">
+<node name="/com/canonical/indicators/sound">
+  <interface name="com.canonical.indicators.sound">
     <method name = "GetSinkMute">
         <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_get_sink_mute"/>
         <arg type='b' name='mute_input' direction="out"/>

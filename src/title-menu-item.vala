@@ -23,37 +23,37 @@ using Gee;
 
 public class TitleMenuitem : PlayerItem
 {
-	public TitleMenuitem(PlayerController parent)
-	{
-		Object(item_type: MENUITEM_TYPE, owner: parent);
-		this.property_set(MENUITEM_NAME, parent.name);		
+  public TitleMenuitem(PlayerController parent)
+  {
+    Object(item_type: MENUITEM_TYPE, owner: parent);
+    this.property_set(MENUITEM_NAME, parent.name);    
     debug("title init - icon name = %s", parent.icon_name);
     this.property_set(MENUITEM_ICON, parent.icon_name);    
-		this.property_set_bool(MENUITEM_RUNNING, false);		    
-	}
+    this.property_set_bool(MENUITEM_RUNNING, false);        
+  }
 
-	public override void handle_event(string name, GLib.Value input_value, uint timestamp)
-	{		
-		if(this.owner.current_state == PlayerController.state.OFFLINE)
-		{
-			this.owner.instantiate();
-		}
-		else if(this.owner.current_state == PlayerController.state.CONNECTED){
-			this.owner.mpris_bridge.expose();
-		}		
-	}
+  public override void handle_event(string name, GLib.Value input_value, uint timestamp)
+  {   
+    if(this.owner.current_state == PlayerController.state.OFFLINE)
+    {
+      this.owner.instantiate();
+    }
+    else if(this.owner.current_state == PlayerController.state.CONNECTED){
+      this.owner.mpris_bridge.expose();
+    }   
+  }
 
-	public void toggle_active_triangle(bool update)
-	{
-		this.property_set_bool(MENUITEM_RUNNING, update);				
-	}
+  public void toggle_active_triangle(bool update)
+  {
+    this.property_set_bool(MENUITEM_RUNNING, update);       
+  }
 
-	public static HashSet<string> attributes_format()
-	{
-		HashSet<string> attrs = new HashSet<string>();		
-		attrs.add(MENUITEM_NAME);
-		attrs.add(MENUITEM_RUNNING);
-		attrs.add(MENUITEM_ICON);
+  public static HashSet<string> attributes_format()
+  {
+    HashSet<string> attrs = new HashSet<string>();    
+    attrs.add(MENUITEM_NAME);
+    attrs.add(MENUITEM_RUNNING);
+    attrs.add(MENUITEM_ICON);
     return attrs;
-	}	
+  } 
 }

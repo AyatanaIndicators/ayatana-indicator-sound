@@ -1,0 +1,29 @@
+<schemalist>
+  <schema id="com.canonical.indicators.sound" path="/apps/indicators/sound/" gettext-domain="indicator-sound">
+    <key name="blacklisted-media-players" type="as">
+      <summary>A list of applications blacklisted from the sound menu</summary>
+      <default>[]</default>
+      <description>
+        Each media player which abides by the MPRIS2 spec will automatically appear in the menu.
+        This array should contain the desktop file names (minus .desktop suffix) of applications which
+        do not want to be included in the sound menu.
+      </description>
+    </key>
+    <key name="interested-media-players" type="as">
+      <summary>A list of applications which at some point have registered with the sound menu</summary>
+      <default>[ 'banshee-1' ]</default>
+      <description>
+        Each media player which abides by the MPRIS2 spec will automatically appear in the menu.
+        This array should contain the desktop file names (minus .desktop suffix) of applications which
+        have at some point appeared in the menU. This allows the menu remember and display offlined applications.
+      </description>
+    </key>
+    <key name="global-mute" type="b">
+      <default>false</default>
+      <summary>Initial setting for global mute (mute all) on the menu </summary>
+      <description>
+        On start up volume should not be muted.
+      </description>
+    </key>
+  </schema>
+</schemalist>

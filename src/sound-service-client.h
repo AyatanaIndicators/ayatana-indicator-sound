@@ -18,30 +18,30 @@ _dbus_glib_async_data_free (gpointer stuff)
 }
 #endif
 
-#ifndef DBUS_GLIB_CLIENT_WRAPPERS_org_ayatana_indicator_sound
-#define DBUS_GLIB_CLIENT_WRAPPERS_org_ayatana_indicator_sound
+#ifndef DBUS_GLIB_CLIENT_WRAPPERS_com_canonical_indicators_sound
+#define DBUS_GLIB_CLIENT_WRAPPERS_com_canonical_indicators_sound
 
 static
 #ifdef G_HAVE_INLINE
 inline
 #endif
 gboolean
-org_ayatana_indicator_sound_get_sink_mute (DBusGProxy *proxy, gboolean* OUT_mute_input, GError **error)
+com_canonical_indicators_sound_get_sink_mute (DBusGProxy *proxy, gboolean* OUT_mute_input, GError **error)
 
 {
   return dbus_g_proxy_call (proxy, "GetSinkMute", error, G_TYPE_INVALID, G_TYPE_BOOLEAN, OUT_mute_input, G_TYPE_INVALID);
 }
 
-typedef void (*org_ayatana_indicator_sound_get_sink_mute_reply) (DBusGProxy *proxy, gboolean OUT_mute_input, GError *error, gpointer userdata);
+typedef void (*com_canonical_indicators_sound_get_sink_mute_reply) (DBusGProxy *proxy, gboolean OUT_mute_input, GError *error, gpointer userdata);
 
 static void
-org_ayatana_indicator_sound_get_sink_mute_async_callback (DBusGProxy *proxy, DBusGProxyCall *call, void *user_data)
+com_canonical_indicators_sound_get_sink_mute_async_callback (DBusGProxy *proxy, DBusGProxyCall *call, void *user_data)
 {
   DBusGAsyncData *data = (DBusGAsyncData*) user_data;
   GError *error = NULL;
   gboolean OUT_mute_input;
   dbus_g_proxy_end_call (proxy, call, &error, G_TYPE_BOOLEAN, &OUT_mute_input, G_TYPE_INVALID);
-  (*(org_ayatana_indicator_sound_get_sink_mute_reply)data->cb) (proxy, OUT_mute_input, error, data->userdata);
+  (*(com_canonical_indicators_sound_get_sink_mute_reply)data->cb) (proxy, OUT_mute_input, error, data->userdata);
   return;
 }
 
@@ -50,36 +50,36 @@ static
 inline
 #endif
 DBusGProxyCall*
-org_ayatana_indicator_sound_get_sink_mute_async (DBusGProxy *proxy, org_ayatana_indicator_sound_get_sink_mute_reply callback, gpointer userdata)
+com_canonical_indicators_sound_get_sink_mute_async (DBusGProxy *proxy, com_canonical_indicators_sound_get_sink_mute_reply callback, gpointer userdata)
 
 {
   DBusGAsyncData *stuff;
   stuff = g_slice_new (DBusGAsyncData);
   stuff->cb = G_CALLBACK (callback);
   stuff->userdata = userdata;
-  return dbus_g_proxy_begin_call (proxy, "GetSinkMute", org_ayatana_indicator_sound_get_sink_mute_async_callback, stuff, _dbus_glib_async_data_free, G_TYPE_INVALID);
+  return dbus_g_proxy_begin_call (proxy, "GetSinkMute", com_canonical_indicators_sound_get_sink_mute_async_callback, stuff, _dbus_glib_async_data_free, G_TYPE_INVALID);
 }
 static
 #ifdef G_HAVE_INLINE
 inline
 #endif
 gboolean
-org_ayatana_indicator_sound_get_sink_availability (DBusGProxy *proxy, gboolean* OUT_availability_input, GError **error)
+com_canonical_indicators_sound_get_sink_availability (DBusGProxy *proxy, gboolean* OUT_availability_input, GError **error)
 
 {
   return dbus_g_proxy_call (proxy, "GetSinkAvailability", error, G_TYPE_INVALID, G_TYPE_BOOLEAN, OUT_availability_input, G_TYPE_INVALID);
 }
 
-typedef void (*org_ayatana_indicator_sound_get_sink_availability_reply) (DBusGProxy *proxy, gboolean OUT_availability_input, GError *error, gpointer userdata);
+typedef void (*com_canonical_indicators_sound_get_sink_availability_reply) (DBusGProxy *proxy, gboolean OUT_availability_input, GError *error, gpointer userdata);
 
 static void
-org_ayatana_indicator_sound_get_sink_availability_async_callback (DBusGProxy *proxy, DBusGProxyCall *call, void *user_data)
+com_canonical_indicators_sound_get_sink_availability_async_callback (DBusGProxy *proxy, DBusGProxyCall *call, void *user_data)
 {
   DBusGAsyncData *data = (DBusGAsyncData*) user_data;
   GError *error = NULL;
   gboolean OUT_availability_input;
   dbus_g_proxy_end_call (proxy, call, &error, G_TYPE_BOOLEAN, &OUT_availability_input, G_TYPE_INVALID);
-  (*(org_ayatana_indicator_sound_get_sink_availability_reply)data->cb) (proxy, OUT_availability_input, error, data->userdata);
+  (*(com_canonical_indicators_sound_get_sink_availability_reply)data->cb) (proxy, OUT_availability_input, error, data->userdata);
   return;
 }
 
@@ -88,15 +88,15 @@ static
 inline
 #endif
 DBusGProxyCall*
-org_ayatana_indicator_sound_get_sink_availability_async (DBusGProxy *proxy, org_ayatana_indicator_sound_get_sink_availability_reply callback, gpointer userdata)
+com_canonical_indicators_sound_get_sink_availability_async (DBusGProxy *proxy, com_canonical_indicators_sound_get_sink_availability_reply callback, gpointer userdata)
 
 {
   DBusGAsyncData *stuff;
   stuff = g_slice_new (DBusGAsyncData);
   stuff->cb = G_CALLBACK (callback);
   stuff->userdata = userdata;
-  return dbus_g_proxy_begin_call (proxy, "GetSinkAvailability", org_ayatana_indicator_sound_get_sink_availability_async_callback, stuff, _dbus_glib_async_data_free, G_TYPE_INVALID);
+  return dbus_g_proxy_begin_call (proxy, "GetSinkAvailability", com_canonical_indicators_sound_get_sink_availability_async_callback, stuff, _dbus_glib_async_data_free, G_TYPE_INVALID);
 }
-#endif /* defined DBUS_GLIB_CLIENT_WRAPPERS_org_ayatana_indicator_sound */
+#endif /* defined DBUS_GLIB_CLIENT_WRAPPERS_com_canonical_indicators_sound */
 
 G_END_DECLS

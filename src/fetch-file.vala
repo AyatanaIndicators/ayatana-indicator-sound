@@ -15,15 +15,15 @@
  * <http://www.gnu.org/licenses/>.
  *
  * Authors
- * 			Gordon Allott <gord.allott@canonical.com>
- *			Conor Curran <conor.curran@canonical.com>
+ *      Gordon Allott <gord.allott@canonical.com>
+ *      Conor Curran <conor.curran@canonical.com>
  */
 
 public class FetchFile : Object
 {
   /* public variables */
   public string uri {get; construct;}
-	public string intended_property {get; construct;}
+  public string intended_property {get; construct;}
 
   /* private variables */
   private DataInputStream stream;

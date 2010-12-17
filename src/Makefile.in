@@ -91,9 +91,11 @@ am__objects_1 = indicator_sound_service-music-player-bridge.$(OBJEXT) \
 	indicator_sound_service-metadata-menu-item.$(OBJEXT) \
 	indicator_sound_service-title-menu-item.$(OBJEXT) \
 	indicator_sound_service-player-controller.$(OBJEXT) \
+	indicator_sound_service-mpris2-interfaces.$(OBJEXT) \
+	indicator_sound_service-mpris2-watcher.$(OBJEXT) \
 	indicator_sound_service-mpris2-controller.$(OBJEXT) \
 	indicator_sound_service-player-item.$(OBJEXT) \
-	indicator_sound_service-familiar-players-db.$(OBJEXT) \
+	indicator_sound_service-settings-manager.$(OBJEXT) \
 	indicator_sound_service-fetch-file.$(OBJEXT)
 am_indicator_sound_service_OBJECTS =  \
 	indicator_sound_service-sound-service.$(OBJEXT) \
@@ -180,10 +182,12 @@ GCONF_LIBS = @GCONF_LIBS@
 GCONF_SCHEMA_CONFIG_SOURCE = @GCONF_SCHEMA_CONFIG_SOURCE@
 GCONF_SCHEMA_FILE_DIR = @GCONF_SCHEMA_FILE_DIR@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
+GLIB_COMPILE_SCHEMAS = @GLIB_COMPILE_SCHEMAS@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
 GNOMELOCALEDIR = @GNOMELOCALEDIR@
 GREP = @GREP@
+GSETTINGS_DISABLE_SCHEMAS_COMPILE = @GSETTINGS_DISABLE_SCHEMAS_COMPILE@
 INDICATORDIR = @INDICATORDIR@
 INDICATORICONSDIR = @INDICATORICONSDIR@
 INSTALL = @INSTALL@
@@ -270,6 +274,7 @@ datarootdir = @datarootdir@
 docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
+gsettingsschemadir = @gsettingsschemadir@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -333,9 +338,11 @@ music_bridge_VALASOURCES = \
 	metadata-menu-item.vala \
 	title-menu-item.vala \
 	player-controller.vala \
+	mpris2-interfaces.vala \
+	mpris2-watcher.vala \
 	mpris2-controller.vala \
 	player-item.vala \
-	familiar-players-db.vala \
+	settings-manager.vala \
 	fetch-file.vala
 
 music_bridge_VALAFLAGS = \
@@ -346,10 +353,9 @@ music_bridge_VALAFLAGS = \
   --vapidir=./ \
   --thread \
   --pkg gee-1.0 \
-  --pkg Indicate-0.2 \
   --pkg Dbusmenu-Glib-0.2 \
   --pkg common-defs \
-	--pkg dbus-glib-1 \
+	--pkg gio-2.0 \
 	--pkg gio-unix-2.0 \
 	--pkg gdk-pixbuf-2.0 
 
@@ -523,14 +529,16 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-dbus-menu-manager.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-familiar-players-db.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-fetch-file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-metadata-menu-item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-mpris2-controller.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-mpris2-interfaces.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-mpris2-watcher.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-music-player-bridge.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-player-controller.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-player-item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-pulse-manager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-settings-manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-slider-menu-item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-sound-service-dbus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-sound-service.Po@am__quote@
@@ -766,6 +774,38 @@ indicator_sound_service-player-controller.obj: player-controller.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-player-controller.obj `if test -f 'player-controller.c'; then $(CYGPATH_W) 'player-controller.c'; else $(CYGPATH_W) '$(srcdir)/player-controller.c'; fi`
 
+indicator_sound_service-mpris2-interfaces.o: mpris2-interfaces.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-mpris2-interfaces.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-mpris2-interfaces.Tpo -c -o indicator_sound_service-mpris2-interfaces.o `test -f 'mpris2-interfaces.c' || echo '$(srcdir)/'`mpris2-interfaces.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-mpris2-interfaces.Tpo $(DEPDIR)/indicator_sound_service-mpris2-interfaces.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mpris2-interfaces.c' object='indicator_sound_service-mpris2-interfaces.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-mpris2-interfaces.o `test -f 'mpris2-interfaces.c' || echo '$(srcdir)/'`mpris2-interfaces.c
+
+indicator_sound_service-mpris2-interfaces.obj: mpris2-interfaces.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-mpris2-interfaces.obj -MD -MP -MF $(DEPDIR)/indicator_sound_service-mpris2-interfaces.Tpo -c -o indicator_sound_service-mpris2-interfaces.obj `if test -f 'mpris2-interfaces.c'; then $(CYGPATH_W) 'mpris2-interfaces.c'; else $(CYGPATH_W) '$(srcdir)/mpris2-interfaces.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-mpris2-interfaces.Tpo $(DEPDIR)/indicator_sound_service-mpris2-interfaces.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mpris2-interfaces.c' object='indicator_sound_service-mpris2-interfaces.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-mpris2-interfaces.obj `if test -f 'mpris2-interfaces.c'; then $(CYGPATH_W) 'mpris2-interfaces.c'; else $(CYGPATH_W) '$(srcdir)/mpris2-interfaces.c'; fi`
+
+indicator_sound_service-mpris2-watcher.o: mpris2-watcher.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-mpris2-watcher.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-mpris2-watcher.Tpo -c -o indicator_sound_service-mpris2-watcher.o `test -f 'mpris2-watcher.c' || echo '$(srcdir)/'`mpris2-watcher.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-mpris2-watcher.Tpo $(DEPDIR)/indicator_sound_service-mpris2-watcher.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mpris2-watcher.c' object='indicator_sound_service-mpris2-watcher.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-mpris2-watcher.o `test -f 'mpris2-watcher.c' || echo '$(srcdir)/'`mpris2-watcher.c
+
+indicator_sound_service-mpris2-watcher.obj: mpris2-watcher.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-mpris2-watcher.obj -MD -MP -MF $(DEPDIR)/indicator_sound_service-mpris2-watcher.Tpo -c -o indicator_sound_service-mpris2-watcher.obj `if test -f 'mpris2-watcher.c'; then $(CYGPATH_W) 'mpris2-watcher.c'; else $(CYGPATH_W) '$(srcdir)/mpris2-watcher.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-mpris2-watcher.Tpo $(DEPDIR)/indicator_sound_service-mpris2-watcher.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mpris2-watcher.c' object='indicator_sound_service-mpris2-watcher.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-mpris2-watcher.obj `if test -f 'mpris2-watcher.c'; then $(CYGPATH_W) 'mpris2-watcher.c'; else $(CYGPATH_W) '$(srcdir)/mpris2-watcher.c'; fi`
+
 indicator_sound_service-mpris2-controller.o: mpris2-controller.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-mpris2-controller.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-mpris2-controller.Tpo -c -o indicator_sound_service-mpris2-controller.o `test -f 'mpris2-controller.c' || echo '$(srcdir)/'`mpris2-controller.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-mpris2-controller.Tpo $(DEPDIR)/indicator_sound_service-mpris2-controller.Po
@@ -798,21 +838,21 @@ indicator_sound_service-player-item.obj: player-item.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-player-item.obj `if test -f 'player-item.c'; then $(CYGPATH_W) 'player-item.c'; else $(CYGPATH_W) '$(srcdir)/player-item.c'; fi`
 
-indicator_sound_service-familiar-players-db.o: familiar-players-db.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-familiar-players-db.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-familiar-players-db.Tpo -c -o indicator_sound_service-familiar-players-db.o `test -f 'familiar-players-db.c' || echo '$(srcdir)/'`familiar-players-db.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-familiar-players-db.Tpo $(DEPDIR)/indicator_sound_service-familiar-players-db.Po
+indicator_sound_service-settings-manager.o: settings-manager.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-settings-manager.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-settings-manager.Tpo -c -o indicator_sound_service-settings-manager.o `test -f 'settings-manager.c' || echo '$(srcdir)/'`settings-manager.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-settings-manager.Tpo $(DEPDIR)/indicator_sound_service-settings-manager.Po
 @am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='familiar-players-db.c' object='indicator_sound_service-familiar-players-db.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='settings-manager.c' object='indicator_sound_service-settings-manager.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-familiar-players-db.o `test -f 'familiar-players-db.c' || echo '$(srcdir)/'`familiar-players-db.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-settings-manager.o `test -f 'settings-manager.c' || echo '$(srcdir)/'`settings-manager.c
 
-indicator_sound_service-familiar-players-db.obj: familiar-players-db.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-familiar-players-db.obj -MD -MP -MF $(DEPDIR)/indicator_sound_service-familiar-players-db.Tpo -c -o indicator_sound_service-familiar-players-db.obj `if test -f 'familiar-players-db.c'; then $(CYGPATH_W) 'familiar-players-db.c'; else $(CYGPATH_W) '$(srcdir)/familiar-players-db.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-familiar-players-db.Tpo $(DEPDIR)/indicator_sound_service-familiar-players-db.Po
+indicator_sound_service-settings-manager.obj: settings-manager.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-settings-manager.obj -MD -MP -MF $(DEPDIR)/indicator_sound_service-settings-manager.Tpo -c -o indicator_sound_service-settings-manager.obj `if test -f 'settings-manager.c'; then $(CYGPATH_W) 'settings-manager.c'; else $(CYGPATH_W) '$(srcdir)/settings-manager.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-settings-manager.Tpo $(DEPDIR)/indicator_sound_service-settings-manager.Po
 @am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='familiar-players-db.c' object='indicator_sound_service-familiar-players-db.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='settings-manager.c' object='indicator_sound_service-settings-manager.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-familiar-players-db.obj `if test -f 'familiar-players-db.c'; then $(CYGPATH_W) 'familiar-players-db.c'; else $(CYGPATH_W) '$(srcdir)/familiar-players-db.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-settings-manager.obj `if test -f 'settings-manager.c'; then $(CYGPATH_W) 'settings-manager.c'; else $(CYGPATH_W) '$(srcdir)/settings-manager.c'; fi`
 
 indicator_sound_service-fetch-file.o: fetch-file.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-fetch-file.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-fetch-file.Tpo -c -o indicator_sound_service-fetch-file.o `test -f 'fetch-file.c' || echo '$(srcdir)/'`fetch-file.c

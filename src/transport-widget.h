@@ -36,30 +36,30 @@ typedef struct _TransportWidget      TransportWidget;
 typedef struct _TransportWidgetClass TransportWidgetClass;
 
 typedef enum {
-	TRANSPORT_PREVIOUS,
-	TRANSPORT_PLAY_PAUSE,
-	TRANSPORT_NEXT,
-	TRANSPORT_NADA
+  TRANSPORT_PREVIOUS,
+  TRANSPORT_PLAY_PAUSE,
+  TRANSPORT_NEXT,
+  TRANSPORT_NADA
 }TransportWidgetEvent;
 
 typedef enum {
-	PLAY,
-	PAUSE	
+  PLAY,
+  PAUSE 
 }TransportWidgetState;
 
 struct _TransportWidgetClass {
-	  GtkMenuItemClass parent_class;
+    GtkMenuItemClass parent_class;
 };
 
 struct _TransportWidget {
-	  GtkMenuItem parent;
+    GtkMenuItem parent;
 };
 
 typedef struct
 {
-	double r;
-	double g;
-	double b;
+  double r;
+  double g;
+  double b;
 } CairoColorRGB;
 
 

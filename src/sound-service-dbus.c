@@ -42,7 +42,6 @@ struct _SoundServiceDbusPrivate {
   gboolean        sink_availability;
 };
 
-
 /* Signals */
 enum {
   SINK_INPUT_WHILE_MUTED,
