@@ -50,6 +50,7 @@ public struct PlaylistDetails{
   public string name;
   public string icon_path;
 }
+
 // Active playlist property container
 public struct ActivePlaylistContainer{
   public bool valid;

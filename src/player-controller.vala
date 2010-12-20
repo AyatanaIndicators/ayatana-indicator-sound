@@ -131,21 +131,23 @@ public class PlayerController : GLib.Object
 
   public void update_layout()
   {     
+    PlaylistsMenuitem playlists_menuitem = this.custom_items[widget_order.PLAYLISTS] as PlaylistsMenuitem;
+
     if(this.current_state != state.CONNECTED){
       this.custom_items[widget_order.TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE,
                                                                   false);
       this.custom_items[widget_order.METADATA].property_set_bool(MENUITEM_PROP_VISIBLE,
                                                                  false);
-      this.custom_items[widget_order.PLAYLISTS].property_set_bool ( MENUITEM_PROP_ENABLED,
-                                                                  false );      
+      playlists_menuitem.root_item.property_set_bool ( MENUITEM_PROP_VISIBLE,
+                                                       false );   
       return; 
     }
     this.custom_items[widget_order.METADATA].property_set_bool(MENUITEM_PROP_VISIBLE,
                                                               this.custom_items[widget_order.METADATA].populated(MetadataMenuitem.attributes_format()));    
     this.custom_items[widget_order.TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE,
                                                                 true);
-    this.custom_items[widget_order.PLAYLISTS].property_set_bool(MENUITEM_PROP_VISIBLE,
-                                                                true);
+    playlists_menuitem.root_item.property_set_bool ( MENUITEM_PROP_VISIBLE,
+                                                     this.mpris_bridge.playlists_support_exist() );
   }
     
   private void construct_widgets()

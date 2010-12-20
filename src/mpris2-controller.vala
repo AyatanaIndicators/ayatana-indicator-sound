@@ -100,7 +100,7 @@ public class Mpris2Controller : GLib.Object
     }
   }
 
-  public bool playlist_support()
+  public bool playlists_support_exist()
   {
     if (this.playlists == null) return false;
     uint32? count = this.playlists.PlaylistCount;
