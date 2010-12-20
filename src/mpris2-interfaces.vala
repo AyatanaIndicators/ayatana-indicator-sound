@@ -21,8 +21,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 public interface MprisRoot : Object {
   // properties
   public abstract bool HasTracklist{owned get; set;}
-  //waiting for MPRIS approval
-  //public abstract bool HasPlaylist{owned get; set;}
   public abstract bool CanQuit{owned get; set;}
   public abstract bool CanRaise{owned get; set;}
   public abstract string Identity{owned get; set;}

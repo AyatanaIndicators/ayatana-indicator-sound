@@ -102,9 +102,10 @@ public class Mpris2Controller : GLib.Object
 
   public bool playlist_support()
   {
-    // awaiting spec updates
-    // return this.mpris2_root.HasPlaylists;
-    return true;  
+    if (this.playlists == null) return false;
+    uint32? count = this.playlists.PlaylistCount;
+    if ( count == null || count <= 0 ) return false;
+    return true;
   }
   
   private bool ensure_correct_playback_status(){

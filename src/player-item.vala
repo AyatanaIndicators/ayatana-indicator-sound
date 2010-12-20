@@ -28,7 +28,7 @@ public class PlayerItem : Dbusmenu.Menuitem
 
   public PlayerItem(string type)
   {   
-    Object(item_type: type);    
+    Object(item_type: type);
   }
   
   construct {
