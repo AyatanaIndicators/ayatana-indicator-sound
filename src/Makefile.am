@@ -65,6 +65,7 @@ music_bridge_VALASOURCES = \
 	mpris2-controller.vala \
 	player-item.vala \
 	settings-manager.vala \
+	playlists-menu-item.vala \
 	fetch-file.vala
 
 

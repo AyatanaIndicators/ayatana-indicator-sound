@@ -76,7 +76,7 @@ public class MusicPlayerBridge : GLib.Object
     }
   }
 
-  public void  client_has_become_available ( string desktop, string dbus_name )
+  public void client_has_become_available ( string desktop, string dbus_name )
   {
     if (desktop == null || desktop == ""){
       warning("Client %s attempting to register without desktop entry being set on the mpris root",
@@ -129,10 +129,10 @@ public class MusicPlayerBridge : GLib.Object
   public void set_root_menu_item ( Dbusmenu.Menuitem menu )
   {
     this.root_menu = menu;
+    this.try_to_add_inactive_familiar_clients();
     this.watcher = new Mpris2Watcher ();
     this.watcher.client_appeared += this.client_has_become_available;
     this.watcher.client_disappeared += this.client_has_vanished;
-    this.try_to_add_inactive_familiar_clients();    
   }
 
   private static AppInfo? create_app_info ( string path )
