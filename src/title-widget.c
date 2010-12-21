@@ -92,7 +92,7 @@ title_widget_set_icon(TitleWidget *self)
   GString* app_panel = g_string_new ( g_utf8_strdown ( dbusmenu_menuitem_property_get(priv->twin_item, DBUSMENU_TITLE_MENUITEM_NAME),
                                                     -1 ));
   GtkWidget * icon = NULL;
-
+  
   // Not ideal but apparently we want the banshee icon to be the greyscale one
   // and any others to be the icon from the desktop file => colour.
   if ( g_string_equal ( banshee_string, app_panel ) == TRUE &&
@@ -153,18 +153,12 @@ title_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 {
   g_return_if_fail (IS_TITLE_WIDGET (userdata));  
   TitleWidget* mitem = TITLE_WIDGET(userdata);
-  g_debug("PROPERTY UPDATE FOR THE TITLE");
   if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_NAME, property) == 0){
         gtk_menu_item_set_label (GTK_MENU_ITEM(mitem),
                                 g_value_get_string(value));
   }
   else if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_ICON, property) == 0){
-    g_debug("changing the icon data on the title - %s",
-            g_value_get_string(value));
-    GtkWidget * icon = gtk_image_new_from_icon_name(g_value_get_string(value),
-                                                    GTK_ICON_SIZE_MENU);
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(mitem), GTK_WIDGET(icon));
-    
+    title_widget_set_icon (mitem);
   }
 }
 
