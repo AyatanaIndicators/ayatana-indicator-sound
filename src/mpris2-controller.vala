@@ -97,6 +97,7 @@ public class Mpris2Controller : GLib.Object
     Variant? playlist_v = changed_properties.lookup("ActivePlaylist");
     if ( playlist_v != null ){
       this.fetch_active_playlist();
+      //Timeout.add ( 200, fetch_active_playlist );
     }
   }
 
@@ -154,6 +155,7 @@ public class Mpris2Controller : GLib.Object
     this.owner.custom_items[PlayerController.widget_order.METADATA].update(cleaned_metadata,
                                                                             MetadataMenuitem.attributes_format());
     this.fetch_playlists();
+    this.fetch_active_playlist();    
   }
 
   public void transport_update(TransportMenuitem.action command)
@@ -172,10 +174,8 @@ public class Mpris2Controller : GLib.Object
 
   public void fetch_playlists()
   {
-    if (this.playlists == null){
-      warning("Playlists object is null");
-      return;
-    }
+    if (this.playlists == null) return;
+
     PlaylistDetails[] current_playlists =  this.playlists.GetPlaylists(0,
                                                                        10,
                                                                        "Alphabetical",
@@ -184,30 +184,17 @@ public class Mpris2Controller : GLib.Object
       debug( "Size of the playlist array = %i", current_playlists.length );
       PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
       playlists_item.update(current_playlists);
-      /*foreach(PlaylistDetails detail in current_playlists){ 
-        debug(" \n \n ");
-        debug( "Playlist Name = %s", detail.name);
-        debug( "Playlist path = %s", detail.path);
-        debug( "Playlist icon path = %s", detail.icon_path);
-        debug(" \n \n ");
-      }*/
     }
+    return;
   }
 
-  public void fetch_active_playlist()
+  private void fetch_active_playlist()
   {
-    if (this.playlists == null && this.playlists.ActivePlaylist.valid == true){
+    if (this.playlists == null && this.playlists.ActivePlaylist.valid == false){
       warning("Playlists object is null or we don't have an active playlist");
-      return;
     }
     PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
     playlists_item.update_active_playlist ( this.playlists.ActivePlaylist.details );
-    /*debug(" \n \n ");
-    debug( "Active Playlist Name = %s", active_details.name);
-    debug( "Active Playlist path = %s", active_details.path);
-    debug( "Active Playlist icon path = %s", active_details.icon_path);
-    debug(" \n \n ");
-    */
   }
 
 

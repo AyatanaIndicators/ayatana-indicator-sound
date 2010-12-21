@@ -76,7 +76,7 @@ public class MusicPlayerBridge : GLib.Object
     }
   }
 
-  public void  client_has_become_available ( string desktop, string dbus_name )
+  public void client_has_become_available ( string desktop, string dbus_name )
   {
     if (desktop == null || desktop == ""){
       warning("Client %s attempting to register without desktop entry being set on the mpris root",

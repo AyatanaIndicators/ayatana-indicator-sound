@@ -38,6 +38,7 @@ public class PlaylistsMenuitem : PlayerItem
   public new void update (PlaylistDetails[] playlists)
   {
     foreach ( PlaylistDetails detail in playlists ){
+      if (this.already_observed(detail)) continue;
       Dbusmenu.Menuitem menuitem = new Menuitem();
       menuitem.property_set (MENUITEM_PROP_LABEL, detail.name);
       menuitem.property_set (MENUITEM_PROP_ICON_NAME, "source-smart-playlist");
@@ -50,9 +51,19 @@ public class PlaylistsMenuitem : PlayerItem
     }
   }
 
+  private bool already_observed (PlaylistDetails new_detail)
+  {
+    foreach ( PlaylistDetails detail in this.current_playlists.values ){
+      if (new_detail.path == detail.path) return true;
+    }
+    return false;
+  }
+
   public void update_active_playlist(PlaylistDetails detail)
   {
-    this.root_item.property_set ( MENUITEM_PROP_LABEL, detail.name );    
+    var update = detail.name; 
+    if ( update == "" ) update = "Choose Playlist";
+    this.root_item.property_set ( MENUITEM_PROP_LABEL, update );    
   }
   
   private void submenu_item_activated (int menu_item_id)
