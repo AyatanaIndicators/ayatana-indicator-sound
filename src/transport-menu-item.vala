@@ -51,7 +51,7 @@ public class TransportMenuitem : PlayerItem
   {
     int input = input_value.get_int();
     debug("handle_event with value %s", input.to_string());
-    debug("transport owner name = %s", this.owner.name);
+    debug("transport owner name = %s", this.owner.app_info.get_name());
     this.owner.mpris_bridge.transport_update((action)input);
   } 
 
