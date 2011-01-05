@@ -141,6 +141,7 @@ public class MusicPlayerBridge : GLib.Object
   private static AppInfo? create_app_info ( string desktop )
   {
     DesktopAppInfo info = new DesktopAppInfo ( desktop ) ;
+
     if ( desktop == null || info == null ){
       warning ( "Could not create a desktopappinfo instance from app: %s", desktop );
       return null;
