@@ -46,14 +46,16 @@ AC_SUBST(APPLET_CFLAGS)
 AC_SUBST(APPLET_LIBS)
 
 
-PKG_CHECK_MODULES(PULSEAUDIO, libpulse-mainloop-glib >= $PULSE_AUDIO_REQUIRED_VERSION)
+PKG_CHECK_MODULES(PULSEAUDIO, libpulse-mainloop-glib >= $PULSE_AUDIO_REQUIRED_VERSION
+                              gio-unix-2.0)
 AC_SUBST(PULSEAUDIO_CFLAGS)
 AC_SUBST(PULSEAUDIO_LIBS)
 
 PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib >= $DBUSMENUGLIB_REQUIRED_VERSION
                                 indicator >= $INDICATOR_REQUIRED_VERSION
 																indicate >= $INDICATE_REQUIRED_VERSION
-																gee-1.0)
+																gee-1.0
+                                gio-unix-2.0)
 
 AC_SUBST(SOUNDSERVICE_CFLAGS)
 AC_SUBST(SOUNDERVICE_LIBS)
