@@ -44,7 +44,7 @@ public class PlayerController : GLib.Object
   public int current_state = state.OFFLINE;
     
   private Dbusmenu.Menuitem root_menu;
-  public string name { get; set;} 
+  //public string name { get; set;} 
   public string dbus_name { get; set;}
   public ArrayList<PlayerItem> custom_items;  
   public Mpris2Controller mpris_bridge;
@@ -62,7 +62,7 @@ public class PlayerController : GLib.Object
     this.root_menu = root;
     this.app_info = app;
     this.dbus_name = dbus_name;
-    this.name = format_player_name(this.app_info.get_name());
+    //this.name = this.app_info.get_name();
     this.icon_name = icon_name;
     this.custom_items = new ArrayList<PlayerItem>();
     this.current_state = initial_state;
@@ -74,7 +74,8 @@ public class PlayerController : GLib.Object
 
   public void update_state(state new_state)
   {
-    debug("update_state - player controller %s : new state %i", this.name, new_state);
+    debug("update_state - player controller %s : new state %i", this.app_info.get_name(),
+                                                                new_state);
     this.current_state = new_state;
     this.update_layout();
   }
@@ -93,13 +94,14 @@ public class PlayerController : GLib.Object
    */
   public void instantiate()
   {
-    debug("instantiate in player controller for %s", this.name);
+    debug("instantiate in player controller for %s", this.app_info.get_name() );
     try{
       this.app_info.launch(null, null);
       this.update_state(state.INSTANTIATING);
     }
     catch(GLib.Error error){
-      warning("Failed to launch app %s with error message: %s", this.name, error.message);
+      warning("Failed to launch app %s with error message: %s", this.app_info.get_name(),
+                                                                error.message );
     }
   }
   
@@ -181,6 +183,7 @@ public class PlayerController : GLib.Object
       }
     }
   }   
+
   
   private static string format_player_name(owned string app_info_name)
   {
