@@ -44,7 +44,6 @@ public class PlayerController : GLib.Object
   public int current_state = state.OFFLINE;
     
   private Dbusmenu.Menuitem root_menu;
-  //public string name { get; set;} 
   public string dbus_name { get; set;}
   public ArrayList<PlayerItem> custom_items;  
   public Mpris2Controller mpris_bridge;
@@ -62,7 +61,6 @@ public class PlayerController : GLib.Object
     this.root_menu = root;
     this.app_info = app;
     this.dbus_name = dbus_name;
-    //this.name = this.app_info.get_name();
     this.icon_name = icon_name;
     this.custom_items = new ArrayList<PlayerItem>();
     this.current_state = initial_state;
@@ -128,7 +126,8 @@ public class PlayerController : GLib.Object
     this.custom_items[widget_order.TRANSPORT].reset(TransportMenuitem.attributes_format());
     this.custom_items[widget_order.METADATA].reset(MetadataMenuitem.attributes_format());
     TitleMenuitem title = this.custom_items[widget_order.TITLE] as TitleMenuitem;
-    title.toggle_active_triangle(false);          
+    title.toggle_active_triangle(false); 
+    this.mpris_bridge = null;
   }
 
   public void update_layout()

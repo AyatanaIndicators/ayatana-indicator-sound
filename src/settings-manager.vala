@@ -35,9 +35,16 @@ public class SettingsManager : GLib.Object
     return this.settings.get_strv ("blacklisted-media-players");
   }
 
-  public string[] fetch_interested()
+  public ArrayList<string> fetch_interested()
   {
-    return this.settings.get_strv ("interested-media-players");
+    var blacklisted = this.settings.get_strv ("blacklisted-media-players");
+    var interested = this.settings.get_strv ("interested-media-players");
+    var list = new ArrayList<string>();
+    foreach(var s in interested){
+      if ( s in blacklisted ) continue;
+      list.add(s);      
+    }
+    return list;
   }
 
   public void clear_list()
@@ -47,7 +54,7 @@ public class SettingsManager : GLib.Object
   
   public void add_interested(string app_desktop_name)
   {
-    var already_interested = fetch_interested();
+    var already_interested = this.settings.get_strv ("interested-media-players");
     foreach ( var s in already_interested){
       if ( s == app_desktop_name ) return;
     }

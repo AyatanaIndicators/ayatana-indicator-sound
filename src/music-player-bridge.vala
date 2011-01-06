@@ -81,6 +81,11 @@ public class MusicPlayerBridge : GLib.Object
                dbus_name);
       return;
     }
+    if (desktop in this.settings_manager.fetch_blacklist()) {
+      debug ("Client %s attempting to register but it has been blacklisted",
+             desktop);
+    }
+    
     debug ( "client_has_become_available %s", desktop );
     AppInfo? app_info = create_app_info ( desktop.concat( ".desktop" ) );
     if ( app_info == null ){
@@ -117,7 +122,7 @@ public class MusicPlayerBridge : GLib.Object
     if (root_menu != null){
       debug("attempt to remove %s", mpris_root_interface);
       var mpris_key = determine_key ( mpris_root_interface );
-      if ( mpris_key != null ){
+      if ( mpris_key != null && this.registered_clients.has_key(mpris_key)){
         registered_clients[mpris_key].hibernate();
         debug("Successively offlined client %s", mpris_key);       
       }
@@ -136,6 +141,7 @@ public class MusicPlayerBridge : GLib.Object
   private static AppInfo? create_app_info ( string desktop )
   {
     DesktopAppInfo info = new DesktopAppInfo ( desktop ) ;
+
     if ( desktop == null || info == null ){
       warning ( "Could not create a desktopappinfo instance from app: %s", desktop );
       return null;
