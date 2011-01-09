@@ -53,7 +53,6 @@ public class Mpris2Controller : GLib.Object
       this.playlists = Bus.get_proxy_sync ( BusType.SESSION,
                                             this.owner.dbus_name,
                                             "/org/mpris/MediaPlayer2" );
-      
       this.properties_interface = Bus.get_proxy_sync ( BusType.SESSION,
                                                        "org.freedesktop.Properties.PropertiesChanged",
                                                        "/org/mpris/MediaPlayer2" );
@@ -95,9 +94,8 @@ public class Mpris2Controller : GLib.Object
                                    metadata.populated(MetadataMenuitem.attributes_format()));
     }
     Variant? playlist_v = changed_properties.lookup("ActivePlaylist");
-    if ( playlist_v != null ){
+    if ( playlist_v != null && this.playlists_support_exist() ){
       this.fetch_active_playlist();
-      //Timeout.add ( 200, fetch_active_playlist );
     }
   }
 
@@ -154,8 +152,12 @@ public class Mpris2Controller : GLib.Object
     GLib.HashTable<string, Value?>? cleaned_metadata = this.clean_metadata();
     this.owner.custom_items[PlayerController.widget_order.METADATA].update(cleaned_metadata,
                                                                             MetadataMenuitem.attributes_format());
-    this.fetch_playlists();
-    this.fetch_active_playlist();    
+
+    /*if ( playlists_support_exist() == true ){
+      debug ("it thinks that there is a valid playlist interface");
+      this.fetch_playlists();
+      this.fetch_active_playlist();    
+    }*/
   }
 
   public void transport_update(TransportMenuitem.action command)
@@ -174,8 +176,6 @@ public class Mpris2Controller : GLib.Object
 
   public void fetch_playlists()
   {
-    if (this.playlists == null) return;
-
     PlaylistDetails[] current_playlists =  this.playlists.GetPlaylists(0,
                                                                        10,
                                                                        "Alphabetical",
@@ -189,9 +189,9 @@ public class Mpris2Controller : GLib.Object
   }
 
   private void fetch_active_playlist()
-  {
-    if (this.playlists == null && this.playlists.ActivePlaylist.valid == false){
-      warning("Playlists object is null or we don't have an active playlist");
+  {    
+    if (this.playlists.ActivePlaylist.valid == false){
+      debug("We don't have an active playlist");
     }
     PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
     playlists_item.update_active_playlist ( this.playlists.ActivePlaylist.details );
@@ -212,10 +212,10 @@ public class Mpris2Controller : GLib.Object
 
   public void activate_playlist (ObjectPath path)
   {
-    if(this.playlists == null){
-      warning("playlists mpris instance is null !");
-      return;       
+    if ( playlists_support_exist() == false ){
+      return;
     }
+
     try{
       this.playlists.ActivatePlaylist.begin(path);
     }

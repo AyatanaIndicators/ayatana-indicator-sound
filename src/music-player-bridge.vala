@@ -82,8 +82,9 @@ public class MusicPlayerBridge : GLib.Object
       return;
     }
     if (desktop in this.settings_manager.fetch_blacklist()) {
-      debug ("Client %s attempting to register but it has been blacklisted",
+      debug ("Client %s attempting to register but I'm afraid it is blacklisted",
              desktop);
+      return;
     }
     
     debug ( "client_has_become_available %s", desktop );
@@ -118,7 +119,8 @@ public class MusicPlayerBridge : GLib.Object
   
   public void client_has_vanished ( string mpris_root_interface )
   {
-    debug("MusicPlayerBridge -> on_server_removed with value %s", mpris_root_interface);
+    debug("MusicPlayerBridge -> client with dbus interface %s has vanished",
+           mpris_root_interface );
     if (root_menu != null){
       debug("attempt to remove %s", mpris_root_interface);
       var mpris_key = determine_key ( mpris_root_interface );
