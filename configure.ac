@@ -55,7 +55,8 @@ PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib >= $DBUSMENUGLIB_REQUIRED_VERSION
                                 indicator >= $INDICATOR_REQUIRED_VERSION
 																indicate >= $INDICATE_REQUIRED_VERSION
 																gee-1.0
-                                gio-unix-2.0)
+                                gio-unix-2.0
+                                libxml-2.0)
 
 AC_SUBST(SOUNDSERVICE_CFLAGS)
 AC_SUBST(SOUNDERVICE_LIBS)
