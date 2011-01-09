@@ -111,7 +111,7 @@ public class Mpris2Watcher : GLib.Object
     else if (previous_owner == "" && current_owner != "") {
       debug ("Client '%s' has appeared", name);
       bool use_playlists = this.supports_playlists ( name );
-      client_appeared (mpris2_root.DesktopEntry, name, false/*use_playlists*/);
+      client_appeared (mpris2_root.DesktopEntry, name, use_playlists);
     }
   }
 
@@ -134,7 +134,14 @@ public class Mpris2Watcher : GLib.Object
   private bool supports_playlists ( string name )
   {
     try {
-      debug( "name = %s", name);
+      /* The dbusproxy flag parameter is needed to ensure Banshee does not 
+       blow up. I suspect the issue is that if you
+       try to instantiate a dbus object which does not have any properties 
+       associated  with it, gdbus will attempt to fetch the properties (this is
+       in the documentation) but the banshee mpris dbus object more than likely 
+       causes a crash because it doesn't check for the presence of properties 
+       before attempting to access them.
+      */
       this.introspectable = Bus.get_proxy_sync (  BusType.SESSION,
                                                   name,
                                                   MPRIS_MEDIA_PLAYER_PATH, 
