@@ -59,8 +59,9 @@ public class MusicPlayerBridge : GLib.Object
                                                      null,
                                                      this.fetch_icon_name(desktop),
                                                      calculate_menu_position(),
+                                                     null,
                                                      PlayerController.state.OFFLINE );
-      this.registered_clients.set(mpris_key, ctrl);  
+      this.registered_clients.set(mpris_key, ctrl);
     }
   }
 
@@ -74,7 +75,9 @@ public class MusicPlayerBridge : GLib.Object
     }
   }
 
-  public void client_has_become_available ( string desktop, string dbus_name )
+  public void client_has_become_available ( string desktop,
+                                            string dbus_name,
+                                            bool use_playlists )
   {
     if (desktop == null || desktop == ""){
       warning("Client %s attempting to register without desktop entry being set on the mpris root",
@@ -104,6 +107,7 @@ public class MusicPlayerBridge : GLib.Object
                                                      dbus_name,
                                                      this.fetch_icon_name(desktop),                                                    
                                                      this.calculate_menu_position(),
+                                                     use_playlists,
                                                      PlayerController.state.READY );
       this.registered_clients.set ( mpris_key, ctrl );
       debug ( "Have not seen this %s before, new controller created.", desktop );        
@@ -111,6 +115,7 @@ public class MusicPlayerBridge : GLib.Object
       debug ( "application added to the interested list" );
     }
     else{
+      this.registered_clients[mpris_key].use_playlists = use_playlists;
       this.registered_clients[mpris_key].update_state ( PlayerController.state.READY );
       this.registered_clients[mpris_key].activate ( dbus_name );
       debug("Application has already registered - awaken the hibernation: %s \n", dbus_name );
@@ -130,7 +135,7 @@ public class MusicPlayerBridge : GLib.Object
       }
     }
   }
-  
+ 
   public void set_root_menu_item ( Dbusmenu.Menuitem menu )
   {
     this.root_menu = menu;

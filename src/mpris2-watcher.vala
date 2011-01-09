@@ -29,7 +29,7 @@ public interface FreeDesktopObject: Object {
 
 [DBus (name = "org.freedesktop.DBus.Introspectable")]
 public interface FreeDesktopIntrospectable: Object {
-  public abstract string introspect() throws IOError;
+  public abstract string Introspect() throws IOError;
 }
 
 public errordomain XmlError {
@@ -45,8 +45,11 @@ public class Mpris2Watcher : GLib.Object
   private const string MPRIS_MEDIA_PLAYER_PATH = "/org/mpris/MediaPlayer2";
 
   FreeDesktopObject fdesktop_obj;
-
-  public signal void client_appeared ( string desktop_file_name, string dbus_name );
+  FreeDesktopIntrospectable introspectable;
+  
+  public signal void client_appeared ( string desktop_file_name,
+                                       string dbus_name,
+                                       bool use_playlists );
   public signal void client_disappeared ( string dbus_name );
 
   public Mpris2Watcher ()
@@ -69,6 +72,29 @@ public class Mpris2Watcher : GLib.Object
     }
   }
 
+  // At startup check to see if there are clients up that we are interested in
+  // More relevant for development and daemon's like mpd. 
+  private async void check_for_active_clients()
+  {
+    string[] interfaces;
+    try{
+      interfaces = yield this.fdesktop_obj.list_names();
+    }
+    catch ( IOError e) {
+      warning( "Mpris2watcher could fetch active interfaces at startup: %s",
+                e.message );
+      return;
+    }
+    foreach (var address in interfaces) {
+      if (address.has_prefix (MPRIS_PREFIX)){
+        MprisRoot? mpris2_root = this.create_mpris_root(address);
+        if (mpris2_root == null) return;
+        bool use_playlists = this.supports_playlists ( address );
+        client_appeared (mpris2_root.DesktopEntry, address, use_playlists);
+      }
+    }
+  }
+
   private void name_changes_detected ( FreeDesktopObject dbus_obj,
                                        string     name,
                                        string     previous_owner,
@@ -84,8 +110,8 @@ public class Mpris2Watcher : GLib.Object
     }
     else if (previous_owner == "" && current_owner != "") {
       debug ("Client '%s' has appeared", name);
-      bool use_playlists = this.supports_playlists ( name );      
-      client_appeared (mpris2_root.DesktopEntry, name);
+      bool use_playlists = this.supports_playlists ( name );
+      client_appeared (mpris2_root.DesktopEntry, name, false/*use_playlists*/);
     }
   }
 
@@ -107,13 +133,15 @@ public class Mpris2Watcher : GLib.Object
 
   private bool supports_playlists ( string name )
   {
-    FreeDesktopIntrospectable introspectable;
     try {
-      introspectable = Bus.get_proxy_sync (  BusType.SESSION,
-                                             name,
-                                             MPRIS_MEDIA_PLAYER_PATH );
-      var results = introspectable.introspect();
-      return this.parse_interfaces (results);      
+      debug( "name = %s", name);
+      this.introspectable = Bus.get_proxy_sync (  BusType.SESSION,
+                                                  name,
+                                                  MPRIS_MEDIA_PLAYER_PATH, 
+                                                  GLib.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
+      
+      var results = introspectable.Introspect();
+      return this.parse_interfaces (results);
     }
     catch (IOError e){
       warning( "Could not create an introspectable object: %s",
@@ -126,7 +154,6 @@ public class Mpris2Watcher : GLib.Object
   {
     //parse the document from path
     bool result = false;
-    debug ("attempting to parse %s", interface_info);
     Xml.Doc* xml_doc = Parser.parse_doc (interface_info);
     if (xml_doc == null) {
       warning ("Mpris2Watcher - parse-interfaces - failed to instantiate xml doc");
@@ -153,31 +180,8 @@ public class Mpris2Watcher : GLib.Object
       if ( interface_name == MPRIS_PREFIX.concat("Playlists")){
         result = true;
       }
-      delete attributes;      
     }
     delete xml_doc;
     return result;
-  }
-  
-  // At startup check to see if there are clients up that we are interested in
-  // More relevant for development and daemon's like mpd. 
-  private async void check_for_active_clients()
-  {
-    string[] interfaces;
-    try{
-      interfaces = yield this.fdesktop_obj.list_names();
-    }
-    catch ( IOError e) {
-      warning( "Mpris2watcher could fetch active interfaces at startup: %s",
-                e.message );
-      return;
-    }
-    foreach (var address in interfaces) {
-      if (address.has_prefix (MPRIS_PREFIX)){
-        MprisRoot? mpris2_root = this.create_mpris_root(address);                                         
-        if (mpris2_root == null) return;
-        client_appeared (mpris2_root.DesktopEntry, address);        
-      }
-    }
-  }   
+  }  
 }
