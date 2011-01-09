@@ -77,13 +77,14 @@ public class Mpris2Watcher : GLib.Object
     MprisRoot? mpris2_root = this.create_mpris_root(name);                                         
 
     if (mpris2_root == null) return;
-    
+
     if (previous_owner != "" && current_owner == "") {
       debug ("Client '%s' gone down", name);
       client_disappeared (name);
     }
     else if (previous_owner == "" && current_owner != "") {
       debug ("Client '%s' has appeared", name);
+      bool use_playlists = this.supports_playlists ( name );      
       client_appeared (mpris2_root.DesktopEntry, name);
     }
   }
@@ -101,7 +102,6 @@ public class Mpris2Watcher : GLib.Object
                   e.message );
       }
     }
-    this.supports_playlists(name);
     return mpris2_root;
   }
 
@@ -125,6 +125,7 @@ public class Mpris2Watcher : GLib.Object
   private bool parse_interfaces( string interface_info )
   {
     //parse the document from path
+    bool result = false;
     debug ("attempting to parse %s", interface_info);
     Xml.Doc* xml_doc = Parser.parse_doc (interface_info);
     if (xml_doc == null) {
@@ -143,13 +144,19 @@ public class Mpris2Watcher : GLib.Object
     //let's parse those nodes
     for (Xml.Node* iter = root_node->children; iter != null; iter = iter->next) {
       //spaces btw. tags are also nodes, discard them
-      if (iter->type != ElementType.ELEMENT_NODE)
-          continue; 
-      string node_name = iter->name; //get the node's name    
-      debug ( "this dbus object has interface %s ", node_name );
+      if (iter->type != ElementType.ELEMENT_NODE){
+        continue;
+      }
+      Xml.Attr* attributes = iter->properties; //get the node's name    
+      string interface_name = attributes->children->content;
+      debug ( "this dbus object has interface %s ", interface_name );
+      if ( interface_name == MPRIS_PREFIX.concat("Playlists")){
+        result = true;
+      }
+      delete attributes;      
     }
     delete xml_doc;
-    return false;
+    return result;
   }
   
   // At startup check to see if there are clients up that we are interested in
