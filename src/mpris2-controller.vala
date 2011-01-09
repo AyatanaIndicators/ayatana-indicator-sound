@@ -71,7 +71,7 @@ public class Mpris2Controller : GLib.Object
   {
     debug("properties-changed for interface %s and owner %s", interface_source, this.owner.dbus_name);
     if ( changed_properties == null ||
-        interface_source.has_prefix ( Mpris2Watcher.MPRIS_PREFIX ) == false ){
+        interface_source.has_prefix ( MPRIS_PREFIX ) == false ){
       warning("Property-changed hash is null or this is an interface that doesn't concerns us");
       return;
     }
