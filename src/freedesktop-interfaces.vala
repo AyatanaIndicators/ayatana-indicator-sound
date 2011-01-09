@@ -30,6 +30,12 @@ public interface FreeDesktopIntrospectable: Object {
   public abstract string Introspect() throws IOError;
 }
 
+[DBus (name = "org.freedesktop.DBus.Properties")]
+public interface FreeDesktopProperties : Object{
+  public signal void PropertiesChanged (string source, HashTable<string, Variant?> changed_properties,
+                                        string[] invalid );
+}
+
 public errordomain XmlError {
     FILE_NOT_FOUND,
     XML_DOCUMENT_EMPTY
