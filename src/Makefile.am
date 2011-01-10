@@ -115,13 +115,12 @@ gen-%.xml.c: %.xml
 	@echo ";" >> $@
 
 
-EXTRA_DIST += \
-  $(DBUS_SPECS)
+EXTRA_DIST = \
+  $(DBUS_SPECS) \
   sound-service.xml \
-  sound-service.list \
   $(music_bridge_APIFILES) \
   $(music_bridge_VALASOURCES)
-
+  
 #######################
 # Stuff to clean Stuff
 #######################
@@ -130,10 +129,9 @@ BUILT_SOURCES = \
 	sound-service-client.h \
   sound-service-server.h \
   $(music_bridge_APIFILES) \
-	gen-indicator-service.xml.h \
-	gen-indicator-service.xml.c \
+	gen-sound-service.xml.h \
+	gen-sound-service.xml.c \
   $(music_bridge_VALASOURCES:.vala=.c)
-
+  
 CLEANFILES = \
 	$(BUILT_SOURCES)
-

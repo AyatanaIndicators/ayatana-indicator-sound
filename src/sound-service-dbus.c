@@ -23,7 +23,7 @@
 #endif
 
 #include <gio/gio.h>
-#include "gen-indicator-service.xml.h"
+#include "gen-sound-service.xml.h"
 #include "dbus-shared-names.h"
 #include "sound-service-dbus.h"
 #include "common-defs.h"
