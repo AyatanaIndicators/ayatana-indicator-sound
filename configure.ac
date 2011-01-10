@@ -39,7 +39,7 @@ GIO_2_0_REQUIRED_VERSION=2.25.13
 
 PKG_CHECK_MODULES(APPLET, gtk+-2.0 >= $GTK_REQUIRED_VERSION
                           indicator >= $INDICATOR_REQUIRED_VERSION
-			              			dbusmenu-gtk-0.4 >= $DBUSMENUGTK_REQUIRED_VERSION
+                          dbusmenu-gtk-0.4 >= $DBUSMENUGTK_REQUIRED_VERSION
                           libido-0.1 >= $INDICATOR_DISPLAY_OBJECTS)
                           
 AC_SUBST(APPLET_CFLAGS)
@@ -53,13 +53,12 @@ AC_SUBST(PULSEAUDIO_LIBS)
 
 PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib-0.4 >= $DBUSMENUGLIB_REQUIRED_VERSION
                                 indicator >= $INDICATOR_REQUIRED_VERSION
-																indicate >= $INDICATE_REQUIRED_VERSION
-																gee-1.0
+                                indicate >= $INDICATE_REQUIRED_VERSION
+                                gee-1.0
                                 gio-unix-2.0
                                 libxml-2.0)
-
 AC_SUBST(SOUNDSERVICE_CFLAGS)
-AC_SUBST(SOUNDERVICE_LIBS)
+AC_SUBST(SOUNDSERVICE_LIBS)
 
 AC_PATH_PROG(GCONFTOOL, gconftool-2)
 dnl Specify the gconf configuration source,
