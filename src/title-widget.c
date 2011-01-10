@@ -138,12 +138,11 @@ title_widget_button_press_event (GtkWidget *menuitem,
   //g_debug("TitleWidget::menu_press_event");
   TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(menuitem);
   
-  GValue value = {0};
-    g_value_init(&value, G_TYPE_BOOLEAN);
-
-  g_value_set_boolean(&value, TRUE);  
-  dbusmenu_menuitem_handle_event (priv->twin_item, "Title menu event", &value, 0);
-  
+  GVariant* new_title_event = g_variant_new_boolean(TRUE);
+  dbusmenu_menuitem_handle_event (priv->twin_item,
+                                  "Title menu event",
+                                  new_title_event,
+                                  0);
   return FALSE;
 }
 

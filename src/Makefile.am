@@ -126,8 +126,6 @@ EXTRA_DIST = \
 #######################
 BUILT_SOURCES = \
 	music_bridge_vala.stamp \
-	sound-service-client.h \
-  sound-service-server.h \
   $(music_bridge_APIFILES) \
 	gen-sound-service.xml.h \
 	gen-sound-service.xml.c \

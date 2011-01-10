@@ -39,7 +39,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "dbus-shared-names.h"
 
-#include "gen-sound-service-xml.h"
+#include "gen-sound-service.xml.h"
 #include "common-defs.h"
 
 typedef struct _IndicatorSoundPrivate IndicatorSoundPrivate;
@@ -85,22 +85,35 @@ static gboolean new_title_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * 
 
 static GDBusNodeInfo *node_info = NULL;
 static GDBusInterfaceInfo *interface_info = NULL;
-
+static void create_connection_to_service (GObject *source_object,
+                                          GAsyncResult *res,
+                                          gpointer user_data);
 static void connection_changed (IndicatorServiceManager * sm,
                                 gboolean connected,
                                 gpointer userdata);
-
 static void g_signal_cb ( GDBusProxy *proxy,
                           const gchar *sender_name,
                           const gchar *signal_name,
                           GVariant *parameters,
-                          gpointer user_data)
+                          gpointer user_data);
 
-static void catch_signal_sink_input_while_muted(DBusGProxy * proxy, gboolean value, gpointer userdata);
-static void catch_signal_sink_mute_update(DBusGProxy *proxy, gboolean mute_value, gpointer userdata);
-static void catch_signal_sink_availability_update(DBusGProxy *proxy, gboolean available_value, gpointer userdata);
-static void fetch_mute_value_from_dbus();
-static void fetch_sink_availability_from_dbus(IndicatorSound* self);
+static void react_to_signal_sink_input_while_muted (gboolean value,
+                                                    IndicatorSound* self);
+static void react_to_signal_sink_mute_update (gboolean value,
+                                              IndicatorSound* self);
+static void react_to_signal_sink_availability_update (gboolean value,
+                                                      IndicatorSound* self);
+static void fetch_state ( IndicatorSound* self );
+
+static void get_sink_mute_cb ( GObject *object,
+                               GAsyncResult *res,
+                               gpointer user_data );
+
+static void get_sink_availability_cb ( GObject *object,
+                                       GAsyncResult *res,
+                                       gpointer user_data );
+
+
 
 /****Volume States 'members' ***/
 static void update_state(const gint state);
@@ -352,8 +365,7 @@ new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, 
                                   newitem,
                                   menu_volume_item,
                                   parent);    
-  fetch_mute_value_from_dbus();
-  fetch_sink_availability_from_dbus(INDICATOR_SOUND (io));      
+  fetch_state(INDICATOR_SOUND (io));      
   return TRUE;  
 }
 
@@ -365,7 +377,8 @@ connection_changed (IndicatorServiceManager * sm,
 {
   IndicatorSound* indicator = INDICATOR_SOUND(user_data);
   g_return_if_fail ( IS_INDICATOR_SOUND (indicator) );
-  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE (indicator);
+  GError *error = NULL;
 
   if (connected == FALSE){
     return;
@@ -374,9 +387,11 @@ connection_changed (IndicatorServiceManager * sm,
     // for 5 seconds and then if no connection message 
     // is received put the state at 'sink not available'
   }
-  // If we connection is back on and the proxy is not null
-  // we don't need to anything gdbus takes care of the rest - bless.
-  if (priv->dbus_proxy!= NULL){
+  // If the proxy is not null and connected is true => its a reconnect,
+  // we don't need to anything, gdbus takes care of the rest - bless.
+  // just fetch the state.
+  if (priv->dbus_proxy != NULL){
+    fetch_state (indicator);    
     return;
   }
   
@@ -417,7 +432,7 @@ static void create_connection_to_service (GObject *source_object,
   IndicatorSound *self = INDICATOR_SOUND(user_data);
   GError *error = NULL;
 
-  g_return_if_fail(self != NULL);
+  g_return_if_fail( IS_INDICATOR_SOUND(self) );
 
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
 
@@ -428,11 +443,103 @@ static void create_connection_to_service (GObject *source_object,
     g_error_free(error);
     return;
   }
-
-  g_signal_connect(self->dbus_proxy, "g-signal", G_CALLBACK(g_signal), self);
   
+  g_signal_connect(priv->dbus_proxy, "g-signal", G_CALLBACK(g_signal_cb), self);  
+  fetch_state (self);
 }
 
+static void fetch_state (IndicatorSound* self)
+{
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
+  
+  g_dbus_proxy_call ( priv->dbus_proxy,
+                      "GetSinkMute",
+                      NULL,
+		                  G_DBUS_CALL_FLAGS_NONE,
+                      -1,
+                      NULL,
+                      (GAsyncReadyCallback)get_sink_mute_cb,
+                      self);
+
+  g_dbus_proxy_call ( priv->dbus_proxy,
+                      "GetSinkAvailability",
+                      NULL,
+		                  G_DBUS_CALL_FLAGS_NONE,
+                      -1,
+                      NULL,
+                      (GAsyncReadyCallback)get_sink_availability_cb,
+                      self);
+}
+
+static void get_sink_availability_cb ( GObject *object,
+                                       GAsyncResult *res,
+		                                   gpointer user_data )
+{
+  IndicatorSound* self = INDICATOR_SOUND(user_data);
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
+  
+  GVariant *result, *value;
+  GError *error = NULL;
+  gboolean is_available;
+
+  result = g_dbus_proxy_call_finish ( priv->dbus_proxy,
+                                      res,
+                                      &error );
+
+  if (error != NULL) {
+    g_debug("get_sink_availability call failed: %s", error->message);
+    g_error_free(error);
+    return;
+  }
+
+  value = g_variant_get_child_value(result, 0);
+  is_available = g_variant_get_boolean(value);
+
+  if (is_available == FALSE) {
+    update_state(STATE_SINKS_NONE);
+  }
+
+  if(priv->volume_widget != NULL){
+    GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));  
+    gtk_widget_set_sensitive(slider_widget, is_available);
+  }
+    
+  g_variant_unref(value);
+  g_variant_unref(result);
+}
+
+
+static void get_sink_mute_cb ( GObject *object,
+                               GAsyncResult *res,
+		                           gpointer user_data)
+{
+  IndicatorSound* self = INDICATOR_SOUND(user_data);
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
+  
+  GVariant *result, *value;
+  GError *error = NULL;
+  gboolean is_muted;
+
+  result = g_dbus_proxy_call_finish ( priv->dbus_proxy,
+                                      res,
+                                      &error );
+
+  if (error != NULL) {
+    g_debug("get_sink_mute call failed: %s", error->message);
+    g_error_free(error);
+    return;
+  }
+
+  value = g_variant_get_child_value(result, 0);
+  is_muted = g_variant_get_boolean(value);
+
+  if ( is_muted == TRUE ){
+    update_state(STATE_MUTED);
+  }
+  
+  g_variant_unref(value);
+  g_variant_unref(result);
+}
 
 /*
 Prepare states Array.
@@ -581,66 +688,9 @@ reset_mute_blocking_animation()
 }
 
 
-/*******************************************************************/
-//DBus method handlers
-/*******************************************************************/
-static void
-fetch_sink_availability_from_dbus(IndicatorSound* self)
-{
-  g_return_if_fail(IS_INDICATOR_SOUND(self));
-  
-  GError * error = NULL;
-  gboolean * available_input;
-  available_input = g_new0(gboolean, 1);
-  com_canonical_indicators_sound_get_sink_availability(sound_dbus_proxy, available_input, &error);
-  if (error != NULL) {
-    g_warning("Unable to fetch AVAILABILITY at indicator start up: %s", error->message);
-    g_error_free(error);
-    g_free(available_input);
-    return;
-  }
-  
-  device_available = *available_input;
-  if (device_available == FALSE) {
-    update_state(STATE_SINKS_NONE);
-    //g_debug("NO DEVICE AVAILABLE");
-  }
-
-  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
-
-  if(priv->volume_widget != NULL){
-    GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));  
-    gtk_widget_set_sensitive(slider_widget, device_available);
-  }
-
-  g_free(available_input);
-  //g_debug("IndicatorSound::fetch_sink_availability_from_dbus ->%i", device_available);
-}
-
-
-static void
-fetch_mute_value_from_dbus()
-{
-  GError * error = NULL;
-  gboolean *mute_input;
-  mute_input = g_new0(gboolean, 1);
-  com_canonical_indicators_sound_get_sink_mute(sound_dbus_proxy, mute_input, &error);
-  if (error != NULL) {
-    g_warning("Unable to fetch MUTE at indicator start up: %s", error->message);
-    g_error_free(error);
-    g_free(mute_input);
-    return;
-  }
-  initial_mute = *mute_input;
-  if (initial_mute == TRUE){
-    update_state(STATE_MUTED);
-  }
-  g_free(mute_input);
-  //g_debug("at the indicator start up and the MUTE returned from dbus method is %i", initial_mute);
-}
 
 /*******************************************************************/
-// Signal reactions
+// DBUS Signal reactions
 /*******************************************************************/
 static void g_signal_cb ( GDBusProxy *proxy,
                           const gchar *sender_name,
@@ -654,18 +704,18 @@ static void g_signal_cb ( GDBusProxy *proxy,
   g_return_if_fail ( IS_INDICATOR_SOUND(self) );
     
   if (g_strcmp0(signal_name, INDICATOR_SOUND_SIGNAL_SINK_AVAILABLE_UPDATE) == 0){
-    react_signal_sink_availability_update ( input, self );
+    react_to_signal_sink_availability_update ( input, self );
   }
   else if (g_strcmp0(signal_name, INDICATOR_SOUND_SIGNAL_SINK_MUTE_UPDATE) == 0){
-    react_signal_sink_mute_update ( input, self );
+    react_to_signal_sink_mute_update ( input, self );
   }
   else if (g_strcmp0(signal_name, INDICATOR_SOUND_SIGNAL_SINK_INPUT_WHILE_MUTED) == 0){
-    react_signal_sink_input_while_muted ( input, self );
+    react_to_signal_sink_input_while_muted ( input, self );
   }
 }
 
 static void
-react_signal_sink_input_while_muted(gboolean block_value, IndicatorSound* self)
+react_to_signal_sink_input_while_muted(gboolean block_value, IndicatorSound* self)
 {
   //g_debug("signal caught - sink input while muted with value %i", block_value);
   if (block_value == 1 && blocked_id == 0 && animation_id == 0 && blocked_animation_list != NULL) {
@@ -680,7 +730,7 @@ react_signal_sink_input_while_muted(gboolean block_value, IndicatorSound* self)
  UNMUTE's force a volume update therefore icon is updated appropriately => no need for unmute handling here.
 */ 
 static void
-react_signal_sink_mute_update(gboolean mute_value, IndicatorSound* self)
+react_to_signal_sink_mute_update(gboolean mute_value, IndicatorSound* self)
 {
   if (mute_value == TRUE && device_available == TRUE) {
     update_state(STATE_MUTED);
@@ -688,7 +738,6 @@ react_signal_sink_mute_update(gboolean mute_value, IndicatorSound* self)
     reset_mute_blocking_animation();
   }
   //g_debug("signal caught - sink mute update with mute value: %i", mute_value);
-  g_return_if_fail(IS_INDICATOR_SOUND(userdata));
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
 
   if(priv->volume_widget == NULL){
@@ -700,7 +749,7 @@ react_signal_sink_mute_update(gboolean mute_value, IndicatorSound* self)
 
 
 static void
-react_signal_sink_availability_update(gboolean available_value, IndicatorSound* self)
+react_to_signal_sink_availability_update(gboolean available_value, IndicatorSound* self)
 {
   device_available  = available_value;
   if (device_available == FALSE) {
