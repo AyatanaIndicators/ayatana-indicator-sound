@@ -18,8 +18,7 @@ libsoundmenu_la_SOURCES = \
             title-widget.h \
             volume-widget.c \
             volume-widget.h \
-            dbus-shared-names.h \
-            sound-service-client.h 
+            dbus-shared-names.h
 
 libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -DG_LOG_DOMAIN=\"Indicator-Sound\"
 libsoundmenu_la_LIBADD = $(APPLET_LIBS)
@@ -29,27 +28,11 @@ checkxml: $(srcdir)/sound-service.xml
 	@xmllint -valid -noout $<
 	@echo $< checks out ok
 
-sound-service-client.h: $(srcdir)/sound-service.xml
-	dbus-binding-tool \
-		--prefix=_sound_service_client \
-		--mode=glib-client \
-		--output=sound-service-client.h \
-		$(srcdir)/sound-service.xml
-
 
 ####################################################################
 # Sound Service 
 ####################################################################
 
-#################
-# dbus interface
-#################
-sound-service-server.h: $(srcdir)/sound-service.xml
-	dbus-binding-tool \
-		--prefix=_sound_service_server \
-		--mode=glib-server \
-		--output=sound-service-server.h \
-		$(srcdir)/sound-service.xml
 
 #####################
 # libsoundmenu vala
@@ -78,7 +61,7 @@ music_bridge_VALAFLAGS = \
   --vapidir=./ \
   --thread \
   --pkg gee-1.0 \
-  --pkg Dbusmenu-Glib-0.2 \
+  --pkg Dbusmenu-Glib-0.4 \
   --pkg common-defs \
 	--pkg gio-2.0 \
 	--pkg gio-unix-2.0 \
@@ -108,7 +91,6 @@ indicator_sound_service_SOURCES = \
   pulse-manager.c \
   sound-service-dbus.h \
   sound-service-dbus.c \
-  sound-service-server.h \
   slider-menu-item.h \
   slider-menu-item.c \
   $(music_bridge_VALASOURCES:.vala=.c)
@@ -117,9 +99,24 @@ indicator_sound_service_CFLAGS = $(PULSEAUDIO_CFLAGS) $(SOUNDSERVICE_CFLAGS) $(G
 indicator_sound_service_LDADD = $(PULSEAUDIO_LIBS) $(SOUNDSERVICE_LIBS) $(GCONF_LIBS)
 
 #########################
-# Extra stuff to package
+# Service xml compilation
 #########################
-EXTRA_DIST = \
+DBUS_SPECS = \
+	sound-service.xml
+
+gen-%.xml.h: %.xml
+	@echo "Building $@ from $<"
+	@echo "extern const char * _$(subst -,_,$(subst .,_,$(basename $<)));" > $@
+
+gen-%.xml.c: %.xml
+	@echo "Building $@ from $<"
+	@echo "const char * _$(subst -,_,$(subst .,_,$(basename $<))) = " > $@
+	@sed -e "s:\":\\\\\":g" -e s:^:\": -e s:\$$:\\\\n\": $< >> $@
+	@echo ";" >> $@
+
+
+EXTRA_DIST += \
+  $(DBUS_SPECS)
   sound-service.xml \
   sound-service.list \
   $(music_bridge_APIFILES) \
@@ -133,6 +130,8 @@ BUILT_SOURCES = \
 	sound-service-client.h \
   sound-service-server.h \
   $(music_bridge_APIFILES) \
+	gen-indicator-service.xml.h \
+	gen-indicator-service.xml.c \
   $(music_bridge_VALASOURCES:.vala=.c)
 
 CLEANFILES = \
