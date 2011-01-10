@@ -43,23 +43,13 @@ static void bus_method_call (GDBusConnection * connection,
 typedef struct _SoundServiceDbusPrivate SoundServiceDbusPrivate;
 
 struct _SoundServiceDbusPrivate {
-  GDBusConnection *connection;
-  gboolean        mute;
-  gboolean        sink_availability;
-};
-
-/* Signals */
-enum {
-  SINK_INPUT_WHILE_MUTED,
-  SINK_MUTE_UPDATE,
-  SINK_AVAILABLE_UPDATE,
-  LAST_SIGNAL
+        GDBusConnection *connection;
+        gboolean        mute;
+        gboolean        sink_availability;
 };
 
 static GDBusNodeInfo *            node_info = NULL;
 static GDBusInterfaceInfo *       interface_info = NULL;
-
-static guint signals[LAST_SIGNAL] = { 0 };
 
 #define SOUND_SERVICE_DBUS_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), SOUND_SERVICE_DBUS_TYPE, SoundServiceDbusPrivate))
 
@@ -82,41 +72,17 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
   object_class->finalize = sound_service_dbus_finalize;
 
   g_assert(klass != NULL);
-  dbus_g_object_type_install_info (SOUND_SERVICE_DBUS_TYPE,
-                                   &dbus_glib__sound_service_server_object_info);
 
-  signals[SINK_INPUT_WHILE_MUTED] =  g_signal_new ("sink-input-while-muted",
-                                                   G_TYPE_FROM_CLASS (klass),
-                                                   G_SIGNAL_RUN_LAST,
-                                                   0,
-                                                   NULL, NULL,
-                                                   g_cclosure_marshal_VOID__BOOLEAN,
-                                                   G_TYPE_NONE, 1, G_TYPE_BOOLEAN);
+  if (node_info == NULL) {
+    GError * error = NULL;
 
-  signals[SINK_MUTE_UPDATE] =  g_signal_new ("sink-mute-update",
-                                             G_TYPE_FROM_CLASS (klass),
-                                             G_SIGNAL_RUN_LAST,
-                                             0,
-                                             NULL, NULL,
-                                             g_cclosure_marshal_VOID__BOOLEAN,
-                                             G_TYPE_NONE, 1, G_TYPE_BOOLEAN);
-  signals[SINK_AVAILABLE_UPDATE] =  g_signal_new ("sink-available-update",
-                                                  G_TYPE_FROM_CLASS (klass),
-                                                  G_SIGNAL_RUN_LAST,
-                                                  0,
-                                                  NULL, NULL,
-                                                  g_cclosure_marshal_VOID__BOOLEAN,
-                                                  G_TYPE_NONE, 1, G_TYPE_BOOLEAN);
-	if (node_info == NULL) {
-		GError * error = NULL;
-
-		node_info = g_dbus_node_info_new_for_xml(_indicator_service, &error);
-		if (error != NULL) {
-			g_error("Unable to parse Indicator Service Interface description: %s",
+    node_info = g_dbus_node_info_new_for_xml(_sound_service, &error);
+    if (error != NULL) {
+      g_error("Unable to parse Indicator Service Interface description: %s",
                error->message);
-			g_error_free(error);
-		}
-	}
+      g_error_free(error);
+    }
+  }
 
 	if (interface_info == NULL) {
 		interface_info = g_dbus_node_info_lookup_interface (node_info,
@@ -228,7 +194,7 @@ void sound_service_dbus_sink_input_while_muted(SoundServiceDbus* obj,
                                  INDICATOR_SOUND_DBUS_NAME,
                                  INDICATOR_SOUND_DBUS_OBJECT,
                                  INDICATOR_SOUND_SERVICE_DBUS_INTERFACE,
-                                 "SinkInputWhileMuted",
+                                 INDICATOR_SOUND_SIGNAL_SINK_INPUT_WHILE_MUTED,
                                   v_output,
                                   &error );
   if (error != NULL) {
@@ -251,7 +217,7 @@ void sound_service_dbus_update_sink_mute(SoundServiceDbus* obj,
                                  INDICATOR_SOUND_DBUS_NAME,
                                  INDICATOR_SOUND_DBUS_OBJECT,
                                  INDICATOR_SOUND_SERVICE_DBUS_INTERFACE,
-                                 "SinkMuteUpdate",
+                                 INDICATOR_SOUND_SIGNAL_SINK_MUTE_UPDATE,
                                   v_output,
                                   &error );
   if (error != NULL) {
@@ -275,7 +241,7 @@ void sound_service_dbus_update_sink_availability(SoundServiceDbus* obj,
                                  INDICATOR_SOUND_DBUS_NAME,
                                  INDICATOR_SOUND_DBUS_OBJECT,
                                  INDICATOR_SOUND_SERVICE_DBUS_INTERFACE,
-                                 "SinkAvailableUpdate",
+                                 INDICATOR_SOUND_SIGNAL_SINK_AVAILABLE_UPDATE,
                                   v_output,
                                   &error );
   if (error != NULL) {

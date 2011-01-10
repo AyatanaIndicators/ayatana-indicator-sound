@@ -30,5 +30,9 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define INDICATOR_SOUND_SERVICE_DBUS_OBJECT "/com/canonical/indicators/sound/service"
 #define INDICATOR_SOUND_SERVICE_DBUS_INTERFACE "com.canonical.indicators.sound"
 #define INDICATOR_SOUND_DBUS_VERSION  0
+#define INDICATOR_SOUND_SIGNAL_SINK_INPUT_WHILE_MUTED "SinkInputWhileMuted"
+#define INDICATOR_SOUND_SIGNAL_SINK_MUTE_UPDATE "SinkMuteUpdate"
+#define INDICATOR_SOUND_SIGNAL_SINK_AVAILABLE_UPDATE "SinkAvailableUpdate"
+
 
 #endif /* __DBUS_SHARED_NAMES_H__ */
