@@ -93,6 +93,8 @@ indicator_sound_service_SOURCES = \
   sound-service-dbus.c \
   slider-menu-item.h \
   slider-menu-item.c \
+  gen-sound-service.xml.h \  
+  gen-sound-service.xml.c \
   $(music_bridge_VALASOURCES:.vala=.c)
 
 indicator_sound_service_CFLAGS = $(PULSEAUDIO_CFLAGS) $(SOUNDSERVICE_CFLAGS) $(GCONF_CFLAGS) -DLIBEXECDIR=\"$(libexecdir)\" -Wall

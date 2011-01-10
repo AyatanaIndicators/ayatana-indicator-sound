@@ -21,9 +21,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <unistd.h>
 #include <glib/gi18n.h>
 
-#include <dbus/dbus-glib.h>
-#include <dbus/dbus-glib-bindings.h>
-
 #include <libdbusmenu-glib/server.h>
 #include <libdbusmenu-glib/client.h>
 
@@ -79,10 +76,10 @@ DbusmenuMenuitem* dbus_menu_manager_setup()
 
 void dbus_menu_manager_update_volume(gdouble  volume)
 {
-  GValue value = {0};
-  g_value_init(&value, G_TYPE_DOUBLE);
-  g_value_set_double(&value, volume);
-  dbusmenu_menuitem_property_set_value(DBUSMENU_MENUITEM(volume_slider_menuitem), DBUSMENU_VOLUME_MENUITEM_LEVEL, &value);  
+  GVariant* new_volume = g_variant_new_double(volume);
+  dbusmenu_menuitem_property_set_variant(DBUSMENU_MENUITEM(volume_slider_menuitem),
+                                         DBUSMENU_VOLUME_MENUITEM_LEVEL,
+                                         new_volume);  
 }
                                      
 

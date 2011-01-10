@@ -33,7 +33,6 @@ DBUSMENUGTK_REQUIRED_VERSION=0.3.9
 POLKIT_REQUIRED_VERSION=0.92
 PULSE_AUDIO_REQUIRED_VERSION=0.9.19
 INDICATOR_DISPLAY_OBJECTS=0.1.11
-INDICATE_REQUIRED_VERSION=0.4.1
 DBUSMENUGLIB_REQUIRED_VERSION=0.3.9
 GIO_2_0_REQUIRED_VERSION=2.25.13
 
@@ -53,7 +52,6 @@ AC_SUBST(PULSEAUDIO_LIBS)
 
 PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib-0.4 >= $DBUSMENUGLIB_REQUIRED_VERSION
                                 indicator >= $INDICATOR_REQUIRED_VERSION
-                                indicate >= $INDICATE_REQUIRED_VERSION
                                 gee-1.0
                                 gio-unix-2.0
                                 libxml-2.0)

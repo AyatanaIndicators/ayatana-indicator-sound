@@ -23,6 +23,7 @@
 #endif
 
 #include <gio/gio.h>
+#include <libindicator/indicator-service.h>
 #include "gen-sound-service.xml.h"
 #include "dbus-shared-names.h"
 #include "sound-service-dbus.h"
@@ -105,11 +106,10 @@ sound_service_dbus_init (SoundServiceDbus *self)
   priv->sink_availability = FALSE;
 
   /* Fetch the session bus */
-  priv->connection = g_bus_get_sync (DBUS_BUS_SESSION, NULL, &error);
+  priv->connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
 
   if (error != NULL) {
-    g_error("sound-service-dbus:Unable to connect to the session bus when
-             creating indicator sound service : %s", error->message);
+    g_error("sound-service-dbus:Unable to connect to the session bus when creating indicator sound service : %s", error->message);
     g_error_free(error);
     return;
   }
@@ -154,19 +154,16 @@ bus_method_call (GDBusConnection * connection,
                  GDBusMethodInvocation * invocation,
                  gpointer user_data) 
 { 
-  IndicatorService * service = INDICATOR_SERVICE(user_data); 
+  IndicatorService* service = INDICATOR_SERVICE(user_data); 
   GVariant * retval = NULL;
+  SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (service);
   
   if (g_strcmp0(method, "GetSinkMute") == 0) {
-    SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
-    g_debug("Get sink mute - sound service dbus!,
-             about to send over mute_value of  %i", priv->mute);
+    g_debug("Get sink mute - sound service dbus!,about to send over mute_value of  %i", priv->mute);
     retval =  g_variant_new_boolean (priv->mute);    
   } 
   else if (g_strcmp0(method, "GetSinkAvailability") == 0) {
-    SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
-    g_debug("Get sink availability - sound service dbus!,
-            about to send over availability_value of  %i", priv->sink_availability);
+    g_debug("Get sink availability - sound service dbus!, about to send over availability_value of  %i", priv->sink_availability);
     retval =  g_variant_new_boolean (priv->sink_availability);
   }
   else {
