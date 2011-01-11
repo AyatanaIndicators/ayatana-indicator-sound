@@ -81,3 +81,4 @@ src/indicator-sound.c
 data/com.canonical.indicators.sound.gschema.valid
 tests/libmockpulse.la
 tests/libmockpulse_la-mockpulse.lo
+src/libsoundmenu_la-gen-sound-service.xml.lo
