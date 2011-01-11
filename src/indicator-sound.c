@@ -149,8 +149,6 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  g_debug(" !!!!!!!!!!!!!!!!! here 0");
-
   object_class->dispose = indicator_sound_dispose;
   object_class->finalize = indicator_sound_finalize;
 
@@ -168,8 +166,6 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
 static void
 indicator_sound_init (IndicatorSound *self)
 {
-  g_debug(" !!!!!!!!!!!!!!!!! here 0");
-
   self->service = NULL;
   self->service = indicator_service_manager_new_version(INDICATOR_SOUND_DBUS_NAME,
                                                         INDICATOR_SOUND_DBUS_VERSION);
@@ -187,8 +183,6 @@ indicator_sound_init (IndicatorSound *self)
   GList* t_list = NULL;
   priv->transport_widgets_list = t_list;
   
-  g_debug(" !!!!!!!!!!!!!!!!! here 1");
-
   g_signal_connect(G_OBJECT(self->service),
                    INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE,
                    G_CALLBACK(connection_changed), self);
@@ -276,7 +270,7 @@ free_the_animation_list()
 static gboolean
 new_transport_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
-  //g_debug("indicator-sound: new_transport_bar() called ");
+  g_debug("indicator-sound: new_transport_bar() called ");
 
   GtkWidget* bar = NULL;
   IndicatorObject *io = NULL;
@@ -300,7 +294,7 @@ new_transport_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbus
 static gboolean
 new_metadata_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
-  //g_debug("indicator-sound: new_metadata_widget");
+  g_debug("indicator-sound: new_metadata_widget");
 
   GtkWidget* metadata = NULL;
 
@@ -322,8 +316,7 @@ new_title_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbusmenu
   g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
-  //g_debug ("%s (\"%s\")", __func__,
-  //dbusmenu_menuitem_property_get(newitem, DBUSMENU_TITLE_MENUITEM_NAME));
+  g_debug ("%s (\"%s\")", __func__, dbusmenu_menuitem_property_get(newitem, DBUSMENU_TITLE_MENUITEM_NAME));
 
   GtkWidget* title = NULL;
 
@@ -341,7 +334,7 @@ new_title_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, Dbusmenu
 static gboolean
 new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client)
 {
-  //g_debug("indicator-sound: new_volume_slider_widget");
+  g_debug("indicator-sound: new_volume_slider_widget");
 
   GtkWidget* volume_widget = NULL;
   IndicatorObject *io = NULL;
@@ -708,7 +701,9 @@ static void g_signal_cb ( GDBusProxy *proxy,
   GVariant *value = g_variant_get_child_value (parameters, 0);
   gboolean input = g_variant_get_boolean (value);
   g_variant_unref (parameters);
-    
+
+  g_debug ( "!!! signal_cb with value %i", input);
+  
   if (g_strcmp0(signal_name, INDICATOR_SOUND_SIGNAL_SINK_AVAILABLE_UPDATE) == 0){
     react_to_signal_sink_availability_update ( input, self );
   }
