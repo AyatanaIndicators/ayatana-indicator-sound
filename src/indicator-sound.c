@@ -360,8 +360,8 @@ new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, 
   dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client),
                                   newitem,
                                   menu_volume_item,
-                                  parent);    
-  fetch_state(INDICATOR_SOUND (io));      
+                                  parent);
+  fetch_state(INDICATOR_SOUND (io));
   return TRUE;  
 }
 
@@ -451,7 +451,11 @@ static void create_connection_to_service (GObject *source_object,
 
 static void fetch_state (IndicatorSound* self)
 {
+
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
+  if(priv->volume_widget != NULL){
+    determine_state_from_volume (volume_widget_get_current_volume(priv->volume_widget));
+  }
   
   g_dbus_proxy_call ( priv->dbus_proxy,
                       "GetSinkMute",
@@ -470,6 +474,7 @@ static void fetch_state (IndicatorSound* self)
                       NULL,
                       (GAsyncReadyCallback)get_sink_availability_cb,
                       self);
+ 
 }
 
 static void get_sink_availability_cb ( GObject *object,
@@ -750,6 +755,9 @@ react_to_signal_sink_mute_update(gboolean mute_value, IndicatorSound* self)
   }
   GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget)); 
   gtk_widget_set_sensitive(slider_widget, !mute_value);
+  if(mute_value == FALSE){
+    determine_state_from_volume (volume_widget_get_current_volume(priv->volume_widget));  
+  }
 }
 
 
@@ -759,7 +767,11 @@ react_to_signal_sink_availability_update(gboolean available_value, IndicatorSoun
   device_available  = available_value;
   if (device_available == FALSE) {
     update_state(STATE_SINKS_NONE);
+    return;
   }
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
+
+  determine_state_from_volume (volume_widget_get_current_volume(priv->volume_widget));    
   //g_debug("signal caught - sink availability update with  value: %i", available_value);
 }
 
