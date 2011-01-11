@@ -19,33 +19,9 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Xml;
 
-[DBus (name = "org.freedesktop.DBus")]
-public interface FreeDesktopObject: Object {
-  public abstract async string[] list_names() throws IOError;
-  public abstract signal void name_owner_changed ( string name,
-                                                   string old_owner,
-                                                   string new_owner );
-}
-
-[DBus (name = "org.freedesktop.DBus.Introspectable")]
-public interface FreeDesktopIntrospectable: Object {
-  public abstract string Introspect() throws IOError;
-}
-
-public errordomain XmlError {
-    FILE_NOT_FOUND,
-    XML_DOCUMENT_EMPTY
-}
-
 public class Mpris2Watcher : GLib.Object
 {
-  private const string FREEDESKTOP_SERVICE = "org.freedesktop.DBus";
-  private const string FREEDESKTOP_OBJECT = "/org/freedesktop/DBus";
-  public  const string MPRIS_PREFIX = "org.mpris.MediaPlayer2.";
-  private const string MPRIS_MEDIA_PLAYER_PATH = "/org/mpris/MediaPlayer2";
-
   FreeDesktopObject fdesktop_obj;
-  FreeDesktopIntrospectable introspectable;
   
   public signal void client_appeared ( string desktop_file_name,
                                        string dbus_name,
@@ -133,6 +109,8 @@ public class Mpris2Watcher : GLib.Object
 
   private bool supports_playlists ( string name )
   {
+    FreeDesktopIntrospectable introspectable;
+
     try {
       /* The dbusproxy flag parameter is needed to ensure Banshee does not 
        blow up. I suspect the issue is that if you
@@ -142,11 +120,10 @@ public class Mpris2Watcher : GLib.Object
        causes a crash because it doesn't check for the presence of properties 
        before attempting to access them.
       */
-      this.introspectable = Bus.get_proxy_sync (  BusType.SESSION,
-                                                  name,
-                                                  MPRIS_MEDIA_PLAYER_PATH, 
-                                                  GLib.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
-      
+      introspectable = Bus.get_proxy_sync (  BusType.SESSION,
+                                             name,
+                                             MPRIS_MEDIA_PLAYER_PATH, 
+                                             GLib.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
       var results = introspectable.Introspect();
       return this.parse_interfaces (results);
     }

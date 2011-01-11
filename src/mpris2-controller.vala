@@ -18,12 +18,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using Dbusmenu;
 
-[DBus (name = "org.freedesktop.DBus.Properties")]
-public interface FreeDesktopProperties : Object{
-  public signal void PropertiesChanged (string source, HashTable<string, Variant?> changed_properties,
-                                        string[] invalid );
-}
-
 /*
  This class will entirely replace mpris-controller.vala hence why there is no
  point in trying to get encorporate both into the same object model. 
@@ -71,7 +65,7 @@ public class Mpris2Controller : GLib.Object
   {
     debug("properties-changed for interface %s and owner %s", interface_source, this.owner.dbus_name);
     if ( changed_properties == null ||
-        interface_source.has_prefix ( Mpris2Watcher.MPRIS_PREFIX ) == false ){
+        interface_source.has_prefix ( MPRIS_PREFIX ) == false ){
       warning("Property-changed hash is null or this is an interface that doesn't concerns us");
       return;
     }
@@ -148,9 +142,8 @@ public class Mpris2Controller : GLib.Object
                                                                             MetadataMenuitem.attributes_format());
 
     if ( this.owner.use_playlists == true ){
-      debug ("it thinks that there is a valid playlist interface");
       this.fetch_playlists();
-      this.fetch_active_playlist();    
+      this.fetch_active_playlist();
     }
   }
 

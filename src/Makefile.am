@@ -66,6 +66,7 @@ music_bridge_VALASOURCES = \
 	player-item.vala \
 	settings-manager.vala \
 	playlists-menu-item.vala \
+	freedesktop-interfaces.vala \
 	fetch-file.vala
 
 
