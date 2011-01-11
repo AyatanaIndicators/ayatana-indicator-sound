@@ -481,7 +481,6 @@ static void get_sink_availability_cb ( GObject *object,
   
   GVariant *result, *value;
   GError *error = NULL;
-  gboolean is_available;
 
   result = g_dbus_proxy_call_finish ( priv->dbus_proxy,
                                       res,
@@ -494,15 +493,15 @@ static void get_sink_availability_cb ( GObject *object,
   }
 
   value = g_variant_get_child_value(result, 0);
-  is_available = g_variant_get_boolean(value);
+  device_available = g_variant_get_boolean(value);
 
-  if (is_available == FALSE) {
+  if (device_available == FALSE) {
     update_state(STATE_SINKS_NONE);
   }
 
   if(priv->volume_widget != NULL){
-    GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));  
-    gtk_widget_set_sensitive(slider_widget, is_available);
+    GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));
+    gtk_widget_set_sensitive(slider_widget, device_available);
   }
     
   g_variant_unref(value);
