@@ -154,7 +154,7 @@ title_widget_property_update(DbusmenuMenuitem* item, gchar* property,
   TitleWidget* mitem = TITLE_WIDGET(userdata);
   if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_NAME, property) == 0){
         gtk_menu_item_set_label (GTK_MENU_ITEM(mitem),
-                                g_value_get_string(value));
+                                g_variant_get_string(value, NULL));
   }
   else if(g_ascii_strcasecmp(DBUSMENU_TITLE_MENUITEM_ICON, property) == 0){
     title_widget_set_icon (mitem);
