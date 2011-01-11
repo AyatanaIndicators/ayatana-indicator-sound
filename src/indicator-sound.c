@@ -112,8 +112,6 @@ static void get_sink_availability_cb ( GObject *object,
                                        GAsyncResult *res,
                                        gpointer user_data );
 
-
-
 /****Volume States 'members' ***/
 static void update_state(const gint state);
 
@@ -704,8 +702,12 @@ static void g_signal_cb ( GDBusProxy *proxy,
                           gpointer user_data)
 {
   IndicatorSound *self = INDICATOR_SOUND(user_data);
-  gboolean input = g_variant_get_boolean (parameters);
   g_return_if_fail ( IS_INDICATOR_SOUND(self) );
+
+  g_variant_ref (parameters);
+  GVariant *value = g_variant_get_child_value (parameters, 0);
+  gboolean input = g_variant_get_boolean (value);
+  g_variant_unref (parameters);
     
   if (g_strcmp0(signal_name, INDICATOR_SOUND_SIGNAL_SINK_AVAILABLE_UPDATE) == 0){
     react_to_signal_sink_availability_update ( input, self );

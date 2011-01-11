@@ -124,7 +124,7 @@ sound_service_dbus_init (SoundServiceDbus *self)
                                      INDICATOR_SOUND_SERVICE_DBUS_OBJECT,
                                      interface_info,
                                      &interface_table,
-                                     NULL,
+                                     self,
                                      NULL,
                                      &error);
 	if (error != NULL) {
@@ -158,19 +158,20 @@ bus_method_call (GDBusConnection * connection,
                  const gchar * method,
                  GVariant * params,
                  GDBusMethodInvocation * invocation,
-                 gpointer user_data) 
+                 gpointer user_data)
 { 
-  IndicatorService* service = INDICATOR_SERVICE(user_data); 
+  SoundServiceDbus* service = SOUND_SERVICE_DBUS(user_data); 
+  g_return_if_fail ( IS_SOUND_SERVICE_DBUS(service) );
   GVariant * retval = NULL;
   SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (service);
   
   if (g_strcmp0(method, "GetSinkMute") == 0) {
     g_debug("Get sink mute - sound service dbus!,about to send over mute_value of  %i", priv->mute);
-    retval =  g_variant_new_boolean (priv->mute);    
+    retval =  g_variant_new ( "(b)", priv->mute);    
   } 
   else if (g_strcmp0(method, "GetSinkAvailability") == 0) {
     g_debug("Get sink availability - sound service dbus!, about to send over availability_value of  %i", priv->sink_availability);
-    retval =  g_variant_new_boolean (priv->sink_availability);
+    retval =  g_variant_new ( "(b)", priv->sink_availability);
   }
   else {
     g_warning("Calling method '%s' on the sound service but it's unknown", method); 
@@ -189,7 +190,7 @@ void sound_service_dbus_sink_input_while_muted(SoundServiceDbus* obj,
   g_debug("Emitting signal: SINK_INPUT_WHILE_MUTED, with  block_value: %i",
            block_value);
   SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (obj);
-  GVariant* v_output = g_variant_new_boolean (block_value);
+  GVariant* v_output = g_variant_new("(b)", block_value);
 
   GError * error = NULL;
 
@@ -212,10 +213,10 @@ void sound_service_dbus_update_sink_mute(SoundServiceDbus* obj,
 {
   g_debug("Emitting signal: SINK_MUTE_UPDATE, with sink mute %i", sink_mute);
   SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (obj);
-  GVariant* v_output = g_variant_new_boolean (sink_mute);
+  priv->mute = sink_mute;
 
+  GVariant* v_output = g_variant_new("(b)", sink_mute);
   GError * error = NULL;
-
   g_dbus_connection_emit_signal( priv->connection,
                                  INDICATOR_SOUND_DBUS_NAME,
                                  INDICATOR_SOUND_DBUS_OBJECT,
@@ -233,13 +234,13 @@ void sound_service_dbus_update_sink_mute(SoundServiceDbus* obj,
 void sound_service_dbus_update_sink_availability(SoundServiceDbus* obj,
                                                  gboolean sink_availability)
 {
-  /*    g_debug("Emitting signal: SINK_AVAILABILITY_UPDATE, with value %i", sink_availability);*/
   g_debug("Emitting signal: SinkAvailableUpdate, with  %i", sink_availability);
   SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (obj);
-  GVariant* v_output = g_variant_new_boolean (sink_availability);
-
+  priv->sink_availability = sink_availability;
+  
+  GVariant* v_output = g_variant_new("(b)", priv->sink_availability);
   GError * error = NULL;
-
+  
   g_dbus_connection_emit_signal( priv->connection,
                                  INDICATOR_SOUND_DBUS_NAME,
                                  INDICATOR_SOUND_DBUS_OBJECT,
