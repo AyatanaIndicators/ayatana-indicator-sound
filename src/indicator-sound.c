@@ -7,7 +7,6 @@ Copyright 2010 Canonical Ltd.
 Authors:
     Conor Curran <conor.curran@canonical.com>
     Ted Gould <ted@canonical.com>
-    Cody Russell <cody.russell@canonical.com>
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License version 3, as published
@@ -386,6 +385,7 @@ connection_changed (IndicatorServiceManager * sm,
   GError *error = NULL;
 
   if (connected == FALSE){
+    update_state (STATE_SINKS_NONE);
     return;
     //TODO: Gracefully handle disconnection
     // do a timeout to wait for reconnection 
@@ -396,7 +396,7 @@ connection_changed (IndicatorServiceManager * sm,
   // we don't need to anything, gdbus takes care of the rest - bless.
   // just fetch the state.
   if (priv->dbus_proxy != NULL){
-    fetch_state (indicator);    
+    fetch_state (indicator);
     return;
   }
   

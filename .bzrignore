@@ -76,3 +76,8 @@ src/playlists-menu-item.c
 src/settings-manager.c
 src/title-menu-item.c
 src/transport-menu-item.c
+modified:
+src/indicator-sound.c
+data/com.canonical.indicators.sound.gschema.valid
+tests/libmockpulse.la
+tests/libmockpulse_la-mockpulse.lo
