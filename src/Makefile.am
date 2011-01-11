@@ -18,6 +18,8 @@ libsoundmenu_la_SOURCES = \
             title-widget.h \
             volume-widget.c \
             volume-widget.h \
+            gen-sound-service.xml.h \
+            gen-sound-service.xml.c \
             dbus-shared-names.h
 
 libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -Werror -DG_LOG_DOMAIN=\"Indicator-Sound\"
@@ -35,7 +37,7 @@ checkxml: $(srcdir)/sound-service.xml
 
 
 #####################
-# libsoundmenu vala
+# Sound service vala
 #####################
 music_bridge_VALASOURCES = \
 	music-player-bridge.vala \
@@ -79,7 +81,7 @@ music_bridge_vala.stamp $(music_bridge_APIFILES): $(music_bridge_VALASOURCES)
 	touch music_bridge_vala.stamp
 
 ###############################
-# libsoundmenu C
+# Sound Service C
 ###############################
 indicator_sound_service_SOURCES = \
 	common-defs.h \
