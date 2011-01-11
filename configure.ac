@@ -1,10 +1,10 @@
 
-AC_INIT(indicator-sound, 0.5.4, conor.curran@canonical.com)
+AC_INIT(indicator-sound, 0.5.5, conor.curran@canonical.com)
 
 AC_PREREQ(2.53)
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(indicator-sound, 0.5.4)
+AM_INIT_AUTOMAKE(indicator-sound, 0.5.5)
 
 AM_MAINTAINER_MODE
 
@@ -55,7 +55,8 @@ PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib >= $DBUSMENUGLIB_REQUIRED_VERSION
                                 indicator >= $INDICATOR_REQUIRED_VERSION
 																indicate >= $INDICATE_REQUIRED_VERSION
 																gee-1.0
-                                gio-unix-2.0)
+                                gio-unix-2.0
+                                libxml-2.0)
 
 AC_SUBST(SOUNDSERVICE_CFLAGS)
 AC_SUBST(SOUNDERVICE_LIBS)

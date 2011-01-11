@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+const string MPRIS_PREFIX = "org.mpris.MediaPlayer2.";
+const string MPRIS_MEDIA_PLAYER_PATH = "/org/mpris/MediaPlayer2";
 
 [DBus (name = "org.mpris.MediaPlayer2")]
 public interface MprisRoot : Object {
@@ -24,7 +26,7 @@ public interface MprisRoot : Object {
   public abstract bool CanQuit{owned get; set;}
   public abstract bool CanRaise{owned get; set;}
   public abstract string Identity{owned get; set;}
-  public abstract string DesktopEntry{owned get; set;}  
+  public abstract string DesktopEntry{owned get; set;}
   // methods
   public abstract async void Quit() throws IOError;
   public abstract async void Raise() throws IOError;

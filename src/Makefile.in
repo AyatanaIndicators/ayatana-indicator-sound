@@ -97,6 +97,7 @@ am__objects_1 = indicator_sound_service-music-player-bridge.$(OBJEXT) \
 	indicator_sound_service-player-item.$(OBJEXT) \
 	indicator_sound_service-settings-manager.$(OBJEXT) \
 	indicator_sound_service-playlists-menu-item.$(OBJEXT) \
+	indicator_sound_service-freedesktop-interfaces.$(OBJEXT) \
 	indicator_sound_service-fetch-file.$(OBJEXT)
 am_indicator_sound_service_OBJECTS =  \
 	indicator_sound_service-sound-service.$(OBJEXT) \
@@ -345,6 +346,7 @@ music_bridge_VALASOURCES = \
 	player-item.vala \
 	settings-manager.vala \
 	playlists-menu-item.vala \
+	freedesktop-interfaces.vala \
 	fetch-file.vala
 
 music_bridge_VALAFLAGS = \
@@ -359,7 +361,8 @@ music_bridge_VALAFLAGS = \
   --pkg common-defs \
 	--pkg gio-2.0 \
 	--pkg gio-unix-2.0 \
-	--pkg gdk-pixbuf-2.0 
+	--pkg gdk-pixbuf-2.0 \
+	--pkg libxml-2.0
 
 music_bridge_APIFILES = \
   music-player-bridge.h 
@@ -532,6 +535,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-dbus-menu-manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-fetch-file.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-freedesktop-interfaces.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-metadata-menu-item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-mpris2-controller.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-mpris2-interfaces.Po@am__quote@
@@ -872,6 +876,22 @@ indicator_sound_service-playlists-menu-item.obj: playlists-menu-item.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='playlists-menu-item.c' object='indicator_sound_service-playlists-menu-item.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-playlists-menu-item.obj `if test -f 'playlists-menu-item.c'; then $(CYGPATH_W) 'playlists-menu-item.c'; else $(CYGPATH_W) '$(srcdir)/playlists-menu-item.c'; fi`
+
+indicator_sound_service-freedesktop-interfaces.o: freedesktop-interfaces.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-freedesktop-interfaces.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-freedesktop-interfaces.Tpo -c -o indicator_sound_service-freedesktop-interfaces.o `test -f 'freedesktop-interfaces.c' || echo '$(srcdir)/'`freedesktop-interfaces.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-freedesktop-interfaces.Tpo $(DEPDIR)/indicator_sound_service-freedesktop-interfaces.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='freedesktop-interfaces.c' object='indicator_sound_service-freedesktop-interfaces.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-freedesktop-interfaces.o `test -f 'freedesktop-interfaces.c' || echo '$(srcdir)/'`freedesktop-interfaces.c
+
+indicator_sound_service-freedesktop-interfaces.obj: freedesktop-interfaces.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-freedesktop-interfaces.obj -MD -MP -MF $(DEPDIR)/indicator_sound_service-freedesktop-interfaces.Tpo -c -o indicator_sound_service-freedesktop-interfaces.obj `if test -f 'freedesktop-interfaces.c'; then $(CYGPATH_W) 'freedesktop-interfaces.c'; else $(CYGPATH_W) '$(srcdir)/freedesktop-interfaces.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-freedesktop-interfaces.Tpo $(DEPDIR)/indicator_sound_service-freedesktop-interfaces.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='freedesktop-interfaces.c' object='indicator_sound_service-freedesktop-interfaces.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-freedesktop-interfaces.obj `if test -f 'freedesktop-interfaces.c'; then $(CYGPATH_W) 'freedesktop-interfaces.c'; else $(CYGPATH_W) '$(srcdir)/freedesktop-interfaces.c'; fi`
 
 indicator_sound_service-fetch-file.o: fetch-file.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-fetch-file.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-fetch-file.Tpo -c -o indicator_sound_service-fetch-file.o `test -f 'fetch-file.c' || echo '$(srcdir)/'`fetch-file.c
