@@ -415,7 +415,7 @@ connection_changed (IndicatorServiceManager * sm,
                             G_DBUS_PROXY_FLAGS_NONE,
                             interface_info,
                             INDICATOR_SOUND_DBUS_NAME,
-                            INDICATOR_SOUND_MENU_DBUS_OBJECT_PATH,
+                            INDICATOR_SOUND_SERVICE_DBUS_OBJECT_PATH,
                             INDICATOR_SOUND_DBUS_INTERFACE,
                             NULL,
                             create_connection_to_service,
@@ -441,10 +441,8 @@ static void create_connection_to_service (GObject *source_object,
     return;
   }
 
-  g_debug ( "about to connect to g-signal ");
   g_signal_connect(priv->dbus_proxy, "g-signal",
                    G_CALLBACK(g_signal_cb), self);
-  g_debug ( "after attempting to connect to g-signal ");
 
   fetch_state (self);
 }
@@ -524,7 +522,6 @@ static void get_sink_mute_cb ( GObject *object,
   GVariant *result, *value;
   GError *error = NULL;
   gboolean is_muted;
-
   result = g_dbus_proxy_call_finish ( priv->dbus_proxy,
                                       res,
                                       &error );
@@ -537,7 +534,7 @@ static void get_sink_mute_cb ( GObject *object,
 
   value = g_variant_get_child_value(result, 0);
   is_muted = g_variant_get_boolean(value);
-
+    
   if ( is_muted == TRUE ){
     update_state(STATE_MUTED);
   }

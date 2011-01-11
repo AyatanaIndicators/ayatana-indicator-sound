@@ -218,8 +218,8 @@ void sound_service_dbus_update_sink_mute(SoundServiceDbus* obj,
   GVariant* v_output = g_variant_new("(b)", sink_mute);
   GError * error = NULL;
   g_dbus_connection_emit_signal( priv->connection,
-                                 INDICATOR_SOUND_DBUS_NAME,
-                                 INDICATOR_SOUND_MENU_DBUS_OBJECT_PATH,
+                                 NULL,
+                                 INDICATOR_SOUND_SERVICE_DBUS_OBJECT_PATH,
                                  INDICATOR_SOUND_DBUS_INTERFACE,
                                  INDICATOR_SOUND_SIGNAL_SINK_MUTE_UPDATE,
                                   v_output,
@@ -242,8 +242,8 @@ void sound_service_dbus_update_sink_availability(SoundServiceDbus* obj,
   GError * error = NULL;
   
   g_dbus_connection_emit_signal( priv->connection,
-                                 INDICATOR_SOUND_DBUS_NAME,
-                                 INDICATOR_SOUND_MENU_DBUS_OBJECT_PATH,
+                                 NULL,
+                                 INDICATOR_SOUND_SERVICE_DBUS_OBJECT_PATH,
                                  INDICATOR_SOUND_DBUS_INTERFACE,
                                  INDICATOR_SOUND_SIGNAL_SINK_AVAILABLE_UPDATE,
                                   v_output,
