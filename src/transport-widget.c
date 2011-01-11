@@ -112,8 +112,8 @@ static gboolean transport_widget_leave_notify_event    (GtkWidget      *menuitem
                                                       GdkEventCrossing *event);  
 static void transport_widget_property_update ( DbusmenuMenuitem* item,
                                                gchar * property, 
-                                             GValue * value,
-                                             gpointer userdata );
+                                               GVariant * value,
+                                               gpointer userdata );
 static void transport_widget_menu_hidden ( GtkWidget        *menu,
                                            TransportWidget *transport);
 static void transport_widget_notify ( GObject *item,
@@ -344,13 +344,11 @@ transport_widget_button_release_event (GtkWidget *menuitem,
   TransportWidgetEvent result = transport_widget_determine_button_event ( transport,
                                                                           event );
   if(result != TRANSPORT_NADA){
-    GValue value = {0};
-    g_value_init(&value, G_TYPE_INT);
     //g_debug("TransportWidget::menu_press_event - going to send value %i", (int)result);
-    g_value_set_int(&value, (int)result); 
+    GVariant* new_transport_state = g_variant_new_int32 ((int)result);
     dbusmenu_menuitem_handle_event ( priv->twin_item,
                                      "Transport state change",
-                                     &value,
+                                     new_transport_state,
                                      0 );
   }
   transport_widget_react_to_button_release ( transport,
@@ -402,13 +400,11 @@ transport_widget_react_to_key_release_event ( TransportWidget* transport,
 {
   if(transport_event != TRANSPORT_NADA){
     TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );     
-    GValue value = {0};
-    g_value_init(&value, G_TYPE_INT);
     //g_debug("TransportWidget::menu_press_event - going to send value %i", (int)result);
-    g_value_set_int(&value, (int)transport_event);  
+    GVariant* new_transport_event = g_variant_new_int32((int)transport_event);  
     dbusmenu_menuitem_handle_event ( priv->twin_item,
                                      "Transport state change",
-                                     &value,
+                                     new_transport_event,
                                      0 );
   }
   transport_widget_react_to_button_release ( transport,
@@ -761,7 +757,9 @@ _color_rgb_to_hls (gdouble *r,
   gdouble red;
   gdouble green;
   gdouble blue;
-  gdouble h, l, s;
+  gdouble h = 0;
+  gdouble l;
+  gdouble s;
   gdouble delta;
 
   red = *r;
@@ -1700,7 +1698,7 @@ transport_widget_set_twin_item(TransportWidget* self,
 **/ 
 static void 
 transport_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
-                                 GValue* value, gpointer userdata)
+                                 GVariant* value, gpointer userdata)
 {
   //g_debug("transport_widget_update_state - with property  %s", property);
   TransportWidget* bar = (TransportWidget*)userdata;
@@ -1708,7 +1706,7 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 
   if(g_ascii_strcasecmp(DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE, property) == 0)
   {
-    int update_value = g_value_get_int(value);
+    int update_value = g_variant_get_int32(value);
     //g_debug("transport_widget_update_state - with value  %i", update_value);  
     transport_widget_toggle_play_pause(bar, (TransportWidgetState)update_value);    
   }
