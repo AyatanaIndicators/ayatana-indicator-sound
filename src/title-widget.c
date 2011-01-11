@@ -49,7 +49,7 @@ static gboolean title_widget_button_press_event (GtkWidget *menuitem,
 
 // Dbusmenuitem properties update callback
 static void title_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
-                                       GValue* value, gpointer userdata);
+                                       GVariant* value, gpointer userdata);
 static void title_widget_set_twin_item( TitleWidget* self,
                                         DbusmenuMenuitem* twin_item);
 static gboolean title_widget_triangle_draw_cb (GtkWidget *widget,
@@ -148,7 +148,7 @@ title_widget_button_press_event (GtkWidget *menuitem,
 
 static void 
 title_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
-                                       GValue* value, gpointer userdata)
+                                       GVariant* value, gpointer userdata)
 {
   g_return_if_fail (IS_TITLE_WIDGET (userdata));  
   TitleWidget* mitem = TITLE_WIDGET(userdata);
