@@ -50,10 +50,11 @@ public class Mpris2Controller : GLib.Object
       this.player = Bus.get_proxy_sync ( BusType.SESSION,
                                          this.owner.dbus_name,
                                          "/org/mpris/MediaPlayer2" );
-      this.playlists = Bus.get_proxy_sync ( BusType.SESSION,
-                                            this.owner.dbus_name,
-                                            "/org/mpris/MediaPlayer2" );
-      
+      if ( this.owner.use_playlists == true ){
+        this.playlists = Bus.get_proxy_sync ( BusType.SESSION,
+                                              this.owner.dbus_name,
+                                              "/org/mpris/MediaPlayer2" );
+      }
       this.properties_interface = Bus.get_proxy_sync ( BusType.SESSION,
                                                        "org.freedesktop.Properties.PropertiesChanged",
                                                        "/org/mpris/MediaPlayer2" );
@@ -95,18 +96,9 @@ public class Mpris2Controller : GLib.Object
                                    metadata.populated(MetadataMenuitem.attributes_format()));
     }
     Variant? playlist_v = changed_properties.lookup("ActivePlaylist");
-    if ( playlist_v != null ){
+    if ( playlist_v != null && this.owner.use_playlists == true ){
       this.fetch_active_playlist();
-      //Timeout.add ( 200, fetch_active_playlist );
     }
-  }
-
-  public bool playlists_support_exist()
-  {
-    if (this.playlists == null) return false;
-    uint32? count = this.playlists.PlaylistCount;
-    if ( count == null || count <= 0 ) return false;
-    return true;
   }
   
   private bool ensure_correct_playback_status(){
@@ -154,8 +146,12 @@ public class Mpris2Controller : GLib.Object
     GLib.HashTable<string, Value?>? cleaned_metadata = this.clean_metadata();
     this.owner.custom_items[PlayerController.widget_order.METADATA].update(cleaned_metadata,
                                                                             MetadataMenuitem.attributes_format());
-    this.fetch_playlists();
-    this.fetch_active_playlist();    
+
+    if ( this.owner.use_playlists == true ){
+      debug ("it thinks that there is a valid playlist interface");
+      this.fetch_playlists();
+      this.fetch_active_playlist();    
+    }
   }
 
   public void transport_update(TransportMenuitem.action command)
@@ -174,8 +170,6 @@ public class Mpris2Controller : GLib.Object
 
   public void fetch_playlists()
   {
-    if (this.playlists == null) return;
-
     PlaylistDetails[] current_playlists =  this.playlists.GetPlaylists(0,
                                                                        10,
                                                                        "Alphabetical",
@@ -185,13 +179,17 @@ public class Mpris2Controller : GLib.Object
       PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
       playlists_item.update(current_playlists);
     }
+    else{
+      warning(" Playlists are on but its returning no current_playlists" );
+      this.owner.use_playlists = false;
+    }
     return;
   }
 
   private void fetch_active_playlist()
-  {
-    if (this.playlists == null && this.playlists.ActivePlaylist.valid == false){
-      warning("Playlists object is null or we don't have an active playlist");
+  {    
+    if (this.playlists.ActivePlaylist.valid == false){
+      debug("We don't have an active playlist");
     }
     PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
     playlists_item.update_active_playlist ( this.playlists.ActivePlaylist.details );
@@ -202,7 +200,7 @@ public class Mpris2Controller : GLib.Object
   {
     return (this.player != null && this.mpris2_root != null);
   }
-  
+
   public void expose()
   {
     if(this.connected() == true){
@@ -212,15 +210,11 @@ public class Mpris2Controller : GLib.Object
 
   public void activate_playlist (ObjectPath path)
   {
-    if(this.playlists == null){
-      warning("playlists mpris instance is null !");
-      return;       
-    }
     try{
       this.playlists.ActivatePlaylist.begin(path);
     }
     catch(IOError e){
       debug("Could not activate playlist %s because %s", (string)path, e.message);     
     }
-  } 
+  }
 }

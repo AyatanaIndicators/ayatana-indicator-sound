@@ -45,19 +45,22 @@ public class PlayerController : GLib.Object
     
   private Dbusmenu.Menuitem root_menu;
   public string dbus_name { get; set;}
-  public ArrayList<PlayerItem> custom_items;  
+  public ArrayList<PlayerItem> custom_items;
   public Mpris2Controller mpris_bridge;
   public AppInfo? app_info { get; set;}
   public int menu_offset { get; set;}
   public string icon_name { get; set; }
-    
+  public bool? use_playlists;
+  
   public PlayerController(Dbusmenu.Menuitem root,
                           GLib.AppInfo app,
                           string? dbus_name,
                           string icon_name,
                           int offset,
+                          bool? use_playlists,
                           state initial_state)
   {
+    this.use_playlists = use_playlists;
     this.root_menu = root;
     this.app_info = app;
     this.dbus_name = dbus_name;
@@ -67,7 +70,7 @@ public class PlayerController : GLib.Object
     this.menu_offset = offset;
     this.construct_widgets();
     this.establish_mpris_connection();
-    this.update_layout();   
+    this.update_layout();
   }
 
   public void update_state(state new_state)
@@ -81,7 +84,7 @@ public class PlayerController : GLib.Object
   public void activate( string dbus_name )
   {
     this.dbus_name = dbus_name;
-    this.establish_mpris_connection();  
+    this.establish_mpris_connection();
   }
 
   /*
@@ -109,6 +112,9 @@ public class PlayerController : GLib.Object
       debug("establish_mpris_connection - Not ready to connect");
       return;
     }   
+    debug ( " establish mpris connection - use playlists value = %s ",
+            this.use_playlists.to_string() );
+    
     this.mpris_bridge = new Mpris2Controller(this); 
     this.determine_state();
   }
@@ -148,7 +154,7 @@ public class PlayerController : GLib.Object
     this.custom_items[widget_order.TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE,
                                                                 true);
     playlists_menuitem.root_item.property_set_bool ( MENUITEM_PROP_VISIBLE,
-                                                     this.mpris_bridge.playlists_support_exist() );
+                                                     this.use_playlists );
   }
     
   private void construct_widgets()
@@ -181,9 +187,8 @@ public class PlayerController : GLib.Object
         root_menu.child_add_position(playlists_menuitem.root_item, this.menu_offset + this.custom_items.index_of(item));              
       }
     }
-  }   
+  }
 
-  
   private static string format_player_name(owned string app_info_name)
   {
     string result = app_info_name.down().strip();

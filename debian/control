@@ -18,7 +18,9 @@ Build-Depends: debhelper (>= 7),
                libgconf2-dev,
                libgee-dev,
                libindicate-dev (>= 0.4.1),
-               valac
+               libxml2-dev,
+               dh-autoreconf,
+               valac-0.12
 Standards-Version: 3.9.1
 Homepage: https://launchpad.net/indicator-sound
 

@@ -7,7 +7,12 @@ indicator-sound (0.5.4-0ubuntu1) UNRELEASED; urgency=low
     - The players list should be customizable (LP: #685725)
     - gio-unix-2.0 checks (LP: #694828)
     - Desktop file loading should not manually use full path (LP: #693824)
-    
+  * debian/control
+    - Added build depends for libxml2-dev
+    - Added build depends for dh-autoreconf
+  * debian/rules
+    - Added autoreconf.mk
+
  -- Ken VanDine <ken.vandine@canonical.com>  Tue, 11 Jan 2011 14:38:36 -0600
 
 indicator-sound (0.5.3-0ubuntu1) natty; urgency=low
