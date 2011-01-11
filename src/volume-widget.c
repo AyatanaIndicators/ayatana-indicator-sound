@@ -28,6 +28,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "volume-widget.h"
 #include "common-defs.h"
 #include <libido/idoscalemenuitem.h>
+#include "indicator-sound.h"
 
 typedef struct _VolumeWidgetPrivate VolumeWidgetPrivate;
 
@@ -136,7 +137,7 @@ volume_widget_property_update( DbusmenuMenuitem* item, gchar* property,
       gdouble update = g_variant_get_double (value);
       //g_debug("volume-widget - update level with value %f", update);
       gtk_range_set_value(range, update);
-      determine_state_from_volume(update);      
+      determine_state_from_volume(update);
     }
   }
 }

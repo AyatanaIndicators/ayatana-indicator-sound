@@ -757,7 +757,9 @@ _color_rgb_to_hls (gdouble *r,
   gdouble red;
   gdouble green;
   gdouble blue;
-  gdouble h, l, s;
+  gdouble h = 0;
+  gdouble l;
+  gdouble s;
   gdouble delta;
 
   red = *r;

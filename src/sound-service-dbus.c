@@ -40,6 +40,12 @@ static void bus_method_call (GDBusConnection * connection,
                              GDBusMethodInvocation * invocation,
                              gpointer user_data);
 
+static GDBusInterfaceVTable       interface_table = {
+	method_call:	bus_method_call,
+	get_property:	NULL, /* No properties */
+	set_property:	NULL  /* No properties */
+};
+
 
 typedef struct _SoundServiceDbusPrivate SoundServiceDbusPrivate;
 
@@ -85,14 +91,14 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
     }
   }
 
-	if (interface_info == NULL) {
-		interface_info = g_dbus_node_info_lookup_interface (node_info,
+  if (interface_info == NULL) {
+    interface_info = g_dbus_node_info_lookup_interface (node_info,
                                                         INDICATOR_SOUND_SERVICE_DBUS_INTERFACE);
 
-		if (interface_info == NULL) {
-			g_error("Unable to find interface '" INDICATOR_SOUND_SERVICE_DBUS_INTERFACE "'");
-		}
-	}
+    if (interface_info == NULL) {
+      g_error("Unable to find interface '" INDICATOR_SOUND_SERVICE_DBUS_INTERFACE "'");
+    }
+  }
 }
 
 static void
@@ -117,7 +123,7 @@ sound_service_dbus_init (SoundServiceDbus *self)
   g_dbus_connection_register_object (priv->connection,
                                      INDICATOR_SOUND_SERVICE_DBUS_OBJECT,
                                      interface_info,
-                                     NULL,
+                                     &interface_table,
                                      NULL,
                                      NULL,
                                      &error);

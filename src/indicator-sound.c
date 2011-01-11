@@ -152,6 +152,8 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+  g_debug(" !!!!!!!!!!!!!!!!! here 0");
+
   object_class->dispose = indicator_sound_dispose;
   object_class->finalize = indicator_sound_finalize;
 
@@ -164,16 +166,17 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
   io_class->get_menu  = get_menu;
   io_class->scroll    = indicator_sound_scroll;
   design_team_size = gtk_icon_size_register("design-team-size", 22, 22);
-
-  return;
 }
 
 static void
 indicator_sound_init (IndicatorSound *self)
 {
+  g_debug(" !!!!!!!!!!!!!!!!! here 0");
+
   self->service = NULL;
   self->service = indicator_service_manager_new_version(INDICATOR_SOUND_DBUS_NAME,
                                                         INDICATOR_SOUND_DBUS_VERSION);
+
   prepare_state_machine();
   prepare_blocked_animation();
   animation_id = 0;
@@ -186,6 +189,8 @@ indicator_sound_init (IndicatorSound *self)
   priv->dbus_proxy = NULL;
   GList* t_list = NULL;
   priv->transport_widgets_list = t_list;
+  
+  g_debug(" !!!!!!!!!!!!!!!!! here 1");
 
   g_signal_connect(G_OBJECT(self->service),
                    INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE,
@@ -699,7 +704,6 @@ static void g_signal_cb ( GDBusProxy *proxy,
                           gpointer user_data)
 {
   IndicatorSound *self = INDICATOR_SOUND(user_data);
-  GError *error = NULL;
   gboolean input = g_variant_get_boolean (parameters);
   g_return_if_fail ( IS_INDICATOR_SOUND(self) );
     
@@ -825,7 +829,7 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
     }
   }
   else if (IS_TRANSPORT_WIDGET(menuitem) == TRUE) {
-    TransportWidget* transport_widget;
+    TransportWidget* transport_widget = NULL;
     GList* elem;
 
     for ( elem = priv->transport_widgets_list; elem; elem = elem->next ) {
@@ -880,7 +884,7 @@ key_release_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
 
   menuitem = GTK_MENU_SHELL (widget)->active_menu_item;
   if (IS_TRANSPORT_WIDGET(menuitem) == TRUE) {
-    TransportWidget* transport_widget;
+    TransportWidget* transport_widget = NULL;
     GList* elem;
 
     for(elem = priv->transport_widgets_list; elem; elem = elem->next) {
