@@ -18,13 +18,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using Dbusmenu;
 
-
-[DBus (name = "org.freedesktop.DBus.Properties")]
-  public interface FreeDesktopProperties : Object{
-  public signal void PropertiesChanged(string source, HashTable<string, Variant?> changed_properties,
-                                       string[] invalid);
-}
-
 /*
  This class will entirely replace mpris-controller.vala hence why there is no
  point in trying to get encorporate both into the same object model. 
@@ -33,13 +26,14 @@ public class Mpris2Controller : GLib.Object
 {
   public MprisRoot mpris2_root {get; construct;}    
   public MprisPlayer player {get; construct;}
+  public MprisPlaylists playlists {get; construct;}
   public FreeDesktopProperties properties_interface {get; construct;}
 
   public PlayerController owner {get; construct;}
-  
+
   public Mpris2Controller(PlayerController ctrl)
   {
-    GLib.Object(owner: ctrl);
+    GLib.Object(owner: ctrl);    
   }
 
   construct{
@@ -50,10 +44,14 @@ public class Mpris2Controller : GLib.Object
       this.player = Bus.get_proxy_sync ( BusType.SESSION,
                                          this.owner.dbus_name,
                                          "/org/mpris/MediaPlayer2" );
-      
+      if ( this.owner.use_playlists == true ){
+        this.playlists = Bus.get_proxy_sync ( BusType.SESSION,
+                                              this.owner.dbus_name,
+                                              "/org/mpris/MediaPlayer2" );
+      }
       this.properties_interface = Bus.get_proxy_sync ( BusType.SESSION,
                                                        "org.freedesktop.Properties.PropertiesChanged",
-                                                       "/org/mpris/MediaPlayer2" );                                                                                
+                                                       "/org/mpris/MediaPlayer2" );
       this.properties_interface.PropertiesChanged.connect ( property_changed_cb );
     }
     catch (IOError e) {
@@ -67,7 +65,7 @@ public class Mpris2Controller : GLib.Object
   {
     debug("properties-changed for interface %s and owner %s", interface_source, this.owner.dbus_name);
     if ( changed_properties == null ||
-        interface_source.has_prefix ( Mpris2Watcher.MPRIS_PREFIX ) == false ){
+        interface_source.has_prefix ( MPRIS_PREFIX ) == false ){
       warning("Property-changed hash is null or this is an interface that doesn't concerns us");
       return;
     }
@@ -91,8 +89,12 @@ public class Mpris2Controller : GLib.Object
       metadata.property_set_bool ( MENUITEM_PROP_VISIBLE,
                                    metadata.populated(MetadataMenuitem.attributes_format()));
     }
+    Variant? playlist_v = changed_properties.lookup("ActivePlaylist");
+    if ( playlist_v != null && this.owner.use_playlists == true ){
+      this.fetch_active_playlist();
+    }
   }
-
+  
   private bool ensure_correct_playback_status(){
     debug("TEST playback status = %s", this.player.PlaybackStatus);
     TransportMenuitem.state p = (TransportMenuitem.state)this.determine_play_state(this.player.PlaybackStatus);
@@ -138,6 +140,11 @@ public class Mpris2Controller : GLib.Object
     GLib.HashTable<string, Value?>? cleaned_metadata = this.clean_metadata();
     this.owner.custom_items[PlayerController.widget_order.METADATA].update(cleaned_metadata,
                                                                             MetadataMenuitem.attributes_format());
+
+    if ( this.owner.use_playlists == true ){
+      this.fetch_playlists();
+      this.fetch_active_playlist();
+    }
   }
 
   public void transport_update(TransportMenuitem.action command)
@@ -154,15 +161,53 @@ public class Mpris2Controller : GLib.Object
     }
   }
 
+  public void fetch_playlists()
+  {
+    PlaylistDetails[] current_playlists =  this.playlists.GetPlaylists(0,
+                                                                       10,
+                                                                       "Alphabetical",
+                                                                       false);
+    if( current_playlists != null ){
+      debug( "Size of the playlist array = %i", current_playlists.length );
+      PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
+      playlists_item.update(current_playlists);
+    }
+    else{
+      warning(" Playlists are on but its returning no current_playlists" );
+      this.owner.use_playlists = false;
+    }
+    return;
+  }
+
+  private void fetch_active_playlist()
+  {    
+    if (this.playlists.ActivePlaylist.valid == false){
+      debug("We don't have an active playlist");
+    }
+    PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
+    playlists_item.update_active_playlist ( this.playlists.ActivePlaylist.details );
+  }
+
+
   public bool connected()
   {
     return (this.player != null && this.mpris2_root != null);
   }
-  
+
   public void expose()
   {
     if(this.connected() == true){
       this.mpris2_root.Raise.begin();
+    }
+  }
+
+  public void activate_playlist (ObjectPath path)
+  {
+    try{
+      this.playlists.ActivatePlaylist.begin(path);
+    }
+    catch(IOError e){
+      debug("Could not activate playlist %s because %s", (string)path, e.message);     
     }
   }
 }

@@ -1,6 +1,5 @@
 /*
 Copyright 2010 Canonical Ltd.
-
 Authors:
     Conor Curran <conor.curran@canonical.com>
 
@@ -17,6 +16,8 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+const string MPRIS_PREFIX = "org.mpris.MediaPlayer2.";
+const string MPRIS_MEDIA_PLAYER_PATH = "/org/mpris/MediaPlayer2";
 
 [DBus (name = "org.mpris.MediaPlayer2")]
 public interface MprisRoot : Object {
@@ -25,7 +26,7 @@ public interface MprisRoot : Object {
   public abstract bool CanQuit{owned get; set;}
   public abstract bool CanRaise{owned get; set;}
   public abstract string Identity{owned get; set;}
-  public abstract string DesktopEntry{owned get; set;}  
+  public abstract string DesktopEntry{owned get; set;}
   // methods
   public abstract async void Quit() throws IOError;
   public abstract async void Raise() throws IOError;
@@ -43,4 +44,32 @@ public interface MprisPlayer : Object {
   public abstract async void Previous() throws IOError;
   // signals
   public signal void Seeked(int64 new_position);
+}
+
+// Playlist container
+public struct PlaylistDetails{
+  public ObjectPath path;
+  public string name;
+  public string icon_path;
+}
+
+// Active playlist property container
+public struct ActivePlaylistContainer{
+  public bool valid;
+  public PlaylistDetails details;
+}
+
+[DBus (name = "org.mpris.MediaPlayer2.Playlists")]
+public interface MprisPlaylists : Object {
+  //properties
+  public abstract string[] Orderings{owned get; set;}
+  public abstract uint32 PlaylistCount{owned get; set;}
+  public abstract ActivePlaylistContainer ActivePlaylist {owned get; set;}
+  
+  //methods
+  public abstract async void ActivatePlaylist(ObjectPath playlist_id) throws IOError;
+  public abstract PlaylistDetails[] GetPlaylists (  uint32 index,
+                                                    uint32 max_count,
+                                                    string order,
+                                                    bool reverse_order ) throws IOError;
 }

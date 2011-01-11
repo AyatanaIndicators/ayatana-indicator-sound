@@ -65,6 +65,8 @@ music_bridge_VALASOURCES = \
 	mpris2-controller.vala \
 	player-item.vala \
 	settings-manager.vala \
+	playlists-menu-item.vala \
+	freedesktop-interfaces.vala \
 	fetch-file.vala
 
 
@@ -80,7 +82,8 @@ music_bridge_VALAFLAGS = \
   --pkg common-defs \
 	--pkg gio-2.0 \
 	--pkg gio-unix-2.0 \
-	--pkg gdk-pixbuf-2.0 
+	--pkg gdk-pixbuf-2.0 \
+	--pkg libxml-2.0
 
 	 
  $(MAINTAINER_VALAFLAGS)

@@ -19,31 +19,38 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 [CCode (cheader_filename = "common-defs.h")]
 namespace DbusmenuMetadata{
-	public const string MENUITEM_TYPE;
-	public const string MENUITEM_ARTIST;
-	public const string MENUITEM_TITLE;
-	public const string MENUITEM_ALBUM;
-	public const string MENUITEM_ARTURL;	
+        public const string MENUITEM_TYPE;
+        public const string MENUITEM_ARTIST;
+        public const string MENUITEM_TITLE;
+        public const string MENUITEM_ALBUM;
+        public const string MENUITEM_ARTURL;    
 }
 
 [CCode (cheader_filename = "common-defs.h")]
 namespace DbusmenuTransport{
-	public const string MENUITEM_TYPE;
-	public const string MENUITEM_PLAY_STATE;
+        public const string MENUITEM_TYPE;
+        public const string MENUITEM_PLAY_STATE;
 }
 
 [CCode (cheader_filename = "common-defs.h")]
 namespace DbusmenuTitle{
-	public const string MENUITEM_TYPE;
-	public const string MENUITEM_NAME;
-	public const string MENUITEM_ICON;
-	public const string MENUITEM_RUNNING;
+        public const string MENUITEM_TYPE;
+        public const string MENUITEM_NAME;
+        public const string MENUITEM_ICON;
+        public const string MENUITEM_RUNNING;
 }
 
 [CCode (cheader_filename = "common-defs.h")]
 namespace DbusmenuScrub{
-	public const string MENUITEM_TYPE;
-	public const string MENUITEM_POSITION;
-	public const string MENUITEM_DURATION;	
-	public const string MENUITEM_PLAY_STATE;		
+        public const string MENUITEM_TYPE;
+        public const string MENUITEM_POSITION;
+        public const string MENUITEM_DURATION;
+        public const string MENUITEM_PLAY_STATE;
+}
+
+[CCode (cheader_filename = "common-defs.h")]
+namespace DbusmenuPlaylists{
+        public const string MENUITEM_TYPE;
+        public const string MENUITEM_TITLE;
+        public const string MENUITEM_PLAYLISTS;
 }
