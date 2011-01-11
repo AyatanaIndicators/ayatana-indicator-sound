@@ -27,7 +27,7 @@ public class SettingsManager : GLib.Object
   }
   construct{
     this.settings = new Settings ("com.canonical.indicators.sound");
-    settings.changed["blacklisted-media-players"].connect (on_blacklist_event);    
+    this.settings.changed["blacklisted-media-players"].connect (on_blacklist_event);    
   }
    
   public string[] fetch_blacklist()
@@ -35,17 +35,33 @@ public class SettingsManager : GLib.Object
     return this.settings.get_strv ("blacklisted-media-players");
   }
 
-  public string[] fetch_interested()
+  public ArrayList<string> fetch_interested()
   {
-    return this.settings.get_strv ("interested-media-players");
+    var blacklisted = this.settings.get_strv ("blacklisted-media-players");
+    var interested = this.settings.get_strv ("interested-media-players");
+    var list = new ArrayList<string>();
+    foreach(var s in interested){
+      if ( s in blacklisted ) continue;
+      list.add(s);      
+    }
+    return list;
   }
 
-  public bool add_interested(string app_desktop_name)
+  public void clear_list()
   {
-    string[] already_interested = fetch_interested();
+    this.settings.reset("interested-media-players");
+  }
+  
+  public void add_interested(string app_desktop_name)
+  {
+    var already_interested = this.settings.get_strv ("interested-media-players");
+    foreach ( var s in already_interested){
+      if ( s == app_desktop_name ) return;
+    }
     already_interested += (app_desktop_name);
-    return this.settings.set_strv( "interested-media-players",
-                                    already_interested );
+    this.settings.set_strv( "interested-media-players",
+                             already_interested );
+    this.settings.apply();
   }
 
   private void on_blacklist_event()

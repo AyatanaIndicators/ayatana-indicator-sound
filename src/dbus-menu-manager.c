@@ -214,6 +214,7 @@ static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service
   // Sound preferences dialog
   DbusmenuMenuitem *settings_mi = dbusmenu_menuitem_new();
   dbusmenu_menuitem_property_set(settings_mi, DBUSMENU_MENUITEM_PROP_LABEL, _("Sound Preferences..."));
+  
   //_("Sound Preferences..."));
   dbusmenu_menuitem_child_append(root, settings_mi);
   g_signal_connect(G_OBJECT(settings_mi), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED,

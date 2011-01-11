@@ -25,6 +25,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <gio/gio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gee.h>
 
 
 #define TYPE_SETTINGS_MANAGER (settings_manager_get_type ())
@@ -38,6 +39,7 @@ typedef struct _SettingsManager SettingsManager;
 typedef struct _SettingsManagerClass SettingsManagerClass;
 typedef struct _SettingsManagerPrivate SettingsManagerPrivate;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
+#define _g_free0(var) (var = (g_free (var), NULL))
 
 struct _SettingsManager {
 	GObject parent_instance;
@@ -63,8 +65,10 @@ enum  {
 SettingsManager* settings_manager_new (void);
 SettingsManager* settings_manager_construct (GType object_type);
 gchar** settings_manager_fetch_blacklist (SettingsManager* self, int* result_length1);
-gchar** settings_manager_fetch_interested (SettingsManager* self, int* result_length1);
-gboolean settings_manager_add_interested (SettingsManager* self, const gchar* app_desktop_name);
+GeeArrayList* settings_manager_fetch_interested (SettingsManager* self);
+static gboolean _vala_string_array_contains (gchar** stack, int stack_length, gchar* needle);
+void settings_manager_clear_list (SettingsManager* self);
+void settings_manager_add_interested (SettingsManager* self, const gchar* app_desktop_name);
 static void _vala_array_add1 (gchar*** array, int* length, int* size, gchar* value);
 static void settings_manager_on_blacklist_event (SettingsManager* self);
 static void g_cclosure_user_marshal_VOID__BOXED_INT (GClosure * closure, GValue * return_value, guint n_param_values, const GValue * param_values, gpointer invocation_hint, gpointer marshal_data);
@@ -102,17 +106,77 @@ gchar** settings_manager_fetch_blacklist (SettingsManager* self, int* result_len
 }
 
 
-gchar** settings_manager_fetch_interested (SettingsManager* self, int* result_length1) {
-	gchar** result = NULL;
+static gboolean _vala_string_array_contains (gchar** stack, int stack_length, gchar* needle) {
+	int i;
+	for (i = 0; i < stack_length; i++) {
+		if (g_strcmp0 (stack[i], needle) == 0) {
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+
+GeeArrayList* settings_manager_fetch_interested (SettingsManager* self) {
+	GeeArrayList* result = NULL;
 	gchar** _tmp0_;
 	gchar** _tmp1_ = NULL;
+	gint blacklisted_length1;
+	gint _blacklisted_size_;
 	gchar** _tmp2_;
+	gchar** blacklisted;
+	gchar** _tmp3_;
+	gchar** _tmp4_ = NULL;
+	gint interested_length1;
+	gint _interested_size_;
+	gchar** _tmp5_;
+	gchar** interested;
+	GeeArrayList* _tmp6_ = NULL;
+	GeeArrayList* list;
 	g_return_val_if_fail (self != NULL, NULL);
-	_tmp1_ = _tmp0_ = g_settings_get_strv (self->priv->settings, "interested-media-players");
+	_tmp1_ = _tmp0_ = g_settings_get_strv (self->priv->settings, "blacklisted-media-players");
 	_tmp2_ = _tmp1_;
-	*result_length1 = _vala_array_length (_tmp0_);
-	result = _tmp2_;
+	blacklisted_length1 = _vala_array_length (_tmp0_);
+	_blacklisted_size_ = blacklisted_length1;
+	blacklisted = _tmp2_;
+	_tmp4_ = _tmp3_ = g_settings_get_strv (self->priv->settings, "interested-media-players");
+	_tmp5_ = _tmp4_;
+	interested_length1 = _vala_array_length (_tmp3_);
+	_interested_size_ = interested_length1;
+	interested = _tmp5_;
+	_tmp6_ = gee_array_list_new (G_TYPE_STRING, (GBoxedCopyFunc) g_strdup, g_free, NULL);
+	list = _tmp6_;
+	{
+		gchar** s_collection;
+		int s_collection_length1;
+		int s_it;
+		s_collection = interested;
+		s_collection_length1 = interested_length1;
+		for (s_it = 0; s_it < interested_length1; s_it = s_it + 1) {
+			gchar* _tmp7_;
+			gchar* s;
+			_tmp7_ = g_strdup (s_collection[s_it]);
+			s = _tmp7_;
+			{
+				if (_vala_string_array_contains (blacklisted, blacklisted_length1, s)) {
+					_g_free0 (s);
+					continue;
+				}
+				gee_abstract_collection_add ((GeeAbstractCollection*) list, s);
+				_g_free0 (s);
+			}
+		}
+	}
+	result = list;
+	interested = (_vala_array_free (interested, interested_length1, (GDestroyNotify) g_free), NULL);
+	blacklisted = (_vala_array_free (blacklisted, blacklisted_length1, (GDestroyNotify) g_free), NULL);
 	return result;
+}
+
+
+void settings_manager_clear_list (SettingsManager* self) {
+	g_return_if_fail (self != NULL);
+	g_settings_reset (self->priv->settings, "interested-media-players");
 }
 
 
@@ -126,29 +190,47 @@ static void _vala_array_add1 (gchar*** array, int* length, int* size, gchar* val
 }
 
 
-gboolean settings_manager_add_interested (SettingsManager* self, const gchar* app_desktop_name) {
-	gboolean result = FALSE;
-	gint _tmp0_;
+void settings_manager_add_interested (SettingsManager* self, const gchar* app_desktop_name) {
+	gchar** _tmp0_;
 	gchar** _tmp1_ = NULL;
 	gint already_interested_length1;
 	gint _already_interested_size_;
 	gchar** _tmp2_;
 	gchar** already_interested;
-	gchar* _tmp3_;
-	gboolean _tmp4_;
-	g_return_val_if_fail (self != NULL, FALSE);
-	g_return_val_if_fail (app_desktop_name != NULL, FALSE);
-	_tmp1_ = settings_manager_fetch_interested (self, &_tmp0_);
+	gchar* _tmp4_;
+	g_return_if_fail (self != NULL);
+	g_return_if_fail (app_desktop_name != NULL);
+	_tmp1_ = _tmp0_ = g_settings_get_strv (self->priv->settings, "interested-media-players");
 	_tmp2_ = _tmp1_;
-	already_interested_length1 = _tmp0_;
+	already_interested_length1 = _vala_array_length (_tmp0_);
 	_already_interested_size_ = already_interested_length1;
 	already_interested = _tmp2_;
-	_tmp3_ = g_strdup (app_desktop_name);
-	_vala_array_add1 (&already_interested, &already_interested_length1, &_already_interested_size_, _tmp3_);
-	_tmp4_ = g_settings_set_strv (self->priv->settings, "interested-media-players", already_interested);
-	result = _tmp4_;
+	{
+		gchar** s_collection;
+		int s_collection_length1;
+		int s_it;
+		s_collection = already_interested;
+		s_collection_length1 = already_interested_length1;
+		for (s_it = 0; s_it < already_interested_length1; s_it = s_it + 1) {
+			gchar* _tmp3_;
+			gchar* s;
+			_tmp3_ = g_strdup (s_collection[s_it]);
+			s = _tmp3_;
+			{
+				if (g_strcmp0 (s, app_desktop_name) == 0) {
+					_g_free0 (s);
+					already_interested = (_vala_array_free (already_interested, already_interested_length1, (GDestroyNotify) g_free), NULL);
+					return;
+				}
+				_g_free0 (s);
+			}
+		}
+	}
+	_tmp4_ = g_strdup (app_desktop_name);
+	_vala_array_add1 (&already_interested, &already_interested_length1, &_already_interested_size_, _tmp4_);
+	g_settings_set_strv (self->priv->settings, "interested-media-players", already_interested);
+	g_settings_apply (self->priv->settings);
 	already_interested = (_vala_array_free (already_interested, already_interested_length1, (GDestroyNotify) g_free), NULL);
-	return result;
 }
 
 

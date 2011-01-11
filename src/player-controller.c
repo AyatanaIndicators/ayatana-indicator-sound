@@ -81,6 +81,18 @@ typedef struct _Mpris2ControllerClass Mpris2ControllerClass;
 typedef struct _TitleMenuitem TitleMenuitem;
 typedef struct _TitleMenuitemClass TitleMenuitemClass;
 
+#define TYPE_PLAYLISTS_MENUITEM (playlists_menuitem_get_type ())
+#define PLAYLISTS_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PLAYLISTS_MENUITEM, PlaylistsMenuitem))
+#define PLAYLISTS_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PLAYLISTS_MENUITEM, PlaylistsMenuitemClass))
+#define IS_PLAYLISTS_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_PLAYLISTS_MENUITEM))
+#define IS_PLAYLISTS_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_PLAYLISTS_MENUITEM))
+#define PLAYLISTS_MENUITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_PLAYLISTS_MENUITEM, PlaylistsMenuitemClass))
+
+typedef struct _PlaylistsMenuitem PlaylistsMenuitem;
+typedef struct _PlaylistsMenuitemClass PlaylistsMenuitemClass;
+typedef struct _PlayerItemPrivate PlayerItemPrivate;
+typedef struct _PlaylistsMenuitemPrivate PlaylistsMenuitemPrivate;
+
 #define TYPE_METADATA_MENUITEM (metadata_menuitem_get_type ())
 #define METADATA_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_METADATA_MENUITEM, MetadataMenuitem))
 #define METADATA_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_METADATA_MENUITEM, MetadataMenuitemClass))
@@ -115,7 +127,6 @@ struct _PlayerControllerClass {
 
 struct _PlayerControllerPrivate {
 	DbusmenuMenuitem* root_menu;
-	gchar* _name;
 	gchar* _dbus_name;
 	GAppInfo* _app_info;
 	gint _menu_offset;
@@ -126,7 +137,8 @@ typedef enum  {
 	PLAYER_CONTROLLER_WIDGET_ORDER_SEPARATOR,
 	PLAYER_CONTROLLER_WIDGET_ORDER_TITLE,
 	PLAYER_CONTROLLER_WIDGET_ORDER_METADATA,
-	PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT
+	PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT,
+	PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLISTS
 } PlayerControllerwidget_order;
 
 typedef enum  {
@@ -137,6 +149,25 @@ typedef enum  {
 	PLAYER_CONTROLLER_STATE_DISCONNECTED
 } PlayerControllerstate;
 
+struct _PlayerItem {
+	DbusmenuMenuitem parent_instance;
+	PlayerItemPrivate * priv;
+};
+
+struct _PlayerItemClass {
+	DbusmenuMenuitemClass parent_class;
+};
+
+struct _PlaylistsMenuitem {
+	PlayerItem parent_instance;
+	PlaylistsMenuitemPrivate * priv;
+	DbusmenuMenuitem* root_item;
+};
+
+struct _PlaylistsMenuitemClass {
+	PlayerItemClass parent_class;
+};
+
 
 static gpointer player_controller_parent_class = NULL;
 
@@ -146,7 +177,6 @@ GType mpris2_controller_get_type (void) G_GNUC_CONST;
 #define PLAYER_CONTROLLER_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_PLAYER_CONTROLLER, PlayerControllerPrivate))
 enum  {
 	PLAYER_CONTROLLER_DUMMY_PROPERTY,
-	PLAYER_CONTROLLER_NAME,
 	PLAYER_CONTROLLER_DBUS_NAME,
 	PLAYER_CONTROLLER_APP_INFO,
 	PLAYER_CONTROLLER_MENU_OFFSET,
@@ -154,21 +184,18 @@ enum  {
 };
 GType player_controller_widget_order_get_type (void) G_GNUC_CONST;
 GType player_controller_state_get_type (void) G_GNUC_CONST;
-#define PLAYER_CONTROLLER_WIDGET_QUANTITY 4
+#define PLAYER_CONTROLLER_WIDGET_QUANTITY 5
 PlayerController* player_controller_new (DbusmenuMenuitem* root, GAppInfo* app, const gchar* dbus_name, const gchar* icon_name, gint offset, PlayerControllerstate initial_state);
 PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, GAppInfo* app, const gchar* dbus_name, const gchar* icon_name, gint offset, PlayerControllerstate initial_state);
 void player_controller_set_app_info (PlayerController* self, GAppInfo* value);
 void player_controller_set_dbus_name (PlayerController* self, const gchar* value);
-static gchar* player_controller_format_player_name (gchar* app_info_name);
-GAppInfo* player_controller_get_app_info (PlayerController* self);
-void player_controller_set_name (PlayerController* self, const gchar* value);
 void player_controller_set_icon_name (PlayerController* self, const gchar* value);
 void player_controller_set_menu_offset (PlayerController* self, gint value);
 static void player_controller_construct_widgets (PlayerController* self);
 static void player_controller_establish_mpris_connection (PlayerController* self);
 void player_controller_update_layout (PlayerController* self);
 void player_controller_update_state (PlayerController* self, PlayerControllerstate new_state);
-const gchar* player_controller_get_name (PlayerController* self);
+GAppInfo* player_controller_get_app_info (PlayerController* self);
 void player_controller_activate (PlayerController* self, const gchar* dbus_name);
 void player_controller_instantiate (PlayerController* self);
 const gchar* player_controller_get_dbus_name (PlayerController* self);
@@ -182,7 +209,9 @@ GeeHashSet* transport_menuitem_attributes_format (void);
 GeeHashSet* metadata_menuitem_attributes_format (void);
 GType title_menuitem_get_type (void) G_GNUC_CONST;
 void title_menuitem_toggle_active_triangle (TitleMenuitem* self, gboolean update);
+GType playlists_menuitem_get_type (void) G_GNUC_CONST;
 gboolean player_item_populated (PlayerItem* self, GeeHashSet* attrs);
+gboolean mpris2_controller_playlists_support_exist (Mpris2Controller* self);
 PlayerItem* player_item_new (const gchar* type);
 PlayerItem* player_item_construct (GType object_type, const gchar* type);
 TitleMenuitem* title_menuitem_new (PlayerController* parent);
@@ -193,7 +222,10 @@ GType metadata_menuitem_get_type (void) G_GNUC_CONST;
 TransportMenuitem* transport_menuitem_new (PlayerController* parent);
 TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerController* parent);
 GType transport_menuitem_get_type (void) G_GNUC_CONST;
+PlaylistsMenuitem* playlists_menuitem_new (PlayerController* parent);
+PlaylistsMenuitem* playlists_menuitem_construct (GType object_type, PlayerController* parent);
 gint player_controller_get_menu_offset (PlayerController* self);
+static gchar* player_controller_format_player_name (gchar* app_info_name);
 gboolean mpris2_controller_connected (Mpris2Controller* self);
 void mpris2_controller_initial_update (Mpris2Controller* self);
 const gchar* player_controller_get_icon_name (PlayerController* self);
@@ -208,7 +240,7 @@ static gint _vala_array_length (gpointer array);
 GType player_controller_widget_order_get_type (void) {
 	static volatile gsize player_controller_widget_order_type_id__volatile = 0;
 	if (g_once_init_enter (&player_controller_widget_order_type_id__volatile)) {
-		static const GEnumValue values[] = {{PLAYER_CONTROLLER_WIDGET_ORDER_SEPARATOR, "PLAYER_CONTROLLER_WIDGET_ORDER_SEPARATOR", "separator"}, {PLAYER_CONTROLLER_WIDGET_ORDER_TITLE, "PLAYER_CONTROLLER_WIDGET_ORDER_TITLE", "title"}, {PLAYER_CONTROLLER_WIDGET_ORDER_METADATA, "PLAYER_CONTROLLER_WIDGET_ORDER_METADATA", "metadata"}, {PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT, "PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT", "transport"}, {0, NULL, NULL}};
+		static const GEnumValue values[] = {{PLAYER_CONTROLLER_WIDGET_ORDER_SEPARATOR, "PLAYER_CONTROLLER_WIDGET_ORDER_SEPARATOR", "separator"}, {PLAYER_CONTROLLER_WIDGET_ORDER_TITLE, "PLAYER_CONTROLLER_WIDGET_ORDER_TITLE", "title"}, {PLAYER_CONTROLLER_WIDGET_ORDER_METADATA, "PLAYER_CONTROLLER_WIDGET_ORDER_METADATA", "metadata"}, {PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT, "PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT", "transport"}, {PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLISTS, "PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLISTS", "playlists"}, {0, NULL, NULL}};
 		GType player_controller_widget_order_type_id;
 		player_controller_widget_order_type_id = g_enum_register_static ("PlayerControllerwidget_order", values);
 		g_once_init_leave (&player_controller_widget_order_type_id__volatile, player_controller_widget_order_type_id);
@@ -238,12 +270,8 @@ PlayerController* player_controller_construct (GType object_type, DbusmenuMenuit
 	PlayerController * self = NULL;
 	DbusmenuMenuitem* _tmp0_;
 	DbusmenuMenuitem* _tmp1_;
-	const gchar* _tmp2_ = NULL;
-	gchar* _tmp3_;
-	gchar* _tmp4_ = NULL;
-	gchar* _tmp5_;
-	GeeArrayList* _tmp6_ = NULL;
-	GeeArrayList* _tmp7_;
+	GeeArrayList* _tmp2_ = NULL;
+	GeeArrayList* _tmp3_;
 	g_return_val_if_fail (root != NULL, NULL);
 	g_return_val_if_fail (app != NULL, NULL);
 	g_return_val_if_fail (icon_name != NULL, NULL);
@@ -254,17 +282,11 @@ PlayerController* player_controller_construct (GType object_type, DbusmenuMenuit
 	self->priv->root_menu = _tmp1_;
 	player_controller_set_app_info (self, app);
 	player_controller_set_dbus_name (self, dbus_name);
-	_tmp2_ = g_app_info_get_name (self->priv->_app_info);
-	_tmp3_ = g_strdup (_tmp2_);
-	_tmp4_ = player_controller_format_player_name (_tmp3_);
-	_tmp5_ = _tmp4_;
-	player_controller_set_name (self, _tmp5_);
-	_g_free0 (_tmp5_);
 	player_controller_set_icon_name (self, icon_name);
-	_tmp6_ = gee_array_list_new (TYPE_PLAYER_ITEM, (GBoxedCopyFunc) g_object_ref, g_object_unref, NULL);
-	_tmp7_ = _tmp6_;
+	_tmp2_ = gee_array_list_new (TYPE_PLAYER_ITEM, (GBoxedCopyFunc) g_object_ref, g_object_unref, NULL);
+	_tmp3_ = _tmp2_;
 	_g_object_unref0 (self->custom_items);
-	self->custom_items = _tmp7_;
+	self->custom_items = _tmp3_;
 	self->current_state = (gint) initial_state;
 	player_controller_set_menu_offset (self, offset);
 	player_controller_construct_widgets (self);
@@ -280,9 +302,11 @@ PlayerController* player_controller_new (DbusmenuMenuitem* root, GAppInfo* app, 
 
 
 void player_controller_update_state (PlayerController* self, PlayerControllerstate new_state) {
+	const gchar* _tmp0_ = NULL;
 	g_return_if_fail (self != NULL);
-	g_debug ("player-controller.vala:76: update_state - player controller %s : new s" \
-"tate %i", self->priv->_name, (gint) new_state);
+	_tmp0_ = g_app_info_get_name (self->priv->_app_info);
+	g_debug ("player-controller.vala:75: update_state - player controller %s : new s" \
+"tate %i", _tmp0_, (gint) new_state);
 	self->current_state = (gint) new_state;
 	player_controller_update_layout (self);
 }
@@ -297,9 +321,11 @@ void player_controller_activate (PlayerController* self, const gchar* dbus_name)
 
 
 void player_controller_instantiate (PlayerController* self) {
+	const gchar* _tmp0_ = NULL;
 	GError * _inner_error_ = NULL;
 	g_return_if_fail (self != NULL);
-	g_debug ("player-controller.vala:95: instantiate in player controller for %s", self->priv->_name);
+	_tmp0_ = g_app_info_get_name (self->priv->_app_info);
+	g_debug ("player-controller.vala:95: instantiate in player controller for %s", _tmp0_);
 	g_app_info_launch (self->priv->_app_info, NULL, NULL, &_inner_error_);
 	if (_inner_error_ != NULL) {
 		goto __catch6_g_error;
@@ -309,10 +335,12 @@ void player_controller_instantiate (PlayerController* self) {
 	__catch6_g_error:
 	{
 		GError * _error_;
+		const gchar* _tmp1_ = NULL;
 		_error_ = _inner_error_;
 		_inner_error_ = NULL;
+		_tmp1_ = g_app_info_get_name (self->priv->_app_info);
 		g_warning ("player-controller.vala:101: Failed to launch app %s with error message" \
-": %s", self->priv->_name, _error_->message);
+": %s", _tmp1_, _error_->message);
 		_g_error_free0 (_error_);
 	}
 	__finally6:
@@ -335,7 +363,7 @@ static void player_controller_establish_mpris_connection (PlayerController* self
 		_tmp0_ = self->priv->_dbus_name == NULL;
 	}
 	if (_tmp0_) {
-		g_debug ("player-controller.vala:108: establish_mpris_connection - Not ready to " \
+		g_debug ("player-controller.vala:109: establish_mpris_connection - Not ready to " \
 "connect");
 		return;
 	}
@@ -389,6 +417,7 @@ void player_controller_hibernate (PlayerController* self) {
 	gpointer _tmp8_ = NULL;
 	PlayerItem* _tmp9_;
 	TitleMenuitem* title;
+	Mpris2Controller* _tmp10_;
 	g_return_if_fail (self != NULL);
 	player_controller_update_state (self, PLAYER_CONTROLLER_STATE_OFFLINE);
 	_tmp0_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT);
@@ -408,51 +437,65 @@ void player_controller_hibernate (PlayerController* self) {
 	_tmp8_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TITLE);
 	title = (_tmp9_ = (PlayerItem*) _tmp8_, IS_TITLE_MENUITEM (_tmp9_) ? ((TitleMenuitem*) _tmp9_) : NULL);
 	title_menuitem_toggle_active_triangle (title, FALSE);
+	_tmp10_ = NULL;
+	_g_object_unref0 (self->mpris_bridge);
+	self->mpris_bridge = _tmp10_;
 	_g_object_unref0 (title);
 }
 
 
 void player_controller_update_layout (PlayerController* self) {
-	gpointer _tmp4_ = NULL;
-	PlayerItem* _tmp5_;
+	gpointer _tmp0_ = NULL;
+	PlayerItem* _tmp1_;
+	PlaylistsMenuitem* playlists_menuitem;
 	gpointer _tmp6_ = NULL;
 	PlayerItem* _tmp7_;
-	GeeHashSet* _tmp8_ = NULL;
-	GeeHashSet* _tmp9_;
-	gboolean _tmp10_;
-	gpointer _tmp11_ = NULL;
-	PlayerItem* _tmp12_;
+	gpointer _tmp8_ = NULL;
+	PlayerItem* _tmp9_;
+	GeeHashSet* _tmp10_ = NULL;
+	GeeHashSet* _tmp11_;
+	gboolean _tmp12_;
+	gpointer _tmp13_ = NULL;
+	PlayerItem* _tmp14_;
+	gboolean _tmp15_;
 	g_return_if_fail (self != NULL);
+	_tmp0_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLISTS);
+	playlists_menuitem = (_tmp1_ = (PlayerItem*) _tmp0_, IS_PLAYLISTS_MENUITEM (_tmp1_) ? ((PlaylistsMenuitem*) _tmp1_) : NULL);
 	if (self->current_state != PLAYER_CONTROLLER_STATE_CONNECTED) {
-		gpointer _tmp0_ = NULL;
-		PlayerItem* _tmp1_;
 		gpointer _tmp2_ = NULL;
 		PlayerItem* _tmp3_;
-		_tmp0_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT);
-		_tmp1_ = (PlayerItem*) _tmp0_;
-		dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) _tmp1_, DBUSMENU_MENUITEM_PROP_VISIBLE, FALSE);
-		_g_object_unref0 (_tmp1_);
-		_tmp2_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
+		gpointer _tmp4_ = NULL;
+		PlayerItem* _tmp5_;
+		_tmp2_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT);
 		_tmp3_ = (PlayerItem*) _tmp2_;
 		dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) _tmp3_, DBUSMENU_MENUITEM_PROP_VISIBLE, FALSE);
 		_g_object_unref0 (_tmp3_);
+		_tmp4_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
+		_tmp5_ = (PlayerItem*) _tmp4_;
+		dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) _tmp5_, DBUSMENU_MENUITEM_PROP_VISIBLE, FALSE);
+		_g_object_unref0 (_tmp5_);
+		dbusmenu_menuitem_property_set_bool (playlists_menuitem->root_item, DBUSMENU_MENUITEM_PROP_VISIBLE, FALSE);
+		_g_object_unref0 (playlists_menuitem);
 		return;
 	}
-	_tmp4_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
-	_tmp5_ = (PlayerItem*) _tmp4_;
 	_tmp6_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
 	_tmp7_ = (PlayerItem*) _tmp6_;
-	_tmp8_ = metadata_menuitem_attributes_format ();
-	_tmp9_ = _tmp8_;
-	_tmp10_ = player_item_populated (_tmp7_, _tmp9_);
-	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) _tmp5_, DBUSMENU_MENUITEM_PROP_VISIBLE, _tmp10_);
+	_tmp8_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
+	_tmp9_ = (PlayerItem*) _tmp8_;
+	_tmp10_ = metadata_menuitem_attributes_format ();
+	_tmp11_ = _tmp10_;
+	_tmp12_ = player_item_populated (_tmp9_, _tmp11_);
+	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) _tmp7_, DBUSMENU_MENUITEM_PROP_VISIBLE, _tmp12_);
+	_g_object_unref0 (_tmp11_);
 	_g_object_unref0 (_tmp9_);
 	_g_object_unref0 (_tmp7_);
-	_g_object_unref0 (_tmp5_);
-	_tmp11_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT);
-	_tmp12_ = (PlayerItem*) _tmp11_;
-	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) _tmp12_, DBUSMENU_MENUITEM_PROP_VISIBLE, TRUE);
-	_g_object_unref0 (_tmp12_);
+	_tmp13_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT);
+	_tmp14_ = (PlayerItem*) _tmp13_;
+	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) _tmp14_, DBUSMENU_MENUITEM_PROP_VISIBLE, TRUE);
+	_g_object_unref0 (_tmp14_);
+	_tmp15_ = mpris2_controller_playlists_support_exist (self->mpris_bridge);
+	dbusmenu_menuitem_property_set_bool (playlists_menuitem->root_item, DBUSMENU_MENUITEM_PROP_VISIBLE, _tmp15_);
+	_g_object_unref0 (playlists_menuitem);
 }
 
 
@@ -465,6 +508,8 @@ static void player_controller_construct_widgets (PlayerController* self) {
 	MetadataMenuitem* metadata_item;
 	TransportMenuitem* _tmp4_ = NULL;
 	TransportMenuitem* transport_item;
+	PlaylistsMenuitem* _tmp5_ = NULL;
+	PlaylistsMenuitem* playlist_menuitem;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = player_item_new (DBUSMENU_CLIENT_TYPES_SEPARATOR);
 	_tmp1_ = _tmp0_;
@@ -479,33 +524,51 @@ static void player_controller_construct_widgets (PlayerController* self) {
 	_tmp4_ = transport_menuitem_new (self);
 	transport_item = _tmp4_;
 	gee_abstract_collection_add ((GeeAbstractCollection*) self->custom_items, (PlayerItem*) transport_item);
+	_tmp5_ = playlists_menuitem_new (self);
+	playlist_menuitem = _tmp5_;
+	gee_abstract_collection_add ((GeeAbstractCollection*) self->custom_items, (PlayerItem*) playlist_menuitem);
 	{
-		GeeArrayList* _tmp5_;
+		GeeArrayList* _tmp6_;
 		GeeArrayList* _item_list;
-		gint _tmp6_;
+		gint _tmp7_;
 		gint _item_size;
 		gint _item_index;
-		_tmp5_ = _g_object_ref0 (self->custom_items);
-		_item_list = _tmp5_;
-		_tmp6_ = gee_collection_get_size ((GeeCollection*) _item_list);
-		_item_size = _tmp6_;
+		_tmp6_ = _g_object_ref0 (self->custom_items);
+		_item_list = _tmp6_;
+		_tmp7_ = gee_collection_get_size ((GeeCollection*) _item_list);
+		_item_size = _tmp7_;
 		_item_index = -1;
 		while (TRUE) {
-			gpointer _tmp7_ = NULL;
+			gpointer _tmp8_ = NULL;
 			PlayerItem* item;
-			gint _tmp8_;
+			gint _tmp9_;
 			_item_index = _item_index + 1;
 			if (!(_item_index < _item_size)) {
 				break;
 			}
-			_tmp7_ = gee_abstract_list_get ((GeeAbstractList*) _item_list, _item_index);
-			item = (PlayerItem*) _tmp7_;
-			_tmp8_ = gee_abstract_list_index_of ((GeeAbstractList*) self->custom_items, item);
-			dbusmenu_menuitem_child_add_position (self->priv->root_menu, (DbusmenuMenuitem*) item, (guint) (self->priv->_menu_offset + _tmp8_));
+			_tmp8_ = gee_abstract_list_get ((GeeAbstractList*) _item_list, _item_index);
+			item = (PlayerItem*) _tmp8_;
+			_tmp9_ = gee_abstract_list_index_of ((GeeAbstractList*) self->custom_items, item);
+			if (_tmp9_ != 4) {
+				gint _tmp10_;
+				_tmp10_ = gee_abstract_list_index_of ((GeeAbstractList*) self->custom_items, item);
+				dbusmenu_menuitem_child_add_position (self->priv->root_menu, (DbusmenuMenuitem*) item, (guint) (self->priv->_menu_offset + _tmp10_));
+			} else {
+				PlayerItem* _tmp11_;
+				PlaylistsMenuitem* _tmp12_;
+				PlaylistsMenuitem* playlists_menuitem;
+				gint _tmp13_;
+				_tmp12_ = _g_object_ref0 ((_tmp11_ = item, IS_PLAYLISTS_MENUITEM (_tmp11_) ? ((PlaylistsMenuitem*) _tmp11_) : NULL));
+				playlists_menuitem = _tmp12_;
+				_tmp13_ = gee_abstract_list_index_of ((GeeAbstractList*) self->custom_items, item);
+				dbusmenu_menuitem_child_add_position (self->priv->root_menu, playlists_menuitem->root_item, (guint) (self->priv->_menu_offset + _tmp13_));
+				_g_object_unref0 (playlists_menuitem);
+			}
 			_g_object_unref0 (item);
 		}
 		_g_object_unref0 (_item_list);
 	}
+	_g_object_unref0 (playlist_menuitem);
 	_g_object_unref0 (transport_item);
 	_g_object_unref0 (metadata_item);
 	_g_object_unref0 (title_menu_item);
@@ -627,7 +690,7 @@ static gchar* player_controller_format_player_name (gchar* app_info_name) {
 		_g_free0 (_tmp14_);
 		_g_free0 (_tmp11_);
 	}
-	g_debug ("player-controller.vala:178: PlayerController->format_player_name - : %" \
+	g_debug ("player-controller.vala:197: PlayerController->format_player_name - : %" \
 "s", _result_);
 	result = _result_;
 	tokens = (_vala_array_free (tokens, tokens_length1, (GDestroyNotify) g_free), NULL);
@@ -653,26 +716,6 @@ static void player_controller_determine_state (PlayerController* self) {
 	} else {
 		player_controller_update_state (self, PLAYER_CONTROLLER_STATE_DISCONNECTED);
 	}
-}
-
-
-const gchar* player_controller_get_name (PlayerController* self) {
-	const gchar* result;
-	g_return_val_if_fail (self != NULL, NULL);
-	result = self->priv->_name;
-	return result;
-}
-
-
-void player_controller_set_name (PlayerController* self, const gchar* value) {
-	gchar* _tmp0_;
-	gchar* _tmp1_;
-	g_return_if_fail (self != NULL);
-	_tmp0_ = g_strdup (value);
-	_tmp1_ = _tmp0_;
-	_g_free0 (self->priv->_name);
-	self->priv->_name = _tmp1_;
-	g_object_notify ((GObject *) self, "name");
 }
 
 
@@ -757,7 +800,6 @@ static void player_controller_class_init (PlayerControllerClass * klass) {
 	G_OBJECT_CLASS (klass)->get_property = _vala_player_controller_get_property;
 	G_OBJECT_CLASS (klass)->set_property = _vala_player_controller_set_property;
 	G_OBJECT_CLASS (klass)->finalize = player_controller_finalize;
-	g_object_class_install_property (G_OBJECT_CLASS (klass), PLAYER_CONTROLLER_NAME, g_param_spec_string ("name", "name", "name", NULL, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), PLAYER_CONTROLLER_DBUS_NAME, g_param_spec_string ("dbus-name", "dbus-name", "dbus-name", NULL, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), PLAYER_CONTROLLER_APP_INFO, g_param_spec_object ("app-info", "app-info", "app-info", G_TYPE_APP_INFO, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), PLAYER_CONTROLLER_MENU_OFFSET, g_param_spec_int ("menu-offset", "menu-offset", "menu-offset", G_MININT, G_MAXINT, 0, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE));
@@ -775,7 +817,6 @@ static void player_controller_finalize (GObject* obj) {
 	PlayerController * self;
 	self = PLAYER_CONTROLLER (obj);
 	_g_object_unref0 (self->priv->root_menu);
-	_g_free0 (self->priv->_name);
 	_g_free0 (self->priv->_dbus_name);
 	_g_object_unref0 (self->custom_items);
 	_g_object_unref0 (self->mpris_bridge);
@@ -801,9 +842,6 @@ static void _vala_player_controller_get_property (GObject * object, guint proper
 	PlayerController * self;
 	self = PLAYER_CONTROLLER (object);
 	switch (property_id) {
-		case PLAYER_CONTROLLER_NAME:
-		g_value_set_string (value, player_controller_get_name (self));
-		break;
 		case PLAYER_CONTROLLER_DBUS_NAME:
 		g_value_set_string (value, player_controller_get_dbus_name (self));
 		break;
@@ -827,9 +865,6 @@ static void _vala_player_controller_set_property (GObject * object, guint proper
 	PlayerController * self;
 	self = PLAYER_CONTROLLER (object);
 	switch (property_id) {
-		case PLAYER_CONTROLLER_NAME:
-		player_controller_set_name (self, g_value_get_string (value));
-		break;
 		case PLAYER_CONTROLLER_DBUS_NAME:
 		player_controller_set_dbus_name (self, g_value_get_string (value));
 		break;

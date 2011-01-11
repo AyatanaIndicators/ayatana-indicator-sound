@@ -26,8 +26,7 @@ public class TitleMenuitem : PlayerItem
   public TitleMenuitem(PlayerController parent)
   {
     Object(item_type: MENUITEM_TYPE, owner: parent);
-    this.property_set(MENUITEM_NAME, parent.name);    
-    debug("title init - icon name = %s", parent.icon_name);
+    this.property_set(MENUITEM_NAME, parent.app_info.get_name());    
     this.property_set(MENUITEM_ICON, parent.icon_name);    
     this.property_set_bool(MENUITEM_RUNNING, false);        
   }
