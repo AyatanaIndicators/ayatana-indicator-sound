@@ -68,7 +68,7 @@ DbusmenuMenuitem* dbus_menu_manager_setup()
 
   dbus_interface = g_object_new(SOUND_SERVICE_DBUS_TYPE, NULL);
 
-  DbusmenuServer *server = dbusmenu_server_new(INDICATOR_SOUND_DBUS_OBJECT);
+  DbusmenuServer *server = dbusmenu_server_new(INDICATOR_SOUND_MENU_DBUS_OBJECT_PATH);
   dbusmenu_server_set_root(server, root_menuitem);
   establish_pulse_activities(dbus_interface);
   return root_menuitem;

@@ -90,10 +90,10 @@ static void create_connection_to_service (GObject *source_object,
 static void connection_changed (IndicatorServiceManager * sm,
                                 gboolean connected,
                                 gpointer userdata);
-static void g_signal_cb ( GDBusProxy *proxy,
-                          const gchar *sender_name,
-                          const gchar *signal_name,
-                          GVariant *parameters,
+static void g_signal_cb ( GDBusProxy* proxy,
+                          gchar* sender_name,
+                          gchar* signal_name,
+                          GVariant* parameters,
                           gpointer user_data);
 
 static void react_to_signal_sink_input_while_muted (gboolean value,
@@ -242,7 +242,8 @@ get_icon (IndicatorObject * io)
 static GtkMenu *
 get_menu (IndicatorObject * io)
 {
-  DbusmenuGtkMenu* menu = dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME, INDICATOR_SOUND_DBUS_OBJECT);
+  DbusmenuGtkMenu* menu = dbusmenu_gtkmenu_new(INDICATOR_SOUND_DBUS_NAME,
+                                               INDICATOR_SOUND_MENU_DBUS_OBJECT_PATH);
         
   DbusmenuGtkClient *client = dbusmenu_gtkmenu_get_client(menu);
   g_object_set_data (G_OBJECT (client), "indicator", io);
@@ -404,9 +405,9 @@ connection_changed (IndicatorServiceManager * sm,
 
   if (interface_info == NULL) {
     interface_info = g_dbus_node_info_lookup_interface (node_info,
-                                                        INDICATOR_SOUND_SERVICE_DBUS_INTERFACE);
+                                                        INDICATOR_SOUND_DBUS_INTERFACE);
     if (interface_info == NULL) {
-      g_error("Unable to find interface '" INDICATOR_SOUND_SERVICE_DBUS_INTERFACE "'");
+      g_error("Unable to find interface '" INDICATOR_SOUND_DBUS_INTERFACE "'");
     }
   }
   
@@ -414,8 +415,8 @@ connection_changed (IndicatorServiceManager * sm,
                             G_DBUS_PROXY_FLAGS_NONE,
                             interface_info,
                             INDICATOR_SOUND_DBUS_NAME,
-                            INDICATOR_SOUND_SERVICE_DBUS_OBJECT,
-                            INDICATOR_SOUND_SERVICE_DBUS_INTERFACE,
+                            INDICATOR_SOUND_MENU_DBUS_OBJECT_PATH,
+                            INDICATOR_SOUND_DBUS_INTERFACE,
                             NULL,
                             create_connection_to_service,
                             indicator );
@@ -439,8 +440,12 @@ static void create_connection_to_service (GObject *source_object,
     g_error_free(error);
     return;
   }
-  
-  g_signal_connect(priv->dbus_proxy, "g-signal", G_CALLBACK(g_signal_cb), self);  
+
+  g_debug ( "about to connect to g-signal ");
+  g_signal_connect(priv->dbus_proxy, "g-signal",
+                   G_CALLBACK(g_signal_cb), self);
+  g_debug ( "after attempting to connect to g-signal ");
+
   fetch_state (self);
 }
 
@@ -688,10 +693,10 @@ reset_mute_blocking_animation()
 /*******************************************************************/
 // DBUS Signal reactions
 /*******************************************************************/
-static void g_signal_cb ( GDBusProxy *proxy,
-                          const gchar *sender_name,
-                          const gchar *signal_name,
-                          GVariant *parameters,
+static void g_signal_cb ( GDBusProxy* proxy,
+                          gchar* sender_name,
+                          gchar* signal_name,
+                          GVariant* parameters,
                           gpointer user_data)
 {
   IndicatorSound *self = INDICATOR_SOUND(user_data);

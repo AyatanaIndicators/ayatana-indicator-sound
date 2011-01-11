@@ -93,10 +93,10 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
 
   if (interface_info == NULL) {
     interface_info = g_dbus_node_info_lookup_interface (node_info,
-                                                        INDICATOR_SOUND_SERVICE_DBUS_INTERFACE);
+                                                        INDICATOR_SOUND_DBUS_INTERFACE);
 
     if (interface_info == NULL) {
-      g_error("Unable to find interface '" INDICATOR_SOUND_SERVICE_DBUS_INTERFACE "'");
+      g_error("Unable to find interface '" INDICATOR_SOUND_DBUS_INTERFACE "'");
     }
   }
 }
@@ -121,7 +121,7 @@ sound_service_dbus_init (SoundServiceDbus *self)
   }
   /* register the service on it */
   g_dbus_connection_register_object (priv->connection,
-                                     INDICATOR_SOUND_SERVICE_DBUS_OBJECT,
+                                     INDICATOR_SOUND_SERVICE_DBUS_OBJECT_PATH,
                                      interface_info,
                                      &interface_table,
                                      self,
@@ -195,9 +195,9 @@ void sound_service_dbus_sink_input_while_muted(SoundServiceDbus* obj,
   GError * error = NULL;
 
   g_dbus_connection_emit_signal( priv->connection,
-                                 INDICATOR_SOUND_DBUS_NAME,
-                                 INDICATOR_SOUND_DBUS_OBJECT,
-                                 INDICATOR_SOUND_SERVICE_DBUS_INTERFACE,
+                                 NULL,
+                                 INDICATOR_SOUND_MENU_DBUS_OBJECT_PATH,
+                                 INDICATOR_SOUND_DBUS_INTERFACE,
                                  INDICATOR_SOUND_SIGNAL_SINK_INPUT_WHILE_MUTED,
                                   v_output,
                                   &error );
@@ -219,8 +219,8 @@ void sound_service_dbus_update_sink_mute(SoundServiceDbus* obj,
   GError * error = NULL;
   g_dbus_connection_emit_signal( priv->connection,
                                  INDICATOR_SOUND_DBUS_NAME,
-                                 INDICATOR_SOUND_DBUS_OBJECT,
-                                 INDICATOR_SOUND_SERVICE_DBUS_INTERFACE,
+                                 INDICATOR_SOUND_MENU_DBUS_OBJECT_PATH,
+                                 INDICATOR_SOUND_DBUS_INTERFACE,
                                  INDICATOR_SOUND_SIGNAL_SINK_MUTE_UPDATE,
                                   v_output,
                                   &error );
@@ -243,8 +243,8 @@ void sound_service_dbus_update_sink_availability(SoundServiceDbus* obj,
   
   g_dbus_connection_emit_signal( priv->connection,
                                  INDICATOR_SOUND_DBUS_NAME,
-                                 INDICATOR_SOUND_DBUS_OBJECT,
-                                 INDICATOR_SOUND_SERVICE_DBUS_INTERFACE,
+                                 INDICATOR_SOUND_MENU_DBUS_OBJECT_PATH,
+                                 INDICATOR_SOUND_DBUS_INTERFACE,
                                  INDICATOR_SOUND_SIGNAL_SINK_AVAILABLE_UPDATE,
                                   v_output,
                                   &error );
