@@ -77,6 +77,22 @@ typedef struct _MprisPlayerIface MprisPlayerIface;
 
 #define TYPE_MPRIS_PLAYER_PROXY (mpris_player_proxy_get_type ())
 
+#define TYPE_MPRIS_PLAYLISTS (mpris_playlists_get_type ())
+#define MPRIS_PLAYLISTS(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_MPRIS_PLAYLISTS, MprisPlaylists))
+#define IS_MPRIS_PLAYLISTS(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_MPRIS_PLAYLISTS))
+#define MPRIS_PLAYLISTS_GET_INTERFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), TYPE_MPRIS_PLAYLISTS, MprisPlaylistsIface))
+
+typedef struct _MprisPlaylists MprisPlaylists;
+typedef struct _MprisPlaylistsIface MprisPlaylistsIface;
+
+#define TYPE_MPRIS_PLAYLISTS_PROXY (mpris_playlists_proxy_get_type ())
+
+#define TYPE_PLAYLIST_DETAILS (playlist_details_get_type ())
+typedef struct _PlaylistDetails PlaylistDetails;
+
+#define TYPE_ACTIVE_PLAYLIST_CONTAINER (active_playlist_container_get_type ())
+typedef struct _ActivePlaylistContainer ActivePlaylistContainer;
+
 #define TYPE_PLAYER_CONTROLLER (player_controller_get_type ())
 #define PLAYER_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PLAYER_CONTROLLER, PlayerController))
 #define PLAYER_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PLAYER_CONTROLLER, PlayerControllerClass))
@@ -115,6 +131,16 @@ typedef struct _TransportMenuitemClass TransportMenuitemClass;
 #define _g_variant_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_unref (var), NULL)))
 
 #define TRANSPORT_MENUITEM_TYPE_ACTION (transport_menuitem_action_get_type ())
+
+#define TYPE_PLAYLISTS_MENUITEM (playlists_menuitem_get_type ())
+#define PLAYLISTS_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PLAYLISTS_MENUITEM, PlaylistsMenuitem))
+#define PLAYLISTS_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PLAYLISTS_MENUITEM, PlaylistsMenuitemClass))
+#define IS_PLAYLISTS_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_PLAYLISTS_MENUITEM))
+#define IS_PLAYLISTS_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_PLAYLISTS_MENUITEM))
+#define PLAYLISTS_MENUITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_PLAYLISTS_MENUITEM, PlaylistsMenuitemClass))
+
+typedef struct _PlaylistsMenuitem PlaylistsMenuitem;
+typedef struct _PlaylistsMenuitemClass PlaylistsMenuitemClass;
 #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 
 struct _FreeDesktopPropertiesIface {
@@ -164,9 +190,34 @@ struct _MprisPlayerIface {
 	void (*set_PlaybackStatus) (MprisPlayer* self, const gchar* value);
 };
 
+struct _PlaylistDetails {
+	char* path;
+	gchar* name;
+	gchar* icon_path;
+};
+
+struct _ActivePlaylistContainer {
+	gboolean valid;
+	PlaylistDetails details;
+};
+
+struct _MprisPlaylistsIface {
+	GTypeInterface parent_iface;
+	void (*ActivatePlaylist) (MprisPlaylists* self, const char* playlist_id, GAsyncReadyCallback _callback_, gpointer _user_data_);
+	void (*ActivatePlaylist_finish) (MprisPlaylists* self, GAsyncResult* _res_, GError** error);
+	PlaylistDetails* (*GetPlaylists) (MprisPlaylists* self, guint32 index, guint32 max_count, const gchar* order, gboolean reverse_order, int* result_length1, GError** error);
+	gchar** (*get_Orderings) (MprisPlaylists* self, int* result_length1);
+	void (*set_Orderings) (MprisPlaylists* self, gchar** value, int value_length1);
+	guint32 (*get_PlaylistCount) (MprisPlaylists* self);
+	void (*set_PlaylistCount) (MprisPlaylists* self, guint32 value);
+	void (*get_ActivePlaylist) (MprisPlaylists* self, ActivePlaylistContainer* value);
+	void (*set_ActivePlaylist) (MprisPlaylists* self, ActivePlaylistContainer* value);
+};
+
 struct _Mpris2ControllerPrivate {
 	MprisRoot* _mpris2_root;
 	MprisPlayer* _player;
+	MprisPlaylists* _playlists;
 	FreeDesktopProperties* _properties_interface;
 	PlayerController* _owner;
 };
@@ -192,7 +243,8 @@ typedef enum  {
 	PLAYER_CONTROLLER_WIDGET_ORDER_SEPARATOR,
 	PLAYER_CONTROLLER_WIDGET_ORDER_TITLE,
 	PLAYER_CONTROLLER_WIDGET_ORDER_METADATA,
-	PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT
+	PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT,
+	PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLISTS
 } PlayerControllerwidget_order;
 
 typedef enum  {
@@ -223,12 +275,26 @@ GType mpris_root_get_type (void) G_GNUC_CONST;
 GType mpris_player_proxy_get_type (void) G_GNUC_CONST;
 guint mpris_player_register_object (void* object, GDBusConnection* connection, const gchar* path, GError** error);
 GType mpris_player_get_type (void) G_GNUC_CONST;
+GType mpris_playlists_proxy_get_type (void) G_GNUC_CONST;
+guint mpris_playlists_register_object (void* object, GDBusConnection* connection, const gchar* path, GError** error);
+GType playlist_details_get_type (void) G_GNUC_CONST;
+PlaylistDetails* playlist_details_dup (const PlaylistDetails* self);
+void playlist_details_free (PlaylistDetails* self);
+void playlist_details_copy (const PlaylistDetails* self, PlaylistDetails* dest);
+void playlist_details_destroy (PlaylistDetails* self);
+GType active_playlist_container_get_type (void) G_GNUC_CONST;
+ActivePlaylistContainer* active_playlist_container_dup (const ActivePlaylistContainer* self);
+void active_playlist_container_free (ActivePlaylistContainer* self);
+void active_playlist_container_copy (const ActivePlaylistContainer* self, ActivePlaylistContainer* dest);
+void active_playlist_container_destroy (ActivePlaylistContainer* self);
+GType mpris_playlists_get_type (void) G_GNUC_CONST;
 GType player_controller_get_type (void) G_GNUC_CONST;
 #define MPRIS2_CONTROLLER_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_MPRIS2_CONTROLLER, Mpris2ControllerPrivate))
 enum  {
 	MPRIS2_CONTROLLER_DUMMY_PROPERTY,
 	MPRIS2_CONTROLLER_MPRIS2_ROOT,
 	MPRIS2_CONTROLLER_PLAYER,
+	MPRIS2_CONTROLLER_PLAYLISTS,
 	MPRIS2_CONTROLLER_PROPERTIES_INTERFACE,
 	MPRIS2_CONTROLLER_OWNER
 };
@@ -253,6 +319,11 @@ void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
 GeeHashSet* metadata_menuitem_attributes_format (void);
 void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes);
 gboolean player_item_populated (PlayerItem* self, GeeHashSet* attrs);
+static void mpris2_controller_fetch_active_playlist (Mpris2Controller* self);
+gboolean mpris2_controller_playlists_support_exist (Mpris2Controller* self);
+MprisPlaylists* mpris2_controller_get_playlists (Mpris2Controller* self);
+guint32 mpris_playlists_get_PlaylistCount (MprisPlaylists* self);
+static guint32* _uint32_dup (guint32* self);
 GHashTable* mpris_player_get_Metadata (MprisPlayer* self);
 static gchar** _variant_get1 (GVariant* value, int* result_length1);
 static gchar** _vala_array_dup1 (gchar** self, int length);
@@ -260,6 +331,7 @@ static GVariant* _variant_new2 (const gchar* value);
 static const gchar* _variant_get3 (GVariant* value);
 static GVariant* _variant_new4 (gint64 value);
 void mpris2_controller_initial_update (Mpris2Controller* self);
+void mpris2_controller_fetch_playlists (Mpris2Controller* self);
 GType transport_menuitem_action_get_type (void) G_GNUC_CONST;
 void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuitemaction command);
 void mpris_player_PlayPause (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
@@ -268,13 +340,23 @@ void mpris_player_Previous (MprisPlayer* self, GAsyncReadyCallback _callback_, g
 void mpris_player_Previous_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
 void mpris_player_Next (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
 void mpris_player_Next_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
+PlaylistDetails* mpris_playlists_GetPlaylists (MprisPlaylists* self, guint32 index, guint32 max_count, const gchar* order, gboolean reverse_order, int* result_length1, GError** error);
+GType playlists_menuitem_get_type (void) G_GNUC_CONST;
+void playlists_menuitem_update (PlaylistsMenuitem* self, PlaylistDetails* playlists, int playlists_length1);
+static void _vala_PlaylistDetails_array_free (PlaylistDetails* array, gint array_length);
+void mpris_playlists_get_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* result);
+void playlists_menuitem_update_active_playlist (PlaylistsMenuitem* self, PlaylistDetails* detail);
 gboolean mpris2_controller_connected (Mpris2Controller* self);
 MprisRoot* mpris2_controller_get_mpris2_root (Mpris2Controller* self);
 void mpris2_controller_expose (Mpris2Controller* self);
 void mpris_root_Raise (MprisRoot* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
 void mpris_root_Raise_finish (MprisRoot* self, GAsyncResult* _res_, GError** error);
+void mpris2_controller_activate_playlist (Mpris2Controller* self, const char* path);
+void mpris_playlists_ActivatePlaylist (MprisPlaylists* self, const char* playlist_id, GAsyncReadyCallback _callback_, gpointer _user_data_);
+void mpris_playlists_ActivatePlaylist_finish (MprisPlaylists* self, GAsyncResult* _res_, GError** error);
 static void mpris2_controller_set_mpris2_root (Mpris2Controller* self, MprisRoot* value);
 static void mpris2_controller_set_player (Mpris2Controller* self, MprisPlayer* value);
+static void mpris2_controller_set_playlists (Mpris2Controller* self, MprisPlaylists* value);
 FreeDesktopProperties* mpris2_controller_get_properties_interface (Mpris2Controller* self);
 static void mpris2_controller_set_properties_interface (Mpris2Controller* self, FreeDesktopProperties* value);
 static void mpris2_controller_set_owner (Mpris2Controller* self, PlayerController* value);
@@ -348,53 +430,53 @@ static void free_desktop_properties_proxy_class_init (FreeDesktopPropertiesProxy
 static void _dbus_handle_free_desktop_properties_properties_changed (FreeDesktopProperties* self, GVariant* parameters) {
 	GVariantIter _arguments_iter;
 	gchar* source = NULL;
-	GVariant* _tmp27_;
+	GVariant* _tmp79_;
 	GHashTable* changed_properties = NULL;
-	GVariant* _tmp28_;
-	GHashTable* _tmp29_;
-	GVariantIter _tmp30_;
-	GVariant* _tmp31_;
-	GVariant* _tmp32_;
+	GVariant* _tmp80_;
+	GHashTable* _tmp81_;
+	GVariantIter _tmp82_;
+	GVariant* _tmp83_;
+	GVariant* _tmp84_;
 	gchar** invalid = NULL;
 	int invalid_length1;
-	GVariant* _tmp33_;
-	gchar** _tmp34_;
-	int _tmp34__length;
-	int _tmp34__size;
-	int _tmp34__length1;
-	GVariantIter _tmp35_;
-	GVariant* _tmp36_;
+	GVariant* _tmp85_;
+	gchar** _tmp86_;
+	int _tmp86__length;
+	int _tmp86__size;
+	int _tmp86__length1;
+	GVariantIter _tmp87_;
+	GVariant* _tmp88_;
 	g_variant_iter_init (&_arguments_iter, parameters);
-	_tmp27_ = g_variant_iter_next_value (&_arguments_iter);
-	source = g_variant_dup_string (_tmp27_, NULL);
-	g_variant_unref (_tmp27_);
-	_tmp28_ = g_variant_iter_next_value (&_arguments_iter);
-	_tmp29_ = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-	g_variant_iter_init (&_tmp30_, _tmp28_);
-	while (g_variant_iter_loop (&_tmp30_, "{?*}", &_tmp31_, &_tmp32_)) {
-		g_hash_table_insert (_tmp29_, g_variant_dup_string (_tmp31_, NULL), g_variant_get_variant (_tmp32_));
+	_tmp79_ = g_variant_iter_next_value (&_arguments_iter);
+	source = g_variant_dup_string (_tmp79_, NULL);
+	g_variant_unref (_tmp79_);
+	_tmp80_ = g_variant_iter_next_value (&_arguments_iter);
+	_tmp81_ = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+	g_variant_iter_init (&_tmp82_, _tmp80_);
+	while (g_variant_iter_loop (&_tmp82_, "{?*}", &_tmp83_, &_tmp84_)) {
+		g_hash_table_insert (_tmp81_, g_variant_dup_string (_tmp83_, NULL), g_variant_get_variant (_tmp84_));
 	}
-	changed_properties = _tmp29_;
-	g_variant_unref (_tmp28_);
+	changed_properties = _tmp81_;
+	g_variant_unref (_tmp80_);
 	invalid_length1 = 0;
-	_tmp33_ = g_variant_iter_next_value (&_arguments_iter);
-	_tmp34_ = g_new (gchar*, 5);
-	_tmp34__length = 0;
-	_tmp34__size = 4;
-	_tmp34__length1 = 0;
-	g_variant_iter_init (&_tmp35_, _tmp33_);
-	for (; _tmp36_ = g_variant_iter_next_value (&_tmp35_); _tmp34__length1++) {
-		if (_tmp34__size == _tmp34__length) {
-			_tmp34__size = 2 * _tmp34__size;
-			_tmp34_ = g_renew (gchar*, _tmp34_, _tmp34__size + 1);
+	_tmp85_ = g_variant_iter_next_value (&_arguments_iter);
+	_tmp86_ = g_new (gchar*, 5);
+	_tmp86__length = 0;
+	_tmp86__size = 4;
+	_tmp86__length1 = 0;
+	g_variant_iter_init (&_tmp87_, _tmp85_);
+	for (; _tmp88_ = g_variant_iter_next_value (&_tmp87_); _tmp86__length1++) {
+		if (_tmp86__size == _tmp86__length) {
+			_tmp86__size = 2 * _tmp86__size;
+			_tmp86_ = g_renew (gchar*, _tmp86_, _tmp86__size + 1);
 		}
-		_tmp34_[_tmp34__length++] = g_variant_dup_string (_tmp36_, NULL);
-		g_variant_unref (_tmp36_);
+		_tmp86_[_tmp86__length++] = g_variant_dup_string (_tmp88_, NULL);
+		g_variant_unref (_tmp88_);
 	}
-	invalid_length1 = _tmp34__length1;
-	_tmp34_[_tmp34__length] = NULL;
-	invalid = _tmp34_;
-	g_variant_unref (_tmp33_);
+	invalid_length1 = _tmp86__length1;
+	_tmp86_[_tmp86__length] = NULL;
+	invalid = _tmp86_;
+	g_variant_unref (_tmp85_);
 	g_signal_emit_by_name (self, "properties-changed", source, changed_properties, invalid, invalid_length1);
 	_g_free0 (source);
 	_g_hash_table_unref0 (changed_properties);
@@ -449,34 +531,34 @@ static void _dbus_free_desktop_properties_properties_changed (GObject* _sender, 
 	const gchar * _path;
 	GVariant *_arguments;
 	GVariantBuilder _arguments_builder;
-	GVariantBuilder _tmp37_;
-	GHashTableIter _tmp38_;
-	gpointer _tmp39_;
-	gpointer _tmp40_;
-	gchar** _tmp41_;
-	GVariantBuilder _tmp42_;
-	int _tmp43_;
+	GVariantBuilder _tmp89_;
+	GHashTableIter _tmp90_;
+	gpointer _tmp91_;
+	gpointer _tmp92_;
+	gchar** _tmp93_;
+	GVariantBuilder _tmp94_;
+	int _tmp95_;
 	_connection = _data[1];
 	_path = _data[2];
 	g_variant_builder_init (&_arguments_builder, G_VARIANT_TYPE_TUPLE);
 	g_variant_builder_add_value (&_arguments_builder, g_variant_new_string (source));
-	g_hash_table_iter_init (&_tmp38_, changed_properties);
-	g_variant_builder_init (&_tmp37_, G_VARIANT_TYPE_DICTIONARY);
-	while (g_hash_table_iter_next (&_tmp38_, &_tmp39_, &_tmp40_)) {
+	g_hash_table_iter_init (&_tmp90_, changed_properties);
+	g_variant_builder_init (&_tmp89_, G_VARIANT_TYPE_DICTIONARY);
+	while (g_hash_table_iter_next (&_tmp90_, &_tmp91_, &_tmp92_)) {
 		gchar* _key;
 		GVariant* _value;
-		_key = (gchar*) _tmp39_;
-		_value = (GVariant*) _tmp40_;
-		g_variant_builder_add (&_tmp37_, "{?*}", g_variant_new_string (_key), g_variant_new_variant (_value));
+		_key = (gchar*) _tmp91_;
+		_value = (GVariant*) _tmp92_;
+		g_variant_builder_add (&_tmp89_, "{?*}", g_variant_new_string (_key), g_variant_new_variant (_value));
 	}
-	g_variant_builder_add_value (&_arguments_builder, g_variant_builder_end (&_tmp37_));
-	_tmp41_ = invalid;
-	g_variant_builder_init (&_tmp42_, G_VARIANT_TYPE ("as"));
-	for (_tmp43_ = 0; _tmp43_ < invalid_length1; _tmp43_++) {
-		g_variant_builder_add_value (&_tmp42_, g_variant_new_string (*_tmp41_));
-		_tmp41_++;
+	g_variant_builder_add_value (&_arguments_builder, g_variant_builder_end (&_tmp89_));
+	_tmp93_ = invalid;
+	g_variant_builder_init (&_tmp94_, G_VARIANT_TYPE ("as"));
+	for (_tmp95_ = 0; _tmp95_ < invalid_length1; _tmp95_++) {
+		g_variant_builder_add_value (&_tmp94_, g_variant_new_string (*_tmp93_));
+		_tmp93_++;
 	}
-	g_variant_builder_add_value (&_arguments_builder, g_variant_builder_end (&_tmp42_));
+	g_variant_builder_add_value (&_arguments_builder, g_variant_builder_end (&_tmp94_));
 	_arguments = g_variant_builder_end (&_arguments_builder);
 	g_dbus_connection_emit_signal (_connection, NULL, _path, "org.freedesktop.DBus.Properties", "PropertiesChanged", _arguments, NULL);
 }
@@ -542,11 +624,14 @@ void mpris2_controller_property_changed_cb (Mpris2Controller* self, const gchar*
 	gconstpointer _tmp10_ = NULL;
 	GVariant* _tmp11_;
 	GVariant* meta_v;
+	gconstpointer _tmp21_ = NULL;
+	GVariant* _tmp22_;
+	GVariant* playlist_v;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (interface_source != NULL);
 	g_return_if_fail (changed_properties != NULL);
 	_tmp0_ = player_controller_get_dbus_name (self->priv->_owner);
-	g_debug ("mpris2-controller.vala:68: properties-changed for interface %s and own" \
+	g_debug ("mpris2-controller.vala:71: properties-changed for interface %s and own" \
 "er %s", interface_source, _tmp0_);
 	if (changed_properties == NULL) {
 		_tmp1_ = TRUE;
@@ -556,7 +641,7 @@ void mpris2_controller_property_changed_cb (Mpris2Controller* self, const gchar*
 		_tmp1_ = _tmp2_ == FALSE;
 	}
 	if (_tmp1_) {
-		g_warning ("mpris2-controller.vala:71: Property-changed hash is null or this is an" \
+		g_warning ("mpris2-controller.vala:74: Property-changed hash is null or this is an" \
 " interface that doesn't concerns us");
 		return;
 	}
@@ -617,8 +702,58 @@ void mpris2_controller_property_changed_cb (Mpris2Controller* self, const gchar*
 		_g_object_unref0 (metadata);
 		_g_hash_table_unref0 (changed_updates);
 	}
+	_tmp21_ = g_hash_table_lookup (changed_properties, "ActivePlaylist");
+	_tmp22_ = _g_variant_ref0 ((GVariant*) _tmp21_);
+	playlist_v = _tmp22_;
+	if (playlist_v != NULL) {
+		mpris2_controller_fetch_active_playlist (self);
+	}
+	_g_variant_unref0 (playlist_v);
 	_g_variant_unref0 (meta_v);
 	_g_variant_unref0 (play_v);
+}
+
+
+static guint32* _uint32_dup (guint32* self) {
+	guint32* dup;
+	dup = g_new0 (guint32, 1);
+	memcpy (dup, self, sizeof (guint32));
+	return dup;
+}
+
+
+static gpointer __uint32_dup0 (gpointer self) {
+	return self ? _uint32_dup (self) : NULL;
+}
+
+
+gboolean mpris2_controller_playlists_support_exist (Mpris2Controller* self) {
+	gboolean result = FALSE;
+	guint32 _tmp0_;
+	guint32* _tmp1_;
+	guint32* count;
+	gboolean _tmp2_ = FALSE;
+	g_return_val_if_fail (self != NULL, FALSE);
+	if (self->priv->_playlists == NULL) {
+		result = FALSE;
+		return result;
+	}
+	_tmp0_ = mpris_playlists_get_PlaylistCount (self->priv->_playlists);
+	_tmp1_ = __uint32_dup0 (&_tmp0_);
+	count = _tmp1_;
+	if (count == NULL) {
+		_tmp2_ = TRUE;
+	} else {
+		_tmp2_ = (*count) <= 0;
+	}
+	if (_tmp2_) {
+		result = FALSE;
+		_g_free0 (count);
+		return result;
+	}
+	result = TRUE;
+	_g_free0 (count);
+	return result;
 }
 
 
@@ -637,7 +772,7 @@ static gboolean mpris2_controller_ensure_correct_playback_status (Mpris2Controll
 	g_return_val_if_fail (self != NULL, FALSE);
 	_tmp0_ = mpris_player_get_PlaybackStatus (self->priv->_player);
 	_tmp1_ = _tmp0_;
-	g_debug ("mpris2-controller.vala:97: TEST playback status = %s", _tmp1_);
+	g_debug ("mpris2-controller.vala:113: TEST playback status = %s", _tmp1_);
 	_g_free0 (_tmp1_);
 	_tmp2_ = mpris_player_get_PlaybackStatus (self->priv->_player);
 	_tmp3_ = _tmp2_;
@@ -757,7 +892,7 @@ static GHashTable* mpris2_controller_clean_metadata (Mpris2Controller* self) {
 		_tmp18_ = g_strdup ("xesam:artist");
 		g_hash_table_replace (changed_updates, _tmp18_, _variant_new2 (display_artists));
 		_tmp19_ = g_hash_table_lookup (changed_updates, "xesam:artist");
-		g_debug ("mpris2-controller.vala:111: artist : %s", _variant_get3 ((GVariant*) _tmp19_));
+		g_debug ("mpris2-controller.vala:127: artist : %s", _variant_get3 ((GVariant*) _tmp19_));
 		_g_free0 (display_artists);
 		artists = (_vala_array_free (artists, artists_length1, (GDestroyNotify) g_free), NULL);
 	}
@@ -843,13 +978,15 @@ void mpris2_controller_initial_update (Mpris2Controller* self) {
 	player_item_update (_tmp9_, cleaned_metadata, _tmp11_);
 	_g_object_unref0 (_tmp11_);
 	_g_object_unref0 (_tmp9_);
+	mpris2_controller_fetch_playlists (self);
+	mpris2_controller_fetch_active_playlist (self);
 	_g_hash_table_unref0 (cleaned_metadata);
 }
 
 
 void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuitemaction command) {
 	g_return_if_fail (self != NULL);
-	g_debug ("mpris2-controller.vala:145: transport_event input = %i", (gint) command);
+	g_debug ("mpris2-controller.vala:163: transport_event input = %i", (gint) command);
 	if (command == TRANSPORT_MENUITEM_ACTION_PLAY_PAUSE) {
 		mpris_player_PlayPause (self->priv->_player, NULL, NULL);
 	} else {
@@ -861,6 +998,86 @@ void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuit
 			}
 		}
 	}
+}
+
+
+static void _vala_PlaylistDetails_array_free (PlaylistDetails* array, gint array_length) {
+	if (array != NULL) {
+		int i;
+		for (i = 0; i < array_length; i = i + 1) {
+			playlist_details_destroy (&array[i]);
+		}
+	}
+	g_free (array);
+}
+
+
+void mpris2_controller_fetch_playlists (Mpris2Controller* self) {
+	gint _tmp0_;
+	PlaylistDetails* _tmp1_ = NULL;
+	gint current_playlists_length1;
+	gint _current_playlists_size_;
+	PlaylistDetails* _tmp2_;
+	PlaylistDetails* current_playlists;
+	GError * _inner_error_ = NULL;
+	g_return_if_fail (self != NULL);
+	if (self->priv->_playlists == NULL) {
+		return;
+	}
+	_tmp1_ = mpris_playlists_GetPlaylists (self->priv->_playlists, (guint32) 0, (guint32) 10, "Alphabetical", FALSE, &_tmp0_, &_inner_error_);
+	_tmp2_ = _tmp1_;
+	current_playlists_length1 = _tmp0_;
+	_current_playlists_size_ = current_playlists_length1;
+	current_playlists = _tmp2_;
+	if (_inner_error_ != NULL) {
+		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+		return;
+	}
+	if (current_playlists != NULL) {
+		gpointer _tmp3_ = NULL;
+		PlayerItem* _tmp4_;
+		PlaylistsMenuitem* playlists_item;
+		g_debug ("mpris2-controller.vala:184: Size of the playlist array = %i", current_playlists_length1);
+		_tmp3_ = gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLISTS);
+		playlists_item = (_tmp4_ = (PlayerItem*) _tmp3_, IS_PLAYLISTS_MENUITEM (_tmp4_) ? ((PlaylistsMenuitem*) _tmp4_) : NULL);
+		playlists_menuitem_update (playlists_item, current_playlists, current_playlists_length1);
+		_g_object_unref0 (playlists_item);
+	}
+	current_playlists = (_vala_PlaylistDetails_array_free (current_playlists, current_playlists_length1), NULL);
+	return;
+}
+
+
+static void mpris2_controller_fetch_active_playlist (Mpris2Controller* self) {
+	gboolean _tmp0_ = FALSE;
+	gpointer _tmp3_ = NULL;
+	PlayerItem* _tmp4_;
+	PlaylistsMenuitem* playlists_item;
+	ActivePlaylistContainer _tmp5_ = {0};
+	ActivePlaylistContainer _tmp6_;
+	g_return_if_fail (self != NULL);
+	if (self->priv->_playlists == NULL) {
+		ActivePlaylistContainer _tmp1_ = {0};
+		ActivePlaylistContainer _tmp2_;
+		mpris_playlists_get_ActivePlaylist (self->priv->_playlists, &_tmp1_);
+		_tmp2_ = _tmp1_;
+		_tmp0_ = _tmp2_.valid == FALSE;
+		active_playlist_container_destroy (&_tmp2_);
+	} else {
+		_tmp0_ = FALSE;
+	}
+	if (_tmp0_) {
+		g_warning ("mpris2-controller.vala:194: Playlists object is null or we don't have " \
+"an active playlist");
+	}
+	_tmp3_ = gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLISTS);
+	playlists_item = (_tmp4_ = (PlayerItem*) _tmp3_, IS_PLAYLISTS_MENUITEM (_tmp4_) ? ((PlaylistsMenuitem*) _tmp4_) : NULL);
+	mpris_playlists_get_ActivePlaylist (self->priv->_playlists, &_tmp5_);
+	_tmp6_ = _tmp5_;
+	playlists_menuitem_update_active_playlist (playlists_item, &_tmp6_.details);
+	active_playlist_container_destroy (&_tmp6_);
+	_g_object_unref0 (playlists_item);
 }
 
 
@@ -884,6 +1101,33 @@ void mpris2_controller_expose (Mpris2Controller* self) {
 	_tmp0_ = mpris2_controller_connected (self);
 	if (_tmp0_ == TRUE) {
 		mpris_root_Raise (self->priv->_mpris2_root, NULL, NULL);
+	}
+}
+
+
+void mpris2_controller_activate_playlist (Mpris2Controller* self, const char* path) {
+	GError * _inner_error_ = NULL;
+	g_return_if_fail (self != NULL);
+	g_return_if_fail (path != NULL);
+	if (self->priv->_playlists == NULL) {
+		g_warning ("mpris2-controller.vala:216: playlists mpris instance is null !");
+		return;
+	}
+	mpris_playlists_ActivatePlaylist (self->priv->_playlists, path, NULL, NULL);
+	goto __finally10;
+	__catch10_g_io_error:
+	{
+		GError * e;
+		e = _inner_error_;
+		_inner_error_ = NULL;
+		g_debug ("mpris2-controller.vala:223: Could not activate playlist %s because %s", (const gchar*) path, e->message);
+		_g_error_free0 (e);
+	}
+	__finally10:
+	if (_inner_error_ != NULL) {
+		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+		return;
 	}
 }
 
@@ -930,6 +1174,26 @@ static void mpris2_controller_set_player (Mpris2Controller* self, MprisPlayer* v
 	_g_object_unref0 (self->priv->_player);
 	self->priv->_player = _tmp1_;
 	g_object_notify ((GObject *) self, "player");
+}
+
+
+MprisPlaylists* mpris2_controller_get_playlists (Mpris2Controller* self) {
+	MprisPlaylists* result;
+	g_return_val_if_fail (self != NULL, NULL);
+	result = self->priv->_playlists;
+	return result;
+}
+
+
+static void mpris2_controller_set_playlists (Mpris2Controller* self, MprisPlaylists* value) {
+	MprisPlaylists* _tmp0_;
+	MprisPlaylists* _tmp1_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = _g_object_ref0 (value);
+	_tmp1_ = _tmp0_;
+	_g_object_unref0 (self->priv->_playlists);
+	self->priv->_playlists = _tmp1_;
+	g_object_notify ((GObject *) self, "playlists");
 }
 
 
@@ -990,8 +1254,12 @@ static GObject * mpris2_controller_constructor (GType type, guint n_construct_pr
 	const gchar* _tmp5_ = NULL;
 	MprisPlayer* _tmp6_;
 	MprisPlayer* _tmp7_;
-	FreeDesktopProperties* _tmp8_;
-	FreeDesktopProperties* _tmp9_;
+	const gchar* _tmp8_ = NULL;
+	const gchar* _tmp9_ = NULL;
+	MprisPlaylists* _tmp10_;
+	MprisPlaylists* _tmp11_;
+	FreeDesktopProperties* _tmp12_;
+	FreeDesktopProperties* _tmp13_;
 	GError * _inner_error_ = NULL;
 	parent_class = G_OBJECT_CLASS (mpris2_controller_parent_class);
 	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
@@ -1001,7 +1269,7 @@ static GObject * mpris2_controller_constructor (GType type, guint n_construct_pr
 	_tmp2_ = (MprisRoot*) g_initable_new (TYPE_MPRIS_ROOT_PROXY, NULL, &_inner_error_, "g-flags", 0, "g-name", _tmp1_, "g-bus-type", G_BUS_TYPE_SESSION, "g-object-path", "/org/mpris/MediaPlayer2", "g-interface-name", "org.mpris.MediaPlayer2", NULL);
 	if (_inner_error_ != NULL) {
 		if (_inner_error_->domain == G_IO_ERROR) {
-			goto __catch10_g_io_error;
+			goto __catch11_g_io_error;
 		}
 		g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -1014,7 +1282,7 @@ static GObject * mpris2_controller_constructor (GType type, guint n_construct_pr
 	_tmp6_ = (MprisPlayer*) g_initable_new (TYPE_MPRIS_PLAYER_PROXY, NULL, &_inner_error_, "g-flags", 0, "g-name", _tmp5_, "g-bus-type", G_BUS_TYPE_SESSION, "g-object-path", "/org/mpris/MediaPlayer2", "g-interface-name", "org.mpris.MediaPlayer2.Player", NULL);
 	if (_inner_error_ != NULL) {
 		if (_inner_error_->domain == G_IO_ERROR) {
-			goto __catch10_g_io_error;
+			goto __catch11_g_io_error;
 		}
 		g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -1022,28 +1290,41 @@ static GObject * mpris2_controller_constructor (GType type, guint n_construct_pr
 	_tmp7_ = _tmp6_;
 	mpris2_controller_set_player (self, _tmp7_);
 	_g_object_unref0 (_tmp7_);
-	_tmp8_ = (FreeDesktopProperties*) g_initable_new (TYPE_FREE_DESKTOP_PROPERTIES_PROXY, NULL, &_inner_error_, "g-flags", 0, "g-name", "org.freedesktop.Properties.PropertiesChanged", "g-bus-type", G_BUS_TYPE_SESSION, "g-object-path", "/org/mpris/MediaPlayer2", "g-interface-name", "org.freedesktop.DBus.Properties", NULL);
+	_tmp8_ = player_controller_get_dbus_name (self->priv->_owner);
+	_tmp9_ = player_controller_get_dbus_name (self->priv->_owner);
+	_tmp10_ = (MprisPlaylists*) g_initable_new (TYPE_MPRIS_PLAYLISTS_PROXY, NULL, &_inner_error_, "g-flags", 0, "g-name", _tmp9_, "g-bus-type", G_BUS_TYPE_SESSION, "g-object-path", "/org/mpris/MediaPlayer2", "g-interface-name", "org.mpris.MediaPlayer2.Playlists", NULL);
 	if (_inner_error_ != NULL) {
 		if (_inner_error_->domain == G_IO_ERROR) {
-			goto __catch10_g_io_error;
+			goto __catch11_g_io_error;
 		}
 		g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 	}
-	_tmp9_ = _tmp8_;
-	mpris2_controller_set_properties_interface (self, _tmp9_);
-	_g_object_unref0 (_tmp9_);
+	_tmp11_ = _tmp10_;
+	mpris2_controller_set_playlists (self, _tmp11_);
+	_g_object_unref0 (_tmp11_);
+	_tmp12_ = (FreeDesktopProperties*) g_initable_new (TYPE_FREE_DESKTOP_PROPERTIES_PROXY, NULL, &_inner_error_, "g-flags", 0, "g-name", "org.freedesktop.Properties.PropertiesChanged", "g-bus-type", G_BUS_TYPE_SESSION, "g-object-path", "/org/mpris/MediaPlayer2", "g-interface-name", "org.freedesktop.DBus.Properties", NULL);
+	if (_inner_error_ != NULL) {
+		if (_inner_error_->domain == G_IO_ERROR) {
+			goto __catch11_g_io_error;
+		}
+		g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+	}
+	_tmp13_ = _tmp12_;
+	mpris2_controller_set_properties_interface (self, _tmp13_);
+	_g_object_unref0 (_tmp13_);
 	g_signal_connect_object (self->priv->_properties_interface, "properties-changed", (GCallback) _mpris2_controller_property_changed_cb_free_desktop_properties_properties_changed, self, 0);
-	goto __finally10;
-	__catch10_g_io_error:
+	goto __finally11;
+	__catch11_g_io_error:
 	{
 		GError * e;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		g_error ("mpris2-controller.vala:60: Problems connecting to the session bus - %s", e->message);
+		g_error ("mpris2-controller.vala:63: Problems connecting to the session bus - %s", e->message);
 		_g_error_free0 (e);
 	}
-	__finally10:
+	__finally11:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -1061,6 +1342,7 @@ static void mpris2_controller_class_init (Mpris2ControllerClass * klass) {
 	G_OBJECT_CLASS (klass)->finalize = mpris2_controller_finalize;
 	g_object_class_install_property (G_OBJECT_CLASS (klass), MPRIS2_CONTROLLER_MPRIS2_ROOT, g_param_spec_object ("mpris2-root", "mpris2-root", "mpris2-root", TYPE_MPRIS_ROOT, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), MPRIS2_CONTROLLER_PLAYER, g_param_spec_object ("player", "player", "player", TYPE_MPRIS_PLAYER, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+	g_object_class_install_property (G_OBJECT_CLASS (klass), MPRIS2_CONTROLLER_PLAYLISTS, g_param_spec_object ("playlists", "playlists", "playlists", TYPE_MPRIS_PLAYLISTS, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), MPRIS2_CONTROLLER_PROPERTIES_INTERFACE, g_param_spec_object ("properties-interface", "properties-interface", "properties-interface", TYPE_FREE_DESKTOP_PROPERTIES, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), MPRIS2_CONTROLLER_OWNER, g_param_spec_object ("owner", "owner", "owner", TYPE_PLAYER_CONTROLLER, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 }
@@ -1076,6 +1358,7 @@ static void mpris2_controller_finalize (GObject* obj) {
 	self = MPRIS2_CONTROLLER (obj);
 	_g_object_unref0 (self->priv->_mpris2_root);
 	_g_object_unref0 (self->priv->_player);
+	_g_object_unref0 (self->priv->_playlists);
 	_g_object_unref0 (self->priv->_properties_interface);
 	_g_object_unref0 (self->priv->_owner);
 	G_OBJECT_CLASS (mpris2_controller_parent_class)->finalize (obj);
@@ -1104,6 +1387,9 @@ static void _vala_mpris2_controller_get_property (GObject * object, guint proper
 		case MPRIS2_CONTROLLER_PLAYER:
 		g_value_set_object (value, mpris2_controller_get_player (self));
 		break;
+		case MPRIS2_CONTROLLER_PLAYLISTS:
+		g_value_set_object (value, mpris2_controller_get_playlists (self));
+		break;
 		case MPRIS2_CONTROLLER_PROPERTIES_INTERFACE:
 		g_value_set_object (value, mpris2_controller_get_properties_interface (self));
 		break;
@@ -1126,6 +1412,9 @@ static void _vala_mpris2_controller_set_property (GObject * object, guint proper
 		break;
 		case MPRIS2_CONTROLLER_PLAYER:
 		mpris2_controller_set_player (self, g_value_get_object (value));
+		break;
+		case MPRIS2_CONTROLLER_PLAYLISTS:
+		mpris2_controller_set_playlists (self, g_value_get_object (value));
 		break;
 		case MPRIS2_CONTROLLER_PROPERTIES_INTERFACE:
 		mpris2_controller_set_properties_interface (self, g_value_get_object (value));

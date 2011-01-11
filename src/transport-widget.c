@@ -4,6 +4,7 @@ Copyright 2010 Canonical Ltd.
 Authors:
     Conor Curran <conor.curran@canonical.com>
     Mirco Müller <mirco.mueller@canonical.com>
+    Andrea Cimitan <andrea.cimitan@canonical.com>
 
 This program is free software: you can redistribute it and/or modify it 
 under the terms of the GNU General Public License version 3, as published 
@@ -1156,6 +1157,7 @@ static void
 draw (GtkWidget* button, cairo_t *cr)
 {
   g_return_if_fail(IS_TRANSPORT_WIDGET(button));
+  g_return_if_fail( cr != NULL );
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(button);  
 
   cairo_surface_t*  surf = NULL;

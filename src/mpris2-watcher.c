@@ -258,21 +258,21 @@ static void free_desktop_object_proxy_class_init (FreeDesktopObjectProxyClass* k
 static void _dbus_handle_free_desktop_object_name_owner_changed (FreeDesktopObject* self, GVariant* parameters) {
 	GVariantIter _arguments_iter;
 	gchar* name = NULL;
-	GVariant* _tmp17_;
+	GVariant* _tmp69_;
 	gchar* old_owner = NULL;
-	GVariant* _tmp18_;
+	GVariant* _tmp70_;
 	gchar* new_owner = NULL;
-	GVariant* _tmp19_;
+	GVariant* _tmp71_;
 	g_variant_iter_init (&_arguments_iter, parameters);
-	_tmp17_ = g_variant_iter_next_value (&_arguments_iter);
-	name = g_variant_dup_string (_tmp17_, NULL);
-	g_variant_unref (_tmp17_);
-	_tmp18_ = g_variant_iter_next_value (&_arguments_iter);
-	old_owner = g_variant_dup_string (_tmp18_, NULL);
-	g_variant_unref (_tmp18_);
-	_tmp19_ = g_variant_iter_next_value (&_arguments_iter);
-	new_owner = g_variant_dup_string (_tmp19_, NULL);
-	g_variant_unref (_tmp19_);
+	_tmp69_ = g_variant_iter_next_value (&_arguments_iter);
+	name = g_variant_dup_string (_tmp69_, NULL);
+	g_variant_unref (_tmp69_);
+	_tmp70_ = g_variant_iter_next_value (&_arguments_iter);
+	old_owner = g_variant_dup_string (_tmp70_, NULL);
+	g_variant_unref (_tmp70_);
+	_tmp71_ = g_variant_iter_next_value (&_arguments_iter);
+	new_owner = g_variant_dup_string (_tmp71_, NULL);
+	g_variant_unref (_tmp71_);
 	g_signal_emit_by_name (self, "name-owner-changed", name, old_owner, new_owner);
 	_g_free0 (name);
 	_g_free0 (old_owner);
@@ -318,13 +318,13 @@ static gchar** free_desktop_object_proxy_list_names_finish (FreeDesktopObject* s
 	GVariantIter _reply_iter;
 	gchar** _result;
 	int _result_length1;
-	GVariant* _tmp20_;
-	gchar** _tmp21_;
-	int _tmp21__length;
-	int _tmp21__size;
-	int _tmp21__length1;
-	GVariantIter _tmp22_;
-	GVariant* _tmp23_;
+	GVariant* _tmp72_;
+	gchar** _tmp73_;
+	int _tmp73__length;
+	int _tmp73__size;
+	int _tmp73__length1;
+	GVariantIter _tmp74_;
+	GVariant* _tmp75_;
 	_reply_message = g_dbus_connection_send_message_with_reply_finish (g_dbus_proxy_get_connection ((GDBusProxy *) self), g_simple_async_result_get_op_res_gpointer (_res_), error);
 	if (!_reply_message) {
 		return NULL;
@@ -336,24 +336,24 @@ static gchar** free_desktop_object_proxy_list_names_finish (FreeDesktopObject* s
 	_reply = g_dbus_message_get_body (_reply_message);
 	g_variant_iter_init (&_reply_iter, _reply);
 	_result_length1 = 0;
-	_tmp20_ = g_variant_iter_next_value (&_reply_iter);
-	_tmp21_ = g_new (gchar*, 5);
-	_tmp21__length = 0;
-	_tmp21__size = 4;
-	_tmp21__length1 = 0;
-	g_variant_iter_init (&_tmp22_, _tmp20_);
-	for (; _tmp23_ = g_variant_iter_next_value (&_tmp22_); _tmp21__length1++) {
-		if (_tmp21__size == _tmp21__length) {
-			_tmp21__size = 2 * _tmp21__size;
-			_tmp21_ = g_renew (gchar*, _tmp21_, _tmp21__size + 1);
+	_tmp72_ = g_variant_iter_next_value (&_reply_iter);
+	_tmp73_ = g_new (gchar*, 5);
+	_tmp73__length = 0;
+	_tmp73__size = 4;
+	_tmp73__length1 = 0;
+	g_variant_iter_init (&_tmp74_, _tmp72_);
+	for (; _tmp75_ = g_variant_iter_next_value (&_tmp74_); _tmp73__length1++) {
+		if (_tmp73__size == _tmp73__length) {
+			_tmp73__size = 2 * _tmp73__size;
+			_tmp73_ = g_renew (gchar*, _tmp73_, _tmp73__size + 1);
 		}
-		_tmp21_[_tmp21__length++] = g_variant_dup_string (_tmp23_, NULL);
-		g_variant_unref (_tmp23_);
+		_tmp73_[_tmp73__length++] = g_variant_dup_string (_tmp75_, NULL);
+		g_variant_unref (_tmp75_);
 	}
-	_result_length1 = _tmp21__length1;
-	_tmp21_[_tmp21__length] = NULL;
-	_result = _tmp21_;
-	g_variant_unref (_tmp20_);
+	_result_length1 = _tmp73__length1;
+	_tmp73_[_tmp73__length] = NULL;
+	_result = _tmp73_;
+	g_variant_unref (_tmp72_);
 	*result_length1 = _result_length1;
 	g_object_unref (_reply_message);
 	return _result;
@@ -382,9 +382,9 @@ static void _dbus_free_desktop_object_list_names_ready (GObject * source_object,
 	GVariantBuilder _reply_builder;
 	gchar** result;
 	int result_length1 = 0;
-	gchar** _tmp24_;
-	GVariantBuilder _tmp25_;
-	int _tmp26_;
+	gchar** _tmp76_;
+	GVariantBuilder _tmp77_;
+	int _tmp78_;
 	invocation = _user_data_;
 	error = NULL;
 	result = free_desktop_object_list_names_finish ((FreeDesktopObject*) source_object, _res_, &result_length1, &error);
@@ -394,13 +394,13 @@ static void _dbus_free_desktop_object_list_names_ready (GObject * source_object,
 	}
 	_reply_message = g_dbus_message_new_method_reply (g_dbus_method_invocation_get_message (invocation));
 	g_variant_builder_init (&_reply_builder, G_VARIANT_TYPE_TUPLE);
-	_tmp24_ = result;
-	g_variant_builder_init (&_tmp25_, G_VARIANT_TYPE ("as"));
-	for (_tmp26_ = 0; _tmp26_ < result_length1; _tmp26_++) {
-		g_variant_builder_add_value (&_tmp25_, g_variant_new_string (*_tmp24_));
-		_tmp24_++;
+	_tmp76_ = result;
+	g_variant_builder_init (&_tmp77_, G_VARIANT_TYPE ("as"));
+	for (_tmp78_ = 0; _tmp78_ < result_length1; _tmp78_++) {
+		g_variant_builder_add_value (&_tmp77_, g_variant_new_string (*_tmp76_));
+		_tmp76_++;
 	}
-	g_variant_builder_add_value (&_reply_builder, g_variant_builder_end (&_tmp25_));
+	g_variant_builder_add_value (&_reply_builder, g_variant_builder_end (&_tmp77_));
 	result = (_vala_array_free (result,  result_length1, (GDestroyNotify) g_free), NULL);
 	_reply = g_variant_builder_end (&_reply_builder);
 	g_dbus_message_set_body (_reply_message, _reply);

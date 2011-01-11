@@ -122,6 +122,22 @@ typedef struct _MprisPlayerIface MprisPlayerIface;
 
 #define TYPE_MPRIS_PLAYER_PROXY (mpris_player_proxy_get_type ())
 
+#define TYPE_PLAYLIST_DETAILS (playlist_details_get_type ())
+typedef struct _PlaylistDetails PlaylistDetails;
+
+#define TYPE_ACTIVE_PLAYLIST_CONTAINER (active_playlist_container_get_type ())
+typedef struct _ActivePlaylistContainer ActivePlaylistContainer;
+
+#define TYPE_MPRIS_PLAYLISTS (mpris_playlists_get_type ())
+#define MPRIS_PLAYLISTS(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_MPRIS_PLAYLISTS, MprisPlaylists))
+#define IS_MPRIS_PLAYLISTS(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_MPRIS_PLAYLISTS))
+#define MPRIS_PLAYLISTS_GET_INTERFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), TYPE_MPRIS_PLAYLISTS, MprisPlaylistsIface))
+
+typedef struct _MprisPlaylists MprisPlaylists;
+typedef struct _MprisPlaylistsIface MprisPlaylistsIface;
+
+#define TYPE_MPRIS_PLAYLISTS_PROXY (mpris_playlists_proxy_get_type ())
+
 #define TYPE_FREE_DESKTOP_OBJECT (free_desktop_object_get_type ())
 #define FREE_DESKTOP_OBJECT(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_FREE_DESKTOP_OBJECT, FreeDesktopObject))
 #define IS_FREE_DESKTOP_OBJECT(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_FREE_DESKTOP_OBJECT))
@@ -164,6 +180,17 @@ typedef struct _Mpris2ControllerPrivate Mpris2ControllerPrivate;
 typedef struct _SettingsManager SettingsManager;
 typedef struct _SettingsManagerClass SettingsManagerClass;
 typedef struct _SettingsManagerPrivate SettingsManagerPrivate;
+
+#define TYPE_PLAYLISTS_MENUITEM (playlists_menuitem_get_type ())
+#define PLAYLISTS_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PLAYLISTS_MENUITEM, PlaylistsMenuitem))
+#define PLAYLISTS_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PLAYLISTS_MENUITEM, PlaylistsMenuitemClass))
+#define IS_PLAYLISTS_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_PLAYLISTS_MENUITEM))
+#define IS_PLAYLISTS_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_PLAYLISTS_MENUITEM))
+#define PLAYLISTS_MENUITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_PLAYLISTS_MENUITEM, PlaylistsMenuitemClass))
+
+typedef struct _PlaylistsMenuitem PlaylistsMenuitem;
+typedef struct _PlaylistsMenuitemClass PlaylistsMenuitemClass;
+typedef struct _PlaylistsMenuitemPrivate PlaylistsMenuitemPrivate;
 
 #define TYPE_FETCH_FILE (fetch_file_get_type ())
 #define FETCH_FILE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_FETCH_FILE, FetchFile))
@@ -248,7 +275,8 @@ typedef enum  {
 	PLAYER_CONTROLLER_WIDGET_ORDER_SEPARATOR,
 	PLAYER_CONTROLLER_WIDGET_ORDER_TITLE,
 	PLAYER_CONTROLLER_WIDGET_ORDER_METADATA,
-	PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT
+	PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT,
+	PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLISTS
 } PlayerControllerwidget_order;
 
 typedef enum  {
@@ -293,6 +321,30 @@ struct _MprisPlayerIface {
 	void (*set_PlaybackStatus) (MprisPlayer* self, const gchar* value);
 };
 
+struct _PlaylistDetails {
+	char* path;
+	gchar* name;
+	gchar* icon_path;
+};
+
+struct _ActivePlaylistContainer {
+	gboolean valid;
+	PlaylistDetails details;
+};
+
+struct _MprisPlaylistsIface {
+	GTypeInterface parent_iface;
+	void (*ActivatePlaylist) (MprisPlaylists* self, const char* playlist_id, GAsyncReadyCallback _callback_, gpointer _user_data_);
+	void (*ActivatePlaylist_finish) (MprisPlaylists* self, GAsyncResult* _res_, GError** error);
+	PlaylistDetails* (*GetPlaylists) (MprisPlaylists* self, guint32 index, guint32 max_count, const gchar* order, gboolean reverse_order, int* result_length1, GError** error);
+	gchar** (*get_Orderings) (MprisPlaylists* self, int* result_length1);
+	void (*set_Orderings) (MprisPlaylists* self, gchar** value, int value_length1);
+	guint32 (*get_PlaylistCount) (MprisPlaylists* self);
+	void (*set_PlaylistCount) (MprisPlaylists* self, guint32 value);
+	void (*get_ActivePlaylist) (MprisPlaylists* self, ActivePlaylistContainer* value);
+	void (*set_ActivePlaylist) (MprisPlaylists* self, ActivePlaylistContainer* value);
+};
+
 struct _FreeDesktopObjectIface {
 	GTypeInterface parent_iface;
 	void (*list_names) (FreeDesktopObject* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
@@ -328,6 +380,16 @@ struct _SettingsManager {
 
 struct _SettingsManagerClass {
 	GObjectClass parent_class;
+};
+
+struct _PlaylistsMenuitem {
+	PlayerItem parent_instance;
+	PlaylistsMenuitemPrivate * priv;
+	DbusmenuMenuitem* root_item;
+};
+
+struct _PlaylistsMenuitemClass {
+	PlayerItemClass parent_class;
 };
 
 struct _FetchFile {
@@ -370,7 +432,7 @@ GeeHashSet* title_menuitem_attributes_format (void);
 GType mpris2_controller_get_type (void) G_GNUC_CONST;
 GType player_controller_widget_order_get_type (void) G_GNUC_CONST;
 GType player_controller_state_get_type (void) G_GNUC_CONST;
-#define PLAYER_CONTROLLER_WIDGET_QUANTITY 4
+#define PLAYER_CONTROLLER_WIDGET_QUANTITY 5
 PlayerController* player_controller_new (DbusmenuMenuitem* root, GAppInfo* app, const gchar* dbus_name, const gchar* icon_name, gint offset, PlayerControllerstate initial_state);
 PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, GAppInfo* app, const gchar* dbus_name, const gchar* icon_name, gint offset, PlayerControllerstate initial_state);
 void player_controller_update_state (PlayerController* self, PlayerControllerstate new_state);
@@ -379,8 +441,6 @@ void player_controller_instantiate (PlayerController* self);
 void player_controller_vanish (PlayerController* self);
 void player_controller_hibernate (PlayerController* self);
 void player_controller_update_layout (PlayerController* self);
-const gchar* player_controller_get_name (PlayerController* self);
-void player_controller_set_name (PlayerController* self, const gchar* value);
 const gchar* player_controller_get_dbus_name (PlayerController* self);
 void player_controller_set_dbus_name (PlayerController* self, const gchar* value);
 GAppInfo* player_controller_get_app_info (PlayerController* self);
@@ -421,6 +481,28 @@ gint32 mpris_player_get_Position (MprisPlayer* self);
 void mpris_player_set_Position (MprisPlayer* self, gint32 value);
 gchar* mpris_player_get_PlaybackStatus (MprisPlayer* self);
 void mpris_player_set_PlaybackStatus (MprisPlayer* self, const gchar* value);
+GType playlist_details_get_type (void) G_GNUC_CONST;
+PlaylistDetails* playlist_details_dup (const PlaylistDetails* self);
+void playlist_details_free (PlaylistDetails* self);
+void playlist_details_copy (const PlaylistDetails* self, PlaylistDetails* dest);
+void playlist_details_destroy (PlaylistDetails* self);
+GType active_playlist_container_get_type (void) G_GNUC_CONST;
+ActivePlaylistContainer* active_playlist_container_dup (const ActivePlaylistContainer* self);
+void active_playlist_container_free (ActivePlaylistContainer* self);
+void active_playlist_container_copy (const ActivePlaylistContainer* self, ActivePlaylistContainer* dest);
+void active_playlist_container_destroy (ActivePlaylistContainer* self);
+GType mpris_playlists_proxy_get_type (void) G_GNUC_CONST;
+guint mpris_playlists_register_object (void* object, GDBusConnection* connection, const gchar* path, GError** error);
+GType mpris_playlists_get_type (void) G_GNUC_CONST;
+void mpris_playlists_ActivatePlaylist (MprisPlaylists* self, const char* playlist_id, GAsyncReadyCallback _callback_, gpointer _user_data_);
+void mpris_playlists_ActivatePlaylist_finish (MprisPlaylists* self, GAsyncResult* _res_, GError** error);
+PlaylistDetails* mpris_playlists_GetPlaylists (MprisPlaylists* self, guint32 index, guint32 max_count, const gchar* order, gboolean reverse_order, int* result_length1, GError** error);
+gchar** mpris_playlists_get_Orderings (MprisPlaylists* self, int* result_length1);
+void mpris_playlists_set_Orderings (MprisPlaylists* self, gchar** value, int value_length1);
+guint32 mpris_playlists_get_PlaylistCount (MprisPlaylists* self);
+void mpris_playlists_set_PlaylistCount (MprisPlaylists* self, guint32 value);
+void mpris_playlists_get_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* result);
+void mpris_playlists_set_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* value);
 GType free_desktop_object_proxy_get_type (void) G_GNUC_CONST;
 guint free_desktop_object_register_object (void* object, GDBusConnection* connection, const gchar* path, GError** error);
 GType free_desktop_object_get_type (void) G_GNUC_CONST;
@@ -436,12 +518,16 @@ guint free_desktop_properties_register_object (void* object, GDBusConnection* co
 Mpris2Controller* mpris2_controller_new (PlayerController* ctrl);
 Mpris2Controller* mpris2_controller_construct (GType object_type, PlayerController* ctrl);
 void mpris2_controller_property_changed_cb (Mpris2Controller* self, const gchar* interface_source, GHashTable* changed_properties, gchar** invalid, int invalid_length1);
+gboolean mpris2_controller_playlists_support_exist (Mpris2Controller* self);
 void mpris2_controller_initial_update (Mpris2Controller* self);
 void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuitemaction command);
+void mpris2_controller_fetch_playlists (Mpris2Controller* self);
 gboolean mpris2_controller_connected (Mpris2Controller* self);
 void mpris2_controller_expose (Mpris2Controller* self);
+void mpris2_controller_activate_playlist (Mpris2Controller* self, const char* path);
 MprisRoot* mpris2_controller_get_mpris2_root (Mpris2Controller* self);
 MprisPlayer* mpris2_controller_get_player (Mpris2Controller* self);
+MprisPlaylists* mpris2_controller_get_playlists (Mpris2Controller* self);
 FreeDesktopProperties* mpris2_controller_get_properties_interface (Mpris2Controller* self);
 PlayerController* mpris2_controller_get_owner (Mpris2Controller* self);
 PlayerItem* player_item_new (const gchar* type);
@@ -455,8 +541,15 @@ GType settings_manager_get_type (void) G_GNUC_CONST;
 SettingsManager* settings_manager_new (void);
 SettingsManager* settings_manager_construct (GType object_type);
 gchar** settings_manager_fetch_blacklist (SettingsManager* self, int* result_length1);
-gchar** settings_manager_fetch_interested (SettingsManager* self, int* result_length1);
-gboolean settings_manager_add_interested (SettingsManager* self, const gchar* app_desktop_name);
+GeeArrayList* settings_manager_fetch_interested (SettingsManager* self);
+void settings_manager_clear_list (SettingsManager* self);
+void settings_manager_add_interested (SettingsManager* self, const gchar* app_desktop_name);
+GType playlists_menuitem_get_type (void) G_GNUC_CONST;
+PlaylistsMenuitem* playlists_menuitem_new (PlayerController* parent);
+PlaylistsMenuitem* playlists_menuitem_construct (GType object_type, PlayerController* parent);
+void playlists_menuitem_update (PlaylistsMenuitem* self, PlaylistDetails* playlists, int playlists_length1);
+void playlists_menuitem_update_active_playlist (PlaylistsMenuitem* self, PlaylistDetails* detail);
+GeeHashSet* playlists_menuitem_attributes_format (void);
 GType fetch_file_get_type (void) G_GNUC_CONST;
 FetchFile* fetch_file_new (const gchar* uri, const gchar* prop);
 FetchFile* fetch_file_construct (GType object_type, const gchar* uri, const gchar* prop);

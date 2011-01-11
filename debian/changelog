@@ -1,3 +1,15 @@
+indicator-sound (0.5.4-0ubuntu1) UNRELEASED; urgency=low
+
+  * New upstream release.
+    - unity-panel-service crashed with SIGSEGV in cairo_translate (LP: #683184)
+    - Add MPRIS Playlist support (LP: #692644)
+    - only first word of application name is shown (LP: #695385)
+    - The players list should be customizable (LP: #685725)
+    - gio-unix-2.0 checks (LP: #694828)
+    - Desktop file loading should not manually use full path (LP: #693824)
+    
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 11 Jan 2011 14:38:36 -0600
+
 indicator-sound (0.5.3-0ubuntu1) natty; urgency=low
 
   * New upstream release.

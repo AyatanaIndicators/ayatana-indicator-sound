@@ -29,6 +29,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <common-defs.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gio/gio.h>
 #include <gee.h>
 
 
@@ -138,7 +139,7 @@ TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerContro
 void transport_menuitem_change_play_state (TransportMenuitem* self, TransportMenuitemstate update);
 static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const gchar* name, GValue* input_value, guint timestamp);
 PlayerController* player_item_get_owner (PlayerItem* self);
-const gchar* player_controller_get_name (PlayerController* self);
+GAppInfo* player_controller_get_app_info (PlayerController* self);
 GType mpris2_controller_get_type (void) G_GNUC_CONST;
 void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuitemaction command);
 GeeHashSet* transport_menuitem_attributes_format (void);
@@ -197,8 +198,9 @@ static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const 
 	gchar* _tmp1_ = NULL;
 	gchar* _tmp2_;
 	PlayerController* _tmp3_ = NULL;
-	const gchar* _tmp4_ = NULL;
-	PlayerController* _tmp5_ = NULL;
+	GAppInfo* _tmp4_ = NULL;
+	const gchar* _tmp5_ = NULL;
+	PlayerController* _tmp6_ = NULL;
 	self = (TransportMenuitem*) base;
 	g_return_if_fail (name != NULL);
 	_tmp0_ = g_value_get_int (input_value);
@@ -208,10 +210,11 @@ static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const 
 	g_debug ("transport-menu-item.vala:53: handle_event with value %s", _tmp2_);
 	_g_free0 (_tmp2_);
 	_tmp3_ = player_item_get_owner ((PlayerItem*) self);
-	_tmp4_ = player_controller_get_name (_tmp3_);
-	g_debug ("transport-menu-item.vala:54: transport owner name = %s", _tmp4_);
-	_tmp5_ = player_item_get_owner ((PlayerItem*) self);
-	mpris2_controller_transport_update (_tmp5_->mpris_bridge, (TransportMenuitemaction) input);
+	_tmp4_ = player_controller_get_app_info (_tmp3_);
+	_tmp5_ = g_app_info_get_name (_tmp4_);
+	g_debug ("transport-menu-item.vala:54: transport owner name = %s", _tmp5_);
+	_tmp6_ = player_item_get_owner ((PlayerItem*) self);
+	mpris2_controller_transport_update (_tmp6_->mpris_bridge, (TransportMenuitemaction) input);
 }
 
 
