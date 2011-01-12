@@ -29,7 +29,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 typedef struct _SliderMenuItemPrivate SliderMenuItemPrivate;
 
 struct _SliderMenuItemPrivate {
-  gdouble slider_value;
 };
 
 #define SLIDER_MENU_ITEM_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), SLIDER_MENU_ITEM_TYPE, SliderMenuItemPrivate))
@@ -76,14 +75,12 @@ slider_menu_item_finalize (GObject *object)
   G_OBJECT_CLASS (slider_menu_item_parent_class)->finalize (object);
 }
 
-
 static void
 handle_event (DbusmenuMenuitem * mi,
               const gchar * name,
               GVariant * value,
               guint timestamp)
 {
-  gdouble volume_input = 0;
   /*g_debug ( "handle-event in the slider at the backend, input is of type %s",
              g_variant_get_type_string(value));*/
 
@@ -96,25 +93,41 @@ handle_event (DbusmenuMenuitem * mi,
     input = g_variant_get_variant(value);
   }
 
-  volume_input = g_variant_get_double(input);
+  gboolean volume_input = g_variant_get_double(input);
   if (value != NULL){
     set_sink_volume(volume_input);
   }
   g_variant_unref (input); 
 }
 
-
-
-SliderMenuItem* slider_menu_item_new(gboolean sinks_available, gdouble start_volume)
-{ 
-  SliderMenuItem *self = g_object_new(SLIDER_MENU_ITEM_TYPE, NULL);
-  dbusmenu_menuitem_property_set(DBUSMENU_MENUITEM(self), DBUSMENU_MENUITEM_PROP_TYPE, DBUSMENU_VOLUME_MENUITEM_TYPE);
-
-  dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(self), DBUSMENU_MENUITEM_PROP_ENABLED, sinks_available);
-  dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(self), DBUSMENU_MENUITEM_PROP_VISIBLE, sinks_available);
-  return self;
+void slider_menu_item_update (SliderMenuItem* item,
+                              gdouble update)
+{
+  // TODO
+  // Check if that variant below will leak !!!
+  GVariant* new_volume = g_variant_new_double(update);
+  dbusmenu_menuitem_property_set_variant(DBUSMENU_MENUITEM(item),
+                                         DBUSMENU_VOLUME_MENUITEM_LEVEL,
+                                         new_volume);
 }
 
+void slider_menu_item_enable (SliderMenuItem* item,
+                              gboolean active)
+{
+  dbusmenu_menuitem_property_set_bool( DBUSMENU_MENUITEM(item),
+                                       DBUSMENU_MENUITEM_PROP_ENABLED,
+                                       active );
+}
 
+SliderMenuItem* slider_menu_item_new (gboolean sinks_available,
+                                      gdouble start_volume)
+{ 
+  SliderMenuItem *self = g_object_new(SLIDER_MENU_ITEM_TYPE, NULL);
+  dbusmenu_menuitem_property_set( DBUSMENU_MENUITEM(self),
+                                  DBUSMENU_MENUITEM_PROP_TYPE,
+                                  DBUSMENU_VOLUME_MENUITEM_TYPE );
+  slider_menu_item_update (self, start_volume);
+  slider_menu_item_enable (self, sinks_available);
 
-
+  return self;
+}

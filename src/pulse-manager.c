@@ -414,7 +414,7 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
       if (mute_changed == TRUE) {
         /*                g_debug("Updating Mute from PA manager with mute = %i", s->mute);*/
         sound_service_dbus_update_sink_mute(dbus_service, s->mute);
-        dbus_menu_manager_update_mute_ui(s->mute);
+        dbus_menu_manager_update_mute(s->mute);
         if (s->mute == FALSE) {
           pa_volume_t vol = pa_cvolume_max(&s->volume);
           gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;

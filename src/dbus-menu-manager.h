@@ -1,10 +1,7 @@
 #ifndef __INCLUDE_DBUS_MENU_MANAGER_H__
 #define __INCLUDE_DBUS_MENU_MANAGER_H__
 
-#include <libdbusmenu-glib/menuitem.h>
-
 /*
-This handles the management of the dbusmeneu items.
 Copyright 2010 Canonical Ltd.
 
 Authors:
@@ -23,12 +20,19 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <libdbusmenu-glib/menuitem.h>
+
+// Entry point
 DbusmenuMenuitem* dbus_menu_manager_setup();
-void dbus_menu_manager_teardown();
-void dbus_menu_manager_update_volume(gdouble volume);
-void dbus_menu_manager_update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_muted, gdouble current_vol);
-// TODO update pa_state should incorporate the method below !
-void dbus_menu_manager_update_mute_ui(gboolean incoming_mute_value);
-void dbmm_pa_wrapper_toggle_mute(gboolean update);
+
+void dbus_menu_manager_update_pa_state (gboolean pa_state,
+                                        gboolean sink_available,
+                                        gboolean sink_muted,
+                                        gdouble current_vol);
+
+// Temporary wrappers on the pulsemanager inward calls
+// until the refactor is complete
+void dbus_menu_manager_update_mute (gboolean incoming_mute_value);
+void dbus_menu_manager_update_volume (gdouble  volume);
 #endif
 

@@ -50,6 +50,7 @@ GType mute_menu_item_get_type (void);
 MuteMenuItem* mute_menu_item_new();
 
 void mute_menu_item_update(MuteMenuItem* item, gboolean update);
+void mute_menu_item_enable(MuteMenuItem* item, gboolean active);
 
 G_END_DECLS
 

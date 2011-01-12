@@ -23,14 +23,11 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "common-defs.h"
 #include <glib/gi18n.h>
 #include "mute-menu-item.h"
-#include "common-defs.h"
-
-#include "dbus-menu-manager.h"
+#include "pulse-manager.h"
 
 typedef struct _MuteMenuItemPrivate MuteMenuItemPrivate;
 
 struct _MuteMenuItemPrivate {
-  gboolean mute_all;
 };
 
 #define MUTE_MENU_ITEM_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), MUTE_MENU_ITEM_TYPE, MuteMenuItemPrivate))
@@ -96,7 +93,8 @@ handle_event (DbusmenuMenuitem * mi,
   }
   
   gboolean mute_input = g_variant_get_boolean(input);
-  dbmm_pa_wrapper_toggle_mute (input);
+  // TODO: use the pulse wrapper directly
+  toggle_global_mute (mute_input);
   g_variant_unref (input); 
 }
 
@@ -104,10 +102,10 @@ void mute_menu_item_update(MuteMenuItem* item, gboolean value_update)
 {
   dbusmenu_menuitem_property_set_bool (DBUSMENU_MENUITEM(item),
                                        DBUSMENU_MUTE_MENUITEM_VALUE,
-                                       update);
-  dbusmenu_menuitem_property_set (DBUSMENUITEM(item),
+                                       value_update);
+  dbusmenu_menuitem_property_set (DBUSMENU_MENUITEM(item),
                                   DBUSMENU_MENUITEM_PROP_LABEL,
-                                  update == FALSE ? _("Mute") : _("Unmute"));  
+                                  value_update == FALSE ? _("Mute") : _("Unmute"));  
 }
 
 void mute_menu_item_enable(MuteMenuItem* item, gboolean active)
@@ -124,7 +122,7 @@ MuteMenuItem* mute_menu_item_new (gboolean initial_update, gboolean enabled)
   dbusmenu_menuitem_property_set (DBUSMENU_MENUITEM(self),
                                   DBUSMENU_MENUITEM_PROP_TYPE,
                                   DBUSMENU_MUTE_MENUITEM_TYPE);
-  mute_menu_item_enable (self, enabled);
   mute_menu_item_update (self, initial_update);
+  mute_menu_item_enable (self, enabled);
   return self;
 }
