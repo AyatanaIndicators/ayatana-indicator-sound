@@ -29,6 +29,6 @@ void dbus_menu_manager_update_volume(gdouble volume);
 void dbus_menu_manager_update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_muted, gdouble current_vol);
 // TODO update pa_state should incorporate the method below !
 void dbus_menu_manager_update_mute_ui(gboolean incoming_mute_value);
-
+void dbmm_pa_wrapper_toggle_mute(gboolean update);
 #endif
 

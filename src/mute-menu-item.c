@@ -1,5 +1,5 @@
 /*
-Copyright 2010 Canonical Ltd.
+Copyright 2011 Canonical Ltd.
 
 Authors:
     Conor Curran <conor.curran@canonical.com>
@@ -25,6 +25,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "mute-menu-item.h"
 #include "common-defs.h"
 
+#include "dbus-menu-manager.h"
 
 typedef struct _MuteMenuItemPrivate MuteMenuItemPrivate;
 
@@ -76,7 +77,6 @@ mute_menu_item_finalize (GObject *object)
   G_OBJECT_CLASS (mute_menu_item_parent_class)->finalize (object);
 }
 
-
 static void
 handle_event (DbusmenuMenuitem * mi,
               const gchar * name,
@@ -96,19 +96,35 @@ handle_event (DbusmenuMenuitem * mi,
   }
   
   gboolean mute_input = g_variant_get_boolean(input);
+  dbmm_pa_wrapper_toggle_mute (input);
   g_variant_unref (input); 
 }
 
-MuteMenuItem* mute_menu_item_new(gboolean sinks_available, gdouble start_volume)
-{ 
-  MuteMenuItem *self = g_object_new(MUTE_MENU_ITEM_TYPE, NULL);
-  dbusmenu_menuitem_property_set(DBUSMENU_MENUITEM(self), DBUSMENU_MENUITEM_PROP_TYPE, DBUSMENU_MUTE_MENUITEM_TYPE);
+void mute_menu_item_update(MuteMenuItem* item, gboolean value_update)
+{
+  dbusmenu_menuitem_property_set_bool (DBUSMENU_MENUITEM(item),
+                                       DBUSMENU_MUTE_MENUITEM_VALUE,
+                                       update);
+  dbusmenu_menuitem_property_set (DBUSMENUITEM(item),
+                                  DBUSMENU_MENUITEM_PROP_LABEL,
+                                  update == FALSE ? _("Mute") : _("Unmute"));  
+}
 
-  //dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(self), DBUSMENU_MENUITEM_PROP_ENABLED, sinks_available);
-  //dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(self), DBUSMENU_MENUITEM_PROP_VISIBLE, sinks_available);
-  return self;
+void mute_menu_item_enable(MuteMenuItem* item, gboolean active)
+{
+  dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(item),
+                                      DBUSMENU_MENUITEM_PROP_ENABLED,
+                                      active);  
 }
 
 
-
-
+MuteMenuItem* mute_menu_item_new (gboolean initial_update, gboolean enabled)
+{ 
+  MuteMenuItem *self = g_object_new(MUTE_MENU_ITEM_TYPE, NULL);
+  dbusmenu_menuitem_property_set (DBUSMENU_MENUITEM(self),
+                                  DBUSMENU_MENUITEM_PROP_TYPE,
+                                  DBUSMENU_MUTE_MENUITEM_TYPE);
+  mute_menu_item_enable (self, enabled);
+  mute_menu_item_update (self, initial_update);
+  return self;
+}

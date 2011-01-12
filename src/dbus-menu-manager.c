@@ -1,5 +1,4 @@
 /*
-This service primarily controls PulseAudio and is driven by the sound indicator menu on the panel.
 Copyright 2010 Canonical Ltd.
 
 Authors:
@@ -18,6 +17,11 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ *TODO: 
+ * Makes this a proper GObject
+ **/
+
 #include <unistd.h>
 #include <glib/gi18n.h>
 
@@ -28,19 +32,20 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "sound-service-dbus.h"
 #include "pulse-manager.h"
 #include "slider-menu-item.h"
+#include "mute-menu-item.h"
+
 #include "common-defs.h"
 
 #include "dbus-shared-names.h"
 
-// DBUS items
+// DBUS related
 static DbusmenuMenuitem *root_menuitem = NULL;
-static DbusmenuMenuitem *mute_all_menuitem = NULL;
 static SliderMenuItem *volume_slider_menuitem = NULL;
+static MuteMenuItem *mute_menuitem = NULL;
 static SoundServiceDbus *dbus_interface = NULL;
 
 // PULSEAUDIO
 static gboolean b_sink_available = FALSE;
-static gboolean b_all_muted = FALSE;
 static gboolean b_pulse_ready = FALSE;
 static gboolean b_startup = TRUE;
 static gdouble volume_percent = 0.0;
@@ -48,7 +53,9 @@ static gdouble volume_percent = 0.0;
 static void set_global_mute_from_ui();
 static gboolean idle_routine (gpointer data);
 static void rebuild_sound_menu(DbusmenuMenuitem *root,
-                               SoundServiceDbus *service);
+                               gboolean mute_update,
+                               gboolean availability,
+                               gdouble volume);
 static void refresh_menu();
 
 
@@ -86,10 +93,12 @@ void dbus_menu_manager_update_volume(gdouble  volume)
 /**
 update_pa_state:
 **/
-void dbus_menu_manager_update_pa_state(gboolean pa_state, gboolean sink_available, gboolean sink_muted, gdouble percent)
+void dbus_menu_manager_update_pa_state (gboolean pa_state,
+                                        gboolean sink_available,
+                                        gboolean sink_muted,
+                                        gdouble percent)
 {
   b_sink_available = sink_available;
-  b_all_muted = sink_muted;
   b_pulse_ready = pa_state;
   volume_percent = percent;
   g_debug("update pa state with state %i, availability of %i, mute value of %i and a volume percent is %f", pa_state, sink_available, sink_muted, volume_percent);
@@ -114,8 +123,8 @@ update_mute_ui:
 **/
 void dbus_menu_manager_update_mute_ui(gboolean incoming_mute_value)
 {
-  b_all_muted = incoming_mute_value;
-  dbusmenu_menuitem_property_set(mute_all_menuitem,
+      
+  dbusmenu_menuitem_property_set(DBUSMENUITEM(mute_all_menuitem),
                                  DBUSMENU_MENUITEM_PROP_LABEL,
                                  b_all_muted == FALSE ? _("Mute") : _("Unmute"));
 }
@@ -181,36 +190,39 @@ static void show_sound_settings_dialog (DbusmenuMenuitem *mi, gpointer user_data
 }
 
 /**
-rebuild_sound_menu:
-Build the DBus menu items, mute/unmute, slider, separator and sound preferences 'link'
+build_sound_menu's default items (without the any player items):
 **/
-static void rebuild_sound_menu(DbusmenuMenuitem *root, SoundServiceDbus *service)
+static void build_sound_menu (DbusmenuMenuitem *root,
+                              gboolean mute_update,
+                              gboolean availability,
+                              gdouble volume);
+
 {
   // Mute button
-  mute_all_menuitem = dbusmenu_menuitem_new();
-  dbusmenu_menuitem_property_set(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_LABEL, b_all_muted == FALSE ? _("Mute") : _("Unmute"));
-  g_signal_connect(G_OBJECT(mute_all_menuitem), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED, G_CALLBACK(set_global_mute_from_ui), NULL);
-  dbusmenu_menuitem_property_set_bool(mute_all_menuitem, DBUSMENU_MENUITEM_PROP_ENABLED, b_sink_available);
+  mute_all_menuitem = mute_menu_item_new ( mute_update, availability);
+  dbusmenu_menuitem_child_append(root, mute_all_menuitem);
 
   // Slider
-  volume_slider_menuitem = slider_menu_item_new(b_sink_available, volume_percent);
-  dbusmenu_menuitem_child_append(root, mute_all_menuitem);
+  volume_slider_menuitem = slider_menu_item_new(available, volume);
   dbusmenu_menuitem_child_append(root, DBUSMENU_MENUITEM(volume_slider_menuitem));
   dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem),
                                       DBUSMENU_MENUITEM_PROP_ENABLED,
                                       b_sink_available && !b_all_muted);
-  g_debug("!!!!!!**in the rebuild sound menu - slider active = %i", b_sink_available && !b_all_muted);
   dbusmenu_menuitem_property_set_bool(DBUSMENU_MENUITEM(volume_slider_menuitem),
                                       DBUSMENU_MENUITEM_PROP_VISIBLE,
                                       b_sink_available);
   // Separator
   DbusmenuMenuitem *separator = dbusmenu_menuitem_new();
-  dbusmenu_menuitem_property_set(separator, DBUSMENU_MENUITEM_PROP_TYPE, DBUSMENU_CLIENT_TYPES_SEPARATOR);
+  dbusmenu_menuitem_property_set( separator,
+                                  DBUSMENU_MENUITEM_PROP_TYPE,
+                                  DBUSMENU_CLIENT_TYPES_SEPARATOR);
   dbusmenu_menuitem_child_append(root, separator);
 
   // Sound preferences dialog
   DbusmenuMenuitem *settings_mi = dbusmenu_menuitem_new();
-  dbusmenu_menuitem_property_set(settings_mi, DBUSMENU_MENUITEM_PROP_LABEL, _("Sound Preferences..."));
+  dbusmenu_menuitem_property_set( settings_mi,
+                                  DBUSMENU_MENUITEM_PROP_LABEL,
+                                  _("Sound Preferences..."));
   
   //_("Sound Preferences..."));
   dbusmenu_menuitem_child_append(root, settings_mi);
@@ -226,9 +238,20 @@ static void set_global_mute_from_ui()
 {
   b_all_muted = !b_all_muted;
   toggle_global_mute(b_all_muted);
-  dbusmenu_menuitem_property_set(mute_all_menuitem,
-                                 DBUSMENU_MENUITEM_PROP_LABEL,
-                                 b_all_muted == FALSE ? _("Mute") : _("Unmute"));
+  dbusmenu_menuitem_property_set((DBUSMENU_MENUITEM)mute_all_menuitem,
+                                  DBUSMENU_MENUITEM_PROP_LABEL,
+                                  b_all_muted == FALSE ? _("Mute") : _("Unmute"));
+}
+
+
+/*
+ TODO: use these temporary wrappers around pulsemanager for the short term
+ Until I get to the point where I can refactor it entirely.
+*/
+
+void dbmm_pa_wrapper_toggle_mute(gboolean update)
+{
+  toggle_global_mute (update);
 }
 
 
