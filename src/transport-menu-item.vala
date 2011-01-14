@@ -36,8 +36,8 @@ public class TransportMenuitem : PlayerItem
   
   public TransportMenuitem(PlayerController parent)
   {
-    Object(item_type: MENUITEM_TYPE, owner: parent); 
-    this.property_set_int(MENUITEM_PLAY_STATE, 1);    
+    Object(item_type: MENUITEM_TYPE, owner: parent);
+    this.property_set_int(MENUITEM_PLAY_STATE, 1);
   }
 
   public void change_play_state(state update)
@@ -47,11 +47,20 @@ public class TransportMenuitem : PlayerItem
     this.property_set_int(MENUITEM_PLAY_STATE, update); 
   }
   
-  public override void handle_event(string name, GLib.Value input_value, uint timestamp)
+  public override void handle_event(string name,
+                                    Variant input_value,
+                                    uint timestamp)
   {
-    int input = input_value.get_int();
-    debug("handle_event with value %s", input.to_string());
-    debug("transport owner name = %s", this.owner.app_info.get_name());
+    /*debug ( "Handle event in transport menu item - input variant is of type %s", 
+             input_value.get_type_string() );*/
+    Variant v = input_value;
+    if ( input_value.is_of_type ( VariantType.VARIANT) ){
+      v = input_value.get_variant();
+    }
+    
+    int32 input = v.get_int32();
+    debug("transport menu item -> handle_event with value %s", input.to_string());
+    //debug("transport owner name = %s", this.owner.app_info.get_name());
     this.owner.mpris_bridge.transport_update((action)input);
   } 
 

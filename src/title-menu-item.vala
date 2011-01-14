@@ -31,7 +31,7 @@ public class TitleMenuitem : PlayerItem
     this.property_set_bool(MENUITEM_RUNNING, false);        
   }
 
-  public override void handle_event(string name, GLib.Value input_value, uint timestamp)
+  public override void handle_event(string name, Variant input_value, uint timestamp)
   {   
     if(this.owner.current_state == PlayerController.state.OFFLINE)
     {

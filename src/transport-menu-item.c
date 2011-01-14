@@ -29,7 +29,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <common-defs.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gio/gio.h>
 #include <gee.h>
 
 
@@ -68,6 +67,7 @@ typedef struct _TransportMenuitemPrivate TransportMenuitemPrivate;
 
 typedef struct _PlayerController PlayerController;
 typedef struct _PlayerControllerClass PlayerControllerClass;
+#define _g_variant_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_unref (var), NULL)))
 #define _g_free0(var) (var = (g_free (var), NULL))
 typedef struct _PlayerControllerPrivate PlayerControllerPrivate;
 
@@ -138,9 +138,8 @@ GType player_controller_get_type (void) G_GNUC_CONST;
 TransportMenuitem* transport_menuitem_new (PlayerController* parent);
 TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerController* parent);
 void transport_menuitem_change_play_state (TransportMenuitem* self, TransportMenuitemstate update);
-static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const gchar* name, GValue* input_value, guint timestamp);
+static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const gchar* name, GVariant* input_value, guint timestamp);
 PlayerController* player_item_get_owner (PlayerItem* self);
-GAppInfo* player_controller_get_app_info (PlayerController* self);
 GType mpris2_controller_get_type (void) G_GNUC_CONST;
 void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuitemaction command);
 GeeHashSet* transport_menuitem_attributes_format (void);
@@ -192,30 +191,45 @@ void transport_menuitem_change_play_state (TransportMenuitem* self, TransportMen
 }
 
 
-static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const gchar* name, GValue* input_value, guint timestamp) {
+static gpointer _g_variant_ref0 (gpointer self) {
+	return self ? g_variant_ref (self) : NULL;
+}
+
+
+static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const gchar* name, GVariant* input_value, guint timestamp) {
 	TransportMenuitem * self;
-	gint _tmp0_;
-	gint input;
-	gchar* _tmp1_ = NULL;
-	gchar* _tmp2_;
-	PlayerController* _tmp3_ = NULL;
-	GAppInfo* _tmp4_ = NULL;
-	const gchar* _tmp5_ = NULL;
-	PlayerController* _tmp6_ = NULL;
+	GVariant* _tmp0_;
+	GVariant* v;
+	gboolean _tmp1_;
+	gint32 _tmp4_;
+	gint32 input;
+	gchar* _tmp5_ = NULL;
+	gchar* _tmp6_;
+	PlayerController* _tmp7_ = NULL;
 	self = (TransportMenuitem*) base;
 	g_return_if_fail (name != NULL);
-	_tmp0_ = g_value_get_int (input_value);
-	input = _tmp0_;
-	_tmp1_ = g_strdup_printf ("%i", input);
-	_tmp2_ = _tmp1_;
-	g_debug ("transport-menu-item.vala:53: handle_event with value %s", _tmp2_);
-	_g_free0 (_tmp2_);
-	_tmp3_ = player_item_get_owner ((PlayerItem*) self);
-	_tmp4_ = player_controller_get_app_info (_tmp3_);
-	_tmp5_ = g_app_info_get_name (_tmp4_);
-	g_debug ("transport-menu-item.vala:54: transport owner name = %s", _tmp5_);
-	_tmp6_ = player_item_get_owner ((PlayerItem*) self);
-	mpris2_controller_transport_update (_tmp6_->mpris_bridge, (TransportMenuitemaction) input);
+	g_return_if_fail (input_value != NULL);
+	_tmp0_ = _g_variant_ref0 (input_value);
+	v = _tmp0_;
+	_tmp1_ = g_variant_is_of_type (input_value, G_VARIANT_TYPE_VARIANT);
+	if (_tmp1_) {
+		GVariant* _tmp2_ = NULL;
+		GVariant* _tmp3_;
+		_tmp2_ = g_variant_get_variant (input_value);
+		_tmp3_ = _tmp2_;
+		_g_variant_unref0 (v);
+		v = _tmp3_;
+	}
+	_tmp4_ = g_variant_get_int32 (v);
+	input = _tmp4_;
+	_tmp5_ = g_strdup_printf ("%i", input);
+	_tmp6_ = _tmp5_;
+	g_debug ("transport-menu-item.vala:62: transport menu item -> handle_event with " \
+"value %s", _tmp6_);
+	_g_free0 (_tmp6_);
+	_tmp7_ = player_item_get_owner ((PlayerItem*) self);
+	mpris2_controller_transport_update (_tmp7_->mpris_bridge, (TransportMenuitemaction) input);
+	_g_variant_unref0 (v);
 }
 
 

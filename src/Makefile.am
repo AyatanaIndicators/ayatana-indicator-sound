@@ -18,10 +18,11 @@ libsoundmenu_la_SOURCES = \
             title-widget.h \
             volume-widget.c \
             volume-widget.h \
-            dbus-shared-names.h \
-            sound-service-client.h 
+            gen-sound-service.xml.h \
+            gen-sound-service.xml.c \
+            dbus-shared-names.h
 
-libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -DG_LOG_DOMAIN=\"Indicator-Sound\"
+libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -Werror -DG_LOG_DOMAIN=\"Indicator-Sound\"
 libsoundmenu_la_LIBADD = $(APPLET_LIBS)
 libsoundmenu_la_LDFLAGS = -module -avoid-version
 
@@ -29,30 +30,14 @@ checkxml: $(srcdir)/sound-service.xml
 	@xmllint -valid -noout $<
 	@echo $< checks out ok
 
-sound-service-client.h: $(srcdir)/sound-service.xml
-	dbus-binding-tool \
-		--prefix=_sound_service_client \
-		--mode=glib-client \
-		--output=sound-service-client.h \
-		$(srcdir)/sound-service.xml
-
 
 ####################################################################
 # Sound Service 
 ####################################################################
 
-#################
-# dbus interface
-#################
-sound-service-server.h: $(srcdir)/sound-service.xml
-	dbus-binding-tool \
-		--prefix=_sound_service_server \
-		--mode=glib-server \
-		--output=sound-service-server.h \
-		$(srcdir)/sound-service.xml
 
 #####################
-# libsoundmenu vala
+# Sound service vala
 #####################
 music_bridge_VALASOURCES = \
 	music-player-bridge.vala \
@@ -78,7 +63,7 @@ music_bridge_VALAFLAGS = \
   --vapidir=./ \
   --thread \
   --pkg gee-1.0 \
-  --pkg Dbusmenu-Glib-0.2 \
+  --pkg Dbusmenu-Glib-0.4 \
   --pkg common-defs \
 	--pkg gio-2.0 \
 	--pkg gio-unix-2.0 \
@@ -96,7 +81,7 @@ music_bridge_vala.stamp $(music_bridge_APIFILES): $(music_bridge_VALASOURCES)
 	touch music_bridge_vala.stamp
 
 ###############################
-# libsoundmenu C
+# Sound Service C
 ###############################
 indicator_sound_service_SOURCES = \
 	common-defs.h \
@@ -108,33 +93,47 @@ indicator_sound_service_SOURCES = \
   pulse-manager.c \
   sound-service-dbus.h \
   sound-service-dbus.c \
-  sound-service-server.h \
   slider-menu-item.h \
   slider-menu-item.c \
+  gen-sound-service.xml.h \  
+  gen-sound-service.xml.c \
   $(music_bridge_VALASOURCES:.vala=.c)
 
 indicator_sound_service_CFLAGS = $(PULSEAUDIO_CFLAGS) $(SOUNDSERVICE_CFLAGS) $(GCONF_CFLAGS) -DLIBEXECDIR=\"$(libexecdir)\" -Wall
 indicator_sound_service_LDADD = $(PULSEAUDIO_LIBS) $(SOUNDSERVICE_LIBS) $(GCONF_LIBS)
 
 #########################
-# Extra stuff to package
+# Service xml compilation
 #########################
+DBUS_SPECS = \
+	sound-service.xml
+
+gen-%.xml.h: %.xml
+	@echo "Building $@ from $<"
+	@echo "extern const char * _$(subst -,_,$(subst .,_,$(basename $<)));" > $@
+
+gen-%.xml.c: %.xml
+	@echo "Building $@ from $<"
+	@echo "const char * _$(subst -,_,$(subst .,_,$(basename $<))) = " > $@
+	@sed -e "s:\":\\\\\":g" -e s:^:\": -e s:\$$:\\\\n\": $< >> $@
+	@echo ";" >> $@
+
+
 EXTRA_DIST = \
+  $(DBUS_SPECS) \
   sound-service.xml \
-  sound-service.list \
   $(music_bridge_APIFILES) \
   $(music_bridge_VALASOURCES)
-
+  
 #######################
 # Stuff to clean Stuff
 #######################
 BUILT_SOURCES = \
 	music_bridge_vala.stamp \
-	sound-service-client.h \
-  sound-service-server.h \
   $(music_bridge_APIFILES) \
+	gen-sound-service.xml.h \
+	gen-sound-service.xml.c \
   $(music_bridge_VALASOURCES:.vala=.c)
-
+  
 CLEANFILES = \
 	$(BUILT_SOURCES)
-

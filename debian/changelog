@@ -1,3 +1,13 @@
+indicator-sound (0.5.6-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Port the sound indicator to the new dbusmenu (LP: #701145)
+  * debian/control
+    - Bumped build depends for dbusmenu to >= 0.3.91
+    - Dropped unneeded build depends for libindicate-dev and dh-autoreconf
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 14 Jan 2011 10:53:50 -0600
+
 indicator-sound (0.5.5-0ubuntu1) natty; urgency=low
 
   * New upstream release.
