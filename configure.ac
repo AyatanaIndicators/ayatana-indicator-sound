@@ -1,10 +1,10 @@
 
-AC_INIT(indicator-sound, 0.5.5, conor.curran@canonical.com)
+AC_INIT(indicator-sound, 0.5.6, conor.curran@canonical.com)
 
 AC_PREREQ(2.53)
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(indicator-sound, 0.5.5)
+AM_INIT_AUTOMAKE(indicator-sound, 0.5.6)
 
 AM_MAINTAINER_MODE
 
@@ -28,18 +28,17 @@ m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 ###########################  
 
 GTK_REQUIRED_VERSION=2.12
-INDICATOR_REQUIRED_VERSION=0.3.6
-DBUSMENUGTK_REQUIRED_VERSION=0.2.2
+INDICATOR_REQUIRED_VERSION=0.3.15
+DBUSMENUGTK_REQUIRED_VERSION=0.3.9
 POLKIT_REQUIRED_VERSION=0.92
 PULSE_AUDIO_REQUIRED_VERSION=0.9.19
 INDICATOR_DISPLAY_OBJECTS=0.1.11
-INDICATE_REQUIRED_VERSION=0.4.1
-DBUSMENUGLIB_REQUIRED_VERSION=0.3.1
+DBUSMENUGLIB_REQUIRED_VERSION=0.3.9
 GIO_2_0_REQUIRED_VERSION=2.25.13
 
-PKG_CHECK_MODULES(APPLET,gtk+-2.0 >= $GTK_REQUIRED_VERSION
+PKG_CHECK_MODULES(APPLET, gtk+-2.0 >= $GTK_REQUIRED_VERSION
                           indicator >= $INDICATOR_REQUIRED_VERSION
-			              			dbusmenu-gtk >= $DBUSMENUGTK_REQUIRED_VERSION
+                          dbusmenu-gtk-0.4 >= $DBUSMENUGTK_REQUIRED_VERSION
                           libido-0.1 >= $INDICATOR_DISPLAY_OBJECTS)
                           
 AC_SUBST(APPLET_CFLAGS)
@@ -51,15 +50,13 @@ PKG_CHECK_MODULES(PULSEAUDIO, libpulse-mainloop-glib >= $PULSE_AUDIO_REQUIRED_VE
 AC_SUBST(PULSEAUDIO_CFLAGS)
 AC_SUBST(PULSEAUDIO_LIBS)
 
-PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib >= $DBUSMENUGLIB_REQUIRED_VERSION
+PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib-0.4 >= $DBUSMENUGLIB_REQUIRED_VERSION
                                 indicator >= $INDICATOR_REQUIRED_VERSION
-																indicate >= $INDICATE_REQUIRED_VERSION
-																gee-1.0
+                                gee-1.0
                                 gio-unix-2.0
                                 libxml-2.0)
-
 AC_SUBST(SOUNDSERVICE_CFLAGS)
-AC_SUBST(SOUNDERVICE_LIBS)
+AC_SUBST(SOUNDSERVICE_LIBS)
 
 AC_PATH_PROG(GCONFTOOL, gconftool-2)
 dnl Specify the gconf configuration source,
@@ -149,7 +146,6 @@ data/icons/16x16/Makefile
 data/icons/16x16/status/Makefile
 data/icons/scalable/Makefile
 data/icons/scalable/status/Makefile
-tests/Makefile
 po/Makefile.in
 ])
 

@@ -131,7 +131,7 @@ TitleMenuitem* title_menuitem_new (PlayerController* parent);
 TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* parent);
 GAppInfo* player_controller_get_app_info (PlayerController* self);
 const gchar* player_controller_get_icon_name (PlayerController* self);
-static void title_menuitem_real_handle_event (DbusmenuMenuitem* base, const gchar* name, GValue* input_value, guint timestamp);
+static void title_menuitem_real_handle_event (DbusmenuMenuitem* base, const gchar* name, GVariant* input_value, guint timestamp);
 PlayerController* player_item_get_owner (PlayerItem* self);
 GType mpris2_controller_get_type (void) G_GNUC_CONST;
 GType player_controller_state_get_type (void) G_GNUC_CONST;
@@ -163,11 +163,12 @@ TitleMenuitem* title_menuitem_new (PlayerController* parent) {
 }
 
 
-static void title_menuitem_real_handle_event (DbusmenuMenuitem* base, const gchar* name, GValue* input_value, guint timestamp) {
+static void title_menuitem_real_handle_event (DbusmenuMenuitem* base, const gchar* name, GVariant* input_value, guint timestamp) {
 	TitleMenuitem * self;
 	PlayerController* _tmp0_ = NULL;
 	self = (TitleMenuitem*) base;
 	g_return_if_fail (name != NULL);
+	g_return_if_fail (input_value != NULL);
 	_tmp0_ = player_item_get_owner ((PlayerItem*) self);
 	if (_tmp0_->current_state == PLAYER_CONTROLLER_STATE_OFFLINE) {
 		PlayerController* _tmp1_ = NULL;

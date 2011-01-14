@@ -39,7 +39,10 @@ libexec_PROGRAMS = indicator-sound-service$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/intltool.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -76,7 +79,8 @@ am_libsoundmenu_la_OBJECTS = libsoundmenu_la-transport-widget.lo \
 	libsoundmenu_la-metadata-widget.lo \
 	libsoundmenu_la-indicator-sound.lo \
 	libsoundmenu_la-title-widget.lo \
-	libsoundmenu_la-volume-widget.lo
+	libsoundmenu_la-volume-widget.lo \
+	libsoundmenu_la-gen-sound-service.xml.lo
 libsoundmenu_la_OBJECTS = $(am_libsoundmenu_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
@@ -105,6 +109,7 @@ am_indicator_sound_service_OBJECTS =  \
 	indicator_sound_service-pulse-manager.$(OBJEXT) \
 	indicator_sound_service-sound-service-dbus.$(OBJEXT) \
 	indicator_sound_service-slider-menu-item.$(OBJEXT) \
+	indicator_sound_service-gen-sound-service.xml.$(OBJEXT) \
 	$(am__objects_1)
 indicator_sound_service_OBJECTS =  \
 	$(am_indicator_sound_service_OBJECTS)
@@ -245,7 +250,6 @@ RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
-SOUNDERVICE_LIBS = @SOUNDERVICE_LIBS@
 SOUNDSERVICE_CFLAGS = @SOUNDSERVICE_CFLAGS@
 SOUNDSERVICE_LIBS = @SOUNDSERVICE_LIBS@
 STRIP = @STRIP@
@@ -324,15 +328,20 @@ libsoundmenu_la_SOURCES = \
             title-widget.h \
             volume-widget.c \
             volume-widget.h \
-            dbus-shared-names.h \
-            sound-service-client.h 
+            gen-sound-service.xml.h \
+            gen-sound-service.xml.c \
+            dbus-shared-names.h
 
-libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -DG_LOG_DOMAIN=\"Indicator-Sound\"
+libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -Werror -DG_LOG_DOMAIN=\"Indicator-Sound\"
 libsoundmenu_la_LIBADD = $(APPLET_LIBS)
 libsoundmenu_la_LDFLAGS = -module -avoid-version
 
+####################################################################
+# Sound Service 
+####################################################################
+
 #####################
-# libsoundmenu vala
+# Sound service vala
 #####################
 music_bridge_VALASOURCES = \
 	music-player-bridge.vala \
@@ -357,7 +366,7 @@ music_bridge_VALAFLAGS = \
   --vapidir=./ \
   --thread \
   --pkg gee-1.0 \
-  --pkg Dbusmenu-Glib-0.2 \
+  --pkg Dbusmenu-Glib-0.4 \
   --pkg common-defs \
 	--pkg gio-2.0 \
 	--pkg gio-unix-2.0 \
@@ -369,7 +378,7 @@ music_bridge_APIFILES = \
 
 
 ###############################
-# libsoundmenu C
+# Sound Service C
 ###############################
 indicator_sound_service_SOURCES = \
 	common-defs.h \
@@ -381,20 +390,24 @@ indicator_sound_service_SOURCES = \
   pulse-manager.c \
   sound-service-dbus.h \
   sound-service-dbus.c \
-  sound-service-server.h \
   slider-menu-item.h \
   slider-menu-item.c \
+  gen-sound-service.xml.h \
+  gen-sound-service.xml.c \
   $(music_bridge_VALASOURCES:.vala=.c)
 
 indicator_sound_service_CFLAGS = $(PULSEAUDIO_CFLAGS) $(SOUNDSERVICE_CFLAGS) $(GCONF_CFLAGS) -DLIBEXECDIR=\"$(libexecdir)\" -Wall
 indicator_sound_service_LDADD = $(PULSEAUDIO_LIBS) $(SOUNDSERVICE_LIBS) $(GCONF_LIBS)
 
 #########################
-# Extra stuff to package
+# Service xml compilation
 #########################
+DBUS_SPECS = \
+	sound-service.xml
+
 EXTRA_DIST = \
+  $(DBUS_SPECS) \
   sound-service.xml \
-  sound-service.list \
   $(music_bridge_APIFILES) \
   $(music_bridge_VALASOURCES)
 
@@ -404,9 +417,9 @@ EXTRA_DIST = \
 #######################
 BUILT_SOURCES = \
 	music_bridge_vala.stamp \
-	sound-service-client.h \
-  sound-service-server.h \
   $(music_bridge_APIFILES) \
+	gen-sound-service.xml.h \
+	gen-sound-service.xml.c \
   $(music_bridge_VALASOURCES:.vala=.c)
 
 CLEANFILES = \
@@ -536,6 +549,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-dbus-menu-manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-fetch-file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-freedesktop-interfaces.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-gen-sound-service.xml.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-metadata-menu-item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-mpris2-controller.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-mpris2-interfaces.Po@am__quote@
@@ -551,6 +565,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-sound-service.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-title-menu-item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-transport-menu-item.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-gen-sound-service.xml.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-indicator-sound.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-metadata-widget.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-title-widget.Plo@am__quote@
@@ -620,6 +635,14 @@ libsoundmenu_la-volume-widget.lo: volume-widget.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='volume-widget.c' object='libsoundmenu_la-volume-widget.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsoundmenu_la_CFLAGS) $(CFLAGS) -c -o libsoundmenu_la-volume-widget.lo `test -f 'volume-widget.c' || echo '$(srcdir)/'`volume-widget.c
+
+libsoundmenu_la-gen-sound-service.xml.lo: gen-sound-service.xml.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsoundmenu_la_CFLAGS) $(CFLAGS) -MT libsoundmenu_la-gen-sound-service.xml.lo -MD -MP -MF $(DEPDIR)/libsoundmenu_la-gen-sound-service.xml.Tpo -c -o libsoundmenu_la-gen-sound-service.xml.lo `test -f 'gen-sound-service.xml.c' || echo '$(srcdir)/'`gen-sound-service.xml.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libsoundmenu_la-gen-sound-service.xml.Tpo $(DEPDIR)/libsoundmenu_la-gen-sound-service.xml.Plo
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='gen-sound-service.xml.c' object='libsoundmenu_la-gen-sound-service.xml.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsoundmenu_la_CFLAGS) $(CFLAGS) -c -o libsoundmenu_la-gen-sound-service.xml.lo `test -f 'gen-sound-service.xml.c' || echo '$(srcdir)/'`gen-sound-service.xml.c
 
 indicator_sound_service-sound-service.o: sound-service.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-sound-service.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-sound-service.Tpo -c -o indicator_sound_service-sound-service.o `test -f 'sound-service.c' || echo '$(srcdir)/'`sound-service.c
@@ -700,6 +723,22 @@ indicator_sound_service-slider-menu-item.obj: slider-menu-item.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='slider-menu-item.c' object='indicator_sound_service-slider-menu-item.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-slider-menu-item.obj `if test -f 'slider-menu-item.c'; then $(CYGPATH_W) 'slider-menu-item.c'; else $(CYGPATH_W) '$(srcdir)/slider-menu-item.c'; fi`
+
+indicator_sound_service-gen-sound-service.xml.o: gen-sound-service.xml.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-gen-sound-service.xml.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-gen-sound-service.xml.Tpo -c -o indicator_sound_service-gen-sound-service.xml.o `test -f 'gen-sound-service.xml.c' || echo '$(srcdir)/'`gen-sound-service.xml.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-gen-sound-service.xml.Tpo $(DEPDIR)/indicator_sound_service-gen-sound-service.xml.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='gen-sound-service.xml.c' object='indicator_sound_service-gen-sound-service.xml.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-gen-sound-service.xml.o `test -f 'gen-sound-service.xml.c' || echo '$(srcdir)/'`gen-sound-service.xml.c
+
+indicator_sound_service-gen-sound-service.xml.obj: gen-sound-service.xml.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-gen-sound-service.xml.obj -MD -MP -MF $(DEPDIR)/indicator_sound_service-gen-sound-service.xml.Tpo -c -o indicator_sound_service-gen-sound-service.xml.obj `if test -f 'gen-sound-service.xml.c'; then $(CYGPATH_W) 'gen-sound-service.xml.c'; else $(CYGPATH_W) '$(srcdir)/gen-sound-service.xml.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-gen-sound-service.xml.Tpo $(DEPDIR)/indicator_sound_service-gen-sound-service.xml.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='gen-sound-service.xml.c' object='indicator_sound_service-gen-sound-service.xml.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-gen-sound-service.xml.obj `if test -f 'gen-sound-service.xml.c'; then $(CYGPATH_W) 'gen-sound-service.xml.c'; else $(CYGPATH_W) '$(srcdir)/gen-sound-service.xml.c'; fi`
 
 indicator_sound_service-music-player-bridge.o: music-player-bridge.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-music-player-bridge.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-music-player-bridge.Tpo -c -o indicator_sound_service-music-player-bridge.o `test -f 'music-player-bridge.c' || echo '$(srcdir)/'`music-player-bridge.c
@@ -1128,32 +1167,21 @@ checkxml: $(srcdir)/sound-service.xml
 	@xmllint -valid -noout $<
 	@echo $< checks out ok
 
-sound-service-client.h: $(srcdir)/sound-service.xml
-	dbus-binding-tool \
-		--prefix=_sound_service_client \
-		--mode=glib-client \
-		--output=sound-service-client.h \
-		$(srcdir)/sound-service.xml
-
-####################################################################
-# Sound Service 
-####################################################################
-
-#################
-# dbus interface
-#################
-sound-service-server.h: $(srcdir)/sound-service.xml
-	dbus-binding-tool \
-		--prefix=_sound_service_server \
-		--mode=glib-server \
-		--output=sound-service-server.h \
-		$(srcdir)/sound-service.xml
-
  $(MAINTAINER_VALAFLAGS)
 
 music_bridge_vala.stamp $(music_bridge_APIFILES): $(music_bridge_VALASOURCES)
 	$(AM_V_GEN) $(VALAC) $(music_bridge_VALAFLAGS) $^
 	touch music_bridge_vala.stamp
+
+gen-%.xml.h: %.xml
+	@echo "Building $@ from $<"
+	@echo "extern const char * _$(subst -,_,$(subst .,_,$(basename $<)));" > $@
+
+gen-%.xml.c: %.xml
+	@echo "Building $@ from $<"
+	@echo "const char * _$(subst -,_,$(subst .,_,$(basename $<))) = " > $@
+	@sed -e "s:\":\\\\\":g" -e s:^:\": -e s:\$$:\\\\n\": $< >> $@
+	@echo ";" >> $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
