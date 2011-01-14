@@ -55,7 +55,7 @@ public class SettingsManager : GLib.Object
   public void add_interested(string app_desktop_name)
   {
     var already_interested = this.settings.get_strv ("interested-media-players");
-    foreach ( var s in already_interested){
+    foreach (var s in already_interested){
       if ( s == app_desktop_name ) return;
     }
     already_interested += (app_desktop_name);

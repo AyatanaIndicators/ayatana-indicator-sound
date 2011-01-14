@@ -39,7 +39,8 @@ static void slider_menu_item_class_init (SliderMenuItemClass *klass);
 static void slider_menu_item_init       (SliderMenuItem *self);
 static void slider_menu_item_dispose    (GObject *object);
 static void slider_menu_item_finalize   (GObject *object);
-static void handle_event (DbusmenuMenuitem * mi, const gchar * name, const GValue * value, guint timestamp);
+static void handle_event (DbusmenuMenuitem * mi, const gchar * name, 
+                          GVariant * value, guint timestamp);
 
 G_DEFINE_TYPE (SliderMenuItem, slider_menu_item, DBUSMENU_TYPE_MENUITEM);
 
@@ -77,12 +78,29 @@ slider_menu_item_finalize (GObject *object)
 
 
 static void
-handle_event (DbusmenuMenuitem * mi, const gchar * name, const GValue * value, guint timestamp)
+handle_event (DbusmenuMenuitem * mi,
+              const gchar * name,
+              GVariant * value,
+              guint timestamp)
 {
   gdouble volume_input = 0;
-  volume_input = g_value_get_double(value);
-  if (value != NULL)
+  /*g_debug ( "handle-event in the slider at the backend, input is of type %s",
+             g_variant_get_type_string(value));*/
+
+  GVariant* input = NULL;
+  input = value;
+  g_variant_ref (input);
+
+  // Please note: Subject to change in future DBusmenu revisions
+  if (g_variant_is_of_type(value, G_VARIANT_TYPE_VARIANT) == TRUE) {
+    input = g_variant_get_variant(value);
+  }
+
+  volume_input = g_variant_get_double(input);
+  if (value != NULL){
     set_sink_volume(volume_input);
+  }
+  g_variant_unref (input); 
 }
 
 

@@ -61,7 +61,7 @@ static gboolean metadata_widget_button_press_event (GtkWidget *menuitem,
 // Dbusmenuitem properties update callback
 static void metadata_widget_property_update (DbusmenuMenuitem* item,
                                              gchar* property, 
-                                             GValue* value,
+                                             GVariant* value,
                                              gpointer userdata);
 static void metadata_widget_style_labels ( MetadataWidget* self,
                                            GtkLabel* label);
@@ -400,38 +400,37 @@ metadata_widget_button_press_event (GtkWidget *menuitem,
 // TODO: Manage empty/mangled music details <unknown artist> etc.
 static void 
 metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
-                                       GValue* value, gpointer userdata)
+                                       GVariant* value, gpointer userdata)
 {
   g_return_if_fail (IS_METADATA_WIDGET (userdata)); 
 
-  if(g_value_get_int(value) == DBUSMENU_PROPERTY_EMPTY){
+  if(g_variant_is_of_type(value, G_VARIANT_TYPE_INT32) == TRUE && 
+     g_variant_get_int32(value) == DBUSMENU_PROPERTY_EMPTY){
     //g_debug("Metadata widget: property update - reset");
-    GValue new_value = {0};
-    g_value_init(&new_value, G_TYPE_STRING);    
-    g_value_set_string(&new_value, g_strdup(""));   
-    value = &new_value;
+    GVariant* new_value = g_variant_new_string ("");
+    value = new_value;
   }
   
   MetadataWidget* mitem = METADATA_WIDGET(userdata);
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(mitem);
   
   if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_ARTIST, property) == 0){  
-    gtk_label_set_text(GTK_LABEL(priv->artist_label), g_value_get_string(value));
+    gtk_label_set_text(GTK_LABEL(priv->artist_label), g_variant_get_string(value, NULL));
     metadata_widget_style_labels(mitem, GTK_LABEL(priv->artist_label));
   }
   else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_TITLE, property) == 0){  
-    gtk_label_set_text(GTK_LABEL(priv->piece_label), g_value_get_string(value));    
+    gtk_label_set_text(GTK_LABEL(priv->piece_label), g_variant_get_string(value, NULL));    
     metadata_widget_style_labels(mitem, GTK_LABEL(priv->piece_label));
   } 
   else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_ALBUM, property) == 0){  
-    gtk_label_set_text(GTK_LABEL(priv->container_label), g_value_get_string(value));
+    gtk_label_set_text(GTK_LABEL(priv->container_label), g_variant_get_string(value, NULL));
     metadata_widget_style_labels(mitem, GTK_LABEL(priv->container_label));
   } 
   else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_ARTURL, property) == 0){
     g_string_erase(priv->image_path, 0, -1);
-    g_string_overwrite(priv->image_path, 0, g_value_get_string (value));
+    g_string_overwrite(priv->image_path, 0, g_variant_get_string (value, NULL));
     // if its a remote image queue a redraw incase the download took too long
-    if (g_str_has_prefix(g_value_get_string (value), g_get_user_cache_dir())){
+    if (g_str_has_prefix(g_variant_get_string (value, NULL), g_get_user_cache_dir())){
       //g_debug("the image update is a download so redraw");
       gtk_widget_queue_draw(GTK_WIDGET(mitem));
     }
