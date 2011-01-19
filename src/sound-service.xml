@@ -16,11 +16,20 @@
         <arg type='b' name='availability_input' direction="out"/>
     </method>
 
+    <method name = "GetSinkState">
+        <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_get_sink_state"/>
+        <arg type='i' name='current_state' direction="out"/>
+    </method>
+
 <!-- Will need to hook up another signal which monitors for volume change 
 Our respective UI element should listen to this and therefore will be updated with accurate setting-->
 <!-- Triggered when a sink is muted but the input has been sent to that sink -->
     <signal name="SinkInputWhileMuted">
       <arg name="block_value" type="b" direction="out"/>
+    </signal>
+
+    <signal name="SinkStateUpdate">
+      <arg name="new_state" type="i" direction="out"/>
     </signal>
     
     <signal name="SinkMuteUpdate">

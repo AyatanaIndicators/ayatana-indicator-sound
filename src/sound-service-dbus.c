@@ -24,11 +24,18 @@
 
 #include <gio/gio.h>
 #include <libindicator/indicator-service.h>
+#include <libdbusmenu-glib/server.h>
+#include <libdbusmenu-glib/client.h>
+
+#include "sound-service-dbus.h"
+
 #include "gen-sound-service.xml.h"
 #include "dbus-shared-names.h"
-#include "sound-service-dbus.h"
 #include "common-defs.h"
 #include "pulse-manager.h"
+#include "slider-menu-item.h"
+#include "mute-menu-item.h"
+
 
 // DBUS methods
 static void bus_method_call (GDBusConnection * connection,
@@ -50,9 +57,12 @@ static GDBusInterfaceVTable       interface_table = {
 typedef struct _SoundServiceDbusPrivate SoundServiceDbusPrivate;
 
 struct _SoundServiceDbusPrivate {
-        GDBusConnection *connection;
-        gboolean        mute;
-        gboolean        sink_availability;
+        GDBusConnection*    connection;
+        gboolean            mute;
+        gboolean            sink_availability;
+        DbusmenuMenuitem*   root_menuitem;
+        SliderMenuItem*     volume_slider_menuitem;
+        MuteMenuItem*       mute_menuitem;
 };
 
 static GDBusNodeInfo *            node_info = NULL;
@@ -65,7 +75,6 @@ static void sound_service_dbus_init       (SoundServiceDbus *self);
 static void sound_service_dbus_dispose    (GObject *object);
 static void sound_service_dbus_finalize   (GObject *object);
 
-/* GObject Boilerplate */
 G_DEFINE_TYPE (SoundServiceDbus, sound_service_dbus, G_TYPE_OBJECT);
 
 static void
@@ -108,6 +117,7 @@ sound_service_dbus_init (SoundServiceDbus *self)
   SoundServiceDbusPrivate * priv = SOUND_SERVICE_DBUS_GET_PRIVATE(self);
 
   priv->connection = NULL;
+
   priv->mute = FALSE;
   priv->sink_availability = FALSE;
 
@@ -132,6 +142,17 @@ sound_service_dbus_init (SoundServiceDbus *self)
 		g_error_free(error);
 		return;
 	}
+}
+
+DbusmenuMenuitem* sound_service_dbus_construct_menu (SoundServiceDbus* self)
+{
+  SoundServiceDbusPrivate * priv = SOUND_SERVICE_DBUS_GET_PRIVATE(self);
+  priv->root_menuitem = dbusmenu_menuitem_new();
+  g_debug("Root ID: %d", dbusmenu_menuitem_get_id(priv->root_menuitem));
+  DbusmenuServer *server = dbusmenu_server_new(INDICATOR_SOUND_MENU_DBUS_OBJECT_PATH);
+  dbusmenu_server_set_root(server, priv->root_menuitem);
+  establish_pulse_activities(self);
+  return priv->root_menuitem;
 }
 
 static void

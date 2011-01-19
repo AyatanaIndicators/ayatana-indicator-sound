@@ -1,5 +1,4 @@
 /*
-This service primarily controls PulseAudio and is driven by the sound indicator menu on the panel.
 Copyright 2010 Canonical Ltd.
 
 Authors:
@@ -19,8 +18,9 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "sound-service.h"
-#include "dbus-menu-manager.h"
-#include "pulse-manager.h"
+//#include "dbus-menu-manager.h"
+//#include "pulse-manager.h"
+#include "sound-service-dbus.h"
 #include "music-player-bridge.h"
 
 static GMainLoop *mainloop = NULL;
@@ -64,7 +64,9 @@ main (int argc, char ** argv)
                    INDICATOR_SERVICE_SIGNAL_SHUTDOWN,
                    G_CALLBACK(service_shutdown), NULL);
 
-  DbusmenuMenuitem* root_menuitem = dbus_menu_manager_setup();
+  SoundServiceDbus* sound_service = g_object_new(SOUND_SERVICE_DBUS_TYPE, NULL);
+  
+  DbusmenuMenuitem* root_menuitem = sound_service_dbus_construct_menu(sound_service);
   MusicPlayerBridge* server = music_player_bridge_new();
   music_player_bridge_set_root_menu_item(server, root_menuitem);
 

@@ -3,7 +3,6 @@
  *
  * Authors:
  *     Conor Curran <conor.curran@canonical.com>
- *     Cody Russell <crussell@canonical.com>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -23,6 +22,8 @@
 
 #include <glib.h>
 #include <glib-object.h>
+#include <libdbusmenu-glib/menuitem.h>
+
 
 G_BEGIN_DECLS
 
@@ -55,6 +56,7 @@ GType sound_service_dbus_get_type  (void) G_GNUC_CONST;
 void sound_service_dbus_sink_input_while_muted (SoundServiceDbus* obj, gboolean block_value);
 void sound_service_dbus_update_sink_mute(SoundServiceDbus* obj, gboolean sink_mute);
 void sound_service_dbus_update_sink_availability(SoundServiceDbus* obj, gboolean sink_availibity);
+DbusmenuMenuitem* sound_service_dbus_construct_menu (SoundServiceDbus* self);
 
 G_END_DECLS
 
