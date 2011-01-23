@@ -16,13 +16,9 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#ifndef __COMMON_DEFS_H__
+#define __COMMON_DEFS_H__
 
-
-/* constants used for signals on the dbus. This file is shared between client and server implementation */
-#define SIGNAL_SINK_INPUT_WHILE_MUTED           "SinkInputWhileMuted"
-#define SIGNAL_SINK_VOLUME_UPDATE               "SinkVolumeUpdate"
-#define SIGNAL_SINK_MUTE_UPDATE                 "SinkMuteUpdate"
-#define SIGNAL_SINK_AVAILABLE_UPDATE            "SinkAvailableUpdate"
 
 typedef enum {
   MUTED,
@@ -67,3 +63,5 @@ typedef enum {
 #define DBUSMENU_PLAYLISTS_MENUITEM_TYPE        "x-canonical-sound-menu-player-playlists-type"
 #define DBUSMENU_PLAYLISTS_MENUITEM_TITLE       "x-canonical-sound-menu-player-playlists-title"
 #define DBUSMENU_PLAYLISTS_MENUITEM_PLAYLISTS   "x-canonical-sound-menu-player-playlists-playlists"
+
+#endif

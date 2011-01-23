@@ -636,7 +636,7 @@ void
 determine_state_from_volume(gdouble volume_percent)
 {
   if (device_available == FALSE)
-    return;
+v    return;
   gint state = previous_state;
   if (volume_percent < 30.0 && volume_percent > 0) {
     state = STATE_LOW;

@@ -199,10 +199,12 @@ static void check_sink_input_while_muted_event(gint sink_index)
   /*    g_debug("SINKINPUTWHILEMUTED SIGNAL EVENT TO BE SENT FROM PA MANAGER - check trace for value");*/
 
   if (default_sink_is_muted(sink_index) == TRUE) {
-    sound_service_dbus_sink_input_while_muted(dbus_service, TRUE);
-  } else {
-    sound_service_dbus_sink_input_while_muted(dbus_service, FALSE);
+    sound_service_dbus_update_sound_state(dbus_service, BLOCKED);
   }
+// Why do you need to send a false for a blocked event, it times out after 5 secs anyway  
+//} else {
+  //  sound_service_dbus_sink_input_while_muted(dbus_service, FALSE);
+  //}
 }
 
 static gdouble get_default_sink_volume()
@@ -437,7 +439,7 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
     value->base_volume = info->base_volume;
     g_hash_table_insert(sink_hash, GINT_TO_POINTER(value->index), value);
     /*        g_debug("pulse-manager:update_sink_info -> After adding a new sink to our hash");*/
-    sound_service_dbus_update_sound_state(dbus_service, TRUE);
+    sound_service_dbus_update_sound_state(dbus_service, AVAILABLE);
   }
 }
 
@@ -496,7 +498,7 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
   case PA_SUBSCRIPTION_EVENT_SINK:
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
       if (index == DEFAULT_SINK_INDEX)
-        sound_service_dbus_update_sink_availability(dbus_service, FALSE);
+        sound_service_dbus_update_sound_state(dbus_service, UNAVAILABLE);
 
       /*                g_debug("Subscribed_events_callback - removing sink of index %i from our sink hash - keep the cache tidy !", index);*/
       g_hash_table_remove(sink_hash, GINT_TO_POINTER(index));

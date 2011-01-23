@@ -32,7 +32,6 @@
 
 #include "gen-sound-service.xml.h"
 #include "dbus-shared-names.h"
-#include "common-defs.h"
 #include "pulse-manager.h"
 #include "slider-menu-item.h"
 #include "mute-menu-item.h"
@@ -80,7 +79,7 @@ static void sound_service_dbus_build_sound_menu ( SoundServiceDbus* root,
                                                   gdouble volume );
 static void show_sound_settings_dialog (DbusmenuMenuitem *mi,
                                         gpointer user_data);
-static void sound_service_dbus_set_state_from_volume (SoundServiceDbus* self);
+static SoundState sound_service_dbus_get_state_from_volume (SoundServiceDbus* self);
 
 
 G_DEFINE_TYPE (SoundServiceDbus, sound_service_dbus, G_TYPE_OBJECT);
@@ -293,21 +292,62 @@ void sound_service_dbus_update_sink_mute(SoundServiceDbus* obj,
   SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (obj);
   mute_menu_item_update (priv->mute_menuitem, mute_update);
 }
+
 // TODO: this will be a bit messy until the pa_manager is sorted.
+// And we figure out all of the edge cases.
 void sound_service_dbus_update_sound_state (SoundServiceDbus* self,
                                             SoundState new_state)
 {
   SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
-
+  SoundState update = new_state;
   if (new_state == AVAILABLE &&
-      dbusmenu_menuitem_property_get_bool (priv->mute_menuitem, DBUSMENU_MUTE_MENUITEM_VALUE) == FALSE){
-      sound_service_dbus_set_state_from_volume (self);
+      dbusmenu_menuitem_property_get_bool ( DBUSMENU_MENUITEM(priv->mute_menuitem),
+                                            DBUSMENU_MUTE_MENUITEM_VALUE) == FALSE ){
+      update = sound_service_dbus_get_state_from_volume (self);
   }
+
+  GVariant* v_output = g_variant_new("(i)", (int)update);
+
+  GError * error = NULL;
+
+  g_dbus_connection_emit_signal( priv->connection,
+                                 NULL,
+                                 INDICATOR_SOUND_MENU_DBUS_OBJECT_PATH,
+                                 INDICATOR_SOUND_DBUS_INTERFACE,
+                                 INDICATOR_SOUND_SIGNAL_SOUND_STATE_UPDATE,
+                                  v_output,
+                                  &error );
+  if (error != NULL) {
+    g_error("Unable to emit signal 'sinkinputwhilemuted' because : %s", error->message);
+    g_error_free(error);
+    return;
+  }
+
+
 }
 
-static void sound_service_dbus_set_state_from_volume (SoundServiceDbus* self)
+static SoundState sound_service_dbus_get_state_from_volume (SoundServiceDbus* self)
 {
-  //SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
+  SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
+  GVariant* v = dbusmenu_menuitem_get_variant (DBUSMENU_MENUITEM(priv->volume_menuitem),
+                                                         DBUSMENU_VOLUME_MENUITEM_LEVEL);
+  gdouble volume_percent = g_variant_get_double (v);
+
+  SoundState state = LOW_LEVEL;
+
+  if (volume_percent < 30.0 && volume_percent > 0) {
+    state = LOW_LEVEL;
+  } 
+  else if (volume_percent < 70.0 && volume_percent >= 30.0) {
+    state = MEDIUM_LEVEL;
+  } 
+  else if (volume_percent >= 70.0) {
+    state = HIGH_LEVEL;
+  } 
+  else if (volume_percent == 0.0) {
+    state = ZERO_LEVEL;
+  }
+  return state;
 }
 
 

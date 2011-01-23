@@ -23,6 +23,7 @@
 #include <glib.h>
 #include <glib-object.h>
 #include <libdbusmenu-glib/menuitem.h>
+#include "common-defs.h"
 
 
 G_BEGIN_DECLS
