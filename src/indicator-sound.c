@@ -115,6 +115,7 @@ static void get_sink_availability_cb ( GObject *object,
 /****Volume States 'members' ***/
 static void update_state(const gint state);
 
+static const gint STATE_INVALID = -1;
 static const gint STATE_MUTED = 0;
 static const gint STATE_ZERO = 1;
 static const gint STATE_LOW = 2;
@@ -452,7 +453,7 @@ static void fetch_state (IndicatorSound* self)
 
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
   if(priv->volume_widget != NULL){
-    determine_state_from_volume (volume_widget_get_current_volume(priv->volume_widget));
+    update_state_from_volume (volume_widget_get_current_volume(priv->volume_widget));
   }
   
   g_dbus_proxy_call ( priv->dbus_proxy,
@@ -631,12 +632,11 @@ update_state(const gint state)
   indicator_image_helper_update(speaker_image, image_name);
 }
 
-
-void
+static gint
 determine_state_from_volume(gdouble volume_percent)
 {
   if (device_available == FALSE)
-    return;
+    return STATE_INVALID;
   gint state = previous_state;
   if (volume_percent < 30.0 && volume_percent > 0) {
     state = STATE_LOW;
@@ -647,9 +647,18 @@ determine_state_from_volume(gdouble volume_percent)
   } else if (volume_percent == 0.0) {
     state = STATE_ZERO;
   }
-  update_state(state);
+  return state;
 }
 
+void
+update_state_from_volume(gdouble volume_percent)
+{
+  gint state = determine_state_from_volume(volume_percent);
+  if (state == STATE_INVALID)
+		return;
+
+	update_state(state);
+}
 
 static gboolean
 start_animation()
@@ -753,7 +762,7 @@ react_to_signal_sink_mute_update(gboolean mute_value, IndicatorSound* self)
   GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget)); 
   gtk_widget_set_sensitive(slider_widget, !mute_value);
   if(mute_value == FALSE){
-    determine_state_from_volume (volume_widget_get_current_volume(priv->volume_widget));  
+    update_state_from_volume (volume_widget_get_current_volume(priv->volume_widget));  
   }
 }
 
@@ -768,7 +777,7 @@ react_to_signal_sink_availability_update(gboolean available_value, IndicatorSoun
   }
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
 
-  determine_state_from_volume (volume_widget_get_current_volume(priv->volume_widget));    
+  update_state_from_volume (volume_widget_get_current_volume(priv->volume_widget));    
   //g_debug("signal caught - sink availability update with  value: %i", available_value);
 }
 

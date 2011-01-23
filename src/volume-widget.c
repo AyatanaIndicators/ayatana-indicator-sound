@@ -137,7 +137,7 @@ volume_widget_property_update( DbusmenuMenuitem* item, gchar* property,
       gdouble update = g_variant_get_double (value);
       //g_debug("volume-widget - update level with value %f", update);
       gtk_range_set_value(range, update);
-      determine_state_from_volume(update);
+      update_state_from_volume(update);
     }
   }
 }
@@ -157,7 +157,7 @@ volume_widget_set_twin_item(VolumeWidget* self,
   GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
   GtkRange *range = (GtkRange*)slider;
   gtk_range_set_value(range, initial_level);
-  determine_state_from_volume(initial_level); 
+  update_state_from_volume(initial_level); 
 }
 
 static gboolean
@@ -169,7 +169,7 @@ volume_widget_change_value_cb (GtkRange     *range,
   g_return_val_if_fail (IS_VOLUME_WIDGET (user_data), FALSE);
   VolumeWidget* mitem = VOLUME_WIDGET(user_data);
   volume_widget_update(mitem, new_value); 
-  determine_state_from_volume(new_value);
+  update_state_from_volume(new_value);
   return FALSE;
 }
 
