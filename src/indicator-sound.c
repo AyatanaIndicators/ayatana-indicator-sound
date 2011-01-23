@@ -1014,7 +1014,7 @@ indicator_sound_notification_show(IndicatorSound *self, double value)
       icon = "audio-volume-muted";
     }
   } else if (state == STATE_LOW) {
-   icon = "audio-volume-low";
+    icon = "audio-volume-low";
   } else if (state == STATE_MEDIUM) {
     icon = "audio-volume-medium";
   } else if (state == STATE_HIGH) {
