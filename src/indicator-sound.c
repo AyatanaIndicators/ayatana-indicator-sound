@@ -1006,13 +1006,8 @@ indicator_sound_notification_show(IndicatorSound *self, double value)
   gint state = determine_state_from_volume (CLAMP(value, 0, 100));
 
   if (state == STATE_ZERO) {
-    GtkIconTheme *theme = gtk_icon_theme_get_default();
-    if (gtk_icon_theme_has_icon(theme, "audio-volume-off")) {
-      // Not available in all the themes
-      icon = "audio-volume-off";
-    } else {
-      icon = "audio-volume-muted";
-    }
+    // Not available for all the themes
+    icon = "audio-volume-off";
   } else if (state == STATE_LOW) {
     icon = "audio-volume-low";
   } else if (state == STATE_MEDIUM) {
