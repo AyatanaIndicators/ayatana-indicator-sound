@@ -30,6 +30,8 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <gio/gio.h>
 
+#include <libnotify/notify.h>
+
 #include "indicator-sound.h"
 #include "transport-widget.h"
 #include "metadata-widget.h"
@@ -47,7 +49,8 @@ struct _IndicatorSoundPrivate
 {
   GtkWidget* volume_widget;
   GList* transport_widgets_list;
-  GDBusProxy *dbus_proxy;  
+  GDBusProxy *dbus_proxy;
+  NotifyNotification* notification;
 };
 
 #define INDICATOR_SOUND_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), INDICATOR_SOUND_TYPE, IndicatorSoundPrivate))
@@ -68,6 +71,10 @@ static GtkLabel * get_label (IndicatorObject * io);
 static GtkImage * get_icon (IndicatorObject * io);
 static GtkMenu *  get_menu (IndicatorObject * io);
 static void       indicator_sound_scroll (IndicatorObject* io, gint delta, IndicatorScrollDirection direction);
+
+//Notification
+static void indicator_sound_notification_init (IndicatorSound *self);
+static void indicator_sound_notification_show (IndicatorSound *self, double value);
 
 //Slider related
 static gboolean new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, DbusmenuClient * client);
@@ -183,6 +190,10 @@ indicator_sound_init (IndicatorSound *self)
   priv->dbus_proxy = NULL;
   GList* t_list = NULL;
   priv->transport_widgets_list = t_list;
+  priv->notification = NULL;
+
+  priv->notification = NULL;
+  indicator_sound_notification_init (self);
   
   g_signal_connect(G_OBJECT(self->service),
                    INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE,
@@ -205,6 +216,10 @@ indicator_sound_dispose (GObject *object)
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (self));
 
   g_list_free ( priv->transport_widgets_list );
+
+  if (priv->notification) {
+    notify_uninit();
+  }
 
   G_OBJECT_CLASS (indicator_sound_parent_class)->dispose (object);
   return;
@@ -349,6 +364,9 @@ new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, 
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
   priv->volume_widget = volume_widget;
 
+  if (priv->notification)
+    notify_notification_attach_to_widget(priv->notification, volume_widget);
+
   GtkWidget* ido_slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));
 
   g_signal_connect(ido_slider_widget, "style-set", G_CALLBACK(style_changed_cb), NULL);   
@@ -366,6 +384,28 @@ new_volume_slider_widget(DbusmenuMenuitem * newitem, DbusmenuMenuitem * parent, 
   return TRUE;  
 }
 
+static void indicator_sound_notification_init (IndicatorSound *self)
+{
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
+
+	if (notify_init(PACKAGE_NAME)) {
+    GList* caps = notify_get_server_caps();
+    gboolean has_notify_osd = FALSE;
+
+    if (caps) {
+      if (g_list_find_custom(caps, "x-canonical-private-synchronous", (GCompareFunc) g_strcmp0)) {
+	      has_notify_osd = TRUE;
+      }
+      g_list_foreach(caps, (GFunc) g_free, NULL);
+      g_list_free(caps);
+    }
+
+    if (has_notify_osd) {
+      priv->notification = notify_notification_new(PACKAGE_NAME, NULL, NULL, NULL);
+      notify_notification_set_hint_string(priv->notification, "x-canonical-private-synchronous", "");
+    }
+	}
+}
 
 static void
 connection_changed (IndicatorServiceManager * sm,
@@ -951,6 +991,41 @@ style_changed_cb(GtkWidget *widget, gpointer user_data)
 }
 
 static void
+indicator_sound_notification_show(IndicatorSound *self, double value)
+{
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
+
+  if (priv->notification == NULL)
+    return;
+
+	char *icon;
+	const int notify_value = CLAMP((int)value, -1, 101);
+	gint state = determine_state_from_volume (CLAMP(value, 0, 100));
+
+	if (state == STATE_ZERO) {
+		GtkIconTheme *theme = gtk_icon_theme_get_default();
+		if (gtk_icon_theme_has_icon(theme, "audio-volume-off")) {
+			// Not available in all the themes
+			icon = "audio-volume-off";
+		} else {
+			icon = "audio-volume-muted";
+		}
+	} else if (state == STATE_LOW) {
+		icon = "audio-volume-low";
+	} else if (state == STATE_MEDIUM) {
+		icon = "audio-volume-medium";
+	} else if (state == STATE_HIGH) {
+		icon = "audio-volume-high";
+	} else {
+		icon = "audio-volume-muted";
+	}
+
+	notify_notification_update(priv->notification, PACKAGE_NAME, NULL, icon);
+	notify_notification_set_hint_int32(priv->notification, "value", notify_value);
+	notify_notification_show(priv->notification, NULL);
+}
+
+static void
 indicator_sound_scroll (IndicatorObject *io, gint delta, IndicatorScrollDirection direction)
 {
   //g_debug("indicator-sound-scroll - current slider value");
@@ -973,5 +1048,7 @@ indicator_sound_scroll (IndicatorObject *io, gint delta, IndicatorScrollDirectio
     value -= adj->step_increment;
   }
   //g_debug("indicator-sound-scroll - update slider with value %f", value);
-  volume_widget_update(VOLUME_WIDGET(priv->volume_widget), value);  
+  volume_widget_update(VOLUME_WIDGET(priv->volume_widget), value);
+
+  indicator_sound_notification_show(INDICATOR_SOUND (io), value);
 }
