@@ -698,9 +698,9 @@ update_state_from_volume(gdouble volume_percent)
 {
   gint state = determine_state_from_volume(volume_percent);
   if (state == STATE_INVALID)
-		return;
+    return;
 
-	update_state(state);
+  update_state(state);
 }
 
 static gboolean
