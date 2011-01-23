@@ -388,23 +388,26 @@ static void indicator_sound_notification_init (IndicatorSound *self)
 {
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
 
-	if (notify_init(PACKAGE_NAME)) {
-    GList* caps = notify_get_server_caps();
-    gboolean has_notify_osd = FALSE;
+  if (!notify_init(PACKAGE_NAME))
+    return;
 
-    if (caps) {
-      if (g_list_find_custom(caps, "x-canonical-private-synchronous", (GCompareFunc) g_strcmp0)) {
-	      has_notify_osd = TRUE;
-      }
-      g_list_foreach(caps, (GFunc) g_free, NULL);
-      g_list_free(caps);
-    }
+  GList* caps = notify_get_server_caps();
+  gboolean has_notify_osd = FALSE;
 
-    if (has_notify_osd) {
-      priv->notification = notify_notification_new(PACKAGE_NAME, NULL, NULL, NULL);
-      notify_notification_set_hint_string(priv->notification, "x-canonical-private-synchronous", "");
+  if (caps) {
+    if (g_list_find_custom(caps, "x-canonical-private-synchronous",
+                           (GCompareFunc) g_strcmp0)) {
+      has_notify_osd = TRUE;
     }
-	}
+    g_list_foreach(caps, (GFunc) g_free, NULL);
+    g_list_free(caps);
+  }
+
+  if (has_notify_osd) {
+    priv->notification = notify_notification_new(PACKAGE_NAME, NULL, NULL, NULL);
+    notify_notification_set_hint_string(priv->notification,
+                                        "x-canonical-private-synchronous", "");
+  }
 }
 
 static void
@@ -998,31 +1001,31 @@ indicator_sound_notification_show(IndicatorSound *self, double value)
   if (priv->notification == NULL)
     return;
 
-	char *icon;
-	const int notify_value = CLAMP((int)value, -1, 101);
-	gint state = determine_state_from_volume (CLAMP(value, 0, 100));
+  char *icon;
+  const int notify_value = CLAMP((int)value, -1, 101);
+  gint state = determine_state_from_volume (CLAMP(value, 0, 100));
 
-	if (state == STATE_ZERO) {
-		GtkIconTheme *theme = gtk_icon_theme_get_default();
-		if (gtk_icon_theme_has_icon(theme, "audio-volume-off")) {
-			// Not available in all the themes
-			icon = "audio-volume-off";
-		} else {
-			icon = "audio-volume-muted";
-		}
-	} else if (state == STATE_LOW) {
-		icon = "audio-volume-low";
-	} else if (state == STATE_MEDIUM) {
-		icon = "audio-volume-medium";
-	} else if (state == STATE_HIGH) {
-		icon = "audio-volume-high";
-	} else {
-		icon = "audio-volume-muted";
-	}
+  if (state == STATE_ZERO) {
+    GtkIconTheme *theme = gtk_icon_theme_get_default();
+    if (gtk_icon_theme_has_icon(theme, "audio-volume-off")) {
+      // Not available in all the themes
+      icon = "audio-volume-off";
+    } else {
+      icon = "audio-volume-muted";
+    }
+  } else if (state == STATE_LOW) {
+   icon = "audio-volume-low";
+  } else if (state == STATE_MEDIUM) {
+    icon = "audio-volume-medium";
+  } else if (state == STATE_HIGH) {
+    icon = "audio-volume-high";
+  } else {
+    icon = "audio-volume-muted";
+  }
 
-	notify_notification_update(priv->notification, PACKAGE_NAME, NULL, icon);
-	notify_notification_set_hint_int32(priv->notification, "value", notify_value);
-	notify_notification_show(priv->notification, NULL);
+  notify_notification_update(priv->notification, PACKAGE_NAME, NULL, icon);
+  notify_notification_set_hint_int32(priv->notification, "value", notify_value);
+  notify_notification_show(priv->notification, NULL);
 }
 
 static void
