@@ -93,7 +93,6 @@ handle_event (DbusmenuMenuitem * mi,
   }
   
   gboolean mute_input = g_variant_get_boolean(input);
-  // TODO: use the pulse wrapper directly
   toggle_global_mute (mute_input);
   g_variant_unref (input); 
 }

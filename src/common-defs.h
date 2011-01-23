@@ -24,6 +24,18 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define SIGNAL_SINK_MUTE_UPDATE                 "SinkMuteUpdate"
 #define SIGNAL_SINK_AVAILABLE_UPDATE            "SinkAvailableUpdate"
 
+typedef enum {
+  MUTED,
+  ZERO_LEVEL,
+  LOW_LEVEL,
+  MEDIUM_LEVEL,
+  HIGH_LEVEL,
+  BLOCKED,
+  UNAVAILABLE,
+  AVAILABLE
+}SoundState;
+
+
 #define DBUSMENU_PROPERTY_EMPTY                 -1
 
 /* DBUS Custom Items */

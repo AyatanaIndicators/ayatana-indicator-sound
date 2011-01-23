@@ -157,21 +157,6 @@ void dbus_menu_manager_update_volume(gdouble  volume)
 }
 
 
-/**
-show_sound_settings_dialog:
-Bring up the gnome volume preferences dialog
-**/
-static void show_sound_settings_dialog (DbusmenuMenuitem *mi,
-                                        gpointer user_data)
-{
-  GError * error = NULL;
-  if (!g_spawn_command_line_async("gnome-volume-control --page=applications", &error) &&
-      !g_spawn_command_line_async("xfce4-mixer", &error)) 
-  {
-    g_warning("Unable to show dialog: %s", error->message);
-    g_error_free(error);
-  }
-}
 
 /**
 TODO: what are you doing with this
