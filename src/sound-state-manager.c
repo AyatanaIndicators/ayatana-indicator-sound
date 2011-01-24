@@ -17,40 +17,50 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <libindicator/indicator-image-helper.h>
+
 #include "sound-state-manager.h"
+
 
 typedef struct _SoundStateManagerPrivate SoundStateManagerPrivate;
 
+// TODO ensure all the relevant below are initialized to null in init
 struct _SoundStateManagerPrivate
 {
   GDBusProxy* dbus_proxy;  
   GHashTable* volume_states;  
   GList* blocked_animation_list;
+  SoundState current_state;
+  GtkImage* speaker_image;
 };
 
 #define SOUND_STATE_MANAGER_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), SOUND_TYPE_STATE_MANAGER, SoundStateManagerPrivate))
 
-static GtkImage *speaker_image = NULL;
-static gint current_state = 0;
-static gint previous_state = 0;
 static GtkIconSize design_team_size;
 static gint blocked_id;
 static gint animation_id;
+static GList* blocked_iter = NULL;
 
-static GList * blocked_animation_list = NULL;
-static GList * blocked_iter = NULL;
-static void prepare_blocked_animation();
-static gboolean fade_back_to_mute_image();
-static gboolean start_animation();
-static void reset_mute_blocking_animation();
-static void free_the_animation_list();
+static void sound_state_manager_prepare_blocked_animation(SoundStateManager* self);
+static gboolean sound_state_manager_start_animation (SoundStateManager* self)
+static gboolean sound_state_manager_fade_back_to_mute_image (gpointer user_data)
+static void sound_state_manager_reset_mute_blocking_animation (SoundStateManager* self);
+static void sound_state_mananger_free_the_animation_list (SoundStateManager* self);
+static void sound_state_manager_prepare_state_image_names (SoundStateManager* self);
 
 G_DEFINE_TYPE (SoundStateManager, sound_state_manager, G_TYPE_OBJECT);
 
 static void
-sound_state_manager_init (SoundStateManager *object)
+sound_state_manager_init (SoundStateManager* self)
 {
-  /* TODO: Add initialization code here */
+  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
+
+  sound_state_manager_prepare_state_image_names (self);
+  sound_state_manager_prepare_blocked_animation (self);
+
+  priv->current_state = UNAVAILABLE;
+  priv->speaker_image = indicator_image_helper(g_hash_table_lookup (priv->volume_states,
+                                                                    GINT_TO_POINTER(priv->current_state));
 }
 
 static void
@@ -68,13 +78,14 @@ sound_state_manager_class_init (SoundStateManagerClass *klass)
 	GObjectClass* parent_class = G_OBJECT_CLASS (klass);
 
 	object_class->finalize = sound_state_manager_finalize;
+  design_team_size = gtk_icon_size_register("design-team-size", 22, 22);  
 }
 
 /*
-Prepare states Array.
+Prepare states versus images names hash.
 */
-void
-sound_state_manager_prepare_state_machine(SoundStateManager* self)
+static void
+sound_state_manager_prepare_state_image_names (SoundStateManager* self)
 {
   SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
   priv->volume_states = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free); 
@@ -93,7 +104,7 @@ Prepares the array of images to be used in the blocked animation.
 Only called at startup.
 */
 static void
-sound_state_manager_prepare_blocked_animation(SoundStateManager* self)
+sound_state_manager_prepare_blocked_animation (SoundStateManager* self)
 {
   SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
   
@@ -130,49 +141,145 @@ sound_state_manager_prepare_blocked_animation(SoundStateManager* self)
   g_object_unref(blocked_buf);
 }
 
-void
-sound_state_manager_tidy_up_hash()
-{
-  g_hash_table_destroy(volume_states);
-}
 
-gchar*
-sound_state_manager_get_current_icon_name (SoundStateManager* self)
+GtkImage*
+sound_state_manager_get_current_icon (SoundStateManager* self)
 {
   SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
-  return g_hash_table_lookup (priv->volume_states,
-                              GINT_TO_POINTER(priv->current_state));
+  return priv->speaker_image;  
+}
+
+SoundState
+sound_state_manager_get_current_state (SoundStateManager* self)
+{
+  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
+  return priv->current_state;
+}
+
+static void 
+sound_state_signal_cb ( GDBusProxy* proxy,
+                        gchar* sender_name,
+                        gchar* signal_name,
+                        GVariant* parameters,
+                        gpointer user_data)
+{
+  g_return_if_fail (SOUND_IS_STATE_MANAGER (user_data));
+  SoundStateManager* self = SOUND_STATE_MANAGER (user_data);
+  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
+
+  g_variant_ref (parameters);
+  GVariant *value = g_variant_get_child_value (parameters, 0);
+  gint update = g_variant_get_int (value);
+
+  g_debug ( "!!! signal_cb with value %i", update);
+
+  priv->current_state = (SoundState)update;
+
+  g_variant_unref (parameters);
+
+  
+  /*if (g_strcmp0(signal_name, INDICATOR_SOUND_SIGNAL_SINK_AVAILABLE_UPDATE) == 0){
+    react_to_signal_sink_availability_update ( input, self );
+  }
+  else if (g_strcmp0(signal_name, INDICATOR_SOUND_SIGNAL_SINK_MUTE_UPDATE) == 0){
+    react_to_signal_sink_mute_update ( input, self );
+  }
+  else if (g_strcmp0(signal_name, INDICATOR_SOUND_SIGNAL_SINK_INPUT_WHILE_MUTED) == 0){
+    react_to_signal_sink_input_while_muted ( input, self );
+  }*/
   
 }
 
-static void g_signal_cb ( GDBusProxy* proxy,
-                          gchar* sender_name,
-                          gchar* signal_name,
-                          GVariant* parameters,
-                          gpointer user_data)
-{
-}
-
-static void
+void
 sound_state_manager_style_changed_cb(GtkWidget *widget, gpointer user_data)
 {
   //g_debug("Just caught a style change event");
-  update_state(current_state);
-  reset_mute_blocking_animation();
-  update_state(current_state);
-  free_the_animation_list();
-  prepare_blocked_animation();
+  g_return_if_fail (SOUND_IS_STATE_MANAGER (user_data));
+  SoundStateManager* self = SOUND_STATE_MANAGER (user_data);
+  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
+  sound_state_manager_reset_mute_blocking_animation (self)
+  sound_state_mananger_free_the_animation_list (self);
+  sound_state_manager_prepare_blocked_animation (self);
+}
+
+static void
+sound_state_manager_reset_mute_blocking_animation (SoundStateManager* self)
+{
+  if (animation_id != 0) {
+    //g_debug("about to remove the animation_id callback from the mainloop!!**");
+    g_source_remove(animation_id);
+    animation_id = 0;
+  }
+  if (blocked_id != 0) {
+    //g_debug("about to remove the blocked_id callback from the mainloop!!**");
+    g_source_remove(blocked_id);
+    blocked_id = 0;
+  }
+}
+
+static void
+sound_state_mananger_free_the_animation_list (SoundStateManager* self)
+{
+  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
+  
+  if (priv->blocked_animation_list != NULL) {
+    g_list_foreach (priv->blocked_animation_list, (GFunc)g_object_unref, NULL);
+    g_list_free (priv->blocked_animation_list);
+    blocked_animation_list = NULL;
+  }
+}
+
+/*static void
+update_state(const gint state)
+{
+  previous_state = current_state;
+  current_state = state;
+  gchar* image_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(current_state));
+  indicator_image_helper_update(speaker_image, image_name);
+}*/
+
+static gboolean
+sound_state_manager_start_animation (SoundStateManager* self)
+{
+  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
+  
+  blocked_iter = priv->blocked_animation_list;
+  blocked_id = 0;
+  animation_id = g_timeout_add (50,
+                                sound_state_manager_fade_back_to_mute_image,
+                                self);
+  return FALSE;
+}
+
+static gboolean
+sound_state_manager_fade_back_to_mute_image (gpointer user_data)
+{
+  g_return_if_fail (SOUND_IS_STATE_MANAGER (user_data));
+  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE( SOUND_STATE_MANAGER (user_data) );
+
+  if (blocked_iter != NULL) {
+    gtk_image_set_from_pixbuf (priv->speaker_image, blocked_iter->data);
+    blocked_iter = blocked_iter->next;
+    return TRUE;
+  } else {
+    animation_id = 0;
+    //g_debug("exit from animation now\n");
+    return FALSE;
+  }
 }
 
 /**
- * volume_widget_new:
- * @returns: a new #VolumeWidget.
+ * sound_state_manager_connect_to_dbus:
+ * @returns: void
+ * When ready the indicator-sound calls this method to enable state communication 
+ * between the indicator and the service. 
  **/
-SoundStateManager* 
-sound_state_manager_new (GDProxy* proxy)
+void
+sound_state_manager_connect_to_dbus (SoundStateManager* self, GDProxy* proxy)
 {
-  SoundStateManager* manager = g_object_new (SOUND_TYPE_STATE_MANAGER, NULL);
-  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(manager);
+  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
   priv->dbus_proxy = proxy;
-  return manager;
+  g_signal_connect (priv->dbus_proxy, "g-signal",
+                    G_CALLBACK (sound_state_signal_cb), self);
+  
 }

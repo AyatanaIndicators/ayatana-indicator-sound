@@ -21,6 +21,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define _SOUND_STATE_MANAGER_H_
 
 #include <glib-object.h>
+#include "common-defs.h"
 
 G_BEGIN_DECLS
 
@@ -45,9 +46,13 @@ struct _SoundStateManager
 };
 
 GType sound_state_manager_get_type (void) G_GNUC_CONST;
-void sound_state_manager_prepare_state_machine(SoundStateManager* self);
-SoundStateManager* sound_state_manager_new (GDProxy* proxy);
-gchar* sound_state_manager_get_current_icon_name (SoundStateManager* self);
+
+void sound_state_manager_style_changed_cb (GtkWidget *widget, gpointer user_data);
+GtkImage* sound_state_manager_get_current_icon (SoundStateManager* self);
+SoundState sound_state_manager_get_current_state (SoundStateManager* self);
+void sound_state_manager_connect_to_dbus (SoundStateManager* self,
+                                          GDProxy* proxy);
+
 G_END_DECLS
 
 #endif /* _SOUND_STATE_MANAGER_H_ */

@@ -38,8 +38,8 @@ typedef enum {
 #define DBUSMENU_VOLUME_MENUITEM_TYPE           "x-canonical-ido-volume-type"
 #define DBUSMENU_VOLUME_MENUITEM_LEVEL          "x-canonical-ido-volume-level"
 
-#define DBUSMENU_MUTE_MENUITEM_TYPE           "x-canonical-sound-menu-mute-type"
-#define DBUSMENU_MUTE_MENUITEM_VALUE          "x-canonical-sound-menu-mute-value"
+#define DBUSMENU_MUTE_MENUITEM_TYPE             "x-canonical-sound-menu-mute-type"
+#define DBUSMENU_MUTE_MENUITEM_VALUE            "x-canonical-sound-menu-mute-value"
 
 #define DBUSMENU_TRANSPORT_MENUITEM_TYPE        "x-canonical-sound-menu-player-transport-type"
 #define DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE  "x-canonical-sound-menu-player-transport-state"
