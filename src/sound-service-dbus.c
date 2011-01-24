@@ -279,11 +279,13 @@ bus_method_call (GDBusConnection * connection,
 
 // TODO until the pulsemanager has been refactored keep in place the consistent api 
 // for it to talk to the UI.
-void sound_service_dbus_update_volume(SoundServiceDbus* obj,
+void sound_service_dbus_update_volume(SoundServiceDbus* self,
                                       gdouble  volume)
 {
-  SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (obj);
+  SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
   slider_menu_item_update (priv->volume_slider_menuitem, volume);
+  sound_service_dbus_update_sound_state (self,
+                                         sound_service_dbus_get_state_from_volume (self));
 }
 
 void sound_service_dbus_update_sink_mute(SoundServiceDbus* obj,

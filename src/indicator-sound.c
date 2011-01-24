@@ -1,12 +1,8 @@
 /*
-A small wrapper utility to load indicators and put them as menu items
-into the gnome-panel using it's applet interface.
-
 Copyright 2010 Canonical Ltd.
 
 Authors:
     Conor Curran <conor.curran@canonical.com>
-    Ted Gould <ted@canonical.com>
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License version 3, as published
@@ -20,6 +16,7 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 #include <math.h>
 #include <glib.h>
 #include <glib-object.h>
@@ -40,6 +37,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "gen-sound-service.xml.h"
 #include "common-defs.h"
+#include "sound-state-manager.h"
 
 typedef struct _IndicatorSoundPrivate IndicatorSoundPrivate;
 
@@ -115,33 +113,9 @@ static void get_sink_availability_cb ( GObject *object,
 /****Volume States 'members' ***/
 static void update_state(const gint state);
 
-static const gint STATE_MUTED = 0;
-static const gint STATE_ZERO = 1;
-static const gint STATE_LOW = 2;
-static const gint STATE_MEDIUM = 3;
-static const gint STATE_HIGH = 4;
-static const gint STATE_MUTED_WHILE_INPUT = 5;
-static const gint STATE_SINKS_NONE = 6;
-
-static GHashTable *volume_states = NULL;
-static GtkImage *speaker_image = NULL;
-static gint current_state = 0;
-static gint previous_state = 0;
-
 static gboolean initial_mute ;
 static gboolean device_available;
 
-static GtkIconSize design_team_size;
-static gint blocked_id;
-static gint animation_id;
-
-static GList * blocked_animation_list = NULL;
-static GList * blocked_iter = NULL;
-static void prepare_blocked_animation();
-static gboolean fade_back_to_mute_image();
-static gboolean start_animation();
-static void reset_mute_blocking_animation();
-static void free_the_animation_list();
 
 
 static void
@@ -170,7 +144,6 @@ indicator_sound_init (IndicatorSound *self)
   self->service = indicator_service_manager_new_version(INDICATOR_SOUND_DBUS_NAME,
                                                         INDICATOR_SOUND_DBUS_VERSION);
 
-  prepare_state_machine();
   prepare_blocked_animation();
   animation_id = 0;
   blocked_id = 0;
@@ -226,11 +199,12 @@ get_label (IndicatorObject * io)
 static GtkImage *
 get_icon (IndicatorObject * io)
 {
-  gchar* current_name = g_hash_table_lookup(volume_states,
-                                            GINT_TO_POINTER(current_state));
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+  // TODO query the sound state manager for the current relevant image
+
   //g_debug("At start-up attempting to set the image to %s",
   //        current_name);
-  speaker_image = indicator_image_helper(current_name);
+  speaker_image = indicator_image_helper(sound_state_manager_get_current_icon_name(priv->sound_state_manager));
   gtk_widget_show(GTK_WIDGET(speaker_image));
     
   return speaker_image;
@@ -377,7 +351,7 @@ connection_changed (IndicatorServiceManager * sm,
   GError *error = NULL;
 
   if (connected == FALSE){
-    update_state (STATE_SINKS_NONE);
+    //update_state (STATE_SINKS_NONE);
     return;
     //TODO: Gracefully handle disconnection
     // do a timeout to wait for reconnection 
@@ -388,7 +362,7 @@ connection_changed (IndicatorServiceManager * sm,
   // we don't need to anything, gdbus takes care of the rest - bless.
   // just fetch the state.
   if (priv->dbus_proxy != NULL){
-    fetch_state (indicator);
+    //fetch_state (indicator);
     return;
   }
   
@@ -440,14 +414,16 @@ static void create_connection_to_service (GObject *source_object,
     g_error_free(error);
     return;
   }
-
+  
+  priv->sound_state_manager = sound_state_manager_new(priv->dbus_proxy);
+  
   g_signal_connect(priv->dbus_proxy, "g-signal",
                    G_CALLBACK(g_signal_cb), self);
 
   fetch_state (self);
 }
 
-static void fetch_state (IndicatorSound* self)
+/*static void fetch_state (IndicatorSound* self)
 {
 
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
@@ -541,61 +517,9 @@ static void get_sink_mute_cb ( GObject *object,
   
   g_variant_unref(value);
   g_variant_unref(result);
-}
+}*/
 
-/*
-Prepare states Array.
-*/
-void
-prepare_state_machine()
-{
-  volume_states = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
-  g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MUTED), g_strdup("audio-volume-muted-panel"));
-  g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_ZERO), g_strdup("audio-volume-low-zero-panel"));
-  g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_LOW), g_strdup("audio-volume-low-panel"));
-  g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MEDIUM), g_strdup("audio-volume-medium-panel"));
-  g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_HIGH), g_strdup("audio-volume-high-panel"));
-  g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT), g_strdup("audio-volume-muted-blocking-panel"));
-  g_hash_table_insert(volume_states, GINT_TO_POINTER(STATE_SINKS_NONE), g_strdup("audio-output-none-panel"));
-}
 
-/*
-prepare_blocked_animation:
-Prepares the array of images to be used in the blocked animation.
-Only called at startup.
-*/
-static void
-prepare_blocked_animation()
-{
-  gchar* blocked_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED_WHILE_INPUT));
-  gchar* muted_name = g_hash_table_lookup(volume_states, GINT_TO_POINTER(STATE_MUTED));
-
-  GtkImage* temp_image = indicator_image_helper(muted_name);
-  GdkPixbuf* mute_buf = gtk_image_get_pixbuf(temp_image);
-
-  temp_image = indicator_image_helper(blocked_name);
-  GdkPixbuf* blocked_buf = gtk_image_get_pixbuf(temp_image);
-
-  if (mute_buf == NULL || blocked_buf == NULL) {
-    //g_debug("Don bother with the animation, the theme aint got the goods !");
-    return;
-  }
-
-  int i;
-
-  // sample 51 snapshots - range : 0-256
-  for (i = 0; i < 51; i++) {
-    gdk_pixbuf_composite(mute_buf, blocked_buf, 0, 0,
-                         gdk_pixbuf_get_width(mute_buf),
-                         gdk_pixbuf_get_height(mute_buf),
-                         0, 0, 1, 1, GDK_INTERP_BILINEAR, MIN(255, i * 5));
-    blocked_animation_list = g_list_append(blocked_animation_list, gdk_pixbuf_copy(blocked_buf));
-  }
-  g_object_ref_sink(mute_buf);
-  g_object_unref(mute_buf);
-  g_object_ref_sink(blocked_buf);
-  g_object_unref(blocked_buf);
-}
 
 gint
 get_state()
@@ -631,24 +555,6 @@ update_state(const gint state)
   indicator_image_helper_update(speaker_image, image_name);
 }
 
-
-void
-determine_state_from_volume(gdouble volume_percent)
-{
-  if (device_available == FALSE)
-v    return;
-  gint state = previous_state;
-  if (volume_percent < 30.0 && volume_percent > 0) {
-    state = STATE_LOW;
-  } else if (volume_percent < 70.0 && volume_percent >= 30.0) {
-    state = STATE_MEDIUM;
-  } else if (volume_percent >= 70.0) {
-    state = STATE_HIGH;
-  } else if (volume_percent == 0.0) {
-    state = STATE_ZERO;
-  }
-  update_state(state);
-}
 
 
 static gboolean
@@ -694,7 +600,7 @@ reset_mute_blocking_animation()
 /*******************************************************************/
 // DBUS Signal reactions
 /*******************************************************************/
-static void g_signal_cb ( GDBusProxy* proxy,
+/*static void g_signal_cb ( GDBusProxy* proxy,
                           gchar* sender_name,
                           gchar* signal_name,
                           GVariant* parameters,
@@ -731,12 +637,12 @@ react_to_signal_sink_input_while_muted(gboolean block_value, IndicatorSound* sel
     blocked_id = g_timeout_add_seconds(5, start_animation, NULL);
   }
 }
-
+*/
 /*
  We can be sure the service won't send a mute signal unless it has changed !
  UNMUTE's force a volume update therefore icon is updated appropriately => no need for unmute handling here.
 */ 
-static void
+/*static void
 react_to_signal_sink_mute_update(gboolean mute_value, IndicatorSound* self)
 {
   if (mute_value == TRUE && device_available == TRUE) {
@@ -771,7 +677,7 @@ react_to_signal_sink_availability_update(gboolean available_value, IndicatorSoun
   determine_state_from_volume (volume_widget_get_current_volume(priv->volume_widget));    
   //g_debug("signal caught - sink availability update with  value: %i", available_value);
 }
-
+*/
 /*******************************************************************/
 //UI callbacks
 /******************************************************************/
@@ -930,16 +836,6 @@ key_release_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
   return digested;
 }
 
-static void
-style_changed_cb(GtkWidget *widget, gpointer user_data)
-{
-  //g_debug("Just caught a style change event");
-  update_state(current_state);
-  reset_mute_blocking_animation();
-  update_state(current_state);
-  free_the_animation_list();
-  prepare_blocked_animation();
-}
 
 static void
 indicator_sound_scroll (IndicatorObject *io, gint delta, IndicatorScrollDirection direction)
