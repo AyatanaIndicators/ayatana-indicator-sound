@@ -20,7 +20,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _SOUND_STATE_MANAGER_H_
 #define _SOUND_STATE_MANAGER_H_
 
-#include <glib-object.h>
+#include <glib.h>
 #include "common-defs.h"
 
 G_BEGIN_DECLS
@@ -51,7 +51,7 @@ void sound_state_manager_style_changed_cb (GtkWidget *widget, gpointer user_data
 GtkImage* sound_state_manager_get_current_icon (SoundStateManager* self);
 SoundState sound_state_manager_get_current_state (SoundStateManager* self);
 void sound_state_manager_connect_to_dbus (SoundStateManager* self,
-                                          GDProxy* proxy);
+                                          GDBusProxy* proxy);
 
 G_END_DECLS
 

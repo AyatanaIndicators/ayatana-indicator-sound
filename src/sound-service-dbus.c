@@ -331,8 +331,8 @@ void sound_service_dbus_update_sound_state (SoundServiceDbus* self,
 static SoundState sound_service_dbus_get_state_from_volume (SoundServiceDbus* self)
 {
   SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
-  GVariant* v = dbusmenu_menuitem_get_variant (DBUSMENU_MENUITEM(priv->volume_menuitem),
-                                                         DBUSMENU_VOLUME_MENUITEM_LEVEL);
+  GVariant* v = dbusmenu_menuitem_property_get_variant (DBUSMENU_MENUITEM(priv->volume_slider_menuitem),
+                                                        DBUSMENU_VOLUME_MENUITEM_LEVEL);
   gdouble volume_percent = g_variant_get_double (v);
 
   SoundState state = LOW_LEVEL;

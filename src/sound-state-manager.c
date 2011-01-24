@@ -18,9 +18,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <libindicator/indicator-image-helper.h>
-
 #include "sound-state-manager.h"
-
 
 typedef struct _SoundStateManagerPrivate SoundStateManagerPrivate;
 
@@ -35,6 +33,7 @@ struct _SoundStateManagerPrivate
 };
 
 #define SOUND_STATE_MANAGER_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), SOUND_TYPE_STATE_MANAGER, SoundStateManagerPrivate))
+G_DEFINE_TYPE (SoundStateManager, sound_state_manager, G_TYPE_OBJECT);
 
 static GtkIconSize design_team_size;
 static gint blocked_id;
@@ -42,13 +41,12 @@ static gint animation_id;
 static GList* blocked_iter = NULL;
 
 static void sound_state_manager_prepare_blocked_animation(SoundStateManager* self);
-static gboolean sound_state_manager_start_animation (SoundStateManager* self)
-static gboolean sound_state_manager_fade_back_to_mute_image (gpointer user_data)
+static gboolean sound_state_manager_start_animation (SoundStateManager* self);
+static gboolean sound_state_manager_fade_back_to_mute_image (gpointer user_data);
 static void sound_state_manager_reset_mute_blocking_animation (SoundStateManager* self);
-static void sound_state_mananger_free_the_animation_list (SoundStateManager* self);
+static void sound_state_manager_free_the_animation_list (SoundStateManager* self);
 static void sound_state_manager_prepare_state_image_names (SoundStateManager* self);
 
-G_DEFINE_TYPE (SoundStateManager, sound_state_manager, G_TYPE_OBJECT);
 
 static void
 sound_state_manager_init (SoundStateManager* self)
@@ -59,8 +57,8 @@ sound_state_manager_init (SoundStateManager* self)
   sound_state_manager_prepare_blocked_animation (self);
 
   priv->current_state = UNAVAILABLE;
-  priv->speaker_image = indicator_image_helper(g_hash_table_lookup (priv->volume_states,
-                                                                    GINT_TO_POINTER(priv->current_state));
+  priv->speaker_image = indicator_image_helper (g_hash_table_lookup (priv->volume_states,
+                                                                     GINT_TO_POINTER(priv->current_state)));
 }
 
 static void
@@ -72,12 +70,26 @@ sound_state_manager_finalize (GObject *object)
 }
 
 static void
+sound_state_manager_dispose (GObject *object)
+{
+  SoundStateManager* self = SOUND_STATE_MANAGER (object);
+  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
+  
+  g_hash_table_destroy (priv->volume_states);
+
+  sound_state_manager_free_the_animation_list (self);
+  G_OBJECT_CLASS (sound_state_manager_parent_class)->dispose (object);
+}
+ 
+
+static void
 sound_state_manager_class_init (SoundStateManagerClass *klass)
 {
 	GObjectClass* object_class = G_OBJECT_CLASS (klass);
-	GObjectClass* parent_class = G_OBJECT_CLASS (klass);
+	//GObjectClass* parent_class = G_OBJECT_CLASS (klass);
 
 	object_class->finalize = sound_state_manager_finalize;
+  object_class->dispose = sound_state_manager_dispose;
   design_team_size = gtk_icon_size_register("design-team-size", 22, 22);  
 }
 
@@ -88,14 +100,14 @@ static void
 sound_state_manager_prepare_state_image_names (SoundStateManager* self)
 {
   SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
-  priv->volume_states = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free); 
-  g_hash_table_insert(priv->volume_states, GINT_TO_POINTER(MUTED), g_strdup("audio-volume-muted-panel"));
-  g_hash_table_insert(priv->volume_states, GINT_TO_POINTER(ZERO_LEVEL), g_strdup("audio-volume-low-zero-panel"));
-  g_hash_table_insert(priv->volume_states, GINT_TO_POINTER(LOW_LEVEL), g_strdup("audio-volume-low-panel"));
-  g_hash_table_insert(priv->volume_states, GINT_TO_POINTER(MEDIUM_LEVEL), g_strdup("audio-volume-medium-panel"));
-  g_hash_table_insert(priv->volume_states, GINT_TO_POINTER(HIGH_LEVEL), g_strdup("audio-volume-high-panel"));
-  g_hash_table_insert(priv->volume_states, GINT_TO_POINTER(BLOCKED), g_strdup("audio-volume-muted-blocking-panel"));
-  g_hash_table_insert(priv->volume_states, GINT_TO_POINTER(UNAVAILABLE), g_strdup("audio-output-none-panel"));
+  priv->volume_states = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_free); 
+  g_hash_table_insert (priv->volume_states, GINT_TO_POINTER(MUTED), g_strdup("audio-volume-muted-panel"));
+  g_hash_table_insert (priv->volume_states, GINT_TO_POINTER(ZERO_LEVEL), g_strdup("audio-volume-low-zero-panel"));
+  g_hash_table_insert (priv->volume_states, GINT_TO_POINTER(LOW_LEVEL), g_strdup("audio-volume-low-panel"));
+  g_hash_table_insert (priv->volume_states, GINT_TO_POINTER(MEDIUM_LEVEL), g_strdup("audio-volume-medium-panel"));
+  g_hash_table_insert (priv->volume_states, GINT_TO_POINTER(HIGH_LEVEL), g_strdup("audio-volume-high-panel"));
+  g_hash_table_insert (priv->volume_states, GINT_TO_POINTER(BLOCKED), g_strdup("audio-volume-muted-blocking-panel"));
+  g_hash_table_insert (priv->volume_states, GINT_TO_POINTER(UNAVAILABLE), g_strdup("audio-output-none-panel"));
 }
 
 /*
@@ -169,7 +181,7 @@ sound_state_signal_cb ( GDBusProxy* proxy,
 
   g_variant_ref (parameters);
   GVariant *value = g_variant_get_child_value (parameters, 0);
-  gint update = g_variant_get_int (value);
+  gint update = g_variant_get_int32 (value);
 
   g_debug ( "!!! signal_cb with value %i", update);
 
@@ -196,9 +208,8 @@ sound_state_manager_style_changed_cb(GtkWidget *widget, gpointer user_data)
   //g_debug("Just caught a style change event");
   g_return_if_fail (SOUND_IS_STATE_MANAGER (user_data));
   SoundStateManager* self = SOUND_STATE_MANAGER (user_data);
-  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
-  sound_state_manager_reset_mute_blocking_animation (self)
-  sound_state_mananger_free_the_animation_list (self);
+  sound_state_manager_reset_mute_blocking_animation (self);
+  sound_state_manager_free_the_animation_list (self);
   sound_state_manager_prepare_blocked_animation (self);
 }
 
@@ -218,14 +229,14 @@ sound_state_manager_reset_mute_blocking_animation (SoundStateManager* self)
 }
 
 static void
-sound_state_mananger_free_the_animation_list (SoundStateManager* self)
+sound_state_manager_free_the_animation_list (SoundStateManager* self)
 {
   SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
   
   if (priv->blocked_animation_list != NULL) {
     g_list_foreach (priv->blocked_animation_list, (GFunc)g_object_unref, NULL);
     g_list_free (priv->blocked_animation_list);
-    blocked_animation_list = NULL;
+    priv->blocked_animation_list = NULL;
   }
 }
 
@@ -254,7 +265,7 @@ sound_state_manager_start_animation (SoundStateManager* self)
 static gboolean
 sound_state_manager_fade_back_to_mute_image (gpointer user_data)
 {
-  g_return_if_fail (SOUND_IS_STATE_MANAGER (user_data));
+  g_return_val_if_fail (SOUND_IS_STATE_MANAGER (user_data), FALSE);
   SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE( SOUND_STATE_MANAGER (user_data) );
 
   if (blocked_iter != NULL) {
@@ -275,7 +286,7 @@ sound_state_manager_fade_back_to_mute_image (gpointer user_data)
  * between the indicator and the service. 
  **/
 void
-sound_state_manager_connect_to_dbus (SoundStateManager* self, GDProxy* proxy)
+sound_state_manager_connect_to_dbus (SoundStateManager* self, GDBusProxy* proxy)
 {
   SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
   priv->dbus_proxy = proxy;

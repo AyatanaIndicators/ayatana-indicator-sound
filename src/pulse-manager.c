@@ -25,7 +25,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <pulse/gccmacro.h>
 
 #include "pulse-manager.h"
-#include "dbus-menu-manager.h"
 
 #define RECONNECT_DELAY 5
 

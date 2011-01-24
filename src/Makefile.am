@@ -9,11 +9,13 @@ soundmenulib_LTLIBRARIES = libsoundmenu.la
 libsoundmenu_la_SOURCES = \
             common-defs.h \
             indicator-sound.h \
+            indicator-sound.c \
+            sound-state-manager.c \
+            sound-state-manager.h \
             transport-widget.c \
             transport-widget.h \
             metadata-widget.c \
             metadata-widget.h \
-            indicator-sound.c \
             title-widget.c \
             title-widget.h \
             volume-widget.c \
@@ -22,7 +24,7 @@ libsoundmenu_la_SOURCES = \
             gen-sound-service.xml.c \
             dbus-shared-names.h
 
-libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -Werror -DG_LOG_DOMAIN=\"Indicator-Sound\"
+libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -DG_LOG_DOMAIN=\"Indicator-Sound\"
 libsoundmenu_la_LIBADD = $(APPLET_LIBS)
 libsoundmenu_la_LDFLAGS = -module -avoid-version
 

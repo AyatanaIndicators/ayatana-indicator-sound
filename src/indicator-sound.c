@@ -98,12 +98,6 @@ static void create_connection_to_service (GObject *source_object,
 static void connection_changed (IndicatorServiceManager * sm,
                                 gboolean connected,
                                 gpointer userdata);
-static void g_signal_cb ( GDBusProxy* proxy,
-                          gchar* sender_name,
-                          gchar* signal_name,
-                          GVariant* parameters,
-                          gpointer user_data);
-
 
 
 static void
@@ -148,16 +142,12 @@ static void
 indicator_sound_dispose (GObject *object)
 {
   IndicatorSound * self = INDICATOR_SOUND(object);
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
 
   if (self->service != NULL) {
     g_object_unref(G_OBJECT(self->service));
     self->service = NULL;
   }
-  g_hash_table_destroy(volume_states);
-
-  free_the_animation_list();
-
-  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (self));
 
   g_list_free ( priv->transport_widgets_list );
 
@@ -182,10 +172,10 @@ static GtkImage *
 get_icon (IndicatorObject * io)
 {
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
-  speaker_image = sound_state_manager_get_current_icon (priv->state_manager));
-  gtk_widget_show(GTK_WIDGET(speaker_image));
+  //speaker_image = sound_state_manager_get_current_icon (priv->state_manager));
+  gtk_widget_show( GTK_WIDGET(sound_state_manager_get_current_icon (priv->state_manager)) );
     
-  return speaker_image;
+  return sound_state_manager_get_current_icon (priv->state_manager);
 }
 
 /* Indicator based function to get the menu for the whole
@@ -742,10 +732,11 @@ indicator_sound_scroll (IndicatorObject *io, gint delta,
                         IndicatorScrollDirection direction)
 {
   //g_debug("indicator-sound-scroll - current slider value");
-
-  if (device_available == FALSE || current_state == STATE_MUTED)
-    return;
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+  SoundState current_state = sound_state_manager_get_current_state (priv->state_manager);
+
+  if (current_state == UNAVAILABLE || current_state == MUTED)
+    return;
   
   GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget)); 
   GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)slider_widget);
