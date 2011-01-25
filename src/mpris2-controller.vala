@@ -121,12 +121,11 @@ public class Mpris2Controller : GLib.Object
       debug("artists is of type %s", v_artists.get_type_string ());
       string display_artists;
       if(v_artists.get_type_string() == "s"){
-        debug("SPOTIFY YOU BASTARD");
+        debug("SPOTIFY is that you ?");
         display_artists = v_artists.get_string();
       }
       else{
-        debug ("conforms with the spec" );
-        string[] artists = v_artists.dup_strv();
+       string[] artists = v_artists.dup_strv();
         display_artists = string.joinv(", ", artists);
       }
       changed_updates.replace("xesam:artist", display_artists);
@@ -189,7 +188,7 @@ public class Mpris2Controller : GLib.Object
     }
   }
 
-  public bool fetch_playlists()
+  public void fetch_playlists()
   {
     PlaylistDetails[] current_playlists =  this.playlists.GetPlaylists(0,
                                                                        10,
@@ -204,17 +203,15 @@ public class Mpris2Controller : GLib.Object
       warning(" Playlists are on but its returning no current_playlists" );
       this.owner.use_playlists = false;
     }
-    return false;
   }
 
-  private bool fetch_active_playlist()
+  private void fetch_active_playlist()
   {    
     if (this.playlists.ActivePlaylist.valid == false){
       debug("We don't have an active playlist");
     }
     PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
     playlists_item.update_active_playlist ( this.playlists.ActivePlaylist.details );
-    return false;
   }
 
   public void activate_playlist (ObjectPath path)
