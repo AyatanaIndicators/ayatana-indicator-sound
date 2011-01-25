@@ -86,10 +86,12 @@ static void
 sound_state_manager_class_init (SoundStateManagerClass *klass)
 {
 	GObjectClass* object_class = G_OBJECT_CLASS (klass);
-	//GObjectClass* parent_class = G_OBJECT_CLASS (klass);
 
 	object_class->finalize = sound_state_manager_finalize;
   object_class->dispose = sound_state_manager_dispose;
+
+  g_type_class_add_private (klass, sizeof (SoundStateManagerPrivate));
+  
   design_team_size = gtk_icon_size_register("design-team-size", 22, 22);  
 }
 
