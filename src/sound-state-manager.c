@@ -22,7 +22,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 typedef struct _SoundStateManagerPrivate SoundStateManagerPrivate;
 
-// TODO ensure all the relevant below are initialized to null in init
 struct _SoundStateManagerPrivate
 {
   GDBusProxy* dbus_proxy;  
@@ -46,6 +45,11 @@ static gboolean sound_state_manager_fade_back_to_mute_image (gpointer user_data)
 static void sound_state_manager_reset_mute_blocking_animation (SoundStateManager* self);
 static void sound_state_manager_free_the_animation_list (SoundStateManager* self);
 static void sound_state_manager_prepare_state_image_names (SoundStateManager* self);
+static void sound_state_signal_cb ( GDBusProxy* proxy,
+                                    gchar* sender_name,
+                                    gchar* signal_name,
+                                    GVariant* parameters,
+                                    gpointer user_data );
 
 
 static void
@@ -53,6 +57,11 @@ sound_state_manager_init (SoundStateManager* self)
 {
   SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
 
+  priv->dbus_proxy = NULL;
+  priv->volume_states = NULL;
+  priv->speaker_image = NULL;
+  priv->blocked_animation_list = NULL;
+  
   sound_state_manager_prepare_state_image_names (self);
   sound_state_manager_prepare_blocked_animation (self);
 
@@ -170,6 +179,23 @@ sound_state_manager_get_current_state (SoundStateManager* self)
   return priv->current_state;
 }
 
+/**
+ * sound_state_manager_connect_to_dbus:
+ * @returns: void
+ * When ready the indicator-sound calls this method to enable state communication 
+ * between the indicator and the service. 
+ **/
+void
+sound_state_manager_connect_to_dbus (SoundStateManager* self, GDBusProxy* proxy)
+{
+  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
+  priv->dbus_proxy = proxy;
+  g_debug (" here about to register for signal callback");
+  g_signal_connect (priv->dbus_proxy, "g-signal",
+                    G_CALLBACK (sound_state_signal_cb), self);
+  
+}
+
 static void 
 sound_state_signal_cb ( GDBusProxy* proxy,
                         gchar* sender_name,
@@ -177,6 +203,8 @@ sound_state_signal_cb ( GDBusProxy* proxy,
                         GVariant* parameters,
                         gpointer user_data)
 {
+  g_debug ( "!!! signal_cb with value" );
+
   g_return_if_fail (SOUND_IS_STATE_MANAGER (user_data));
   SoundStateManager* self = SOUND_STATE_MANAGER (user_data);
   SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
@@ -281,18 +309,3 @@ sound_state_manager_fade_back_to_mute_image (gpointer user_data)
   }
 }
 
-/**
- * sound_state_manager_connect_to_dbus:
- * @returns: void
- * When ready the indicator-sound calls this method to enable state communication 
- * between the indicator and the service. 
- **/
-void
-sound_state_manager_connect_to_dbus (SoundStateManager* self, GDBusProxy* proxy)
-{
-  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
-  priv->dbus_proxy = proxy;
-  g_signal_connect (priv->dbus_proxy, "g-signal",
-                    G_CALLBACK (sound_state_signal_cb), self);
-  
-}
