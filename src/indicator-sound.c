@@ -382,7 +382,6 @@ new_volume_slider_widget(DbusmenuMenuitem * newitem,
                                   newitem,
                                   menu_volume_item,
                                   parent);
-  //fetch_state(INDICATOR_SOUND (io));
   return TRUE;  
 }
 

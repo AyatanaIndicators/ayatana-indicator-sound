@@ -47,7 +47,9 @@ struct _SoundStateManager
 
 GType sound_state_manager_get_type (void) G_GNUC_CONST;
 
-void sound_state_manager_style_changed_cb (GtkWidget *widget, gpointer user_data);
+void sound_state_manager_style_changed_cb (GtkWidget *widget,
+                                           GtkStyle  *previous_style,
+                                           gpointer user_data);
 GtkImage* sound_state_manager_get_current_icon (SoundStateManager* self);
 SoundState sound_state_manager_get_current_state (SoundStateManager* self);
 void sound_state_manager_connect_to_dbus (SoundStateManager* self,

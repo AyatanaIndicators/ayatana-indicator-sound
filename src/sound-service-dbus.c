@@ -258,8 +258,6 @@ sound_service_dbus_finalize (GObject *object)
   return;
 }
 
-// TODO until the pulsemanager has been refactored keep in place the consistent api 
-// for it to talk to the UI.
 void sound_service_dbus_update_volume(SoundServiceDbus* self,
                                       gdouble  volume)
 {
@@ -323,6 +321,7 @@ static void sound_service_dbus_determine_state (SoundServiceDbus* self,
   sound_service_dbus_update_sound_state (self, update);    
 }
 
+
 // EMIT STATE SIGNAL
 
 // TODO: this will be a bit messy until the pa_manager is sorted.
@@ -338,8 +337,9 @@ void sound_service_dbus_update_sound_state (SoundServiceDbus* self,
                                             DBUSMENU_MUTE_MENUITEM_VALUE) == FALSE ){
       update = sound_service_dbus_get_state_from_volume (self);
   }
-  
-  priv->current_sound_state = update;
+  if (update != BLOCKED){
+    priv->current_sound_state = update;
+  }
 
   GVariant* v_output = g_variant_new("(i)", (int)update);
 
