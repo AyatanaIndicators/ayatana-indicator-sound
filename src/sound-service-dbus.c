@@ -258,34 +258,6 @@ sound_service_dbus_finalize (GObject *object)
   return;
 }
 
-/* A method has been called from our dbus inteface.  Figure out what it
-   is and dispatch it. */
-  // TODO we will need to implement the black_list method.
-static void
-bus_method_call (GDBusConnection * connection,
-                 const gchar * sender,
-                 const gchar * path,
-                 const gchar * interface,
-                 const gchar * method,
-                 GVariant * params,
-                 GDBusMethodInvocation * invocation,
-                 gpointer user_data)
-{ 
-  SoundServiceDbus* service = SOUND_SERVICE_DBUS(user_data); 
-  g_return_if_fail ( IS_SOUND_SERVICE_DBUS(service) );
-  GVariant * retval = NULL;
-  SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (service);
-
-  if (g_strcmp0(method, "GetSoundState") == 0) {
-    g_debug("Get state -  %i", priv->current_sound_state );
-    retval =  g_variant_new ( "(i)", priv->current_sound_state);    
-  }   
-  else {
-    g_warning("Calling method '%s' on the sound service but it's unknown", method); 
-  }
-  g_dbus_method_invocation_return_value (invocation, retval);
-}
-
 // TODO until the pulsemanager has been refactored keep in place the consistent api 
 // for it to talk to the UI.
 void sound_service_dbus_update_volume(SoundServiceDbus* self,
@@ -308,6 +280,50 @@ void sound_service_dbus_update_sink_mute(SoundServiceDbus* self,
   }
   sound_service_dbus_update_sound_state (self, state);
 }
+
+static SoundState sound_service_dbus_get_state_from_volume (SoundServiceDbus* self)
+{
+  SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
+  GVariant* v = dbusmenu_menuitem_property_get_variant (DBUSMENU_MENUITEM(priv->volume_slider_menuitem),
+                                                        DBUSMENU_VOLUME_MENUITEM_LEVEL);
+  gdouble volume_percent = g_variant_get_double (v);
+
+  SoundState state = LOW_LEVEL;
+
+  if (volume_percent < 30.0 && volume_percent > 0) {
+    state = LOW_LEVEL;
+  } 
+  else if (volume_percent < 70.0 && volume_percent >= 30.0) {
+    state = MEDIUM_LEVEL;
+  } 
+  else if (volume_percent >= 70.0) {
+    state = HIGH_LEVEL;
+  } 
+  else if (volume_percent == 0.0) {
+    state = ZERO_LEVEL;
+  }
+  return state;
+}
+
+static void sound_service_dbus_determine_state (SoundServiceDbus* self, 
+                                                gboolean availability,
+                                                gboolean mute,
+                                                gdouble volume)
+{
+  SoundState update;
+  if (availability == FALSE) {
+    update = UNAVAILABLE;
+  }
+  else if (mute == TRUE) {
+    update = MUTED;
+  }
+  else{
+    update = sound_service_dbus_get_state_from_volume (self);
+  }
+  sound_service_dbus_update_sound_state (self, update);    
+}
+
+// EMIT STATE SIGNAL
 
 // TODO: this will be a bit messy until the pa_manager is sorted.
 // And we figure out all of the edge cases.
@@ -344,66 +360,31 @@ void sound_service_dbus_update_sound_state (SoundServiceDbus* self,
   }
 }
 
-static SoundState sound_service_dbus_get_state_from_volume (SoundServiceDbus* self)
-{
-  SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
-  GVariant* v = dbusmenu_menuitem_property_get_variant (DBUSMENU_MENUITEM(priv->volume_slider_menuitem),
-                                                        DBUSMENU_VOLUME_MENUITEM_LEVEL);
-  gdouble volume_percent = g_variant_get_double (v);
+//HANDLE DBUS METHOD CALLS
+// TODO we will need to implement the black_list method.
+static void
+bus_method_call (GDBusConnection * connection,
+                 const gchar * sender,
+                 const gchar * path,
+                 const gchar * interface,
+                 const gchar * method,
+                 GVariant * params,
+                 GDBusMethodInvocation * invocation,
+                 gpointer user_data)
+{ 
+  SoundServiceDbus* service = SOUND_SERVICE_DBUS(user_data); 
+  g_return_if_fail ( IS_SOUND_SERVICE_DBUS(service) );
+  GVariant * retval = NULL;
+  SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (service);
 
-  SoundState state = LOW_LEVEL;
-
-  if (volume_percent < 30.0 && volume_percent > 0) {
-    state = LOW_LEVEL;
-  } 
-  else if (volume_percent < 70.0 && volume_percent >= 30.0) {
-    state = MEDIUM_LEVEL;
-  } 
-  else if (volume_percent >= 70.0) {
-    state = HIGH_LEVEL;
-  } 
-  else if (volume_percent == 0.0) {
-    state = ZERO_LEVEL;
+  if (g_strcmp0(method, "GetSoundState") == 0) {
+    g_debug("Get state -  %i", priv->current_sound_state );
+    retval =  g_variant_new ( "(i)", priv->current_sound_state);    
+  }   
+  else {
+    g_warning("Calling method '%s' on the sound service but it's unknown", method); 
   }
-  return state;
-}
-
-static void sound_service_dbus_determine_state (SoundServiceDbus* self, 
-                                                gboolean availability,
-                                                gboolean mute,
-                                                gdouble volume)
-{
-  //SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
-  SoundState update;
-  if (availability == FALSE) {
-    update = UNAVAILABLE;
-  }
-  else if (mute == TRUE) {
-    update = MUTED;
-  }
-  else{
-    update = sound_service_dbus_get_state_from_volume (self);
-  }
-
-  sound_service_dbus_update_sound_state (self, update);
-  /*GVariant* v_output = g_variant_new("(i)", (int)priv->current_sound_state);
-
-  GError * error = NULL;
-
-  g_debug ("emitting signal with value %i", (int)priv->current_sound_state);
-  g_dbus_connection_emit_signal( priv->connection,
-                                 NULL,
-                                 INDICATOR_SOUND_SERVICE_DBUS_OBJECT_PATH,
-                                 INDICATOR_SOUND_DBUS_INTERFACE,
-                                 INDICATOR_SOUND_SIGNAL_STATE_UPDATE,
-                                 v_output,
-                                 &error );
-  if (error != NULL) {
-    g_error("Unable to emit signal 'sinkinputwhilemuted' because : %s", error->message);
-    g_error_free(error);
-    return;
-  }*/
-    
+  g_dbus_method_invocation_return_value (invocation, retval);
 }
 
 
