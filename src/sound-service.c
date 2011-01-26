@@ -18,8 +18,8 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "sound-service.h"
-//#include "dbus-menu-manager.h"
-//#include "pulse-manager.h"
+
+#include "pulse-manager.h"
 #include "sound-service-dbus.h"
 #include "music-player-bridge.h"
 

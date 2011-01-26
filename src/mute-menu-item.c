@@ -39,10 +39,7 @@ static void mute_menu_item_class_init (MuteMenuItemClass *klass);
 static void mute_menu_item_init       (MuteMenuItem *self);
 static void mute_menu_item_dispose    (GObject *object);
 static void mute_menu_item_finalize   (GObject *object);
-static void handle_event (DbusmenuMenuitem * mi, const gchar * name, 
-                          GVariant * value, guint timestamp);
-static void 
-mute_menu_item_set_global_mute_from_ui (gpointer user_data);
+static void mute_menu_item_set_global_mute_from_ui (gpointer user_data);
 
 G_DEFINE_TYPE (MuteMenuItem, mute_menu_item, G_TYPE_OBJECT);
 

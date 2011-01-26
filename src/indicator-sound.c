@@ -129,7 +129,6 @@ indicator_sound_init (IndicatorSound *self)
   priv->dbus_proxy = NULL;
   GList* t_list = NULL;
   priv->transport_widgets_list = t_list;
-  // create our state manager which will handle all icon changing etc. 
   priv->state_manager = g_object_new (SOUND_TYPE_STATE_MANAGER, NULL);
   
   g_signal_connect ( G_OBJECT(self->service),
@@ -209,7 +208,7 @@ connection_changed (IndicatorServiceManager * sm,
   GError *error = NULL;
 
   if (connected == FALSE){
-    //update_state (STATE_SINKS_NONE);
+    sound_state_manager_deal_with_disconnect (priv->state_manager);
     return;
     //TODO: Gracefully handle disconnection
     // do a timeout to wait for reconnection 
@@ -220,7 +219,14 @@ connection_changed (IndicatorServiceManager * sm,
   // we don't need to anything, gdbus takes care of the rest - bless.
   // just fetch the state.
   if (priv->dbus_proxy != NULL){
-    //fetch_state (indicator);
+    g_dbus_proxy_call ( priv->dbus_proxy,
+                        "GetSoundState",
+                        NULL,
+		                    G_DBUS_CALL_FLAGS_NONE,
+                        -1,
+                        NULL,
+                        (GAsyncReadyCallback)sound_state_manager_get_state_cb,
+                        priv->state_manager);  
     return;
   }
   

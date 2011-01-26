@@ -52,9 +52,6 @@ static void sound_state_signal_cb ( GDBusProxy* proxy,
                                     gchar* signal_name,
                                     GVariant* parameters,
                                     gpointer user_data );
-static void sound_state_manager_get_state_cb (GObject *object,
-                                              GAsyncResult *res,
-                                              gpointer user_data);
 static gboolean sound_state_manager_can_proceed_with_blocking_animation (SoundStateManager* self);
 
 static void
@@ -210,7 +207,7 @@ sound_state_manager_connect_to_dbus (SoundStateManager* self, GDBusProxy* proxy)
                       self);  
 }
 
-static void
+void
 sound_state_manager_get_state_cb (GObject *object,
                                   GAsyncResult *res,
                                   gpointer user_data)
@@ -240,6 +237,17 @@ sound_state_manager_get_state_cb (GObject *object,
   
   g_variant_unref(value);
   g_variant_unref(result);
+}
+
+void 
+sound_state_manager_deal_with_disconnect (SoundStateManager* self)
+{
+  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
+  priv->current_state = UNAVAILABLE;
+
+  gchar* image_name = g_hash_table_lookup (priv->volume_states, 
+                                           GINT_TO_POINTER(priv->current_state) );
+  indicator_image_helper_update (priv->speaker_image, image_name);
 }
 
 static void 

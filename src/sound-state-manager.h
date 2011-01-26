@@ -54,6 +54,12 @@ GtkImage* sound_state_manager_get_current_icon (SoundStateManager* self);
 SoundState sound_state_manager_get_current_state (SoundStateManager* self);
 void sound_state_manager_connect_to_dbus (SoundStateManager* self,
                                           GDBusProxy* proxy);
+void sound_state_manager_deal_with_disconnect (SoundStateManager* self);
+void sound_state_manager_get_state_cb (GObject *object,
+                                       GAsyncResult *res,
+                                       gpointer user_data);
+
+
 
 G_END_DECLS
 
