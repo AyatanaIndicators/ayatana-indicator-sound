@@ -173,7 +173,8 @@ static void sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
 
   // Mute button
   priv->mute_menuitem = mute_menu_item_new ( mute_update, availability);
-  dbusmenu_menuitem_child_append (priv->root_menuitem, DBUSMENU_MENUITEM(priv->mute_menuitem));
+  dbusmenu_menuitem_child_append (priv->root_menuitem,
+                                  mute_menu_item_get_button (priv->mute_menuitem));
 
   // Slider
   priv->volume_slider_menuitem = slider_menu_item_new ( availability, volume );
@@ -240,12 +241,6 @@ void sound_service_dbus_update_pa_state ( SoundServiceDbus* self,
                             availability );
   sound_service_dbus_determine_state (self, availability, mute_update, volume);  
 
-  // Emit the signals after the menus are setup/torn down
-  // preserve ordering !
-  /*sound_service_dbus_update_sink_availability(dbus_interface, sink_available);
-  dbus_menu_manager_update_volume(percent);
-  sound_service_dbus_update_sink_mute(dbus_interface, sink_muted);
-  dbus_menu_manager_update_mute_ui(b_all_muted);*/
 }
 
 
@@ -302,11 +297,16 @@ void sound_service_dbus_update_volume(SoundServiceDbus* self,
                                          sound_service_dbus_get_state_from_volume (self));
 }
 
-void sound_service_dbus_update_sink_mute(SoundServiceDbus* obj,
+void sound_service_dbus_update_sink_mute(SoundServiceDbus* self,
                                          gboolean mute_update)
 {
-  SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (obj);
+  SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
   mute_menu_item_update (priv->mute_menuitem, mute_update);
+  SoundState state = sound_service_dbus_get_state_from_volume (self);
+  if (mute_update == TRUE){
+    state = MUTED;
+  }
+  sound_service_dbus_update_sound_state (self, state);
 }
 
 // TODO: this will be a bit messy until the pa_manager is sorted.
@@ -316,11 +316,14 @@ void sound_service_dbus_update_sound_state (SoundServiceDbus* self,
 {
   SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
   SoundState update = new_state;
+  // Ensure that after it has become available update the state with the current volume level
   if (new_state == AVAILABLE &&
       dbusmenu_menuitem_property_get_bool ( DBUSMENU_MENUITEM(priv->mute_menuitem),
                                             DBUSMENU_MUTE_MENUITEM_VALUE) == FALSE ){
       update = sound_service_dbus_get_state_from_volume (self);
   }
+  
+  priv->current_sound_state = update;
 
   GVariant* v_output = g_variant_new("(i)", (int)update);
 
@@ -370,19 +373,20 @@ static void sound_service_dbus_determine_state (SoundServiceDbus* self,
                                                 gboolean mute,
                                                 gdouble volume)
 {
-  SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
-  
+  //SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
+  SoundState update;
   if (availability == FALSE) {
-    priv->current_sound_state = AVAILABLE;
+    update = UNAVAILABLE;
   }
   else if (mute == TRUE) {
-    priv->current_sound_state = MUTED;
+    update = MUTED;
   }
   else{
-    priv->current_sound_state = sound_service_dbus_get_state_from_volume (self);
+    update = sound_service_dbus_get_state_from_volume (self);
   }
 
-  GVariant* v_output = g_variant_new("(i)", (int)priv->current_sound_state);
+  sound_service_dbus_update_sound_state (self, update);
+  /*GVariant* v_output = g_variant_new("(i)", (int)priv->current_sound_state);
 
   GError * error = NULL;
 
@@ -398,7 +402,7 @@ static void sound_service_dbus_determine_state (SoundServiceDbus* self,
     g_error("Unable to emit signal 'sinkinputwhilemuted' because : %s", error->message);
     g_error_free(error);
     return;
-  }
+  }*/
     
 }
 

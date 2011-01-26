@@ -22,7 +22,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <glib.h>
 #include <glib-object.h>
-
 #include <libdbusmenu-glib/menuitem.h>
 
 G_BEGIN_DECLS
@@ -38,19 +37,21 @@ typedef struct _MuteMenuItem      MuteMenuItem;
 typedef struct _MuteMenuItemClass MuteMenuItemClass;
 
 struct _MuteMenuItemClass {
-  DbusmenuMenuitemClass parent_class;
+  GObjectClass parent_class;
 };
 
 struct _MuteMenuItem {
-  DbusmenuMenuitem parent;
+  GObject parent;
 };
 
 GType mute_menu_item_get_type (void);
 
-MuteMenuItem* mute_menu_item_new();
+MuteMenuItem* mute_menu_item_new ();
 
-void mute_menu_item_update(MuteMenuItem* item, gboolean update);
-void mute_menu_item_enable(MuteMenuItem* item, gboolean active);
+void mute_menu_item_update (MuteMenuItem* item, gboolean update);
+void mute_menu_item_enable (MuteMenuItem* item, gboolean active);
+
+DbusmenuMenuitem* mute_menu_item_get_button (MuteMenuItem* item);
 
 G_END_DECLS
 
