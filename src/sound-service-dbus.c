@@ -80,7 +80,10 @@ static void sound_service_dbus_build_sound_menu ( SoundServiceDbus* root,
 static void show_sound_settings_dialog (DbusmenuMenuitem *mi,
                                         gpointer user_data);
 static SoundState sound_service_dbus_get_state_from_volume (SoundServiceDbus* self);
-
+static void sound_service_dbus_determine_state (SoundServiceDbus* self, 
+                                                gboolean availability,
+                                                gboolean mute,
+                                                gdouble volume);
 
 G_DEFINE_TYPE (SoundServiceDbus, sound_service_dbus, G_TYPE_OBJECT);
 
@@ -191,6 +194,7 @@ static void sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
   dbusmenu_menuitem_child_append(priv->root_menuitem, settings_mi);
   g_signal_connect(G_OBJECT(settings_mi), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED,
                    G_CALLBACK(show_sound_settings_dialog), NULL);
+  sound_service_dbus_determine_state (self, availability, mute_update, volume);
 }
 
 /**
@@ -234,6 +238,7 @@ void sound_service_dbus_update_pa_state ( SoundServiceDbus* self,
   mute_menu_item_enable ( priv->mute_menuitem, availability);
   slider_menu_item_enable ( priv->volume_slider_menuitem, 
                             availability );
+  sound_service_dbus_determine_state (self, availability, mute_update, volume);  
 
   // Emit the signals after the menus are setup/torn down
   // preserve ordering !
@@ -260,6 +265,7 @@ sound_service_dbus_finalize (GObject *object)
 
 /* A method has been called from our dbus inteface.  Figure out what it
    is and dispatch it. */
+  // TODO we will need to implement the black_list method.
 static void
 bus_method_call (GDBusConnection * connection,
                  const gchar * sender,
@@ -272,9 +278,17 @@ bus_method_call (GDBusConnection * connection,
 { 
   SoundServiceDbus* service = SOUND_SERVICE_DBUS(user_data); 
   g_return_if_fail ( IS_SOUND_SERVICE_DBUS(service) );
-  //GVariant * retval = NULL;
-  //SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (service);
-  // TODO we will need to implement the black_list and state fetch.  
+  GVariant * retval = NULL;
+  SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (service);
+
+  if (g_strcmp0(method, "GetSoundState") == 0) {
+    g_debug("Get state -  %i", priv->current_sound_state );
+    retval =  g_variant_new ( "(i)", priv->current_sound_state);    
+  }   
+  else {
+    g_warning("Calling method '%s' on the sound service but it's unknown", method); 
+  }
+  g_dbus_method_invocation_return_value (invocation, retval);
 }
 
 // TODO until the pulsemanager has been refactored keep in place the consistent api 
@@ -315,9 +329,9 @@ void sound_service_dbus_update_sound_state (SoundServiceDbus* self,
   g_debug ("emitting signal with value %i", (int)update);
   g_dbus_connection_emit_signal( priv->connection,
                                  NULL,
-                                 INDICATOR_SOUND_MENU_DBUS_OBJECT_PATH,
+                                 INDICATOR_SOUND_SERVICE_DBUS_OBJECT_PATH,
                                  INDICATOR_SOUND_DBUS_INTERFACE,
-                                 INDICATOR_SOUND_SIGNAL_SOUND_STATE_UPDATE,
+                                 INDICATOR_SOUND_SIGNAL_STATE_UPDATE,
                                  v_output,
                                  &error );
   if (error != NULL) {
@@ -350,6 +364,44 @@ static SoundState sound_service_dbus_get_state_from_volume (SoundServiceDbus* se
   }
   return state;
 }
+
+static void sound_service_dbus_determine_state (SoundServiceDbus* self, 
+                                                gboolean availability,
+                                                gboolean mute,
+                                                gdouble volume)
+{
+  SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
+  
+  if (availability == FALSE) {
+    priv->current_sound_state = AVAILABLE;
+  }
+  else if (mute == TRUE) {
+    priv->current_sound_state = MUTED;
+  }
+  else{
+    priv->current_sound_state = sound_service_dbus_get_state_from_volume (self);
+  }
+
+  GVariant* v_output = g_variant_new("(i)", (int)priv->current_sound_state);
+
+  GError * error = NULL;
+
+  g_debug ("emitting signal with value %i", (int)priv->current_sound_state);
+  g_dbus_connection_emit_signal( priv->connection,
+                                 NULL,
+                                 INDICATOR_SOUND_SERVICE_DBUS_OBJECT_PATH,
+                                 INDICATOR_SOUND_DBUS_INTERFACE,
+                                 INDICATOR_SOUND_SIGNAL_STATE_UPDATE,
+                                 v_output,
+                                 &error );
+  if (error != NULL) {
+    g_error("Unable to emit signal 'sinkinputwhilemuted' because : %s", error->message);
+    g_error_free(error);
+    return;
+  }
+    
+}
+
 
 
 

@@ -19,6 +19,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <libindicator/indicator-image-helper.h>
 #include "sound-state-manager.h"
+#include "dbus-shared-names.h"
 
 typedef struct _SoundStateManagerPrivate SoundStateManagerPrivate;
 
@@ -50,6 +51,10 @@ static void sound_state_signal_cb ( GDBusProxy* proxy,
                                     gchar* signal_name,
                                     GVariant* parameters,
                                     gpointer user_data );
+static void sound_state_manager_get_state_cb (GObject *object,
+                                              GAsyncResult *res,
+                                              gpointer user_data);
+
 
 
 static void
@@ -193,7 +198,47 @@ sound_state_manager_connect_to_dbus (SoundStateManager* self, GDBusProxy* proxy)
   g_debug (" here about to register for signal callback on %s", g_dbus_proxy_get_name (priv->dbus_proxy));
   g_signal_connect (priv->dbus_proxy, "g-signal",
                     G_CALLBACK (sound_state_signal_cb), self);
+
+  g_dbus_proxy_call ( priv->dbus_proxy,
+                      "GetSoundState",
+                      NULL,
+		                  G_DBUS_CALL_FLAGS_NONE,
+                      -1,
+                      NULL,
+                      (GAsyncReadyCallback)sound_state_manager_get_state_cb,
+                      self);  
+}
+
+static void
+sound_state_manager_get_state_cb (GObject *object,
+                                  GAsyncResult *res,
+                                  gpointer user_data)
+{
+  g_return_if_fail (SOUND_IS_STATE_MANAGER (user_data));
+  SoundStateManager* self = SOUND_STATE_MANAGER (user_data);
+  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
   
+  GVariant *result, *value;
+  GError *error = NULL;
+  result = g_dbus_proxy_call_finish ( priv->dbus_proxy,
+                                      res,
+                                      &error );
+
+  if (error != NULL) {
+    g_debug("get_sound_state call failed: %s", error->message);
+    g_error_free(error);
+    return;
+  }
+
+  value = g_variant_get_child_value(result, 0);
+  priv->current_state = (SoundState)g_variant_get_int32(value);
+
+  gchar* image_name = g_hash_table_lookup (priv->volume_states, 
+                                           GINT_TO_POINTER(priv->current_state) );
+  indicator_image_helper_update (priv->speaker_image, image_name);
+  
+  g_variant_unref(value);
+  g_variant_unref(result);
 }
 
 static void 
@@ -219,16 +264,14 @@ sound_state_signal_cb ( GDBusProxy* proxy,
 
   g_variant_unref (parameters);
 
-  
-  /*if (g_strcmp0(signal_name, INDICATOR_SOUND_SIGNAL_SINK_AVAILABLE_UPDATE) == 0){
-    react_to_signal_sink_availability_update ( input, self );
+  if (g_strcmp0(signal_name, INDICATOR_SOUND_SIGNAL_STATE_UPDATE) == 0){
+    gchar* image_name = g_hash_table_lookup (priv->volume_states, 
+                                             GINT_TO_POINTER(priv->current_state) );
+    indicator_image_helper_update (priv->speaker_image, image_name);    
   }
-  else if (g_strcmp0(signal_name, INDICATOR_SOUND_SIGNAL_SINK_MUTE_UPDATE) == 0){
-    react_to_signal_sink_mute_update ( input, self );
+  else {
+    g_debug ("sorry don't know what signal this is - %s", signal_name);
   }
-  else if (g_strcmp0(signal_name, INDICATOR_SOUND_SIGNAL_SINK_INPUT_WHILE_MUTED) == 0){
-    react_to_signal_sink_input_while_muted ( input, self );
-  }*/
   
 }
 

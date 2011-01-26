@@ -31,7 +31,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define INDICATOR_SOUND_DBUS_INTERFACE "com.canonical.indicators.sound"
 #define INDICATOR_SOUND_DBUS_VERSION  0
 
-#define INDICATOR_SOUND_SIGNAL_SOUND_STATE_UPDATE               "SoundStateUpdate"
+#define INDICATOR_SOUND_SIGNAL_STATE_UPDATE               "SoundStateUpdate"
 
 
 #endif /* __DBUS_SHARED_NAMES_H__ */

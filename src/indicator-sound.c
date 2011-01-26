@@ -99,12 +99,6 @@ static void connection_changed (IndicatorServiceManager * sm,
                                 gboolean connected,
                                 gpointer userdata);
 
-static void g_signal_cb ( GDBusProxy* proxy,
-                        gchar* sender_name,
-                        gchar* signal_name,
-                        GVariant* parameters,
-                        gpointer user_data);
-
 static void
 indicator_sound_class_init (IndicatorSoundClass *klass)
 {
@@ -177,8 +171,7 @@ static GtkImage *
 get_icon (IndicatorObject * io)
 {
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
-  gtk_widget_show( GTK_WIDGET(sound_state_manager_get_current_icon (priv->state_manager)) );
-    
+  gtk_widget_show( GTK_WIDGET(sound_state_manager_get_current_icon (priv->state_manager)) );  
   return sound_state_manager_get_current_icon (priv->state_manager);
 }
 
@@ -282,22 +275,8 @@ static void create_connection_to_service (GObject *source_object,
   g_debug ("Connection to dbus seemed to work fine from the indicator side");
   sound_state_manager_connect_to_dbus (priv->state_manager,
                                        priv->dbus_proxy);
-  g_signal_connect (priv->dbus_proxy, "g-signal",
-                    G_CALLBACK (g_signal_cb), self);
   
 }
-
-static void 
-g_signal_cb ( GDBusProxy* proxy,
-                        gchar* sender_name,
-                        gchar* signal_name,
-                        GVariant* parameters,
-                        gpointer user_data)
-{
-  g_debug ( "!!! indicator-sound signal_cb" );
-}
-
-
 
 static gboolean
 new_transport_widget (DbusmenuMenuitem * newitem,
@@ -324,7 +303,6 @@ new_transport_widget (DbusmenuMenuitem * newitem,
                                    newitem,
                                    menu_transport_bar,
                                    parent);
-
   return TRUE;
 }
 
@@ -346,7 +324,6 @@ new_metadata_widget (DbusmenuMenuitem * newitem,
   gtk_widget_show_all(metadata);
   dbusmenu_gtkclient_newitem_base (DBUSMENU_GTKCLIENT(client),
                                    newitem, menu_metadata_widget, parent);
-
   return TRUE;
 }
 
