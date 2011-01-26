@@ -99,6 +99,11 @@ static void connection_changed (IndicatorServiceManager * sm,
                                 gboolean connected,
                                 gpointer userdata);
 
+static void g_signal_cb ( GDBusProxy* proxy,
+                        gchar* sender_name,
+                        gchar* signal_name,
+                        GVariant* parameters,
+                        gpointer user_data);
 
 static void
 indicator_sound_class_init (IndicatorSoundClass *klass)
@@ -274,10 +279,24 @@ static void create_connection_to_service (GObject *source_object,
     g_error_free(error);
     return;
   }
-  
+  g_debug ("Connection to dbus seemed to work fine from the indicator side");
   sound_state_manager_connect_to_dbus (priv->state_manager,
                                        priv->dbus_proxy);
+  g_signal_connect (priv->dbus_proxy, "g-signal",
+                    G_CALLBACK (g_signal_cb), self);
+  
 }
+
+static void 
+g_signal_cb ( GDBusProxy* proxy,
+                        gchar* sender_name,
+                        gchar* signal_name,
+                        GVariant* parameters,
+                        gpointer user_data)
+{
+  g_debug ( "!!! indicator-sound signal_cb" );
+}
+
 
 
 static gboolean

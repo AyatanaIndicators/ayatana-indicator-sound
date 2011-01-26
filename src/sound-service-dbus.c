@@ -312,20 +312,19 @@ void sound_service_dbus_update_sound_state (SoundServiceDbus* self,
 
   GError * error = NULL;
 
+  g_debug ("emitting signal with value %i", (int)update);
   g_dbus_connection_emit_signal( priv->connection,
                                  NULL,
                                  INDICATOR_SOUND_MENU_DBUS_OBJECT_PATH,
                                  INDICATOR_SOUND_DBUS_INTERFACE,
                                  INDICATOR_SOUND_SIGNAL_SOUND_STATE_UPDATE,
-                                  v_output,
-                                  &error );
+                                 v_output,
+                                 &error );
   if (error != NULL) {
     g_error("Unable to emit signal 'sinkinputwhilemuted' because : %s", error->message);
     g_error_free(error);
     return;
   }
-
-
 }
 
 static SoundState sound_service_dbus_get_state_from_volume (SoundServiceDbus* self)

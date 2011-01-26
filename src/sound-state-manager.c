@@ -190,7 +190,7 @@ sound_state_manager_connect_to_dbus (SoundStateManager* self, GDBusProxy* proxy)
 {
   SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
   priv->dbus_proxy = proxy;
-  g_debug (" here about to register for signal callback");
+  g_debug (" here about to register for signal callback on %s", g_dbus_proxy_get_name (priv->dbus_proxy));
   g_signal_connect (priv->dbus_proxy, "g-signal",
                     G_CALLBACK (sound_state_signal_cb), self);
   
@@ -203,7 +203,7 @@ sound_state_signal_cb ( GDBusProxy* proxy,
                         GVariant* parameters,
                         gpointer user_data)
 {
-  g_debug ( "!!! signal_cb with value" );
+  g_debug ( "!!! sound state manager signal_cb" );
 
   g_return_if_fail (SOUND_IS_STATE_MANAGER (user_data));
   SoundStateManager* self = SOUND_STATE_MANAGER (user_data);
