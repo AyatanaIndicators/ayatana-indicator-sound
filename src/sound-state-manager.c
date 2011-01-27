@@ -193,7 +193,6 @@ sound_state_manager_connect_to_dbus (SoundStateManager* self, GDBusProxy* proxy)
 {
   SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
   priv->dbus_proxy = proxy;
-  g_debug (" here about to register for signal callback on %s", g_dbus_proxy_get_name (priv->dbus_proxy));
   g_signal_connect (priv->dbus_proxy, "g-signal",
                     G_CALLBACK (sound_state_signal_cb), self);
 
@@ -223,7 +222,7 @@ sound_state_manager_get_state_cb (GObject *object,
                                       &error );
 
   if (error != NULL) {
-    g_debug("get_sound_state call failed: %s", error->message);
+    g_warning("get_sound_state call failed: %s", error->message);
     g_error_free(error);
     return;
   }

@@ -81,12 +81,8 @@ handle_event (DbusmenuMenuitem * mi,
               GVariant * value,
               guint timestamp)
 {
-  /*g_debug ( "handle-event in the slider at the backend, input is of type %s",
-             g_variant_get_type_string(value));*/
-
   GVariant* input = NULL;
   input = value;
-  // Please note: Subject to change in future DBusmenu revisions
   if (g_variant_is_of_type(value, G_VARIANT_TYPE_VARIANT) == TRUE) {
     input = g_variant_get_variant(value);
   }
@@ -94,6 +90,11 @@ handle_event (DbusmenuMenuitem * mi,
   gboolean volume_input = g_variant_get_double(input);
   if (value != NULL){
     set_sink_volume(volume_input);
+    // TODO -when the ACTIVESINK instance exists this will be handled nicely
+    // PA MANAGER will be refactored first.
+    if (default_sink_is_muted () == TRUE){
+      toggle_global_mute (FALSE);
+    }
   }
 }
 

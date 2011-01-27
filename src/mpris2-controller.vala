@@ -95,12 +95,12 @@ public class Mpris2Controller : GLib.Object
     }
     Variant? playlist_count_v = changed_properties.lookup("PlaylistCount");
     if ( playlist_count_v != null && this.owner.use_playlists == true ){
-      this.fetch_playlists();
+      this.fetch_playlists.begin();
       this.fetch_active_playlist();
     }
     Variant? playlist_orderings_v = changed_properties.lookup("Orderings");
     if ( playlist_orderings_v != null && this.owner.use_playlists == true ){
-      this.fetch_playlists();
+      this.fetch_playlists.begin();
       this.fetch_active_playlist();
     }
   }
@@ -156,7 +156,7 @@ public class Mpris2Controller : GLib.Object
                                                                             MetadataMenuitem.attributes_format());
 
     if ( this.owner.use_playlists == true ){
-      this.fetch_playlists();
+      this.fetch_playlists.begin();
       this.fetch_active_playlist();
     }
   }
@@ -188,12 +188,21 @@ public class Mpris2Controller : GLib.Object
     }
   }
 
-  public void fetch_playlists()
+  public async void fetch_playlists()
   {
-    PlaylistDetails[] current_playlists =  this.playlists.GetPlaylists(0,
-                                                                       10,
-                                                                       "Alphabetical",
-                                                                       false);
+    PlaylistDetails[] current_playlists = null;
+    
+    try{   
+      current_playlists =  yield this.playlists.GetPlaylists (0,
+                                                              10,
+                                                              "Alphabetical",
+                                                              false);
+    }
+    catch (IOError e){
+      debug("Could not fetch playlists because %s", e.message);   
+      return;
+    }
+    
     if( current_playlists != null ){
       debug( "Size of the playlist array = %i", current_playlists.length );
       PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;

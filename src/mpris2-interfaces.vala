@@ -68,8 +68,8 @@ public interface MprisPlaylists : Object {
   
   //methods
   public abstract async void ActivatePlaylist(ObjectPath playlist_id) throws IOError;
-  public abstract PlaylistDetails[] GetPlaylists (  uint32 index,
-                                                    uint32 max_count,
-                                                    string order,
-                                                    bool reverse_order ) throws IOError;
+  public abstract async PlaylistDetails[] GetPlaylists (  uint32 index,
+                                                          uint32 max_count,
+                                                          string order,
+                                                          bool reverse_order ) throws IOError;
 }

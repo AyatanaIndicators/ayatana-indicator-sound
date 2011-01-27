@@ -289,11 +289,7 @@ transport_widget_motion_notify_event (GtkWidget *menuitem,
                                                                             event);
 
   priv->motion_event = result;
-    cairo_t *cr;
-    cr = gdk_cairo_create (menuitem->window);
-    draw ( menuitem, cr );
-    cairo_destroy ( cr );
-
+  gtk_widget_queue_draw (menuitem);
   return TRUE;
 }
 

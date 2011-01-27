@@ -278,7 +278,6 @@ static void create_connection_to_service (GObject *source_object,
     g_error_free(error);
     return;
   }
-  g_debug ("Connection to dbus seemed to work fine from the indicator side");
   sound_state_manager_connect_to_dbus (priv->state_manager,
                                        priv->dbus_proxy);
   

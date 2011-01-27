@@ -43,7 +43,8 @@ static void mute_menu_item_set_global_mute_from_ui (gpointer user_data);
 
 G_DEFINE_TYPE (MuteMenuItem, mute_menu_item, G_TYPE_OBJECT);
 
-static void mute_menu_item_class_init (MuteMenuItemClass *klass)
+static void
+mute_menu_item_class_init (MuteMenuItemClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
@@ -55,7 +56,8 @@ static void mute_menu_item_class_init (MuteMenuItemClass *klass)
   return;
 }
 
-static void mute_menu_item_init (MuteMenuItem *self)
+static void
+mute_menu_item_init (MuteMenuItem *self)
 {
   g_debug("Building new Mute Menu Item");
   MuteMenuItemPrivate* priv = MUTE_MENU_ITEM_GET_PRIVATE(self);
@@ -68,7 +70,8 @@ static void mute_menu_item_init (MuteMenuItem *self)
   return;
 }
 
-static void mute_menu_item_dispose (GObject *object)
+static void
+mute_menu_item_dispose (GObject *object)
 {
   G_OBJECT_CLASS (mute_menu_item_parent_class)->dispose (object);
   return;
@@ -93,8 +96,8 @@ mute_menu_item_set_global_mute_from_ui (gpointer user_data)
   toggle_global_mute (new_value);
 }
 
-
-void mute_menu_item_update(MuteMenuItem* item, gboolean value_update)
+void
+mute_menu_item_update (MuteMenuItem* item, gboolean value_update)
 {
   MuteMenuItemPrivate* priv = MUTE_MENU_ITEM_GET_PRIVATE (item);
   
@@ -106,7 +109,8 @@ void mute_menu_item_update(MuteMenuItem* item, gboolean value_update)
                                   value_update == FALSE ? _("Mute") : _("Unmute"));  
 }
 
-void mute_menu_item_enable(MuteMenuItem* item, gboolean active)
+void
+mute_menu_item_enable (MuteMenuItem* item, gboolean active)
 {
   MuteMenuItemPrivate* priv = MUTE_MENU_ITEM_GET_PRIVATE (item);
   
@@ -115,13 +119,23 @@ void mute_menu_item_enable(MuteMenuItem* item, gboolean active)
                                        active);  
 }
 
-DbusmenuMenuitem* mute_menu_item_get_button (MuteMenuItem* item)
+DbusmenuMenuitem*
+mute_menu_item_get_button (MuteMenuItem* item)
 {
   MuteMenuItemPrivate* priv = MUTE_MENU_ITEM_GET_PRIVATE (item);
   return priv->button;
 }
 
-MuteMenuItem* mute_menu_item_new (gboolean initial_update, gboolean enabled)
+gboolean
+mute_menu_item_is_muted (MuteMenuItem* item)
+{
+  MuteMenuItemPrivate* priv = MUTE_MENU_ITEM_GET_PRIVATE (item);
+  return dbusmenu_menuitem_property_get_bool (priv->button,
+                                              DBUSMENU_MUTE_MENUITEM_VALUE);
+}
+
+MuteMenuItem*
+mute_menu_item_new (gboolean initial_update, gboolean enabled)
 { 
   MuteMenuItem *self = g_object_new (MUTE_MENU_ITEM_TYPE, NULL);
   mute_menu_item_update (self, initial_update);
