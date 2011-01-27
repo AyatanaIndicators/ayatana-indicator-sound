@@ -49,6 +49,7 @@ struct _IndicatorSoundPrivate
   GList* transport_widgets_list;
   GDBusProxy *dbus_proxy; 
   SoundStateManager* state_manager;
+  GSettings *settings_manager;
   NotifyNotification* notification;
 };
 
@@ -140,6 +141,7 @@ indicator_sound_init (IndicatorSound *self)
   priv->state_manager = g_object_new (SOUND_TYPE_STATE_MANAGER, NULL);
   priv->notification = NULL;
 
+  priv->settings_manager = g_settings_new("com.canonical.indicators.sound");
   indicator_sound_notification_init (self);
 
   g_signal_connect ( G_OBJECT(self->service),
@@ -651,5 +653,6 @@ indicator_sound_scroll (IndicatorObject *io, gint delta,
   //g_debug("indicator-sound-scroll - update slider with value %f", value);
   volume_widget_update(VOLUME_WIDGET(priv->volume_widget), value);
 
-  indicator_sound_notification_show(INDICATOR_SOUND (io), current_state, value);
+  if (g_settings_get_boolean(priv->settings_manager, "show-notify-osd-on-scroll"))
+    indicator_sound_notification_show(INDICATOR_SOUND (io), current_state, value);
 }
