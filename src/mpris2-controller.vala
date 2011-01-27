@@ -93,6 +93,16 @@ public class Mpris2Controller : GLib.Object
     if ( playlist_v != null && this.owner.use_playlists == true ){
       this.fetch_active_playlist();
     }
+    Variant? playlist_count_v = changed_properties.lookup("PlaylistCount");
+    if ( playlist_count_v != null && this.owner.use_playlists == true ){
+      this.fetch_playlists();
+      this.fetch_active_playlist();
+    }
+    Variant? playlist_orderings_v = changed_properties.lookup("Orderings");
+    if ( playlist_orderings_v != null && this.owner.use_playlists == true ){
+      this.fetch_playlists();
+      this.fetch_active_playlist();
+    }
   }
   
   private bool ensure_correct_playback_status(){
@@ -107,15 +117,19 @@ public class Mpris2Controller : GLib.Object
     GLib.HashTable<string, Variant?> changed_updates = this.player.Metadata; 
     Variant? artist_v = this.player.Metadata.lookup("xesam:artist");
     if(artist_v != null){
-      string[] artists = (string[])this.player.Metadata.lookup("xesam:artist");
-      string display_artists = string.joinv(", ", artists);
+      Variant? v_artists = this.player.Metadata.lookup("xesam:artist");
+      debug("artists is of type %s", v_artists.get_type_string ());
+      string display_artists;
+      if(v_artists.get_type_string() == "s"){
+        debug("SPOTIFY is that you ?");
+        display_artists = v_artists.get_string();
+      }
+      else{
+       string[] artists = v_artists.dup_strv();
+        display_artists = string.joinv(", ", artists);
+      }
       changed_updates.replace("xesam:artist", display_artists);
       debug("artist : %s", (string)changed_updates.lookup("xesam:artist"));
-    }
-    Variant? length_v = this.player.Metadata.lookup("mpris:length");
-    if(length_v != null){
-      int64 duration = this.player.Metadata.lookup("mpris:length").get_int64();
-      changed_updates.replace("mpris:length", duration/1000000); 
     }
     return changed_updates;
   }
@@ -161,6 +175,19 @@ public class Mpris2Controller : GLib.Object
     }
   }
 
+
+  public bool connected()
+  {
+    return (this.player != null && this.mpris2_root != null);
+  }
+
+  public void expose()
+  {
+    if(this.connected() == true){
+      this.mpris2_root.Raise.begin();
+    }
+  }
+
   public void fetch_playlists()
   {
     PlaylistDetails[] current_playlists =  this.playlists.GetPlaylists(0,
@@ -176,7 +203,6 @@ public class Mpris2Controller : GLib.Object
       warning(" Playlists are on but its returning no current_playlists" );
       this.owner.use_playlists = false;
     }
-    return;
   }
 
   private void fetch_active_playlist()
@@ -186,19 +212,6 @@ public class Mpris2Controller : GLib.Object
     }
     PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
     playlists_item.update_active_playlist ( this.playlists.ActivePlaylist.details );
-  }
-
-
-  public bool connected()
-  {
-    return (this.player != null && this.mpris2_root != null);
-  }
-
-  public void expose()
-  {
-    if(this.connected() == true){
-      this.mpris2_root.Raise.begin();
-    }
   }
 
   public void activate_playlist (ObjectPath path)
