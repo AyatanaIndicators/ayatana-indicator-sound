@@ -184,7 +184,6 @@ static void sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
   // Separator
   
   DbusmenuMenuitem* separator = dbusmenu_menuitem_new();
-  g_object_ref (separator);
 
   dbusmenu_menuitem_property_set( separator,
                                   DBUSMENU_MENUITEM_PROP_TYPE,
@@ -194,7 +193,7 @@ static void sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
 
   // Sound preferences dialog
   DbusmenuMenuitem* settings_mi = dbusmenu_menuitem_new();
-  g_object_ref(settings_mi);
+
   dbusmenu_menuitem_property_set( settings_mi,
                                   DBUSMENU_MENUITEM_PROP_LABEL,
                                   _("Sound Preferences..."));
