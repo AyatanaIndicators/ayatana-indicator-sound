@@ -1,9 +1,6 @@
 #ifndef __INCLUDE_PULSE_MANAGER_H__
 #define __INCLUDE_PULSE_MANAGER_H__
 /*
-A small wrapper utility to load indicators and put them as menu items
-into the gnome-panel using it's applet interface.
-
 Copyright 2010 Canonical Ltd.
 
 Authors:
@@ -43,6 +40,6 @@ void establish_pulse_activities(SoundServiceDbus *service);
 void set_sink_volume(gdouble percent);
 void toggle_global_mute(gboolean mute_value);
 void close_pulse_activites();
-
+gboolean default_sink_is_muted();
 #endif
 

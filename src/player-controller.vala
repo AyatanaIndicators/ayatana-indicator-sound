@@ -189,20 +189,6 @@ public class PlayerController : GLib.Object
     }
   }
 
-  private static string format_player_name(owned string app_info_name)
-  {
-    string result = app_info_name.down().strip();
-    var tokens = result.split(" ");
-    if(tokens.length > 1){
-      result = tokens[0];
-    }
-    if(result.length > 1){
-      result = result.up(1).concat(result.slice(1, result.length));
-    }   
-    debug("PlayerController->format_player_name - : %s", result);
-    return result;
-  }
-
   private void determine_state()
   {
     if(this.mpris_bridge.connected() == true){

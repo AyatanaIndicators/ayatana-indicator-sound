@@ -1,3 +1,16 @@
+indicator-sound (0.5.7-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Music control buttons flicker (LP: #684755)
+    - Sound Menu should re-read playlists from MPRIS apps when 
+      PropertiesChanged is postec (LP: #707042)
+    - Spotify crashes the service (LP: #707367)
+    - Refactor service dbus code plus state handling (LP: #708793)
+    - changing the volume is impossible while muted (LP: #558784)
+    - Banshee icon changes to coloured icon once in use (LP: #692648)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 27 Jan 2011 15:57:41 -0500
+
 indicator-sound (0.5.6-0ubuntu1) natty; urgency=low
 
   * New upstream release.

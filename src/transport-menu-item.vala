@@ -44,7 +44,8 @@ public class TransportMenuitem : PlayerItem
   {
     debug("UPDATING THE TRANSPORT DBUSMENUITEM PLAY STATE WITH VALUE %i",
           (int)update);
-    this.property_set_int(MENUITEM_PLAY_STATE, update); 
+    int temp = (int)update;
+    this.property_set_int(MENUITEM_PLAY_STATE, temp); 
   }
   
   public override void handle_event(string name,
