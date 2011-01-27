@@ -393,7 +393,6 @@ metadata_widget_button_press_event (GtkWidget *menuitem,
   return FALSE;
 }
 
-// TODO: Manage empty/mangled music details <unknown artist> etc.
 static void 
 metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
                                        GVariant* value, gpointer userdata)

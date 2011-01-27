@@ -9,11 +9,13 @@ soundmenulib_LTLIBRARIES = libsoundmenu.la
 libsoundmenu_la_SOURCES = \
             common-defs.h \
             indicator-sound.h \
+            indicator-sound.c \
+            sound-state-manager.c \
+            sound-state-manager.h \
             transport-widget.c \
             transport-widget.h \
             metadata-widget.c \
             metadata-widget.h \
-            indicator-sound.c \
             title-widget.c \
             title-widget.h \
             volume-widget.c \
@@ -87,15 +89,15 @@ indicator_sound_service_SOURCES = \
 	common-defs.h \
   sound-service.h \
   sound-service.c \
-  dbus-menu-manager.c \
-  dbus-menu-manager.h \
   pulse-manager.h \
   pulse-manager.c \
   sound-service-dbus.h \
   sound-service-dbus.c \
   slider-menu-item.h \
   slider-menu-item.c \
-  gen-sound-service.xml.h \  
+  mute-menu-item.h \
+  mute-menu-item.c \
+  gen-sound-service.xml.h \
   gen-sound-service.xml.c \
   $(music_bridge_VALASOURCES:.vala=.c)
 

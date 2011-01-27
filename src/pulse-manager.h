@@ -1,9 +1,6 @@
 #ifndef __INCLUDE_PULSE_MANAGER_H__
 #define __INCLUDE_PULSE_MANAGER_H__
 /*
-A small wrapper utility to load indicators and put them as menu items
-into the gnome-panel using it's applet interface.
-
 Copyright 2010 Canonical Ltd.
 
 Authors:
