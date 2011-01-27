@@ -101,8 +101,7 @@ metadata_widget_init (MetadataWidget *self)
 
   // image
   priv->album_art = gtk_image_new();
-  priv->image_path = g_string_new(dbusmenu_menuitem_property_get(priv->twin_item,
-                                                                 DBUSMENU_METADATA_MENUITEM_ARTURL));
+  priv->image_path = g_string_new("");
   priv->old_image_path = g_string_new("");
   
   g_signal_connect(priv->album_art, "expose-event", 
@@ -120,8 +119,7 @@ metadata_widget_init (MetadataWidget *self)
   
   // artist
   GtkWidget* artist;
-  artist = gtk_label_new(dbusmenu_menuitem_property_get(priv->twin_item,
-                                                        DBUSMENU_METADATA_MENUITEM_ARTIST));
+  artist = gtk_label_new("");
   gtk_misc_set_alignment(GTK_MISC(artist), (gfloat)0, (gfloat)0);
   gtk_misc_set_padding (GTK_MISC(artist), (gfloat)10, (gfloat)0);
   gtk_widget_set_size_request (artist, 140, 15);
@@ -131,8 +129,7 @@ metadata_widget_init (MetadataWidget *self)
   
   // title
   GtkWidget* piece;
-  piece = gtk_label_new(dbusmenu_menuitem_property_get( priv->twin_item,
-                                                        DBUSMENU_METADATA_MENUITEM_TITLE) );
+  piece = gtk_label_new("");
   gtk_misc_set_alignment(GTK_MISC(piece), (gfloat)0, (gfloat)0);
   gtk_misc_set_padding (GTK_MISC(piece), (gfloat)10, (gfloat)-5);
   gtk_widget_set_size_request (piece, 140, 15);
@@ -142,8 +139,7 @@ metadata_widget_init (MetadataWidget *self)
 
   // container
   GtkWidget* container;
-  container = gtk_label_new(dbusmenu_menuitem_property_get( priv->twin_item,
-                                                            DBUSMENU_METADATA_MENUITEM_ALBUM) );
+  container = gtk_label_new("");
   gtk_misc_set_alignment(GTK_MISC(container), (gfloat)0, (gfloat)0);
   gtk_misc_set_padding (GTK_MISC(container), (gfloat)10, (gfloat)0);  
   gtk_widget_set_size_request (container, 140, 15);
@@ -480,16 +476,18 @@ metadata_widget_set_twin_item(MetadataWidget* self,
   metadata_widget_style_labels( self, GTK_LABEL(priv->artist_label));
 
   g_string_erase(priv->image_path, 0, -1);
-  g_string_overwrite( priv->image_path,
-                      0,
-                      dbusmenu_menuitem_property_get( priv->twin_item,
-                                                      DBUSMENU_METADATA_MENUITEM_ARTURL ));
+  const gchar *arturl = dbusmenu_menuitem_property_get( priv->twin_item,
+                                                        DBUSMENU_METADATA_MENUITEM_ARTURL );
+  if (arturl != NULL){
+    g_string_overwrite( priv->image_path,
+                        0,
+                        arturl);
 
-  // if its a remote image queue a redraw incase the download took too long
-  if (g_str_has_prefix (dbusmenu_menuitem_property_get (priv->twin_item, DBUSMENU_METADATA_MENUITEM_ARTURL ),
-                        g_get_user_cache_dir())){
-    gtk_widget_queue_draw(GTK_WIDGET(self));                                                          
-  }                       
+    // if its a remote image queue a redraw incase the download took too long
+    if (g_str_has_prefix (arturl, g_get_user_cache_dir())){
+      gtk_widget_queue_draw(GTK_WIDGET(self));                                                          
+    }
+  }
 }
 
  /**
