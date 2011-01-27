@@ -176,27 +176,30 @@ static void sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
   priv->mute_menuitem = mute_menu_item_new ( mute_update, availability);
   dbusmenu_menuitem_child_append (priv->root_menuitem,
                                   mute_menu_item_get_button (priv->mute_menuitem));
-  g_object_unref (priv->mute_menuitem);
   
   // Slider
   priv->volume_slider_menuitem = slider_menu_item_new ( availability, volume );
   dbusmenu_menuitem_child_append (priv->root_menuitem, DBUSMENU_MENUITEM ( priv->volume_slider_menuitem ));
-  g_object_unref (priv->volume_slider__menuitem);
 
   // Separator
   
   DbusmenuMenuitem* separator = dbusmenu_menuitem_new();
+  g_object_ref (separator);
+
   dbusmenu_menuitem_property_set( separator,
                                   DBUSMENU_MENUITEM_PROP_TYPE,
                                   DBUSMENU_CLIENT_TYPES_SEPARATOR);
   dbusmenu_menuitem_child_append(priv->root_menuitem, separator);
+  g_object_unref (separator);
 
   // Sound preferences dialog
   DbusmenuMenuitem* settings_mi = dbusmenu_menuitem_new();
+  g_object_ref(settings_mi);
   dbusmenu_menuitem_property_set( settings_mi,
                                   DBUSMENU_MENUITEM_PROP_LABEL,
                                   _("Sound Preferences..."));
   dbusmenu_menuitem_child_append(priv->root_menuitem, settings_mi);
+  g_object_unref (settings_mi);  
   g_signal_connect(G_OBJECT(settings_mi), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED,
                    G_CALLBACK(show_sound_settings_dialog), NULL);
   
