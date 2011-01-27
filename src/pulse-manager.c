@@ -25,7 +25,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <pulse/gccmacro.h>
 
 #include "pulse-manager.h"
-#include "dbus-menu-manager.h"
 
 #define RECONNECT_DELAY 5
 
@@ -75,7 +74,7 @@ void establish_pulse_activities(SoundServiceDbus *service)
 
   // Establish event callback registration
   pa_context_set_state_callback (pulse_context, context_state_callback, NULL);
-  dbus_menu_manager_update_pa_state (FALSE, FALSE, FALSE, 0);
+  sound_service_dbus_update_pa_state (dbus_service, FALSE, FALSE, 0);
   pa_context_connect (pulse_context, NULL, PA_CONTEXT_NOFAIL, NULL);
 }
 
@@ -184,7 +183,7 @@ static gboolean determine_sink_availability()
   return available;
 }
 
-static gboolean default_sink_is_muted()
+gboolean default_sink_is_muted()
 {
   if (DEFAULT_SINK_INDEX < 0)
     return FALSE;
@@ -199,10 +198,12 @@ static void check_sink_input_while_muted_event(gint sink_index)
   /*    g_debug("SINKINPUTWHILEMUTED SIGNAL EVENT TO BE SENT FROM PA MANAGER - check trace for value");*/
 
   if (default_sink_is_muted(sink_index) == TRUE) {
-    sound_service_dbus_sink_input_while_muted (dbus_service, TRUE);
-  } else {
-    sound_service_dbus_sink_input_while_muted(dbus_service, FALSE);
+    sound_service_dbus_update_sound_state(dbus_service, BLOCKED);
   }
+// Why do you need to send a false for a blocked event, it times out after 5 secs anyway  
+//} else {
+  //  sound_service_dbus_sink_input_while_muted(dbus_service, FALSE);
+  //}
 }
 
 static gdouble get_default_sink_volume()
@@ -223,10 +224,8 @@ static void mute_each_sink(gpointer key, gpointer value, gpointer user_data)
   if (GPOINTER_TO_INT(user_data) == 1) {
     sound_service_dbus_update_sink_mute(dbus_service, TRUE);
   } else {
-    dbus_menu_manager_update_volume(get_default_sink_volume());
+    sound_service_dbus_update_volume(dbus_service, get_default_sink_volume());
   }
-
-  /*    g_debug("in the pulse manager: mute each sink %i", GPOINTER_TO_INT(user_data));*/
 }
 
 void toggle_global_mute(gboolean mute_value)
@@ -309,14 +308,17 @@ static void pulse_sink_info_callback(pa_context *c, const pa_sink_info *sink, in
 
     gboolean device_available = determine_sink_availability();
     if (device_available == TRUE) {
-      dbus_menu_manager_update_pa_state(TRUE,
-                                        device_available,
-                                        default_sink_is_muted(),
-                                        get_default_sink_volume());
+      sound_service_dbus_update_pa_state( dbus_service,
+                                         device_available,
+                                         default_sink_is_muted(),
+                                         get_default_sink_volume() );
     } else {
       //Update the indicator to show PA either is not ready or has no available sink
       g_warning("Cannot find a suitable default sink ...");
-      dbus_menu_manager_update_pa_state(FALSE, device_available, default_sink_is_muted(), get_default_sink_volume());
+      sound_service_dbus_update_pa_state( dbus_service,
+                                         device_available,
+                                         default_sink_is_muted(),
+                                         get_default_sink_volume() );
     }
   } else {
     /*        g_debug("About to add an item to our hash");*/
@@ -346,7 +348,10 @@ static void pulse_default_sink_info_callback(pa_context *c, const pa_sink_info *
     if (position < 0) {
       pa_operation_unref(pa_context_get_sink_info_list(c, pulse_sink_info_callback, NULL));
     } else {
-      dbus_menu_manager_update_pa_state(TRUE, determine_sink_availability(), default_sink_is_muted(), get_default_sink_volume());
+      sound_service_dbus_update_pa_state(dbus_service,
+                                        determine_sink_availability(),
+                                        default_sink_is_muted(),
+                                        get_default_sink_volume());
     }
   }
 }
@@ -408,18 +413,17 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
         pa_volume_t vol = pa_cvolume_max(&s->volume);
         gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
         /*                g_debug("Updating volume from PA manager with volume = %f", volume_percent);*/
-        dbus_menu_manager_update_volume(volume_percent);
+        sound_service_dbus_update_volume(dbus_service, volume_percent);
       }
 
       if (mute_changed == TRUE) {
         /*                g_debug("Updating Mute from PA manager with mute = %i", s->mute);*/
         sound_service_dbus_update_sink_mute(dbus_service, s->mute);
-        dbus_menu_manager_update_mute_ui(s->mute);
         if (s->mute == FALSE) {
           pa_volume_t vol = pa_cvolume_max(&s->volume);
           gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
-          /*                    g_debug("Updating volume from PA manager with volume = %f", volume_percent);*/
-          dbus_menu_manager_update_volume(volume_percent);
+          /*                    g_debug("Updating volume from PA manager with volume = %f", volume_percent);*/                 
+          sound_service_dbus_update_volume(dbus_service, volume_percent);
         }
       }
     }
@@ -434,7 +438,7 @@ static void update_sink_info(pa_context *c, const pa_sink_info *info, int eol, v
     value->base_volume = info->base_volume;
     g_hash_table_insert(sink_hash, GINT_TO_POINTER(value->index), value);
     /*        g_debug("pulse-manager:update_sink_info -> After adding a new sink to our hash");*/
-    sound_service_dbus_update_sink_availability(dbus_service, TRUE);
+    sound_service_dbus_update_sound_state(dbus_service, AVAILABLE);
   }
 }
 
@@ -463,7 +467,7 @@ static void pulse_server_info_callback(pa_context *c,
   pa_operation *operation;
   if (info == NULL) {
     g_warning("No server - get the hell out of here");
-    dbus_menu_manager_update_pa_state(FALSE, FALSE, TRUE, 0);
+    sound_service_dbus_update_pa_state(dbus_service, FALSE, TRUE, 0);
     pa_server_available = FALSE;
     return;
   }
@@ -493,7 +497,7 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
   case PA_SUBSCRIPTION_EVENT_SINK:
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
       if (index == DEFAULT_SINK_INDEX)
-        sound_service_dbus_update_sink_availability(dbus_service, FALSE);
+        sound_service_dbus_update_sound_state(dbus_service, UNAVAILABLE);
 
       /*                g_debug("Subscribed_events_callback - removing sink of index %i from our sink hash - keep the cache tidy !", index);*/
       g_hash_table_remove(sink_hash, GINT_TO_POINTER(index));
@@ -548,10 +552,10 @@ static void context_state_callback(pa_context *c, void *userdata)
   case PA_CONTEXT_FAILED:
     g_warning("PA_CONTEXT_FAILED - Is PulseAudio Daemon running ?");
     pa_server_available = FALSE;
-    dbus_menu_manager_update_pa_state(TRUE,
-                                      pa_server_available,
-                                      default_sink_is_muted(),
-                                      get_default_sink_volume());
+    sound_service_dbus_update_pa_state( dbus_service,
+                                        pa_server_available,
+                                        default_sink_is_muted(),
+                                        get_default_sink_volume() );
       
     if (reconnect_idle_id == 0){
       reconnect_idle_id = g_timeout_add_seconds (RECONNECT_DELAY,
