@@ -183,7 +183,7 @@ static gboolean determine_sink_availability()
   return available;
 }
 
-static gboolean default_sink_is_muted()
+gboolean default_sink_is_muted()
 {
   if (DEFAULT_SINK_INDEX < 0)
     return FALSE;

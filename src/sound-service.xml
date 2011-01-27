@@ -4,6 +4,7 @@
     <method name = "BlacklistMediaPlayer">
         <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_blacklist_media_player"/>
         <arg type='s' name='player_desktop_name' direction="in"/>
+        <arg type='b' name='blacklist' direction="in"/>
     </method>
     <method name = "GetSoundState">
         <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_get_sink_state"/>
