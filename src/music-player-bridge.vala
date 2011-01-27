@@ -141,8 +141,8 @@ public class MusicPlayerBridge : GLib.Object
     this.root_menu = menu;
     this.try_to_add_inactive_familiar_clients();
     this.watcher = new Mpris2Watcher ();
-    this.watcher.client_appeared += this.client_has_become_available;
-    this.watcher.client_disappeared += this.client_has_vanished;
+    this.watcher.client_appeared.connect (this.client_has_become_available);
+    this.watcher.client_disappeared.connect (this.client_has_vanished);
   }
 
   private static AppInfo? create_app_info ( string desktop )
