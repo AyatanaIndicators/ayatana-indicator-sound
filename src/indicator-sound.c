@@ -162,6 +162,8 @@ indicator_sound_dispose (GObject *object)
 
   g_list_free ( priv->transport_widgets_list );
 
+  g_object_unref(priv->settings_manager);
+
   if (priv->notification) {
     notify_uninit();
   }
