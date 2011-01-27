@@ -7,6 +7,7 @@ check_PROGRAMS = \
 TESTS = \
 	test-indicator-sound \
 	test-pulse-manager
+XTESTS_FAIL = $(TESTS)
 
 DISTCLEANFILES = $(TESTS)
 
@@ -46,6 +47,8 @@ test_pulse_manager_SOURCES = \
 	test-pulse-manager.c \
     $(top_builddir)/src/dbus-menu-manager.c \
     $(top_builddir)/src/sound-service-dbus.c \
+    $(top_builddir)/src/gen-sound-service.xml.h \
+    $(top_builddir)/src/gen-sound-service.xml.c \
     $(top_builddir)/src/slider-menu-item.c 
 
 test_pulse_manager_CFLAGS = \

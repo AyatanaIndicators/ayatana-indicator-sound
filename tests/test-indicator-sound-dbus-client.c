@@ -21,17 +21,17 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #include <glib.h>
-#include <dbus/dbus-glib.h>
 #include "../src/dbus-shared-names.h"
 #include "test-defines.h"
 #include "../src/sound-service-client.h"
 
 static GMainLoop * mainloop = NULL;
-static DBusGProxy * proxy= NULL;
+static GDBusProxy * proxy= NULL;
 
 static void
-test_fetch_mute(DBusGProxy * proxy)
+test_fetch_mute(GDBusProxy * proxy)
 {
   GError * error = NULL;
   gboolean *fetched_mute_value;
