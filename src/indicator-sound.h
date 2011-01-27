@@ -26,7 +26,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <libindicator/indicator.h>
 #include <libindicator/indicator-object.h>
 #include <libindicator/indicator-service-manager.h>
-#include <libindicator/indicator-image-helper.h>
 
 #define INDICATOR_SOUND_TYPE            (indicator_sound_get_type ())
 #define INDICATOR_SOUND(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), INDICATOR_SOUND_TYPE, IndicatorSound))

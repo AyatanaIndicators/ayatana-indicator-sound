@@ -16,19 +16,30 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#ifndef __COMMON_DEFS_H__
+#define __COMMON_DEFS_H__
 
 
-/* constants used for signals on the dbus. This file is shared between client and server implementation */
-#define SIGNAL_SINK_INPUT_WHILE_MUTED           "SinkInputWhileMuted"
-#define SIGNAL_SINK_VOLUME_UPDATE               "SinkVolumeUpdate"
-#define SIGNAL_SINK_MUTE_UPDATE                 "SinkMuteUpdate"
-#define SIGNAL_SINK_AVAILABLE_UPDATE            "SinkAvailableUpdate"
+typedef enum {
+  MUTED,
+  ZERO_LEVEL,
+  LOW_LEVEL,
+  MEDIUM_LEVEL,
+  HIGH_LEVEL,
+  BLOCKED,
+  UNAVAILABLE,
+  AVAILABLE
+}SoundState;
+
 
 #define DBUSMENU_PROPERTY_EMPTY                 -1
 
 /* DBUS Custom Items */
 #define DBUSMENU_VOLUME_MENUITEM_TYPE           "x-canonical-ido-volume-type"
 #define DBUSMENU_VOLUME_MENUITEM_LEVEL          "x-canonical-ido-volume-level"
+
+#define DBUSMENU_MUTE_MENUITEM_TYPE             "x-canonical-sound-menu-mute-type"
+#define DBUSMENU_MUTE_MENUITEM_VALUE            "x-canonical-sound-menu-mute-value"
 
 #define DBUSMENU_TRANSPORT_MENUITEM_TYPE        "x-canonical-sound-menu-player-transport-type"
 #define DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE  "x-canonical-sound-menu-player-transport-state"
@@ -52,3 +63,5 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DBUSMENU_PLAYLISTS_MENUITEM_TYPE        "x-canonical-sound-menu-player-playlists-type"
 #define DBUSMENU_PLAYLISTS_MENUITEM_TITLE       "x-canonical-sound-menu-player-playlists-title"
 #define DBUSMENU_PLAYLISTS_MENUITEM_PLAYLISTS   "x-canonical-sound-menu-player-playlists-playlists"
+
+#endif
