@@ -159,8 +159,9 @@ DbusmenuMenuitem* sound_service_dbus_create_root_item (SoundServiceDbus* self)
   priv->root_menuitem = dbusmenu_menuitem_new();
   g_debug("Root ID: %d", dbusmenu_menuitem_get_id(priv->root_menuitem));
   DbusmenuServer *server = dbusmenu_server_new(INDICATOR_SOUND_MENU_DBUS_OBJECT_PATH);
-  dbusmenu_server_set_root(server, priv->root_menuitem);
-  establish_pulse_activities(self);
+  dbusmenu_server_set_root (server, priv->root_menuitem);
+  g_object_unref (priv->root_menuitem);
+  establish_pulse_activities (self);
   return priv->root_menuitem;
 }
 
@@ -175,12 +176,15 @@ static void sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
   priv->mute_menuitem = mute_menu_item_new ( mute_update, availability);
   dbusmenu_menuitem_child_append (priv->root_menuitem,
                                   mute_menu_item_get_button (priv->mute_menuitem));
-
+  g_object_unref (priv->mute_menuitem);
+  
   // Slider
   priv->volume_slider_menuitem = slider_menu_item_new ( availability, volume );
   dbusmenu_menuitem_child_append (priv->root_menuitem, DBUSMENU_MENUITEM ( priv->volume_slider_menuitem ));
+  g_object_unref (priv->volume_slider__menuitem);
 
   // Separator
+  
   DbusmenuMenuitem* separator = dbusmenu_menuitem_new();
   dbusmenu_menuitem_property_set( separator,
                                   DBUSMENU_MENUITEM_PROP_TYPE,
@@ -195,6 +199,7 @@ static void sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
   dbusmenu_menuitem_child_append(priv->root_menuitem, settings_mi);
   g_signal_connect(G_OBJECT(settings_mi), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED,
                    G_CALLBACK(show_sound_settings_dialog), NULL);
+  
   sound_service_dbus_determine_state (self, availability, mute_update, volume);
 }
 

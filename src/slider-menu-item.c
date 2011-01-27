@@ -86,8 +86,6 @@ handle_event (DbusmenuMenuitem * mi,
 
   GVariant* input = NULL;
   input = value;
-  g_variant_ref (input);
-
   // Please note: Subject to change in future DBusmenu revisions
   if (g_variant_is_of_type(value, G_VARIANT_TYPE_VARIANT) == TRUE) {
     input = g_variant_get_variant(value);
@@ -97,7 +95,6 @@ handle_event (DbusmenuMenuitem * mi,
   if (value != NULL){
     set_sink_volume(volume_input);
   }
-  g_variant_unref (input); 
 }
 
 void slider_menu_item_update (SliderMenuItem* item,
