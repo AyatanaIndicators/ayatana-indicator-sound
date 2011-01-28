@@ -27,6 +27,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <gee.h>
 #include <libdbusmenu-glib/client.h>
+#include <libdbusmenu-glib/dbusmenu-glib.h>
 #include <libdbusmenu-glib/menuitem-proxy.h>
 #include <libdbusmenu-glib/menuitem.h>
 #include <libdbusmenu-glib/server.h>
