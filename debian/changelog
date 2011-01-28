@@ -1,3 +1,11 @@
+indicator-sound (0.5.8-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Media buttons inconsistent with system-wide button behavior (LP: #651006)
+    - update to deal with dbusmenu api chages (LP: #709181)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 28 Jan 2011 09:28:10 -0500
+
 indicator-sound (0.5.7-0ubuntu1) natty; urgency=low
 
   * New upstream release.
