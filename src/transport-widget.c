@@ -422,7 +422,6 @@ transport_widget_determine_button_event( TransportWidget* button,
   //g_debug("event x coordinate = %f", event->x);
   //g_debug("event y coordinate = %f", event->y);
   TransportWidgetEvent button_event = TRANSPORT_NADA;
-  // For now very simple rectangular collision detection
   if(event->x > 67 && event->x < 112
      && event->y > 12 && event->y < 40){
     button_event = TRANSPORT_PREVIOUS;
