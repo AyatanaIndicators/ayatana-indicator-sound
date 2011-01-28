@@ -78,19 +78,19 @@ static gboolean key_release_cb(GtkWidget* widget, GdkEventKey* event, gpointer d
 static gboolean new_volume_slider_widget (DbusmenuMenuitem * newitem,
                                           DbusmenuMenuitem * parent,
                                           DbusmenuClient * client,
-                                          gboolean user_data);
+                                          gpointer user_data);
 static gboolean new_transport_widget (DbusmenuMenuitem * newitem,
                                       DbusmenuMenuitem * parent,
                                       DbusmenuClient * client,
-                                      gboolean user_data);                                     
+                                      gpointer user_data);                                     
 static gboolean new_metadata_widget (DbusmenuMenuitem * newitem,
                                      DbusmenuMenuitem * parent,
                                      DbusmenuClient * client,
-                                     gboolean user_data);
+                                     gpointer user_data);
 static gboolean new_title_widget (DbusmenuMenuitem * newitem,
                                   DbusmenuMenuitem * parent,
                                   DbusmenuClient * client,
-                                  gboolean user_data);
+                                  gpointer user_data);
 
 // DBUS communication
 static GDBusNodeInfo *node_info = NULL;
@@ -190,16 +190,16 @@ get_menu (IndicatorObject * io)
   g_object_set_data (G_OBJECT (client), "indicator", io);
   dbusmenu_client_add_type_handler (DBUSMENU_CLIENT(client),
                                     DBUSMENU_VOLUME_MENUITEM_TYPE,
-                                    (DbusmenuClientTypeHandler)new_volume_slider_widget);
+                                    new_volume_slider_widget);
   dbusmenu_client_add_type_handler (DBUSMENU_CLIENT(client),
                                     DBUSMENU_TRANSPORT_MENUITEM_TYPE,
-                                    (DbusmenuClientTypeHandler)new_transport_widget);
+                                    new_transport_widget);
   dbusmenu_client_add_type_handler (DBUSMENU_CLIENT(client),
                                     DBUSMENU_METADATA_MENUITEM_TYPE,
-                                    (DbusmenuClientTypeHandler)new_metadata_widget);
+                                    new_metadata_widget);
   dbusmenu_client_add_type_handler (DBUSMENU_CLIENT(client),
                                     DBUSMENU_TITLE_MENUITEM_TYPE,
-                                    (DbusmenuClientTypeHandler)new_title_widget);
+                                    new_title_widget);
   // Note: Not ideal but all key handling needs to be managed here and then 
   // delegated to the appropriate widget. 
   g_signal_connect (menu, "key-press-event", G_CALLBACK(key_press_cb), io);
@@ -298,7 +298,7 @@ static gboolean
 new_transport_widget (DbusmenuMenuitem * newitem,
                       DbusmenuMenuitem * parent,
                       DbusmenuClient * client,
-                      gboolean user_data)
+                      gpointer user_data)
 {
   g_debug("indicator-sound: new_transport_bar() called ");
 
@@ -327,7 +327,7 @@ static gboolean
 new_metadata_widget (DbusmenuMenuitem * newitem,
                      DbusmenuMenuitem * parent,
                      DbusmenuClient * client,
-                     gboolean user_data)
+                     gpointer user_data)
 {
   g_debug("indicator-sound: new_metadata_widget");
 
@@ -349,7 +349,7 @@ static gboolean
 new_title_widget(DbusmenuMenuitem * newitem,
                  DbusmenuMenuitem * parent,
                  DbusmenuClient * client,
-                 gboolean user_data)
+                 gpointer user_data)
 {
   g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
@@ -373,7 +373,7 @@ static gboolean
 new_volume_slider_widget(DbusmenuMenuitem * newitem,
                          DbusmenuMenuitem * parent,
                          DbusmenuClient * client,
-                         gboolean user_data)
+                         gpointer user_data)
 {
   g_debug("indicator-sound: new_volume_slider_widget");
 
