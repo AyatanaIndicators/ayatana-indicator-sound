@@ -129,10 +129,10 @@ static void transport_widget_toggle_play_pause ( TransportWidget* button,
                                                  TransportWidgetState update);
 static void transport_widget_select (GtkItem* menu, gpointer Userdata);
 static void transport_widget_deselect (GtkItem* menu, gpointer Userdata);
+static TransportWidgetEvent transport_widget_collision_detection (gint x, gint y);
 
 
 /// Init functions //////////////////////////////////////////////////////////
-
 static void
 transport_widget_class_init (TransportWidgetClass *klass)
 { 
@@ -301,30 +301,23 @@ transport_widget_leave_notify_event (GtkWidget *menuitem,
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE ( TRANSPORT_WIDGET(menuitem) );
   
   priv->motion_event = TRANSPORT_NADA;
-    cairo_t *cr;
-    cr = gdk_cairo_create (menuitem->window);
-    draw ( menuitem, cr );
-    cairo_destroy ( cr );
-
+  priv->current_command = TRANSPORT_NADA;
+  gtk_widget_queue_draw (GTK_WIDGET(menuitem));
+  
   return TRUE;
 }
 
-/* keyevents */
 static gboolean
 transport_widget_button_press_event (GtkWidget *menuitem, 
-                                    GdkEventButton *event)
+                                     GdkEventButton *event)
 {
   g_return_val_if_fail ( IS_TRANSPORT_WIDGET(menuitem), FALSE );
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE ( TRANSPORT_WIDGET(menuitem) );
   TransportWidgetEvent result = transport_widget_determine_button_event ( TRANSPORT_WIDGET(menuitem),
                                                                             event);
-    
   if(result != TRANSPORT_NADA){
     priv->current_command = result;
-    cairo_t *cr;
-    cr = gdk_cairo_create (menuitem->window);
-    draw ( menuitem, cr );
-    cairo_destroy ( cr );
+    gtk_widget_queue_draw (GTK_WIDGET(menuitem));
   }
   return TRUE;
 }
@@ -333,14 +326,12 @@ static gboolean
 transport_widget_button_release_event (GtkWidget *menuitem, 
                                        GdkEventButton *event)
 {
-    //g_debug("TransportWidget::menu_release_event");
   g_return_val_if_fail(IS_TRANSPORT_WIDGET(menuitem), FALSE);
   TransportWidget* transport = TRANSPORT_WIDGET(menuitem);
   TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport ); 
   TransportWidgetEvent result = transport_widget_determine_button_event ( transport,
                                                                           event );
-  if(result != TRANSPORT_NADA){
-    //g_debug("TransportWidget::menu_press_event - going to send value %i", (int)result);
+  if (result != TRANSPORT_NADA && priv->current_command == result){
     GVariant* new_transport_state = g_variant_new_int32 ((int)result);
     dbusmenu_menuitem_handle_event ( priv->twin_item,
                                      "Transport state change",
@@ -376,17 +367,8 @@ transport_widget_react_to_key_press_event ( TransportWidget* transport,
     TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );
     priv->current_command = transport_event;
     priv->key_event = transport_event;
-/*    printf("transport_widget_react_to_key_press_event: before drawing\n");*/
     gtk_widget_realize ( GTK_WIDGET(transport) );
-
-    printf ( "transport widget - react to key press event -> is the window null: %i",
-              gtk_widget_get_window (GTK_WIDGET (transport) ) == NULL );
-    cairo_t *cr;
-
-    printf("transport_widget_react_to_key_press_event: before drawing\n");
-    cr = gdk_cairo_create ( GTK_WIDGET(transport)->window );
-    draw ( GTK_WIDGET(transport), cr );
-    cairo_destroy (cr);
+    gtk_widget_queue_draw (GTK_WIDGET(transport) );
   } 
 }
 
@@ -396,7 +378,6 @@ transport_widget_react_to_key_release_event ( TransportWidget* transport,
 {
   if(transport_event != TRANSPORT_NADA){
     TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );     
-    //g_debug("TransportWidget::menu_press_event - going to send value %i", (int)result);
     GVariant* new_transport_event = g_variant_new_int32((int)transport_event);  
     dbusmenu_menuitem_handle_event ( priv->twin_item,
                                      "Transport state change",
@@ -412,52 +393,41 @@ transport_widget_focus_update ( TransportWidget* transport, gboolean focus )
 {
   TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );     
   priv->has_focus = focus;  
-  g_debug("new focus update = %i", focus);
 }
 
 static TransportWidgetEvent
 transport_widget_determine_button_event( TransportWidget* button,
                                          GdkEventButton* event )
 {
-  //g_debug("event x coordinate = %f", event->x);
-  //g_debug("event y coordinate = %f", event->y);
-  TransportWidgetEvent button_event = TRANSPORT_NADA;
-  if(event->x > 67 && event->x < 112
-     && event->y > 12 && event->y < 40){
-    button_event = TRANSPORT_PREVIOUS;
-  }
-  else if(event->x > 111 && event->x < 153
-     && event->y > 5 && event->y < 47){
-    button_event = TRANSPORT_PLAY_PAUSE;  
-  }
-  else if(event->x > 152 && event->x < 197
-     && event->y > 12 && event->y < 40){
-    button_event = TRANSPORT_NEXT;
-  } 
-  return button_event;  
+  return transport_widget_collision_detection (event->x, event->y);
 }
 
 static TransportWidgetEvent
 transport_widget_determine_motion_event( TransportWidget* button,
                                          GdkEventMotion* event )
 {
-/*  g_debug("event x coordinate = %f", event->x);*/
-/*  g_debug("event y coordinate = %f", event->y);*/
-  TransportWidgetEvent motion_event = TRANSPORT_NADA;
-  // For now very simple rectangular collision detection
-  if(event->x > 67 && event->x < 112
-     && event->y > 12 && event->y < 40){
-    motion_event = TRANSPORT_PREVIOUS;
+  return transport_widget_collision_detection (event->x, event->y);
+}
+
+static TransportWidgetEvent
+transport_widget_collision_detection ( gint x,
+                                       gint y )
+{
+  TransportWidgetEvent event = TRANSPORT_NADA;
+  
+  if (x > 67 && x < 112
+      && y > 12 && y < 40){
+    event = TRANSPORT_PREVIOUS;
   }
-  else if(event->x > 111 && event->x < 153
-     && event->y > 5 && event->y < 47){
-    motion_event = TRANSPORT_PLAY_PAUSE;  
+  else if (x > 111 && x < 153
+           && y > 5 && y < 47){
+    event = TRANSPORT_PLAY_PAUSE;  
   }
-  else if(event->x > 152 && event->x < 197
-     && event->y > 12 && event->y < 40){
-    motion_event = TRANSPORT_NEXT;
-  } 
-  return motion_event;  
+  else if (x > 152 && x < 197
+           && y > 12 && y < 40){
+    event = TRANSPORT_NEXT;
+  }   
+  return event;
 }
 
 static void 
@@ -466,17 +436,11 @@ transport_widget_react_to_button_release ( TransportWidget* button,
 {
   g_return_if_fail(IS_TRANSPORT_WIDGET(button));
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(button);  
-  if(priv->current_command != TRANSPORT_NADA &&
-          command != TRANSPORT_NADA){           
-    priv->current_command = command;
-  }
-  cairo_t *cr;  
-  cr = gdk_cairo_create ( GTK_WIDGET(button)->window );
 
   priv->current_command = TRANSPORT_NADA;
   priv->key_event = TRANSPORT_NADA;
-  draw ( GTK_WIDGET(button), cr );
-  cairo_destroy (cr);
+
+  gtk_widget_queue_draw (GTK_WIDGET(button));
 }
 
 /// internal helper functions //////////////////////////////////////////////////
