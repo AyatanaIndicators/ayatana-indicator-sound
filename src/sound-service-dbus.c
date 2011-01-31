@@ -458,7 +458,6 @@ static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
     g_variant_builder_add (builder, "s", player_name);
   }
   else{
-    //g_variant_builder_clear (builder); 
     gboolean present = FALSE;
     g_variant_get (the_black_list, "as", &iter);
     
