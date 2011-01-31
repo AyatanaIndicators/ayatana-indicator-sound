@@ -41,6 +41,17 @@ public class MusicPlayerBridge : GLib.Object
   private void on_blacklist_update ( string[] blacklist )
   {
     debug("some blacklist update");
+
+    foreach(var s in blacklist){
+      string key = this.determine_key (s);
+      if (this.registered_clients.has_key (key)){
+        debug ("Apparently %s is now blacklisted - remove thy self", key);
+        this.registered_clients[key].remove_from_menu();
+        this.registered_clients.unset (key);
+      }
+    }
+    // double check present players to ensure dynamic removal/addition 
+    this.watcher.check_for_active_clients.begin();
   }
 
   private void try_to_add_inactive_familiar_clients()
