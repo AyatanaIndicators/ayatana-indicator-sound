@@ -427,68 +427,77 @@ static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
                                                      gboolean blacklist) 
 {
   gboolean result = FALSE;
-  GSettings* our_settings = g_settings_new ("com.canonical.indicators.sound");
+  GSettings* our_settings = NULL;
+  our_settings  = g_settings_new ("com.canonical.indicators.sound");
   GVariant* the_black_list = g_settings_get_value (our_settings,
                                                    "blacklisted-media-players");
-
-  GVariantIter *iter;
+  GVariantIter iter;
   gchar *str;
   // Firstly prep new array which will be set on the key.
-  GVariantBuilder *builder;
-  g_variant_get (the_black_list, "as", &iter);
-  builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
+  GVariantBuilder builder;
+  
+  g_variant_iter_init (&iter, the_black_list);
+  g_variant_builder_init(&builder, G_VARIANT_TYPE_STRING_ARRAY);  
 
-  while (g_variant_iter_loop (iter, "s", &str)){
-    g_variant_builder_add (builder, "s", str);
+  while (g_variant_iter_loop (&iter, "s", &str)){
+    g_variant_builder_add (&builder, "s", str);
   }
-
-  g_variant_get (the_black_list, "as", &iter);
+  g_variant_iter_init (&iter, the_black_list);
 
   if (blacklist == TRUE){
-    while (g_variant_iter_loop (iter, "s", &str)){
+    while (g_variant_iter_loop (&iter, "s", &str)){
       g_print ("first pass to check if %s is present\n", str);
       if (g_strcmp0 (player_name, str) == 0){
         // Return if its already there
-        g_debug ("we have this already blacklisted");
+        g_debug ("we have this already blacklisted, no need to do anything");
+        g_variant_builder_end (&builder);
+        g_object_unref (our_settings);
         return result;
       }
     }
     // Otherwise blacklist it !
     g_debug ("about to blacklist %s", player_name);
-    g_variant_builder_add (builder, "s", player_name);
+    g_variant_builder_add (&builder, "s", player_name);
   }
   else{
     gboolean present = FALSE;
-    g_variant_get (the_black_list, "as", &iter);
-    
-    while (g_variant_iter_loop (iter, "s", &str)){
+    g_variant_iter_init (&iter, the_black_list);
+    g_debug ("attempting to UN-blacklist %s", player_name);
+        
+    while (g_variant_iter_loop (&iter, "s", &str)){
       if (g_strcmp0 (player_name, str) == 0){      
         present = TRUE;
       }
     }
     // It was not there anyway, return false
-    if (present == FALSE)
+    if (present == FALSE){
+      g_debug ("it was not blacklisted ?, no need to do anything");
+      g_variant_builder_end (&builder);
+      g_object_unref (our_settings);
       return result;
-
+    }
+    
     // Otherwise free the builder and reconstruct ensuring no duplicates.
-    g_variant_builder_unref (builder);  
-    builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
+    g_variant_builder_end (&builder);  
+    g_variant_builder_init (&builder, G_VARIANT_TYPE_STRING_ARRAY);  
 
-    g_variant_get (the_black_list, "as", &iter);
+    g_variant_iter_init (&iter, the_black_list);
 
-    while (g_variant_iter_loop (iter, "s", &str)){
+    while (g_variant_iter_loop (&iter, "s", &str)){
       if (g_strcmp0 (player_name, str) != 0){            
-        g_variant_builder_add (builder, "s", str);
+        g_variant_builder_add (&builder, "s", str);
       }
     }
   }
-  GVariant* value = g_variant_new ("as", builder);
-  g_variant_builder_unref (builder);  
-  g_variant_iter_free (iter);
+  GVariant* value = g_variant_builder_end (&builder);
+  g_variant_ref (value);  
   result = g_settings_set_value (our_settings,
                                  "blacklisted-media-players",
                                  value);
+
   g_variant_unref (value);
+  g_object_unref (our_settings);
+  
   return result;
 }
 

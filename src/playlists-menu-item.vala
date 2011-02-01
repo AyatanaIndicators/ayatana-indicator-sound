@@ -50,7 +50,7 @@ public class PlaylistsMenuitem : PlayerItem
       this.root_item.child_append( menuitem );
     }
   }
-
+  
   private bool already_observed (PlaylistDetails new_detail)
   {
     foreach ( PlaylistDetails detail in this.current_playlists.values ){

@@ -28,7 +28,6 @@ public class SettingsManager : GLib.Object
   construct{
     this.settings = new Settings ("com.canonical.indicators.sound");
     this.settings.changed["blacklisted-media-players"].connect (on_blacklist_event);    
-    //this.reveal_contents();    
   }
    
   public string[] fetch_blacklist()

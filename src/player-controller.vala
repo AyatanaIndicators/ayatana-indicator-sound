@@ -124,6 +124,10 @@ public class PlayerController : GLib.Object
     foreach(PlayerItem item in this.custom_items){
       this.root_menu.child_delete(item);
     }
+    if (this.use_playlists == true){
+      PlaylistsMenuitem playlists_menuitem = this.custom_items[widget_order.PLAYLISTS] as PlaylistsMenuitem;
+      this.root_menu.child_delete (playlists_menuitem.root_item);
+    }
   }
 
   public void hibernate()
