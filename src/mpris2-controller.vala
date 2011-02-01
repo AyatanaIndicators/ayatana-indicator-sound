@@ -103,6 +103,11 @@ public class Mpris2Controller : GLib.Object
       this.fetch_playlists.begin();
       this.fetch_active_playlist();
     }
+    Variant? identity_v = changed_properties.lookup("Identity");
+    if (identity_v != null){
+      TitleMenuitem title = this.owner.custom_items[PlayerController.widget_order.TITLE] as TitleMenuitem;
+      title.alter_label (identity_v.get_string());
+    }
   }
   
   private bool ensure_correct_playback_status(){
@@ -144,15 +149,20 @@ public class Mpris2Controller : GLib.Object
   public void initial_update()
   {
     TransportMenuitem.state update;
+    
     if(this.player.PlaybackStatus == null){
       update = TransportMenuitem.state.PAUSED;
     }
-
-    update = determine_play_state(null);
-   
-    (this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(TransportMenuitem.state.PAUSED);
+    else{
+      update = determine_play_state (this.player.PlaybackStatus);
+    }
+    if (this.mpris2_root.Identity != null){
+      TitleMenuitem title = this.owner.custom_items[PlayerController.widget_order.TITLE] as TitleMenuitem;
+      title.alter_label (this.mpris2_root.Identity);
+    }
+    (this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state (update);
     GLib.HashTable<string, Value?>? cleaned_metadata = this.clean_metadata();
-    this.owner.custom_items[PlayerController.widget_order.METADATA].update(cleaned_metadata,
+    this.owner.custom_items[PlayerController.widget_order.METADATA].update (cleaned_metadata,
                                                                             MetadataMenuitem.attributes_format());
 
     if ( this.owner.use_playlists == true ){
