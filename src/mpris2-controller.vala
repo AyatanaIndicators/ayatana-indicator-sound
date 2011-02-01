@@ -106,7 +106,7 @@ public class Mpris2Controller : GLib.Object
     Variant? identity_v = changed_properties.lookup("Identity");
     if (identity_v != null){
       TitleMenuitem title = this.owner.custom_items[PlayerController.widget_order.TITLE] as TitleMenuitem;
-      title.alter_label (identity_v.get_string());
+      title.alter_label (this.mpris2_root.Identity);
     }
   }
   
