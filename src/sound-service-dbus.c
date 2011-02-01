@@ -450,8 +450,9 @@ static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
       if (g_strcmp0 (player_name, str) == 0){
         // Return if its already there
         g_debug ("we have this already blacklisted, no need to do anything");
-        g_variant_builder_end (&builder);
+        g_variant_builder_clear (&builder);
         g_object_unref (our_settings);
+        g_object_unref (the_black_list);
         return result;
       }
     }
@@ -472,17 +473,18 @@ static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
     // It was not there anyway, return false
     if (present == FALSE){
       g_debug ("it was not blacklisted ?, no need to do anything");
-      g_variant_builder_end (&builder);
+      g_variant_builder_clear (&builder);
       g_object_unref (our_settings);
+      g_object_unref (the_black_list);
       return result;
     }
     
     // Otherwise free the builder and reconstruct ensuring no duplicates.
-    g_variant_builder_end (&builder);  
+    g_variant_builder_clear (&builder);  
     g_variant_builder_init (&builder, G_VARIANT_TYPE_STRING_ARRAY);  
 
     g_variant_iter_init (&iter, the_black_list);
-
+    
     while (g_variant_iter_loop (&iter, "s", &str)){
       if (g_strcmp0 (player_name, str) != 0){            
         g_variant_builder_add (&builder, "s", str);
@@ -490,13 +492,12 @@ static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
     }
   }
   GVariant* value = g_variant_builder_end (&builder);
-  g_variant_ref (value);  
   result = g_settings_set_value (our_settings,
                                  "blacklisted-media-players",
                                  value);
 
-  g_variant_unref (value);
   g_object_unref (our_settings);
+  g_object_unref (the_black_list);
   
   return result;
 }
