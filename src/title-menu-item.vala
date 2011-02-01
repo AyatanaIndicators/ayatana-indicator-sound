@@ -48,7 +48,7 @@ public class TitleMenuitem : PlayerItem
 
   public void alter_label (string new_title)
   {
-    if (new_title != null) return;
+    if (new_title == null) return;
     this.property_set(MENUITEM_NAME, new_title);        
   }
 

@@ -452,7 +452,7 @@ static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
         g_debug ("we have this already blacklisted, no need to do anything");
         g_variant_builder_clear (&builder);
         g_object_unref (our_settings);
-        g_object_unref (the_black_list);
+        g_variant_unref (the_black_list);
         return result;
       }
     }
@@ -475,7 +475,7 @@ static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
       g_debug ("it was not blacklisted ?, no need to do anything");
       g_variant_builder_clear (&builder);
       g_object_unref (our_settings);
-      g_object_unref (the_black_list);
+      g_variant_unref (the_black_list);
       return result;
     }
     
@@ -497,7 +497,7 @@ static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
                                  value);
 
   g_object_unref (our_settings);
-  g_object_unref (the_black_list);
+  g_variant_unref (the_black_list);
   
   return result;
 }
