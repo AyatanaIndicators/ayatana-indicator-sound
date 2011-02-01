@@ -85,6 +85,10 @@ static void sound_service_dbus_determine_state (SoundServiceDbus* self,
                                                 gboolean availability,
                                                 gboolean mute,
                                                 gdouble volume);
+static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
+                                                     gchar* player_name,
+                                                     gboolean blacklist); 
+
 
 G_DEFINE_TYPE (SoundServiceDbus, sound_service_dbus, G_TYPE_OBJECT);
 
@@ -400,12 +404,102 @@ bus_method_call (GDBusConnection * connection,
     g_debug("Get state -  %i", priv->current_sound_state );
     retval =  g_variant_new ( "(i)", priv->current_sound_state);    
   }   
+  else if (g_strcmp0(method, "BlacklistMediaPlayer") == 0) {    
+    gboolean blacklist;
+    gchar* player_name;
+    g_variant_get (params, "(sb)", &player_name, &blacklist);
+                   
+    g_debug ("BlacklistMediaPlayer - bool %i", blacklist); 
+    g_debug ("BlacklistMediaPlayer - name %s", player_name); 
+    gboolean result = sound_service_dbus_blacklist_player (service,                                                           
+                                                           player_name,
+                                                           blacklist);
+    retval =  g_variant_new ("(b)", result);
+  }     
   else {
     g_warning("Calling method '%s' on the sound service but it's unknown", method); 
   }
   g_dbus_method_invocation_return_value (invocation, retval);
 }
 
+static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
+                                                     gchar* player_name,
+                                                     gboolean blacklist) 
+{
+  gboolean result = FALSE;
+  GSettings* our_settings = NULL;
+  our_settings  = g_settings_new ("com.canonical.indicators.sound");
+  GVariant* the_black_list = g_settings_get_value (our_settings,
+                                                   "blacklisted-media-players");
+  GVariantIter iter;
+  gchar *str;
+  // Firstly prep new array which will be set on the key.
+  GVariantBuilder builder;
+  
+  g_variant_iter_init (&iter, the_black_list);
+  g_variant_builder_init(&builder, G_VARIANT_TYPE_STRING_ARRAY);  
 
+  while (g_variant_iter_loop (&iter, "s", &str)){
+    g_variant_builder_add (&builder, "s", str);
+  }
+  g_variant_iter_init (&iter, the_black_list);
+
+  if (blacklist == TRUE){
+    while (g_variant_iter_loop (&iter, "s", &str)){
+      g_print ("first pass to check if %s is present\n", str);
+      if (g_strcmp0 (player_name, str) == 0){
+        // Return if its already there
+        g_debug ("we have this already blacklisted, no need to do anything");
+        g_variant_builder_clear (&builder);
+        g_object_unref (our_settings);
+        g_object_unref (the_black_list);
+        return result;
+      }
+    }
+    // Otherwise blacklist it !
+    g_debug ("about to blacklist %s", player_name);
+    g_variant_builder_add (&builder, "s", player_name);
+  }
+  else{
+    gboolean present = FALSE;
+    g_variant_iter_init (&iter, the_black_list);
+    g_debug ("attempting to UN-blacklist %s", player_name);
+        
+    while (g_variant_iter_loop (&iter, "s", &str)){
+      if (g_strcmp0 (player_name, str) == 0){      
+        present = TRUE;
+      }
+    }
+    // It was not there anyway, return false
+    if (present == FALSE){
+      g_debug ("it was not blacklisted ?, no need to do anything");
+      g_variant_builder_clear (&builder);
+      g_object_unref (our_settings);
+      g_object_unref (the_black_list);
+      return result;
+    }
+    
+    // Otherwise free the builder and reconstruct ensuring no duplicates.
+    g_variant_builder_clear (&builder);  
+    g_variant_builder_init (&builder, G_VARIANT_TYPE_STRING_ARRAY);  
+
+    g_variant_iter_init (&iter, the_black_list);
+    
+    while (g_variant_iter_loop (&iter, "s", &str)){
+      if (g_strcmp0 (player_name, str) != 0){            
+        g_variant_builder_add (&builder, "s", str);
+      }
+    }
+  }
+  GVariant* value = g_variant_builder_end (&builder);
+  result = g_settings_set_value (our_settings,
+                                 "blacklisted-media-players",
+                                 value);
+
+  g_object_unref (our_settings);
+  g_object_unref (the_black_list);
+  
+  return result;
+}
 
 
