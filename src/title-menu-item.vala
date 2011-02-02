@@ -26,8 +26,12 @@ public class TitleMenuitem : PlayerItem
   public TitleMenuitem(PlayerController parent)
   {
     Object(item_type: MENUITEM_TYPE, owner: parent);
-    this.property_set(MENUITEM_NAME, parent.app_info.get_name());    
-    this.property_set(MENUITEM_ICON, parent.icon_name);    
+  }
+
+  construct
+  {  
+    this.property_set(MENUITEM_NAME, this.owner.app_info.get_name());    
+    this.property_set(MENUITEM_ICON, this.owner.icon_name);    
     this.property_set_bool(MENUITEM_RUNNING, false);        
   }
 
@@ -40,6 +44,12 @@ public class TitleMenuitem : PlayerItem
     else if(this.owner.current_state == PlayerController.state.CONNECTED){
       this.owner.mpris_bridge.expose();
     }   
+  }
+
+  public void alter_label (string new_title)
+  {
+    if (new_title == null) return;
+    this.property_set(MENUITEM_NAME, new_title);        
   }
 
   public void toggle_active_triangle(bool update)
