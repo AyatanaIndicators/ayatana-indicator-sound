@@ -18,6 +18,10 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <libindicator/indicator-image-helper.h>
+#include <libnotify/notify.h>
+
+#include "config.h"
+
 #include "sound-state-manager.h"
 #include "dbus-shared-names.h"
 
@@ -30,6 +34,8 @@ struct _SoundStateManagerPrivate
   GList* blocked_animation_list;
   SoundState current_state;
   GtkImage* speaker_image;
+  NotifyNotification* notification;  
+  GSettings *settings_manager;  
 };
 
 #define SOUND_STATE_MANAGER_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), SOUND_TYPE_STATE_MANAGER, SoundStateManagerPrivate))
@@ -41,7 +47,11 @@ static gint animation_id;
 static GList* blocked_iter = NULL;
 static gboolean can_animate = FALSE;
 
-static void sound_state_manager_prepare_blocked_animation(SoundStateManager* self);
+//Notifications
+static void sound_state_manager_notification_init (SoundStateManager* self);
+
+//Animation/State related
+static void sound_state_manager_prepare_blocked_animation (SoundStateManager* self);
 static gboolean sound_state_manager_start_animation (gpointer user_data);
 static gboolean sound_state_manager_fade_back_to_mute_image (gpointer user_data);
 static void sound_state_manager_reset_mute_blocking_animation (SoundStateManager* self);
@@ -54,6 +64,7 @@ static void sound_state_signal_cb ( GDBusProxy* proxy,
                                     gpointer user_data );
 static gboolean sound_state_manager_can_proceed_with_blocking_animation (SoundStateManager* self);
 
+
 static void
 sound_state_manager_init (SoundStateManager* self)
 {
@@ -63,6 +74,12 @@ sound_state_manager_init (SoundStateManager* self)
   priv->volume_states = NULL;
   priv->speaker_image = NULL;
   priv->blocked_animation_list = NULL;
+  priv->notification = NULL;  
+  priv->settings_manager = NULL;
+
+  priv->settings_manager = g_settings_new("com.canonical.indicators.sound");
+
+  sound_state_manager_notification_init (self);
   
   sound_state_manager_prepare_state_image_names (self);
   sound_state_manager_prepare_blocked_animation (self);
@@ -89,9 +106,16 @@ sound_state_manager_dispose (GObject *object)
   g_hash_table_destroy (priv->volume_states);
 
   sound_state_manager_free_the_animation_list (self);
+
+  if (priv->notification) {
+    notify_uninit();
+  }
+
+  g_object_unref(priv->settings_manager);
+  
   G_OBJECT_CLASS (sound_state_manager_parent_class)->dispose (object);
 }
- 
+
 
 static void
 sound_state_manager_class_init (SoundStateManagerClass *klass)
@@ -106,6 +130,77 @@ sound_state_manager_class_init (SoundStateManagerClass *klass)
   design_team_size = gtk_icon_size_register("design-team-size", 22, 22);  
 }
 
+static void
+sound_state_manager_notification_init (SoundStateManager* self)
+{
+  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
+
+  if (!notify_init(PACKAGE_NAME))
+    return;
+
+  GList* caps = notify_get_server_caps();
+  gboolean has_notify_osd = FALSE;
+
+  if (caps) {
+    if (g_list_find_custom(caps, "x-canonical-private-synchronous",
+                           (GCompareFunc) g_strcmp0)) {
+      has_notify_osd = TRUE;
+    }
+    g_list_foreach(caps, (GFunc) g_free, NULL);
+    g_list_free(caps);
+  }
+
+  if (has_notify_osd) {
+    priv->notification = notify_notification_new(PACKAGE_NAME, NULL, NULL, NULL);
+    notify_notification_set_hint_string(priv->notification,
+                                        "x-canonical-private-synchronous", "");
+  }
+}
+
+void
+sound_state_manager_attach_notification_to_volume_widget (SoundStateManager *self, 
+                                                          GtkWidget* volume_widget)
+{
+  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
+  if (priv->notification)
+    notify_notification_attach_to_widget(priv->notification, volume_widget);
+}
+
+
+void
+sound_state_manager_show_notification (SoundStateManager *self,
+                                       double value)
+{
+  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
+
+  if (priv->notification == NULL || 
+      g_settings_get_boolean (priv->settings_manager, "show-notify-osd-on-scroll") == FALSE){
+    return;
+  }
+
+  char *icon;
+  const int notify_value = CLAMP((int)value, -1, 101);
+  SoundState state = sound_state_manager_get_current_state (self);
+      
+  if (state == ZERO_LEVEL) {
+    // Not available for all the themes
+    icon = "audio-volume-off";
+  } else if (state == LOW_LEVEL) {
+    icon = "audio-volume-low";
+  } else if (state == MEDIUM_LEVEL) {
+    icon = "audio-volume-medium";
+  } else if (state == HIGH_LEVEL) {
+    icon = "audio-volume-high";
+  } else {
+    icon = "audio-volume-muted";
+  }
+
+  notify_notification_update(priv->notification, PACKAGE_NAME, NULL, icon);
+  notify_notification_set_hint_int32(priv->notification, "value", notify_value);
+  notify_notification_show(priv->notification, NULL);
+}
+
+
 /*
 Prepare states versus images names hash.
 */
@@ -113,7 +208,8 @@ static void
 sound_state_manager_prepare_state_image_names (SoundStateManager* self)
 {
   SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
-  priv->volume_states = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_free); 
+  priv->volume_states = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_free);
+  
   g_hash_table_insert (priv->volume_states, GINT_TO_POINTER(MUTED), g_strdup("audio-volume-muted-panel"));
   g_hash_table_insert (priv->volume_states, GINT_TO_POINTER(ZERO_LEVEL), g_strdup("audio-volume-low-zero-panel"));
   g_hash_table_insert (priv->volume_states, GINT_TO_POINTER(LOW_LEVEL), g_strdup("audio-volume-low-panel"));
@@ -281,8 +377,7 @@ sound_state_signal_cb ( GDBusProxy* proxy,
       blocked_id = g_timeout_add_seconds (4,
                                           sound_state_manager_start_animation,
                                           self);
-      indicator_image_helper_update (priv->speaker_image, image_name); 
-          
+      indicator_image_helper_update (priv->speaker_image, image_name);
     }
     else{
       indicator_image_helper_update (priv->speaker_image, image_name); 
@@ -291,7 +386,6 @@ sound_state_signal_cb ( GDBusProxy* proxy,
   else {
     g_warning ("sorry don't know what signal this is - %s", signal_name);
   }
-  
 }
 
 void

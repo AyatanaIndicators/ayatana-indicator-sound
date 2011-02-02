@@ -53,11 +53,4 @@ struct _IndicatorSound {
 // GObject Boiler plate
 GType indicator_sound_get_type (void);
 
-void prepare_state_machine();
-extern void determine_state_from_volume(gdouble volume_percent);
-gint get_state();
-gchar* get_state_image_name(gint state);
-void prepare_for_tests(IndicatorObject * io);
-void tidy_up_hash();
-
 #endif
