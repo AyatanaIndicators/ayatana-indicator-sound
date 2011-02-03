@@ -24,7 +24,7 @@
 #include <glib-object.h>
 #include <libdbusmenu-glib/menuitem.h>
 #include "common-defs.h"
-
+#include <pulse/pulseaudio.h>
 
 G_BEGIN_DECLS
 
@@ -38,7 +38,6 @@ G_BEGIN_DECLS
 typedef struct _ActiveSink      ActiveSink;
 typedef struct _ActiveSinkClass ActiveSinkClass;
 
-
 struct _ActiveSink {
   GObject parent;
 };
@@ -46,6 +45,16 @@ struct _ActiveSink {
 struct _ActiveSinkClass {
   GObjectClass parent_class;
 };
+
+typedef struct {
+  gchar* name;
+  gint index;
+  pa_cvolume volume;
+  pa_channel_map channel_map;
+  gboolean mute;
+  pa_volume_t base_volume;
+} sink_details;
+
 
 GType active_sink_get_type  (void) G_GNUC_CONST;
 

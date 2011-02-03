@@ -97,6 +97,17 @@ reconnect_to_pulse (gpointer user_data)
 }
 
 static void 
+populate_active_sink (const pa_sink_info *info, ActiveSink* sink)
+{
+  
+}
+
+/**********************************************************************************************************************/
+//    Pulse-Audio asychronous call-backs
+/**********************************************************************************************************************/
+
+
+static void 
 pm_subscribed_events_callback (pa_context *c,
                                enum pa_subscription_event_type t,
                                uint32_t index,
@@ -192,7 +203,7 @@ pm_server_info_callback (pa_context *c,
 {
   pa_operation *operation;
   if (info == NULL) {
-    g_warning("No server - get the hell out of here");
+    g_warning("No PA server - get the hell out of here");
     //TODO update active sink with state info
     return;
   }
@@ -213,4 +224,54 @@ pm_server_info_callback (pa_context *c,
   }
   pa_operation_unref(operation);
 }
+
+static void
+pm_sink_info_callback (pa_context *c,
+                       const pa_sink_info *sink,
+                       int eol,
+                       void *userdata)
+{
+  if (eol > 0) {
+    return;
+  }
+  else {
+    /*        g_debug("About to add an item to our hash");*/
+    sink_info *value;
+    value = g_new0(sink_info, 1);
+    value->index = sink->index;
+    value->name = g_strdup(sink->name);
+    value->mute = !!sink->mute;
+    value->volume = construct_mono_volume(&sink->volume);
+    value->base_volume = sink->base_volume;
+    value->channel_map = sink->channel_map;
+    g_hash_table_insert(sink_hash, GINT_TO_POINTER(sink->index), value);
+    /*        g_debug("After adding an item to our hash");*/
+  }
+}
+
+static void
+pm_default_sink_info_callback (pa_context *c,
+                               const pa_sink_info *info,
+                               int eol,
+                               void *userdata)
+{
+  if (eol > 0) {
+    return;
+  } else {
+    DEFAULT_SINK_INDEX = info->index;
+    /*        g_debug("Just set the default sink index to %i", DEFAULT_SINK_INDEX);    */
+    GList *keys = g_hash_table_get_keys(sink_hash);
+    gint position =  g_list_index(keys, GINT_TO_POINTER(info->index));
+    // Only update sink-list if the index is not in our already fetched list.
+    if (position < 0) {
+      pa_operation_unref(pa_context_get_sink_info_list(c, pulse_sink_info_callback, NULL));
+    } else {
+      sound_service_dbus_update_pa_state(dbus_service,
+                                        determine_sink_availability(),
+                                        default_sink_is_muted(),
+                                        get_default_sink_volume());
+    }
+  }
+}
+
 
