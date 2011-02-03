@@ -21,34 +21,51 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <pulse/gccmacro.h>
 
 #include "pulse-manager.h"
+#include "active-sink.h"
 
 #define RECONNECT_DELAY 5
 
-static void context_state_callback(pa_context *c, void *userdata);
 
+static void pm_context_state_callback(pa_context *c, void *userdata);
+static void pm_subscribed_events_callback (pa_context *c,
+                                           enum pa_subscription_event_type t,
+                                           uint32_t index,
+                                           void* userdata);
+static void pm_server_info_callback (pa_context *c,
+                                     const pa_server_info *info,
+                                     void *userdata);
+
+
+static gint connection_attempts = 0;
 static gint reconnect_idle_id = 0;
 static pa_context *pulse_context = NULL;
 static pa_glib_mainloop *pa_main_loop = NULL;
 
 // Entry Point
-void establish_pulse_activities()
+void 
+establish_pulse_activities (ActiveSink* active_sink)
 {
-  pa_main_loop = pa_glib_mainloop_new(g_main_context_default());
-  g_assert(pa_main_loop);
-  pulse_context = pa_context_new(pa_glib_mainloop_get_api(pa_main_loop),
+  pa_main_loop = pa_glib_mainloop_new (g_main_context_default ());
+  g_assert (pa_main_loop);
+  pulse_context = pa_context_new (pa_glib_mainloop_get_api (pa_main_loop),
                                  "com.canonical.indicators.sound");
-  g_assert(pulse_context);
+  g_assert (pulse_context);
 
-  pa_context_set_state_callback (pulse_context, context_state_callback, /*active sink obj*/NULL);
-  sound_service_dbus_update_pa_state (dbus_service, FALSE, FALSE, 0);
-  pa_context_connect (pulse_context, NULL, PA_CONTEXT_NOFAIL, /*active sink obj*/NULL);  
+  pa_context_set_state_callback (pulse_context,
+                                 pm_context_state_callback,
+                                 (gpointer)active_sink);
+  
+  //TODO update active sink before init with state at unavailable
+  
+  pa_context_connect (pulse_context, NULL, PA_CONTEXT_NOFAIL, (gpointer)active_sink);  
 }
 
 static gboolean
-reconnect_to_pulse()
+reconnect_to_pulse (gpointer user_data)
 {
   g_debug("Attempt to reconnect to pulse");
   // reset
+  connection_attempts += 1;
   if (pulse_context != NULL) {
     pa_context_unref(pulse_context);
     pulse_context = NULL;
@@ -57,83 +74,56 @@ reconnect_to_pulse()
   pulse_context = pa_context_new( pa_glib_mainloop_get_api( pa_main_loop ),
                                   "com.canonical.indicators.sound" );
   g_assert(pulse_context);
-  pa_context_set_state_callback (pulse_context, context_state_callback, NULL);
-  int result = pa_context_connect (pulse_context, NULL, PA_CONTEXT_NOFAIL, NULL);
+  pa_context_set_state_callback (pulse_context,
+                                 pm_context_state_callback,
+                                 user_data);
+  int result = pa_context_connect (pulse_context,
+                                   NULL,
+                                   PA_CONTEXT_NOFAIL,
+                                   user_data);
 
   if (result < 0) {
     g_warning ("Failed to connect context: %s",
                pa_strerror (pa_context_errno (pulse_context)));
   }
-  // we always want to cancel any continious callbacks with the existing timeout
-  // if the connection failed the new context created above will catch any updates
-  // to do with the state of pulse and thus take care of business.
+  
   reconnect_idle_id = 0;  
-  return FALSE;
+  if (connection_attempts > 5){
+    return FALSE;
+  }
+  else{
+    return TRUE;
+  }
 }
 
-
-static void pulse_server_info_callback(pa_context *c,
-                                       const pa_server_info *info,
-                                       void *userdata)
-{
-  pa_operation *operation;
-  if (info == NULL) {
-    g_warning("No server - get the hell out of here");
-    //sound_service_dbus_update_pa_state(dbus_service, FALSE, TRUE, 0);
-    return;
-  }
-  if (info->default_sink_name != NULL) {
-    if (!(operation = pa_context_get_sink_info_by_name(c,
-                                                       info->default_sink_name,
-                                                       pulse_default_sink_info_callback,
-                                                       userdata))) {
-    } else {
-      pa_operation_unref(operation);
-      return;
-    }
-  }
-  if (!(operation = pa_context_get_sink_info_list(c, pulse_sink_info_callback, NULL))) {
-    g_warning("pa_context_get_sink_info_list() failed");
-    return;
-  }
-  pa_operation_unref(operation);
-}
-
-
-static void subscribed_events_callback(pa_context *c, enum pa_subscription_event_type t, uint32_t index, void *userdata)
+static void 
+pm_subscribed_events_callback (pa_context *c,
+                               enum pa_subscription_event_type t,
+                               uint32_t index,
+                               void* userdata)
 {
   switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) {
   case PA_SUBSCRIPTION_EVENT_SINK:
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
-      if (index == DEFAULT_SINK_INDEX)
-        sound_service_dbus_update_sound_state(dbus_service, UNAVAILABLE);
-
-      /*                g_debug("Subscribed_events_callback - removing sink of index %i from our sink hash - keep the cache tidy !", index);*/
-      g_hash_table_remove(sink_hash, GINT_TO_POINTER(index));
-
-      if (index == DEFAULT_SINK_INDEX) {
-        /*                    g_debug("subscribed_events_callback - PA_SUBSCRIPTION_EVENT_SINK REMOVAL: default sink %i has been removed.", DEFAULT_SINK_INDEX);  */
-        DEFAULT_SINK_INDEX = -1;
-        determine_sink_availability();
-      }
-      /*                g_debug("subscribed_events_callback - Now what is our default sink : %i", DEFAULT_SINK_INDEX);    */
-    } else {
-      /*          g_debug("subscribed_events_callback - PA_SUBSCRIPTION_EVENT_SINK: a generic sink event - will trigger an update");            */
-      pa_operation_unref(pa_context_get_sink_info_by_index(c, index, update_sink_info, userdata));
+      // TODO check the sink index is not your active index and react appropriately
     }
     break;
   case PA_SUBSCRIPTION_EVENT_SINK_INPUT:
-    /*      g_debug("subscribed_events_callback - PA_SUBSCRIPTION_EVENT_SINK_INPUT event triggered!!");*/
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
       //handle the sink input remove event - not relevant for current design
-    } else {
-      pa_operation_unref(pa_context_get_sink_input_info(c, index, pulse_sink_input_info_callback, userdata));
+    } 
+    else {
+      // query the info of the sink input to see if we have a blocking moment
+      // TODO investigate what the id is here.
+      pa_operation_unref (pa_context_get_sink_input_info (c,
+                                                          index,
+                                                          pulse_sink_input_info_callback, userdata));
     }
     break;
   case PA_SUBSCRIPTION_EVENT_SERVER:
-    g_debug("subscribed_events_callback - PA_SUBSCRIPTION_EVENT_SERVER change of some description ???");
+    g_debug("PA_SUBSCRIPTION_EVENT_SERVER event triggered.");
     pa_operation *o;
-    if (!(o = pa_context_get_server_info(c, pulse_server_info_callback, userdata))) {
+    if (!(o = pa_context_get_server_info (c, pulse_server_info_callback, userdata))) {
       g_warning("subscribed_events_callback - pa_context_get_server_info() failed");
       return;
     }
@@ -144,44 +134,39 @@ static void subscribed_events_callback(pa_context *c, enum pa_subscription_event
 
 
 static void
-context_state_callback (pa_context *c, void *userdata)
+pm_context_state_callback (pa_context *c, void *userdata)
 {
   switch (pa_context_get_state(c)) {
   case PA_CONTEXT_UNCONNECTED:
-          g_debug("unconnected");
+    g_debug("unconnected");
     break;
   case PA_CONTEXT_CONNECTING:
-          g_debug("connecting - waiting for the server to become available");
+    g_debug("connecting - waiting for the server to become available");
     break;
   case PA_CONTEXT_AUTHORIZING:
-    /*      g_debug("authorizing");*/
     break;
   case PA_CONTEXT_SETTING_NAME:
-    /*      g_debug("context setting name");*/
     break;
   case PA_CONTEXT_FAILED:
     g_warning("PA_CONTEXT_FAILED - Is PulseAudio Daemon running ?");
-    /*sound_service_dbus_update_pa_state( dbus_service,
-                                        pa_server_available,
-                                        default_sink_is_muted(),
-                                        get_default_sink_volume() );
-    */  
+    // TODO: update state to unvailable on active sink
     if (reconnect_idle_id == 0){
       reconnect_idle_id = g_timeout_add_seconds (RECONNECT_DELAY,
                                                  reconnect_to_pulse,
-                                                 NULL);                                                      
+                                                 userdata);                                                      
     }     
     break;
   case PA_CONTEXT_TERMINATED:
-    /*      g_debug("context terminated");*/
     break;
   case PA_CONTEXT_READY:
+          
+    connection_attempts = 0;
     g_debug("PA_CONTEXT_READY");
     pa_operation *o;
             
-    pa_context_set_subscribe_callback(c, subscribed_events_callback, userdata);
+    pa_context_set_subscribe_callback(c, pm_subscribed_events_callback, userdata);
 
-    if (!(o = pa_context_subscribe(c, (pa_subscription_mask_t)
+    if (!(o = pa_context_subscribe (c, (pa_subscription_mask_t)
                                    (PA_SUBSCRIPTION_MASK_SINK|
                                     PA_SUBSCRIPTION_MASK_SINK_INPUT|
                                     PA_SUBSCRIPTION_MASK_SERVER), NULL, NULL))) {
@@ -195,3 +180,37 @@ context_state_callback (pa_context *c, void *userdata)
     break;
   }
 }
+
+/**
+ After startup we go straight for the server info to see if it has details of
+ the default sink. If so it makes things much easier.
+ **/
+static void 
+pm_server_info_callback (pa_context *c,
+                         const pa_server_info *info,
+                         void *userdata)
+{
+  pa_operation *operation;
+  if (info == NULL) {
+    g_warning("No server - get the hell out of here");
+    //TODO update active sink with state info
+    return;
+  }
+  if (info->default_sink_name != NULL) {
+    if (!(operation = pa_context_get_sink_info_by_name (c,
+                                                       info->default_sink_name,
+                                                       pm_default_sink_info_callback,
+                                                       userdata) )) {
+    } 
+    else{
+      pa_operation_unref(operation);
+      return;
+    }
+  }
+  else if (!(operation = pa_context_get_sink_info_list(c, pulse_sink_info_callback, NULL))) {
+    g_warning("pa_context_get_sink_info_list() failed");
+    return;
+  }
+  pa_operation_unref(operation);
+}
+
