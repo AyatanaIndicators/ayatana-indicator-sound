@@ -55,8 +55,10 @@ typedef struct {
   pa_volume_t base_volume;
 } sink_details;
 
-
 GType active_sink_get_type  (void) G_GNUC_CONST;
+
+void active_sink_update_details (ActiveSink* sink, sink_details* details);  
+void gboolean active_sink_is_populated (ActiveSink* sink)
 
 G_END_DECLS
 

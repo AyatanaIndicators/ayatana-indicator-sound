@@ -25,6 +25,7 @@ typedef struct _ActiveSinkPrivate ActiveSinkPrivate;
 
 struct _ActiveSinkPrivate
 {
+  sink_details* details;
 };
 
 #define ACTIVE_SINK_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), ACTIVE_SINK_TYPE, ActiveSinkPrivate))
@@ -52,11 +53,21 @@ active_sink_class_init (ActiveSinkClass *klass)
 static void
 active_sink_init(ActiveSink *self)
 {
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE(sink);
+  priv->details = NULL;  
 }
 
 static void
 active_sink_dispose (GObject *object)
 {
+  ActiveSink * self = ACTIVE_SINK(object);
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE(sink);
+
+  if (priv->details != NULL) {
+    g_free (priv->details->name);
+    g_free (priv->details);
+  }
+  
   G_OBJECT_CLASS (active_sink_parent_class)->dispose (object);
 }
 
@@ -65,3 +76,19 @@ active_sink_finalize (GObject *object)
 {
   G_OBJECT_CLASS (active_sink_parent_class)->finalize (object);  
 }
+
+void
+active_sink_update_details (ActiveSink* sink, sink_details* details)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE(sink);
+  priv->details = details;
+}
+
+void gboolean
+active_sink_is_populated (ActiveSink* sink)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE(sink);
+  return (priv->details != NULL)
+}
+
+  
