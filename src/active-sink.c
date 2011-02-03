@@ -42,7 +42,6 @@ static void
 active_sink_class_init (ActiveSinkClass *klass)
 {
   GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
-  GtkWidgetClass    *widget_class = GTK_WIDGET_CLASS (klass);
 
   g_type_class_add_private (klass, sizeof (ActiveSinkPrivate));
 
@@ -53,7 +52,7 @@ active_sink_class_init (ActiveSinkClass *klass)
 static void
 active_sink_init(ActiveSink *self)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE(sink);
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
   priv->details = NULL;  
 }
 
@@ -61,7 +60,7 @@ static void
 active_sink_dispose (GObject *object)
 {
   ActiveSink * self = ACTIVE_SINK(object);
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE(sink);
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
 
   if (priv->details != NULL) {
     g_free (priv->details->name);
@@ -84,11 +83,11 @@ active_sink_update_details (ActiveSink* sink, sink_details* details)
   priv->details = details;
 }
 
-void gboolean
+gboolean
 active_sink_is_populated (ActiveSink* sink)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE(sink);
-  return (priv->details != NULL)
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (sink);
+  return (priv->details != NULL);
 }
 
   

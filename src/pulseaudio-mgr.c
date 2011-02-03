@@ -17,11 +17,20 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
+/**Notes
+ *
+ * Approach now is to set up the communication channels then query the server
+ * fetch its default sink. If this fails then fetch the list of sinks and take
+ * the first one which is not the auto-null sink.
+ * TODO: need to handle the situation where one chink in this linear chain breaks
+ * i.e. start off the process again and count the attempts (note different to
+                                                            reconnect attempts)
+ */
 #include <pulse/gccmacro.h>
+#include <pulse/glib-mainloop.h>
+#include <pulse/error.h>
 
 #include "pulse-manager.h"
-#include "active-sink.h"
 
 #define RECONNECT_DELAY 5
 
@@ -34,6 +43,19 @@ static void pm_subscribed_events_callback (pa_context *c,
 static void pm_server_info_callback (pa_context *c,
                                      const pa_server_info *info,
                                      void *userdata);
+static void pm_default_sink_info_callback (pa_context *c,
+                                           const pa_sink_info *info,
+                                           int eol,
+                                           void *userdata);
+static void pm_sink_info_callback (pa_context *c,
+                                   const pa_sink_info *sink,
+                                   int eol,
+                                   void *userdata);
+
+
+static void populate_active_sink (const pa_sink_info *info, ActiveSink* sink);
+static gboolean reconnect_to_pulse (gpointer user_data);
+static pa_cvolume construct_mono_volume(const pa_cvolume* vol);
 
 
 static gint connection_attempts = 0;
@@ -59,6 +81,21 @@ establish_pulse_activities (ActiveSink* active_sink)
   
   pa_context_connect (pulse_context, NULL, PA_CONTEXT_NOFAIL, (gpointer)active_sink);  
 }
+
+/**
+close_pulse_activites()
+Gracefully close our connection with the Pulse async library.
+**/
+void close_pulse_activites()
+{
+  if (pulse_context != NULL) {
+    pa_context_unref(pulse_context);
+    pulse_context = NULL;
+  }
+  pa_glib_mainloop_free(pa_main_loop);
+  pa_main_loop = NULL;
+}
+
 
 static gboolean
 reconnect_to_pulse (gpointer user_data)
@@ -107,7 +144,19 @@ populate_active_sink (const pa_sink_info *info, ActiveSink* sink)
   details->volume = construct_mono_volume (&info->volume);
   details->base_volume = info->base_volume;
   details->channel_map = info->channel_map;
-  active_sink_update_details (sink, details);  
+  active_sink_update_details (sink, details);
+  g_debug ("active sink populated with sink %s", details->name);
+}
+
+static pa_cvolume
+construct_mono_volume(const pa_cvolume* vol)
+{
+  pa_cvolume new_volume;
+  pa_cvolume_init(&new_volume);
+  new_volume.channels = 1;
+  pa_volume_t max_vol = pa_cvolume_max(vol);
+  pa_cvolume_set(&new_volume, 1, max_vol);
+  return new_volume;
 }
 
 /**********************************************************************************************************************/
@@ -134,15 +183,15 @@ pm_subscribed_events_callback (pa_context *c,
     else {
       // query the info of the sink input to see if we have a blocking moment
       // TODO investigate what the id is here.
-      pa_operation_unref (pa_context_get_sink_input_info (c,
-                                                          index,
-                                                          pulse_sink_input_info_callback, userdata));
+      //pa_operation_unref (pa_context_get_sink_input_info (c,
+      //                                                    index,
+      //                                                    pulse_sink_input_info_callback, userdata));
     }
     break;
   case PA_SUBSCRIPTION_EVENT_SERVER:
     g_debug("PA_SUBSCRIPTION_EVENT_SERVER event triggered.");
     pa_operation *o;
-    if (!(o = pa_context_get_server_info (c, pulse_server_info_callback, userdata))) {
+    if (!(o = pa_context_get_server_info (c, pm_server_info_callback, userdata))) {
       g_warning("subscribed_events_callback - pa_context_get_server_info() failed");
       return;
     }
@@ -190,11 +239,15 @@ pm_context_state_callback (pa_context *c, void *userdata)
                                     PA_SUBSCRIPTION_MASK_SINK_INPUT|
                                     PA_SUBSCRIPTION_MASK_SERVER), NULL, NULL))) {
       g_warning("pa_context_subscribe() failed");
-      return;
+    
+    }
+
+    if (!(o = pa_context_get_server_info (c, pm_server_info_callback, userdata))) {
+      g_warning("Initial - pa_context_get_server_info() failed");
     }
     pa_operation_unref(o);
 
-    //gather_pulse_information(c, userdata);
+  
 
     break;
   }
@@ -210,12 +263,15 @@ pm_server_info_callback (pa_context *c,
                          void *userdata)
 {
   pa_operation *operation;
+  g_debug ("server info callback");
+
   if (info == NULL) {
     g_warning("No PA server - get the hell out of here");
     //TODO update active sink with state info
     return;
   }
   if (info->default_sink_name != NULL) {
+    g_debug ("default sink name from the server ain't null'");
     if (!(operation = pa_context_get_sink_info_by_name (c,
                                                        info->default_sink_name,
                                                        pm_default_sink_info_callback,
@@ -226,7 +282,9 @@ pm_server_info_callback (pa_context *c,
       return;
     }
   }
-  else if (!(operation = pa_context_get_sink_info_list(c, pulse_sink_info_callback, NULL))) {
+  else if (!(operation = pa_context_get_sink_info_list(c,
+                                                       pm_sink_info_callback,
+                                                       NULL))) {
     g_warning("pa_context_get_sink_info_list() failed");
     return;
   }
@@ -235,21 +293,25 @@ pm_server_info_callback (pa_context *c,
 
 // If the server doesn't have a default sink to give us
 // we should attempt to pick up the first of the list of sinks which doesn't have
-// the name 'auto_null'
+// the name 'auto_null' (that was all really I was doing before)
 static void
 pm_sink_info_callback (pa_context *c,
                        const pa_sink_info *sink,
                        int eol,
-                       void *userdata)
+                       void* userdata)
 {
   if (eol > 0) {
     return;
   }
   else {
-    ActiveSink* a_sink = ACTIVESINK (userdata);
+    if (IS_ACTIVE_SINK (userdata) == FALSE){
+      g_warning ("sink info callback - our user data is not what we think it should be");
+      return;
+    }
+    ActiveSink* a_sink = ACTIVE_SINK (userdata);
     if (active_sink_is_populated (a_sink) &&
         g_ascii_strncasecmp("auto_null", sink->name, 9) != 0){
-      populate_active_sink (info, ACTIVESINK (userdata));         
+      populate_active_sink (sink, a_sink);         
     }
   }
 }
@@ -265,7 +327,8 @@ pm_default_sink_info_callback (pa_context *c,
     return;
   } 
   else {
-    populate_active_sink (info, ACTIVESINK (userdata));
+    g_debug ("server has handed us a default sink");
+    populate_active_sink (info, ACTIVE_SINK (userdata));
   }
 }
 
