@@ -51,6 +51,15 @@ static void pm_sink_info_callback (pa_context *c,
                                    const pa_sink_info *sink,
                                    int eol,
                                    void *userdata);
+static void pm_sink_input_info_callback (pa_context *c,
+                                         const pa_sink_input_info *info,
+                                         int eol,
+                                         void *userdata);
+
+static void pm_update_active_sink (pa_context *c,
+                                   const pa_sink_info *info,
+                                   int eol,
+                                   void *userdata);
 
 
 static void populate_active_sink (const pa_sink_info *info, ActiveSink* sink);
@@ -172,20 +181,31 @@ pm_subscribed_events_callback (pa_context *c,
 {
   switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) {
   case PA_SUBSCRIPTION_EVENT_SINK:
+    if (IS_ACTIVE_SINK (userdata) == FALSE){
+      g_warning ("subscribed events callback - our userdata is not what we think it should be");
+      return;
+    }      
+    ActiveSink* sink = ACTIVE_SINK (userdata);
+    // We don't care about any other sink other than the active one.
+    if (index != active_sink_get_index (sink))
+        return;
+      
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
-      // TODO check the sink index is not your active index and react appropriately
+      // TODO: Fire of an unavailable state signal and try to find another sink
+    }
+    else{
+      pa_operation_unref (pa_context_get_sink_info_by_index (c,
+                                                             index,
+                                                             pm_update_active_sink,
+                                                             userdata) );
     }
     break;
   case PA_SUBSCRIPTION_EVENT_SINK_INPUT:
-    if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
-      //handle the sink input remove event - not relevant for current design
-    } 
-    else {
-      // query the info of the sink input to see if we have a blocking moment
-      // TODO investigate what the id is here.
-      //pa_operation_unref (pa_context_get_sink_input_info (c,
-      //                                                    index,
-      //                                                    pulse_sink_input_info_callback, userdata));
+    // We don't care about sink input removals.
+    if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) != PA_SUBSCRIPTION_EVENT_REMOVE) {
+      pa_operation_unref (pa_context_get_sink_input_info (c,
+                                                          index,
+                                                          pm_sink_input_info_callback, userdata));
     }
     break;
   case PA_SUBSCRIPTION_EVENT_SERVER:
@@ -246,9 +266,7 @@ pm_context_state_callback (pa_context *c, void *userdata)
       g_warning("Initial - pa_context_get_server_info() failed");
     }
     pa_operation_unref(o);
-
-  
-
+      
     break;
   }
 }
@@ -327,8 +345,55 @@ pm_default_sink_info_callback (pa_context *c,
     return;
   } 
   else {
+    if (IS_ACTIVE_SINK (userdata) == FALSE){
+      g_warning ("Default sink info callback - our user data is not what we think it should be");
+      return;
+    }
+    
     g_debug ("server has handed us a default sink");
     populate_active_sink (info, ACTIVE_SINK (userdata));
+  }
+}
+
+static void 
+pm_sink_input_info_callback (pa_context *c,
+                             const pa_sink_input_info *info,
+                             int eol,
+                             void *userdata)
+{
+  if (eol > 0) {
+    return;
+  }
+  else {
+    if (info == NULL) {
+      // TODO: watch this carefully - PA async api should not be doing this . . .
+      g_warning("\n Sink input info callback : SINK INPUT INFO IS NULL BUT EOL was not POSITIVE!!!");
+      return;
+    }
+    if (IS_ACTIVE_SINK (userdata) == FALSE){
+      g_warning ("sink input info callback - our user data is not what we think it should be");
+      return;
+    }
+    
+    ActiveSink* a_sink = ACTIVE_SINK (userdata);
+    if (active_sink_get_index (a_sink) == info->sink->index && 
+        active_sink_is_muted () == TRUE) {
+        // TODO fire off blocking signal
+    }
+  }
+}
+
+static void 
+pm_update_active_sink (pa_context *c,
+                       const pa_sink_info *info,
+                       int eol,
+                       void *userdata)
+{
+  if (eol > 0) {
+    return;
+  }
+  else{
+    
   }
 }
 

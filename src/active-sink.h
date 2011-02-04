@@ -59,7 +59,8 @@ GType active_sink_get_type  (void) G_GNUC_CONST;
 
 void active_sink_update_details (ActiveSink* sink, sink_details* details);  
 gboolean active_sink_is_populated (ActiveSink* sink);
-
+gboolean active_sink_is_muted (ActiveSink* self);
+gint active_sink_get_index (ActiveSink* self);
 G_END_DECLS
 
 #endif

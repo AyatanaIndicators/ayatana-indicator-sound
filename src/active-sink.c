@@ -90,4 +90,15 @@ active_sink_is_populated (ActiveSink* sink)
   return (priv->details != NULL);
 }
 
+gboolean
+active_sink_is_muted (ActiveSink* self)
+{
+  return FALSE;
+}
+
+gint
+active_sink_get_index (ActiveSink* self)
+{
+  return 0;
+}
   
