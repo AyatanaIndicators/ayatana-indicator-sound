@@ -62,7 +62,7 @@ static void pm_update_active_sink (pa_context *c,
                                    void *userdata);
 
 
-static void pm_populate_active_sink (const pa_sink_info *info, ActiveSink* sink);
+//static void pm_populate_active_sink (const pa_sink_info *info, ActiveSink* sink);
 static gboolean reconnect_to_pulse (gpointer user_data);
 static pa_cvolume construct_mono_volume(const pa_cvolume* vol);
 
@@ -74,7 +74,7 @@ static pa_glib_mainloop *pa_main_loop = NULL;
 
 // Entry Point
 void 
-establish_pulse_activities (ActiveSink* active_sink)
+pm_establish_pulse_connection (ActiveSink* active_sink)
 {
   pa_main_loop = pa_glib_mainloop_new (g_main_context_default ());
   g_assert (pa_main_loop);
@@ -142,7 +142,7 @@ reconnect_to_pulse (gpointer user_data)
   }
 }
 
-static void 
+/*static void 
 pm_populate_active_sink (const pa_sink_info *info, ActiveSink* sink)
 {
   details->index = info->index;
@@ -153,18 +153,9 @@ pm_populate_active_sink (const pa_sink_info *info, ActiveSink* sink)
   details->channel_map = info->channel_map;
   active_sink_update_details (sink, details);
   g_debug ("active sink populated with sink %s", details->name);
-}
+  
+}*/
 
-static pa_cvolume
-construct_mono_volume(const pa_cvolume* vol)
-{
-  pa_cvolume new_volume;
-  pa_cvolume_init(&new_volume);
-  new_volume.channels = 1;
-  pa_volume_t max_vol = pa_cvolume_max(vol);
-  pa_cvolume_set(&new_volume, 1, max_vol);
-  return new_volume;
-}
 
 /**********************************************************************************************************************/
 //    Pulse-Audio asychronous call-backs
@@ -325,9 +316,10 @@ pm_sink_info_callback (pa_context *c,
       return;
     }
     ActiveSink* a_sink = ACTIVE_SINK (userdata);
-    if (active_sink_is_populated (a_sink) &&
+    if (active_sink_is_populated (a_sink) == FALSE &&
         g_ascii_strncasecmp("auto_null", sink->name, 9) != 0){
-      populate_active_sink (sink, a_sink);         
+      active_sink_populate (a_sink, sink);
+      //populate_active_sink (sink, a_sink);         
     }
   }
 }
@@ -349,7 +341,8 @@ pm_default_sink_info_callback (pa_context *c,
     }
     
     g_debug ("server has handed us a default sink");
-    pm_populate_active_sink (info, ACTIVE_SINK (userdata));
+    active_sink_populate (ACTIVE_SINK (userdata), info);
+    //pm_populate_active_sink (info, ACTIVE_SINK (userdata));
   }
 }
 

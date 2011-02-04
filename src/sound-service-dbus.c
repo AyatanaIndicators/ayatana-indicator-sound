@@ -29,7 +29,7 @@
 #include <libdbusmenu-glib/client.h>
 
 #include "sound-service-dbus.h"
-
+#include "active-sink.h"
 #include "gen-sound-service.xml.h"
 #include "dbus-shared-names.h"
 
@@ -60,7 +60,6 @@ struct _SoundServiceDbusPrivate {
 
 static GDBusNodeInfo *            node_info = NULL;
 static GDBusInterfaceInfo *       interface_info = NULL;
-static gboolean                   b_startup = TRUE;
 
 #define SOUND_SERVICE_DBUS_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), SOUND_SERVICE_DBUS_TYPE, SoundServiceDbusPrivate))
 
@@ -69,17 +68,8 @@ static void sound_service_dbus_init       (SoundServiceDbus *self);
 static void sound_service_dbus_dispose    (GObject *object);
 static void sound_service_dbus_finalize   (GObject *object);
 
-static void sound_service_dbus_build_sound_menu ( SoundServiceDbus* root,
-                                                  gboolean mute_update,
-                                                  gboolean availability,
-                                                  gdouble volume );
 static void show_sound_settings_dialog (DbusmenuMenuitem *mi,
                                         gpointer user_data);
-static SoundState sound_service_dbus_get_state_from_volume (SoundServiceDbus* self);
-static void sound_service_dbus_determine_state (SoundServiceDbus* self, 
-                                                gboolean availability,
-                                                gboolean mute,
-                                                gdouble volume);
 static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
                                                      gchar* player_name,
                                                      gboolean blacklist); 
@@ -173,8 +163,8 @@ sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
   SoundServiceDbusPrivate * priv = SOUND_SERVICE_DBUS_GET_PRIVATE(self);
 
   // Mute button
-  dbusmenu_menuitem_child_append (priv->root_menuitem, mute_item));
-  dbusmenu_menuitem_child_append (priv->root_menuitem, slider_item ));
+  dbusmenu_menuitem_child_append (priv->root_menuitem, mute_item);
+  dbusmenu_menuitem_child_append (priv->root_menuitem, slider_item);
 
   // Separator
   DbusmenuMenuitem* separator = dbusmenu_menuitem_new();
@@ -239,21 +229,12 @@ sound_service_dbus_update_sound_state (SoundServiceDbus* self,
                                        SoundState new_state)
 {
   SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (self);
-  SoundState update = new_state;
-  // Ensure that after it has become available update the state with the current volume level
-  if (new_state == AVAILABLE &&
-      mute_menu_item_is_muted (priv->mute_menuitem) == FALSE){
-      update = sound_service_dbus_get_state_from_volume (self);
-  }
-  if (update != BLOCKED){
-    priv->current_sound_state = update;
-  }
 
-  GVariant* v_output = g_variant_new("(i)", (int)update);
+  GVariant* v_output = g_variant_new("(i)", (int)new_state);
 
   GError * error = NULL;
 
-  g_debug ("emitting signal with value %i", (int)update);
+  g_debug ("emitting state signal with value %i", (int)new_state);
   g_dbus_connection_emit_signal( priv->connection,
                                  NULL,
                                  INDICATOR_SOUND_SERVICE_DBUS_OBJECT_PATH,
@@ -286,7 +267,7 @@ bus_method_call (GDBusConnection * connection,
   SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (service);
 
   if (g_strcmp0(method, "GetSoundState") == 0) {
-    g_debug("Get state -  %i", active_sink_get_state (priv->active_sink);
+    g_debug("Get state -  %i", active_sink_get_state (priv->active_sink));
     retval =  g_variant_new ( "(i)", active_sink_get_state (priv->active_sink));    
   }   
   else if (g_strcmp0(method, "BlacklistMediaPlayer") == 0) {    

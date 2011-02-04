@@ -16,25 +16,27 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along 
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 #include <libdbusmenu-glib/menuitem.h>
 
 #include "active-sink.h"
 #include "slider-menu-item.h"
 #include "mute-menu-item.h"
 
-
+#include "pulseaudio-mgr.h"
 
 typedef struct _ActiveSinkPrivate ActiveSinkPrivate;
 
 struct _ActiveSinkPrivate
 {
-  gboolean            is_active;
   SliderMenuItem*     volume_slider_menuitem;
   MuteMenuItem*       mute_menuitem;
   SoundState          current_sound_state;  
-  gint                index;
   SoundServiceDbus*   service;
+  gint                index;
+  gchar*              name;
+  pa_cvolume          volume;
+  pa_channel_map      channel_map;  
+  pa_volume_t         base_volume;  
 };
 
 #define ACTIVE_SINK_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), ACTIVE_SINK_TYPE, ActiveSinkPrivate))
@@ -46,6 +48,8 @@ static void active_sink_dispose    (GObject *object);
 static void active_sink_finalize   (GObject *object);
 
 static SoundState active_sink_get_state_from_volume (ActiveSink* self);
+static pa_cvolume active_sink_construct_mono_volume (const pa_cvolume* vol);
+
 
 G_DEFINE_TYPE (ActiveSink, active_sink, G_TYPE_OBJECT);
 
@@ -64,12 +68,12 @@ static void
 active_sink_init(ActiveSink *self)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
-  priv->details = NULL;  
   priv->mute_menuitem = NULL;
   priv->volume_slider_menuitem = NULL;
   priv->current_sound_state = UNAVAILABLE;
-  priv->is_active = TRUE;  
   priv->index = -1;
+  priv->name = NULL;
+  priv->service = NULL;
 
   // Init our menu items.
   priv->mute_menuitem = g_object_new (MUTE_MENU_ITEM_TYPE, NULL);
@@ -82,10 +86,10 @@ active_sink_dispose (GObject *object)
   ActiveSink * self = ACTIVE_SINK(object);
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
 
-  if (priv->details != NULL) {
+  /*if (priv->details != NULL) {
     g_free (priv->details->name);
     g_free (priv->details);
-  }
+  }*/
   
   G_OBJECT_CLASS (active_sink_parent_class)->dispose (object);
 }
@@ -96,25 +100,30 @@ active_sink_finalize (GObject *object)
   G_OBJECT_CLASS (active_sink_parent_class)->finalize (object);  
 }
 
-// This needs to populate the appropriate values on the menu items
 void
 active_sink_populate (ActiveSink* sink,
-                      gdouble volume,
-                      gboolean mute,
-                      gint device_index)
+                      const pa_sink_info* update)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE(sink);
-  active_sink_update_volume (sink, volume);
-  active_sink_update_mute (sink, mute);
-  priv->index = device_index;
-  priv->is_active = TRUE;
+
+  priv->name = g_strdup (update->name);
+  priv->index = update->index;
+  // Why the double negative !?
+  active_sink_update_mute (sink, !!update->mute);
+  priv->volume = active_sink_construct_mono_volume (&update->volume);
+  priv->base_volume = update->base_volume;
+  priv->channel_map = update->channel_map;
+
+  pa_volume_t vol = pa_cvolume_max (&update->volume);
+  gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
+  active_sink_update_volume (sink, volume_percent);  
 }
 
 gboolean
 active_sink_is_populated (ActiveSink* sink)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (sink);
-  return priv->is_active;
+  return (priv->index != -1);
 }
 
 gboolean
@@ -186,13 +195,26 @@ active_sink_get_state_from_volume (ActiveSink* self)
   return state;
 }
 
+static pa_cvolume
+active_sink_construct_mono_volume (const pa_cvolume* vol)
+{
+  pa_cvolume new_volume;
+  pa_cvolume_init(&new_volume);
+  new_volume.channels = 1;
+  pa_volume_t max_vol = pa_cvolume_max(vol);
+  pa_cvolume_set(&new_volume, 1, max_vol);
+  return new_volume;
+}
+
+
 ActiveSink* active_sink_new (SoundServiceDbus* service)
 {
   ActiveSink* sink = g_object_new (ACTIVE_SINK_TYPE, NULL);
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (sink);
   priv->service = service;
   sound_service_dbus_build_sound_menu (service,
-                                       priv->mute_menuitem,
-                                       priv->voluem_slider_menuitem);
+                                       mute_menu_item_get_button (priv->mute_menuitem),
+                                       DBUSMENU_MENUITEM (priv->volume_slider_menuitem));
+  pm_establish_pulse_connection (sink);
   return sink;
 }

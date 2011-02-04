@@ -72,7 +72,6 @@ music_bridge_VALAFLAGS = \
 	--pkg gdk-pixbuf-2.0 \
 	--pkg libxml-2.0
 
-	 
  $(MAINTAINER_VALAFLAGS)
 
 music_bridge_APIFILES = \
@@ -89,8 +88,10 @@ indicator_sound_service_SOURCES = \
 	common-defs.h \
   sound-service.h \
   sound-service.c \
-  pulse-manager.h \
-  pulse-manager.c \
+  pulseaudio-mgr.h \
+  pulseaudio-mgr.c \
+  active-sink.c \
+  active-sink.h \
   sound-service-dbus.h \
   sound-service-dbus.c \
   slider-menu-item.h \
@@ -108,7 +109,7 @@ indicator_sound_service_LDADD = $(PULSEAUDIO_LIBS) $(SOUNDSERVICE_LIBS) $(GCONF_
 # Service xml compilation
 #########################
 DBUS_SPECS = \
-	sound-service.xml
+  sound-service.xml
 
 gen-%.xml.h: %.xml
 	@echo "Building $@ from $<"
