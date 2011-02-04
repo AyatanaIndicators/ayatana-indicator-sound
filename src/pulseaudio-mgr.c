@@ -62,7 +62,7 @@ static void pm_update_active_sink (pa_context *c,
                                    void *userdata);
 
 
-static void populate_active_sink (const pa_sink_info *info, ActiveSink* sink);
+static void pm_populate_active_sink (const pa_sink_info *info, ActiveSink* sink);
 static gboolean reconnect_to_pulse (gpointer user_data);
 static pa_cvolume construct_mono_volume(const pa_cvolume* vol);
 
@@ -143,10 +143,8 @@ reconnect_to_pulse (gpointer user_data)
 }
 
 static void 
-populate_active_sink (const pa_sink_info *info, ActiveSink* sink)
+pm_populate_active_sink (const pa_sink_info *info, ActiveSink* sink)
 {
-  sink_details *details;
-  details = g_new0 (sink_details, 1);
   details->index = info->index;
   details->name = g_strdup (info->name);
   details->mute = !!info->mute;
@@ -351,7 +349,7 @@ pm_default_sink_info_callback (pa_context *c,
     }
     
     g_debug ("server has handed us a default sink");
-    populate_active_sink (info, ACTIVE_SINK (userdata));
+    pm_populate_active_sink (info, ACTIVE_SINK (userdata));
   }
 }
 

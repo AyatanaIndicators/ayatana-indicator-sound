@@ -61,6 +61,7 @@ void active_sink_update_details (ActiveSink* sink, sink_details* details);
 gboolean active_sink_is_populated (ActiveSink* sink);
 gboolean active_sink_is_muted (ActiveSink* self);
 gint active_sink_get_index (ActiveSink* self);
+SoundState active_sink_get_state (ActiveSink* self);
 void active_sink_update_volume (ActiveSink* self, gdouble vol_percent);
 void active_sink_update_mute (ActiveSink* self, gboolean muted);
 
