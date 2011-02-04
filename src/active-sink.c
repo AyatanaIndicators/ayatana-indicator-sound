@@ -101,4 +101,13 @@ active_sink_get_index (ActiveSink* self)
 {
   return 0;
 }
-  
+
+void 
+active_sink_update_volume (ActiveSink* self, gdouble percent)
+{
+}
+
+void 
+active_sink_update_mute (ActiveSink* self, gboolean muted)
+{
+}

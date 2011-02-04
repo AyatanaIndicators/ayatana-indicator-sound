@@ -30,7 +30,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <pulse/glib-mainloop.h>
 #include <pulse/error.h>
 
-#include "pulse-manager.h"
+#include "pulseaudio-mgr.h"
 
 #define RECONNECT_DELAY 5
 
@@ -376,8 +376,8 @@ pm_sink_input_info_callback (pa_context *c,
     }
     
     ActiveSink* a_sink = ACTIVE_SINK (userdata);
-    if (active_sink_get_index (a_sink) == info->sink->index && 
-        active_sink_is_muted () == TRUE) {
+    if (active_sink_get_index (a_sink) == info->sink && 
+        active_sink_is_muted (a_sink) == TRUE) {
         // TODO fire off blocking signal
     }
   }
@@ -393,7 +393,13 @@ pm_update_active_sink (pa_context *c,
     return;
   }
   else{
-    
+    if (IS_ACTIVE_SINK (userdata) == FALSE){
+      g_warning ("update_active_sink - our user data is not what we think it should be");
+      return;
+    }
+    pa_volume_t vol = pa_cvolume_max (&info->volume);
+    gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
+    active_sink_update_volume (ACTIVE_SINK(userdata), volume_percent);
   }
 }
 
