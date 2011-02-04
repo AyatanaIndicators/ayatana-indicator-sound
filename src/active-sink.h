@@ -48,23 +48,17 @@ struct _ActiveSinkClass {
   GObjectClass parent_class;
 };
 
-/*typedef struct {
-  gchar* name;
-  gint index;
-  pa_cvolume volume;
-  pa_channel_map channel_map;
-  gboolean mute;
-  pa_volume_t base_volume;
-} sink_details;
-*/
-
 GType active_sink_get_type  (void) G_GNUC_CONST;
 
 void active_sink_populate (ActiveSink* sink, const pa_sink_info* update);  
+
 gboolean active_sink_is_populated (ActiveSink* sink);
-gboolean active_sink_is_muted (ActiveSink* self);
+void active_sink_determine_blocking_state (ActiveSink* self);
+
 gint active_sink_get_index (ActiveSink* self);
 SoundState active_sink_get_state (ActiveSink* self);
+
+void active_sink_deactivate (ActiveSink* self);
 
 void active_sink_update_volume (ActiveSink* self, gdouble vol_percent);
 void active_sink_update_mute (ActiveSink* self, gboolean muted);

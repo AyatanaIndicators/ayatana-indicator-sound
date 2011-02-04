@@ -62,12 +62,7 @@ static void slider_menu_item_init (SliderMenuItem *self)
   g_debug("Building new Slider Menu Item");
   dbusmenu_menuitem_property_set( DBUSMENU_MENUITEM(self),
                                   DBUSMENU_MENUITEM_PROP_TYPE,
-                                  DBUSMENU_VOLUME_MENUITEM_TYPE );
-
-  /*dbusmenu_menuitem_property_set_bool( DBUSMENU_MENUITEM(self),
-                                       DBUSMENU_MENUITEM_PROP_VISIBLE,
-                                       TRUE);*/
-  
+                                  DBUSMENU_VOLUME_MENUITEM_TYPE );  
   return;
 }
 
@@ -110,8 +105,6 @@ handle_event (DbusmenuMenuitem * mi,
 void slider_menu_item_update (SliderMenuItem* item,
                               gdouble update)
 {
-  // TODO
-  // Check if that variant below will leak !!!
   GVariant* new_volume = g_variant_new_double(update);
   dbusmenu_menuitem_property_set_variant(DBUSMENU_MENUITEM(item),
                                          DBUSMENU_VOLUME_MENUITEM_LEVEL,

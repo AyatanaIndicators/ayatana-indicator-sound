@@ -35,8 +35,8 @@ struct _ActiveSinkPrivate
   gint                index;
   gchar*              name;
   pa_cvolume          volume;
-  pa_channel_map      channel_map;  
-  pa_volume_t         base_volume;  
+  pa_channel_map      channel_map;
+  pa_volume_t         base_volume;
 };
 
 #define ACTIVE_SINK_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), ACTIVE_SINK_TYPE, ActiveSinkPrivate))
@@ -82,15 +82,7 @@ active_sink_init(ActiveSink *self)
 
 static void
 active_sink_dispose (GObject *object)
-{
-  ActiveSink * self = ACTIVE_SINK(object);
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
-
-  /*if (priv->details != NULL) {
-    g_free (priv->details->name);
-    g_free (priv->details);
-  }*/
-  
+{  
   G_OBJECT_CLASS (active_sink_parent_class)->dispose (object);
 }
 
@@ -127,11 +119,18 @@ active_sink_is_populated (ActiveSink* sink)
   return (priv->index != -1);
 }
 
-gboolean
-active_sink_is_muted (ActiveSink* self)
+void
+active_sink_determine_blocking_state (ActiveSink* self)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
-  return mute_menu_item_is_muted (priv->mute_menuitem);
+  if (mute_menu_item_is_muted (priv->mute_menuitem)){
+    /**
+    We don't want to set the current state to blocking
+    as this is a fire and forget event.
+    */  
+    sound_service_dbus_update_sound_state (priv->service,
+                                           BLOCKED);  
+  }
 }
 
 gint
@@ -151,6 +150,18 @@ active_sink_update_volume (ActiveSink* self, gdouble percent)
 
   sound_service_dbus_update_sound_state (priv->service,
                                          priv->current_sound_state);
+}
+
+void 
+active_sink_deactivate (ActiveSink* self)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  priv->current_sound_state = UNAVAILABLE;
+  sound_service_dbus_update_sound_state (priv->service,
+                                         priv->current_sound_state);  
+  priv->index = -1;
+  g_free(priv->name);
+  priv->name = NULL;
 }
 
 void 
@@ -211,8 +222,8 @@ active_sink_construct_mono_volume (const pa_cvolume* vol)
   return new_volume;
 }
 
-
-ActiveSink* active_sink_new (SoundServiceDbus* service)
+ActiveSink* 
+active_sink_new (SoundServiceDbus* service)
 {
   ActiveSink* sink = g_object_new (ACTIVE_SINK_TYPE, NULL);
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (sink);

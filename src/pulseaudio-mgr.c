@@ -62,10 +62,7 @@ static void pm_update_active_sink (pa_context *c,
                                    void *userdata);
 
 
-//static void pm_populate_active_sink (const pa_sink_info *info, ActiveSink* sink);
 static gboolean reconnect_to_pulse (gpointer user_data);
-//static pa_cvolume construct_mono_volume(const pa_cvolume* vol);
-
 
 static gint connection_attempts = 0;
 static gint reconnect_idle_id = 0;
@@ -87,9 +84,7 @@ pm_establish_pulse_connection (ActiveSink* active_sink)
   pa_context_set_state_callback (pulse_context,
                                  pm_context_state_callback,
                                  (gpointer)active_sink);
-  
-  //TODO update active sink before init with state at unavailable
-  
+    
   pa_context_connect (pulse_context, NULL, PA_CONTEXT_NOFAIL, (gpointer)active_sink);  
 }
 
@@ -144,20 +139,6 @@ reconnect_to_pulse (gpointer user_data)
   }
 }
 
-/*static void 
-pm_populate_active_sink (const pa_sink_info *info, ActiveSink* sink)
-{
-  details->index = info->index;
-  details->name = g_strdup (info->name);
-  details->mute = !!info->mute;
-  details->volume = construct_mono_volume (&info->volume);
-  details->base_volume = info->base_volume;
-  details->channel_map = info->channel_map;
-  active_sink_update_details (sink, details);
-  g_debug ("active sink populated with sink %s", details->name);
-  
-}*/
-
 
 /**********************************************************************************************************************/
 //    Pulse-Audio asychronous call-backs
@@ -182,7 +163,8 @@ pm_subscribed_events_callback (pa_context *c,
         return;
       
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
-      // TODO: Fire of an unavailable state signal and try to find another sink
+      active_sink_deactivate (ACTIVE_SINK (userdata));
+      
     }
     else{
       pa_operation_unref (pa_context_get_sink_info_by_index (c,
@@ -228,7 +210,7 @@ pm_context_state_callback (pa_context *c, void *userdata)
     break;
   case PA_CONTEXT_FAILED:
     g_warning("PA_CONTEXT_FAILED - Is PulseAudio Daemon running ?");
-    // TODO: update state to unvailable on active sink
+    active_sink_deactivate (ACTIVE_SINK (userdata));
     if (reconnect_idle_id == 0){
       reconnect_idle_id = g_timeout_add_seconds (RECONNECT_DELAY,
                                                  reconnect_to_pulse,
@@ -276,7 +258,7 @@ pm_server_info_callback (pa_context *c,
 
   if (info == NULL) {
     g_warning("No PA server - get the hell out of here");
-    //TODO update active sink with state info
+    active_sink_deactivate (ACTIVE_SINK (userdata));
     return;
   }
   if (info->default_sink_name != NULL) {
@@ -321,7 +303,6 @@ pm_sink_info_callback (pa_context *c,
     if (active_sink_is_populated (a_sink) == FALSE &&
         g_ascii_strncasecmp("auto_null", sink->name, 9) != 0){
       active_sink_populate (a_sink, sink);
-      //populate_active_sink (sink, a_sink);         
     }
   }
 }
@@ -333,7 +314,6 @@ pm_default_sink_info_callback (pa_context *c,
                                void *userdata)
 {
   if (eol > 0) {
-    // TODO what happens here - high and dry!
     return;
   } 
   else {
@@ -344,7 +324,6 @@ pm_default_sink_info_callback (pa_context *c,
     
     g_debug ("server has handed us a default sink");
     active_sink_populate (ACTIVE_SINK (userdata), info);
-    //pm_populate_active_sink (info, ACTIVE_SINK (userdata));
   }
 }
 
@@ -369,9 +348,8 @@ pm_sink_input_info_callback (pa_context *c,
     }
     
     ActiveSink* a_sink = ACTIVE_SINK (userdata);
-    if (active_sink_get_index (a_sink) == info->sink && 
-        active_sink_is_muted (a_sink) == TRUE) {
-        // TODO fire off blocking signal
+    if (active_sink_get_index (a_sink) == info->sink){
+      active_sink_determine_blocking_state (a_sink);
     }
   }
 }
@@ -393,6 +371,7 @@ pm_update_active_sink (pa_context *c,
     pa_volume_t vol = pa_cvolume_max (&info->volume);
     gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
     active_sink_update_volume (ACTIVE_SINK(userdata), volume_percent);
+    active_sink_update_mute (ACTIVE_SINK(userdata), info->mute);
   }
 }
 

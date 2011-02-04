@@ -151,7 +151,6 @@ sound_service_dbus_create_root_item (SoundServiceDbus* self)
   dbusmenu_server_set_root (server, priv->root_menuitem);
   g_object_unref (priv->root_menuitem);
   priv->active_sink = active_sink_new (self);
-  //establish_pulse_activities (self);
   return priv->root_menuitem;
 }
 
@@ -222,9 +221,6 @@ sound_service_dbus_finalize (GObject *object)
 
 
 // EMIT STATE SIGNAL
-
-// TODO: this will be a bit messy until the pa_manager is sorted.
-// And we figure out all of the edge cases.
 void 
 sound_service_dbus_update_sound_state (SoundServiceDbus* self,
                                        SoundState new_state)
@@ -251,7 +247,6 @@ sound_service_dbus_update_sound_state (SoundServiceDbus* self,
 }
 
 //HANDLE DBUS METHOD CALLS
-// TODO we will need to implement the black_list method.
 static void
 bus_method_call (GDBusConnection * connection,
                  const gchar * sender,
