@@ -55,12 +55,10 @@ static void pm_sink_input_info_callback (pa_context *c,
                                          const pa_sink_input_info *info,
                                          int eol,
                                          void *userdata);
-
 static void pm_update_active_sink (pa_context *c,
                                    const pa_sink_info *info,
                                    int eol,
                                    void *userdata);
-
 
 static gboolean reconnect_to_pulse (gpointer user_data);
 
@@ -370,8 +368,8 @@ pm_update_active_sink (pa_context *c,
     }
     pa_volume_t vol = pa_cvolume_max (&info->volume);
     gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
-    active_sink_update_volume (ACTIVE_SINK(userdata), volume_percent);
-    active_sink_update_mute (ACTIVE_SINK(userdata), info->mute);
+    active_sink_volume_update (ACTIVE_SINK(userdata), volume_percent);
+    active_sink_mute_update (ACTIVE_SINK(userdata), info->mute);
   }
 }
 
