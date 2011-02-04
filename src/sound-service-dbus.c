@@ -164,6 +164,7 @@ sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
 
   // Mute button
   dbusmenu_menuitem_child_append (priv->root_menuitem, mute_item);
+  g_debug ("just about to add the slider %i", DBUSMENU_IS_MENUITEM(slider_item));
   dbusmenu_menuitem_child_append (priv->root_menuitem, slider_item);
 
   // Separator

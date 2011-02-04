@@ -93,7 +93,7 @@ mute_menu_item_set_global_mute_from_ui (gpointer user_data)
 
   gboolean new_value = !current_value;
   // pa manager api - to be refactored
-  toggle_global_mute (new_value);
+  //toggle_global_mute (new_value);
 }
 
 void

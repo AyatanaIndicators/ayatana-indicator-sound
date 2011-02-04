@@ -64,7 +64,7 @@ static void pm_update_active_sink (pa_context *c,
 
 //static void pm_populate_active_sink (const pa_sink_info *info, ActiveSink* sink);
 static gboolean reconnect_to_pulse (gpointer user_data);
-static pa_cvolume construct_mono_volume(const pa_cvolume* vol);
+//static pa_cvolume construct_mono_volume(const pa_cvolume* vol);
 
 
 static gint connection_attempts = 0;
@@ -72,7 +72,9 @@ static gint reconnect_idle_id = 0;
 static pa_context *pulse_context = NULL;
 static pa_glib_mainloop *pa_main_loop = NULL;
 
-// Entry Point
+/**
+ Entry Point
+ **/
 void 
 pm_establish_pulse_connection (ActiveSink* active_sink)
 {

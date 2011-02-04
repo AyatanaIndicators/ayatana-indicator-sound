@@ -60,6 +60,14 @@ static void slider_menu_item_class_init (SliderMenuItemClass *klass)
 static void slider_menu_item_init (SliderMenuItem *self)
 {
   g_debug("Building new Slider Menu Item");
+  dbusmenu_menuitem_property_set( DBUSMENU_MENUITEM(self),
+                                  DBUSMENU_MENUITEM_PROP_TYPE,
+                                  DBUSMENU_VOLUME_MENUITEM_TYPE );
+
+  /*dbusmenu_menuitem_property_set_bool( DBUSMENU_MENUITEM(self),
+                                       DBUSMENU_MENUITEM_PROP_VISIBLE,
+                                       TRUE);*/
+  
   return;
 }
 
@@ -89,12 +97,13 @@ handle_event (DbusmenuMenuitem * mi,
 
   gboolean volume_input = g_variant_get_double(input);
   if (value != NULL){
-    set_sink_volume(volume_input);
-    // TODO -when the ACTIVESINK instance exists this will be handled nicely
+    // TODO - when the ACTIVESINK instance exists this will be handled nicely
     // PA MANAGER will be refactored first.
-    if (default_sink_is_muted () == TRUE){
+    
+    //set_sink_volume(volume_input);
+    /*if (default_sink_is_muted () == TRUE){
       toggle_global_mute (FALSE);
-    }
+    }*/
   }
 }
 
@@ -121,9 +130,6 @@ SliderMenuItem* slider_menu_item_new (gboolean sinks_available,
                                       gdouble start_volume)
 { 
   SliderMenuItem *self = g_object_new(SLIDER_MENU_ITEM_TYPE, NULL);
-  dbusmenu_menuitem_property_set( DBUSMENU_MENUITEM(self),
-                                  DBUSMENU_MENUITEM_PROP_TYPE,
-                                  DBUSMENU_VOLUME_MENUITEM_TYPE );
   slider_menu_item_update (self, start_volume);
   slider_menu_item_enable (self, sinks_available);
 

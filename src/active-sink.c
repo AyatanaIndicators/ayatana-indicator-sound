@@ -117,6 +117,7 @@ active_sink_populate (ActiveSink* sink,
   pa_volume_t vol = pa_cvolume_max (&update->volume);
   gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
   active_sink_update_volume (sink, volume_percent);  
+  g_debug ("Active sink has been populated - volume %f", volume_percent);
 }
 
 gboolean
@@ -145,8 +146,11 @@ active_sink_update_volume (ActiveSink* self, gdouble percent)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
   slider_menu_item_update (priv->volume_slider_menuitem, percent);  
+
+  priv->current_sound_state = active_sink_get_state_from_volume (self);
+
   sound_service_dbus_update_sound_state (priv->service,
-                                         active_sink_get_state_from_volume (self));
+                                         priv->current_sound_state);
 }
 
 void 
@@ -159,6 +163,7 @@ active_sink_update_mute (ActiveSink* self, gboolean muted)
   if (muted == TRUE){
     state = MUTED;
   }
+  priv->current_sound_state = state;
   sound_service_dbus_update_sound_state (priv->service, state);
 }
 
