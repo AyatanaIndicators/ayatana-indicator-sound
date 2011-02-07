@@ -79,15 +79,7 @@ pm_establish_pulse_connection (ActiveSink* active_sink)
 {
   pa_main_loop = pa_glib_mainloop_new (g_main_context_default ());
   g_assert (pa_main_loop);
-  pulse_context = pa_context_new (pa_glib_mainloop_get_api (pa_main_loop),
-                                 "com.canonical.indicators.sound");
-  g_assert (pulse_context);
-
-  pa_context_set_state_callback (pulse_context,
-                                 pm_context_state_callback,
-                                 (gpointer)active_sink);
-    
-  pa_context_connect (pulse_context, NULL, PA_CONTEXT_NOFAIL, (gpointer)active_sink);  
+  reconnect_to_pulse ((gpointer)active_sink);  
 }
 
 /**
@@ -104,7 +96,10 @@ void close_pulse_activites()
   pa_main_loop = NULL;
 }
 
-
+/**
+reconnect_to_pulse (gpointer user_data)
+Method which connects to the pulse server and is used to track reconnects.
+ */
 static gboolean
 reconnect_to_pulse (gpointer user_data)
 {
