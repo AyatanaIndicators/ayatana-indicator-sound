@@ -59,6 +59,10 @@ static void pm_update_active_sink (pa_context *c,
                                    const pa_sink_info *info,
                                    int eol,
                                    void *userdata);
+static void pm_toggle_mute_for_every_sink_callback (pa_context *c,
+                                                    const pa_sink_info *sink,
+                                                    int eol,
+                                                    void* userdata);
 
 static gboolean reconnect_to_pulse (gpointer user_data);
 
@@ -137,6 +141,23 @@ reconnect_to_pulse (gpointer user_data)
   }
 }
 
+void
+pm_update_volume (gint sink_index, pa_cvolume new_volume)
+{
+  pa_operation_unref (pa_context_set_sink_volume_by_index (pulse_context,
+                                                           sink_index,
+                                                           &new_volume,
+                                                           NULL,
+                                                           NULL) );
+}
+
+void
+pm_update_mute (gboolean update)
+{
+  pa_operation_unref (pa_context_get_sink_info_list (pulse_context,
+                                                     pm_toggle_mute_for_every_sink_callback,
+                                                     GINT_TO_POINTER (update)));
+}
 
 /**********************************************************************************************************************/
 //    Pulse-Audio asychronous call-backs
@@ -212,17 +233,16 @@ pm_context_state_callback (pa_context *c, void *userdata)
     if (reconnect_idle_id == 0){
       reconnect_idle_id = g_timeout_add_seconds (RECONNECT_DELAY,
                                                  reconnect_to_pulse,
-                                                 userdata);                                                      
-    }     
+                                                 userdata);
+    }
     break;
   case PA_CONTEXT_TERMINATED:
     break;
   case PA_CONTEXT_READY:
-          
     connection_attempts = 0;
     g_debug("PA_CONTEXT_READY");
     pa_operation *o;
-            
+
     pa_context_set_subscribe_callback(c, pm_subscribed_events_callback, userdata);
 
     if (!(o = pa_context_subscribe (c, (pa_subscription_mask_t)
@@ -318,8 +338,7 @@ pm_default_sink_info_callback (pa_context *c,
     if (IS_ACTIVE_SINK (userdata) == FALSE){
       g_warning ("Default sink info callback - our user data is not what we think it should be");
       return;
-    }
-    
+    }    
     g_debug ("server has handed us a default sink");
     active_sink_populate (ACTIVE_SINK (userdata), info);
   }
@@ -366,11 +385,25 @@ pm_update_active_sink (pa_context *c,
       g_warning ("update_active_sink - our user data is not what we think it should be");
       return;
     }
-    pa_volume_t vol = pa_cvolume_max (&info->volume);
-    gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
-    active_sink_volume_update (ACTIVE_SINK(userdata), volume_percent);
-    active_sink_mute_update (ACTIVE_SINK(userdata), info->mute);
+    active_sink_update (ACTIVE_SINK(userdata), info);
   }
 }
 
+static void
+pm_toggle_mute_for_every_sink_callback (pa_context *c,
+                                        const pa_sink_info *sink,
+                                        int eol,
+                                        void* userdata)
+{
+  if (eol > 0) {
+    return;
+  }
+  else {
+    pa_operation_unref (pa_context_set_sink_mute_by_index (c,
+                                                           sink->index,
+                                                           GPOINTER_TO_INT(userdata),
+                                                           NULL,
+                                                           NULL));
+  }
+}
 

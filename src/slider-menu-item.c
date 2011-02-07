@@ -98,13 +98,7 @@ handle_event (DbusmenuMenuitem * mi,
     if (IS_SLIDER_MENU_ITEM (mi)) {
       SliderMenuItemPrivate* priv = SLIDER_MENU_ITEM_GET_PRIVATE (SLIDER_MENU_ITEM (mi));
       active_sink_update_volume (priv->a_sink, volume_input);
-    }
-
-    //active_sink_update_volume  (
-    // TODO - when the ACTIVESINK instance exists this will be handled nicely
-    // PA MANAGER will be refactored first.
-    
-    //set_sink_volume(volume_input);
+    }    
     /*if (default_sink_is_muted () == TRUE){
       toggle_global_mute (FALSE);
     }*/

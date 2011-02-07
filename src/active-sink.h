@@ -51,6 +51,7 @@ struct _ActiveSinkClass {
 GType active_sink_get_type  (void) G_GNUC_CONST;
 
 void active_sink_populate (ActiveSink* sink, const pa_sink_info* update);  
+void active_sink_update (ActiveSink* sink, const pa_sink_info* update);  
 
 gboolean active_sink_is_populated (ActiveSink* sink);
 void active_sink_determine_blocking_state (ActiveSink* self);
@@ -60,10 +61,9 @@ SoundState active_sink_get_state (ActiveSink* self);
 
 void active_sink_deactivate (ActiveSink* self);
 
-void active_sink_volume_update (ActiveSink* self, gdouble vol_percent);
-void active_sink_update_volume (ActiveSink* self, gdouble percent);
+//void active_sink_volume_update (ActiveSink* self, gdouble vol_percent);
 
-void active_sink_mute_update (ActiveSink* self, gboolean muted);
+void active_sink_update_volume (ActiveSink* self, gdouble percent);
 
 ActiveSink* active_sink_new (SoundServiceDbus* service);
 

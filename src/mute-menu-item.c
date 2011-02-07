@@ -1,4 +1,4 @@
-/*
+#/*
 Copyright 2011 Canonical Ltd.
 
 Authors:
@@ -24,7 +24,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "common-defs.h"
 #include "mute-menu-item.h"
-#include "pulse-manager.h"
+#include "pulseaudio-mgr.h"
 
 typedef struct _MuteMenuItemPrivate MuteMenuItemPrivate;
 
@@ -90,10 +90,8 @@ mute_menu_item_set_global_mute_from_ui (gpointer user_data)
   DbusmenuMenuitem* button = DBUSMENU_MENUITEM (user_data);
   gboolean current_value = dbusmenu_menuitem_property_get_bool (button,
                                                                 DBUSMENU_MUTE_MENUITEM_VALUE);
-
   gboolean new_value = !current_value;
-  // pa manager api - to be refactored
-  //toggle_global_mute (new_value);
+  pm_update_mute (new_value);
 }
 
 void

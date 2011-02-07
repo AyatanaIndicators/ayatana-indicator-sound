@@ -49,6 +49,8 @@ static void active_sink_finalize   (GObject *object);
 
 static SoundState active_sink_get_state_from_volume (ActiveSink* self);
 static pa_cvolume active_sink_construct_mono_volume (const pa_cvolume* vol);
+static void active_sink_volume_update (ActiveSink* self, gdouble percent);
+static void active_sink_mute_update (ActiveSink* self, gboolean muted);
 
 
 G_DEFINE_TYPE (ActiveSink, active_sink, G_TYPE_OBJECT);
@@ -65,7 +67,7 @@ active_sink_class_init (ActiveSinkClass *klass)
 }
 
 static void
-active_sink_init(ActiveSink *self)
+active_sink_init (ActiveSink *self)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
   priv->mute_menuitem = NULL;
@@ -108,66 +110,37 @@ active_sink_populate (ActiveSink* sink,
 
   pa_volume_t vol = pa_cvolume_max (&update->volume);
   gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
+
   active_sink_volume_update (sink, volume_percent);  
+  active_sink_mute_update (sink, !!update->mute);
+
   g_debug ("Active sink has been populated - volume %f", volume_percent);
 }
 
-gboolean
-active_sink_is_populated (ActiveSink* sink)
+void
+active_sink_update (ActiveSink* sink,
+                    const pa_sink_info* update)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (sink);
-  return (priv->index != -1);
-}
+  active_sink_mute_update (sink, update->mute);
+  priv->volume = active_sink_construct_mono_volume (&update->volume);
+  priv->base_volume = update->base_volume;
+  priv->channel_map = update->channel_map;
 
-void
-active_sink_determine_blocking_state (ActiveSink* self)
-{
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
-  if (mute_menu_item_is_muted (priv->mute_menuitem)){
-    /**
-    We don't want to set the current state to blocking
-    as this is a fire and forget event.
-    */  
-    sound_service_dbus_update_sound_state (priv->service,
-                                           BLOCKED);  
-  }
-}
+  pa_volume_t vol = pa_cvolume_max (&update->volume);
+  gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
 
-gint
-active_sink_get_index (ActiveSink* self)
-{
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
-  return priv->index;
-}
-
-void 
-active_sink_deactivate (ActiveSink* self)
-{
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
-  priv->current_sound_state = UNAVAILABLE;
-  sound_service_dbus_update_sound_state (priv->service,
-                                         priv->current_sound_state);  
-  priv->index = -1;
-  g_free(priv->name);
-  priv->name = NULL;
-}
-
-SoundState
-active_sink_get_state (ActiveSink* self)
-{
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
-  return priv->current_sound_state;
+  active_sink_volume_update (sink, volume_percent);  
+  active_sink_mute_update (sink, update->mute);  
 }
 
 // To the UI
-void
+static void
 active_sink_volume_update (ActiveSink* self, gdouble percent)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
   slider_menu_item_update (priv->volume_slider_menuitem, percent);  
-
   priv->current_sound_state = active_sink_get_state_from_volume (self);
-
   sound_service_dbus_update_sound_state (priv->service,
                                          priv->current_sound_state);
 }
@@ -185,11 +158,11 @@ active_sink_update_volume (ActiveSink* self, gdouble percent)
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
 
   pa_cvolume_set(&priv->volume, priv->channel_map.channels, new_volume_value);
-  
+  pm_update_volume (priv->index, new_volume);
 }
 
 
-void 
+static void 
 active_sink_mute_update (ActiveSink* self, gboolean muted)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
@@ -240,7 +213,54 @@ active_sink_construct_mono_volume (const pa_cvolume* vol)
   return new_volume;
 }
 
-ActiveSink* 
+void
+active_sink_determine_blocking_state (ActiveSink* self)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  if (mute_menu_item_is_muted (priv->mute_menuitem)){
+    /**
+    We don't want to set the current state to blocking
+    as this is a fire and forget event.
+    */  
+    sound_service_dbus_update_sound_state (priv->service,
+                                           BLOCKED);  
+  }
+}
+
+gint
+active_sink_get_index (ActiveSink* self)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  return priv->index;
+}
+
+gboolean
+active_sink_is_populated (ActiveSink* sink)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (sink);
+  return (priv->index != -1);
+}
+
+void 
+active_sink_deactivate (ActiveSink* self)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  priv->current_sound_state = UNAVAILABLE;
+  sound_service_dbus_update_sound_state (priv->service,
+                                         priv->current_sound_state);  
+  priv->index = -1;
+  g_free(priv->name);
+  priv->name = NULL;
+}
+
+SoundState
+active_sink_get_state (ActiveSink* self)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  return priv->current_sound_state;
+}
+
+ActiveSink*
 active_sink_new (SoundServiceDbus* service)
 {
   ActiveSink* sink = g_object_new (ACTIVE_SINK_TYPE, NULL);
@@ -250,5 +270,5 @@ active_sink_new (SoundServiceDbus* service)
                                        mute_menu_item_get_button (priv->mute_menuitem),
                                        DBUSMENU_MENUITEM (priv->volume_slider_menuitem));
   pm_establish_pulse_connection (sink);
-  return sink;
+  return sink; 
 }
