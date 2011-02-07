@@ -140,9 +140,12 @@ active_sink_volume_update (ActiveSink* self, gdouble percent)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
   slider_menu_item_update (priv->volume_slider_menuitem, percent);  
-  priv->current_sound_state = active_sink_get_state_from_volume (self);
-  sound_service_dbus_update_sound_state (priv->service,
-                                         priv->current_sound_state);
+  SoundState state = active_sink_get_state_from_volume (self);
+  if (priv->current_sound_state != state){
+    priv->current_sound_state  = state;
+    sound_service_dbus_update_sound_state (priv->service,
+                                           priv->current_sound_state);
+  }
 }
 
 // From the UI
@@ -172,8 +175,10 @@ active_sink_mute_update (ActiveSink* self, gboolean muted)
   if (muted == TRUE){
     state = MUTED;
   }
-  priv->current_sound_state = state;
-  sound_service_dbus_update_sound_state (priv->service, state);
+  if (priv->current_sound_state != state){
+    priv->current_sound_state = state;
+    sound_service_dbus_update_sound_state (priv->service, state);
+  }
 }
 
 void
