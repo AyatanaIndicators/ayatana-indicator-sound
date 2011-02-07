@@ -80,6 +80,8 @@ active_sink_init (ActiveSink *self)
   // Init our menu items.
   priv->mute_menuitem = g_object_new (MUTE_MENU_ITEM_TYPE, NULL);
   priv->volume_slider_menuitem = slider_menu_item_new (self);
+  mute_menu_item_enable (priv->mute_menuitem, FALSE);
+  slider_menu_item_enable (priv->volume_slider_menuitem, FALSE);  
 }
 
 static void
@@ -102,8 +104,7 @@ active_sink_populate (ActiveSink* sink,
 
   priv->name = g_strdup (update->name);
   priv->index = update->index;
-  // Why the double negative !?
-  active_sink_mute_update (sink, !!update->mute);
+  active_sink_mute_update (sink, update->mute);
   priv->volume = active_sink_construct_mono_volume (&update->volume);
   priv->base_volume = update->base_volume;
   priv->channel_map = update->channel_map;
@@ -112,7 +113,9 @@ active_sink_populate (ActiveSink* sink,
   gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
 
   active_sink_volume_update (sink, volume_percent);  
-  active_sink_mute_update (sink, !!update->mute);
+  active_sink_mute_update (sink, update->mute);
+  mute_menu_item_enable (priv->mute_menuitem, TRUE);
+  slider_menu_item_enable (priv->volume_slider_menuitem, TRUE);
 
   g_debug ("Active sink has been populated - volume %f", volume_percent);
 }
@@ -262,6 +265,8 @@ active_sink_deactivate (ActiveSink* self)
   priv->current_sound_state = UNAVAILABLE;
   sound_service_dbus_update_sound_state (priv->service,
                                          priv->current_sound_state);  
+  mute_menu_item_enable (priv->mute_menuitem, FALSE);
+  slider_menu_item_enable (priv->volume_slider_menuitem, FALSE);
   priv->index = -1;
   g_free(priv->name);
   priv->name = NULL;
