@@ -24,7 +24,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "common-defs.h"
 #include "mute-menu-item.h"
-#include "pulse-manager.h"
+#include "pulseaudio-mgr.h"
 
 typedef struct _MuteMenuItemPrivate MuteMenuItemPrivate;
 
@@ -62,6 +62,9 @@ mute_menu_item_init (MuteMenuItem *self)
   g_debug("Building new Mute Menu Item");
   MuteMenuItemPrivate* priv = MUTE_MENU_ITEM_GET_PRIVATE(self);
   priv->button = dbusmenu_menuitem_new();
+  dbusmenu_menuitem_property_set_bool (priv->button,
+                                       DBUSMENU_MENUITEM_PROP_VISIBLE,
+                                       TRUE);
 
   g_signal_connect (G_OBJECT (priv->button), 
                     DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED,
@@ -90,10 +93,8 @@ mute_menu_item_set_global_mute_from_ui (gpointer user_data)
   DbusmenuMenuitem* button = DBUSMENU_MENUITEM (user_data);
   gboolean current_value = dbusmenu_menuitem_property_get_bool (button,
                                                                 DBUSMENU_MUTE_MENUITEM_VALUE);
-
   gboolean new_value = !current_value;
-  // pa manager api - to be refactored
-  toggle_global_mute (new_value);
+  pm_update_mute (new_value);
 }
 
 void
@@ -113,6 +114,9 @@ void
 mute_menu_item_enable (MuteMenuItem* item, gboolean active)
 {
   MuteMenuItemPrivate* priv = MUTE_MENU_ITEM_GET_PRIVATE (item);
+  dbusmenu_menuitem_property_set_bool (priv->button,
+                                       DBUSMENU_MENUITEM_PROP_VISIBLE,
+                                       TRUE);
   
   dbusmenu_menuitem_property_set_bool (priv->button,
                                        DBUSMENU_MENUITEM_PROP_ENABLED,
