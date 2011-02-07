@@ -176,6 +176,15 @@ active_sink_mute_update (ActiveSink* self, gboolean muted)
   sound_service_dbus_update_sound_state (priv->service, state);
 }
 
+void
+active_sink_ensure_sink_is_unmuted (ActiveSink* self)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  if (mute_menu_item_is_muted (priv->mute_menuitem)){
+    pm_update_mute (FALSE);    
+  }
+}
+
 
 static SoundState
 active_sink_get_state_from_volume (ActiveSink* self)

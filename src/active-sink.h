@@ -61,9 +61,9 @@ SoundState active_sink_get_state (ActiveSink* self);
 
 void active_sink_deactivate (ActiveSink* self);
 
-//void active_sink_volume_update (ActiveSink* self, gdouble vol_percent);
-
+void active_sink_update_mute (ActiveSink* self, gboolean mute_update);
 void active_sink_update_volume (ActiveSink* self, gdouble percent);
+void active_sink_ensure_sink_is_unmuted (ActiveSink* self);
 
 ActiveSink* active_sink_new (SoundServiceDbus* service);
 
