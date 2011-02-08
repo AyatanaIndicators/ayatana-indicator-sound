@@ -54,3 +54,7 @@ namespace DbusmenuPlaylists{
         public const string MENUITEM_TITLE;
         public const string MENUITEM_PLAYLISTS;
 }
+[CCode (cheader_filename = "common-defs.h")]
+namespace DbusmenuPlaylist{
+        public const string MENUITEM_PATH;
+}

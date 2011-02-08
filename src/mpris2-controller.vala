@@ -48,6 +48,7 @@ public class Mpris2Controller : GLib.Object
         this.playlists = Bus.get_proxy_sync ( BusType.SESSION,
                                               this.owner.dbus_name,
                                               "/org/mpris/MediaPlayer2" );
+        this.playlists.PlaylistChanged.connect (on_playlistdetails_changed);
       }
       this.properties_interface = Bus.get_proxy_sync ( BusType.SESSION,
                                                        "org.freedesktop.Properties.PropertiesChanged",
@@ -109,7 +110,7 @@ public class Mpris2Controller : GLib.Object
       title.alter_label (this.mpris2_root.Identity);
     }
   }
-  
+                                      
   private bool ensure_correct_playback_status(){
     debug("TEST playback status = %s", this.player.PlaybackStatus);
     TransportMenuitem.state p = (TransportMenuitem.state)this.determine_play_state(this.player.PlaybackStatus);
@@ -185,7 +186,6 @@ public class Mpris2Controller : GLib.Object
     }
   }
 
-
   public bool connected()
   {
     return (this.player != null && this.mpris2_root != null);
@@ -196,6 +196,11 @@ public class Mpris2Controller : GLib.Object
     if(this.connected() == true){
       this.mpris2_root.Raise.begin();
     }
+  }
+
+  private void on_playlistdetails_changed (PlaylistDetails details)
+  {
+    
   }
 
   public async void fetch_playlists()
