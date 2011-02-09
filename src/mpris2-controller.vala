@@ -92,7 +92,7 @@ public class Mpris2Controller : GLib.Object
     }
     Variant? playlist_v = changed_properties.lookup("ActivePlaylist");
     if ( playlist_v != null && this.owner.use_playlists == true ){
-      // Once again GDBus race condition, the property_changed signal is sent
+      // Once again A GDBus race condition, the property_changed signal is sent
       // before the value is set on the respective property.
       Timeout.add (300, this.fetch_active_playlist);
     }
