@@ -72,4 +72,7 @@ public interface MprisPlaylists : Object {
                                                           uint32 max_count,
                                                           string order,
                                                           bool reverse_order ) throws IOError;
+  //signals
+  public signal void PlaylistChanged (PlaylistDetails details);
+  
 }

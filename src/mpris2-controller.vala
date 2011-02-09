@@ -48,6 +48,7 @@ public class Mpris2Controller : GLib.Object
         this.playlists = Bus.get_proxy_sync ( BusType.SESSION,
                                               this.owner.dbus_name,
                                               "/org/mpris/MediaPlayer2" );
+        this.playlists.PlaylistChanged.connect (on_playlistdetails_changed);
       }
       this.properties_interface = Bus.get_proxy_sync ( BusType.SESSION,
                                                        "org.freedesktop.Properties.PropertiesChanged",
@@ -63,7 +64,7 @@ public class Mpris2Controller : GLib.Object
                                     HashTable<string, Variant?> changed_properties,
                                     string[] invalid )
   {
-    debug("properties-changed for interface %s and owner %s", interface_source, this.owner.dbus_name);
+    //debug("properties-changed for interface %s and owner %s", interface_source, this.owner.dbus_name);
     if ( changed_properties == null ||
         interface_source.has_prefix ( MPRIS_PREFIX ) == false ){
       warning("Property-changed hash is null or this is an interface that doesn't concerns us");
@@ -91,7 +92,9 @@ public class Mpris2Controller : GLib.Object
     }
     Variant? playlist_v = changed_properties.lookup("ActivePlaylist");
     if ( playlist_v != null && this.owner.use_playlists == true ){
-      this.fetch_active_playlist();
+      // Once again A GDBus race condition, the property_changed signal is sent
+      // before the value is set on the respective property.
+      Timeout.add (300, this.fetch_active_playlist);
     }
     Variant? playlist_count_v = changed_properties.lookup("PlaylistCount");
     if ( playlist_count_v != null && this.owner.use_playlists == true ){
@@ -109,9 +112,9 @@ public class Mpris2Controller : GLib.Object
       title.alter_label (this.mpris2_root.Identity);
     }
   }
-  
+                                      
   private bool ensure_correct_playback_status(){
-    debug("TEST playback status = %s", this.player.PlaybackStatus);
+    //debug("TEST playback status = %s", this.player.PlaybackStatus);
     TransportMenuitem.state p = (TransportMenuitem.state)this.determine_play_state(this.player.PlaybackStatus);
     (this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(p);
     return false;
@@ -173,7 +176,7 @@ public class Mpris2Controller : GLib.Object
 
   public void transport_update(TransportMenuitem.action command)
   {
-    debug("transport_event input = %i", (int)command);
+    //debug("transport_event input = %i", (int)command);
     if(command == TransportMenuitem.action.PLAY_PAUSE){
       this.player.PlayPause.begin();              
     }
@@ -185,7 +188,6 @@ public class Mpris2Controller : GLib.Object
     }
   }
 
-
   public bool connected()
   {
     return (this.player != null && this.mpris2_root != null);
@@ -196,6 +198,12 @@ public class Mpris2Controller : GLib.Object
     if(this.connected() == true){
       this.mpris2_root.Raise.begin();
     }
+  }
+
+  private void on_playlistdetails_changed (PlaylistDetails details)
+  {
+    PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
+    playlists_item.update_individual_playlist (details);    
   }
 
   public async void fetch_playlists()
@@ -214,7 +222,7 @@ public class Mpris2Controller : GLib.Object
     }
     
     if( current_playlists != null ){
-      debug( "Size of the playlist array = %i", current_playlists.length );
+      //debug( "Size of the playlist array = %i", current_playlists.length );
       PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
       playlists_item.update(current_playlists);
     }
@@ -224,13 +232,14 @@ public class Mpris2Controller : GLib.Object
     }
   }
 
-  private void fetch_active_playlist()
+  private bool fetch_active_playlist()
   {    
     if (this.playlists.ActivePlaylist.valid == false){
-      debug("We don't have an active playlist");
-    }
+      debug(" We don't have an active playlist");
+    }    
     PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
     playlists_item.update_active_playlist ( this.playlists.ActivePlaylist.details );
+    return false;
   }
 
   public void activate_playlist (ObjectPath path)
