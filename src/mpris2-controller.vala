@@ -202,7 +202,8 @@ public class Mpris2Controller : GLib.Object
 
   private void on_playlistdetails_changed (PlaylistDetails details)
   {
-    
+    PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
+    playlists_item.update_individual_playlist (details);    
   }
 
   public async void fetch_playlists()
