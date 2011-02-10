@@ -126,8 +126,6 @@ reconnect_to_pulse (gpointer user_data)
     g_warning ("Failed to connect context: %s",
                pa_strerror (pa_context_errno (pulse_context)));
   }
-  
-  reconnect_idle_id = 0;  
   if (connection_attempts > 5){
     return FALSE;
   }
@@ -236,6 +234,10 @@ pm_context_state_callback (pa_context *c, void *userdata)
   case PA_CONTEXT_READY:
     connection_attempts = 0;
     g_debug("PA_CONTEXT_READY");
+    if (reconnect_idle_id != 0){
+      g_source_remove (reconnect_idle_id);
+      reconnect_idle_id = 0;
+    }
     pa_operation *o;
 
     pa_context_set_subscribe_callback(c, pm_subscribed_events_callback, userdata);
