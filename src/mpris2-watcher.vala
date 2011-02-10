@@ -50,7 +50,7 @@ public class Mpris2Watcher : GLib.Object
 
   // At startup check to see if there are clients up that we are interested in
   // More relevant for development and daemon's like mpd. 
-  private async void check_for_active_clients()
+  public async void check_for_active_clients()
   {
     string[] interfaces;
     try{

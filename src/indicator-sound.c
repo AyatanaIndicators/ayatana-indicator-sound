@@ -133,7 +133,7 @@ indicator_sound_init (IndicatorSound *self)
   GList* t_list = NULL;
   priv->transport_widgets_list = t_list;
   priv->state_manager = g_object_new (SOUND_TYPE_STATE_MANAGER, NULL);
-  
+
   g_signal_connect ( G_OBJECT(self->service),
                      INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE,
                      G_CALLBACK(connection_changed), self );
@@ -149,7 +149,6 @@ indicator_sound_dispose (GObject *object)
     g_object_unref(G_OBJECT(self->service));
     self->service = NULL;
   }
-
   g_list_free ( priv->transport_widgets_list );
 
   G_OBJECT_CLASS (indicator_sound_parent_class)->dispose (object);
@@ -402,7 +401,9 @@ new_volume_slider_widget(DbusmenuMenuitem * newitem,
                                   newitem,
                                   menu_volume_item,
                                   parent);
-  return TRUE;  
+  sound_state_manager_attach_notification_to_volume_widget (priv->state_manager,
+                                                            volume_widget);
+  return TRUE;
 }
 
 /*******************************************************************/
@@ -563,7 +564,6 @@ key_release_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
   return digested;
 }
 
-
 static void
 indicator_sound_scroll (IndicatorObject *io, gint delta, 
                         IndicatorScrollDirection direction)
@@ -589,5 +589,7 @@ indicator_sound_scroll (IndicatorObject *io, gint delta,
     value -= adj->step_increment;
   }
   //g_debug("indicator-sound-scroll - update slider with value %f", value);
-  volume_widget_update(VOLUME_WIDGET(priv->volume_widget), value);  
+  volume_widget_update(VOLUME_WIDGET(priv->volume_widget), value);
+
+  sound_state_manager_show_notification (priv->state_manager, value);
 }

@@ -72,16 +72,6 @@ typedef struct _Mpris2ControllerClass Mpris2ControllerClass;
 #define _g_free0(var) (var = (g_free (var), NULL))
 #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 
-#define TYPE_TITLE_MENUITEM (title_menuitem_get_type ())
-#define TITLE_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_TITLE_MENUITEM, TitleMenuitem))
-#define TITLE_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_TITLE_MENUITEM, TitleMenuitemClass))
-#define IS_TITLE_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_TITLE_MENUITEM))
-#define IS_TITLE_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_TITLE_MENUITEM))
-#define TITLE_MENUITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_TITLE_MENUITEM, TitleMenuitemClass))
-
-typedef struct _TitleMenuitem TitleMenuitem;
-typedef struct _TitleMenuitemClass TitleMenuitemClass;
-
 #define TYPE_PLAYLISTS_MENUITEM (playlists_menuitem_get_type ())
 #define PLAYLISTS_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PLAYLISTS_MENUITEM, PlaylistsMenuitem))
 #define PLAYLISTS_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PLAYLISTS_MENUITEM, PlaylistsMenuitemClass))
@@ -93,6 +83,16 @@ typedef struct _PlaylistsMenuitem PlaylistsMenuitem;
 typedef struct _PlaylistsMenuitemClass PlaylistsMenuitemClass;
 typedef struct _PlayerItemPrivate PlayerItemPrivate;
 typedef struct _PlaylistsMenuitemPrivate PlaylistsMenuitemPrivate;
+
+#define TYPE_TITLE_MENUITEM (title_menuitem_get_type ())
+#define TITLE_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_TITLE_MENUITEM, TitleMenuitem))
+#define TITLE_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_TITLE_MENUITEM, TitleMenuitemClass))
+#define IS_TITLE_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_TITLE_MENUITEM))
+#define IS_TITLE_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_TITLE_MENUITEM))
+#define TITLE_MENUITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_TITLE_MENUITEM, TitleMenuitemClass))
+
+typedef struct _TitleMenuitem TitleMenuitem;
+typedef struct _TitleMenuitemClass TitleMenuitemClass;
 
 #define TYPE_METADATA_MENUITEM (metadata_menuitem_get_type ())
 #define METADATA_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_METADATA_MENUITEM, MetadataMenuitem))
@@ -205,14 +205,15 @@ const gchar* player_controller_get_dbus_name (PlayerController* self);
 Mpris2Controller* mpris2_controller_new (PlayerController* ctrl);
 Mpris2Controller* mpris2_controller_construct (GType object_type, PlayerController* ctrl);
 static void player_controller_determine_state (PlayerController* self);
-void player_controller_vanish (PlayerController* self);
+void player_controller_remove_from_menu (PlayerController* self);
+static gboolean _bool_equal (const gboolean* s1, const gboolean* s2);
+GType playlists_menuitem_get_type (void) G_GNUC_CONST;
 void player_controller_hibernate (PlayerController* self);
 void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
 GeeHashSet* transport_menuitem_attributes_format (void);
 GeeHashSet* metadata_menuitem_attributes_format (void);
 GType title_menuitem_get_type (void) G_GNUC_CONST;
 void title_menuitem_toggle_active_triangle (TitleMenuitem* self, gboolean update);
-GType playlists_menuitem_get_type (void) G_GNUC_CONST;
 gboolean player_item_populated (PlayerItem* self, GeeHashSet* attrs);
 PlayerItem* player_item_new (const gchar* type);
 PlayerItem* player_item_construct (GType object_type, const gchar* type);
@@ -415,7 +416,22 @@ static void player_controller_establish_mpris_connection (PlayerController* self
 }
 
 
-void player_controller_vanish (PlayerController* self) {
+static gboolean _bool_equal (const gboolean* s1, const gboolean* s2) {
+	if (s1 == s2) {
+		return TRUE;
+	}
+	if (s1 == NULL) {
+		return FALSE;
+	}
+	if (s2 == NULL) {
+		return FALSE;
+	}
+	return (*s1) == (*s2);
+}
+
+
+void player_controller_remove_from_menu (PlayerController* self) {
+	gboolean _tmp3_;
 	g_return_if_fail (self != NULL);
 	{
 		GeeArrayList* _tmp0_;
@@ -430,17 +446,26 @@ void player_controller_vanish (PlayerController* self) {
 		_item_index = -1;
 		while (TRUE) {
 			gpointer _tmp2_ = NULL;
-			DbusmenuMenuitem* item;
+			PlayerItem* item;
 			_item_index = _item_index + 1;
 			if (!(_item_index < _item_size)) {
 				break;
 			}
 			_tmp2_ = gee_abstract_list_get ((GeeAbstractList*) _item_list, _item_index);
-			item = (DbusmenuMenuitem*) ((PlayerItem*) _tmp2_);
-			dbusmenu_menuitem_child_delete (self->priv->root_menu, item);
+			item = (PlayerItem*) _tmp2_;
+			dbusmenu_menuitem_child_delete (self->priv->root_menu, (DbusmenuMenuitem*) item);
 			_g_object_unref0 (item);
 		}
 		_g_object_unref0 (_item_list);
+	}
+	if (_bool_equal (self->use_playlists, (_tmp3_ = TRUE, &_tmp3_)) == TRUE) {
+		gpointer _tmp4_ = NULL;
+		PlayerItem* _tmp5_;
+		PlaylistsMenuitem* playlists_menuitem;
+		_tmp4_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLISTS);
+		playlists_menuitem = (_tmp5_ = (PlayerItem*) _tmp4_, IS_PLAYLISTS_MENUITEM (_tmp5_) ? ((PlaylistsMenuitem*) _tmp5_) : NULL);
+		dbusmenu_menuitem_child_delete (self->priv->root_menu, playlists_menuitem->root_item);
+		_g_object_unref0 (playlists_menuitem);
 	}
 }
 

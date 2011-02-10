@@ -119,10 +119,14 @@ public class PlayerController : GLib.Object
     this.determine_state();
   }
   
-  public void vanish()
+  public void remove_from_menu()
   {
-    foreach(Dbusmenu.Menuitem item in this.custom_items){
-      root_menu.child_delete(item);
+    foreach(PlayerItem item in this.custom_items){
+      this.root_menu.child_delete(item);
+    }
+    if (this.use_playlists == true){
+      PlaylistsMenuitem playlists_menuitem = this.custom_items[widget_order.PLAYLISTS] as PlaylistsMenuitem;
+      this.root_menu.child_delete (playlists_menuitem.root_item);
     }
   }
 
@@ -180,7 +184,7 @@ public class PlayerController : GLib.Object
     
     foreach(PlayerItem item in this.custom_items){
       if (this.custom_items.index_of(item) != 4) {
-        root_menu.child_add_position(item, this.menu_offset + this.custom_items.index_of(item));      
+        root_menu.child_add_position(item, this.menu_offset + this.custom_items.index_of(item));
       }
       else{
         PlaylistsMenuitem playlists_menuitem = item as PlaylistsMenuitem;
@@ -188,7 +192,7 @@ public class PlayerController : GLib.Object
       }
     }
   }
-
+   
   private void determine_state()
   {
     if(this.mpris_bridge.connected() == true){

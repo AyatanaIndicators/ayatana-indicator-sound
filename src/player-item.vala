@@ -52,19 +52,19 @@ public class PlayerItem : Dbusmenu.Menuitem
   {
     debug("PlayerItem::update()");
     if(data == null){
-      debug("PlayerItem::Update -> The hashtable was null - just leave it!");
+      warning("PlayerItem::Update -> The hashtable was null - just leave it!");
       return;
     }
     
     foreach(string property in attributes){
       string[] input_keys = property.split("-");
       string search_key = input_keys[input_keys.length-1 : input_keys.length][0];
-      debug("search key = %s", search_key);
+      //debug("search key = %s", search_key);
       Variant? v = data.lookup(search_key);
       
       if (v.is_of_type ( VariantType.STRING )){
         string update = v.get_string().strip();
-        debug("with value : %s", update);
+        //debug("with value : %s", update);
         if(property.contains("mpris:artUrl")){    
             // We know its a metadata instance because thats the only
             // object with the arturl prop            
@@ -75,15 +75,15 @@ public class PlayerItem : Dbusmenu.Menuitem
         this.property_set(property, update);                      
       }         
       else if (v.is_of_type (VariantType.INT32 )){
-        debug("with value : %i", v.get_int32());
+        //debug("with value : %i", v.get_int32());
         this.property_set_int(property, v.get_int32());
       }
       else if (v.is_of_type (VariantType.INT64 )){
-        debug("with value : %i", (int)v.get_int64());
+        //debug("with value : %i", (int)v.get_int64());
         this.property_set_int(property, (int)v.get_int64());
       }
       else if(v.is_of_type ( VariantType.BOOLEAN )){
-        debug("with value : %s", v.get_boolean().to_string());        
+        //debug("with value : %s", v.get_boolean().to_string());        
         this.property_set_bool(property, v.get_boolean());
       }
     }
@@ -93,10 +93,10 @@ public class PlayerItem : Dbusmenu.Menuitem
   public bool populated(HashSet<string> attrs)
   {
     foreach(string prop in attrs){
-      debug("populated ? - prop: %s", prop);
+      //debug("populated ? - prop: %s", prop);
       int value_int = property_get_int(prop);
       if(property_get_int(prop) != EMPTY){
-        debug("populated - prop %s and value %i", prop, value_int);        
+        //debug("populated - prop %s and value %i", prop, value_int);        
         return true;
       }
     }

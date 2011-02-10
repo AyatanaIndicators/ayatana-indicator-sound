@@ -22,13 +22,12 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <glib/gi18n.h>
 #include "slider-menu-item.h"
-#include "pulse-manager.h"
 #include "common-defs.h"
-
 
 typedef struct _SliderMenuItemPrivate SliderMenuItemPrivate;
 
 struct _SliderMenuItemPrivate {
+  ActiveSink* a_sink;
 };
 
 #define SLIDER_MENU_ITEM_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), SLIDER_MENU_ITEM_TYPE, SliderMenuItemPrivate))
@@ -43,7 +42,8 @@ static void handle_event (DbusmenuMenuitem * mi, const gchar * name,
 
 G_DEFINE_TYPE (SliderMenuItem, slider_menu_item, DBUSMENU_TYPE_MENUITEM);
 
-static void slider_menu_item_class_init (SliderMenuItemClass *klass)
+static void
+slider_menu_item_class_init (SliderMenuItemClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
@@ -57,13 +57,18 @@ static void slider_menu_item_class_init (SliderMenuItemClass *klass)
   return;
 }
 
-static void slider_menu_item_init (SliderMenuItem *self)
+static void
+slider_menu_item_init (SliderMenuItem *self)
 {
   g_debug("Building new Slider Menu Item");
+  dbusmenu_menuitem_property_set( DBUSMENU_MENUITEM(self),
+                                  DBUSMENU_MENUITEM_PROP_TYPE,
+                                  DBUSMENU_VOLUME_MENUITEM_TYPE );  
   return;
 }
 
-static void slider_menu_item_dispose (GObject *object)
+static void
+slider_menu_item_dispose (GObject *object)
 {
   G_OBJECT_CLASS (slider_menu_item_parent_class)->dispose (object);
   return;
@@ -89,27 +94,26 @@ handle_event (DbusmenuMenuitem * mi,
 
   gboolean volume_input = g_variant_get_double(input);
   if (value != NULL){
-    set_sink_volume(volume_input);
-    // TODO -when the ACTIVESINK instance exists this will be handled nicely
-    // PA MANAGER will be refactored first.
-    if (default_sink_is_muted () == TRUE){
-      toggle_global_mute (FALSE);
-    }
+    if (IS_SLIDER_MENU_ITEM (mi)) {
+      SliderMenuItemPrivate* priv = SLIDER_MENU_ITEM_GET_PRIVATE (SLIDER_MENU_ITEM (mi));
+      active_sink_update_volume (priv->a_sink, volume_input);
+      active_sink_ensure_sink_is_unmuted (priv->a_sink);      
+    }    
   }
 }
 
-void slider_menu_item_update (SliderMenuItem* item,
+void
+slider_menu_item_update (SliderMenuItem* item,
                               gdouble update)
 {
-  // TODO
-  // Check if that variant below will leak !!!
   GVariant* new_volume = g_variant_new_double(update);
   dbusmenu_menuitem_property_set_variant(DBUSMENU_MENUITEM(item),
                                          DBUSMENU_VOLUME_MENUITEM_LEVEL,
                                          new_volume);
 }
 
-void slider_menu_item_enable (SliderMenuItem* item,
+void
+slider_menu_item_enable (SliderMenuItem* item,
                               gboolean active)
 {
   dbusmenu_menuitem_property_set_bool( DBUSMENU_MENUITEM(item),
@@ -117,15 +121,11 @@ void slider_menu_item_enable (SliderMenuItem* item,
                                        active );
 }
 
-SliderMenuItem* slider_menu_item_new (gboolean sinks_available,
-                                      gdouble start_volume)
+SliderMenuItem*
+slider_menu_item_new (ActiveSink* sink)
 { 
   SliderMenuItem *self = g_object_new(SLIDER_MENU_ITEM_TYPE, NULL);
-  dbusmenu_menuitem_property_set( DBUSMENU_MENUITEM(self),
-                                  DBUSMENU_MENUITEM_PROP_TYPE,
-                                  DBUSMENU_VOLUME_MENUITEM_TYPE );
-  slider_menu_item_update (self, start_volume);
-  slider_menu_item_enable (self, sinks_available);
-
+  SliderMenuItemPrivate* priv = SLIDER_MENU_ITEM_GET_PRIVATE (self);
+  priv->a_sink = sink;
   return self;
 }
