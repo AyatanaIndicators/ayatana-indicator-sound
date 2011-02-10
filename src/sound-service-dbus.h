@@ -55,12 +55,10 @@ GType sound_service_dbus_get_type  (void) G_GNUC_CONST;
 
 DbusmenuMenuitem* sound_service_dbus_create_root_item (SoundServiceDbus* self);
 void sound_service_dbus_update_sound_state (SoundServiceDbus* self, SoundState new_state);
-void sound_service_dbus_update_sink_mute(SoundServiceDbus* self, gboolean sink_mute);
-void sound_service_dbus_update_volume(SoundServiceDbus* self, gdouble  volume);
-void sound_service_dbus_update_pa_state ( SoundServiceDbus* root,
-                                          gboolean availability,
-                                          gboolean mute_update,
-                                          gdouble volume );
+void sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
+                                           DbusmenuMenuitem* mute_item,
+                                           DbusmenuMenuitem* slider_item);
+
 
 G_END_DECLS
 

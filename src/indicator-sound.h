@@ -23,6 +23,8 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include "config.h"
+
 #include <libindicator/indicator.h>
 #include <libindicator/indicator-object.h>
 #include <libindicator/indicator-service-manager.h>
@@ -50,12 +52,5 @@ struct _IndicatorSound {
 
 // GObject Boiler plate
 GType indicator_sound_get_type (void);
-
-void prepare_state_machine();
-extern void determine_state_from_volume(gdouble volume_percent);
-gint get_state();
-gchar* get_state_image_name(gint state);
-void prepare_for_tests(IndicatorObject * io);
-void tidy_up_hash();
 
 #endif

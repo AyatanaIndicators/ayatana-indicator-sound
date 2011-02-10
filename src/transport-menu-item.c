@@ -69,7 +69,6 @@ typedef struct _TransportMenuitemPrivate TransportMenuitemPrivate;
 typedef struct _PlayerController PlayerController;
 typedef struct _PlayerControllerClass PlayerControllerClass;
 #define _g_variant_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_unref (var), NULL)))
-#define _g_free0(var) (var = (g_free (var), NULL))
 typedef struct _PlayerControllerPrivate PlayerControllerPrivate;
 
 #define TYPE_MPRIS2_CONTROLLER (mpris2_controller_get_type ())
@@ -187,8 +186,6 @@ TransportMenuitem* transport_menuitem_new (PlayerController* parent) {
 void transport_menuitem_change_play_state (TransportMenuitem* self, TransportMenuitemstate update) {
 	gint temp;
 	g_return_if_fail (self != NULL);
-	g_debug ("transport-menu-item.vala:45: UPDATING THE TRANSPORT DBUSMENUITEM PLAY " \
-"STATE WITH VALUE %i", (gint) update);
 	temp = (gint) update;
 	dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE, temp);
 }
@@ -206,9 +203,7 @@ static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const 
 	gboolean _tmp1_;
 	gint32 _tmp4_;
 	gint32 input;
-	gchar* _tmp5_ = NULL;
-	gchar* _tmp6_;
-	PlayerController* _tmp7_ = NULL;
+	PlayerController* _tmp5_ = NULL;
 	self = (TransportMenuitem*) base;
 	g_return_if_fail (name != NULL);
 	g_return_if_fail (input_value != NULL);
@@ -225,13 +220,8 @@ static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const 
 	}
 	_tmp4_ = g_variant_get_int32 (v);
 	input = _tmp4_;
-	_tmp5_ = g_strdup_printf ("%i", input);
-	_tmp6_ = _tmp5_;
-	g_debug ("transport-menu-item.vala:63: transport menu item -> handle_event with " \
-"value %s", _tmp6_);
-	_g_free0 (_tmp6_);
-	_tmp7_ = player_item_get_owner ((PlayerItem*) self);
-	mpris2_controller_transport_update (_tmp7_->mpris_bridge, (TransportMenuitemaction) input);
+	_tmp5_ = player_item_get_owner ((PlayerItem*) self);
+	mpris2_controller_transport_update (_tmp5_->mpris_bridge, (TransportMenuitemaction) input);
 	_g_variant_unref0 (v);
 }
 

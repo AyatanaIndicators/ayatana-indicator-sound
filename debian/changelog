@@ -1,3 +1,19 @@
+indicator-sound (0.5.9-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - crashed with SIGSEGV in pa_cvolume_valid () (LP: #705009)
+    - The players list should be customizable (LP: #685725)
+    - Allow players to set their own title (LP: #709367)
+    - refactor pulse manager (LP: #709371)
+    - listen for playlist changed signal (LP: #715277)
+    - playlist name not updated corrrectly (LP: #715694)
+    - Not enough feedback when changing the volume (LP: #669163)
+    - indicator-sound volume does not detect sink change (LP: #700361)
+  * debian/control
+    - Added new build depends libnotify-dev
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 10 Feb 2011 11:52:59 -0500
+
 indicator-sound (0.5.8-0ubuntu1) natty; urgency=low
 
   * New upstream release.

@@ -28,10 +28,10 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <libdbusmenu-glib/menuitem.h>
 #include <libdbusmenu-glib/server.h>
 #include <common-defs.h>
-#include <gio/gio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <gee.h>
+#include <gio/gio.h>
 
 
 #define TYPE_PLAYER_ITEM (player_item_get_type ())
@@ -130,31 +130,24 @@ enum  {
 GType player_controller_get_type (void) G_GNUC_CONST;
 TitleMenuitem* title_menuitem_new (PlayerController* parent);
 TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* parent);
-GAppInfo* player_controller_get_app_info (PlayerController* self);
-const gchar* player_controller_get_icon_name (PlayerController* self);
 static void title_menuitem_real_handle_event (DbusmenuMenuitem* base, const gchar* name, GVariant* input_value, guint timestamp);
 PlayerController* player_item_get_owner (PlayerItem* self);
 GType mpris2_controller_get_type (void) G_GNUC_CONST;
 GType player_controller_state_get_type (void) G_GNUC_CONST;
 void player_controller_instantiate (PlayerController* self);
 void mpris2_controller_expose (Mpris2Controller* self);
+void title_menuitem_alter_label (TitleMenuitem* self, const gchar* new_title);
 void title_menuitem_toggle_active_triangle (TitleMenuitem* self, gboolean update);
 GeeHashSet* title_menuitem_attributes_format (void);
+static GObject * title_menuitem_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
+GAppInfo* player_controller_get_app_info (PlayerController* self);
+const gchar* player_controller_get_icon_name (PlayerController* self);
 
 
 TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* parent) {
 	TitleMenuitem * self = NULL;
-	GAppInfo* _tmp0_ = NULL;
-	const gchar* _tmp1_ = NULL;
-	const gchar* _tmp2_ = NULL;
 	g_return_val_if_fail (parent != NULL, NULL);
 	self = (TitleMenuitem*) g_object_new (object_type, "item-type", DBUSMENU_TITLE_MENUITEM_TYPE, "owner", parent, NULL);
-	_tmp0_ = player_controller_get_app_info (parent);
-	_tmp1_ = g_app_info_get_name (_tmp0_);
-	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_TITLE_MENUITEM_NAME, _tmp1_);
-	_tmp2_ = player_controller_get_icon_name (parent);
-	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_TITLE_MENUITEM_ICON, _tmp2_);
-	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_TITLE_MENUITEM_RUNNING, FALSE);
 	return self;
 }
 
@@ -187,6 +180,16 @@ static void title_menuitem_real_handle_event (DbusmenuMenuitem* base, const gcha
 }
 
 
+void title_menuitem_alter_label (TitleMenuitem* self, const gchar* new_title) {
+	g_return_if_fail (self != NULL);
+	g_return_if_fail (new_title != NULL);
+	if (new_title == NULL) {
+		return;
+	}
+	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_TITLE_MENUITEM_NAME, new_title);
+}
+
+
 void title_menuitem_toggle_active_triangle (TitleMenuitem* self, gboolean update) {
 	g_return_if_fail (self != NULL);
 	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_TITLE_MENUITEM_RUNNING, update);
@@ -207,9 +210,34 @@ GeeHashSet* title_menuitem_attributes_format (void) {
 }
 
 
+static GObject * title_menuitem_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties) {
+	GObject * obj;
+	GObjectClass * parent_class;
+	TitleMenuitem * self;
+	PlayerController* _tmp0_ = NULL;
+	GAppInfo* _tmp1_ = NULL;
+	const gchar* _tmp2_ = NULL;
+	PlayerController* _tmp3_ = NULL;
+	const gchar* _tmp4_ = NULL;
+	parent_class = G_OBJECT_CLASS (title_menuitem_parent_class);
+	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
+	self = TITLE_MENUITEM (obj);
+	_tmp0_ = player_item_get_owner ((PlayerItem*) self);
+	_tmp1_ = player_controller_get_app_info (_tmp0_);
+	_tmp2_ = g_app_info_get_name (_tmp1_);
+	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_TITLE_MENUITEM_NAME, _tmp2_);
+	_tmp3_ = player_item_get_owner ((PlayerItem*) self);
+	_tmp4_ = player_controller_get_icon_name (_tmp3_);
+	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_TITLE_MENUITEM_ICON, _tmp4_);
+	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_TITLE_MENUITEM_RUNNING, FALSE);
+	return obj;
+}
+
+
 static void title_menuitem_class_init (TitleMenuitemClass * klass) {
 	title_menuitem_parent_class = g_type_class_peek_parent (klass);
 	DBUSMENU_MENUITEM_CLASS (klass)->handle_event = title_menuitem_real_handle_event;
+	G_OBJECT_CLASS (klass)->constructor = title_menuitem_constructor;
 }
 
 

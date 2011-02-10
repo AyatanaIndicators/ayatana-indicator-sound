@@ -52,7 +52,7 @@ public class SettingsManager : GLib.Object
     this.settings.reset("interested-media-players");
   }
   
-  public void add_interested(string app_desktop_name)
+  public void add_interested (string app_desktop_name)
   {
     var already_interested = this.settings.get_strv ("interested-media-players");
     foreach (var s in already_interested){
@@ -67,5 +67,24 @@ public class SettingsManager : GLib.Object
   private void on_blacklist_event()
   {
     this.blacklist_updates(this.settings.get_strv ("blacklisted-media-players"));        
-  }  
+  }
+
+  // Convenient debug method inorder to provide visability over 
+  // the contents of both interested and blacklisted containers in its gsettings
+  private void reveal_contents()
+  {
+    var already_interested = this.settings.get_strv ("interested-media-players");
+    foreach (var s in already_interested)
+    {
+      debug ("client %s is in interested array", s);      
+    }
+    var blacklisted = this.settings.get_strv ("blacklisted-media-players");
+    foreach (var s in blacklisted)
+    {
+      debug ("client %s is in blacklisted array", s);      
+    }
+
+    debug ("interested array size = %i", already_interested.length);
+    debug ("blacklisted array size = %i", blacklisted.length);
+  }
 }

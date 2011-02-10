@@ -1,10 +1,10 @@
 
-AC_INIT(indicator-sound, 0.5.8, conor.curran@canonical.com)
+AC_INIT(indicator-sound, 0.5.9, conor.curran@canonical.com)
 
 AC_PREREQ(2.53)
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(indicator-sound, 0.5.8)
+AM_INIT_AUTOMAKE(indicator-sound, 0.5.9)
 
 AM_MAINTAINER_MODE
 
@@ -35,11 +35,13 @@ PULSE_AUDIO_REQUIRED_VERSION=0.9.19
 INDICATOR_DISPLAY_OBJECTS=0.1.11
 DBUSMENUGLIB_REQUIRED_VERSION=0.3.9
 GIO_2_0_REQUIRED_VERSION=2.25.13
+LIBNOTIFY_REQUIRED_VERSION=0.5.0
 
 PKG_CHECK_MODULES(APPLET, gtk+-2.0 >= $GTK_REQUIRED_VERSION
                           indicator >= $INDICATOR_REQUIRED_VERSION
                           dbusmenu-gtk-0.4 >= $DBUSMENUGTK_REQUIRED_VERSION
-                          libido-0.1 >= $INDICATOR_DISPLAY_OBJECTS)
+                          libido-0.1 >= $INDICATOR_DISPLAY_OBJECTS
+                          libnotify >= $LIBNOTIFY_REQUIRED_VERSION)
                           
 AC_SUBST(APPLET_CFLAGS)
 AC_SUBST(APPLET_LIBS)

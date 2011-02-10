@@ -2,12 +2,13 @@
 <node name="/com/canonical/indicators/sound">
   <interface name="com.canonical.indicators.sound">
     <method name = "BlacklistMediaPlayer">
-        <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_blacklist_media_player"/>
+        <annotation name="org.freedesktop.DBus.GLib.Async" value="true"/>
         <arg type='s' name='player_desktop_name' direction="in"/>
         <arg type='b' name='blacklist' direction="in"/>
+        <arg type='b' name='result' direction="out"/>
     </method>
     <method name = "GetSoundState">
-        <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="sound_service_dbus_get_sink_state"/>
+        <annotation name="org.freedesktop.DBus.GLib.Async" value="true"/>
         <arg type='i' name='current_state' direction="out"/>
     </method>
     <signal name="SoundStateUpdate">

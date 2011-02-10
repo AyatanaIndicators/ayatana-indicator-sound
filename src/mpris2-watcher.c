@@ -161,8 +161,8 @@ enum  {
 Mpris2Watcher* mpris2_watcher_new (void);
 Mpris2Watcher* mpris2_watcher_construct (GType object_type);
 static void mpris2_watcher_check_for_active_clients_data_free (gpointer _data);
-static void mpris2_watcher_check_for_active_clients (Mpris2Watcher* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
-static void mpris2_watcher_check_for_active_clients_finish (Mpris2Watcher* self, GAsyncResult* _res_);
+void mpris2_watcher_check_for_active_clients (Mpris2Watcher* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
+void mpris2_watcher_check_for_active_clients_finish (Mpris2Watcher* self, GAsyncResult* _res_);
 static gboolean mpris2_watcher_check_for_active_clients_co (Mpris2WatcherCheckForActiveClientsData* data);
 void free_desktop_object_list_names (FreeDesktopObject* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
 gchar** free_desktop_object_list_names_finish (FreeDesktopObject* self, GAsyncResult* _res_, int* result_length1, GError** error);
@@ -216,7 +216,7 @@ static gpointer _g_object_ref0 (gpointer self) {
 }
 
 
-static void mpris2_watcher_check_for_active_clients (Mpris2Watcher* self, GAsyncReadyCallback _callback_, gpointer _user_data_) {
+void mpris2_watcher_check_for_active_clients (Mpris2Watcher* self, GAsyncReadyCallback _callback_, gpointer _user_data_) {
 	Mpris2WatcherCheckForActiveClientsData* _data_;
 	_data_ = g_slice_new0 (Mpris2WatcherCheckForActiveClientsData);
 	_data_->_async_result = g_simple_async_result_new (G_OBJECT (self), _callback_, _user_data_, mpris2_watcher_check_for_active_clients);
@@ -226,7 +226,7 @@ static void mpris2_watcher_check_for_active_clients (Mpris2Watcher* self, GAsync
 }
 
 
-static void mpris2_watcher_check_for_active_clients_finish (Mpris2Watcher* self, GAsyncResult* _res_) {
+void mpris2_watcher_check_for_active_clients_finish (Mpris2Watcher* self, GAsyncResult* _res_) {
 	Mpris2WatcherCheckForActiveClientsData* _data_;
 	_data_ = g_simple_async_result_get_op_res_gpointer (G_SIMPLE_ASYNC_RESULT (_res_));
 }

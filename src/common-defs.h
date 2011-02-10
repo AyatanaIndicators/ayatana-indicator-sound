@@ -64,4 +64,6 @@ typedef enum {
 #define DBUSMENU_PLAYLISTS_MENUITEM_TITLE       "x-canonical-sound-menu-player-playlists-title"
 #define DBUSMENU_PLAYLISTS_MENUITEM_PLAYLISTS   "x-canonical-sound-menu-player-playlists-playlists"
 
+#define DBUSMENU_PLAYLIST_MENUITEM_PATH         "x-canonical-sound-menu-player-playlist-path"
+
 #endif

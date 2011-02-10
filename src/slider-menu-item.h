@@ -23,6 +23,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib-object.h>
 
 #include <libdbusmenu-glib/menuitem.h>
+#include "active-sink.h"
 
 G_BEGIN_DECLS
 
@@ -49,8 +50,7 @@ GType slider_menu_item_get_type (void);
 void slider_menu_item_update(SliderMenuItem* item, gdouble update);
 void slider_menu_item_enable(SliderMenuItem* item, gboolean active);
 
-SliderMenuItem* slider_menu_item_new (gboolean sinks_available,
-                                      gdouble current_vol);
+SliderMenuItem* slider_menu_item_new (ActiveSink* sink);
 
 G_END_DECLS
 
