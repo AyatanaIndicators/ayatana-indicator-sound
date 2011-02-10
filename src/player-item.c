@@ -192,30 +192,14 @@ static gpointer _g_object_ref0 (gpointer self) {
 }
 
 
-static gchar* bool_to_string (gboolean self) {
-	gchar* result = NULL;
-	if (self) {
-		gchar* _tmp0_;
-		_tmp0_ = g_strdup ("true");
-		result = _tmp0_;
-		return result;
-	} else {
-		gchar* _tmp1_;
-		_tmp1_ = g_strdup ("false");
-		result = _tmp1_;
-		return result;
-	}
-}
-
-
 void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes) {
-	gboolean _tmp25_;
+	gboolean _tmp20_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (data != NULL);
 	g_return_if_fail (attributes != NULL);
 	g_debug ("player-item.vala:53: PlayerItem::update()");
 	if (data == NULL) {
-		g_debug ("player-item.vala:55: PlayerItem::Update -> The hashtable was null - ju" \
+		g_warning ("player-item.vala:55: PlayerItem::Update -> The hashtable was null - ju" \
 "st leave it!");
 		return;
 	}
@@ -251,7 +235,6 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 			_input_keys_size_ = _vala_array_length (_tmp3_);
 			_tmp5_ = g_strdup ((input_keys + (input_keys_length1 - 1))[0]);
 			search_key = _tmp5_;
-			g_debug ("player-item.vala:62: search key = %s", search_key);
 			_tmp6_ = g_hash_table_lookup (data, search_key);
 			_tmp7_ = _g_variant_ref0 ((GVariant*) _tmp6_);
 			v = _tmp7_;
@@ -264,7 +247,6 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 				_tmp9_ = g_variant_get_string (v, NULL);
 				_tmp10_ = string_strip (_tmp9_);
 				update = _tmp10_;
-				g_debug ("player-item.vala:67: with value : %s", update);
 				_tmp11_ = string_contains (property, "mpris:artUrl");
 				if (_tmp11_) {
 					PlayerItem* _tmp12_;
@@ -288,36 +270,22 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 				_tmp14_ = g_variant_is_of_type (v, G_VARIANT_TYPE_INT32);
 				if (_tmp14_) {
 					gint32 _tmp15_;
-					gint32 _tmp16_;
 					_tmp15_ = g_variant_get_int32 (v);
-					g_debug ("player-item.vala:78: with value : %i", (gint) _tmp15_);
-					_tmp16_ = g_variant_get_int32 (v);
-					dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, property, (gint) _tmp16_);
+					dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, property, (gint) _tmp15_);
 				} else {
-					gboolean _tmp17_;
-					_tmp17_ = g_variant_is_of_type (v, G_VARIANT_TYPE_INT64);
-					if (_tmp17_) {
-						gint64 _tmp18_;
-						gint64 _tmp19_;
-						_tmp18_ = g_variant_get_int64 (v);
-						g_debug ("player-item.vala:82: with value : %i", (gint) _tmp18_);
-						_tmp19_ = g_variant_get_int64 (v);
-						dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, property, (gint) _tmp19_);
+					gboolean _tmp16_;
+					_tmp16_ = g_variant_is_of_type (v, G_VARIANT_TYPE_INT64);
+					if (_tmp16_) {
+						gint64 _tmp17_;
+						_tmp17_ = g_variant_get_int64 (v);
+						dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, property, (gint) _tmp17_);
 					} else {
-						gboolean _tmp20_;
-						_tmp20_ = g_variant_is_of_type (v, G_VARIANT_TYPE_BOOLEAN);
-						if (_tmp20_) {
-							gboolean _tmp21_;
-							gchar* _tmp22_ = NULL;
-							gchar* _tmp23_;
-							gboolean _tmp24_;
-							_tmp21_ = g_variant_get_boolean (v);
-							_tmp22_ = bool_to_string (_tmp21_);
-							_tmp23_ = _tmp22_;
-							g_debug ("player-item.vala:86: with value : %s", _tmp23_);
-							_g_free0 (_tmp23_);
-							_tmp24_ = g_variant_get_boolean (v);
-							dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, property, _tmp24_);
+						gboolean _tmp18_;
+						_tmp18_ = g_variant_is_of_type (v, G_VARIANT_TYPE_BOOLEAN);
+						if (_tmp18_) {
+							gboolean _tmp19_;
+							_tmp19_ = g_variant_get_boolean (v);
+							dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, property, _tmp19_);
 						}
 					}
 				}
@@ -329,8 +297,8 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 		}
 		_g_object_unref0 (_property_it);
 	}
-	_tmp25_ = player_item_populated (self, attributes);
-	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_MENUITEM_PROP_VISIBLE, _tmp25_);
+	_tmp20_ = player_item_populated (self, attributes);
+	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_MENUITEM_PROP_VISIBLE, _tmp20_);
 }
 
 
@@ -356,12 +324,10 @@ gboolean player_item_populated (PlayerItem* self, GeeHashSet* attrs) {
 			}
 			_tmp2_ = gee_iterator_get (_prop_it);
 			prop = (gchar*) _tmp2_;
-			g_debug ("player-item.vala:96: populated ? - prop: %s", prop);
 			_tmp3_ = dbusmenu_menuitem_property_get_int ((DbusmenuMenuitem*) self, prop);
 			value_int = _tmp3_;
 			_tmp4_ = dbusmenu_menuitem_property_get_int ((DbusmenuMenuitem*) self, prop);
 			if (_tmp4_ != PLAYER_ITEM_EMPTY) {
-				g_debug ("player-item.vala:99: populated - prop %s and value %i", prop, value_int);
 				result = TRUE;
 				_g_free0 (prop);
 				_g_object_unref0 (_prop_it);

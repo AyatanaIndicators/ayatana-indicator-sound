@@ -42,8 +42,8 @@ public class TransportMenuitem : PlayerItem
 
   public void change_play_state(state update)
   {
-    debug("UPDATING THE TRANSPORT DBUSMENUITEM PLAY STATE WITH VALUE %i",
-          (int)update);
+    //debug("UPDATING THE TRANSPORT DBUSMENUITEM PLAY STATE WITH VALUE %i",
+    //      (int)update);
     int temp = (int)update;
     this.property_set_int(MENUITEM_PLAY_STATE, temp); 
   }
@@ -60,7 +60,7 @@ public class TransportMenuitem : PlayerItem
     }
     
     int32 input = v.get_int32();
-    debug("transport menu item -> handle_event with value %s", input.to_string());
+    //debug("transport menu item -> handle_event with value %s", input.to_string());
     //debug("transport owner name = %s", this.owner.app_info.get_name());
     this.owner.mpris_bridge.transport_update((action)input);
   } 

@@ -71,6 +71,7 @@ void settings_manager_clear_list (SettingsManager* self);
 void settings_manager_add_interested (SettingsManager* self, const gchar* app_desktop_name);
 static void _vala_array_add1 (gchar*** array, int* length, int* size, gchar* value);
 static void settings_manager_on_blacklist_event (SettingsManager* self);
+static void settings_manager_reveal_contents (SettingsManager* self);
 static void g_cclosure_user_marshal_VOID__BOXED_INT (GClosure * closure, GValue * return_value, guint n_param_values, const GValue * param_values, gpointer invocation_hint, gpointer marshal_data);
 static GObject * settings_manager_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
 static void _settings_manager_on_blacklist_event_g_settings_changed (GSettings* _sender, const gchar* key, gpointer self);
@@ -239,6 +240,67 @@ static void settings_manager_on_blacklist_event (SettingsManager* self) {
 	_tmp2__length1 = _vala_array_length (_tmp0_);
 	g_signal_emit_by_name (self, "blacklist-updates", _tmp2_, _vala_array_length (_tmp0_));
 	_tmp2_ = (_vala_array_free (_tmp2_, _tmp2__length1, (GDestroyNotify) g_free), NULL);
+}
+
+
+static void settings_manager_reveal_contents (SettingsManager* self) {
+	gchar** _tmp0_;
+	gchar** _tmp1_ = NULL;
+	gchar** already_interested;
+	gint already_interested_length1;
+	gint _already_interested_size_;
+	gchar** _tmp3_;
+	gchar** _tmp4_ = NULL;
+	gchar** blacklisted;
+	gint blacklisted_length1;
+	gint _blacklisted_size_;
+	g_return_if_fail (self != NULL);
+	_tmp1_ = _tmp0_ = g_settings_get_strv (self->priv->settings, "interested-media-players");
+	already_interested = _tmp1_;
+	already_interested_length1 = _vala_array_length (_tmp0_);
+	_already_interested_size_ = _vala_array_length (_tmp0_);
+	{
+		gchar** s_collection;
+		int s_collection_length1;
+		int s_it;
+		s_collection = already_interested;
+		s_collection_length1 = already_interested_length1;
+		for (s_it = 0; s_it < already_interested_length1; s_it = s_it + 1) {
+			gchar* _tmp2_;
+			gchar* s;
+			_tmp2_ = g_strdup (s_collection[s_it]);
+			s = _tmp2_;
+			{
+				g_debug ("settings-manager.vala:79: client %s is in interested array", s);
+				_g_free0 (s);
+			}
+		}
+	}
+	_tmp4_ = _tmp3_ = g_settings_get_strv (self->priv->settings, "blacklisted-media-players");
+	blacklisted = _tmp4_;
+	blacklisted_length1 = _vala_array_length (_tmp3_);
+	_blacklisted_size_ = _vala_array_length (_tmp3_);
+	{
+		gchar** s_collection;
+		int s_collection_length1;
+		int s_it;
+		s_collection = blacklisted;
+		s_collection_length1 = blacklisted_length1;
+		for (s_it = 0; s_it < blacklisted_length1; s_it = s_it + 1) {
+			gchar* _tmp5_;
+			gchar* s;
+			_tmp5_ = g_strdup (s_collection[s_it]);
+			s = _tmp5_;
+			{
+				g_debug ("settings-manager.vala:84: client %s is in blacklisted array", s);
+				_g_free0 (s);
+			}
+		}
+	}
+	g_debug ("settings-manager.vala:87: interested array size = %i", already_interested_length1);
+	g_debug ("settings-manager.vala:88: blacklisted array size = %i", blacklisted_length1);
+	blacklisted = (_vala_array_free (blacklisted, blacklisted_length1, (GDestroyNotify) g_free), NULL);
+	already_interested = (_vala_array_free (already_interested, already_interested_length1, (GDestroyNotify) g_free), NULL);
 }
 
 

@@ -28,9 +28,9 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <libdbusmenu-glib/menuitem.h>
 #include <libdbusmenu-glib/server.h>
 #include <gee.h>
+#include <common-defs.h>
 #include <stdlib.h>
 #include <string.h>
-#include <common-defs.h>
 
 
 #define TYPE_PLAYER_ITEM (player_item_get_type ())
@@ -54,9 +54,6 @@ typedef struct _PlayerItemPrivate PlayerItemPrivate;
 typedef struct _PlaylistsMenuitem PlaylistsMenuitem;
 typedef struct _PlaylistsMenuitemClass PlaylistsMenuitemClass;
 typedef struct _PlaylistsMenuitemPrivate PlaylistsMenuitemPrivate;
-
-#define TYPE_PLAYLIST_DETAILS (playlist_details_get_type ())
-typedef struct _PlaylistDetails PlaylistDetails;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 
 #define TYPE_PLAYER_CONTROLLER (player_controller_get_type ())
@@ -68,8 +65,10 @@ typedef struct _PlaylistDetails PlaylistDetails;
 
 typedef struct _PlayerController PlayerController;
 typedef struct _PlayerControllerClass PlayerControllerClass;
+
+#define TYPE_PLAYLIST_DETAILS (playlist_details_get_type ())
+typedef struct _PlaylistDetails PlaylistDetails;
 typedef struct _Block1Data Block1Data;
-#define _playlist_details_free0(var) ((var == NULL) ? NULL : (var = (playlist_details_free (var), NULL)))
 #define _g_free0(var) (var = (g_free (var), NULL))
 typedef struct _PlayerControllerPrivate PlayerControllerPrivate;
 
@@ -102,14 +101,14 @@ struct _PlaylistsMenuitemClass {
 	PlayerItemClass parent_class;
 };
 
+struct _PlaylistsMenuitemPrivate {
+	GeeHashMap* current_playlists;
+};
+
 struct _PlaylistDetails {
 	char* path;
 	gchar* name;
 	gchar* icon_path;
-};
-
-struct _PlaylistsMenuitemPrivate {
-	GeeHashMap* current_playlists;
 };
 
 struct _Block1Data {
@@ -136,11 +135,6 @@ static gpointer playlists_menuitem_parent_class = NULL;
 
 GType player_item_get_type (void) G_GNUC_CONST;
 GType playlists_menuitem_get_type (void) G_GNUC_CONST;
-GType playlist_details_get_type (void) G_GNUC_CONST;
-PlaylistDetails* playlist_details_dup (const PlaylistDetails* self);
-void playlist_details_free (PlaylistDetails* self);
-void playlist_details_copy (const PlaylistDetails* self, PlaylistDetails* dest);
-void playlist_details_destroy (PlaylistDetails* self);
 #define PLAYLISTS_MENUITEM_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_PLAYLISTS_MENUITEM, PlaylistsMenuitemPrivate))
 enum  {
 	PLAYLISTS_MENUITEM_DUMMY_PROPERTY
@@ -148,6 +142,11 @@ enum  {
 GType player_controller_get_type (void) G_GNUC_CONST;
 PlaylistsMenuitem* playlists_menuitem_new (PlayerController* parent);
 PlaylistsMenuitem* playlists_menuitem_construct (GType object_type, PlayerController* parent);
+GType playlist_details_get_type (void) G_GNUC_CONST;
+PlaylistDetails* playlist_details_dup (const PlaylistDetails* self);
+void playlist_details_free (PlaylistDetails* self);
+void playlist_details_copy (const PlaylistDetails* self, PlaylistDetails* dest);
+void playlist_details_destroy (PlaylistDetails* self);
 void playlists_menuitem_update (PlaylistsMenuitem* self, PlaylistDetails* playlists, int playlists_length1);
 static Block1Data* block1_data_ref (Block1Data* _data1_);
 static void block1_data_unref (Block1Data* _data1_);
@@ -155,6 +154,7 @@ static gboolean playlists_menuitem_already_observed (PlaylistsMenuitem* self, Pl
 static void _lambda1_ (Block1Data* _data1_);
 static void playlists_menuitem_submenu_item_activated (PlaylistsMenuitem* self, gint menu_item_id);
 static void __lambda1__dbusmenu_menuitem_item_activated (DbusmenuMenuitem* _sender, guint timestamp, gpointer self);
+void playlists_menuitem_update_individual_playlist (PlaylistsMenuitem* self, PlaylistDetails* new_detail);
 void playlists_menuitem_update_active_playlist (PlaylistsMenuitem* self, PlaylistDetails* detail);
 PlayerController* player_item_get_owner (PlayerItem* self);
 GType mpris2_controller_get_type (void) G_GNUC_CONST;
@@ -238,18 +238,54 @@ void playlists_menuitem_update (PlaylistsMenuitem* self, PlaylistDetails* playli
 				_tmp3_ = dbusmenu_menuitem_new ();
 				_data1_->menuitem = _tmp3_;
 				dbusmenu_menuitem_property_set (_data1_->menuitem, DBUSMENU_MENUITEM_PROP_LABEL, detail.name);
-				dbusmenu_menuitem_property_set (_data1_->menuitem, DBUSMENU_MENUITEM_PROP_ICON_NAME, "source-smart-playlist");
+				dbusmenu_menuitem_property_set (_data1_->menuitem, DBUSMENU_MENUITEM_PROP_ICON_NAME, detail.icon_path);
+				dbusmenu_menuitem_property_set (_data1_->menuitem, DBUSMENU_PLAYLIST_MENUITEM_PATH, (const gchar*) detail.path);
 				dbusmenu_menuitem_property_set_bool (_data1_->menuitem, DBUSMENU_MENUITEM_PROP_VISIBLE, TRUE);
 				dbusmenu_menuitem_property_set_bool (_data1_->menuitem, DBUSMENU_MENUITEM_PROP_ENABLED, TRUE);
-				_tmp4_ = dbusmenu_menuitem_get_id (_data1_->menuitem);
-				gee_abstract_map_set ((GeeAbstractMap*) self->priv->current_playlists, GINT_TO_POINTER (_tmp4_), &detail);
 				g_signal_connect_data (_data1_->menuitem, "item-activated", (GCallback) __lambda1__dbusmenu_menuitem_item_activated, block1_data_ref (_data1_), (GClosureNotify) block1_data_unref, 0);
+				_tmp4_ = dbusmenu_menuitem_get_id (_data1_->menuitem);
+				gee_abstract_map_set ((GeeAbstractMap*) self->priv->current_playlists, GINT_TO_POINTER (_tmp4_), _data1_->menuitem);
 				dbusmenu_menuitem_child_append (self->root_item, _data1_->menuitem);
 				playlist_details_destroy (&detail);
 				block1_data_unref (_data1_);
 				_data1_ = NULL;
 			}
 		}
+	}
+}
+
+
+void playlists_menuitem_update_individual_playlist (PlaylistsMenuitem* self, PlaylistDetails* new_detail) {
+	g_return_if_fail (self != NULL);
+	{
+		GeeCollection* _tmp0_ = NULL;
+		GeeCollection* _tmp1_;
+		GeeIterator* _tmp2_ = NULL;
+		GeeIterator* _tmp3_;
+		GeeIterator* _item_it;
+		_tmp0_ = gee_map_get_values ((GeeMap*) self->priv->current_playlists);
+		_tmp1_ = _tmp0_;
+		_tmp2_ = gee_iterable_iterator ((GeeIterable*) _tmp1_);
+		_item_it = (_tmp3_ = _tmp2_, _g_object_unref0 (_tmp1_), _tmp3_);
+		while (TRUE) {
+			gboolean _tmp4_;
+			gpointer _tmp5_ = NULL;
+			DbusmenuMenuitem* item;
+			const gchar* _tmp6_ = NULL;
+			_tmp4_ = gee_iterator_next (_item_it);
+			if (!_tmp4_) {
+				break;
+			}
+			_tmp5_ = gee_iterator_get (_item_it);
+			item = (DbusmenuMenuitem*) _tmp5_;
+			_tmp6_ = dbusmenu_menuitem_property_get (item, DBUSMENU_PLAYLIST_MENUITEM_PATH);
+			if (g_strcmp0 ((*new_detail).path, _tmp6_) == 0) {
+				dbusmenu_menuitem_property_set (item, DBUSMENU_MENUITEM_PROP_LABEL, (*new_detail).name);
+				dbusmenu_menuitem_property_set (item, DBUSMENU_MENUITEM_PROP_ICON_NAME, (*new_detail).icon_path);
+			}
+			_g_object_unref0 (item);
+		}
+		_g_object_unref0 (_item_it);
 	}
 }
 
@@ -262,36 +298,38 @@ static gboolean playlists_menuitem_already_observed (PlaylistsMenuitem* self, Pl
 		GeeCollection* _tmp1_;
 		GeeIterator* _tmp2_ = NULL;
 		GeeIterator* _tmp3_;
-		GeeIterator* _detail_it;
+		GeeIterator* _item_it;
 		_tmp0_ = gee_map_get_values ((GeeMap*) self->priv->current_playlists);
 		_tmp1_ = _tmp0_;
 		_tmp2_ = gee_iterable_iterator ((GeeIterable*) _tmp1_);
-		_detail_it = (_tmp3_ = _tmp2_, _g_object_unref0 (_tmp1_), _tmp3_);
+		_item_it = (_tmp3_ = _tmp2_, _g_object_unref0 (_tmp1_), _tmp3_);
 		while (TRUE) {
 			gboolean _tmp4_;
 			gpointer _tmp5_ = NULL;
-			PlaylistDetails* _tmp6_;
-			PlaylistDetails _tmp7_;
-			PlaylistDetails _tmp8_ = {0};
-			PlaylistDetails _tmp9_;
-			PlaylistDetails detail;
-			_tmp4_ = gee_iterator_next (_detail_it);
+			DbusmenuMenuitem* item;
+			const gchar* _tmp6_ = NULL;
+			gchar* _tmp7_;
+			gchar* path;
+			_tmp4_ = gee_iterator_next (_item_it);
 			if (!_tmp4_) {
 				break;
 			}
-			_tmp5_ = gee_iterator_get (_detail_it);
-			_tmp6_ = (PlaylistDetails*) _tmp5_;
-			_tmp7_ = (playlist_details_copy (_tmp6_, &_tmp8_), _tmp8_);
-			detail = (_tmp9_ = _tmp7_, _playlist_details_free0 (_tmp6_), _tmp9_);
-			if (g_strcmp0 ((*new_detail).path, detail.path) == 0) {
+			_tmp5_ = gee_iterator_get (_item_it);
+			item = (DbusmenuMenuitem*) _tmp5_;
+			_tmp6_ = dbusmenu_menuitem_property_get (item, DBUSMENU_PLAYLIST_MENUITEM_PATH);
+			_tmp7_ = g_strdup (_tmp6_);
+			path = _tmp7_;
+			if (g_strcmp0 ((*new_detail).path, path) == 0) {
 				result = TRUE;
-				playlist_details_destroy (&detail);
-				_g_object_unref0 (_detail_it);
+				_g_free0 (path);
+				_g_object_unref0 (item);
+				_g_object_unref0 (_item_it);
 				return result;
 			}
-			playlist_details_destroy (&detail);
+			_g_free0 (path);
+			_g_object_unref0 (item);
 		}
-		_g_object_unref0 (_detail_it);
+		_g_object_unref0 (_item_it);
 	}
 	result = FALSE;
 	return result;
@@ -321,19 +359,21 @@ static void playlists_menuitem_submenu_item_activated (PlaylistsMenuitem* self, 
 	gboolean _tmp0_;
 	PlayerController* _tmp1_ = NULL;
 	gpointer _tmp2_ = NULL;
-	PlaylistDetails* _tmp3_;
+	DbusmenuMenuitem* _tmp3_;
+	const gchar* _tmp4_ = NULL;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = gee_abstract_map_has_key ((GeeAbstractMap*) self->priv->current_playlists, GINT_TO_POINTER (menu_item_id));
 	if (!_tmp0_) {
-		g_warning ("playlists-menu-item.vala:72: item %i was activated but we don't have a" \
+		g_warning ("playlists-menu-item.vala:89: item %i was activated but we don't have a" \
 " corresponding playlist", menu_item_id);
 		return;
 	}
 	_tmp1_ = player_item_get_owner ((PlayerItem*) self);
 	_tmp2_ = gee_abstract_map_get ((GeeAbstractMap*) self->priv->current_playlists, GINT_TO_POINTER (menu_item_id));
-	_tmp3_ = (PlaylistDetails*) _tmp2_;
-	mpris2_controller_activate_playlist (_tmp1_->mpris_bridge, (*_tmp3_).path);
-	_playlist_details_free0 (_tmp3_);
+	_tmp3_ = (DbusmenuMenuitem*) _tmp2_;
+	_tmp4_ = dbusmenu_menuitem_property_get (_tmp3_, DBUSMENU_PLAYLIST_MENUITEM_PATH);
+	mpris2_controller_activate_playlist (_tmp1_->mpris_bridge, (const char*) _tmp4_);
+	_g_object_unref0 (_tmp3_);
 }
 
 
@@ -361,7 +401,7 @@ static GObject * playlists_menuitem_constructor (GType type, guint n_construct_p
 	parent_class = G_OBJECT_CLASS (playlists_menuitem_parent_class);
 	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
 	self = PLAYLISTS_MENUITEM (obj);
-	_tmp0_ = gee_hash_map_new (G_TYPE_INT, NULL, NULL, TYPE_PLAYLIST_DETAILS, (GBoxedCopyFunc) playlist_details_dup, playlist_details_free, NULL, NULL, NULL);
+	_tmp0_ = gee_hash_map_new (G_TYPE_INT, NULL, NULL, DBUSMENU_TYPE_MENUITEM, (GBoxedCopyFunc) g_object_ref, g_object_unref, NULL, NULL, NULL);
 	_tmp1_ = _tmp0_;
 	_g_object_unref0 (self->priv->current_playlists);
 	self->priv->current_playlists = _tmp1_;
