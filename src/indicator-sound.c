@@ -401,8 +401,6 @@ new_volume_slider_widget(DbusmenuMenuitem * newitem,
                                   newitem,
                                   menu_volume_item,
                                   parent);
-  sound_state_manager_attach_notification_to_volume_widget (priv->state_manager,
-                                                            volume_widget);
   return TRUE;
 }
 
