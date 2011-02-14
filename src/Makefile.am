@@ -65,7 +65,7 @@ music_bridge_VALAFLAGS = \
   --vapidir=./ \
   --thread \
   --pkg gee-1.0 \
-  --pkg Dbusmenu-Glib-0.4 \
+  --pkg Dbusmenu-0.4 \
   --pkg common-defs \
 	--pkg gio-2.0 \
 	--pkg gio-unix-2.0 \
