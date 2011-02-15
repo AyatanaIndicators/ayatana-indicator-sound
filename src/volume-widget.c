@@ -37,6 +37,7 @@ struct _VolumeWidgetPrivate
   DbusmenuMenuitem* twin_item;  
   GtkWidget* ido_volume_slider;
   gboolean grabbed;
+  IndicatorObject* indicator;
 };
 
 #define VOLUME_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), VOLUME_WIDGET_TYPE, VolumeWidgetPrivate))
@@ -137,6 +138,11 @@ volume_widget_property_update( DbusmenuMenuitem* item, gchar* property,
       gdouble update = g_variant_get_double (value);
       //g_debug("volume-widget - update level with value %f", update);
       gtk_range_set_value(range, update);
+      g_signal_emit(G_OBJECT(priv->indicator),
+                    INDICATOR_OBJECT_SIGNAL_ACCESSIBLE_DESC_UPDATE_ID,
+                    0,
+                    (IndicatorObjectEntry *)indicator_object_get_entries(INDICATOR_OBJECT(priv->indicator))->data,
+                    TRUE);
     }
   }
 }
@@ -156,6 +162,11 @@ volume_widget_set_twin_item(VolumeWidget* self,
   GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
   GtkRange *range = (GtkRange*)slider;
   gtk_range_set_value(range, initial_level);
+  g_signal_emit(G_OBJECT(priv->indicator),
+                INDICATOR_OBJECT_SIGNAL_ACCESSIBLE_DESC_UPDATE_ID,
+                0,
+                (IndicatorObjectEntry *)indicator_object_get_entries(INDICATOR_OBJECT(priv->indicator))->data,
+                TRUE);
 }
 
 static gboolean
@@ -196,6 +207,11 @@ volume_widget_update(VolumeWidget* self, gdouble update)
   gdouble clamped = CLAMP(update, 0, 100);
   GVariant* new_volume = g_variant_new_double(clamped);
   dbusmenu_menuitem_handle_event (priv->twin_item, "update", new_volume, 0);
+  g_signal_emit(G_OBJECT(priv->indicator),
+                INDICATOR_OBJECT_SIGNAL_ACCESSIBLE_DESC_UPDATE_ID,
+                0,
+                (IndicatorObjectEntry *)indicator_object_get_entries(INDICATOR_OBJECT(priv->indicator))->data,
+                TRUE);
 }
 
 GtkWidget*
@@ -251,10 +267,12 @@ volume_widget_get_current_volume ( GtkWidget *widget )
  * volume_widget_new:
  * @returns: a new #VolumeWidget.
  **/
-GtkWidget* 
-volume_widget_new(DbusmenuMenuitem *item)
+GtkWidget*
+volume_widget_new(DbusmenuMenuitem *item, IndicatorObject* io)
 {
   GtkWidget* widget = g_object_new(VOLUME_WIDGET_TYPE, NULL);
+  VolumeWidgetPrivate* priv = VOLUME_WIDGET_GET_PRIVATE(VOLUME_WIDGET(widget));
+  priv->indicator = io;
   volume_widget_set_twin_item((VolumeWidget*)widget, item);
   return widget;
 }
