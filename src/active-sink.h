@@ -52,6 +52,7 @@ GType active_sink_get_type  (void) G_GNUC_CONST;
 
 void active_sink_populate (ActiveSink* sink, const pa_sink_info* update);  
 void active_sink_update (ActiveSink* sink, const pa_sink_info* update);  
+void active_sink_update_voip_input (ActiveSink* sink, const pa_source_info* update);
 
 gboolean active_sink_is_populated (ActiveSink* sink);
 void active_sink_determine_blocking_state (ActiveSink* self);

@@ -21,7 +21,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "active-sink.h"
 #include "slider-menu-item.h"
 #include "mute-menu-item.h"
-
+#include "voip-input-menu-item.h"
 #include "pulseaudio-mgr.h"
 
 typedef struct _ActiveSinkPrivate ActiveSinkPrivate;
@@ -30,7 +30,8 @@ struct _ActiveSinkPrivate
 {
   SliderMenuItem*     volume_slider_menuitem;
   MuteMenuItem*       mute_menuitem;
-  SoundState          current_sound_state;  
+  VoipInputMenuItem*  voip_input_menu_item;
+  SoundState          current_sound_state;
   SoundServiceDbus*   service;
   gint                index;
   gchar*              name;
@@ -72,6 +73,7 @@ active_sink_init (ActiveSink *self)
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
   priv->mute_menuitem = NULL;
   priv->volume_slider_menuitem = NULL;
+  priv->voip_input_menu_item = NULL;
   priv->current_sound_state = UNAVAILABLE;
   priv->index = -1;
   priv->name = NULL;
@@ -79,6 +81,7 @@ active_sink_init (ActiveSink *self)
 
   // Init our menu items.
   priv->mute_menuitem = g_object_new (MUTE_MENU_ITEM_TYPE, NULL);
+  priv->voip_input_menu_item = g_object_new (VOIP_INPUT_MENU_ITEM_TYPE, NULL);;
   priv->volume_slider_menuitem = slider_menu_item_new (self);
   mute_menu_item_enable (priv->mute_menuitem, FALSE);
   slider_menu_item_enable (priv->volume_slider_menuitem, FALSE);  
@@ -279,6 +282,13 @@ active_sink_get_state (ActiveSink* self)
   return priv->current_sound_state;
 }
 
+void
+active_sink_update_voip_input_source (ActiveSink* self, const pa_source_info* update)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+
+}
+
 ActiveSink*
 active_sink_new (SoundServiceDbus* service)
 {
@@ -287,7 +297,8 @@ active_sink_new (SoundServiceDbus* service)
   priv->service = service;
   sound_service_dbus_build_sound_menu (service,
                                        mute_menu_item_get_button (priv->mute_menuitem),
-                                       DBUSMENU_MENUITEM (priv->volume_slider_menuitem));
+                                       DBUSMENU_MENUITEM (priv->volume_slider_menuitem),
+                                       DBUSMENU_MENUITEM (priv->voip_input_menu_item));
   pm_establish_pulse_connection (sink);
   return sink; 
 }
