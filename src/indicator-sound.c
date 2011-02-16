@@ -20,7 +20,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <math.h>
 #include <glib.h>
 #include <glib-object.h>
-#include <glib/gi18n.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include <libdbusmenu-gtk/menu.h>
@@ -67,7 +66,6 @@ G_DEFINE_TYPE (IndicatorSound, indicator_sound, INDICATOR_OBJECT_TYPE);
 static GtkLabel * get_label (IndicatorObject * io);
 static GtkImage * get_icon (IndicatorObject * io);
 static GtkMenu *  get_menu (IndicatorObject * io);
-static const gchar * get_accessible_desc (IndicatorObject * io);
 static void indicator_sound_scroll (IndicatorObject* io,
                                     gint delta,
                                     IndicatorScrollDirection direction);
@@ -119,7 +117,6 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
   io_class->get_label = get_label;
   io_class->get_image = get_icon;
   io_class->get_menu  = get_menu;
-  io_class->get_accessible_desc = get_accessible_desc;
   io_class->scroll    = indicator_sound_scroll;
 }
 
@@ -209,19 +206,6 @@ get_menu (IndicatorObject * io)
   
   return GTK_MENU(menu);
 }
-
-static const gchar *
-get_accessible_desc (IndicatorObject * io)
-{
-  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(io);
-
-  if (priv->volume_widget != NULL){
-    return g_strdup_printf(_("Volume (%'.0f%%)"), volume_widget_get_current_volume(priv->volume_widget));
-  }
-
-  return NULL;
-}
-
 
 static void
 connection_changed (IndicatorServiceManager * sm,
@@ -398,8 +382,8 @@ new_volume_slider_widget(DbusmenuMenuitem * newitem,
   g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
+  volume_widget = volume_widget_new (newitem);  
   io = g_object_get_data (G_OBJECT (client), "indicator");
-  volume_widget = volume_widget_new (newitem, io);
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
   priv->volume_widget = volume_widget;
 
