@@ -20,8 +20,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define __VOIP_INPUT_MENU_ITEM_H__
 
 #include <glib.h>
-#include <glib-object.h>
-
+#include <pulse/pulseaudio.h>
 #include <libdbusmenu-glib/menuitem.h>
 #include "active-sink.h"
 
@@ -47,8 +46,12 @@ struct _VoipInputMenuItem {
 
 GType voip_input_menu_item_get_type (void);
 
-void voip_input_menu_item_update(VoipInputMenuItem* item, gdouble update);
-void voip_input_menu_item_enable(VoipInputMenuItem* item, gboolean active);
+void voip_input_menu_item_update (VoipInputMenuItem* item,
+                                  const pa_source_info* source);
+void voip_input_menu_item_update_source_details (VoipInputMenuItem* item,
+                                                 const pa_source_info* source);
+
+void voip_input_menu_item_enable (VoipInputMenuItem* item, gboolean active);
 
 VoipInputMenuItem* voip_input_menu_item_new (ActiveSink* sink);
 

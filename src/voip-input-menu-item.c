@@ -27,7 +27,12 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 typedef struct _VoipInputMenuItemPrivate VoipInputMenuItemPrivate;
 
 struct _VoipInputMenuItemPrivate {
-  ActiveSink* a_sink;
+  ActiveSink*         a_sink;
+  pa_cvolume          volume;
+  gint                mute;
+  guint32             volume_steps;
+  pa_channel_map      channel_map;
+  pa_volume_t         base_volume;
 };
 
 #define VOIP_INPUT_MENU_ITEM_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), VOIP_INPUT_MENU_ITEM_TYPE, VoipInputMenuItemPrivate))
@@ -102,6 +107,26 @@ handle_event (DbusmenuMenuitem * mi,
 }
 
 void
+voip_input_menu_item_update_(VoipInputMenuItem* item,
+                             const pa_source_info* source)
+{
+
+}
+
+void
+voip_input_menu_item_update_source_details (VoipInputMenuItem* item,
+                                            const pa_source_info* source)
+{
+  VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
+  priv->base_volume = source->base_volume;
+  priv->volume_steps = source->n_volume_steps;
+  priv->channel_map = source->channel_map;
+  priv->volume = source->volume;
+  priv->mute = source->mute;
+}
+
+
+/*
 voip_input_menu_item_update (VoipInputMenuItem* item,
                               gdouble update)
 {
@@ -110,10 +135,11 @@ voip_input_menu_item_update (VoipInputMenuItem* item,
                                          DBUSMENU_VOIP_INPUT_MENUITEM_LEVEL,
                                          new_volume);
 }
+*/
 
 void
 voip_input_menu_item_enable (VoipInputMenuItem* item,
-                              gboolean active)
+                             gboolean active)
 {
   dbusmenu_menuitem_property_set_bool( DBUSMENU_MENUITEM(item),
                                        DBUSMENU_MENUITEM_PROP_VISIBLE,
