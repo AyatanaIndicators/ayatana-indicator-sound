@@ -1,3 +1,16 @@
+indicator-sound (0.5.9-0ubuntu2) natty; urgency=low
+
+  * debian/control
+    - bump build depends for libindicator-dev to >= 0.3.19
+    - bump build depends for libdbusmenu-glib-dev to >= 0.3.97
+    - added build depends on dh-autoreconf
+  * src/Makefile.am
+    - Hand Dbusmenu-Glib-0.4 rename to Dbusmenu-0.4
+  * debian/rules
+    - include autoreconf.mk to handle the Dbusmenu rename
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 17 Feb 2011 15:21:33 -0500
+
 indicator-sound (0.5.9-0ubuntu1) natty; urgency=low
 
   * New upstream release.
