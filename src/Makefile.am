@@ -20,6 +20,8 @@ libsoundmenu_la_SOURCES = \
             title-widget.h \
             volume-widget.c \
             volume-widget.h \
+            voip-input-widget.c \
+            voip-input-widget.h \
             gen-sound-service.xml.h \
             gen-sound-service.xml.c \
             dbus-shared-names.h

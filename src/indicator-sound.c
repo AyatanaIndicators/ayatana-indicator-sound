@@ -79,6 +79,10 @@ static gboolean new_volume_slider_widget (DbusmenuMenuitem * newitem,
                                           DbusmenuMenuitem * parent,
                                           DbusmenuClient * client,
                                           gpointer user_data);
+static gboolean new_voip_slider_widget (DbusmenuMenuitem * newitem,
+                                          DbusmenuMenuitem * parent,
+                                          DbusmenuClient * client,
+                                          gpointer user_data);
 static gboolean new_transport_widget (DbusmenuMenuitem * newitem,
                                       DbusmenuMenuitem * parent,
                                       DbusmenuClient * client,
@@ -190,6 +194,9 @@ get_menu (IndicatorObject * io)
   dbusmenu_client_add_type_handler (DBUSMENU_CLIENT(client),
                                     DBUSMENU_VOLUME_MENUITEM_TYPE,
                                     new_volume_slider_widget);
+  dbusmenu_client_add_type_handler (DBUSMENU_CLIENT(client),
+                                    DBUSMENU_VOIP_INPUT_MENUITEM_TYPE,
+                                    new_voip_slider_widget);
   dbusmenu_client_add_type_handler (DBUSMENU_CLIENT(client),
                                     DBUSMENU_TRANSPORT_MENUITEM_TYPE,
                                     new_transport_widget);
@@ -401,6 +408,43 @@ new_volume_slider_widget(DbusmenuMenuitem * newitem,
                                   newitem,
                                   menu_volume_item,
                                   parent);
+  return TRUE;
+}
+static gboolean
+new_voip_slider_widget (DbusmenuMenuitem * newitem,
+                        DbusmenuMenuitem * parent,
+                        DbusmenuClient * client,
+                        gpointer user_data)
+{
+  g_debug("indicator-sound: new_voip_slider_widget");
+/*
+  GtkWidget* voip_widget = NULL;
+  IndicatorObject *io = NULL;
+
+
+  g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
+  g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
+
+  volume_widget = volume_widget_new (newitem);
+  io = g_object_get_data (G_OBJECT (client), "indicator");
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+  priv->volume_widget = volume_widget;
+
+  GtkWidget* ido_slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));
+
+  gtk_widget_show_all(ido_slider_widget);
+  // register the style callback on this widget with state manager's style change
+  // handler (needs to remake the blocking animation for each style).
+  g_signal_connect (ido_slider_widget, "style-set",
+                    G_CALLBACK(sound_state_manager_style_changed_cb),
+                    priv->state_manager);
+
+  GtkMenuItem *menu_volume_item = GTK_MENU_ITEM(ido_slider_widget);
+  dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client),
+                                  newitem,
+                                  menu_volume_item,
+                                  parent);
+*/
   return TRUE;
 }
 
