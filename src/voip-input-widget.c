@@ -28,7 +28,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "voip-input-widget.h"
 #include "common-defs.h"
 #include <libido/idoscalemenuitem.h>
-//#include "indicator-sound.h"
 
 typedef struct _VoipInputWidgetPrivate VoipInputWidgetPrivate;
 
@@ -102,7 +101,7 @@ voip_input_widget_init (VoipInputWidget *self)
   g_object_unref(primary_gicon);
 
   GtkWidget* secondary_image = ido_scale_menu_item_get_secondary_image((IdoScaleMenuItem*)priv->ido_voip_input_slider);
-  GIcon * secondary_gicon = g_themed_icon_new_with_default_fallbacks("audio-volume-high-panel");
+  GIcon * secondary_gicon = g_themed_icon_new_with_default_fallbacks("audio-input-microphone");
   gtk_image_set_from_gicon(GTK_IMAGE(secondary_image), secondary_gicon, GTK_ICON_SIZE_MENU);
   g_object_unref(secondary_gicon);
 

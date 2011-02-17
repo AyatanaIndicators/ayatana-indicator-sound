@@ -23,6 +23,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib/gi18n.h>
 #include "voip-input-menu-item.h"
 #include "common-defs.h"
+#include "pulseaudio-mgr.h"
 
 typedef struct _VoipInputMenuItemPrivate VoipInputMenuItemPrivate;
 
@@ -107,11 +108,18 @@ handle_event (DbusmenuMenuitem * mi,
     input = g_variant_get_variant(value);
   }
 
-  gboolean volume_input = g_variant_get_double(input);
+  gboolean percent = g_variant_get_double(input);
   if (value != NULL){
     if (IS_VOIP_INPUT_MENU_ITEM (mi)) {
       VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (VOIP_INPUT_MENU_ITEM (mi));
-      g_debug ("Handle event in the voip input level backend instance - %f", volume_input);
+      g_debug ("Handle event in the voip input level backend instance - %f", percent);
+      pa_cvolume new_volume;
+      pa_cvolume_init(&new_volume);
+      new_volume.channels = 1;
+      pa_volume_t new_volume_value = (pa_volume_t) ((percent * PA_VOLUME_NORM) / 100);
+      pa_cvolume_set(&new_volume, 1, new_volume_value);
+
+      pm_update_mic_gain (priv->index, new_volume);
       //active_sink_update_volume (priv->a_sink, volume_input);
       //active_sink_ensure_sink_is_unmuted (priv->a_sink);
     }

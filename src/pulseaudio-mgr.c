@@ -19,9 +19,9 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /**Notes
  *
- * Approach now is to set up the communication channels then query the server
- * fetch its default sink. If this fails then fetch the list of sinks and take
- * the first one which is not the auto-null sink.
+ * Approach now is to set up the communication channels, query the server
+ * fetch its default sink/source. If this fails then fetch the list of sinks/sources
+ * and take the first one which is not the auto-null sink.
  * TODO: need to handle the situation where one chink in this linear chain breaks
  * i.e. start off the process again and count the attempts (note different to
                                                             reconnect attempts)
@@ -165,6 +165,16 @@ pm_update_mute (gboolean update)
                                                      GINT_TO_POINTER (update)));
 }
 
+void
+pm_update_mic_gain (gint source_index, pa_cvolume new_gain)
+{
+  pa_operation_unref (pa_context_set_source_volume_by_index (pulse_context,
+                                                             source_index,
+                                                             &new_gain,
+                                                             NULL,
+                                                             NULL) );
+}
+
 /**********************************************************************************************************************/
 //    Pulse-Audio asychronous call-backs
 /**********************************************************************************************************************/
@@ -217,10 +227,12 @@ pm_subscribed_events_callback (pa_context *c,
     break;
   case PA_SUBSCRIPTION_EVENT_SINK_INPUT:
     // We don't care about sink input removals.
+    g_debug ("sink input event");
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
-      g_debug ("Just saw a sink input removal event");
+      g_debug ("Just saw a sink input removal event - index = %i", index);
     }
     else if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_NEW) {
+      g_debug ("some new sink input event ? - index = %i", index);
       // Determine if its a VOIP app or a maybe blocking state.
       pa_operation_unref (pa_context_get_sink_input_info (c,
                                                           index,

@@ -22,6 +22,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 void pm_establish_pulse_connection (ActiveSink* active_sink);
 void close_pulse_activites();
 void pm_update_volume (gint sink_index, pa_cvolume new_volume);
+void pm_update_mic_gain (gint source_index, pa_cvolume new_gain);
 void pm_update_mute (gboolean update);
 
 
