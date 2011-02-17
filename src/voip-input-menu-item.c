@@ -1,5 +1,5 @@
 /*
-Copyright 2010 Canonical Ltd.
+Copyright 2011 Canonical Ltd.
 
 Authors:
     Conor Curran <conor.curran@canonical.com>
@@ -33,6 +33,8 @@ struct _VoipInputMenuItemPrivate {
   guint32             volume_steps;
   pa_channel_map      channel_map;
   pa_volume_t         base_volume;
+  gint                index;
+  gint                sink_input_index;
 };
 
 #define VOIP_INPUT_MENU_ITEM_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), VOIP_INPUT_MENU_ITEM_TYPE, VoipInputMenuItemPrivate))
@@ -68,6 +70,12 @@ voip_input_menu_item_init (VoipInputMenuItem *self)
   dbusmenu_menuitem_property_set( DBUSMENU_MENUITEM(self),
                                   DBUSMENU_MENUITEM_PROP_TYPE,
                                   DBUSMENU_VOIP_INPUT_MENUITEM_TYPE );
+  VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (self);
+  dbusmenu_menuitem_property_set_bool( DBUSMENU_MENUITEM(self),
+                                       DBUSMENU_MENUITEM_PROP_VISIBLE,
+                                       FALSE );
+
+  priv->index = -1;
 }
 
 static void
@@ -107,40 +115,58 @@ handle_event (DbusmenuMenuitem * mi,
 }
 
 void
-voip_input_menu_item_update_(VoipInputMenuItem* item,
+voip_input_menu_item_update (VoipInputMenuItem* item,
                              const pa_source_info* source)
 {
-
-}
-
-void
-voip_input_menu_item_update_source_details (VoipInputMenuItem* item,
-                                            const pa_source_info* source)
-{
   VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
-  priv->base_volume = source->base_volume;
-  priv->volume_steps = source->n_volume_steps;
-  priv->channel_map = source->channel_map;
+  // only overwrite the constants of each source if the device has changed
+  if (priv->index != source->index){
+    priv->base_volume = source->base_volume;
+    priv->volume_steps = source->n_volume_steps;
+    priv->channel_map = source->channel_map;
+  }
   priv->volume = source->volume;
   priv->mute = source->mute;
-}
-
-
 /*
-voip_input_menu_item_update (VoipInputMenuItem* item,
-                              gdouble update)
-{
   GVariant* new_volume = g_variant_new_double(update);
   dbusmenu_menuitem_property_set_variant(DBUSMENU_MENUITEM(item),
                                          DBUSMENU_VOIP_INPUT_MENUITEM_LEVEL,
                                          new_volume);
-}
 */
+
+}
+
+gboolean
+voip_input_menu_item_is_populated (VoipInputMenuItem* item)
+{
+  VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
+  return priv->index != -1;
+}
+
+gint
+voip_input_menu_item_get_index (VoipInputMenuItem* item)
+{
+  VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
+  return priv->index;
+}
+
+void
+voip_input_menu_item_deactivate (VoipInputMenuItem* item)
+{
+  VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
+  priv->index = -1;
+}
 
 void
 voip_input_menu_item_enable (VoipInputMenuItem* item,
                              gboolean active)
 {
+  VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
+  if (priv->index != -1){
+    if (active == TRUE)
+      g_warning ("Tried to enable the VOIP menuitem but we don't have an active source");
+    active = FALSE;
+  }
   dbusmenu_menuitem_property_set_bool( DBUSMENU_MENUITEM(item),
                                        DBUSMENU_MENUITEM_PROP_VISIBLE,
                                        active );

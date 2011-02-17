@@ -59,6 +59,10 @@ static void pm_source_info_callback (pa_context *c,
                                      const pa_source_info *info,
                                      int eol,
                                      void *userdata);
+static void pm_update_source_info_callback (pa_context *c,
+                                            const pa_source_info *info,
+                                            int eol,
+                                            void *userdata);
 static void pm_sink_input_info_callback (pa_context *c,
                                          const pa_sink_input_info *info,
                                          int eol,
@@ -172,19 +176,21 @@ pm_subscribed_events_callback (pa_context *c,
                                uint32_t index,
                                void* userdata)
 {
+  if (IS_ACTIVE_SINK (userdata) == FALSE){
+    g_critical ("subscribed events callback - our userdata is not what we think it should be");
+    return;
+  }
+  ActiveSink* sink = ACTIVE_SINK (userdata);
+
   switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) {
   case PA_SUBSCRIPTION_EVENT_SINK:
-    if (IS_ACTIVE_SINK (userdata) == FALSE){
-      g_warning ("subscribed events callback - our userdata is not what we think it should be");
-      return;
-    }      
-    ActiveSink* sink = ACTIVE_SINK (userdata);
+    
     // We don't care about any other sink other than the active one.
     if (index != active_sink_get_index (sink))
-        return;
+      return;
       
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
-      active_sink_deactivate (ACTIVE_SINK (userdata));
+      active_sink_deactivate (sink);
       
     }
     else{
@@ -194,12 +200,27 @@ pm_subscribed_events_callback (pa_context *c,
                                                              userdata) );
     }
     break;
+  case PA_SUBSCRIPTION_EVENT_SOURCE:
+    // We don't care about any other sink other than the active one.
+    if (index != active_sink_get_source_index (sink))
+        return;
+    if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
+      active_sink_deactivate_voip_source (sink);
+    }
+    else{
+      pa_operation_unref (pa_context_get_source_info_by_index (c,
+                                                               index,
+                                                               pm_update_source_info_callback,
+                                                               userdata) );
+    }
+    break;
   case PA_SUBSCRIPTION_EVENT_SINK_INPUT:
     // We don't care about sink input removals.
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
-
+      g_debug ("Just saw a sink input removal event");
     }
-    else{
+    else if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_NEW) {
+      // Determine if its a VOIP app or a maybe blocking state.
       pa_operation_unref (pa_context_get_sink_input_info (c,
                                                           index,
                                                           pm_sink_input_info_callback, userdata));
@@ -256,6 +277,7 @@ pm_context_state_callback (pa_context *c, void *userdata)
 
     if (!(o = pa_context_subscribe (c, (pa_subscription_mask_t)
                                    (PA_SUBSCRIPTION_MASK_SINK|
+                                    PA_SUBSCRIPTION_MASK_SOURCE|
                                     PA_SUBSCRIPTION_MASK_SINK_INPUT|
                                     PA_SUBSCRIPTION_MASK_SERVER), NULL, NULL))) {
       g_warning("pa_context_subscribe() failed");
@@ -273,7 +295,8 @@ pm_context_state_callback (pa_context *c, void *userdata)
 
 /**
  After startup we go straight for the server info to see if it has details of
- the default sink. If so it makes things much easier.
+ the default sink and source. Normally these are valid, if there is none set
+ fetch the list of each and try to determine the sink.
  **/
 static void 
 pm_server_info_callback (pa_context *c,
@@ -326,9 +349,8 @@ pm_server_info_callback (pa_context *c,
                                                          pm_source_info_callback,
                                                          userdata))) {
     g_warning("pa_context_get_sink_info_list() failed");
-    //  TODO: call some input deactivate method on active sink
+    //  TODO: call some input deactivate method for the source
   }
-
   pa_operation_unref(operation);
 }
 
@@ -392,21 +414,28 @@ pm_sink_input_info_callback (pa_context *c,
       return;
     }
 
-    gint result  = pa_proplist_contains (info->proplist, PA_PROP_MEDIA_ROLE);
-    if (result == 1){
-      g_debug ("Sink input info has media role property");
-      const char* value = pa_proplist_gets (info->proplist, PA_PROP_MEDIA_ROLE);
-      if (g_strcmp0 (value, "phone")) {
-        g_debug ("And yes its a VOIP app ...");
-      }
-      //g_free (value);
-    }
-
     if (IS_ACTIVE_SINK (userdata) == FALSE){
       g_warning ("sink input info callback - our user data is not what we think it should be");
       return;
     }
-    
+    // Check if this is Voip sink input
+    gint result  = pa_proplist_contains (info->proplist, PA_PROP_MEDIA_ROLE);
+    if (result == 1){
+      g_debug ("Sink input info has media role property");
+      const char* value = pa_proplist_gets (info->proplist, PA_PROP_MEDIA_ROLE);
+      g_debug ("prop role = %s", value);
+      if (g_strcmp0 (value, "phone") == 0) {
+        g_debug ("And yes its a VOIP app ...");
+        // TODO to start with we will assume our source is the same as what this 'client'
+        // is pointing at. This should probably be more intelligent :
+        // query for the list of source output info's and going on the name of the client
+        // from the sink input ensure our voip item is using the right source.
+
+      }
+      //g_free (value);
+    }
+
+    // And finally check for the mute blocking state
     ActiveSink* a_sink = ACTIVE_SINK (userdata);
     if (active_sink_get_index (a_sink) == info->sink){
       active_sink_determine_blocking_state (a_sink);
@@ -465,8 +494,8 @@ pm_default_source_info_callback (pa_context *c,
       g_warning ("Default sink info callback - our user data is not what we think it should be");
       return;
     }
-    g_debug ("server has handed us a default sink");
-    //active_sink_update_source (ACTIVE_SINK (userdata), info);
+    g_debug ("server has handed us a default source");
+    active_sink_update_voip_input_source (ACTIVE_SINK (userdata), info);
   }
 }
 
@@ -476,5 +505,35 @@ pm_source_info_callback (pa_context *c,
                          int eol,
                          void *userdata)
 {
+  if (eol > 0) {
+    return;
+  }
+  else {
+    if (IS_ACTIVE_SINK (userdata) == FALSE){
+      g_warning ("Default sink info callback - our user data is not what we think it should be");
+      return;
+    }
+    // For now we will take the first available
+    if (active_sink_is_voip_source_populated (ACTIVE_SINK (userdata)) == FALSE){
+      active_sink_update_voip_input_source (ACTIVE_SINK (userdata), info);
+    }
+  }
+}
 
+static void
+pm_update_source_info_callback (pa_context *c,
+                                const pa_source_info *info,
+                                int eol,
+                                void *userdata)
+{
+  if (eol > 0) {
+    return;
+  }
+  else {
+    if (IS_ACTIVE_SINK (userdata) == FALSE){
+      g_warning ("Default sink info callback - our user data is not what we think it should be");
+      return;
+    }
+    active_sink_update_voip_input_source (ACTIVE_SINK (userdata), info);
+  }
 }

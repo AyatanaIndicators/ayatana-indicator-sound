@@ -1,5 +1,5 @@
 /*
-Copyright 2010 Canonical Ltd.
+Copyright 2011 Canonical Ltd.
 
 Authors:
     Conor Curran <conor.curran@canonical.com>
@@ -48,10 +48,10 @@ GType voip_input_menu_item_get_type (void);
 
 void voip_input_menu_item_update (VoipInputMenuItem* item,
                                   const pa_source_info* source);
-void voip_input_menu_item_update_source_details (VoipInputMenuItem* item,
-                                                 const pa_source_info* source);
-
 void voip_input_menu_item_enable (VoipInputMenuItem* item, gboolean active);
+gboolean voip_input_menu_item_is_populated (VoipInputMenuItem* item);
+gint voip_input_menu_item_get_index (VoipInputMenuItem* item);
+void voip_input_menu_item_deactivate (VoipInputMenuItem* item);
 
 VoipInputMenuItem* voip_input_menu_item_new (ActiveSink* sink);
 

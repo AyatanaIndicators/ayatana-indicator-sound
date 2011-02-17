@@ -87,6 +87,21 @@ active_sink_init (ActiveSink *self)
   slider_menu_item_enable (priv->volume_slider_menuitem, FALSE);  
 }
 
+void
+active_sink_activate_voip_item (ActiveSink* self)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  voip_input_menu_item_enable (priv->voip_input_menu_item, TRUE);
+}
+
+void
+active_sink_deactivate_voip_source (ActiveSink* self)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  voip_input_menu_item_enable (priv->voip_input_menu_item, FALSE);
+}
+
+
 static void
 active_sink_dispose (GObject *object)
 {  
@@ -286,7 +301,20 @@ void
 active_sink_update_voip_input_source (ActiveSink* self, const pa_source_info* update)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  voip_input_menu_item_update (priv->voip_input_menu_item, update);
+}
 
+gboolean
+active_sink_is_voip_source_populated (ActiveSink* self)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  return voip_input_menu_item_is_populated (priv->voip_input_menu_item);
+}
+
+gint active_sink_get_source_index (ActiveSink* self)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  return voip_input_menu_item_get_index (priv->voip_input_menu_item);
 }
 
 ActiveSink*
