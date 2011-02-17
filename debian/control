@@ -8,9 +8,9 @@ Build-Depends: debhelper (>= 7),
                autotools-dev,
                libglib2.0-dev (>= 2.22.3),
                libgtk2.0-dev (>= 2.12.0),
-               libdbusmenu-glib-dev (>= 0.3.91),
+               libdbusmenu-glib-dev (>= 0.3.97),
                libdbusmenu-gtk-dev (>= 0.3.91) ,
-               libindicator-dev (>= 0.3.14),
+               libindicator-dev (>= 0.3.19),
                libpulse-dev (>= 0.9.18),
                libpulse-mainloop-glib0 (>= 0.9.18),
                libido-0.1-dev (>= 0.1.11),
@@ -18,7 +18,8 @@ Build-Depends: debhelper (>= 7),
                libgee-dev,
                libxml2-dev,
                libnotify-dev,
-               valac-0.12
+               valac-0.12,
+               dh-autoreconf
 Standards-Version: 3.9.1
 Homepage: https://launchpad.net/indicator-sound
 
