@@ -163,6 +163,8 @@ sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
   SoundServiceDbusPrivate * priv = SOUND_SERVICE_DBUS_GET_PRIVATE(self);
 
   // Mute button
+  // TODO this additions should be fixed position, i.e. add via position and not just append
+  // be explicit as it is fixed.
   dbusmenu_menuitem_child_append (priv->root_menuitem, mute_item);
   dbusmenu_menuitem_child_append (priv->root_menuitem, slider_item);
   g_debug ("just about to add the slider %i", DBUSMENU_IS_MENUITEM(slider_item));

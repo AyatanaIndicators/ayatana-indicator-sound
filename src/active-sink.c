@@ -237,7 +237,7 @@ active_sink_get_state_from_volume (ActiveSink* self)
   return state;
 }
 
-static pa_cvolume
+pa_cvolume
 active_sink_construct_mono_volume (const pa_cvolume* vol)
 {
   pa_cvolume new_volume;

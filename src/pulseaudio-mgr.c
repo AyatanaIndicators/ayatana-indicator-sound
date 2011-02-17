@@ -201,6 +201,7 @@ pm_subscribed_events_callback (pa_context *c,
     }
     break;
   case PA_SUBSCRIPTION_EVENT_SOURCE:
+    g_debug ("Looks like source event of some description");
     // We don't care about any other sink other than the active one.
     if (index != active_sink_get_source_index (sink))
         return;
@@ -420,23 +421,23 @@ pm_sink_input_info_callback (pa_context *c,
     }
     // Check if this is Voip sink input
     gint result  = pa_proplist_contains (info->proplist, PA_PROP_MEDIA_ROLE);
+    ActiveSink* a_sink = ACTIVE_SINK (userdata);
+
     if (result == 1){
       g_debug ("Sink input info has media role property");
       const char* value = pa_proplist_gets (info->proplist, PA_PROP_MEDIA_ROLE);
       g_debug ("prop role = %s", value);
       if (g_strcmp0 (value, "phone") == 0) {
         g_debug ("And yes its a VOIP app ...");
+        active_sink_activate_voip_item (a_sink);
         // TODO to start with we will assume our source is the same as what this 'client'
         // is pointing at. This should probably be more intelligent :
         // query for the list of source output info's and going on the name of the client
         // from the sink input ensure our voip item is using the right source.
-
       }
-      //g_free (value);
     }
 
     // And finally check for the mute blocking state
-    ActiveSink* a_sink = ACTIVE_SINK (userdata);
     if (active_sink_get_index (a_sink) == info->sink){
       active_sink_determine_blocking_state (a_sink);
     }
@@ -534,6 +535,7 @@ pm_update_source_info_callback (pa_context *c,
       g_warning ("Default sink info callback - our user data is not what we think it should be");
       return;
     }
+    g_debug ("Got a source update for %s , index %i", info->name, info->index);
     active_sink_update_voip_input_source (ACTIVE_SINK (userdata), info);
   }
 }

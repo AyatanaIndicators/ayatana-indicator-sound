@@ -130,7 +130,7 @@ voip_input_widget_property_update( DbusmenuMenuitem* item, gchar* property,
   VoipInputWidget* mitem = VOIP_INPUT_WIDGET(userdata);
   VoipInputWidgetPrivate * priv = VOIP_INPUT_WIDGET_GET_PRIVATE(mitem);
   //g_debug("scrub-widget::property_update for prop %s", property);
-  if(g_ascii_strcasecmp(DBUSMENU_VOLUME_MENUITEM_LEVEL, property) == 0){
+  if(g_ascii_strcasecmp(DBUSMENU_VOIP_INPUT_MENUITEM_LEVEL, property) == 0){
     if(priv->grabbed == FALSE){
       GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_voip_input_slider);
       GtkRange *range = (GtkRange*)slider;
@@ -142,8 +142,8 @@ voip_input_widget_property_update( DbusmenuMenuitem* item, gchar* property,
 }
 
 static void
-voip_input_widget_set_twin_item(VoipInputWidget* self,
-                           DbusmenuMenuitem* twin_item)
+voip_input_widget_set_twin_item (VoipInputWidget* self,
+                                 DbusmenuMenuitem* twin_item)
 {
   VoipInputWidgetPrivate * priv = VOIP_INPUT_WIDGET_GET_PRIVATE(self);
   priv->twin_item = twin_item;
@@ -151,7 +151,7 @@ voip_input_widget_set_twin_item(VoipInputWidget* self,
   g_signal_connect(G_OBJECT(twin_item), "property-changed",
                    G_CALLBACK(voip_input_widget_property_update), self);
   gdouble initial_level = g_variant_get_double (dbusmenu_menuitem_property_get_variant(twin_item,
-                                                DBUSMENU_VOLUME_MENUITEM_LEVEL));
+                                                DBUSMENU_VOIP_INPUT_MENUITEM_LEVEL));
   //g_debug("voip_input_widget_set_twin_item initial level = %f", initial_level);
   GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_voip_input_slider);
   GtkRange *range = (GtkRange*)slider;
@@ -160,15 +160,16 @@ voip_input_widget_set_twin_item(VoipInputWidget* self,
 
 static gboolean
 voip_input_widget_change_value_cb (GtkRange     *range,
-                              GtkScrollType scroll,
-                              gdouble       new_value,
-                              gpointer      user_data)
+                                   GtkScrollType scroll,
+                                   gdouble       new_value,
+                                   gpointer      user_data)
 {
   g_return_val_if_fail (IS_VOIP_INPUT_WIDGET (user_data), FALSE);
   VoipInputWidget* mitem = VOIP_INPUT_WIDGET(user_data);
   voip_input_widget_update(mitem, new_value);
   return FALSE;
 }
+
 
 /*
  We only want this callback to catch mouse icon press events

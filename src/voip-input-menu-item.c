@@ -46,6 +46,10 @@ static void voip_input_menu_item_dispose    (GObject *object);
 static void voip_input_menu_item_finalize   (GObject *object);
 static void handle_event (DbusmenuMenuitem * mi, const gchar * name,
                           GVariant * value, guint timestamp);
+// This method should really be shared between this and the volume slider obj
+// perfectly static - wait until the device mgr wrapper is properly sorted and
+// then consolidate
+static pa_cvolume voip_input_menu_item_construct_mono_volume (const pa_cvolume* vol);
 
 G_DEFINE_TYPE (VoipInputMenuItem, voip_input_menu_item, DBUSMENU_TYPE_MENUITEM);
 
@@ -75,7 +79,7 @@ voip_input_menu_item_init (VoipInputMenuItem *self)
                                        DBUSMENU_MENUITEM_PROP_VISIBLE,
                                        FALSE );
 
-  priv->index = -1;
+  priv->index = DEVICE_NOT_ACTIVE;
 }
 
 static void
@@ -114,26 +118,39 @@ handle_event (DbusmenuMenuitem * mi,
   }
 }
 
+static pa_cvolume
+voip_input_menu_item_construct_mono_volume (const pa_cvolume* vol)
+{
+  pa_cvolume new_volume;
+  pa_cvolume_init(&new_volume);
+  new_volume.channels = 1;
+  pa_volume_t max_vol = pa_cvolume_max(vol);
+  pa_cvolume_set(&new_volume, 1, max_vol);
+  return new_volume;
+}
+
 void
 voip_input_menu_item_update (VoipInputMenuItem* item,
                              const pa_source_info* source)
 {
   VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
   // only overwrite the constants of each source if the device has changed
-  if (priv->index != source->index){
+  if (priv->index == DEVICE_NOT_ACTIVE){
     priv->base_volume = source->base_volume;
     priv->volume_steps = source->n_volume_steps;
     priv->channel_map = source->channel_map;
+    priv->index = source->index;
   }
-  priv->volume = source->volume;
+  priv->volume = voip_input_menu_item_construct_mono_volume (&source->volume);
   priv->mute = source->mute;
-/*
+
+  pa_volume_t vol = pa_cvolume_max (&source->volume);
+  gdouble update = ((gdouble) vol * 100) / PA_VOLUME_NORM;
+  
   GVariant* new_volume = g_variant_new_double(update);
   dbusmenu_menuitem_property_set_variant(DBUSMENU_MENUITEM(item),
                                          DBUSMENU_VOIP_INPUT_MENUITEM_LEVEL,
                                          new_volume);
-*/
-
 }
 
 gboolean
@@ -155,6 +172,7 @@ voip_input_menu_item_deactivate (VoipInputMenuItem* item)
 {
   VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
   priv->index = -1;
+  voip_input_menu_item_enable (item, FALSE);
 }
 
 void
@@ -162,9 +180,8 @@ voip_input_menu_item_enable (VoipInputMenuItem* item,
                              gboolean active)
 {
   VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
-  if (priv->index != -1){
-    if (active == TRUE)
-      g_warning ("Tried to enable the VOIP menuitem but we don't have an active source");
+  if (priv->index == -1 && active == TRUE) {
+    g_warning ("Tried to enable the VOIP menuitem but we don't have an active source ??");
     active = FALSE;
   }
   dbusmenu_menuitem_property_set_bool( DBUSMENU_MENUITEM(item),
