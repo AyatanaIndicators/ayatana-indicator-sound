@@ -175,6 +175,15 @@ pm_update_mic_gain (gint source_index, pa_cvolume new_gain)
                                                              NULL) );
 }
 
+void
+pm_update_mic_mute (gint source_index, gint mute_update)
+{
+    pa_operation_unref (pa_context_set_source_mute_by_index (pulse_context,
+                                                             source_index,
+                                                             mute_update,
+                                                             NULL,
+                                                             NULL));
+}
 /**********************************************************************************************************************/
 //    Pulse-Audio asychronous call-backs
 /**********************************************************************************************************************/
@@ -256,6 +265,7 @@ pm_subscribed_events_callback (pa_context *c,
     break;
   }
 }
+
 
 
 static void

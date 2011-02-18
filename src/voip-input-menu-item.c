@@ -85,7 +85,7 @@ voip_input_menu_item_init (VoipInputMenuItem *self)
   priv->source_index     = DEVICE_NOT_ACTIVE;
   priv->sink_input_index = DEVICE_NOT_ACTIVE;
   priv->client_index     = DEVICE_NOT_ACTIVE;
-  priv->mute = 0;
+  priv->mute             = DEVICE_NOT_ACTIVE;
 }
 
 static void
@@ -125,6 +125,10 @@ handle_event (DbusmenuMenuitem * mi,
       pa_cvolume_set(&new_volume, 1, new_volume_value);
 
       pm_update_mic_gain (priv->source_index, new_volume);
+      // finally unmute if needed
+      if (priv->mute == 1) {
+        pm_update_mic_mute (priv->source_index, 0);
+      }
       //active_sink_update_volume (priv->a_sink, volume_input);
       //active_sink_ensure_sink_is_unmuted (priv->a_sink);
     }
@@ -155,8 +159,15 @@ voip_input_menu_item_update (VoipInputMenuItem* item,
     priv->source_index = source->index;
   }
   priv->volume = voip_input_menu_item_construct_mono_volume (&source->volume);
-
+  pa_volume_t vol = pa_cvolume_max (&source->volume);
+  gdouble update = ((gdouble) vol * 100) / PA_VOLUME_NORM;
+  
+  GVariant* new_volume = g_variant_new_double(update);
+  dbusmenu_menuitem_property_set_variant(DBUSMENU_MENUITEM(item),
+                                         DBUSMENU_VOIP_INPUT_MENUITEM_LEVEL,
+                                         new_volume);
   // Only send over the mute updates if the state has changed.
+  // in this order - volume first mute last!!
   if (priv->mute != source->mute){
     g_debug ("voip menu item - update - mute = %i", priv->mute);
 
@@ -168,13 +179,6 @@ voip_input_menu_item_update (VoipInputMenuItem* item,
 
   priv->mute = source->mute;
 
-  pa_volume_t vol = pa_cvolume_max (&source->volume);
-  gdouble update = ((gdouble) vol * 100) / PA_VOLUME_NORM;
-  
-  GVariant* new_volume = g_variant_new_double(update);
-  dbusmenu_menuitem_property_set_variant(DBUSMENU_MENUITEM(item),
-                                         DBUSMENU_VOIP_INPUT_MENUITEM_LEVEL,
-                                         new_volume);
 }
 
 gboolean
