@@ -493,19 +493,23 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
     switch (event->keyval) {
     case GDK_Right:
       digested = TRUE;
+/*
       if (event->state & GDK_CONTROL_MASK) {
         new_value = 100;
       } else {
+*/
         new_value = current_value + five_percent;
-      }
+      //}
       break;
     case GDK_Left:
       digested = TRUE;
+/*
       if (event->state & GDK_CONTROL_MASK) {
         new_value = 0;
       } else {
+*/
         new_value = current_value - five_percent;
-      }
+      //}
       break;
     case GDK_plus:
       digested = TRUE;
