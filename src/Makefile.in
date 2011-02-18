@@ -78,6 +78,7 @@ am_libsoundmenu_la_OBJECTS = libsoundmenu_la-indicator-sound.lo \
 	libsoundmenu_la-metadata-widget.lo \
 	libsoundmenu_la-title-widget.lo \
 	libsoundmenu_la-volume-widget.lo \
+	libsoundmenu_la-voip-input-widget.lo \
 	libsoundmenu_la-gen-sound-service.xml.lo
 libsoundmenu_la_OBJECTS = $(am_libsoundmenu_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
@@ -107,6 +108,7 @@ am_indicator_sound_service_OBJECTS =  \
 	indicator_sound_service-active-sink.$(OBJEXT) \
 	indicator_sound_service-sound-service-dbus.$(OBJEXT) \
 	indicator_sound_service-slider-menu-item.$(OBJEXT) \
+	indicator_sound_service-voip-input-menu-item.$(OBJEXT) \
 	indicator_sound_service-mute-menu-item.$(OBJEXT) \
 	indicator_sound_service-gen-sound-service.xml.$(OBJEXT) \
 	$(am__objects_1)
@@ -329,6 +331,8 @@ libsoundmenu_la_SOURCES = \
             title-widget.h \
             volume-widget.c \
             volume-widget.h \
+            voip-input-widget.c \
+            voip-input-widget.h \
             gen-sound-service.xml.h \
             gen-sound-service.xml.c \
             dbus-shared-names.h
@@ -367,7 +371,7 @@ music_bridge_VALAFLAGS = \
   --vapidir=./ \
   --thread \
   --pkg gee-1.0 \
-  --pkg Dbusmenu-Glib-0.4 \
+  --pkg Dbusmenu-0.4 \
   --pkg common-defs \
 	--pkg gio-2.0 \
 	--pkg gio-unix-2.0 \
@@ -382,7 +386,7 @@ music_bridge_APIFILES = \
 # Sound Service C
 ###############################
 indicator_sound_service_SOURCES = \
-	common-defs.h \
+  common-defs.h \
   sound-service.h \
   sound-service.c \
   pulseaudio-mgr.h \
@@ -393,6 +397,8 @@ indicator_sound_service_SOURCES = \
   sound-service-dbus.c \
   slider-menu-item.h \
   slider-menu-item.c \
+  voip-input-menu-item.h \
+  voip-input-menu-item.c \
   mute-menu-item.h \
   mute-menu-item.c \
   gen-sound-service.xml.h \
@@ -569,12 +575,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-sound-service.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-title-menu-item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-transport-menu-item.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-voip-input-menu-item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-gen-sound-service.xml.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-indicator-sound.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-metadata-widget.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-sound-state-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-title-widget.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-transport-widget.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-voip-input-widget.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-volume-widget.Plo@am__quote@
 
 .c.o:
@@ -648,6 +656,14 @@ libsoundmenu_la-volume-widget.lo: volume-widget.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='volume-widget.c' object='libsoundmenu_la-volume-widget.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsoundmenu_la_CFLAGS) $(CFLAGS) -c -o libsoundmenu_la-volume-widget.lo `test -f 'volume-widget.c' || echo '$(srcdir)/'`volume-widget.c
+
+libsoundmenu_la-voip-input-widget.lo: voip-input-widget.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsoundmenu_la_CFLAGS) $(CFLAGS) -MT libsoundmenu_la-voip-input-widget.lo -MD -MP -MF $(DEPDIR)/libsoundmenu_la-voip-input-widget.Tpo -c -o libsoundmenu_la-voip-input-widget.lo `test -f 'voip-input-widget.c' || echo '$(srcdir)/'`voip-input-widget.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libsoundmenu_la-voip-input-widget.Tpo $(DEPDIR)/libsoundmenu_la-voip-input-widget.Plo
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='voip-input-widget.c' object='libsoundmenu_la-voip-input-widget.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsoundmenu_la_CFLAGS) $(CFLAGS) -c -o libsoundmenu_la-voip-input-widget.lo `test -f 'voip-input-widget.c' || echo '$(srcdir)/'`voip-input-widget.c
 
 libsoundmenu_la-gen-sound-service.xml.lo: gen-sound-service.xml.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsoundmenu_la_CFLAGS) $(CFLAGS) -MT libsoundmenu_la-gen-sound-service.xml.lo -MD -MP -MF $(DEPDIR)/libsoundmenu_la-gen-sound-service.xml.Tpo -c -o libsoundmenu_la-gen-sound-service.xml.lo `test -f 'gen-sound-service.xml.c' || echo '$(srcdir)/'`gen-sound-service.xml.c
@@ -736,6 +752,22 @@ indicator_sound_service-slider-menu-item.obj: slider-menu-item.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='slider-menu-item.c' object='indicator_sound_service-slider-menu-item.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-slider-menu-item.obj `if test -f 'slider-menu-item.c'; then $(CYGPATH_W) 'slider-menu-item.c'; else $(CYGPATH_W) '$(srcdir)/slider-menu-item.c'; fi`
+
+indicator_sound_service-voip-input-menu-item.o: voip-input-menu-item.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-voip-input-menu-item.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-voip-input-menu-item.Tpo -c -o indicator_sound_service-voip-input-menu-item.o `test -f 'voip-input-menu-item.c' || echo '$(srcdir)/'`voip-input-menu-item.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-voip-input-menu-item.Tpo $(DEPDIR)/indicator_sound_service-voip-input-menu-item.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='voip-input-menu-item.c' object='indicator_sound_service-voip-input-menu-item.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-voip-input-menu-item.o `test -f 'voip-input-menu-item.c' || echo '$(srcdir)/'`voip-input-menu-item.c
+
+indicator_sound_service-voip-input-menu-item.obj: voip-input-menu-item.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-voip-input-menu-item.obj -MD -MP -MF $(DEPDIR)/indicator_sound_service-voip-input-menu-item.Tpo -c -o indicator_sound_service-voip-input-menu-item.obj `if test -f 'voip-input-menu-item.c'; then $(CYGPATH_W) 'voip-input-menu-item.c'; else $(CYGPATH_W) '$(srcdir)/voip-input-menu-item.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-voip-input-menu-item.Tpo $(DEPDIR)/indicator_sound_service-voip-input-menu-item.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='voip-input-menu-item.c' object='indicator_sound_service-voip-input-menu-item.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-voip-input-menu-item.obj `if test -f 'voip-input-menu-item.c'; then $(CYGPATH_W) 'voip-input-menu-item.c'; else $(CYGPATH_W) '$(srcdir)/voip-input-menu-item.c'; fi`
 
 indicator_sound_service-mute-menu-item.o: mute-menu-item.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-mute-menu-item.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-mute-menu-item.Tpo -c -o indicator_sound_service-mute-menu-item.o `test -f 'mute-menu-item.c' || echo '$(srcdir)/'`mute-menu-item.c

@@ -20,6 +20,8 @@ libsoundmenu_la_SOURCES = \
             title-widget.h \
             volume-widget.c \
             volume-widget.h \
+            voip-input-widget.c \
+            voip-input-widget.h \
             gen-sound-service.xml.h \
             gen-sound-service.xml.c \
             dbus-shared-names.h
@@ -65,7 +67,7 @@ music_bridge_VALAFLAGS = \
   --vapidir=./ \
   --thread \
   --pkg gee-1.0 \
-  --pkg Dbusmenu-Glib-0.4 \
+  --pkg Dbusmenu-0.4 \
   --pkg common-defs \
 	--pkg gio-2.0 \
 	--pkg gio-unix-2.0 \
@@ -85,7 +87,7 @@ music_bridge_vala.stamp $(music_bridge_APIFILES): $(music_bridge_VALASOURCES)
 # Sound Service C
 ###############################
 indicator_sound_service_SOURCES = \
-	common-defs.h \
+  common-defs.h \
   sound-service.h \
   sound-service.c \
   pulseaudio-mgr.h \
@@ -96,6 +98,8 @@ indicator_sound_service_SOURCES = \
   sound-service-dbus.c \
   slider-menu-item.h \
   slider-menu-item.c \
+  voip-input-menu-item.h \
+  voip-input-menu-item.c \
   mute-menu-item.h \
   mute-menu-item.c \
   gen-sound-service.xml.h \
