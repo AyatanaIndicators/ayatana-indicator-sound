@@ -151,21 +151,11 @@ sound_state_manager_notification_init (SoundStateManager* self)
   }
 
   if (has_notify_osd) {
-    priv->notification = notify_notification_new(PACKAGE_NAME, NULL, NULL, NULL);
+    priv->notification = notify_notification_new(PACKAGE_NAME, NULL, NULL);
     notify_notification_set_hint_string(priv->notification,
                                         "x-canonical-private-synchronous", "");
   }
 }
-
-void
-sound_state_manager_attach_notification_to_volume_widget (SoundStateManager *self, 
-                                                          GtkWidget* volume_widget)
-{
-  SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
-  if (priv->notification)
-    notify_notification_attach_to_widget(priv->notification, volume_widget);
-}
-
 
 void
 sound_state_manager_show_notification (SoundStateManager *self,

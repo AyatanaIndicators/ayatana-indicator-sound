@@ -61,8 +61,6 @@ void sound_state_manager_get_state_cb (GObject *object,
 void sound_state_manager_show_notification (SoundStateManager *self,
                                             double value);
 
-void sound_state_manager_attach_notification_to_volume_widget (SoundStateManager *self, 
-                                                               GtkWidget* volume_widget);
 
 G_END_DECLS
 

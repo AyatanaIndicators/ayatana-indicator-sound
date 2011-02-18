@@ -57,7 +57,8 @@ DbusmenuMenuitem* sound_service_dbus_create_root_item (SoundServiceDbus* self);
 void sound_service_dbus_update_sound_state (SoundServiceDbus* self, SoundState new_state);
 void sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
                                            DbusmenuMenuitem* mute_item,
-                                           DbusmenuMenuitem* slider_item);
+                                           DbusmenuMenuitem* slider_item,
+                                           DbusmenuMenuitem* voip_input_menu_item);
 
 
 G_END_DECLS
