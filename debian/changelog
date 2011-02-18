@@ -1,3 +1,16 @@
+indicator-sound (0.6.0-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - New voip slider will be displayed in the sound menu while in a call
+    - [Conexant CX20561(Hermosa)] No indicator that input is muted (LP: #683689)
+    - Ctrl+arrow jumps sound to max volume in indicator (LP: #669167)
+    - Fixed build with latest dbusmenu (LP: #717340)
+    - Ported to libnotify >= 0.7.0
+  * debian/control
+    - Changed build depends for libnotify-dev to libnotify4-dev
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 18 Feb 2011 13:20:44 -0500
+
 indicator-sound (0.5.9-0ubuntu2) natty; urgency=low
 
   * debian/control

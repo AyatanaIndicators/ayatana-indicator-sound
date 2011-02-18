@@ -61,6 +61,7 @@ mute_menu_item_init (MuteMenuItem *self)
 {
   g_debug("Building new Mute Menu Item");
   MuteMenuItemPrivate* priv = MUTE_MENU_ITEM_GET_PRIVATE(self);
+  priv->button = NULL;
   priv->button = dbusmenu_menuitem_new();
   dbusmenu_menuitem_property_set_bool (priv->button,
                                        DBUSMENU_MENUITEM_PROP_VISIBLE,

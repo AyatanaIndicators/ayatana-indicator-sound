@@ -17,7 +17,7 @@ Build-Depends: debhelper (>= 7),
                libgconf2-dev,
                libgee-dev,
                libxml2-dev,
-               libnotify-dev,
+               libnotify4-dev,
                valac-0.12,
                dh-autoreconf
 Standards-Version: 3.9.1
