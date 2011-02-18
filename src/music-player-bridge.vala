@@ -23,11 +23,13 @@ using GLib;
 
 public class MusicPlayerBridge : GLib.Object
 {
+  const int DEVICE_ITEMS_COUNT = 3;
+
   private SettingsManager settings_manager;
   private Dbusmenu.Menuitem root_menu;
   private HashMap<string, PlayerController> registered_clients;  
   private Mpris2Watcher watcher;
-  
+
   public MusicPlayerBridge()
   {
   }
@@ -79,10 +81,10 @@ public class MusicPlayerBridge : GLib.Object
   private int calculate_menu_position()
   {
     if(this.registered_clients.size == 0){
-      return 2;
+      return DEVICE_ITEMS_COUNT;
     }
     else{
-      return (2 + (this.registered_clients.size * PlayerController.WIDGET_QUANTITY));
+      return (DEVICE_ITEMS_COUNT + (this.registered_clients.size * PlayerController.WIDGET_QUANTITY));
     }
   }
 

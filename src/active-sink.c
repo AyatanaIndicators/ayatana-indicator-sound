@@ -21,7 +21,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "active-sink.h"
 #include "slider-menu-item.h"
 #include "mute-menu-item.h"
-
+#include "voip-input-menu-item.h"
 #include "pulseaudio-mgr.h"
 
 typedef struct _ActiveSinkPrivate ActiveSinkPrivate;
@@ -30,7 +30,8 @@ struct _ActiveSinkPrivate
 {
   SliderMenuItem*     volume_slider_menuitem;
   MuteMenuItem*       mute_menuitem;
-  SoundState          current_sound_state;  
+  VoipInputMenuItem*  voip_input_menu_item;
+  SoundState          current_sound_state;
   SoundServiceDbus*   service;
   gint                index;
   gchar*              name;
@@ -52,7 +53,6 @@ static pa_cvolume active_sink_construct_mono_volume (const pa_cvolume* vol);
 static void active_sink_volume_update (ActiveSink* self, gdouble percent);
 static void active_sink_mute_update (ActiveSink* self, gboolean muted);
 
-
 G_DEFINE_TYPE (ActiveSink, active_sink, G_TYPE_OBJECT);
 
 static void
@@ -72,6 +72,7 @@ active_sink_init (ActiveSink *self)
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
   priv->mute_menuitem = NULL;
   priv->volume_slider_menuitem = NULL;
+  priv->voip_input_menu_item = NULL;
   priv->current_sound_state = UNAVAILABLE;
   priv->index = -1;
   priv->name = NULL;
@@ -79,6 +80,7 @@ active_sink_init (ActiveSink *self)
 
   // Init our menu items.
   priv->mute_menuitem = g_object_new (MUTE_MENU_ITEM_TYPE, NULL);
+  priv->voip_input_menu_item = g_object_new (VOIP_INPUT_MENU_ITEM_TYPE, NULL);;
   priv->volume_slider_menuitem = slider_menu_item_new (self);
   mute_menu_item_enable (priv->mute_menuitem, FALSE);
   slider_menu_item_enable (priv->volume_slider_menuitem, FALSE);  
@@ -118,6 +120,32 @@ active_sink_populate (ActiveSink* sink,
   slider_menu_item_enable (priv->volume_slider_menuitem, TRUE);
 
   g_debug ("Active sink has been populated - volume %f", volume_percent);
+}
+
+void
+active_sink_activate_voip_item (ActiveSink* self, gint sink_input_index, gint client_index)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  if (voip_input_menu_item_is_interested (priv->voip_input_menu_item,
+                                          sink_input_index,
+                                          client_index)){
+    voip_input_menu_item_enable (priv->voip_input_menu_item, TRUE);
+  }
+}
+
+void
+active_sink_deactivate_voip_source (ActiveSink* self, gboolean visible)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  visible &= voip_input_menu_item_is_active (priv->voip_input_menu_item);
+  voip_input_menu_item_deactivate_source (priv->voip_input_menu_item, visible);
+}
+
+void
+active_sink_deactivate_voip_client (ActiveSink* self)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  voip_input_menu_item_deactivate_voip_client (priv->voip_input_menu_item);
 }
 
 void
@@ -167,6 +195,13 @@ active_sink_update_volume (ActiveSink* self, gdouble percent)
   pm_update_volume (priv->index, new_volume);
 }
 
+
+gint
+active_sink_get_current_sink_input_index (ActiveSink* sink)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (sink);
+  return voip_input_menu_item_get_sink_input_index (priv->voip_input_menu_item);
+}
 
 static void 
 active_sink_mute_update (ActiveSink* self, gboolean muted)
@@ -219,7 +254,7 @@ active_sink_get_state_from_volume (ActiveSink* self)
   return state;
 }
 
-static pa_cvolume
+pa_cvolume
 active_sink_construct_mono_volume (const pa_cvolume* vol)
 {
   pa_cvolume new_volume;
@@ -279,6 +314,26 @@ active_sink_get_state (ActiveSink* self)
   return priv->current_sound_state;
 }
 
+void
+active_sink_update_voip_input_source (ActiveSink* self, const pa_source_info* update)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  voip_input_menu_item_update (priv->voip_input_menu_item, update);
+}
+
+gboolean
+active_sink_is_voip_source_populated (ActiveSink* self)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  return voip_input_menu_item_is_populated (priv->voip_input_menu_item);
+}
+
+gint active_sink_get_source_index (ActiveSink* self)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  return voip_input_menu_item_get_index (priv->voip_input_menu_item);
+}
+
 ActiveSink*
 active_sink_new (SoundServiceDbus* service)
 {
@@ -287,7 +342,8 @@ active_sink_new (SoundServiceDbus* service)
   priv->service = service;
   sound_service_dbus_build_sound_menu (service,
                                        mute_menu_item_get_button (priv->mute_menuitem),
-                                       DBUSMENU_MENUITEM (priv->volume_slider_menuitem));
+                                       DBUSMENU_MENUITEM (priv->volume_slider_menuitem),
+                                       DBUSMENU_MENUITEM (priv->voip_input_menu_item));
   pm_establish_pulse_connection (sink);
   return sink; 
 }

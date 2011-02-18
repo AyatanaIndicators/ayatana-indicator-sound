@@ -94,9 +94,8 @@ public class PlayerItem : Dbusmenu.Menuitem
   {
     foreach(string prop in attrs){
       //debug("populated ? - prop: %s", prop);
-      int value_int = property_get_int(prop);
       if(property_get_int(prop) != EMPTY){
-        //debug("populated - prop %s and value %i", prop, value_int);        
+        //debug("populated - prop %s and value %i", prop, property_get_int(prop));
         return true;
       }
     }

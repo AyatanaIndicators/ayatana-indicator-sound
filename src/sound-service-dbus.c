@@ -157,14 +157,18 @@ sound_service_dbus_create_root_item (SoundServiceDbus* self)
 void
 sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
                                       DbusmenuMenuitem* mute_item,
-                                      DbusmenuMenuitem* slider_item)                                      
+                                      DbusmenuMenuitem* slider_item,
+                                      DbusmenuMenuitem* voip_input_menu_item)
 {
   SoundServiceDbusPrivate * priv = SOUND_SERVICE_DBUS_GET_PRIVATE(self);
 
   // Mute button
+  // TODO this additions should be fixed position, i.e. add via position and not just append
+  // be explicit as it is fixed.
   dbusmenu_menuitem_child_append (priv->root_menuitem, mute_item);
-  g_debug ("just about to add the slider %i", DBUSMENU_IS_MENUITEM(slider_item));
   dbusmenu_menuitem_child_append (priv->root_menuitem, slider_item);
+  g_debug ("just about to add the slider %i", DBUSMENU_IS_MENUITEM(slider_item));
+  dbusmenu_menuitem_child_append (priv->root_menuitem, voip_input_menu_item);
 
   // Separator
   DbusmenuMenuitem* separator = dbusmenu_menuitem_new();
