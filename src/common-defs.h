@@ -31,7 +31,7 @@ typedef enum {
   AVAILABLE
 }SoundState;
 
-#define DEVICE_NOT_ACTIVE                       -1
+#define NOT_ACTIVE                       -1
 #define DBUSMENU_PROPERTY_EMPTY                 -1
 
 /* DBUS Custom Items */

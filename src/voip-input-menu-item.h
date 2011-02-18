@@ -58,7 +58,7 @@ gint voip_input_menu_item_get_index (VoipInputMenuItem* item);
 
 gint voip_input_menu_item_get_sink_input_index (VoipInputMenuItem* item);
 
-void voip_input_menu_item_deactivate_source (VoipInputMenuItem* item);
+void voip_input_menu_item_deactivate_source (VoipInputMenuItem* item, gboolean visible);
 void voip_input_menu_item_deactivate_voip_client (VoipInputMenuItem* item);
 
 VoipInputMenuItem* voip_input_menu_item_new (ActiveSink* sink);

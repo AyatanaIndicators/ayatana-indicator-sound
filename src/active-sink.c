@@ -98,10 +98,10 @@ active_sink_activate_voip_item (ActiveSink* self, gint sink_input_index, gint cl
 }
 
 void
-active_sink_deactivate_voip_source (ActiveSink* self)
+active_sink_deactivate_voip_source (ActiveSink* self, gboolean visible)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
-  voip_input_menu_item_deactivate_source (priv->voip_input_menu_item);
+  voip_input_menu_item_deactivate_source (priv->voip_input_menu_item, visible);
 }
 
 void

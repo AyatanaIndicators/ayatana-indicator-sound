@@ -74,7 +74,7 @@ gint active_sink_get_current_sink_input_index (ActiveSink* sink);
 gboolean active_sink_is_voip_source_populated (ActiveSink* sink);
 gint active_sink_get_source_index (ActiveSink* self);
 void active_sink_determine_blocking_state (ActiveSink* self);
-void active_sink_deactivate_voip_source (ActiveSink* self);
+void active_sink_deactivate_voip_source (ActiveSink* self, gboolean visible);
 void active_sink_deactivate_voip_client (ActiveSink* self);
 SoundState active_sink_get_state (ActiveSink* self);
 

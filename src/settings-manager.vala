@@ -71,6 +71,7 @@ public class SettingsManager : GLib.Object
 
   // Convenient debug method inorder to provide visability over 
   // the contents of both interested and blacklisted containers in its gsettings
+/**
   private void reveal_contents()
   {
     var already_interested = this.settings.get_strv ("interested-media-players");
@@ -87,4 +88,5 @@ public class SettingsManager : GLib.Object
     debug ("interested array size = %i", already_interested.length);
     debug ("blacklisted array size = %i", blacklisted.length);
   }
+**/
 }

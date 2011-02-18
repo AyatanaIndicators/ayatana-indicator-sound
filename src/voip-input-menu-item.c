@@ -82,10 +82,10 @@ voip_input_menu_item_init (VoipInputMenuItem *self)
                                        DBUSMENU_MENUITEM_PROP_VISIBLE,
                                        FALSE );
 
-  priv->source_index     = DEVICE_NOT_ACTIVE;
-  priv->sink_input_index = DEVICE_NOT_ACTIVE;
-  priv->client_index     = DEVICE_NOT_ACTIVE;
-  priv->mute             = DEVICE_NOT_ACTIVE;
+  priv->source_index     = NOT_ACTIVE;
+  priv->sink_input_index = NOT_ACTIVE;
+  priv->client_index     = NOT_ACTIVE;
+  priv->mute             = NOT_ACTIVE;
 }
 
 static void
@@ -152,7 +152,7 @@ voip_input_menu_item_update (VoipInputMenuItem* item,
 {
   VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
   // only overwrite the constants of each source if the device has changed
-  if (priv->source_index == DEVICE_NOT_ACTIVE){
+  if (priv->source_index == NOT_ACTIVE){
     priv->base_volume = source->base_volume;
     priv->volume_steps = source->n_volume_steps;
     priv->channel_map = source->channel_map;
@@ -170,7 +170,6 @@ voip_input_menu_item_update (VoipInputMenuItem* item,
   // in this order - volume first mute last!!
   if (priv->mute != source->mute){
     g_debug ("voip menu item - update - mute = %i", priv->mute);
-
     GVariant* new_mute_update = g_variant_new_int32 (source->mute);
     dbusmenu_menuitem_property_set_variant (DBUSMENU_MENUITEM(item),
                                             DBUSMENU_VOIP_INPUT_MENUITEM_MUTE,
@@ -189,8 +188,8 @@ voip_input_menu_item_is_interested (VoipInputMenuItem* item,
   VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
   // Check to make sure we are not handling another voip beforehand and that we
   // have an active sink (might need to match up at start up)
-  if (priv->sink_input_index != DEVICE_NOT_ACTIVE &&
-      priv->source_index != DEVICE_NOT_ACTIVE){
+  if (priv->sink_input_index != NOT_ACTIVE &&
+      priv->source_index != NOT_ACTIVE){
     return FALSE;
   }
   
@@ -205,7 +204,7 @@ gboolean
 voip_input_menu_item_is_populated (VoipInputMenuItem* item)
 {
   VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
-  return priv->source_index != DEVICE_NOT_ACTIVE;
+  return priv->source_index != NOT_ACTIVE;
 }
 
 gint
@@ -223,20 +222,27 @@ voip_input_menu_item_get_sink_input_index (VoipInputMenuItem* item)
   return priv->sink_input_index;
 }
 
+/**
+ * If the pulse server informs of a default source change
+ * or the source in question is removed.
+ * @param item
+ */
 void
-voip_input_menu_item_deactivate_source (VoipInputMenuItem* item)
+voip_input_menu_item_deactivate_source (VoipInputMenuItem* item, gboolean visible)
 {
   VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
-  priv->source_index = DEVICE_NOT_ACTIVE;
-  voip_input_menu_item_enable (item, FALSE);
+  priv->source_index = NOT_ACTIVE;
+  dbusmenu_menuitem_property_set_bool( DBUSMENU_MENUITEM(item),
+                                       DBUSMENU_MENUITEM_PROP_VISIBLE,
+                                       visible );
 }
 
 void
 voip_input_menu_item_deactivate_voip_client (VoipInputMenuItem* item)
 {
   VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
-  priv->client_index = DEVICE_NOT_ACTIVE;
-  priv->sink_input_index = DEVICE_NOT_ACTIVE;
+  priv->client_index = NOT_ACTIVE;
+  priv->sink_input_index = NOT_ACTIVE;
   voip_input_menu_item_enable (item, FALSE);
 }
 
@@ -245,7 +251,7 @@ voip_input_menu_item_enable (VoipInputMenuItem* item,
                              gboolean active)
 {
   VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
-  if (priv->source_index == DEVICE_NOT_ACTIVE && active == TRUE) {
+  if (priv->source_index == NOT_ACTIVE && active == TRUE) {
     g_warning ("Tried to enable the VOIP menuitem but we don't have an active source ??");
     active = FALSE;
   }

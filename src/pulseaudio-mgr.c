@@ -225,7 +225,7 @@ pm_subscribed_events_callback (pa_context *c,
     if (index != active_sink_get_source_index (sink))
         return;
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
-      active_sink_deactivate_voip_source (sink);
+      active_sink_deactivate_voip_source (sink, FALSE);
     }
     else{
       pa_operation_unref (pa_context_get_source_info_by_index (c,
@@ -421,8 +421,12 @@ pm_default_sink_info_callback (pa_context *c,
     if (IS_ACTIVE_SINK (userdata) == FALSE){
       g_warning ("Default sink info callback - our user data is not what we think it should be");
       return;
-    }    
-    g_debug ("server has handed us a default sink");
+    }
+    // Only repopulate if there is a change with regards the index
+    if (active_sink_get_index (ACTIVE_SINK (userdata)) == info->index)
+      return;
+    
+    g_debug ("Pulse Server has handed us a new default sink");
     active_sink_populate (ACTIVE_SINK (userdata), info);
   }
 }
@@ -523,7 +527,11 @@ pm_default_source_info_callback (pa_context *c,
       g_warning ("Default sink info callback - our user data is not what we think it should be");
       return;
     }
-    g_debug ("server has handed us a default source");
+    // If there is an index change we need to change our cached source
+    if (active_sink_get_source_index (ACTIVE_SINK (userdata)) == info->index)
+      return;
+    g_debug ("Pulse Server has handed us a new default source");
+    active_sink_deactivate_voip_source (ACTIVE_SINK (userdata), TRUE);
     active_sink_update_voip_input_source (ACTIVE_SINK (userdata), info);
   }
 }
