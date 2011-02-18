@@ -48,6 +48,7 @@ static void voip_input_menu_item_dispose    (GObject *object);
 static void voip_input_menu_item_finalize   (GObject *object);
 static void handle_event (DbusmenuMenuitem * mi, const gchar * name,
                           GVariant * value, guint timestamp);
+// TODO:
 // This method should really be shared between this and the volume slider obj
 // perfectly static - wait until the device mgr wrapper is properly sorted and
 // then consolidate
@@ -84,6 +85,7 @@ voip_input_menu_item_init (VoipInputMenuItem *self)
   priv->source_index     = DEVICE_NOT_ACTIVE;
   priv->sink_input_index = DEVICE_NOT_ACTIVE;
   priv->client_index     = DEVICE_NOT_ACTIVE;
+  priv->mute = 0;
 }
 
 static void
@@ -153,6 +155,17 @@ voip_input_menu_item_update (VoipInputMenuItem* item,
     priv->source_index = source->index;
   }
   priv->volume = voip_input_menu_item_construct_mono_volume (&source->volume);
+
+  // Only send over the mute updates if the state has changed.
+  if (priv->mute != source->mute){
+    g_debug ("voip menu item - update - mute = %i", priv->mute);
+
+    GVariant* new_mute_update = g_variant_new_int32 (source->mute);
+    dbusmenu_menuitem_property_set_variant (DBUSMENU_MENUITEM(item),
+                                            DBUSMENU_VOIP_INPUT_MENUITEM_MUTE,
+                                            new_mute_update);
+  }
+
   priv->mute = source->mute;
 
   pa_volume_t vol = pa_cvolume_max (&source->volume);
@@ -178,10 +191,6 @@ voip_input_menu_item_is_interested (VoipInputMenuItem* item,
   }
   
   priv->sink_input_index = sink_input_index;
-
-  g_debug ("vimi - siindex = %i", sink_input_index);
-  g_debug ("vimi - siindex stored = %i", priv->sink_input_index);
-
   priv->client_index     = client_index;
 
   return TRUE;
@@ -226,7 +235,6 @@ voip_input_menu_item_deactivate_voip_client (VoipInputMenuItem* item)
   priv->sink_input_index = DEVICE_NOT_ACTIVE;
   voip_input_menu_item_enable (item, FALSE);
 }
-
 
 void
 voip_input_menu_item_enable (VoipInputMenuItem* item,
