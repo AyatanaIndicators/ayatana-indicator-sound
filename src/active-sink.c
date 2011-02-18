@@ -53,7 +53,6 @@ static pa_cvolume active_sink_construct_mono_volume (const pa_cvolume* vol);
 static void active_sink_volume_update (ActiveSink* self, gdouble percent);
 static void active_sink_mute_update (ActiveSink* self, gboolean muted);
 
-
 G_DEFINE_TYPE (ActiveSink, active_sink, G_TYPE_OBJECT);
 
 static void
@@ -88,17 +87,28 @@ active_sink_init (ActiveSink *self)
 }
 
 void
-active_sink_activate_voip_item (ActiveSink* self)
+active_sink_activate_voip_item (ActiveSink* self, gint sink_input_index, gint client_index)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
-  voip_input_menu_item_enable (priv->voip_input_menu_item, TRUE);
+  if (voip_input_menu_item_is_interested (priv->voip_input_menu_item,
+                                          sink_input_index,
+                                          client_index)){
+    voip_input_menu_item_enable (priv->voip_input_menu_item, TRUE);
+  }
 }
 
 void
 active_sink_deactivate_voip_source (ActiveSink* self)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
-  voip_input_menu_item_enable (priv->voip_input_menu_item, FALSE);
+  voip_input_menu_item_deactivate_source (priv->voip_input_menu_item);
+}
+
+void
+active_sink_deactivate_voip_client (ActiveSink* self)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  voip_input_menu_item_deactivate_voip_client (priv->voip_input_menu_item);
 }
 
 
@@ -185,6 +195,13 @@ active_sink_update_volume (ActiveSink* self, gdouble percent)
   pm_update_volume (priv->index, new_volume);
 }
 
+
+gint
+active_sink_get_current_sink_input_index (ActiveSink* sink)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (sink);
+  return voip_input_menu_item_get_sink_input_index (priv->voip_input_menu_item);
+}
 
 static void 
 active_sink_mute_update (ActiveSink* self, gboolean muted)

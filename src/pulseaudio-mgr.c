@@ -229,7 +229,13 @@ pm_subscribed_events_callback (pa_context *c,
     // We don't care about sink input removals.
     g_debug ("sink input event");
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
-      g_debug ("Just saw a sink input removal event - index = %i", index);
+      gint cached_index = active_sink_get_current_sink_input_index (sink);
+
+      g_debug ("Just saw a sink input removal event - index = %i and cached index = %i", index, cached_index);
+
+      if (index == cached_index){
+        active_sink_deactivate_voip_client (sink);
+      }
     }
     else if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_NEW) {
       g_debug ("some new sink input event ? - index = %i", index);
@@ -440,8 +446,8 @@ pm_sink_input_info_callback (pa_context *c,
       const char* value = pa_proplist_gets (info->proplist, PA_PROP_MEDIA_ROLE);
       g_debug ("prop role = %s", value);
       if (g_strcmp0 (value, "phone") == 0) {
-        g_debug ("And yes its a VOIP app ...");
-        active_sink_activate_voip_item (a_sink);
+        g_debug ("And yes its a VOIP app ... sink input index = %i", info->index);
+        active_sink_activate_voip_item (a_sink, (gint)info->index, (gint)info->client);
         // TODO to start with we will assume our source is the same as what this 'client'
         // is pointing at. This should probably be more intelligent :
         // query for the list of source output info's and going on the name of the client

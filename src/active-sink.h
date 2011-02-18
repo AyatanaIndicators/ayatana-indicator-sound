@@ -50,26 +50,33 @@ struct _ActiveSinkClass {
 
 GType active_sink_get_type  (void) G_GNUC_CONST;
 
+/**
+ * TODO
+ * Refactor this to become a device manager obj basically acting as wrapper for
+ * the communication between pulseaudio-mgr and the individual items.
+ * First steps collapse slider/volume related stuff into slider-menu-item.
+ */
+
+// Sink related
 void active_sink_populate (ActiveSink* sink, const pa_sink_info* update);  
 void active_sink_update (ActiveSink* sink, const pa_sink_info* update);  
-void active_sink_update_voip_input_source (ActiveSink* sink, const pa_source_info* update);
-void active_sink_activate_voip_item (ActiveSink* sink);
-
-gboolean active_sink_is_voip_source_populated (ActiveSink* sink);
 gboolean active_sink_is_populated (ActiveSink* sink);
-
-void active_sink_determine_blocking_state (ActiveSink* self);
-
 gint active_sink_get_index (ActiveSink* self);
-gint active_sink_get_source_index (ActiveSink* self);
-
-SoundState active_sink_get_state (ActiveSink* self);
-
 void active_sink_deactivate (ActiveSink* self);
-void active_sink_deactivate_voip_source (ActiveSink* self);
 void active_sink_update_mute (ActiveSink* self, gboolean mute_update);
 void active_sink_update_volume (ActiveSink* self, gdouble percent);
 void active_sink_ensure_sink_is_unmuted (ActiveSink* self);
+
+// source and sinkinput/client related for VOIP functionality
+void active_sink_update_voip_input_source (ActiveSink* sink, const pa_source_info* update);
+void active_sink_activate_voip_item (ActiveSink* sink, gint sink_input_index, gint client_index);
+gint active_sink_get_current_sink_input_index (ActiveSink* sink);
+gboolean active_sink_is_voip_source_populated (ActiveSink* sink);
+gint active_sink_get_source_index (ActiveSink* self);
+void active_sink_determine_blocking_state (ActiveSink* self);
+void active_sink_deactivate_voip_source (ActiveSink* self);
+void active_sink_deactivate_voip_client (ActiveSink* self);
+SoundState active_sink_get_state (ActiveSink* self);
 
 ActiveSink* active_sink_new (SoundServiceDbus* service);
 

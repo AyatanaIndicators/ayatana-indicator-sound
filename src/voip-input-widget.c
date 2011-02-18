@@ -96,12 +96,12 @@ voip_input_widget_init (VoipInputWidget *self)
   g_signal_connect(priv->ido_voip_input_slider, "slider-released", G_CALLBACK(voip_input_widget_slider_released), self);
 
   GtkWidget* primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)priv->ido_voip_input_slider);
-  GIcon * primary_gicon = g_themed_icon_new_with_default_fallbacks("audio-volume-low-zero-panel");
+  GIcon * primary_gicon = g_themed_icon_new_with_default_fallbacks("audio-input-microphone");
   gtk_image_set_from_gicon(GTK_IMAGE(primary_image), primary_gicon, GTK_ICON_SIZE_MENU);
   g_object_unref(primary_gicon);
 
   GtkWidget* secondary_image = ido_scale_menu_item_get_secondary_image((IdoScaleMenuItem*)priv->ido_voip_input_slider);
-  GIcon * secondary_gicon = g_themed_icon_new_with_default_fallbacks("audio-input-microphone");
+  GIcon * secondary_gicon = g_themed_icon_new_with_default_fallbacks("audio-input-microphone-high");
   gtk_image_set_from_gicon(GTK_IMAGE(secondary_image), secondary_gicon, GTK_ICON_SIZE_MENU);
   g_object_unref(secondary_gicon);
 
