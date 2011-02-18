@@ -199,6 +199,13 @@ voip_input_menu_item_is_interested (VoipInputMenuItem* item,
   return TRUE;
 }
 
+gboolean
+voip_input_menu_item_is_active (VoipInputMenuItem* item)
+{
+  VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
+  return (priv->sink_input_index != NOT_ACTIVE && priv->client_index != NOT_ACTIVE);
+}
+
 
 gboolean
 voip_input_menu_item_is_populated (VoipInputMenuItem* item)

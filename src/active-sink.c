@@ -86,32 +86,6 @@ active_sink_init (ActiveSink *self)
   slider_menu_item_enable (priv->volume_slider_menuitem, FALSE);  
 }
 
-void
-active_sink_activate_voip_item (ActiveSink* self, gint sink_input_index, gint client_index)
-{
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
-  if (voip_input_menu_item_is_interested (priv->voip_input_menu_item,
-                                          sink_input_index,
-                                          client_index)){
-    voip_input_menu_item_enable (priv->voip_input_menu_item, TRUE);
-  }
-}
-
-void
-active_sink_deactivate_voip_source (ActiveSink* self, gboolean visible)
-{
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
-  voip_input_menu_item_deactivate_source (priv->voip_input_menu_item, visible);
-}
-
-void
-active_sink_deactivate_voip_client (ActiveSink* self)
-{
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
-  voip_input_menu_item_deactivate_voip_client (priv->voip_input_menu_item);
-}
-
-
 static void
 active_sink_dispose (GObject *object)
 {  
@@ -146,6 +120,32 @@ active_sink_populate (ActiveSink* sink,
   slider_menu_item_enable (priv->volume_slider_menuitem, TRUE);
 
   g_debug ("Active sink has been populated - volume %f", volume_percent);
+}
+
+void
+active_sink_activate_voip_item (ActiveSink* self, gint sink_input_index, gint client_index)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  if (voip_input_menu_item_is_interested (priv->voip_input_menu_item,
+                                          sink_input_index,
+                                          client_index)){
+    voip_input_menu_item_enable (priv->voip_input_menu_item, TRUE);
+  }
+}
+
+void
+active_sink_deactivate_voip_source (ActiveSink* self, gboolean visible)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  visible &= voip_input_menu_item_is_active (priv->voip_input_menu_item);
+  voip_input_menu_item_deactivate_source (priv->voip_input_menu_item, visible);
+}
+
+void
+active_sink_deactivate_voip_client (ActiveSink* self)
+{
+  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  voip_input_menu_item_deactivate_voip_client (priv->voip_input_menu_item);
 }
 
 void

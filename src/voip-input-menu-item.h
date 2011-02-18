@@ -52,6 +52,7 @@ void voip_input_menu_item_enable (VoipInputMenuItem* item, gboolean active);
 gboolean voip_input_menu_item_is_interested (VoipInputMenuItem* item,
                                              gint sink_input_index,
                                              gint client_index);
+gboolean voip_input_menu_item_is_active (VoipInputMenuItem* item);
 gboolean voip_input_menu_item_is_populated (VoipInputMenuItem* item);
 // TODO rename get source index
 gint voip_input_menu_item_get_index (VoipInputMenuItem* item);
