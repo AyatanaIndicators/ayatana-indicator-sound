@@ -1,10 +1,10 @@
 
-AC_INIT(indicator-sound, 0.6.0, conor.curran@canonical.com)
+AC_INIT(indicator-sound, 0.6.1, conor.curran@canonical.com)
 
 AC_PREREQ(2.53)
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(indicator-sound, 0.6.0)
+AM_INIT_AUTOMAKE(indicator-sound, 0.6.1)
 
 AM_MAINTAINER_MODE
 
@@ -28,7 +28,7 @@ m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 ###########################  
 
 GTK_REQUIRED_VERSION=2.12
-INDICATOR_REQUIRED_VERSION=0.3.15
+INDICATOR_REQUIRED_VERSION=0.3.19
 DBUSMENUGTK_REQUIRED_VERSION=0.3.9
 POLKIT_REQUIRED_VERSION=0.92
 PULSE_AUDIO_REQUIRED_VERSION=0.9.19
