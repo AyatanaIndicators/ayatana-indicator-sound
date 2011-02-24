@@ -22,6 +22,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib.h>
 #include <glib-object.h>
 #include <libdbusmenu-gtk/menuitem.h>
+#include <libindicator/indicator-object.h>
 
 G_BEGIN_DECLS
 
@@ -44,7 +45,7 @@ struct _VolumeWidget {
 };
 
 GType volume_widget_get_type (void) G_GNUC_CONST;
-GtkWidget* volume_widget_new(DbusmenuMenuitem* twin_item);
+GtkWidget* volume_widget_new(DbusmenuMenuitem *item, IndicatorObject* io);
 GtkWidget* volume_widget_get_ido_slider(VolumeWidget* self);
 void volume_widget_update(VolumeWidget* self, gdouble update);
 void volume_widget_tidy_up (GtkWidget *widget);
