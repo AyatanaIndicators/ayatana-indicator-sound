@@ -528,11 +528,10 @@ pm_toggle_mute_for_every_sink_callback (pa_context *c,
     return;
   }
   else {
-    if (IS_ACTIVE_SINK (userdata) == FALSE || sink == NULL){
-      g_warning ("toggle_mute cb - our user data is not what we think it should be or the sink parameter is null");
+    if (sink == NULL) {
+      g_warning ("toggle_mute cb - sink parameter is null - why ?");
       return;
     }
-
     pa_operation_unref (pa_context_set_sink_mute_by_index (c,
                                                            sink->index,
                                                            GPOINTER_TO_INT(userdata),
