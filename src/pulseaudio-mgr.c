@@ -31,6 +31,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <pulse/error.h>
 
 #include "pulseaudio-mgr.h"
+#include "config.h"
 
 #define RECONNECT_DELAY 5
 
@@ -116,24 +117,44 @@ Method which connects to the pulse server and is used to track reconnects.
 static gboolean
 reconnect_to_pulse (gpointer user_data)
 {
-  g_debug("Attempt to reconnect to pulse");
+  g_debug("Attempt a pulse connection");
   // reset
+  g_return_val_if_fail (IS_ACTIVE_SINK (user_data), FALSE);
+
   connection_attempts += 1;
   if (pulse_context != NULL) {
     pa_context_unref(pulse_context);
     pulse_context = NULL;
   }
 
-  pulse_context = pa_context_new( pa_glib_mainloop_get_api( pa_main_loop ),
-                                  "com.canonical.indicators.sound" );
+  pa_proplist     *proplist;
+
+  proplist = pa_proplist_new ();
+  pa_proplist_sets (proplist,
+                    PA_PROP_APPLICATION_NAME,
+                    "Indicator Sound");
+  pa_proplist_sets (proplist,
+                    PA_PROP_APPLICATION_ID,
+                    "com.canonical.indicators.sound");
+  pa_proplist_sets (proplist,
+                    PA_PROP_APPLICATION_ICON_NAME,
+                    "multimedia-volume-control");
+  pa_proplist_sets (proplist,
+                    PA_PROP_APPLICATION_VERSION,
+                    PACKAGE_VERSION);
+
+  pulse_context = pa_context_new_with_proplist (pa_glib_mainloop_get_api( pa_main_loop ),
+                                                NULL,
+                                                proplist);
+  pa_proplist_free (proplist);
   g_assert(pulse_context);
   pa_context_set_state_callback (pulse_context,
                                  pm_context_state_callback,
                                  user_data);
   int result = pa_context_connect (pulse_context,
                                    NULL,
-                                   PA_CONTEXT_NOFAIL,
-                                   user_data);
+                                   (pa_context_flags_t)PA_CONTEXT_NOFAIL,
+                                   NULL);
 
   if (result < 0) {
     g_warning ("Failed to connect context: %s",
@@ -280,8 +301,10 @@ pm_context_state_callback (pa_context *c, void *userdata)
     g_debug("connecting - waiting for the server to become available");
     break;
   case PA_CONTEXT_AUTHORIZING:
+    g_debug ("Authorizing");
     break;
   case PA_CONTEXT_SETTING_NAME:
+    g_debug ("Setting name");
     break;
   case PA_CONTEXT_FAILED:
     g_warning("PA_CONTEXT_FAILED - Is PulseAudio Daemon running ?");
@@ -289,10 +312,11 @@ pm_context_state_callback (pa_context *c, void *userdata)
     if (reconnect_idle_id == 0){
       reconnect_idle_id = g_timeout_add_seconds (RECONNECT_DELAY,
                                                  reconnect_to_pulse,
-                                                 userdata);
+                                                 (gpointer)userdata);
     }
     break;
   case PA_CONTEXT_TERMINATED:
+    g_debug ("Terminated");
     break;
   case PA_CONTEXT_READY:
     connection_attempts = 0;
@@ -504,11 +528,10 @@ pm_toggle_mute_for_every_sink_callback (pa_context *c,
     return;
   }
   else {
-    if (IS_ACTIVE_SINK (userdata) == FALSE || sink == NULL){
-      g_warning ("toggle_mute cb - our user data is not what we think it should be or the sink parameter is null");
+    if (sink == NULL) {
+      g_warning ("toggle_mute cb - sink parameter is null - why ?");
       return;
     }
-
     pa_operation_unref (pa_context_set_sink_mute_by_index (c,
                                                            sink->index,
                                                            GPOINTER_TO_INT(userdata),
