@@ -47,6 +47,12 @@ public class PlaylistsMenuitem : PlayerItem
       
       Dbusmenu.Menuitem menuitem = new Menuitem();
       menuitem.property_set (MENUITEM_PROP_LABEL, detail.name);
+
+      var icon_file = File.new_for_path (detail.icon_path);
+      if (icon_file.query_exists () == true) {
+        menuitem.property_set (MENUITEM_PROP_ICON_NAME,
+                               icon_file.get_basename () );
+      }
       menuitem.property_set (MENUITEM_PROP_ICON_NAME, detail.icon_path);
       menuitem.property_set (MENUITEM_PATH, (string)detail.path);
       menuitem.property_set_bool (MENUITEM_PROP_VISIBLE, true);
