@@ -50,6 +50,7 @@ public class PlaylistsMenuitem : PlayerItem
 
       var icon_file = File.new_for_path (detail.icon_path);
       if (icon_file.query_exists () == true) {
+        debug ("icon name = %s", icon_file.get_basename ());
         menuitem.property_set (MENUITEM_PROP_ICON_NAME,
                                icon_file.get_basename () );
       }
