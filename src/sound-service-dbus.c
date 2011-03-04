@@ -151,6 +151,7 @@ sound_service_dbus_create_root_item (SoundServiceDbus* self)
   gchar** paths = {'/usr/share/banshee-1/icons'};
   dbusmenu_server_set_icon_paths (server,
                                   g_strdupv(paths));
+  g_strfreev (paths);
   dbusmenu_server_set_root (server, priv->root_menuitem);
   g_object_unref (priv->root_menuitem);
   priv->active_sink = active_sink_new (self);
