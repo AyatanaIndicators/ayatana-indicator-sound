@@ -148,10 +148,9 @@ sound_service_dbus_create_root_item (SoundServiceDbus* self)
   priv->root_menuitem = dbusmenu_menuitem_new();
   g_debug("Root ID: %d", dbusmenu_menuitem_get_id(priv->root_menuitem));
   DbusmenuServer *server = dbusmenu_server_new (INDICATOR_SOUND_MENU_DBUS_OBJECT_PATH);
-  gchar** paths = {'/usr/share/banshee-1/icons'};
+  gchar* paths[] = {"/usr/share/banshee-1/icons", NULL};
   dbusmenu_server_set_icon_paths (server,
-                                  g_strdupv(paths));
-  g_strfreev (paths);
+                                  paths);
   dbusmenu_server_set_root (server, priv->root_menuitem);
   g_object_unref (priv->root_menuitem);
   priv->active_sink = active_sink_new (self);
