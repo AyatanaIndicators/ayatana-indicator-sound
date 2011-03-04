@@ -222,7 +222,7 @@ public class Mpris2Controller : GLib.Object
     }
     
     if( current_playlists != null ){
-      //debug( "Size of the playlist array = %i", current_playlists.length );
+      debug( "Size of the playlist array = %i", current_playlists.length );
       PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
       playlists_item.update(current_playlists);
     }
@@ -238,7 +238,7 @@ public class Mpris2Controller : GLib.Object
       debug(" We don't have an active playlist");
     }    
     PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
-    playlists_item.update_active_playlist ( this.playlists.ActivePlaylist.details );
+    playlists_item.active_playlist_update ( this.playlists.ActivePlaylist.details );
     return false;
   }
 
