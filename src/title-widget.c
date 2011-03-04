@@ -44,8 +44,8 @@ static void title_widget_dispose    (GObject *object);
 static void title_widget_finalize   (GObject *object);
 
 // keyevent consumers
-static gboolean title_widget_button_press_event (GtkWidget *menuitem, 
-                                                 GdkEventButton *event);
+static gboolean title_widget_button_release_event (GtkWidget *menuitem,
+                                                   GdkEventButton *event);
 
 // Dbusmenuitem properties update callback
 static void title_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
@@ -64,7 +64,7 @@ title_widget_class_init (TitleWidgetClass *klass)
   GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass    *widget_class = GTK_WIDGET_CLASS (klass);
 
-  widget_class->button_press_event = title_widget_button_press_event;
+  widget_class->button_release_event = title_widget_button_release_event;
 
   g_type_class_add_private (klass, sizeof (TitleWidgetPrivate));
 
@@ -132,8 +132,8 @@ title_widget_finalize (GObject *object)
 
 /* Suppress/consume keyevents */
 static gboolean
-title_widget_button_press_event (GtkWidget *menuitem, 
-                                  GdkEventButton *event)
+title_widget_button_release_event (GtkWidget *menuitem,
+                                   GdkEventButton *event)
 {
   //g_debug("TitleWidget::menu_press_event");
   TitleWidgetPrivate * priv = TITLE_WIDGET_GET_PRIVATE(menuitem);
@@ -147,8 +147,8 @@ title_widget_button_press_event (GtkWidget *menuitem,
 }
 
 static void 
-title_widget_property_update(DbusmenuMenuitem* item, gchar* property, 
-                                       GVariant* value, gpointer userdata)
+title_widget_property_update (DbusmenuMenuitem* item, gchar* property,
+                              GVariant* value, gpointer userdata)
 {
   g_return_if_fail (IS_TITLE_WIDGET (userdata));  
   TitleWidget* mitem = TITLE_WIDGET(userdata);

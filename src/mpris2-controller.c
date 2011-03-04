@@ -28,9 +28,11 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <gee.h>
 #include <libdbusmenu-glib/client.h>
 #include <libdbusmenu-glib/dbusmenu-glib.h>
+#include <libdbusmenu-glib/enum-types.h>
 #include <libdbusmenu-glib/menuitem-proxy.h>
 #include <libdbusmenu-glib/menuitem.h>
 #include <libdbusmenu-glib/server.h>
+#include <libdbusmenu-glib/types.h>
 
 
 #define TYPE_MPRIS2_CONTROLLER (mpris2_controller_get_type ())
@@ -384,7 +386,7 @@ static void _vala_PlaylistDetails_array_free (PlaylistDetails* array, gint array
 void playlists_menuitem_update (PlaylistsMenuitem* self, PlaylistDetails* playlists, int playlists_length1);
 static gboolean* _bool_dup (gboolean* self);
 void mpris_playlists_get_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* result);
-void playlists_menuitem_update_active_playlist (PlaylistsMenuitem* self, PlaylistDetails* detail);
+void playlists_menuitem_active_playlist_update (PlaylistsMenuitem* self, PlaylistDetails* detail);
 void mpris2_controller_activate_playlist (Mpris2Controller* self, const char* path);
 void mpris_playlists_ActivatePlaylist (MprisPlaylists* self, const char* playlist_id, GAsyncReadyCallback _callback_, gpointer _user_data_);
 void mpris_playlists_ActivatePlaylist_finish (MprisPlaylists* self, GAsyncResult* _res_, GError** error);
@@ -985,6 +987,7 @@ static gboolean mpris2_controller_fetch_playlists_co (Mpris2ControllerFetchPlayl
 		return FALSE;
 	}
 	if (data->current_playlists != NULL) {
+		g_debug ("mpris2-controller.vala:225: Size of the playlist array = %i", data->current_playlists_length1);
 		data->_tmp4_ = NULL;
 		data->_tmp4_ = gee_abstract_list_get ((GeeAbstractList*) data->self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLISTS);
 		data->playlists_item = (data->_tmp5_ = (PlayerItem*) data->_tmp4_, IS_PLAYLISTS_MENUITEM (data->_tmp5_) ? ((PlaylistsMenuitem*) data->_tmp5_) : NULL);
@@ -1029,7 +1032,7 @@ static gboolean mpris2_controller_fetch_active_playlist (Mpris2Controller* self)
 	playlists_item = (_tmp4_ = (PlayerItem*) _tmp3_, IS_PLAYLISTS_MENUITEM (_tmp4_) ? ((PlaylistsMenuitem*) _tmp4_) : NULL);
 	mpris_playlists_get_ActivePlaylist (self->priv->_playlists, &_tmp5_);
 	_tmp6_ = _tmp5_;
-	playlists_menuitem_update_active_playlist (playlists_item, &_tmp6_.details);
+	playlists_menuitem_active_playlist_update (playlists_item, &_tmp6_.details);
 	active_playlist_container_destroy (&_tmp6_);
 	result = FALSE;
 	_g_object_unref0 (playlists_item);

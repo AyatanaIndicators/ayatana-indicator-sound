@@ -1,3 +1,18 @@
+indicator-sound (0.6.2-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Fixed crashed with SIGSEGV in pa_context_connect() (LP: #717453)
+    - Fixed crashed with SIGSEGV in pa_pdispatch_run() (LP: #723096)
+    - Fixed crashed with SIGSEGV (LP: #723096)
+    - Fixed crashed with SIGSEGV  (LP: #717557)
+    - Fixed crashed with SIGSEGV in g_variant_builder_add_value() 
+      (LP: #717999)
+    - Sound Menu Play lists show Favorites item twice in menu and icons for 
+      all playlists not found (LP: #728263)
+    - Players are raised too quickly (LP: #723278)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 04 Mar 2011 13:07:40 -0500
+
 indicator-sound (0.6.1-0ubuntu1) natty; urgency=low
 
   * New upstream release.

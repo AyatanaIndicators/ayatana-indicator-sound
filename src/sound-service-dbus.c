@@ -295,6 +295,8 @@ static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
                                                      gchar* player_name,
                                                      gboolean blacklist) 
 {
+  g_return_val_if_fail (player_name != NULL, FALSE);
+
   gboolean result = FALSE;
   GSettings* our_settings = NULL;
   our_settings  = g_settings_new ("com.canonical.indicators.sound");

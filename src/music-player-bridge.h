@@ -10,9 +10,11 @@
 #include <string.h>
 #include <libdbusmenu-glib/client.h>
 #include <libdbusmenu-glib/dbusmenu-glib.h>
+#include <libdbusmenu-glib/enum-types.h>
 #include <libdbusmenu-glib/menuitem-proxy.h>
 #include <libdbusmenu-glib/menuitem.h>
 #include <libdbusmenu-glib/server.h>
+#include <libdbusmenu-glib/types.h>
 #include <gee.h>
 #include <gio/gio.h>
 
@@ -570,7 +572,7 @@ PlaylistsMenuitem* playlists_menuitem_new (PlayerController* parent);
 PlaylistsMenuitem* playlists_menuitem_construct (GType object_type, PlayerController* parent);
 void playlists_menuitem_update (PlaylistsMenuitem* self, PlaylistDetails* playlists, int playlists_length1);
 void playlists_menuitem_update_individual_playlist (PlaylistsMenuitem* self, PlaylistDetails* new_detail);
-void playlists_menuitem_update_active_playlist (PlaylistsMenuitem* self, PlaylistDetails* detail);
+void playlists_menuitem_active_playlist_update (PlaylistsMenuitem* self, PlaylistDetails* detail);
 GeeHashSet* playlists_menuitem_attributes_format (void);
 GType free_desktop_object_proxy_get_type (void) G_GNUC_CONST;
 guint free_desktop_object_register_object (void* object, GDBusConnection* connection, const gchar* path, GError** error);
