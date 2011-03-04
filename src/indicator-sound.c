@@ -443,28 +443,15 @@ new_voip_slider_widget (DbusmenuMenuitem * newitem,
 {
   g_debug("indicator-sound: new_voip_slider_widget");
   GtkWidget* voip_widget = NULL;
-  //IndicatorObject *io = NULL;
 
   g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
   voip_widget = voip_input_widget_new (newitem);
-/*
- / io = g_object_get_data (G_OBJECT (client), "indicator");
-*/
-  //IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
-  //priv->volume_widget = volume_widget;
 
   GtkWidget* ido_slider_widget = voip_input_widget_get_ido_slider(VOIP_INPUT_WIDGET(voip_widget));
 
   gtk_widget_show_all(ido_slider_widget);
-  // register the style callback on this widget with state manager's style change
-  // handler (needs to remake the blocking animation for each style).
-/*
-  g_signal_connect (ido_slider_widget, "style-set",
-                    G_CALLBACK(sound_state_manager_style_changed_cb),
-                    priv->state_manager);
-*/
 
   GtkMenuItem *menu_volume_item = GTK_MENU_ITEM(ido_slider_widget);
   dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client),
@@ -509,23 +496,11 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
     switch (event->keyval) {
     case GDK_Right:
       digested = TRUE;
-/*
-      if (event->state & GDK_CONTROL_MASK) {
-        new_value = 100;
-      } else {
-*/
-        new_value = current_value + five_percent;
-      //}
+      new_value = current_value + five_percent;
       break;
     case GDK_Left:
       digested = TRUE;
-/*
-      if (event->state & GDK_CONTROL_MASK) {
-        new_value = 0;
-      } else {
-*/
-        new_value = current_value - five_percent;
-      //}
+      new_value = current_value - five_percent;
       break;
     case GDK_plus:
       digested = TRUE;

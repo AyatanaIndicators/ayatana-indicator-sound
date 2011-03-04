@@ -34,7 +34,9 @@ public class PlaylistsMenuitem : PlayerItem
   construct{
     this.current_playlists = new HashMap<int, Dbusmenu.Menuitem>();
     this.root_item = new Menuitem();
+
     this.root_item.property_set ( MENUITEM_PROP_LABEL, "Choose Playlist" );
+    this.root_item.property_set ( MENUITEM_PATH, "" );
   }
 
   public new void update (PlaylistDetails[] playlists)
@@ -51,9 +53,27 @@ public class PlaylistsMenuitem : PlayerItem
       menuitem.property_set_bool (MENUITEM_PROP_ENABLED, true);
       
       menuitem.item_activated.connect(() => {
-        submenu_item_activated (menuitem.id );});
-      this.current_playlists.set( menuitem.id, menuitem );      
+        submenu_item_activated (menuitem.id );
+        }
+      );
+      this.current_playlists.set( menuitem.id, menuitem ); 
       this.root_item.child_append( menuitem );
+    }
+    // Finally remove any that might have been deleted
+    foreach (Dbusmenu.Menuitem item in this.current_playlists.values) {
+      bool within = false;
+      foreach (PlaylistDetails detail in playlists){
+        if (detail.path == item.property_get (MENUITEM_PATH)) {
+          within = true;
+          break;
+        }
+      }
+      if (within == false){
+        if (this.root_item.property_get (MENUITEM_PATH) == item.property_get (MENUITEM_PATH)){
+          this.root_item.property_set (MENUITEM_PROP_LABEL, "Choose Playlist");        
+        }
+        this.root_item.child_delete (item);   
+      }
     }
   }
 
@@ -64,6 +84,10 @@ public class PlaylistsMenuitem : PlayerItem
         item.property_set (MENUITEM_PROP_LABEL, new_detail.name);
         item.property_set (MENUITEM_PROP_ICON_NAME, new_detail.icon_path);      
       }
+    }
+    // If its active make sure the name is updated on the root item.
+    if (this.root_item.property_get (MENUITEM_PATH) == new_detail.path) {
+      this.root_item.property_set (MENUITEM_PROP_LABEL, new_detail.name);          
     }
   }
                                                   
@@ -76,11 +100,12 @@ public class PlaylistsMenuitem : PlayerItem
     return false;
   }
 
-  public void update_active_playlist(PlaylistDetails detail)
+  public void active_playlist_update (PlaylistDetails detail)
   {
     var update = detail.name; 
     if ( update == "" ) update = "Choose Playlist";
-    this.root_item.property_set ( MENUITEM_PROP_LABEL, update );    
+    this.root_item.property_set (MENUITEM_PROP_LABEL, update);  
+    this.root_item.property_set (MENUITEM_PATH, detail.path);  
   }
   
   private void submenu_item_activated (int menu_item_id)
