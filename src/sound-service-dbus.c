@@ -74,6 +74,8 @@ static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
                                                      gchar* player_name,
                                                      gboolean blacklist); 
 
+static gboolean sound_service_dbus_is_blacklisted (SoundServiceDbus* self,
+                                                   gchar* player_name);
 
 G_DEFINE_TYPE (SoundServiceDbus, sound_service_dbus, G_TYPE_OBJECT);
 
@@ -281,7 +283,16 @@ bus_method_call (GDBusConnection * connection,
                                                            player_name,
                                                            blacklist);
     retval =  g_variant_new ("(b)", result);
-  }     
+  }
+  else if (g_strcmp0(method, "IsBlacklisted") == 0) {
+    gchar* player_name;
+    g_variant_get (params, "(s)", &player_name);
+
+    g_debug ("IsBlacklisted - name %s", player_name);
+    gboolean result = sound_service_dbus_is_blacklisted (service,
+                                                         player_name);
+    retval =  g_variant_new ("(b)", result);
+  }
   else {
     g_warning("Calling method '%s' on the sound service but it's unknown", method); 
   }
@@ -373,4 +384,42 @@ static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
   return result;
 }
 
+static gboolean sound_service_dbus_is_blacklisted (SoundServiceDbus* self,
+                                                   gchar* player_name)
+{
+  g_return_val_if_fail (player_name != NULL, FALSE);
+
+  gboolean result = FALSE;
+  GSettings* our_settings = NULL;
+  our_settings  = g_settings_new ("com.canonical.indicators.sound");
+  GVariant* the_black_list = g_settings_get_value (our_settings,
+                                                   "blacklisted-media-players");
+  GVariantIter iter;
+  gchar *str;
+  // Firstly prep new array which will be set on the key.
+  GVariantBuilder builder;
+
+  g_variant_iter_init (&iter, the_black_list);
+  g_variant_builder_init(&builder, G_VARIANT_TYPE_STRING_ARRAY);
+
+  while (g_variant_iter_loop (&iter, "s", &str)){
+    g_variant_builder_add (&builder, "s", str);
+  }
+  g_variant_iter_init (&iter, the_black_list);
+
+  while (g_variant_iter_loop (&iter, "s", &str)){
+    if (g_strcmp0 (player_name, str) == 0){
+      // Return if its already there
+      g_debug ("Yes it is blacklisted !");
+      result = TRUE;
+      break;
+    }
+  }
+  g_variant_builder_clear (&builder);
+  g_object_unref (our_settings);
+  g_variant_unref (the_black_list);
+  g_debug ("Is it blacklisted ? %i", result);
+
+  return result;
+}
 
