@@ -7,6 +7,12 @@
         <arg type='b' name='blacklist' direction="in"/>
         <arg type='b' name='result' direction="out"/>
     </method>
+    <method name = "IsBlacklisted">
+        <annotation name="org.freedesktop.DBus.GLib.Async" value="true"/>
+        <arg type='s' name='player_desktop_name' direction="in"/>
+        <arg type='b' name='result' direction="out"/>
+    </method>
+
     <method name = "GetSoundState">
         <annotation name="org.freedesktop.DBus.GLib.Async" value="true"/>
         <arg type='i' name='current_state' direction="out"/>
