@@ -395,7 +395,9 @@ transport_widget_button_release_event (GtkWidget *menuitem,
   TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport ); 
   TransportWidgetEvent result = transport_widget_determine_button_event ( transport,
                                                                           event );
-  if (result != TRANSPORT_NADA && priv->current_command == result){
+  if (result != TRANSPORT_NADA &&
+      priv->current_command == result &&
+      priv->skip_frequency == 0){
     GVariant* new_transport_state = g_variant_new_int32 ((int)result);
     dbusmenu_menuitem_handle_event ( priv->twin_item,
                                      "Transport state change",
