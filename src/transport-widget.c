@@ -81,9 +81,11 @@ struct _TransportWidgetPrivate
   TransportWidgetEvent key_event;
   TransportWidgetEvent motion_event;
   TransportWidgetState current_state;
-  GHashTable*      command_coordinates; 
+  GHashTable*          command_coordinates;
   DbusmenuMenuitem*    twin_item;   
-  gboolean has_focus;
+  gboolean             has_focus;
+  gint                 hold_timer;
+  gint                 skip_frequency;
 };
 
 #define TRANSPORT_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TRANSPORT_WIDGET_TYPE, TransportWidgetPrivate))
@@ -130,6 +132,9 @@ static void transport_widget_toggle_play_pause ( TransportWidget* button,
 static void transport_widget_select (GtkItem* menu, gpointer Userdata);
 static void transport_widget_deselect (GtkItem* menu, gpointer Userdata);
 static TransportWidgetEvent transport_widget_collision_detection (gint x, gint y);
+static void transport_widget_start_timing (TransportWidget* widget);
+static gboolean transport_widget_trigger_seek (gpointer userdata);
+static gboolean transport_widget_seek (gpointer userdata);
 
 
 /// Init functions //////////////////////////////////////////////////////////
@@ -160,6 +165,8 @@ transport_widget_init (TransportWidget *self)
   priv->key_event = TRANSPORT_NADA;
   priv->motion_event = TRANSPORT_NADA;
   priv->has_focus = FALSE;
+  priv->hold_timer = 0;
+  priv->skip_frequency = 0;
   priv->command_coordinates =  g_hash_table_new_full(g_direct_hash,
                                                       g_direct_equal,
                                                       NULL,
@@ -287,7 +294,6 @@ transport_widget_motion_notify_event (GtkWidget *menuitem,
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE ( TRANSPORT_WIDGET(menuitem) );
   TransportWidgetEvent result = transport_widget_determine_motion_event ( TRANSPORT_WIDGET(menuitem),
                                                                             event);
-
   priv->motion_event = result;
   gtk_widget_queue_draw (menuitem);
   return TRUE;
@@ -318,10 +324,50 @@ transport_widget_button_press_event (GtkWidget *menuitem,
   if(result != TRANSPORT_NADA){
     priv->current_command = result;
     gtk_widget_queue_draw (GTK_WIDGET(menuitem));
+    transport_widget_start_timing (TRANSPORT_WIDGET(menuitem));
   }
   return TRUE;
 }
-                              
+/**
+ * TODO rename or merge
+ * @param widget
+ */
+static void
+transport_widget_start_timing (TransportWidget* widget)
+{
+  TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE (widget);
+  priv->hold_timer = g_timeout_add (1200,
+                                    transport_widget_trigger_seek,
+                                    widget);
+}
+
+static gboolean
+transport_widget_trigger_seek (gpointer userdata)
+{
+  g_return_val_if_fail ( IS_TRANSPORT_WIDGET(userdata), FALSE );
+  TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE (TRANSPORT_WIDGET(userdata));
+  priv->skip_frequency = g_timeout_add (500,
+                                        transport_widget_seek,
+                                        userdata);
+  return FALSE;
+}
+
+/**
+ * This will be called repeatedly until a key/button release is received
+ * @param userdata
+ * @return 
+ */
+static gboolean
+transport_widget_seek (gpointer userdata)
+{
+/*
+  g_return_val_if_fail ( IS_TRANSPORT_WIDGET(userdata), FALSE );
+  TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE (TRANSPORT_WIDGET(userdata));
+*/
+
+  return TRUE;
+}
+
 static gboolean
 transport_widget_button_release_event (GtkWidget *menuitem, 
                                        GdkEventButton *event)
@@ -441,6 +487,14 @@ transport_widget_react_to_button_release ( TransportWidget* button,
   priv->key_event = TRANSPORT_NADA;
 
   gtk_widget_queue_draw (GTK_WIDGET(button));
+  if (priv->hold_timer != 0){
+    g_source_remove (priv->hold_timer);
+    priv->hold_timer = 0;
+  }
+  if(priv->skip_frequency != 0){
+    g_source_remove (priv->skip_frequency);
+    priv->skip_frequency = 0;
+  }
 }
 
 /// internal helper functions //////////////////////////////////////////////////
