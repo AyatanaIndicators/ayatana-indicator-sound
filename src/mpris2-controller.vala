@@ -186,6 +186,12 @@ public class Mpris2Controller : GLib.Object
     else if(command == TransportMenuitem.action.NEXT){
       this.player.Next.begin();
     }
+    else if(command == TransportMenuitem.action.REWIND){
+     this.player.Seek.begin(-1);
+    }
+    else if(command == TransportMenuitem.action.FORWIND){
+     this.player.Seek.begin(1);
+    }
   }
 
   public bool connected()

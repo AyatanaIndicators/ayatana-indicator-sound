@@ -26,7 +26,9 @@ public class TransportMenuitem : PlayerItem
   public enum action{
     PREVIOUS,
     PLAY_PAUSE,
-    NEXT
+    NEXT,
+    REWIND,
+    FORWIND
   }
 
   public enum state{
