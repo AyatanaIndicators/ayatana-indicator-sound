@@ -176,7 +176,7 @@ public class Mpris2Controller : GLib.Object
 
   public void transport_update(TransportMenuitem.action command)
   {
-    //debug("transport_event input = %i", (int)command);
+    debug("transport_event input = %i", (int)command);
     if(command == TransportMenuitem.action.PLAY_PAUSE){
       this.player.PlayPause.begin();              
     }

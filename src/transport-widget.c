@@ -336,7 +336,7 @@ static void
 transport_widget_start_timing (TransportWidget* widget)
 {
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE (widget);
-  priv->hold_timer = g_timeout_add (1200,
+  priv->hold_timer = g_timeout_add (800,
                                     transport_widget_trigger_seek,
                                     widget);
 }
@@ -346,7 +346,7 @@ transport_widget_trigger_seek (gpointer userdata)
 {
   g_return_val_if_fail ( IS_TRANSPORT_WIDGET(userdata), FALSE );
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE (TRANSPORT_WIDGET(userdata));
-  priv->skip_frequency = g_timeout_add (500,
+  priv->skip_frequency = g_timeout_add (300,
                                         transport_widget_seek,
                                         userdata);
   return FALSE;
@@ -360,10 +360,28 @@ transport_widget_trigger_seek (gpointer userdata)
 static gboolean
 transport_widget_seek (gpointer userdata)
 {
-/*
   g_return_val_if_fail ( IS_TRANSPORT_WIDGET(userdata), FALSE );
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE (TRANSPORT_WIDGET(userdata));
-*/
+  GVariant* new_transport_state;
+  if(priv->current_command ==  TRANSPORT_NEXT){
+    g_debug ("we should be skipping forward");
+    new_transport_state = g_variant_new_int32 ((int)TRANSPORT_FORWIND);
+
+    dbusmenu_menuitem_handle_event ( priv->twin_item,
+                                     "Transport state change",
+                                     new_transport_state,
+                                     0 );
+
+  }
+  else if(priv->current_command ==  TRANSPORT_PREVIOUS){
+    g_debug ("we should be skipping back");
+    new_transport_state = g_variant_new_int32 ((int)TRANSPORT_REWIND);
+
+    dbusmenu_menuitem_handle_event ( priv->twin_item,
+                                     "Transport state change",
+                                     new_transport_state,
+                                     0 );
+  }
 
   return TRUE;
 }
