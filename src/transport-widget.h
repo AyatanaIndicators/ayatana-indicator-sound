@@ -23,6 +23,8 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <gtk/gtkmenuitem.h>
 #include <libdbusmenu-gtk/menuitem.h>
 
+#include "common-defs.h"
+
 G_BEGIN_DECLS
 
 #define TRANSPORT_WIDGET_TYPE            (transport_widget_get_type ())
@@ -35,17 +37,6 @@ G_BEGIN_DECLS
 typedef struct _TransportWidget      TransportWidget;
 typedef struct _TransportWidgetClass TransportWidgetClass;
 
-typedef enum {
-  TRANSPORT_PREVIOUS,
-  TRANSPORT_PLAY_PAUSE,
-  TRANSPORT_NEXT,
-  TRANSPORT_NADA
-}TransportWidgetEvent;
-
-typedef enum {
-  PLAY,
-  PAUSE 
-}TransportWidgetState;
 
 struct _TransportWidgetClass {
     GtkMenuItemClass parent_class;
@@ -65,12 +56,12 @@ typedef struct
 
 void _color_shade (const CairoColorRGB *a, float k, CairoColorRGB *b);
 GType transport_widget_get_type (void);
-GtkWidget* transport_widget_new ( DbusmenuMenuitem *item );
-void transport_widget_react_to_key_press_event ( TransportWidget* widget,
-                                                 TransportWidgetEvent transport_event );
-void transport_widget_react_to_key_release_event ( TransportWidget* widget,
-                                                   TransportWidgetEvent transport_event );
-gboolean transport_widget_is_selected ( TransportWidget* widget );
+GtkWidget* transport_widget_new (DbusmenuMenuitem *item);
+void transport_widget_react_to_key_press_event (TransportWidget* widget,
+                                                TransportAction transport_event);
+void transport_widget_react_to_key_release_event (TransportWidget* widget,
+                                                  TransportAction transport_event);
+gboolean transport_widget_is_selected (TransportWidget* widget);
 G_END_DECLS
 
 #endif
