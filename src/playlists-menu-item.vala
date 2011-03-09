@@ -47,18 +47,13 @@ public class PlaylistsMenuitem : PlayerItem
       
       Dbusmenu.Menuitem menuitem = new Menuitem();
       menuitem.property_set (MENUITEM_PROP_LABEL, detail.name);
-
-      var icon_file = File.new_for_path (detail.icon_path);
-
-      if (icon_file.get_basename () != null) {
-        debug ("icon name = %s", icon_file.get_basename().split(".")[0]);
-        menuitem.property_set (MENUITEM_PROP_ICON_NAME,
-                               icon_file.get_basename().split(".")[0]);
+      var result = this.parse_icon_path (detail.icon_path);
+      if (result != null) {
+        menuitem.property_set (MENUITEM_PROP_ICON_NAME, result);
       }
       // TODO: Make sure to set a stock playlist image
       else{
       }
-      menuitem.property_set (MENUITEM_PROP_ICON_NAME, detail.icon_path);
       menuitem.property_set (MENUITEM_PATH, (string)detail.path);
       menuitem.property_set_bool (MENUITEM_PROP_VISIBLE, true);
       menuitem.property_set_bool (MENUITEM_PROP_ENABLED, true);
@@ -88,12 +83,25 @@ public class PlaylistsMenuitem : PlayerItem
     }
   }
 
+  private string? parse_icon_path (string path)  
+  {
+    var icon_file = File.new_for_path (path);
+
+    if (icon_file.get_basename() == null)return null;
+
+    debug ("icon name = %s", icon_file.get_basename().split(".")[0]);
+    return icon_file.get_basename().split(".")[0];
+  }
+
   public void update_individual_playlist (PlaylistDetails new_detail)
   {
     foreach ( Dbusmenu.Menuitem item in this.current_playlists.values ){
       if (new_detail.path == item.property_get (MENUITEM_PATH)){
         item.property_set (MENUITEM_PROP_LABEL, new_detail.name);
-        item.property_set (MENUITEM_PROP_ICON_NAME, new_detail.icon_path);      
+        var result = this.parse_icon_path (new_detail.icon_path);
+        if (result != null) {
+          item.property_set (MENUITEM_PROP_ICON_NAME, result);
+        }
       }
     }
     // If its active make sure the name is updated on the root item.
