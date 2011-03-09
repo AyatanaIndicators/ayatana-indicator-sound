@@ -532,17 +532,17 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
     switch (event->keyval) {
     case GDK_Right:
       transport_widget_react_to_key_press_event ( transport_widget,
-                                                  TRANSPORT_NEXT );
+                                                  TRANSPORT_ACTION_NEXT );
       digested = TRUE;         
       break;        
     case GDK_Left:
       transport_widget_react_to_key_press_event ( transport_widget,
-                                                  TRANSPORT_PREVIOUS );
+                                                  TRANSPORT_ACTION_PREVIOUS );
       digested = TRUE;         
       break;                  
     case GDK_KEY_space:
       transport_widget_react_to_key_press_event ( transport_widget,
-                                                  TRANSPORT_PLAY_PAUSE );        
+                                                  TRANSPORT_ACTION_PLAY_PAUSE );
       digested = TRUE;         
       break;
     case GDK_Up:
@@ -587,17 +587,17 @@ key_release_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
     switch (event->keyval) {
     case GDK_Right:
       transport_widget_react_to_key_release_event ( transport_widget,
-                                                    TRANSPORT_NEXT );
+                                                    TRANSPORT_ACTION_NEXT );
       digested = TRUE;
       break;        
     case GDK_Left:
       transport_widget_react_to_key_release_event ( transport_widget,
-                                                    TRANSPORT_PREVIOUS );
+                                                    TRANSPORT_ACTION_PREVIOUS );
       digested = TRUE;         
       break;                  
     case GDK_KEY_space:
       transport_widget_react_to_key_release_event ( transport_widget,
-                                                    TRANSPORT_PLAY_PAUSE );        
+                                                    TRANSPORT_ACTION_PLAY_PAUSE );
       digested = TRUE;         
       break;
     case GDK_Up:

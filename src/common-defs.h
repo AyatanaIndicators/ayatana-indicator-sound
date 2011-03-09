@@ -31,6 +31,20 @@ typedef enum {
   AVAILABLE
 }SoundState;
 
+typedef enum {
+  TRANSPORT_ACTION_PREVIOUS,
+  TRANSPORT_ACTION_PLAY_PAUSE,
+  TRANSPORT_ACTION_NEXT,
+  TRANSPORT_ACTION_REWIND,
+  TRANSPORT_ACTION_FORWIND,
+  TRANSPORT_ACTION_NO_ACTION
+}TransportAction;
+
+typedef enum {
+  TRANSPORT_STATE_PLAYING,
+  TRANSPORT_STATE_PAUSED
+}TransportState;
+
 #define NOT_ACTIVE                       -1
 #define DBUSMENU_PROPERTY_EMPTY                 -1
 

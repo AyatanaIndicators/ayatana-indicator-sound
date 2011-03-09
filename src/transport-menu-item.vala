@@ -20,21 +20,10 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 using Dbusmenu;
 using Gee;
 using DbusmenuTransport;
+using Transport;
 
 public class TransportMenuitem : PlayerItem
 {
-  public enum action{
-    PREVIOUS,
-    PLAY_PAUSE,
-    NEXT,
-    REWIND,
-    FORWIND
-  }
-
-  public enum state{
-    PLAYING,
-    PAUSED
-  }
   
   public TransportMenuitem(PlayerController parent)
   {
@@ -42,7 +31,7 @@ public class TransportMenuitem : PlayerItem
     this.property_set_int(MENUITEM_PLAY_STATE, 1);
   }
 
-  public void change_play_state(state update)
+  public void change_play_state(Transport.State update)
   {
     //debug("UPDATING THE TRANSPORT DBUSMENUITEM PLAY STATE WITH VALUE %i",
     //      (int)update);
@@ -64,7 +53,7 @@ public class TransportMenuitem : PlayerItem
     int32 input = v.get_int32();
     //debug("transport menu item -> handle_event with value %s", input.to_string());
     //debug("transport owner name = %s", this.owner.app_info.get_name());
-    this.owner.mpris_bridge.transport_update((action)input);
+    this.owner.mpris_bridge.transport_update((Transport.Action)input);
   } 
 
   public static HashSet<string> attributes_format()

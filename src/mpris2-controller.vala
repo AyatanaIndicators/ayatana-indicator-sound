@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using Dbusmenu;
+using Transport;
 
 /*
  This class will entirely replace mpris-controller.vala hence why there is no
@@ -33,7 +34,7 @@ public class Mpris2Controller : GLib.Object
 
   public Mpris2Controller(PlayerController ctrl)
   {
-    GLib.Object(owner: ctrl);    
+    GLib.Object(owner: ctrl); 
   }
 
   construct{
@@ -77,7 +78,7 @@ public class Mpris2Controller : GLib.Object
       string state = this.player.PlaybackStatus;
       //debug("in the property update and the playback status = %s and update = %s", state, (string)play_v);
       Timeout.add ( 200, ensure_correct_playback_status );
-      TransportMenuitem.state p = (TransportMenuitem.state)this.determine_play_state(state);
+      Transport.State p = (Transport.State)this.determine_play_state(state);
       (this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(p);
     }
     Variant? meta_v = changed_properties.lookup("Metadata");
@@ -115,7 +116,7 @@ public class Mpris2Controller : GLib.Object
                                       
   private bool ensure_correct_playback_status(){
     //debug("TEST playback status = %s", this.player.PlaybackStatus);
-    TransportMenuitem.state p = (TransportMenuitem.state)this.determine_play_state(this.player.PlaybackStatus);
+    Transport.State p = (Transport.State)this.determine_play_state(this.player.PlaybackStatus);
     (this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state(p);
     return false;
   }
@@ -142,19 +143,19 @@ public class Mpris2Controller : GLib.Object
     return changed_updates;
   }
   
-  private TransportMenuitem.state determine_play_state(string? status){ 
+  private Transport.State determine_play_state(string? status){
     if(status != null && status == "Playing"){
-      return TransportMenuitem.state.PLAYING;
+      return Transport.State.PLAYING;
     }
-    return TransportMenuitem.state.PAUSED;
+    return Transport.State.PAUSED;
   }
 
   public void initial_update()
   {
-    TransportMenuitem.state update;
+    Transport.State update;
     
     if(this.player.PlaybackStatus == null){
-      update = TransportMenuitem.state.PAUSED;
+      update = Transport.State.PAUSED;
     }
     else{
       update = determine_play_state (this.player.PlaybackStatus);
@@ -174,25 +175,25 @@ public class Mpris2Controller : GLib.Object
     }
   }
 
-  public void transport_update(TransportMenuitem.action command)
+  public void transport_update(Transport.Action command)
   {
     //debug("transport_event input = %i", (int)command);
-    if(command == TransportMenuitem.action.PLAY_PAUSE){
+    if(command == Transport.Action.PLAY_PAUSE){
       this.player.PlayPause.begin();              
     }
-    else if(command == TransportMenuitem.action.PREVIOUS){
+    else if(command == Transport.Action.PREVIOUS){
       this.player.Previous.begin();
     }
-    else if(command == TransportMenuitem.action.NEXT){
+    else if(command == Transport.Action.NEXT){
       this.player.Next.begin();
     }
-    else if(command == TransportMenuitem.action.REWIND){
-     debug("transport_event rewind = %i", (int)command);
+    else if(command == Transport.Action.REWIND){
+     //debug("transport_event rewind = %i", (int)command);
      this.player.Seek.begin(-500000);
     }
-    else if(command == TransportMenuitem.action.FORWIND){
-     debug("transport_event input = %i", (int)command);
-     this.player.Seek.begin(350000);
+    else if(command == Transport.Action.FORWIND){
+     //debug("transport_event input = %i", (int)command);
+     this.player.Seek.begin(400000);
     }
   }
 
