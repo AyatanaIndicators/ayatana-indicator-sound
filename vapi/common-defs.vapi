@@ -40,14 +40,6 @@ namespace DbusmenuTitle{
         public const string MENUITEM_RUNNING;
 }
 
-/**[CCode (cheader_filename = "common-defs.h")]
-namespace DbusmenuScrub{
-        public const string MENUITEM_TYPE;
-        public const string MENUITEM_POSITION;
-        public const string MENUITEM_DURATION;
-        public const string MENUITEM_PLAY_STATE;
-}
-**/
 [CCode (cheader_filename = "common-defs.h")]
 namespace DbusmenuPlaylists{
         public const string MENUITEM_TYPE;
