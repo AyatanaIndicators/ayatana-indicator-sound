@@ -138,14 +138,7 @@ volume_widget_property_update( DbusmenuMenuitem* item, gchar* property,
       gdouble update = g_variant_get_double (value);
       //g_debug("volume-widget - update level with value %f", update);
       gtk_range_set_value(range, update);
-
-      GList *entry = indicator_object_get_entries(priv->indicator);
-      g_signal_emit(G_OBJECT(priv->indicator),
-                    INDICATOR_OBJECT_SIGNAL_ACCESSIBLE_DESC_UPDATE_ID,
-                    0,
-                    entry->data,
-                    TRUE);
-      g_list_free(entry);
+      update_accessible_desc(priv->indicator);
     }
   }
 }
@@ -165,14 +158,7 @@ volume_widget_set_twin_item(VolumeWidget* self,
   GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
   GtkRange *range = (GtkRange*)slider;
   gtk_range_set_value(range, initial_level);
-
-  GList *entry = indicator_object_get_entries(priv->indicator);
-  g_signal_emit(G_OBJECT(priv->indicator),
-                INDICATOR_OBJECT_SIGNAL_ACCESSIBLE_DESC_UPDATE_ID,
-                0,
-                entry->data,
-                TRUE);
-  g_list_free(entry);
+  update_accessible_desc(priv->indicator);
 }
 
 static gboolean
