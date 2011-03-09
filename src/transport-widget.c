@@ -27,7 +27,6 @@ Uses code from ctk
 
 #include <math.h>
 #include "transport-widget.h"
-#include "common-defs.h"
 
 
 #define RECT_WIDTH 130.0f
@@ -77,15 +76,15 @@ typedef struct _TransportWidgetPrivate TransportWidgetPrivate;
 
 struct _TransportWidgetPrivate
 {
-  TransportWidgetEvent current_command;
-  TransportWidgetEvent key_event;
-  TransportWidgetEvent motion_event;
-  TransportWidgetState current_state;
-  GHashTable*          command_coordinates;
-  DbusmenuMenuitem*    twin_item;   
-  gboolean             has_focus;
-  gint                 hold_timer;
-  gint                 skip_frequency;
+  TransportAction     current_command;
+  TransportAction     key_event;
+  TransportAction     motion_event;
+  TransportState      current_state;
+  GHashTable*         command_coordinates;
+  DbusmenuMenuitem*   twin_item;   
+  gboolean            has_focus;
+  gint                hold_timer;
+  gint                skip_frequency;
 };
 
 #define TRANSPORT_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TRANSPORT_WIDGET_TYPE, TransportWidgetPrivate))
@@ -121,17 +120,17 @@ static void transport_widget_menu_hidden ( GtkWidget        *menu,
 static void transport_widget_notify ( GObject *item,
                                       GParamSpec       *pspec,
                                       gpointer          user_data );
-static TransportWidgetEvent transport_widget_determine_button_event ( TransportWidget* button,
+static TransportAction transport_widget_determine_button_event ( TransportWidget* button,
                                                                       GdkEventButton* event);
-static TransportWidgetEvent transport_widget_determine_motion_event ( TransportWidget* button,
+static TransportAction transport_widget_determine_motion_event ( TransportWidget* button,
                                                                       GdkEventMotion* event);
 static void transport_widget_react_to_button_release ( TransportWidget* button,
-                                                       TransportWidgetEvent command);
+                                                       TransportAction command);
 static void transport_widget_toggle_play_pause ( TransportWidget* button,
-                                                 TransportWidgetState update);
+                                                 TransportState update);
 static void transport_widget_select (GtkItem* menu, gpointer Userdata);
 static void transport_widget_deselect (GtkItem* menu, gpointer Userdata);
-static TransportWidgetEvent transport_widget_collision_detection (gint x, gint y);
+static TransportAction transport_widget_collision_detection (gint x, gint y);
 static void transport_widget_start_timing (TransportWidget* widget);
 static gboolean transport_widget_trigger_seek (gpointer userdata);
 static gboolean transport_widget_seek (gpointer userdata);
@@ -160,10 +159,10 @@ static void
 transport_widget_init (TransportWidget *self)
 {
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(self);  
-  priv->current_command = TRANSPORT_NADA;
-  priv->current_state = PAUSE;
-  priv->key_event = TRANSPORT_NADA;
-  priv->motion_event = TRANSPORT_NADA;
+  priv->current_command = TRANSPORT_ACTION_NO_ACTION;
+  priv->current_state = TRANSPORT_STATE_PAUSED;
+  priv->key_event = TRANSPORT_ACTION_NO_ACTION;
+  priv->motion_event = TRANSPORT_ACTION_NO_ACTION;
   priv->has_focus = FALSE;
   priv->hold_timer = 0;
   priv->skip_frequency = 0;
@@ -177,7 +176,7 @@ transport_widget_init (TransportWidget *self)
   previous_list = g_list_insert(previous_list, GINT_TO_POINTER(60), 2);
   previous_list = g_list_insert(previous_list, GINT_TO_POINTER(34), 3);
   g_hash_table_insert(priv->command_coordinates,
-                      GINT_TO_POINTER(TRANSPORT_PREVIOUS),
+                      GINT_TO_POINTER(TRANSPORT_ACTION_PREVIOUS),
                       previous_list);
                      
   GList* play_list = NULL;
@@ -187,7 +186,7 @@ transport_widget_init (TransportWidget *self)
   play_list = g_list_insert(play_list, GINT_TO_POINTER(43), 3);
 
   g_hash_table_insert(priv->command_coordinates,
-                      GINT_TO_POINTER(TRANSPORT_PLAY_PAUSE),
+                      GINT_TO_POINTER(TRANSPORT_ACTION_PLAY_PAUSE),
                       play_list);
 
   GList* next_list = NULL;
@@ -197,7 +196,7 @@ transport_widget_init (TransportWidget *self)
   next_list = g_list_insert(next_list, GINT_TO_POINTER(34), 3);
 
   g_hash_table_insert(priv->command_coordinates,
-                      GINT_TO_POINTER(TRANSPORT_NEXT),
+                      GINT_TO_POINTER(TRANSPORT_ACTION_NEXT),
                       next_list);
   gtk_widget_set_size_request(GTK_WIDGET(self), 200, 43);
   g_signal_connect (G_OBJECT(self),
@@ -255,7 +254,7 @@ transport_widget_is_selected ( TransportWidget* widget )
 
 static void
 transport_widget_toggle_play_pause(TransportWidget* button,
-                                   TransportWidgetState update)
+                                   TransportState update)
 {
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(button);
   priv->current_state = update;
@@ -283,7 +282,7 @@ transport_widget_menu_hidden ( GtkWidget        *menu,
                                TransportWidget *transport)
 {
   g_return_if_fail(IS_TRANSPORT_WIDGET(transport));
-  transport_widget_react_to_button_release(transport, TRANSPORT_NADA); 
+  transport_widget_react_to_button_release(transport, TRANSPORT_ACTION_NO_ACTION);
 }
 
 static gboolean
@@ -292,7 +291,7 @@ transport_widget_motion_notify_event (GtkWidget *menuitem,
 {
   g_return_val_if_fail ( IS_TRANSPORT_WIDGET(menuitem), FALSE );
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE ( TRANSPORT_WIDGET(menuitem) );
-  TransportWidgetEvent result = transport_widget_determine_motion_event ( TRANSPORT_WIDGET(menuitem),
+  TransportAction result = transport_widget_determine_motion_event ( TRANSPORT_WIDGET(menuitem),
                                                                             event);
   priv->motion_event = result;
   gtk_widget_queue_draw (menuitem);
@@ -306,8 +305,8 @@ transport_widget_leave_notify_event (GtkWidget *menuitem,
   g_return_val_if_fail ( IS_TRANSPORT_WIDGET(menuitem), FALSE );
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE ( TRANSPORT_WIDGET(menuitem) );
   
-  priv->motion_event = TRANSPORT_NADA;
-  priv->current_command = TRANSPORT_NADA;
+  priv->motion_event = TRANSPORT_ACTION_NO_ACTION;
+  priv->current_command = TRANSPORT_ACTION_NO_ACTION;
   gtk_widget_queue_draw (GTK_WIDGET(menuitem));
   
   return TRUE;
@@ -319,9 +318,9 @@ transport_widget_button_press_event (GtkWidget *menuitem,
 {
   g_return_val_if_fail ( IS_TRANSPORT_WIDGET(menuitem), FALSE );
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE ( TRANSPORT_WIDGET(menuitem) );
-  TransportWidgetEvent result = transport_widget_determine_button_event ( TRANSPORT_WIDGET(menuitem),
+  TransportAction result = transport_widget_determine_button_event ( TRANSPORT_WIDGET(menuitem),
                                                                             event);
-  if(result != TRANSPORT_NADA){
+  if(result != TRANSPORT_ACTION_NO_ACTION){
     priv->current_command = result;
     gtk_widget_queue_draw (GTK_WIDGET(menuitem));
     transport_widget_start_timing (TRANSPORT_WIDGET(menuitem));
@@ -363,9 +362,9 @@ transport_widget_seek (gpointer userdata)
   g_return_val_if_fail ( IS_TRANSPORT_WIDGET(userdata), FALSE );
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE (TRANSPORT_WIDGET(userdata));
   GVariant* new_transport_state;
-  if(priv->current_command ==  TRANSPORT_NEXT){
+  if(priv->current_command ==  TRANSPORT_ACTION_NEXT){
     g_debug ("we should be skipping forward");
-    new_transport_state = g_variant_new_int32 ((int)TRANSPORT_FORWIND);
+    new_transport_state = g_variant_new_int32 ((int)TRANSPORT_ACTION_FORWIND);
 
     dbusmenu_menuitem_handle_event ( priv->twin_item,
                                      "Transport state change",
@@ -373,9 +372,9 @@ transport_widget_seek (gpointer userdata)
                                      0 );
 
   }
-  else if(priv->current_command ==  TRANSPORT_PREVIOUS){
+  else if(priv->current_command ==  TRANSPORT_ACTION_PREVIOUS){
     g_debug ("we should be skipping back");
-    new_transport_state = g_variant_new_int32 ((int)TRANSPORT_REWIND);
+    new_transport_state = g_variant_new_int32 ((int)TRANSPORT_ACTION_REWIND);
 
     dbusmenu_menuitem_handle_event ( priv->twin_item,
                                      "Transport state change",
@@ -393,9 +392,9 @@ transport_widget_button_release_event (GtkWidget *menuitem,
   g_return_val_if_fail(IS_TRANSPORT_WIDGET(menuitem), FALSE);
   TransportWidget* transport = TRANSPORT_WIDGET(menuitem);
   TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport ); 
-  TransportWidgetEvent result = transport_widget_determine_button_event ( transport,
+  TransportAction result = transport_widget_determine_button_event ( transport,
                                                                           event );
-  if (result != TRANSPORT_NADA &&
+  if (result != TRANSPORT_ACTION_NO_ACTION &&
       priv->current_command == result &&
       priv->skip_frequency == 0){
     GVariant* new_transport_state = g_variant_new_int32 ((int)result);
@@ -427,9 +426,9 @@ transport_widget_deselect (GtkItem* item, gpointer Userdata)
 
 void
 transport_widget_react_to_key_press_event ( TransportWidget* transport,
-                                            TransportWidgetEvent transport_event )
+                                            TransportAction transport_event )
 {
-  if(transport_event != TRANSPORT_NADA){
+  if(transport_event != TRANSPORT_ACTION_NO_ACTION){
     TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );
     priv->current_command = transport_event;
     priv->key_event = transport_event;
@@ -440,9 +439,9 @@ transport_widget_react_to_key_press_event ( TransportWidget* transport,
 
 void
 transport_widget_react_to_key_release_event ( TransportWidget* transport,
-                                              TransportWidgetEvent transport_event )
+                                              TransportAction transport_event )
 {
-  if(transport_event != TRANSPORT_NADA){
+  if(transport_event != TRANSPORT_ACTION_NO_ACTION){
     TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );     
     GVariant* new_transport_event = g_variant_new_int32((int)transport_event);  
     dbusmenu_menuitem_handle_event ( priv->twin_item,
@@ -461,50 +460,50 @@ transport_widget_focus_update ( TransportWidget* transport, gboolean focus )
   priv->has_focus = focus;  
 }
 
-static TransportWidgetEvent
+static TransportAction
 transport_widget_determine_button_event( TransportWidget* button,
                                          GdkEventButton* event )
 {
   return transport_widget_collision_detection (event->x, event->y);
 }
 
-static TransportWidgetEvent
+static TransportAction
 transport_widget_determine_motion_event( TransportWidget* button,
                                          GdkEventMotion* event )
 {
   return transport_widget_collision_detection (event->x, event->y);
 }
 
-static TransportWidgetEvent
+static TransportAction
 transport_widget_collision_detection ( gint x,
                                        gint y )
 {
-  TransportWidgetEvent event = TRANSPORT_NADA;
+  TransportAction event = TRANSPORT_ACTION_NO_ACTION;
   
   if (x > 67 && x < 112
       && y > 12 && y < 40){
-    event = TRANSPORT_PREVIOUS;
+    event = TRANSPORT_ACTION_PREVIOUS;
   }
   else if (x > 111 && x < 153
            && y > 5 && y < 47){
-    event = TRANSPORT_PLAY_PAUSE;  
+    event = TRANSPORT_ACTION_PLAY_PAUSE;
   }
   else if (x > 152 && x < 197
            && y > 12 && y < 40){
-    event = TRANSPORT_NEXT;
+    event = TRANSPORT_ACTION_NEXT;
   }   
   return event;
 }
 
 static void 
 transport_widget_react_to_button_release ( TransportWidget* button,
-                                           TransportWidgetEvent command )
+                                           TransportAction command )
 {
   g_return_if_fail(IS_TRANSPORT_WIDGET(button));
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(button);  
 
-  priv->current_command = TRANSPORT_NADA;
-  priv->key_event = TRANSPORT_NADA;
+  priv->current_command = TRANSPORT_ACTION_NO_ACTION;
+  priv->key_event = TRANSPORT_ACTION_NO_ACTION;
 
   gtk_widget_queue_draw (GTK_WIDGET(button));
   if (priv->hold_timer != 0){
@@ -1292,7 +1291,7 @@ draw (GtkWidget* button, cairo_t *cr)
                  MIDDLE_END);
 
   //prev/next button
-  if(priv->current_command == TRANSPORT_PREVIOUS)
+  if(priv->current_command == TRANSPORT_ACTION_PREVIOUS)
   {
     draw_gradient (cr,
                    X,
@@ -1318,7 +1317,7 @@ draw (GtkWidget* button, cairo_t *cr)
                    INNER_COMPRESSED_START,
                    INNER_COMPRESSED_END);
   }
-  else if(priv->current_command == TRANSPORT_NEXT)
+  else if(priv->current_command == TRANSPORT_ACTION_NEXT)
   {
     draw_gradient (cr,
                    RECT_WIDTH / 2 + X,
@@ -1344,7 +1343,7 @@ draw (GtkWidget* button, cairo_t *cr)
                    INNER_COMPRESSED_START,
                    INNER_COMPRESSED_END);
   }
-  else if (priv->motion_event == TRANSPORT_PREVIOUS)
+  else if (priv->motion_event == TRANSPORT_ACTION_PREVIOUS)
   {
     draw_gradient (cr,
                    X,
@@ -1370,7 +1369,7 @@ draw (GtkWidget* button, cairo_t *cr)
                    MIDDLE_START_PRELIGHT,
                    MIDDLE_END_PRELIGHT);
   }
-  else if (priv->motion_event == TRANSPORT_NEXT)
+  else if (priv->motion_event == TRANSPORT_ACTION_NEXT)
   {
     draw_gradient (cr,
                    RECT_WIDTH / 2 + X,
@@ -1398,7 +1397,7 @@ draw (GtkWidget* button, cairo_t *cr)
   }
 
   // play/pause shadow
-  if(priv->current_command != TRANSPORT_PLAY_PAUSE)
+  if(priv->current_command != TRANSPORT_ACTION_PLAY_PAUSE)
   {
     cairo_save (cr);
     cairo_rectangle (cr, X, Y, RECT_WIDTH, MIDDLE_RADIUS*2);
@@ -1415,7 +1414,7 @@ draw (GtkWidget* button, cairo_t *cr)
   }
 
   // play/pause button
-  if(priv->current_command == TRANSPORT_PLAY_PAUSE)
+  if(priv->current_command == TRANSPORT_ACTION_PLAY_PAUSE)
   {
     draw_circle (cr,
                  X + RECT_WIDTH / 2.0f - 2.0f * OUTER_RADIUS - 5.5f,
@@ -1431,7 +1430,7 @@ draw (GtkWidget* button, cairo_t *cr)
                  INNER_COMPRESSED_START,
                  INNER_COMPRESSED_END);
   }
-  else if (priv->motion_event == TRANSPORT_PLAY_PAUSE)
+  else if (priv->motion_event == TRANSPORT_ACTION_PLAY_PAUSE)
   {
     /* this subtle offset is to fix alpha borders, should be removed once this draw routine will be refactored */
     draw_circle (cr,
@@ -1466,7 +1465,7 @@ draw (GtkWidget* button, cairo_t *cr)
   }
 
   // draw previous-button drop-shadow
-  if (priv->has_focus && priv->key_event == TRANSPORT_PREVIOUS)
+  if (priv->has_focus && priv->key_event == TRANSPORT_ACTION_PREVIOUS)
   {
     _setup (&cr_surf, &surf, PREV_WIDTH+6, PREV_HEIGHT+6);
     _mask_prev (cr_surf,
@@ -1526,7 +1525,7 @@ draw (GtkWidget* button, cairo_t *cr)
   _finalize (cr, &cr_surf, &surf, PREV_X, PREV_Y);
 
   // draw next-button drop-shadow
-  if (priv->has_focus && priv->key_event == TRANSPORT_NEXT)
+  if (priv->has_focus && priv->key_event == TRANSPORT_ACTION_NEXT)
   {
     _setup (&cr_surf, &surf, NEXT_WIDTH+6, NEXT_HEIGHT+6);
     _mask_next (cr_surf,
@@ -1586,9 +1585,10 @@ draw (GtkWidget* button, cairo_t *cr)
   _finalize (cr, &cr_surf, &surf, NEXT_X, NEXT_Y);
 
   // draw pause-button drop-shadow
-  if(priv->current_state == PLAY)
+  if(priv->current_state == TRANSPORT_STATE_PLAYING)
   {
-    if (priv->has_focus && (priv->key_event == TRANSPORT_NADA || priv->key_event == TRANSPORT_PLAY_PAUSE))
+    if (priv->has_focus && (priv->key_event == TRANSPORT_ACTION_NO_ACTION ||
+        priv->key_event == TRANSPORT_ACTION_PLAY_PAUSE))
     {
       _setup (&cr_surf, &surf, PAUSE_WIDTH+6, PAUSE_HEIGHT+6);
       _mask_pause (cr_surf,
@@ -1647,9 +1647,10 @@ draw (GtkWidget* button, cairo_t *cr)
            TRUE);
     _finalize (cr, &cr_surf, &surf, PAUSE_X, PAUSE_Y);
   }
-  else if(priv->current_state == PAUSE)
+  else if(priv->current_state == TRANSPORT_STATE_PAUSED)
   {
-    if (priv->has_focus && (priv->key_event == TRANSPORT_NADA || priv->key_event == TRANSPORT_PLAY_PAUSE))
+    if (priv->has_focus && (priv->key_event == TRANSPORT_ACTION_NO_ACTION ||
+        priv->key_event == TRANSPORT_ACTION_PLAY_PAUSE))
     {
       _setup (&cr_surf, &surf, PLAY_WIDTH+6, PLAY_HEIGHT+6);
       _mask_play (cr_surf, 
@@ -1718,11 +1719,11 @@ transport_widget_set_twin_item(TransportWidget* self,
     priv->twin_item = twin_item;
     g_signal_connect(G_OBJECT(priv->twin_item), "property-changed", 
                               G_CALLBACK(transport_widget_property_update), self);
-    gint initial_state = dbusmenu_menuitem_property_get_int( twin_item,
+    gint initial_state = dbusmenu_menuitem_property_get_int (twin_item,
                                                              DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE );
     //g_debug("TRANSPORT WIDGET - INITIAL UPDATE = %i", initial_state);
-    transport_widget_toggle_play_pause( self,
-                                        (TransportWidgetState)initial_state);       
+    transport_widget_toggle_play_pause (self,
+                                       (TransportState)initial_state);
 }
 
 /**
@@ -1741,7 +1742,7 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
   {
     int update_value = g_variant_get_int32(value);
     //g_debug("transport_widget_update_state - with value  %i", update_value);  
-    transport_widget_toggle_play_pause(bar, (TransportWidgetState)update_value);    
+    transport_widget_toggle_play_pause(bar, (TransportState)update_value);
   }
 }
 
