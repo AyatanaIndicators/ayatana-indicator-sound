@@ -49,10 +49,14 @@ public class PlaylistsMenuitem : PlayerItem
       menuitem.property_set (MENUITEM_PROP_LABEL, detail.name);
 
       var icon_file = File.new_for_path (detail.icon_path);
-      if (icon_file.query_exists () == true) {
-        debug ("icon name = %s", icon_file.get_basename ());
+
+      if (icon_file.get_basename () != null) {
+        debug ("icon name = %s", icon_file.get_basename().split(".")[0]);
         menuitem.property_set (MENUITEM_PROP_ICON_NAME,
-                               icon_file.get_basename () );
+                               icon_file.get_basename().split(".")[0]);
+      }
+      // TODO: Make sure to set a stock playlist image
+      else{
       }
       menuitem.property_set (MENUITEM_PROP_ICON_NAME, detail.icon_path);
       menuitem.property_set (MENUITEM_PATH, (string)detail.path);
