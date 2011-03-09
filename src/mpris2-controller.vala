@@ -176,7 +176,7 @@ public class Mpris2Controller : GLib.Object
 
   public void transport_update(TransportMenuitem.action command)
   {
-    debug("transport_event input = %i", (int)command);
+    //debug("transport_event input = %i", (int)command);
     if(command == TransportMenuitem.action.PLAY_PAUSE){
       this.player.PlayPause.begin();              
     }
@@ -187,10 +187,12 @@ public class Mpris2Controller : GLib.Object
       this.player.Next.begin();
     }
     else if(command == TransportMenuitem.action.REWIND){
-     this.player.Seek.begin(-1);
+     debug("transport_event rewind = %i", (int)command);
+     this.player.Seek.begin(-500000);
     }
     else if(command == TransportMenuitem.action.FORWIND){
-     this.player.Seek.begin(1);
+     debug("transport_event input = %i", (int)command);
+     this.player.Seek.begin(350000);
     }
   }
 

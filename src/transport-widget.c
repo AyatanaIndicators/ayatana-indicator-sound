@@ -346,7 +346,7 @@ transport_widget_trigger_seek (gpointer userdata)
 {
   g_return_val_if_fail ( IS_TRANSPORT_WIDGET(userdata), FALSE );
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE (TRANSPORT_WIDGET(userdata));
-  priv->skip_frequency = g_timeout_add (300,
+  priv->skip_frequency = g_timeout_add (100,
                                         transport_widget_seek,
                                         userdata);
   return FALSE;
