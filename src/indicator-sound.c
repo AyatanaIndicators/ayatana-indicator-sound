@@ -640,3 +640,17 @@ indicator_sound_scroll (IndicatorObject *io, gint delta,
 
   sound_state_manager_show_notification (priv->state_manager, value);
 }
+
+void
+update_accessible_desc (IndicatorObject * io)
+{
+  GList *entries = indicator_object_get_entries(io);
+  IndicatorObjectEntry * entry = (IndicatorObjectEntry *)entries->data;
+  entry->accessible_desc = get_accessible_desc(io);
+  g_signal_emit(G_OBJECT(io),
+                INDICATOR_OBJECT_SIGNAL_ACCESSIBLE_DESC_UPDATE_ID,
+                0,
+                entry,
+                TRUE);
+  g_list_free(entries);
+}
