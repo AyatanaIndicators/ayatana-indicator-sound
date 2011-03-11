@@ -92,10 +92,11 @@ handle_event (DbusmenuMenuitem * mi,
     input = g_variant_get_variant(value);
   }
 
-  gboolean volume_input = g_variant_get_double(input);
   if (value != NULL){
     if (IS_SLIDER_MENU_ITEM (mi)) {
       SliderMenuItemPrivate* priv = SLIDER_MENU_ITEM_GET_PRIVATE (SLIDER_MENU_ITEM (mi));
+      gdouble volume_input = g_variant_get_double(input);
+      //g_debug ("slider menu item about to update volume %f", volume_input);
       active_sink_update_volume (priv->a_sink, volume_input);
       active_sink_ensure_sink_is_unmuted (priv->a_sink);      
     }    
