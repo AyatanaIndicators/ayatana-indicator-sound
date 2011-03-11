@@ -84,10 +84,7 @@ public class PlaylistsMenuitem : PlayerItem
 
   private string? parse_icon_path (string path)  
   {
-    if (path == "")return null;
-    var icon_file = File.new_for_path (path);
-    if (icon_file.get_path() == null)return null;
-    return icon_file.get_basename().split(".")[0];
+    return ( path == "" ? null : Path.get_basename(path).split(".")[0] );
   }
 
   public void update_individual_playlist (PlaylistDetails new_detail)
