@@ -87,6 +87,8 @@ struct _TransportWidgetPrivate
   gint                skip_frequency;
 };
 
+// TODO refactor the UI handlers, consolidate functionality between key press /release
+// and button press / release.
 #define TRANSPORT_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TRANSPORT_WIDGET_TYPE, TransportWidgetPrivate))
 
 /* Gobject boiler plate */
@@ -295,6 +297,14 @@ transport_widget_motion_notify_event (GtkWidget *menuitem,
                                                                             event);
   priv->motion_event = result;
   gtk_widget_queue_draw (menuitem);
+  if (priv->hold_timer != 0){
+    g_source_remove (priv->hold_timer);
+    priv->hold_timer = 0;
+  }
+  if(priv->skip_frequency != 0){
+    g_source_remove (priv->skip_frequency);
+    priv->skip_frequency = 0;
+  }
   return TRUE;
 }
 
@@ -323,7 +333,10 @@ transport_widget_button_press_event (GtkWidget *menuitem,
   if(result != TRANSPORT_ACTION_NO_ACTION){
     priv->current_command = result;
     gtk_widget_queue_draw (GTK_WIDGET(menuitem));
-    transport_widget_start_timing (TRANSPORT_WIDGET(menuitem));
+    if (priv->current_command == TRANSPORT_ACTION_PREVIOUS ||
+        priv->current_command == TRANSPORT_ACTION_NEXT){
+      transport_widget_start_timing (TRANSPORT_WIDGET(menuitem));
+    }
   }
   return TRUE;
 }
@@ -335,9 +348,11 @@ static void
 transport_widget_start_timing (TransportWidget* widget)
 {
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE (widget);
-  priv->hold_timer = g_timeout_add (800,
-                                    transport_widget_trigger_seek,
-                                    widget);
+  if (priv->hold_timer == 0){
+    priv->hold_timer = g_timeout_add (800,
+                                      transport_widget_trigger_seek,
+                                      widget);
+  }
 }
 
 static gboolean
@@ -345,9 +360,12 @@ transport_widget_trigger_seek (gpointer userdata)
 {
   g_return_val_if_fail ( IS_TRANSPORT_WIDGET(userdata), FALSE );
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE (TRANSPORT_WIDGET(userdata));
-  priv->skip_frequency = g_timeout_add (100,
-                                        transport_widget_seek,
-                                        userdata);
+  if (priv->skip_frequency == 0){
+    priv->skip_frequency = g_timeout_add (100,
+                                          transport_widget_seek,
+                                          userdata);
+  }
+  priv->hold_timer = 0;
   return FALSE;
 }
 
@@ -363,7 +381,7 @@ transport_widget_seek (gpointer userdata)
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE (TRANSPORT_WIDGET(userdata));
   GVariant* new_transport_state;
   if(priv->current_command ==  TRANSPORT_ACTION_NEXT){
-    g_debug ("we should be skipping forward");
+    //g_debug ("we should be skipping forward");
     new_transport_state = g_variant_new_int32 ((int)TRANSPORT_ACTION_FORWIND);
 
     dbusmenu_menuitem_handle_event ( priv->twin_item,
@@ -373,7 +391,7 @@ transport_widget_seek (gpointer userdata)
 
   }
   else if(priv->current_command ==  TRANSPORT_ACTION_PREVIOUS){
-    g_debug ("we should be skipping back");
+    //g_debug ("we should be skipping back");
     new_transport_state = g_variant_new_int32 ((int)TRANSPORT_ACTION_REWIND);
 
     dbusmenu_menuitem_handle_event ( priv->twin_item,
@@ -434,6 +452,10 @@ transport_widget_react_to_key_press_event ( TransportWidget* transport,
     priv->key_event = transport_event;
     gtk_widget_realize ( GTK_WIDGET(transport) );
     gtk_widget_queue_draw (GTK_WIDGET(transport) );
+    if (priv->current_command == TRANSPORT_ACTION_PREVIOUS ||
+        priv->current_command == TRANSPORT_ACTION_NEXT){
+      transport_widget_start_timing (transport);
+    }
   } 
 }
 
@@ -443,11 +465,13 @@ transport_widget_react_to_key_release_event ( TransportWidget* transport,
 {
   if(transport_event != TRANSPORT_ACTION_NO_ACTION){
     TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport );     
-    GVariant* new_transport_event = g_variant_new_int32((int)transport_event);  
-    dbusmenu_menuitem_handle_event ( priv->twin_item,
-                                     "Transport state change",
-                                     new_transport_event,
-                                     0 );
+    GVariant* new_transport_event = g_variant_new_int32((int)transport_event);
+    if (priv->skip_frequency == 0){
+      dbusmenu_menuitem_handle_event ( priv->twin_item,
+                                       "Transport state change",
+                                       new_transport_event,
+                                       0 );
+    }
   }
   transport_widget_react_to_button_release ( transport,
                                              transport_event );  
