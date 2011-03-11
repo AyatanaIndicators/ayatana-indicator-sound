@@ -48,12 +48,11 @@ public class PlaylistsMenuitem : PlayerItem
       Dbusmenu.Menuitem menuitem = new Menuitem();
       menuitem.property_set (MENUITEM_PROP_LABEL, detail.name);
       var result = this.parse_icon_path (detail.icon_path);
+
       if (result != null) {
-        menuitem.property_set (MENUITEM_PROP_ICON_NAME, result);
+       menuitem.property_set (MENUITEM_PROP_ICON_NAME, result);
       }
-      // TODO: Make sure to set a stock playlist image
-      else{
-      }
+
       menuitem.property_set (MENUITEM_PATH, (string)detail.path);
       menuitem.property_set_bool (MENUITEM_PROP_VISIBLE, true);
       menuitem.property_set_bool (MENUITEM_PROP_ENABLED, true);
@@ -85,11 +84,9 @@ public class PlaylistsMenuitem : PlayerItem
 
   private string? parse_icon_path (string path)  
   {
+    if (path == "")return null;
     var icon_file = File.new_for_path (path);
-
-    if (icon_file.get_basename() == null)return null;
-
-    debug ("icon name = %s", icon_file.get_basename().split(".")[0]);
+    if (icon_file.get_path() == null)return null;
     return icon_file.get_basename().split(".")[0];
   }
 
