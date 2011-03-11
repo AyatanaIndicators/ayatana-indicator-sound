@@ -33,6 +33,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <common-defs.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gio/gio.h>
 
 
 #define TYPE_PLAYER_ITEM (player_item_get_type ())
@@ -153,6 +154,7 @@ void playlists_menuitem_update (PlaylistsMenuitem* self, PlaylistDetails* playli
 static Block1Data* block1_data_ref (Block1Data* _data1_);
 static void block1_data_unref (Block1Data* _data1_);
 static gboolean playlists_menuitem_already_observed (PlaylistsMenuitem* self, PlaylistDetails* new_detail);
+static gchar* playlists_menuitem_parse_icon_path (PlaylistsMenuitem* self, const gchar* path);
 static void _lambda1_ (Block1Data* _data1_);
 static void playlists_menuitem_submenu_item_activated (PlaylistsMenuitem* self, gint menu_item_id);
 static void __lambda1__dbusmenu_menuitem_item_activated (DbusmenuMenuitem* _sender, guint timestamp, gpointer self);
@@ -164,6 +166,9 @@ void mpris2_controller_activate_playlist (Mpris2Controller* self, const char* pa
 GeeHashSet* playlists_menuitem_attributes_format (void);
 static GObject * playlists_menuitem_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
 static void playlists_menuitem_finalize (GObject* obj);
+static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNotify destroy_func);
+static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify destroy_func);
+static gint _vala_array_length (gpointer array);
 
 
 PlaylistsMenuitem* playlists_menuitem_construct (GType object_type, PlayerController* parent) {
@@ -226,7 +231,9 @@ void playlists_menuitem_update (PlaylistsMenuitem* self, PlaylistDetails* playli
 				Block1Data* _data1_;
 				gboolean _tmp2_;
 				DbusmenuMenuitem* _tmp3_ = NULL;
-				gint _tmp4_;
+				gchar* _tmp4_ = NULL;
+				gchar* _result_;
+				gint _tmp5_;
 				_data1_ = g_slice_new0 (Block1Data);
 				_data1_->_ref_count_ = 1;
 				_data1_->self = g_object_ref (self);
@@ -240,14 +247,19 @@ void playlists_menuitem_update (PlaylistsMenuitem* self, PlaylistDetails* playli
 				_tmp3_ = dbusmenu_menuitem_new ();
 				_data1_->menuitem = _tmp3_;
 				dbusmenu_menuitem_property_set (_data1_->menuitem, DBUSMENU_MENUITEM_PROP_LABEL, detail.name);
-				dbusmenu_menuitem_property_set (_data1_->menuitem, DBUSMENU_MENUITEM_PROP_ICON_NAME, detail.icon_path);
+				_tmp4_ = playlists_menuitem_parse_icon_path (self, detail.icon_path);
+				_result_ = _tmp4_;
+				if (_result_ != NULL) {
+					dbusmenu_menuitem_property_set (_data1_->menuitem, DBUSMENU_MENUITEM_PROP_ICON_NAME, (const gchar*) _result_);
+				}
 				dbusmenu_menuitem_property_set (_data1_->menuitem, DBUSMENU_PLAYLIST_MENUITEM_PATH, (const gchar*) detail.path);
 				dbusmenu_menuitem_property_set_bool (_data1_->menuitem, DBUSMENU_MENUITEM_PROP_VISIBLE, TRUE);
 				dbusmenu_menuitem_property_set_bool (_data1_->menuitem, DBUSMENU_MENUITEM_PROP_ENABLED, TRUE);
 				g_signal_connect_data (_data1_->menuitem, "item-activated", (GCallback) __lambda1__dbusmenu_menuitem_item_activated, block1_data_ref (_data1_), (GClosureNotify) block1_data_unref, 0);
-				_tmp4_ = dbusmenu_menuitem_get_id (_data1_->menuitem);
-				gee_abstract_map_set ((GeeAbstractMap*) self->priv->current_playlists, GINT_TO_POINTER (_tmp4_), _data1_->menuitem);
+				_tmp5_ = dbusmenu_menuitem_get_id (_data1_->menuitem);
+				gee_abstract_map_set ((GeeAbstractMap*) self->priv->current_playlists, GINT_TO_POINTER (_tmp5_), _data1_->menuitem);
 				dbusmenu_menuitem_child_append (self->root_item, _data1_->menuitem);
+				_g_free0 (_result_);
 				playlist_details_destroy (&detail);
 				block1_data_unref (_data1_);
 				_data1_ = NULL;
@@ -255,26 +267,26 @@ void playlists_menuitem_update (PlaylistsMenuitem* self, PlaylistDetails* playli
 		}
 	}
 	{
-		GeeCollection* _tmp5_ = NULL;
-		GeeCollection* _tmp6_;
-		GeeIterator* _tmp7_ = NULL;
-		GeeIterator* _tmp8_;
+		GeeCollection* _tmp6_ = NULL;
+		GeeCollection* _tmp7_;
+		GeeIterator* _tmp8_ = NULL;
+		GeeIterator* _tmp9_;
 		GeeIterator* _item_it;
-		_tmp5_ = gee_map_get_values ((GeeMap*) self->priv->current_playlists);
-		_tmp6_ = _tmp5_;
-		_tmp7_ = gee_iterable_iterator ((GeeIterable*) _tmp6_);
-		_item_it = (_tmp8_ = _tmp7_, _g_object_unref0 (_tmp6_), _tmp8_);
+		_tmp6_ = gee_map_get_values ((GeeMap*) self->priv->current_playlists);
+		_tmp7_ = _tmp6_;
+		_tmp8_ = gee_iterable_iterator ((GeeIterable*) _tmp7_);
+		_item_it = (_tmp9_ = _tmp8_, _g_object_unref0 (_tmp7_), _tmp9_);
 		while (TRUE) {
-			gboolean _tmp9_;
-			gpointer _tmp10_ = NULL;
+			gboolean _tmp10_;
+			gpointer _tmp11_ = NULL;
 			DbusmenuMenuitem* item;
 			gboolean within;
-			_tmp9_ = gee_iterator_next (_item_it);
-			if (!_tmp9_) {
+			_tmp10_ = gee_iterator_next (_item_it);
+			if (!_tmp10_) {
 				break;
 			}
-			_tmp10_ = gee_iterator_get (_item_it);
-			item = (DbusmenuMenuitem*) _tmp10_;
+			_tmp11_ = gee_iterator_get (_item_it);
+			item = (DbusmenuMenuitem*) _tmp11_;
 			within = FALSE;
 			{
 				PlaylistDetails* detail_collection;
@@ -283,15 +295,15 @@ void playlists_menuitem_update (PlaylistsMenuitem* self, PlaylistDetails* playli
 				detail_collection = playlists;
 				detail_collection_length1 = playlists_length1;
 				for (detail_it = 0; detail_it < playlists_length1; detail_it = detail_it + 1) {
-					PlaylistDetails _tmp11_;
-					PlaylistDetails _tmp12_ = {0};
+					PlaylistDetails _tmp12_;
+					PlaylistDetails _tmp13_ = {0};
 					PlaylistDetails detail;
-					_tmp11_ = (playlist_details_copy (&detail_collection[detail_it], &_tmp12_), _tmp12_);
-					detail = _tmp11_;
+					_tmp12_ = (playlist_details_copy (&detail_collection[detail_it], &_tmp13_), _tmp13_);
+					detail = _tmp12_;
 					{
-						const gchar* _tmp13_ = NULL;
-						_tmp13_ = dbusmenu_menuitem_property_get (item, DBUSMENU_PLAYLIST_MENUITEM_PATH);
-						if (g_strcmp0 (detail.path, _tmp13_) == 0) {
+						const gchar* _tmp14_ = NULL;
+						_tmp14_ = dbusmenu_menuitem_property_get (item, DBUSMENU_PLAYLIST_MENUITEM_PATH);
+						if (g_strcmp0 (detail.path, _tmp14_) == 0) {
 							within = TRUE;
 							playlist_details_destroy (&detail);
 							break;
@@ -301,11 +313,11 @@ void playlists_menuitem_update (PlaylistsMenuitem* self, PlaylistDetails* playli
 				}
 			}
 			if (within == FALSE) {
-				const gchar* _tmp14_ = NULL;
 				const gchar* _tmp15_ = NULL;
-				_tmp14_ = dbusmenu_menuitem_property_get (self->root_item, DBUSMENU_PLAYLIST_MENUITEM_PATH);
-				_tmp15_ = dbusmenu_menuitem_property_get (item, DBUSMENU_PLAYLIST_MENUITEM_PATH);
-				if (g_strcmp0 (_tmp14_, _tmp15_) == 0) {
+				const gchar* _tmp16_ = NULL;
+				_tmp15_ = dbusmenu_menuitem_property_get (self->root_item, DBUSMENU_PLAYLIST_MENUITEM_PATH);
+				_tmp16_ = dbusmenu_menuitem_property_get (item, DBUSMENU_PLAYLIST_MENUITEM_PATH);
+				if (g_strcmp0 (_tmp15_, _tmp16_) == 0) {
 					dbusmenu_menuitem_property_set (self->root_item, DBUSMENU_MENUITEM_PROP_LABEL, "Choose Playlist");
 				}
 				dbusmenu_menuitem_child_delete (self->root_item, item);
@@ -317,8 +329,50 @@ void playlists_menuitem_update (PlaylistsMenuitem* self, PlaylistDetails* playli
 }
 
 
+static gchar* playlists_menuitem_parse_icon_path (PlaylistsMenuitem* self, const gchar* path) {
+	gchar* result = NULL;
+	GFile* _tmp0_ = NULL;
+	GFile* icon_file;
+	gchar* _tmp1_ = NULL;
+	gchar* _tmp2_;
+	gboolean _tmp3_;
+	gchar* _tmp4_ = NULL;
+	gchar* _tmp5_;
+	gchar** _tmp6_;
+	gchar** _tmp7_ = NULL;
+	gchar** _tmp8_;
+	gint _tmp8__length1;
+	gchar* _tmp9_;
+	gchar* _tmp10_;
+	g_return_val_if_fail (self != NULL, NULL);
+	g_return_val_if_fail (path != NULL, NULL);
+	if (g_strcmp0 (path, "") == 0) {
+		result = NULL;
+		return result;
+	}
+	_tmp0_ = g_file_new_for_path (path);
+	icon_file = _tmp0_;
+	_tmp1_ = g_file_get_path (icon_file);
+	_tmp2_ = _tmp1_;
+	if ((_tmp3_ = _tmp2_ == NULL, _g_free0 (_tmp2_), _tmp3_)) {
+		result = NULL;
+		_g_object_unref0 (icon_file);
+		return result;
+	}
+	_tmp4_ = g_file_get_basename (icon_file);
+	_tmp5_ = _tmp4_;
+	_tmp7_ = _tmp6_ = g_strsplit (_tmp5_, ".", 0);
+	_tmp8_ = _tmp7_;
+	_tmp8__length1 = _vala_array_length (_tmp6_);
+	_tmp9_ = g_strdup (_tmp8_[0]);
+	result = (_tmp10_ = _tmp9_, _tmp8_ = (_vala_array_free (_tmp8_, _tmp8__length1, (GDestroyNotify) g_free), NULL), _g_free0 (_tmp5_), _tmp10_);
+	_g_object_unref0 (icon_file);
+	return result;
+}
+
+
 void playlists_menuitem_update_individual_playlist (PlaylistsMenuitem* self, PlaylistDetails* new_detail) {
-	const gchar* _tmp7_ = NULL;
+	const gchar* _tmp8_ = NULL;
 	g_return_if_fail (self != NULL);
 	{
 		GeeCollection* _tmp0_ = NULL;
@@ -343,15 +397,22 @@ void playlists_menuitem_update_individual_playlist (PlaylistsMenuitem* self, Pla
 			item = (DbusmenuMenuitem*) _tmp5_;
 			_tmp6_ = dbusmenu_menuitem_property_get (item, DBUSMENU_PLAYLIST_MENUITEM_PATH);
 			if (g_strcmp0 ((*new_detail).path, _tmp6_) == 0) {
+				gchar* _tmp7_ = NULL;
+				gchar* _result_;
 				dbusmenu_menuitem_property_set (item, DBUSMENU_MENUITEM_PROP_LABEL, (*new_detail).name);
-				dbusmenu_menuitem_property_set (item, DBUSMENU_MENUITEM_PROP_ICON_NAME, (*new_detail).icon_path);
+				_tmp7_ = playlists_menuitem_parse_icon_path (self, (*new_detail).icon_path);
+				_result_ = _tmp7_;
+				if (_result_ != NULL) {
+					dbusmenu_menuitem_property_set (item, DBUSMENU_MENUITEM_PROP_ICON_NAME, _result_);
+				}
+				_g_free0 (_result_);
 			}
 			_g_object_unref0 (item);
 		}
 		_g_object_unref0 (_item_it);
 	}
-	_tmp7_ = dbusmenu_menuitem_property_get (self->root_item, DBUSMENU_PLAYLIST_MENUITEM_PATH);
-	if (g_strcmp0 (_tmp7_, (*new_detail).path) == 0) {
+	_tmp8_ = dbusmenu_menuitem_property_get (self->root_item, DBUSMENU_PLAYLIST_MENUITEM_PATH);
+	if (g_strcmp0 (_tmp8_, (*new_detail).path) == 0) {
 		dbusmenu_menuitem_property_set (self->root_item, DBUSMENU_MENUITEM_PROP_LABEL, (*new_detail).name);
 	}
 }
@@ -432,7 +493,7 @@ static void playlists_menuitem_submenu_item_activated (PlaylistsMenuitem* self, 
 	g_return_if_fail (self != NULL);
 	_tmp0_ = gee_abstract_map_has_key ((GeeAbstractMap*) self->priv->current_playlists, GINT_TO_POINTER (menu_item_id));
 	if (!_tmp0_) {
-		g_warning ("playlists-menu-item.vala:114: item %i was activated but we don't have " \
+		g_warning ("playlists-menu-item.vala:129: item %i was activated but we don't have " \
 "a corresponding playlist", menu_item_id);
 		return;
 	}
@@ -514,6 +575,36 @@ GType playlists_menuitem_get_type (void) {
 		g_once_init_leave (&playlists_menuitem_type_id__volatile, playlists_menuitem_type_id);
 	}
 	return playlists_menuitem_type_id__volatile;
+}
+
+
+static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNotify destroy_func) {
+	if ((array != NULL) && (destroy_func != NULL)) {
+		int i;
+		for (i = 0; i < array_length; i = i + 1) {
+			if (((gpointer*) array)[i] != NULL) {
+				destroy_func (((gpointer*) array)[i]);
+			}
+		}
+	}
+}
+
+
+static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify destroy_func) {
+	_vala_array_destroy (array, array_length, destroy_func);
+	g_free (array);
+}
+
+
+static gint _vala_array_length (gpointer array) {
+	int length;
+	length = 0;
+	if (array) {
+		while (((gpointer*) array)[length]) {
+			length++;
+		}
+	}
+	return length;
 }
 
 

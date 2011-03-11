@@ -128,6 +128,7 @@ volume_widget_property_update( DbusmenuMenuitem* item, gchar* property,
                                GVariant* value, gpointer userdata)
 { 
   g_return_if_fail (IS_VOLUME_WIDGET (userdata)); 
+  g_return_if_fail (g_variant_is_of_type (value, G_VARIANT_TYPE_DOUBLE) );
   VolumeWidget* mitem = VOLUME_WIDGET(userdata);
   VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(mitem);
   //g_debug("scrub-widget::property_update for prop %s", property); 
@@ -136,16 +137,8 @@ volume_widget_property_update( DbusmenuMenuitem* item, gchar* property,
       GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
       GtkRange *range = (GtkRange*)slider;
       gdouble update = g_variant_get_double (value);
-      //g_debug("volume-widget - update level with value %f", update);
       gtk_range_set_value(range, update);
-
-      GList *entry = indicator_object_get_entries(priv->indicator);
-      g_signal_emit(G_OBJECT(priv->indicator),
-                    INDICATOR_OBJECT_SIGNAL_ACCESSIBLE_DESC_UPDATE_ID,
-                    0,
-                    entry->data,
-                    TRUE);
-      g_list_free(entry);
+      update_accessible_desc(priv->indicator);
     }
   }
 }
@@ -165,25 +158,19 @@ volume_widget_set_twin_item(VolumeWidget* self,
   GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
   GtkRange *range = (GtkRange*)slider;
   gtk_range_set_value(range, initial_level);
-
-  GList *entry = indicator_object_get_entries(priv->indicator);
-  g_signal_emit(G_OBJECT(priv->indicator),
-                INDICATOR_OBJECT_SIGNAL_ACCESSIBLE_DESC_UPDATE_ID,
-                0,
-                entry->data,
-                TRUE);
-  g_list_free(entry);
+  update_accessible_desc(priv->indicator);
 }
 
 static gboolean
 volume_widget_change_value_cb (GtkRange     *range,
-                              GtkScrollType scroll,
-                              gdouble       new_value,
-                              gpointer      user_data)
+                               GtkScrollType scroll,
+                               gdouble       new_value,
+                               gpointer      user_data)
 {
   g_return_val_if_fail (IS_VOLUME_WIDGET (user_data), FALSE);
   VolumeWidget* mitem = VOLUME_WIDGET(user_data);
-  volume_widget_update(mitem, new_value); 
+  //g_debug ("changed value %f", new_value);
+  volume_widget_update(mitem, new_value);
   return FALSE;
 }
 
@@ -192,17 +179,19 @@ volume_widget_change_value_cb (GtkRange     *range,
  which set the slider to 0 or 100. Ignore all other events.
 */ 
 static gboolean
-volume_widget_value_changed_cb(GtkRange *range, gpointer user_data)
+volume_widget_value_changed_cb (GtkRange *range, gpointer user_data)
 {
+
   g_return_val_if_fail (IS_VOLUME_WIDGET (user_data), FALSE);
   VolumeWidget* mitem = VOLUME_WIDGET(user_data);
   VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(mitem);
-  GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);  
+  GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
   gdouble current_value =  CLAMP(gtk_range_get_value(GTK_RANGE(slider)), 0, 100);
-  
+  //g_debug ("value changed %f", gtk_range_get_value(GTK_RANGE(slider)));
   if(current_value == 0 || current_value == 100){
     volume_widget_update(mitem, current_value);
   }
+
   return FALSE;
 }
 

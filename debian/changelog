@@ -1,3 +1,19 @@
+indicator-sound (0.6.3-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Broken images on playlist items (LP: #727325)
+    - wrong icon for audio-input slider (LP: #723254)
+    - blacklist dbus api lacks query functionality (LP: #730526)
+    - volume goes to zero when using some players like banshee, 
+      rhythmbox (LP: #730925)
+    - holding the FW or RW button should have an effect (LP: #694258)
+    - With new notify-osd the volume notification on scroll doesn't work as 
+      expected (LP: #729849)
+  * debian/control
+    - Bumped build depends for dbusmenu to >= 0.3.101
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 11 Mar 2011 12:47:26 -0500
+
 indicator-sound (0.6.2-0ubuntu1) natty; urgency=low
 
   * New upstream release.
