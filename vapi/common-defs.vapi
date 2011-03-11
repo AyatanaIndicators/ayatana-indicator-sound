@@ -41,14 +41,6 @@ namespace DbusmenuTitle{
 }
 
 [CCode (cheader_filename = "common-defs.h")]
-namespace DbusmenuScrub{
-        public const string MENUITEM_TYPE;
-        public const string MENUITEM_POSITION;
-        public const string MENUITEM_DURATION;
-        public const string MENUITEM_PLAY_STATE;
-}
-
-[CCode (cheader_filename = "common-defs.h")]
 namespace DbusmenuPlaylists{
         public const string MENUITEM_TYPE;
         public const string MENUITEM_TITLE;
@@ -57,4 +49,20 @@ namespace DbusmenuPlaylists{
 [CCode (cheader_filename = "common-defs.h")]
 namespace DbusmenuPlaylist{
         public const string MENUITEM_PATH;
+}
+
+
+[CCode (cprefix ="Transport", cheader_filename = "common-defs.h")]
+namespace Transport{
+  public enum Action{
+    PREVIOUS,
+    PLAY_PAUSE,
+    NEXT,
+    REWIND,
+    FORWIND
+  }
+  public enum State{
+    PLAYING,
+    PAUSED
+  }
 }

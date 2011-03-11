@@ -96,6 +96,8 @@ struct _MprisPlayerIface {
 	void (*Next_finish) (MprisPlayer* self, GAsyncResult* _res_, GError** error);
 	void (*Previous) (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
 	void (*Previous_finish) (MprisPlayer* self, GAsyncResult* _res_, GError** error);
+	void (*Seek) (MprisPlayer* self, gint64 offset, GAsyncReadyCallback _callback_, gpointer _user_data_);
+	void (*Seek_finish) (MprisPlayer* self, GAsyncResult* _res_, GError** error);
 	GHashTable* (*get_Metadata) (MprisPlayer* self);
 	void (*set_Metadata) (MprisPlayer* self, GHashTable* value);
 	gint32 (*get_Position) (MprisPlayer* self);
@@ -194,6 +196,8 @@ void mpris_player_Next (MprisPlayer* self, GAsyncReadyCallback _callback_, gpoin
 void mpris_player_Next_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
 void mpris_player_Previous (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
 void mpris_player_Previous_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
+void mpris_player_Seek (MprisPlayer* self, gint64 offset, GAsyncReadyCallback _callback_, gpointer _user_data_);
+void mpris_player_Seek_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
 GHashTable* mpris_player_get_Metadata (MprisPlayer* self);
 void mpris_player_set_Metadata (MprisPlayer* self, GHashTable* value);
 gint32 mpris_player_get_Position (MprisPlayer* self);
@@ -209,6 +213,8 @@ static void mpris_player_proxy_Next_async (MprisPlayer* self, GAsyncReadyCallbac
 static void mpris_player_proxy_Next_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
 static void mpris_player_proxy_Previous_async (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
 static void mpris_player_proxy_Previous_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
+static void mpris_player_proxy_Seek_async (MprisPlayer* self, gint64 offset, GAsyncReadyCallback _callback_, gpointer _user_data_);
+static void mpris_player_proxy_Seek_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
 static GHashTable* mpris_player_dbus_proxy_get_Metadata (MprisPlayer* self);
 static void mpris_player_dbus_proxy_set_Metadata (MprisPlayer* self, GHashTable* value);
 static gint32 mpris_player_dbus_proxy_get_Position (MprisPlayer* self);
@@ -222,6 +228,8 @@ static void _dbus_mpris_player_Next (MprisPlayer* self, GVariant* parameters, GD
 static void _dbus_mpris_player_Next_ready (GObject * source_object, GAsyncResult * _res_, gpointer _user_data_);
 static void _dbus_mpris_player_Previous (MprisPlayer* self, GVariant* parameters, GDBusMethodInvocation* invocation);
 static void _dbus_mpris_player_Previous_ready (GObject * source_object, GAsyncResult * _res_, gpointer _user_data_);
+static void _dbus_mpris_player_Seek (MprisPlayer* self, GVariant* parameters, GDBusMethodInvocation* invocation);
+static void _dbus_mpris_player_Seek_ready (GObject * source_object, GAsyncResult * _res_, gpointer _user_data_);
 static void mpris_player_dbus_interface_method_call (GDBusConnection* connection, const gchar* sender, const gchar* object_path, const gchar* interface_name, const gchar* method_name, GVariant* parameters, GDBusMethodInvocation* invocation, gpointer user_data);
 static GVariant* mpris_player_dbus_interface_get_property (GDBusConnection* connection, const gchar* sender, const gchar* object_path, const gchar* interface_name, const gchar* property_name, GError** error, gpointer user_data);
 static GVariant* _dbus_mpris_player_get_Metadata (MprisPlayer* self);
@@ -314,7 +322,11 @@ static const GDBusMethodInfo _mpris_player_dbus_method_info_Next = {-1, "Next", 
 static const GDBusArgInfo * const _mpris_player_dbus_arg_info_Previous_in[] = {NULL};
 static const GDBusArgInfo * const _mpris_player_dbus_arg_info_Previous_out[] = {NULL};
 static const GDBusMethodInfo _mpris_player_dbus_method_info_Previous = {-1, "Previous", (GDBusArgInfo **) (&_mpris_player_dbus_arg_info_Previous_in), (GDBusArgInfo **) (&_mpris_player_dbus_arg_info_Previous_out)};
-static const GDBusMethodInfo * const _mpris_player_dbus_method_info[] = {&_mpris_player_dbus_method_info_PlayPause, &_mpris_player_dbus_method_info_Next, &_mpris_player_dbus_method_info_Previous, NULL};
+static const GDBusArgInfo _mpris_player_dbus_arg_info_Seek_offset = {-1, "offset", "x"};
+static const GDBusArgInfo * const _mpris_player_dbus_arg_info_Seek_in[] = {&_mpris_player_dbus_arg_info_Seek_offset, NULL};
+static const GDBusArgInfo * const _mpris_player_dbus_arg_info_Seek_out[] = {NULL};
+static const GDBusMethodInfo _mpris_player_dbus_method_info_Seek = {-1, "Seek", (GDBusArgInfo **) (&_mpris_player_dbus_arg_info_Seek_in), (GDBusArgInfo **) (&_mpris_player_dbus_arg_info_Seek_out)};
+static const GDBusMethodInfo * const _mpris_player_dbus_method_info[] = {&_mpris_player_dbus_method_info_PlayPause, &_mpris_player_dbus_method_info_Next, &_mpris_player_dbus_method_info_Previous, &_mpris_player_dbus_method_info_Seek, NULL};
 static const GDBusArgInfo _mpris_player_dbus_arg_info_seeked_new_position = {-1, "new_position", "x"};
 static const GDBusArgInfo * const _mpris_player_dbus_arg_info_seeked[] = {&_mpris_player_dbus_arg_info_seeked_new_position, NULL};
 static const GDBusSignalInfo _mpris_player_dbus_signal_info_seeked = {-1, "Seeked", (GDBusArgInfo **) (&_mpris_player_dbus_arg_info_seeked)};
@@ -1015,6 +1027,16 @@ void mpris_player_Previous_finish (MprisPlayer* self, GAsyncResult* _res_, GErro
 }
 
 
+void mpris_player_Seek (MprisPlayer* self, gint64 offset, GAsyncReadyCallback _callback_, gpointer _user_data_) {
+	MPRIS_PLAYER_GET_INTERFACE (self)->Seek (self, offset, _callback_, _user_data_);
+}
+
+
+void mpris_player_Seek_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error) {
+	MPRIS_PLAYER_GET_INTERFACE (self)->Seek_finish (self, _res_, error);
+}
+
+
 GHashTable* mpris_player_get_Metadata (MprisPlayer* self) {
 	return MPRIS_PLAYER_GET_INTERFACE (self)->get_Metadata (self);
 }
@@ -1202,6 +1224,35 @@ static void mpris_player_proxy_Previous_finish (MprisPlayer* self, GAsyncResult*
 }
 
 
+static void mpris_player_proxy_Seek_async (MprisPlayer* self, gint64 offset, GAsyncReadyCallback _callback_, gpointer _user_data_) {
+	GDBusMessage *_message;
+	GVariant *_arguments;
+	GVariantBuilder _arguments_builder;
+	G_IO_ERROR;
+	_message = g_dbus_message_new_method_call (g_dbus_proxy_get_name ((GDBusProxy *) self), g_dbus_proxy_get_object_path ((GDBusProxy *) self), "org.mpris.MediaPlayer2.Player", "Seek");
+	g_variant_builder_init (&_arguments_builder, G_VARIANT_TYPE_TUPLE);
+	g_variant_builder_add_value (&_arguments_builder, g_variant_new_int64 (offset));
+	_arguments = g_variant_builder_end (&_arguments_builder);
+	g_dbus_message_set_body (_message, _arguments);
+	g_dbus_connection_send_message_with_reply (g_dbus_proxy_get_connection ((GDBusProxy *) self), _message, G_DBUS_SEND_MESSAGE_FLAGS_NONE, g_dbus_proxy_get_default_timeout ((GDBusProxy *) self), NULL, NULL, _vala_g_async_ready_callback, g_simple_async_result_new ((GObject *) self, _callback_, _user_data_, NULL));
+	g_object_unref (_message);
+}
+
+
+static void mpris_player_proxy_Seek_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error) {
+	GDBusMessage *_reply_message;
+	_reply_message = g_dbus_connection_send_message_with_reply_finish (g_dbus_proxy_get_connection ((GDBusProxy *) self), g_simple_async_result_get_op_res_gpointer ((GSimpleAsyncResult *) _res_), error);
+	if (!_reply_message) {
+		return;
+	}
+	if (g_dbus_message_to_gerror (_reply_message, error)) {
+		g_object_unref (_reply_message);
+		return;
+	}
+	g_object_unref (_reply_message);
+}
+
+
 static GHashTable* mpris_player_dbus_proxy_get_Metadata (MprisPlayer* self) {
 	GVariant *_inner_reply;
 	GHashTable* _result;
@@ -1363,6 +1414,8 @@ static void mpris_player_proxy_mpris_player_interface_init (MprisPlayerIface* if
 	iface->Next_finish = mpris_player_proxy_Next_finish;
 	iface->Previous = mpris_player_proxy_Previous_async;
 	iface->Previous_finish = mpris_player_proxy_Previous_finish;
+	iface->Seek = mpris_player_proxy_Seek_async;
+	iface->Seek_finish = mpris_player_proxy_Seek_finish;
 	iface->get_Metadata = mpris_player_dbus_proxy_get_Metadata;
 	iface->set_Metadata = mpris_player_dbus_proxy_set_Metadata;
 	iface->get_Position = mpris_player_dbus_proxy_get_Position;
@@ -1459,6 +1512,40 @@ static void _dbus_mpris_player_Previous_ready (GObject * source_object, GAsyncRe
 }
 
 
+static void _dbus_mpris_player_Seek (MprisPlayer* self, GVariant* parameters, GDBusMethodInvocation* invocation) {
+	GVariantIter _arguments_iter;
+	gint64 offset = 0LL;
+	GVariant* _tmp9_;
+	g_variant_iter_init (&_arguments_iter, parameters);
+	_tmp9_ = g_variant_iter_next_value (&_arguments_iter);
+	offset = g_variant_get_int64 (_tmp9_);
+	g_variant_unref (_tmp9_);
+	mpris_player_Seek (self, offset, (GAsyncReadyCallback) _dbus_mpris_player_Seek_ready, invocation);
+}
+
+
+static void _dbus_mpris_player_Seek_ready (GObject * source_object, GAsyncResult * _res_, gpointer _user_data_) {
+	GDBusMethodInvocation * invocation;
+	GError* error = NULL;
+	GDBusMessage* _reply_message;
+	GVariant* _reply;
+	GVariantBuilder _reply_builder;
+	invocation = _user_data_;
+	mpris_player_Seek_finish ((MprisPlayer*) source_object, _res_, &error);
+	if (error) {
+		g_dbus_method_invocation_return_gerror (invocation, error);
+		return;
+	}
+	_reply_message = g_dbus_message_new_method_reply (g_dbus_method_invocation_get_message (invocation));
+	g_variant_builder_init (&_reply_builder, G_VARIANT_TYPE_TUPLE);
+	_reply = g_variant_builder_end (&_reply_builder);
+	g_dbus_message_set_body (_reply_message, _reply);
+	g_dbus_connection_send_message (g_dbus_method_invocation_get_connection (invocation), _reply_message, G_DBUS_SEND_MESSAGE_FLAGS_NONE, NULL, NULL);
+	g_object_unref (invocation);
+	g_object_unref (_reply_message);
+}
+
+
 static void mpris_player_dbus_interface_method_call (GDBusConnection* connection, const gchar* sender, const gchar* object_path, const gchar* interface_name, const gchar* method_name, GVariant* parameters, GDBusMethodInvocation* invocation, gpointer user_data) {
 	gpointer* data;
 	gpointer object;
@@ -1470,6 +1557,8 @@ static void mpris_player_dbus_interface_method_call (GDBusConnection* connection
 		_dbus_mpris_player_Next (object, parameters, invocation);
 	} else if (strcmp (method_name, "Previous") == 0) {
 		_dbus_mpris_player_Previous (object, parameters, invocation);
+	} else if (strcmp (method_name, "Seek") == 0) {
+		_dbus_mpris_player_Seek (object, parameters, invocation);
 	} else {
 		g_object_unref (invocation);
 	}
@@ -1478,22 +1567,22 @@ static void mpris_player_dbus_interface_method_call (GDBusConnection* connection
 
 static GVariant* _dbus_mpris_player_get_Metadata (MprisPlayer* self) {
 	GHashTable* result;
-	GVariantBuilder _tmp9_;
-	GHashTableIter _tmp10_;
-	gpointer _tmp11_;
+	GVariantBuilder _tmp10_;
+	GHashTableIter _tmp11_;
 	gpointer _tmp12_;
+	gpointer _tmp13_;
 	GVariant* _reply;
 	result = mpris_player_get_Metadata (self);
-	g_hash_table_iter_init (&_tmp10_, result);
-	g_variant_builder_init (&_tmp9_, G_VARIANT_TYPE ("a{sv}"));
-	while (g_hash_table_iter_next (&_tmp10_, &_tmp11_, &_tmp12_)) {
+	g_hash_table_iter_init (&_tmp11_, result);
+	g_variant_builder_init (&_tmp10_, G_VARIANT_TYPE ("a{sv}"));
+	while (g_hash_table_iter_next (&_tmp11_, &_tmp12_, &_tmp13_)) {
 		gchar* _key;
 		GVariant* _value;
-		_key = (gchar*) _tmp11_;
-		_value = (GVariant*) _tmp12_;
-		g_variant_builder_add (&_tmp9_, "{?*}", g_variant_new_string (_key), g_variant_new_variant (_value));
+		_key = (gchar*) _tmp12_;
+		_value = (GVariant*) _tmp13_;
+		g_variant_builder_add (&_tmp10_, "{?*}", g_variant_new_string (_key), g_variant_new_variant (_value));
 	}
-	_reply = g_variant_builder_end (&_tmp9_);
+	_reply = g_variant_builder_end (&_tmp10_);
 	_g_hash_table_unref0 ( result);
 	return _reply;
 }
@@ -1536,16 +1625,16 @@ static GVariant* mpris_player_dbus_interface_get_property (GDBusConnection* conn
 
 static void _dbus_mpris_player_set_Metadata (MprisPlayer* self, GVariant* _value) {
 	GHashTable* value = NULL;
-	GHashTable* _tmp13_;
-	GVariantIter _tmp14_;
-	GVariant* _tmp15_;
+	GHashTable* _tmp14_;
+	GVariantIter _tmp15_;
 	GVariant* _tmp16_;
-	_tmp13_ = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-	g_variant_iter_init (&_tmp14_, _value);
-	while (g_variant_iter_loop (&_tmp14_, "{?*}", &_tmp15_, &_tmp16_)) {
-		g_hash_table_insert (_tmp13_, g_variant_dup_string (_tmp15_, NULL), g_variant_get_variant (_tmp16_));
+	GVariant* _tmp17_;
+	_tmp14_ = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+	g_variant_iter_init (&_tmp15_, _value);
+	while (g_variant_iter_loop (&_tmp15_, "{?*}", &_tmp16_, &_tmp17_)) {
+		g_hash_table_insert (_tmp14_, g_variant_dup_string (_tmp16_, NULL), g_variant_get_variant (_tmp17_));
 	}
-	value = _tmp13_;
+	value = _tmp14_;
 	mpris_player_set_Metadata (self, value);
 	_g_hash_table_unref0 (value);
 }
@@ -1804,26 +1893,26 @@ static void mpris_playlists_proxy_class_init (MprisPlaylistsProxyClass* klass) {
 static void _dbus_handle_mpris_playlists_playlist_changed (MprisPlaylists* self, GVariant* parameters) {
 	GVariantIter _arguments_iter;
 	PlaylistDetails details = {0};
-	GVariant* _tmp17_;
-	PlaylistDetails _tmp18_;
-	GVariantIter _tmp19_;
-	GVariant* _tmp20_;
+	GVariant* _tmp18_;
+	PlaylistDetails _tmp19_;
+	GVariantIter _tmp20_;
 	GVariant* _tmp21_;
 	GVariant* _tmp22_;
+	GVariant* _tmp23_;
 	g_variant_iter_init (&_arguments_iter, parameters);
-	_tmp17_ = g_variant_iter_next_value (&_arguments_iter);
-	g_variant_iter_init (&_tmp19_, _tmp17_);
-	_tmp20_ = g_variant_iter_next_value (&_tmp19_);
-	_tmp18_.path = g_variant_dup_string (_tmp20_, NULL);
-	g_variant_unref (_tmp20_);
-	_tmp21_ = g_variant_iter_next_value (&_tmp19_);
-	_tmp18_.name = g_variant_dup_string (_tmp21_, NULL);
+	_tmp18_ = g_variant_iter_next_value (&_arguments_iter);
+	g_variant_iter_init (&_tmp20_, _tmp18_);
+	_tmp21_ = g_variant_iter_next_value (&_tmp20_);
+	_tmp19_.path = g_variant_dup_string (_tmp21_, NULL);
 	g_variant_unref (_tmp21_);
-	_tmp22_ = g_variant_iter_next_value (&_tmp19_);
-	_tmp18_.icon_path = g_variant_dup_string (_tmp22_, NULL);
+	_tmp22_ = g_variant_iter_next_value (&_tmp20_);
+	_tmp19_.name = g_variant_dup_string (_tmp22_, NULL);
 	g_variant_unref (_tmp22_);
-	details = _tmp18_;
-	g_variant_unref (_tmp17_);
+	_tmp23_ = g_variant_iter_next_value (&_tmp20_);
+	_tmp19_.icon_path = g_variant_dup_string (_tmp23_, NULL);
+	g_variant_unref (_tmp23_);
+	details = _tmp19_;
+	g_variant_unref (_tmp18_);
 	g_signal_emit_by_name (self, "playlist-changed", &details);
 	playlist_details_destroy (&details);
 }
@@ -1893,13 +1982,13 @@ static PlaylistDetails* mpris_playlists_proxy_GetPlaylists_finish (MprisPlaylist
 	GVariantIter _reply_iter;
 	PlaylistDetails* _result;
 	int _result_length1;
-	GVariant* _tmp23_;
-	PlaylistDetails* _tmp24_;
-	int _tmp24__length;
-	int _tmp24__size;
-	int _tmp24__length1;
-	GVariantIter _tmp25_;
-	GVariant* _tmp26_;
+	GVariant* _tmp24_;
+	PlaylistDetails* _tmp25_;
+	int _tmp25__length;
+	int _tmp25__size;
+	int _tmp25__length1;
+	GVariantIter _tmp26_;
+	GVariant* _tmp27_;
 	_reply_message = g_dbus_connection_send_message_with_reply_finish (g_dbus_proxy_get_connection ((GDBusProxy *) self), g_simple_async_result_get_op_res_gpointer ((GSimpleAsyncResult *) _res_), error);
 	if (!_reply_message) {
 		return NULL;
@@ -1911,38 +2000,38 @@ static PlaylistDetails* mpris_playlists_proxy_GetPlaylists_finish (MprisPlaylist
 	_reply = g_dbus_message_get_body (_reply_message);
 	g_variant_iter_init (&_reply_iter, _reply);
 	_result_length1 = 0;
-	_tmp23_ = g_variant_iter_next_value (&_reply_iter);
-	_tmp24_ = g_new (PlaylistDetails, 5);
-	_tmp24__length = 0;
-	_tmp24__size = 4;
-	_tmp24__length1 = 0;
-	g_variant_iter_init (&_tmp25_, _tmp23_);
-	for (; (_tmp26_ = g_variant_iter_next_value (&_tmp25_)) != NULL; _tmp24__length1++) {
-		PlaylistDetails _tmp27_;
-		GVariantIter _tmp28_;
-		GVariant* _tmp29_;
+	_tmp24_ = g_variant_iter_next_value (&_reply_iter);
+	_tmp25_ = g_new (PlaylistDetails, 5);
+	_tmp25__length = 0;
+	_tmp25__size = 4;
+	_tmp25__length1 = 0;
+	g_variant_iter_init (&_tmp26_, _tmp24_);
+	for (; (_tmp27_ = g_variant_iter_next_value (&_tmp26_)) != NULL; _tmp25__length1++) {
+		PlaylistDetails _tmp28_;
+		GVariantIter _tmp29_;
 		GVariant* _tmp30_;
 		GVariant* _tmp31_;
-		if (_tmp24__size == _tmp24__length) {
-			_tmp24__size = 2 * _tmp24__size;
-			_tmp24_ = g_renew (PlaylistDetails, _tmp24_, _tmp24__size + 1);
+		GVariant* _tmp32_;
+		if (_tmp25__size == _tmp25__length) {
+			_tmp25__size = 2 * _tmp25__size;
+			_tmp25_ = g_renew (PlaylistDetails, _tmp25_, _tmp25__size + 1);
 		}
-		g_variant_iter_init (&_tmp28_, _tmp26_);
-		_tmp29_ = g_variant_iter_next_value (&_tmp28_);
-		_tmp27_.path = g_variant_dup_string (_tmp29_, NULL);
-		g_variant_unref (_tmp29_);
-		_tmp30_ = g_variant_iter_next_value (&_tmp28_);
-		_tmp27_.name = g_variant_dup_string (_tmp30_, NULL);
+		g_variant_iter_init (&_tmp29_, _tmp27_);
+		_tmp30_ = g_variant_iter_next_value (&_tmp29_);
+		_tmp28_.path = g_variant_dup_string (_tmp30_, NULL);
 		g_variant_unref (_tmp30_);
-		_tmp31_ = g_variant_iter_next_value (&_tmp28_);
-		_tmp27_.icon_path = g_variant_dup_string (_tmp31_, NULL);
+		_tmp31_ = g_variant_iter_next_value (&_tmp29_);
+		_tmp28_.name = g_variant_dup_string (_tmp31_, NULL);
 		g_variant_unref (_tmp31_);
-		_tmp24_[_tmp24__length++] = _tmp27_;
-		g_variant_unref (_tmp26_);
+		_tmp32_ = g_variant_iter_next_value (&_tmp29_);
+		_tmp28_.icon_path = g_variant_dup_string (_tmp32_, NULL);
+		g_variant_unref (_tmp32_);
+		_tmp25_[_tmp25__length++] = _tmp28_;
+		g_variant_unref (_tmp27_);
 	}
-	_result_length1 = _tmp24__length1;
-	_result = _tmp24_;
-	g_variant_unref (_tmp23_);
+	_result_length1 = _tmp25__length1;
+	_result = _tmp25_;
+	g_variant_unref (_tmp24_);
 	*result_length1 = _result_length1;
 	g_object_unref (_reply_message);
 	return _result;
@@ -1953,12 +2042,12 @@ static gchar** mpris_playlists_dbus_proxy_get_Orderings (MprisPlaylists* self, i
 	GVariant *_inner_reply;
 	gchar** _result;
 	int _result_length1;
-	gchar** _tmp32_;
-	int _tmp32__length;
-	int _tmp32__size;
-	int _tmp32__length1;
-	GVariantIter _tmp33_;
-	GVariant* _tmp34_;
+	gchar** _tmp33_;
+	int _tmp33__length;
+	int _tmp33__size;
+	int _tmp33__length1;
+	GVariantIter _tmp34_;
+	GVariant* _tmp35_;
 	_inner_reply = g_dbus_proxy_get_cached_property ((GDBusProxy *) self, "Orderings");
 	if (!_inner_reply) {
 		GVariant *_arguments;
@@ -1976,22 +2065,22 @@ static gchar** mpris_playlists_dbus_proxy_get_Orderings (MprisPlaylists* self, i
 		g_variant_unref (_reply);
 	}
 	_result_length1 = 0;
-	_tmp32_ = g_new (gchar*, 5);
-	_tmp32__length = 0;
-	_tmp32__size = 4;
-	_tmp32__length1 = 0;
-	g_variant_iter_init (&_tmp33_, _inner_reply);
-	for (; (_tmp34_ = g_variant_iter_next_value (&_tmp33_)) != NULL; _tmp32__length1++) {
-		if (_tmp32__size == _tmp32__length) {
-			_tmp32__size = 2 * _tmp32__size;
-			_tmp32_ = g_renew (gchar*, _tmp32_, _tmp32__size + 1);
+	_tmp33_ = g_new (gchar*, 5);
+	_tmp33__length = 0;
+	_tmp33__size = 4;
+	_tmp33__length1 = 0;
+	g_variant_iter_init (&_tmp34_, _inner_reply);
+	for (; (_tmp35_ = g_variant_iter_next_value (&_tmp34_)) != NULL; _tmp33__length1++) {
+		if (_tmp33__size == _tmp33__length) {
+			_tmp33__size = 2 * _tmp33__size;
+			_tmp33_ = g_renew (gchar*, _tmp33_, _tmp33__size + 1);
 		}
-		_tmp32_[_tmp32__length++] = g_variant_dup_string (_tmp34_, NULL);
-		g_variant_unref (_tmp34_);
+		_tmp33_[_tmp33__length++] = g_variant_dup_string (_tmp35_, NULL);
+		g_variant_unref (_tmp35_);
 	}
-	_result_length1 = _tmp32__length1;
-	_tmp32_[_tmp32__length] = NULL;
-	_result = _tmp32_;
+	_result_length1 = _tmp33__length1;
+	_tmp33_[_tmp33__length] = NULL;
+	_result = _tmp33_;
 	*result_length1 = _result_length1;
 	g_variant_unref (_inner_reply);
 	return _result;
@@ -2002,20 +2091,20 @@ static void mpris_playlists_dbus_proxy_set_Orderings (MprisPlaylists* self, gcha
 	GVariant *_arguments;
 	GVariant *_reply;
 	GVariantBuilder _arguments_builder;
-	gchar** _tmp35_;
-	GVariantBuilder _tmp36_;
-	int _tmp37_;
+	gchar** _tmp36_;
+	GVariantBuilder _tmp37_;
+	int _tmp38_;
 	g_variant_builder_init (&_arguments_builder, G_VARIANT_TYPE_TUPLE);
 	g_variant_builder_add_value (&_arguments_builder, g_variant_new_string ("org.mpris.MediaPlayer2.Playlists"));
 	g_variant_builder_add_value (&_arguments_builder, g_variant_new_string ("Orderings"));
 	g_variant_builder_open (&_arguments_builder, G_VARIANT_TYPE_VARIANT);
-	_tmp35_ = value;
-	g_variant_builder_init (&_tmp36_, G_VARIANT_TYPE ("as"));
-	for (_tmp37_ = 0; _tmp37_ < value_length1; _tmp37_++) {
-		g_variant_builder_add_value (&_tmp36_, g_variant_new_string (*_tmp35_));
-		_tmp35_++;
+	_tmp36_ = value;
+	g_variant_builder_init (&_tmp37_, G_VARIANT_TYPE ("as"));
+	for (_tmp38_ = 0; _tmp38_ < value_length1; _tmp38_++) {
+		g_variant_builder_add_value (&_tmp37_, g_variant_new_string (*_tmp36_));
+		_tmp36_++;
 	}
-	g_variant_builder_add_value (&_arguments_builder, g_variant_builder_end (&_tmp36_));
+	g_variant_builder_add_value (&_arguments_builder, g_variant_builder_end (&_tmp37_));
 	g_variant_builder_close (&_arguments_builder);
 	_arguments = g_variant_builder_end (&_arguments_builder);
 	_reply = g_dbus_proxy_call_sync ((GDBusProxy *) self, "org.freedesktop.DBus.Properties.Set", _arguments, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL);
@@ -2072,15 +2161,15 @@ static void mpris_playlists_dbus_proxy_set_PlaylistCount (MprisPlaylists* self, 
 
 static void mpris_playlists_dbus_proxy_get_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* result) {
 	GVariant *_inner_reply;
-	ActivePlaylistContainer _tmp38_;
-	GVariantIter _tmp39_;
-	GVariant* _tmp40_;
+	ActivePlaylistContainer _tmp39_;
+	GVariantIter _tmp40_;
 	GVariant* _tmp41_;
-	PlaylistDetails _tmp42_;
-	GVariantIter _tmp43_;
-	GVariant* _tmp44_;
+	GVariant* _tmp42_;
+	PlaylistDetails _tmp43_;
+	GVariantIter _tmp44_;
 	GVariant* _tmp45_;
 	GVariant* _tmp46_;
+	GVariant* _tmp47_;
 	_inner_reply = g_dbus_proxy_get_cached_property ((GDBusProxy *) self, "ActivePlaylist");
 	if (!_inner_reply) {
 		GVariant *_arguments;
@@ -2097,24 +2186,24 @@ static void mpris_playlists_dbus_proxy_get_ActivePlaylist (MprisPlaylists* self,
 		g_variant_get (_reply, "(v)", &_inner_reply);
 		g_variant_unref (_reply);
 	}
-	g_variant_iter_init (&_tmp39_, _inner_reply);
-	_tmp40_ = g_variant_iter_next_value (&_tmp39_);
-	_tmp38_.valid = g_variant_get_boolean (_tmp40_);
-	g_variant_unref (_tmp40_);
-	_tmp41_ = g_variant_iter_next_value (&_tmp39_);
-	g_variant_iter_init (&_tmp43_, _tmp41_);
-	_tmp44_ = g_variant_iter_next_value (&_tmp43_);
-	_tmp42_.path = g_variant_dup_string (_tmp44_, NULL);
-	g_variant_unref (_tmp44_);
-	_tmp45_ = g_variant_iter_next_value (&_tmp43_);
-	_tmp42_.name = g_variant_dup_string (_tmp45_, NULL);
-	g_variant_unref (_tmp45_);
-	_tmp46_ = g_variant_iter_next_value (&_tmp43_);
-	_tmp42_.icon_path = g_variant_dup_string (_tmp46_, NULL);
-	g_variant_unref (_tmp46_);
-	_tmp38_.details = _tmp42_;
+	g_variant_iter_init (&_tmp40_, _inner_reply);
+	_tmp41_ = g_variant_iter_next_value (&_tmp40_);
+	_tmp39_.valid = g_variant_get_boolean (_tmp41_);
 	g_variant_unref (_tmp41_);
-	*result = _tmp38_;
+	_tmp42_ = g_variant_iter_next_value (&_tmp40_);
+	g_variant_iter_init (&_tmp44_, _tmp42_);
+	_tmp45_ = g_variant_iter_next_value (&_tmp44_);
+	_tmp43_.path = g_variant_dup_string (_tmp45_, NULL);
+	g_variant_unref (_tmp45_);
+	_tmp46_ = g_variant_iter_next_value (&_tmp44_);
+	_tmp43_.name = g_variant_dup_string (_tmp46_, NULL);
+	g_variant_unref (_tmp46_);
+	_tmp47_ = g_variant_iter_next_value (&_tmp44_);
+	_tmp43_.icon_path = g_variant_dup_string (_tmp47_, NULL);
+	g_variant_unref (_tmp47_);
+	_tmp39_.details = _tmp43_;
+	g_variant_unref (_tmp42_);
+	*result = _tmp39_;
 	g_variant_unref (_inner_reply);
 	return;
 }
@@ -2124,20 +2213,20 @@ static void mpris_playlists_dbus_proxy_set_ActivePlaylist (MprisPlaylists* self,
 	GVariant *_arguments;
 	GVariant *_reply;
 	GVariantBuilder _arguments_builder;
-	GVariantBuilder _tmp47_;
 	GVariantBuilder _tmp48_;
+	GVariantBuilder _tmp49_;
 	g_variant_builder_init (&_arguments_builder, G_VARIANT_TYPE_TUPLE);
 	g_variant_builder_add_value (&_arguments_builder, g_variant_new_string ("org.mpris.MediaPlayer2.Playlists"));
 	g_variant_builder_add_value (&_arguments_builder, g_variant_new_string ("ActivePlaylist"));
 	g_variant_builder_open (&_arguments_builder, G_VARIANT_TYPE_VARIANT);
-	g_variant_builder_init (&_tmp47_, G_VARIANT_TYPE_TUPLE);
-	g_variant_builder_add_value (&_tmp47_, g_variant_new_boolean ((*value).valid));
 	g_variant_builder_init (&_tmp48_, G_VARIANT_TYPE_TUPLE);
-	g_variant_builder_add_value (&_tmp48_, g_variant_new_object_path ((*value).details.path));
-	g_variant_builder_add_value (&_tmp48_, g_variant_new_string ((*value).details.name));
-	g_variant_builder_add_value (&_tmp48_, g_variant_new_string ((*value).details.icon_path));
-	g_variant_builder_add_value (&_tmp47_, g_variant_builder_end (&_tmp48_));
-	g_variant_builder_add_value (&_arguments_builder, g_variant_builder_end (&_tmp47_));
+	g_variant_builder_add_value (&_tmp48_, g_variant_new_boolean ((*value).valid));
+	g_variant_builder_init (&_tmp49_, G_VARIANT_TYPE_TUPLE);
+	g_variant_builder_add_value (&_tmp49_, g_variant_new_object_path ((*value).details.path));
+	g_variant_builder_add_value (&_tmp49_, g_variant_new_string ((*value).details.name));
+	g_variant_builder_add_value (&_tmp49_, g_variant_new_string ((*value).details.icon_path));
+	g_variant_builder_add_value (&_tmp48_, g_variant_builder_end (&_tmp49_));
+	g_variant_builder_add_value (&_arguments_builder, g_variant_builder_end (&_tmp48_));
 	g_variant_builder_close (&_arguments_builder);
 	_arguments = g_variant_builder_end (&_arguments_builder);
 	_reply = g_dbus_proxy_call_sync ((GDBusProxy *) self, "org.freedesktop.DBus.Properties.Set", _arguments, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL);
@@ -2165,11 +2254,11 @@ static void mpris_playlists_proxy_mpris_playlists_interface_init (MprisPlaylists
 static void _dbus_mpris_playlists_ActivatePlaylist (MprisPlaylists* self, GVariant* parameters, GDBusMethodInvocation* invocation) {
 	GVariantIter _arguments_iter;
 	char* playlist_id = NULL;
-	GVariant* _tmp49_;
+	GVariant* _tmp50_;
 	g_variant_iter_init (&_arguments_iter, parameters);
-	_tmp49_ = g_variant_iter_next_value (&_arguments_iter);
-	playlist_id = g_variant_dup_string (_tmp49_, NULL);
-	g_variant_unref (_tmp49_);
+	_tmp50_ = g_variant_iter_next_value (&_arguments_iter);
+	playlist_id = g_variant_dup_string (_tmp50_, NULL);
+	g_variant_unref (_tmp50_);
 	mpris_playlists_ActivatePlaylist (self, playlist_id, (GAsyncReadyCallback) _dbus_mpris_playlists_ActivatePlaylist_ready, invocation);
 	_g_free0 (playlist_id);
 }
@@ -2200,26 +2289,26 @@ static void _dbus_mpris_playlists_ActivatePlaylist_ready (GObject * source_objec
 static void _dbus_mpris_playlists_GetPlaylists (MprisPlaylists* self, GVariant* parameters, GDBusMethodInvocation* invocation) {
 	GVariantIter _arguments_iter;
 	guint32 index = 0U;
-	GVariant* _tmp50_;
-	guint32 max_count = 0U;
 	GVariant* _tmp51_;
-	gchar* order = NULL;
+	guint32 max_count = 0U;
 	GVariant* _tmp52_;
-	gboolean reverse_order = FALSE;
+	gchar* order = NULL;
 	GVariant* _tmp53_;
+	gboolean reverse_order = FALSE;
+	GVariant* _tmp54_;
 	g_variant_iter_init (&_arguments_iter, parameters);
-	_tmp50_ = g_variant_iter_next_value (&_arguments_iter);
-	index = g_variant_get_uint32 (_tmp50_);
-	g_variant_unref (_tmp50_);
 	_tmp51_ = g_variant_iter_next_value (&_arguments_iter);
-	max_count = g_variant_get_uint32 (_tmp51_);
+	index = g_variant_get_uint32 (_tmp51_);
 	g_variant_unref (_tmp51_);
 	_tmp52_ = g_variant_iter_next_value (&_arguments_iter);
-	order = g_variant_dup_string (_tmp52_, NULL);
+	max_count = g_variant_get_uint32 (_tmp52_);
 	g_variant_unref (_tmp52_);
 	_tmp53_ = g_variant_iter_next_value (&_arguments_iter);
-	reverse_order = g_variant_get_boolean (_tmp53_);
+	order = g_variant_dup_string (_tmp53_, NULL);
 	g_variant_unref (_tmp53_);
+	_tmp54_ = g_variant_iter_next_value (&_arguments_iter);
+	reverse_order = g_variant_get_boolean (_tmp54_);
+	g_variant_unref (_tmp54_);
 	mpris_playlists_GetPlaylists (self, index, max_count, order, reverse_order, (GAsyncReadyCallback) _dbus_mpris_playlists_GetPlaylists_ready, invocation);
 	_g_free0 (order);
 }
@@ -2244,9 +2333,9 @@ static void _dbus_mpris_playlists_GetPlaylists_ready (GObject * source_object, G
 	GVariantBuilder _reply_builder;
 	PlaylistDetails* result;
 	int result_length1 = 0;
-	PlaylistDetails* _tmp54_;
-	GVariantBuilder _tmp55_;
-	int _tmp56_;
+	PlaylistDetails* _tmp55_;
+	GVariantBuilder _tmp56_;
+	int _tmp57_;
 	invocation = _user_data_;
 	result = mpris_playlists_GetPlaylists_finish ((MprisPlaylists*) source_object, _res_, &result_length1, &error);
 	if (error) {
@@ -2255,18 +2344,18 @@ static void _dbus_mpris_playlists_GetPlaylists_ready (GObject * source_object, G
 	}
 	_reply_message = g_dbus_message_new_method_reply (g_dbus_method_invocation_get_message (invocation));
 	g_variant_builder_init (&_reply_builder, G_VARIANT_TYPE_TUPLE);
-	_tmp54_ = result;
-	g_variant_builder_init (&_tmp55_, G_VARIANT_TYPE ("a(oss)"));
-	for (_tmp56_ = 0; _tmp56_ < result_length1; _tmp56_++) {
-		GVariantBuilder _tmp57_;
-		g_variant_builder_init (&_tmp57_, G_VARIANT_TYPE_TUPLE);
-		g_variant_builder_add_value (&_tmp57_, g_variant_new_object_path ((*_tmp54_).path));
-		g_variant_builder_add_value (&_tmp57_, g_variant_new_string ((*_tmp54_).name));
-		g_variant_builder_add_value (&_tmp57_, g_variant_new_string ((*_tmp54_).icon_path));
-		g_variant_builder_add_value (&_tmp55_, g_variant_builder_end (&_tmp57_));
-		_tmp54_++;
+	_tmp55_ = result;
+	g_variant_builder_init (&_tmp56_, G_VARIANT_TYPE ("a(oss)"));
+	for (_tmp57_ = 0; _tmp57_ < result_length1; _tmp57_++) {
+		GVariantBuilder _tmp58_;
+		g_variant_builder_init (&_tmp58_, G_VARIANT_TYPE_TUPLE);
+		g_variant_builder_add_value (&_tmp58_, g_variant_new_object_path ((*_tmp55_).path));
+		g_variant_builder_add_value (&_tmp58_, g_variant_new_string ((*_tmp55_).name));
+		g_variant_builder_add_value (&_tmp58_, g_variant_new_string ((*_tmp55_).icon_path));
+		g_variant_builder_add_value (&_tmp56_, g_variant_builder_end (&_tmp58_));
+		_tmp55_++;
 	}
-	g_variant_builder_add_value (&_reply_builder, g_variant_builder_end (&_tmp55_));
+	g_variant_builder_add_value (&_reply_builder, g_variant_builder_end (&_tmp56_));
 	 result = (_vala_PlaylistDetails_array_free ( result,  result_length1), NULL);
 	_reply = g_variant_builder_end (&_reply_builder);
 	g_dbus_message_set_body (_reply_message, _reply);
@@ -2294,18 +2383,18 @@ static void mpris_playlists_dbus_interface_method_call (GDBusConnection* connect
 static GVariant* _dbus_mpris_playlists_get_Orderings (MprisPlaylists* self) {
 	gchar** result;
 	int result_length1;
-	gchar** _tmp58_;
-	GVariantBuilder _tmp59_;
-	int _tmp60_;
+	gchar** _tmp59_;
+	GVariantBuilder _tmp60_;
+	int _tmp61_;
 	GVariant* _reply;
 	result = mpris_playlists_get_Orderings (self, &result_length1);
-	_tmp58_ = result;
-	g_variant_builder_init (&_tmp59_, G_VARIANT_TYPE ("as"));
-	for (_tmp60_ = 0; _tmp60_ < result_length1; _tmp60_++) {
-		g_variant_builder_add_value (&_tmp59_, g_variant_new_string (*_tmp58_));
-		_tmp58_++;
+	_tmp59_ = result;
+	g_variant_builder_init (&_tmp60_, G_VARIANT_TYPE ("as"));
+	for (_tmp61_ = 0; _tmp61_ < result_length1; _tmp61_++) {
+		g_variant_builder_add_value (&_tmp60_, g_variant_new_string (*_tmp59_));
+		_tmp59_++;
 	}
-	_reply = g_variant_builder_end (&_tmp59_);
+	_reply = g_variant_builder_end (&_tmp60_);
 	 result = (_vala_array_free ( result,  result_length1, (GDestroyNotify) g_free), NULL);
 	return _reply;
 }
@@ -2322,18 +2411,18 @@ static GVariant* _dbus_mpris_playlists_get_PlaylistCount (MprisPlaylists* self) 
 
 static GVariant* _dbus_mpris_playlists_get_ActivePlaylist (MprisPlaylists* self) {
 	ActivePlaylistContainer result = {0};
-	GVariantBuilder _tmp61_;
 	GVariantBuilder _tmp62_;
+	GVariantBuilder _tmp63_;
 	GVariant* _reply;
 	mpris_playlists_get_ActivePlaylist (self, &result);
-	g_variant_builder_init (&_tmp61_, G_VARIANT_TYPE_TUPLE);
-	g_variant_builder_add_value (&_tmp61_, g_variant_new_boolean (result.valid));
 	g_variant_builder_init (&_tmp62_, G_VARIANT_TYPE_TUPLE);
-	g_variant_builder_add_value (&_tmp62_, g_variant_new_object_path (result.details.path));
-	g_variant_builder_add_value (&_tmp62_, g_variant_new_string (result.details.name));
-	g_variant_builder_add_value (&_tmp62_, g_variant_new_string (result.details.icon_path));
-	g_variant_builder_add_value (&_tmp61_, g_variant_builder_end (&_tmp62_));
-	_reply = g_variant_builder_end (&_tmp61_);
+	g_variant_builder_add_value (&_tmp62_, g_variant_new_boolean (result.valid));
+	g_variant_builder_init (&_tmp63_, G_VARIANT_TYPE_TUPLE);
+	g_variant_builder_add_value (&_tmp63_, g_variant_new_object_path (result.details.path));
+	g_variant_builder_add_value (&_tmp63_, g_variant_new_string (result.details.name));
+	g_variant_builder_add_value (&_tmp63_, g_variant_new_string (result.details.icon_path));
+	g_variant_builder_add_value (&_tmp62_, g_variant_builder_end (&_tmp63_));
+	_reply = g_variant_builder_end (&_tmp62_);
 	active_playlist_container_destroy (& result);
 	return _reply;
 }
@@ -2358,28 +2447,28 @@ static GVariant* mpris_playlists_dbus_interface_get_property (GDBusConnection* c
 static void _dbus_mpris_playlists_set_Orderings (MprisPlaylists* self, GVariant* _value) {
 	gchar** value = NULL;
 	int value_length1;
-	gchar** _tmp63_;
-	int _tmp63__length;
-	int _tmp63__size;
-	int _tmp63__length1;
-	GVariantIter _tmp64_;
-	GVariant* _tmp65_;
-	_tmp63_ = g_new (gchar*, 5);
-	_tmp63__length = 0;
-	_tmp63__size = 4;
-	_tmp63__length1 = 0;
-	g_variant_iter_init (&_tmp64_, _value);
-	for (; (_tmp65_ = g_variant_iter_next_value (&_tmp64_)) != NULL; _tmp63__length1++) {
-		if (_tmp63__size == _tmp63__length) {
-			_tmp63__size = 2 * _tmp63__size;
-			_tmp63_ = g_renew (gchar*, _tmp63_, _tmp63__size + 1);
+	gchar** _tmp64_;
+	int _tmp64__length;
+	int _tmp64__size;
+	int _tmp64__length1;
+	GVariantIter _tmp65_;
+	GVariant* _tmp66_;
+	_tmp64_ = g_new (gchar*, 5);
+	_tmp64__length = 0;
+	_tmp64__size = 4;
+	_tmp64__length1 = 0;
+	g_variant_iter_init (&_tmp65_, _value);
+	for (; (_tmp66_ = g_variant_iter_next_value (&_tmp65_)) != NULL; _tmp64__length1++) {
+		if (_tmp64__size == _tmp64__length) {
+			_tmp64__size = 2 * _tmp64__size;
+			_tmp64_ = g_renew (gchar*, _tmp64_, _tmp64__size + 1);
 		}
-		_tmp63_[_tmp63__length++] = g_variant_dup_string (_tmp65_, NULL);
-		g_variant_unref (_tmp65_);
+		_tmp64_[_tmp64__length++] = g_variant_dup_string (_tmp66_, NULL);
+		g_variant_unref (_tmp66_);
 	}
-	value_length1 = _tmp63__length1;
-	_tmp63_[_tmp63__length] = NULL;
-	value = _tmp63_;
+	value_length1 = _tmp64__length1;
+	_tmp64_[_tmp64__length] = NULL;
+	value = _tmp64_;
 	mpris_playlists_set_Orderings (self, value, value_length1);
 	value = (_vala_array_free (value, value_length1, (GDestroyNotify) g_free), NULL);
 }
@@ -2394,33 +2483,33 @@ static void _dbus_mpris_playlists_set_PlaylistCount (MprisPlaylists* self, GVari
 
 static void _dbus_mpris_playlists_set_ActivePlaylist (MprisPlaylists* self, GVariant* _value) {
 	ActivePlaylistContainer value = {0};
-	ActivePlaylistContainer _tmp66_;
-	GVariantIter _tmp67_;
-	GVariant* _tmp68_;
+	ActivePlaylistContainer _tmp67_;
+	GVariantIter _tmp68_;
 	GVariant* _tmp69_;
-	PlaylistDetails _tmp70_;
-	GVariantIter _tmp71_;
-	GVariant* _tmp72_;
+	GVariant* _tmp70_;
+	PlaylistDetails _tmp71_;
+	GVariantIter _tmp72_;
 	GVariant* _tmp73_;
 	GVariant* _tmp74_;
-	g_variant_iter_init (&_tmp67_, _value);
-	_tmp68_ = g_variant_iter_next_value (&_tmp67_);
-	_tmp66_.valid = g_variant_get_boolean (_tmp68_);
-	g_variant_unref (_tmp68_);
-	_tmp69_ = g_variant_iter_next_value (&_tmp67_);
-	g_variant_iter_init (&_tmp71_, _tmp69_);
-	_tmp72_ = g_variant_iter_next_value (&_tmp71_);
-	_tmp70_.path = g_variant_dup_string (_tmp72_, NULL);
-	g_variant_unref (_tmp72_);
-	_tmp73_ = g_variant_iter_next_value (&_tmp71_);
-	_tmp70_.name = g_variant_dup_string (_tmp73_, NULL);
-	g_variant_unref (_tmp73_);
-	_tmp74_ = g_variant_iter_next_value (&_tmp71_);
-	_tmp70_.icon_path = g_variant_dup_string (_tmp74_, NULL);
-	g_variant_unref (_tmp74_);
-	_tmp66_.details = _tmp70_;
+	GVariant* _tmp75_;
+	g_variant_iter_init (&_tmp68_, _value);
+	_tmp69_ = g_variant_iter_next_value (&_tmp68_);
+	_tmp67_.valid = g_variant_get_boolean (_tmp69_);
 	g_variant_unref (_tmp69_);
-	value = _tmp66_;
+	_tmp70_ = g_variant_iter_next_value (&_tmp68_);
+	g_variant_iter_init (&_tmp72_, _tmp70_);
+	_tmp73_ = g_variant_iter_next_value (&_tmp72_);
+	_tmp71_.path = g_variant_dup_string (_tmp73_, NULL);
+	g_variant_unref (_tmp73_);
+	_tmp74_ = g_variant_iter_next_value (&_tmp72_);
+	_tmp71_.name = g_variant_dup_string (_tmp74_, NULL);
+	g_variant_unref (_tmp74_);
+	_tmp75_ = g_variant_iter_next_value (&_tmp72_);
+	_tmp71_.icon_path = g_variant_dup_string (_tmp75_, NULL);
+	g_variant_unref (_tmp75_);
+	_tmp67_.details = _tmp71_;
+	g_variant_unref (_tmp70_);
+	value = _tmp67_;
 	mpris_playlists_set_ActivePlaylist (self, &value);
 	active_playlist_container_destroy (&value);
 }
@@ -2450,15 +2539,15 @@ static void _dbus_mpris_playlists_playlist_changed (GObject* _sender, PlaylistDe
 	const gchar * _path;
 	GVariant *_arguments;
 	GVariantBuilder _arguments_builder;
-	GVariantBuilder _tmp75_;
+	GVariantBuilder _tmp76_;
 	_connection = _data[1];
 	_path = _data[2];
 	g_variant_builder_init (&_arguments_builder, G_VARIANT_TYPE_TUPLE);
-	g_variant_builder_init (&_tmp75_, G_VARIANT_TYPE_TUPLE);
-	g_variant_builder_add_value (&_tmp75_, g_variant_new_object_path ((*details).path));
-	g_variant_builder_add_value (&_tmp75_, g_variant_new_string ((*details).name));
-	g_variant_builder_add_value (&_tmp75_, g_variant_new_string ((*details).icon_path));
-	g_variant_builder_add_value (&_arguments_builder, g_variant_builder_end (&_tmp75_));
+	g_variant_builder_init (&_tmp76_, G_VARIANT_TYPE_TUPLE);
+	g_variant_builder_add_value (&_tmp76_, g_variant_new_object_path ((*details).path));
+	g_variant_builder_add_value (&_tmp76_, g_variant_new_string ((*details).name));
+	g_variant_builder_add_value (&_tmp76_, g_variant_new_string ((*details).icon_path));
+	g_variant_builder_add_value (&_arguments_builder, g_variant_builder_end (&_tmp76_));
 	_arguments = g_variant_builder_end (&_arguments_builder);
 	g_dbus_connection_emit_signal (_connection, NULL, _path, "org.mpris.MediaPlayer2.Playlists", "PlaylistChanged", _arguments, NULL);
 }

@@ -153,7 +153,7 @@ sound_state_manager_notification_init (SoundStateManager* self)
   if (has_notify_osd) {
     priv->notification = notify_notification_new(PACKAGE_NAME, NULL, NULL);
     notify_notification_set_hint_string(priv->notification,
-                                        "x-canonical-private-synchronous", "");
+                                        "x-canonical-private-synchronous", PACKAGE_NAME);
   }
 }
 
