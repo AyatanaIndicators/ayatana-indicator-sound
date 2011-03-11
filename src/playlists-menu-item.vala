@@ -48,9 +48,9 @@ public class PlaylistsMenuitem : PlayerItem
       Dbusmenu.Menuitem menuitem = new Menuitem();
       menuitem.property_set (MENUITEM_PROP_LABEL, detail.name);
       var result = this.parse_icon_path (detail.icon_path);
-
       if (result != null) {
-       menuitem.property_set (MENUITEM_PROP_ICON_NAME, result);
+       debug("ICON PATH = %s and name = %s", detail.icon_path, Path.get_basename(detail.icon_path).split(".")[0]);
+       menuitem.property_set (MENUITEM_PROP_ICON_NAME, (string)result);
       }
 
       menuitem.property_set (MENUITEM_PATH, (string)detail.path);
@@ -84,7 +84,11 @@ public class PlaylistsMenuitem : PlayerItem
 
   private string? parse_icon_path (string path)  
   {
-    return ( path == "" ? null : Path.get_basename(path).split(".")[0] );
+    if (path == "")return null;
+    var icon_file = File.new_for_path (path);
+    if (icon_file.get_path() == null)return null;
+    return icon_file.get_basename().split(".")[0];
+    //return ( path == "" ? null : Path.get_basename(path).split(".")[0] );
   }
 
   public void update_individual_playlist (PlaylistDetails new_detail)
