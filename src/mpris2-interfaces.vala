@@ -42,6 +42,7 @@ public interface MprisPlayer : Object {
   public abstract async void PlayPause() throws IOError;
   public abstract async void Next() throws IOError;
   public abstract async void Previous() throws IOError;
+  public abstract async void Seek(int64 offset) throws IOError;
   // signals
   public signal void Seeked(int64 new_position);
 }

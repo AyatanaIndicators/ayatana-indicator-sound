@@ -57,10 +57,6 @@ typedef struct _TransportMenuitem TransportMenuitem;
 typedef struct _TransportMenuitemClass TransportMenuitemClass;
 typedef struct _TransportMenuitemPrivate TransportMenuitemPrivate;
 
-#define TRANSPORT_MENUITEM_TYPE_ACTION (transport_menuitem_action_get_type ())
-
-#define TRANSPORT_MENUITEM_TYPE_STATE (transport_menuitem_state_get_type ())
-
 #define TYPE_PLAYER_CONTROLLER (player_controller_get_type ())
 #define PLAYER_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PLAYER_CONTROLLER, PlayerController))
 #define PLAYER_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PLAYER_CONTROLLER, PlayerControllerClass))
@@ -102,17 +98,6 @@ struct _TransportMenuitemClass {
 	PlayerItemClass parent_class;
 };
 
-typedef enum  {
-	TRANSPORT_MENUITEM_ACTION_PREVIOUS,
-	TRANSPORT_MENUITEM_ACTION_PLAY_PAUSE,
-	TRANSPORT_MENUITEM_ACTION_NEXT
-} TransportMenuitemaction;
-
-typedef enum  {
-	TRANSPORT_MENUITEM_STATE_PLAYING,
-	TRANSPORT_MENUITEM_STATE_PAUSED
-} TransportMenuitemstate;
-
 struct _PlayerController {
 	GObject parent_instance;
 	PlayerControllerPrivate * priv;
@@ -134,41 +119,15 @@ GType transport_menuitem_get_type (void) G_GNUC_CONST;
 enum  {
 	TRANSPORT_MENUITEM_DUMMY_PROPERTY
 };
-GType transport_menuitem_action_get_type (void) G_GNUC_CONST;
-GType transport_menuitem_state_get_type (void) G_GNUC_CONST;
 GType player_controller_get_type (void) G_GNUC_CONST;
 TransportMenuitem* transport_menuitem_new (PlayerController* parent);
 TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerController* parent);
-void transport_menuitem_change_play_state (TransportMenuitem* self, TransportMenuitemstate update);
+void transport_menuitem_change_play_state (TransportMenuitem* self, TransportState update);
 static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const gchar* name, GVariant* input_value, guint timestamp);
 PlayerController* player_item_get_owner (PlayerItem* self);
 GType mpris2_controller_get_type (void) G_GNUC_CONST;
-void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuitemaction command);
+void mpris2_controller_transport_update (Mpris2Controller* self, TransportAction command);
 GeeHashSet* transport_menuitem_attributes_format (void);
-
-
-GType transport_menuitem_action_get_type (void) {
-	static volatile gsize transport_menuitem_action_type_id__volatile = 0;
-	if (g_once_init_enter (&transport_menuitem_action_type_id__volatile)) {
-		static const GEnumValue values[] = {{TRANSPORT_MENUITEM_ACTION_PREVIOUS, "TRANSPORT_MENUITEM_ACTION_PREVIOUS", "previous"}, {TRANSPORT_MENUITEM_ACTION_PLAY_PAUSE, "TRANSPORT_MENUITEM_ACTION_PLAY_PAUSE", "play-pause"}, {TRANSPORT_MENUITEM_ACTION_NEXT, "TRANSPORT_MENUITEM_ACTION_NEXT", "next"}, {0, NULL, NULL}};
-		GType transport_menuitem_action_type_id;
-		transport_menuitem_action_type_id = g_enum_register_static ("TransportMenuitemaction", values);
-		g_once_init_leave (&transport_menuitem_action_type_id__volatile, transport_menuitem_action_type_id);
-	}
-	return transport_menuitem_action_type_id__volatile;
-}
-
-
-GType transport_menuitem_state_get_type (void) {
-	static volatile gsize transport_menuitem_state_type_id__volatile = 0;
-	if (g_once_init_enter (&transport_menuitem_state_type_id__volatile)) {
-		static const GEnumValue values[] = {{TRANSPORT_MENUITEM_STATE_PLAYING, "TRANSPORT_MENUITEM_STATE_PLAYING", "playing"}, {TRANSPORT_MENUITEM_STATE_PAUSED, "TRANSPORT_MENUITEM_STATE_PAUSED", "paused"}, {0, NULL, NULL}};
-		GType transport_menuitem_state_type_id;
-		transport_menuitem_state_type_id = g_enum_register_static ("TransportMenuitemstate", values);
-		g_once_init_leave (&transport_menuitem_state_type_id__volatile, transport_menuitem_state_type_id);
-	}
-	return transport_menuitem_state_type_id__volatile;
-}
 
 
 TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerController* parent) {
@@ -185,7 +144,7 @@ TransportMenuitem* transport_menuitem_new (PlayerController* parent) {
 }
 
 
-void transport_menuitem_change_play_state (TransportMenuitem* self, TransportMenuitemstate update) {
+void transport_menuitem_change_play_state (TransportMenuitem* self, TransportState update) {
 	gint temp;
 	g_return_if_fail (self != NULL);
 	temp = (gint) update;
@@ -223,7 +182,7 @@ static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const 
 	_tmp4_ = g_variant_get_int32 (v);
 	input = _tmp4_;
 	_tmp5_ = player_item_get_owner ((PlayerItem*) self);
-	mpris2_controller_transport_update (_tmp5_->mpris_bridge, (TransportMenuitemaction) input);
+	mpris2_controller_transport_update (_tmp5_->mpris_bridge, (TransportAction) input);
 	_g_variant_unref0 (v);
 }
 

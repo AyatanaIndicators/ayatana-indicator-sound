@@ -15,6 +15,7 @@
 #include <libdbusmenu-glib/menuitem.h>
 #include <libdbusmenu-glib/server.h>
 #include <libdbusmenu-glib/types.h>
+#include <common-defs.h>
 #include <gee.h>
 #include <gio/gio.h>
 
@@ -53,10 +54,6 @@ typedef struct _PlayerItemPrivate PlayerItemPrivate;
 typedef struct _TransportMenuitem TransportMenuitem;
 typedef struct _TransportMenuitemClass TransportMenuitemClass;
 typedef struct _TransportMenuitemPrivate TransportMenuitemPrivate;
-
-#define TRANSPORT_MENUITEM_TYPE_ACTION (transport_menuitem_action_get_type ())
-
-#define TRANSPORT_MENUITEM_TYPE_STATE (transport_menuitem_state_get_type ())
 
 #define TYPE_PLAYER_CONTROLLER (player_controller_get_type ())
 #define PLAYER_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PLAYER_CONTROLLER, PlayerController))
@@ -243,17 +240,6 @@ struct _TransportMenuitemClass {
 	PlayerItemClass parent_class;
 };
 
-typedef enum  {
-	TRANSPORT_MENUITEM_ACTION_PREVIOUS,
-	TRANSPORT_MENUITEM_ACTION_PLAY_PAUSE,
-	TRANSPORT_MENUITEM_ACTION_NEXT
-} TransportMenuitemaction;
-
-typedef enum  {
-	TRANSPORT_MENUITEM_STATE_PLAYING,
-	TRANSPORT_MENUITEM_STATE_PAUSED
-} TransportMenuitemstate;
-
 struct _MetadataMenuitem {
 	PlayerItem parent_instance;
 	MetadataMenuitemPrivate * priv;
@@ -327,6 +313,8 @@ struct _MprisPlayerIface {
 	void (*Next_finish) (MprisPlayer* self, GAsyncResult* _res_, GError** error);
 	void (*Previous) (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
 	void (*Previous_finish) (MprisPlayer* self, GAsyncResult* _res_, GError** error);
+	void (*Seek) (MprisPlayer* self, gint64 offset, GAsyncReadyCallback _callback_, gpointer _user_data_);
+	void (*Seek_finish) (MprisPlayer* self, GAsyncResult* _res_, GError** error);
 	GHashTable* (*get_Metadata) (MprisPlayer* self);
 	void (*set_Metadata) (MprisPlayer* self, GHashTable* value);
 	gint32 (*get_Position) (MprisPlayer* self);
@@ -435,12 +423,10 @@ void music_player_bridge_client_has_vanished (MusicPlayerBridge* self, const gch
 void music_player_bridge_set_root_menu_item (MusicPlayerBridge* self, DbusmenuMenuitem* menu);
 GType player_item_get_type (void) G_GNUC_CONST;
 GType transport_menuitem_get_type (void) G_GNUC_CONST;
-GType transport_menuitem_action_get_type (void) G_GNUC_CONST;
-GType transport_menuitem_state_get_type (void) G_GNUC_CONST;
 GType player_controller_get_type (void) G_GNUC_CONST;
 TransportMenuitem* transport_menuitem_new (PlayerController* parent);
 TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerController* parent);
-void transport_menuitem_change_play_state (TransportMenuitem* self, TransportMenuitemstate update);
+void transport_menuitem_change_play_state (TransportMenuitem* self, TransportState update);
 GeeHashSet* transport_menuitem_attributes_format (void);
 GType metadata_menuitem_get_type (void) G_GNUC_CONST;
 extern gchar* metadata_menuitem_album_art_cache_dir;
@@ -501,6 +487,8 @@ void mpris_player_Next (MprisPlayer* self, GAsyncReadyCallback _callback_, gpoin
 void mpris_player_Next_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
 void mpris_player_Previous (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
 void mpris_player_Previous_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
+void mpris_player_Seek (MprisPlayer* self, gint64 offset, GAsyncReadyCallback _callback_, gpointer _user_data_);
+void mpris_player_Seek_finish (MprisPlayer* self, GAsyncResult* _res_, GError** error);
 GHashTable* mpris_player_get_Metadata (MprisPlayer* self);
 void mpris_player_set_Metadata (MprisPlayer* self, GHashTable* value);
 gint32 mpris_player_get_Position (MprisPlayer* self);
@@ -539,7 +527,7 @@ Mpris2Controller* mpris2_controller_new (PlayerController* ctrl);
 Mpris2Controller* mpris2_controller_construct (GType object_type, PlayerController* ctrl);
 void mpris2_controller_property_changed_cb (Mpris2Controller* self, const gchar* interface_source, GHashTable* changed_properties, gchar** invalid, int invalid_length1);
 void mpris2_controller_initial_update (Mpris2Controller* self);
-void mpris2_controller_transport_update (Mpris2Controller* self, TransportMenuitemaction command);
+void mpris2_controller_transport_update (Mpris2Controller* self, TransportAction command);
 gboolean mpris2_controller_connected (Mpris2Controller* self);
 void mpris2_controller_expose (Mpris2Controller* self);
 void mpris2_controller_fetch_playlists (Mpris2Controller* self, GAsyncReadyCallback _callback_, gpointer _user_data_);

@@ -53,4 +53,7 @@ struct _IndicatorSound {
 // GObject Boiler plate
 GType indicator_sound_get_type (void);
 
+// Update the accessible description
+void update_accessible_desc (IndicatorObject * io);
+
 #endif
