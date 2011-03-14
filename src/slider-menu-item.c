@@ -28,7 +28,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 typedef struct _SliderMenuItemPrivate SliderMenuItemPrivate;
 
 struct _SliderMenuItemPrivate {
-  ActiveSink*         a_sink;
+  Device*         a_sink;
   gint                index;
   gchar*              name;
   pa_cvolume          volume;
@@ -112,7 +112,7 @@ handle_event (DbusmenuMenuitem * mi,
       gdouble volume_input = g_variant_get_double(input);
       //g_debug ("slider menu item about to update volume %f", volume_input);
       slider_menu_item_update_volume (SLIDER_MENU_ITEM (mi), volume_input);
-      active_sink_ensure_sink_is_unmuted (priv->a_sink);      
+      device_ensure_sink_is_unmuted (priv->a_sink);
     }    
   }
 }
@@ -212,7 +212,7 @@ slider_menu_item_construct_mono_volume (const pa_cvolume* vol)
 }
 
 SliderMenuItem*
-slider_menu_item_new (ActiveSink* sink)
+slider_menu_item_new (Device* sink)
 { 
   SliderMenuItem *self = g_object_new(SLIDER_MENU_ITEM_TYPE, NULL);
   SliderMenuItemPrivate* priv = SLIDER_MENU_ITEM_GET_PRIVATE (self);

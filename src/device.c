@@ -18,15 +18,15 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <libdbusmenu-glib/menuitem.h>
 
-#include "active-sink.h"
+#include "device.h"
 #include "slider-menu-item.h"
 #include "mute-menu-item.h"
 #include "voip-input-menu-item.h"
 #include "pulseaudio-mgr.h"
 
-typedef struct _ActiveSinkPrivate ActiveSinkPrivate;
+typedef struct _DevicePrivate DevicePrivate;
 
-struct _ActiveSinkPrivate
+struct _DevicePrivate
 {
   SliderMenuItem*     volume_slider_menuitem;
   MuteMenuItem*       mute_menuitem;
@@ -35,35 +35,34 @@ struct _ActiveSinkPrivate
   SoundServiceDbus*   service;
 };
 
-#define ACTIVE_SINK_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), ACTIVE_SINK_TYPE, ActiveSinkPrivate))
+#define DEVICE_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), DEVICE_TYPE, DevicePrivate))
 
 /* Prototypes */
-static void active_sink_class_init (ActiveSinkClass *klass);
-static void active_sink_init       (ActiveSink *self);
-static void active_sink_dispose    (GObject *object);
-static void active_sink_finalize   (GObject *object);
+static void device_class_init (DeviceClass *klass);
+static void device_init       (Device *self);
+static void device_dispose    (GObject *object);
+static void device_finalize   (GObject *object);
 
-static SoundState active_sink_get_state_from_volume (ActiveSink* self);
-static void active_sink_volume_update (ActiveSink* self, gdouble percent);
-static void active_sink_mute_update (ActiveSink* self, gboolean muted);
+static SoundState device_get_state_from_volume (Device* self);
+static void device_mute_update (Device* self, gboolean muted);
 
-G_DEFINE_TYPE (ActiveSink, active_sink, G_TYPE_OBJECT);
+G_DEFINE_TYPE (Device, device, G_TYPE_OBJECT);
 
 static void
-active_sink_class_init (ActiveSinkClass *klass)
+device_class_init (DeviceClass *klass)
 {
   GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
 
-  g_type_class_add_private (klass, sizeof (ActiveSinkPrivate));
+  g_type_class_add_private (klass, sizeof (DevicePrivate));
 
-  gobject_class->dispose = active_sink_dispose;
-  gobject_class->finalize = active_sink_finalize;  
+  gobject_class->dispose = device_dispose;
+  gobject_class->finalize = device_finalize;
 }
 
 static void
-active_sink_init (ActiveSink *self)
+device_init (Device *self)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   priv->mute_menuitem = NULL;
   priv->volume_slider_menuitem = NULL;
   priv->voip_input_menu_item = NULL;
@@ -79,26 +78,26 @@ active_sink_init (ActiveSink *self)
 }
 
 static void
-active_sink_dispose (GObject *object)
+device_dispose (GObject *object)
 {  
-  G_OBJECT_CLASS (active_sink_parent_class)->dispose (object);
+  G_OBJECT_CLASS (device_parent_class)->dispose (object);
 }
 
 static void
-active_sink_finalize (GObject *object)
+device_finalize (GObject *object)
 {
-  G_OBJECT_CLASS (active_sink_parent_class)->finalize (object);  
+  G_OBJECT_CLASS (device_parent_class)->finalize (object);
 }
 
 void
-active_sink_populate (ActiveSink* sink,
+device_populate (Device* self,
                       const pa_sink_info* update)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE(sink);
-  active_sink_mute_update (sink, update->mute);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE(self);
+  device_mute_update (self, update->mute);
   mute_menu_item_enable (priv->mute_menuitem, TRUE);
   slider_menu_item_populate (priv->volume_slider_menuitem, update);
-  SoundState state = active_sink_get_state_from_volume (sink);
+  SoundState state = device_get_state_from_volume (self);
   if (priv->current_sound_state != state){
     priv->current_sound_state  = state;
     sound_service_dbus_update_sound_state (priv->service,
@@ -108,9 +107,9 @@ active_sink_populate (ActiveSink* sink,
 }
 
 void
-active_sink_activate_voip_item (ActiveSink* self, gint sink_input_index, gint client_index)
+device_activate_voip_item (Device* self, gint sink_input_index, gint client_index)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   if (voip_input_menu_item_is_interested (priv->voip_input_menu_item,
                                           sink_input_index,
                                           client_index)){
@@ -119,50 +118,50 @@ active_sink_activate_voip_item (ActiveSink* self, gint sink_input_index, gint cl
 }
 
 void
-active_sink_deactivate_voip_source (ActiveSink* self, gboolean visible)
+device_deactivate_voip_source (Device* self, gboolean visible)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   visible &= voip_input_menu_item_is_active (priv->voip_input_menu_item);
   voip_input_menu_item_deactivate_source (priv->voip_input_menu_item, visible);
 }
 
 void
-active_sink_deactivate_voip_client (ActiveSink* self)
+device_deactivate_voip_client (Device* self)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   voip_input_menu_item_deactivate_voip_client (priv->voip_input_menu_item);
 }
 
 void
-active_sink_update (ActiveSink* sink,
+device_update (Device* self,
                     const pa_sink_info* update)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (sink);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   slider_menu_item_update (priv->volume_slider_menuitem, update);
 
-  SoundState state = active_sink_get_state_from_volume (sink);
+  SoundState state = device_get_state_from_volume (self);
   if (priv->current_sound_state != state){
     priv->current_sound_state  = state;
     sound_service_dbus_update_sound_state (priv->service,
                                            priv->current_sound_state);
   }
 
-  active_sink_mute_update (sink, update->mute);  
+  device_mute_update (self, update->mute);
 }
 
 gint
-active_sink_get_current_sink_input_index (ActiveSink* sink)
+device_get_current_sink_input_index (Device* self)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (sink);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   return voip_input_menu_item_get_sink_input_index (priv->voip_input_menu_item);
 }
 
 static void 
-active_sink_mute_update (ActiveSink* self, gboolean muted)
+device_mute_update (Device* self, gboolean muted)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   mute_menu_item_update (priv->mute_menuitem, muted);
-  SoundState state = active_sink_get_state_from_volume (self);
+  SoundState state = device_get_state_from_volume (self);
   
   if (muted == TRUE){
     state = MUTED;
@@ -175,9 +174,9 @@ active_sink_mute_update (ActiveSink* self, gboolean muted)
 }
 
 void
-active_sink_ensure_sink_is_unmuted (ActiveSink* self)
+device_ensure_sink_is_unmuted (Device* self)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   if (mute_menu_item_is_muted (priv->mute_menuitem)){
     pm_update_mute (FALSE);    
   }
@@ -185,9 +184,9 @@ active_sink_ensure_sink_is_unmuted (ActiveSink* self)
 
 
 static SoundState
-active_sink_get_state_from_volume (ActiveSink* self)
+device_get_state_from_volume (Device* self)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   GVariant* v = dbusmenu_menuitem_property_get_variant (DBUSMENU_MENUITEM(priv->volume_slider_menuitem),
                                                         DBUSMENU_VOLUME_MENUITEM_LEVEL);
   gdouble volume_percent = g_variant_get_double (v);
@@ -210,9 +209,9 @@ active_sink_get_state_from_volume (ActiveSink* self)
 }
 
 void
-active_sink_determine_blocking_state (ActiveSink* self)
+device_determine_blocking_state (Device* self)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   if (mute_menu_item_is_muted (priv->mute_menuitem)){
     /**
     We don't want to set the current state to blocking
@@ -224,24 +223,24 @@ active_sink_determine_blocking_state (ActiveSink* self)
 }
 
 gint
-active_sink_get_index (ActiveSink* self)
+device_get_index (Device* self)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   return slider_menu_item_get_sink_index (priv->volume_slider_menuitem);
 }
 
 gboolean
-active_sink_is_populated (ActiveSink* sink)
+device_is_populated (Device* self)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (sink);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   return dbusmenu_menuitem_property_get_bool (DBUSMENU_MENUITEM (priv->volume_slider_menuitem),
                                                                  DBUSMENU_MENUITEM_PROP_ENABLED);
 }
 
 void 
-active_sink_deactivate (ActiveSink* self)
+device_deactivate (Device* self)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   priv->current_sound_state = UNAVAILABLE;
   sound_service_dbus_update_sound_state (priv->service,
                                          priv->current_sound_state);  
@@ -250,37 +249,37 @@ active_sink_deactivate (ActiveSink* self)
 }
 
 SoundState
-active_sink_get_state (ActiveSink* self)
+device_get_state (Device* self)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   return priv->current_sound_state;
 }
 
 void
-active_sink_update_voip_input_source (ActiveSink* self, const pa_source_info* update)
+device_update_voip_input_source (Device* self, const pa_source_info* update)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   voip_input_menu_item_update (priv->voip_input_menu_item, update);
 }
 
 gboolean
-active_sink_is_voip_source_populated (ActiveSink* self)
+device_is_voip_source_populated (Device* self)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   return voip_input_menu_item_is_populated (priv->voip_input_menu_item);
 }
 
-gint active_sink_get_source_index (ActiveSink* self)
+gint device_get_source_index (Device* self)
 {
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   return voip_input_menu_item_get_index (priv->voip_input_menu_item);
 }
 
-ActiveSink*
-active_sink_new (SoundServiceDbus* service)
+Device*
+device_new (SoundServiceDbus* service)
 {
-  ActiveSink* sink = g_object_new (ACTIVE_SINK_TYPE, NULL);
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (sink);
+  Device* sink = g_object_new (DEVICE_TYPE, NULL);
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (sink);
   priv->service = service;
   sound_service_dbus_build_sound_menu (service,
                                        mute_menu_item_get_button (priv->mute_menuitem),

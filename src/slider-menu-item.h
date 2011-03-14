@@ -23,7 +23,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib-object.h>
 
 #include <libdbusmenu-glib/menuitem.h>
-#include "active-sink.h"
+#include "device.h"
 
 G_BEGIN_DECLS
 
@@ -56,7 +56,7 @@ void slider_menu_item_populate (SliderMenuItem* self, const pa_sink_info* update
 
 gint slider_menu_item_get_sink_index (SliderMenuItem* self);
 
-SliderMenuItem* slider_menu_item_new (ActiveSink* sink);
+SliderMenuItem* slider_menu_item_new (Device* sink);
 
 G_END_DECLS
 
