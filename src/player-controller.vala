@@ -145,8 +145,6 @@ public class PlayerController : GLib.Object
     PlaylistsMenuitem playlists_menuitem = this.custom_items[widget_order.PLAYLISTS] as PlaylistsMenuitem;
 
     if(this.current_state != state.CONNECTED){
-      this.custom_items[widget_order.TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE,
-                                                                  false);
       this.custom_items[widget_order.METADATA].property_set_bool(MENUITEM_PROP_VISIBLE,
                                                                  false);
       playlists_menuitem.root_item.property_set_bool ( MENUITEM_PROP_VISIBLE,
@@ -155,8 +153,9 @@ public class PlayerController : GLib.Object
     }
     this.custom_items[widget_order.METADATA].property_set_bool(MENUITEM_PROP_VISIBLE,
                                                               this.custom_items[widget_order.METADATA].populated(MetadataMenuitem.attributes_format()));    
-    this.custom_items[widget_order.TRANSPORT].property_set_bool(MENUITEM_PROP_VISIBLE,
-                                                                true);
+    TransportMenuitem transport = this.custom_items[widget_order.TRANSPORT] as TransportMenuitem;
+    transport.handle_cached_action();
+
     playlists_menuitem.root_item.property_set_bool ( MENUITEM_PROP_VISIBLE,
                                                      this.use_playlists );
   }

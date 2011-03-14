@@ -23,12 +23,38 @@ using DbusmenuTransport;
 using Transport;
 
 public class TransportMenuitem : PlayerItem
-{
-  
+{ 
+  private Transport.Action cached_action;
+ 
+  private bool running {
+    get{
+      return this.owner.current_state == PlayerController.state.CONNECTED;
+    } 
+  }
+
   public TransportMenuitem(PlayerController parent)
   {
     Object(item_type: MENUITEM_TYPE, owner: parent);
-    this.property_set_int(MENUITEM_PLAY_STATE, 1);
+  }
+  construct{
+    this.property_set_int(MENUITEM_PLAY_STATE, (int)Transport.State.PAUSED);
+    this.cached_action = Transport.Action.NO_ACTION;
+  }
+
+  public void handle_cached_action()
+  {
+    if (this.cached_action != Transport.Action.NO_ACTION){ 
+     debug ("TRYING TO FIRE OF A CACHED ACTION %i", (int)this.cached_action);
+     Timeout.add_seconds (2, send_cached_action);
+     //this.owner.mpris_bridge.transport_update(this.cached_action);        
+    }
+  }
+
+  private bool send_cached_action()
+  {
+    this.owner.mpris_bridge.transport_update(this.cached_action);
+    this.cached_action = Transport.Action.NO_ACTION;
+    return false;
   }
 
   public void change_play_state(Transport.State update)
@@ -43,17 +69,26 @@ public class TransportMenuitem : PlayerItem
                                     Variant input_value,
                                     uint timestamp)
   {
-    /*debug ( "Handle event in transport menu item - input variant is of type %s", 
-             input_value.get_type_string() );*/
+    debug ( "Handle event in transport menu item - is the player actually running %s", 
+             this.running.to_string() );
     Variant v = input_value;
-    if ( input_value.is_of_type ( VariantType.VARIANT) ){
+    if ( input_value.is_of_type (VariantType.VARIANT)){
       v = input_value.get_variant();
     }
     
     int32 input = v.get_int32();
-    //debug("transport menu item -> handle_event with value %s", input.to_string());
-    //debug("transport owner name = %s", this.owner.app_info.get_name());
-    this.owner.mpris_bridge.transport_update((Transport.Action)input);
+    
+    if (this.running == true){
+      //debug("transport menu item -> handle_event with value %s", input.to_string());
+      //debug("transport owner name = %s", this.owner.app_info.get_name());
+      this.owner.mpris_bridge.transport_update((Transport.Action)input);
+    }
+    else{
+      debug("transport cached action = %i", (Transport.Action)input);
+
+      this.cached_action = (Transport.Action)input;
+      this.owner.instantiate();
+    }
   } 
 
   public static HashSet<string> attributes_format()
