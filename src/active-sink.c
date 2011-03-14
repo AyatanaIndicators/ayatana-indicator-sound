@@ -33,11 +33,6 @@ struct _ActiveSinkPrivate
   VoipInputMenuItem*  voip_input_menu_item;
   SoundState          current_sound_state;
   SoundServiceDbus*   service;
-  gint                index;
-  gchar*              name;
-  pa_cvolume          volume;
-  pa_channel_map      channel_map;
-  pa_volume_t         base_volume;
 };
 
 #define ACTIVE_SINK_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), ACTIVE_SINK_TYPE, ActiveSinkPrivate))
@@ -49,7 +44,6 @@ static void active_sink_dispose    (GObject *object);
 static void active_sink_finalize   (GObject *object);
 
 static SoundState active_sink_get_state_from_volume (ActiveSink* self);
-static pa_cvolume active_sink_construct_mono_volume (const pa_cvolume* vol);
 static void active_sink_volume_update (ActiveSink* self, gdouble percent);
 static void active_sink_mute_update (ActiveSink* self, gboolean muted);
 
@@ -74,8 +68,6 @@ active_sink_init (ActiveSink *self)
   priv->volume_slider_menuitem = NULL;
   priv->voip_input_menu_item = NULL;
   priv->current_sound_state = UNAVAILABLE;
-  priv->index = -1;
-  priv->name = NULL;
   priv->service = NULL;
 
   // Init our menu items.
@@ -103,23 +95,16 @@ active_sink_populate (ActiveSink* sink,
                       const pa_sink_info* update)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE(sink);
-
-  priv->name = g_strdup (update->name);
-  priv->index = update->index;
-  active_sink_mute_update (sink, update->mute);
-  priv->volume = active_sink_construct_mono_volume (&update->volume);
-  priv->base_volume = update->base_volume;
-  priv->channel_map = update->channel_map;
-
-  pa_volume_t vol = pa_cvolume_max (&update->volume);
-  gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
-
-  active_sink_volume_update (sink, volume_percent);  
   active_sink_mute_update (sink, update->mute);
   mute_menu_item_enable (priv->mute_menuitem, TRUE);
-  slider_menu_item_enable (priv->volume_slider_menuitem, TRUE);
+  slider_menu_item_populate (priv->volume_slider_menuitem, update);
+  SoundState state = active_sink_get_state_from_volume (sink);
+  if (priv->current_sound_state != state){
+    priv->current_sound_state  = state;
+    sound_service_dbus_update_sound_state (priv->service,
+                                           priv->current_sound_state);
+  }
 
-  g_debug ("Active sink has been populated - volume %f", volume_percent);
 }
 
 void
@@ -153,48 +138,17 @@ active_sink_update (ActiveSink* sink,
                     const pa_sink_info* update)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (sink);
-  active_sink_mute_update (sink, update->mute);
-  priv->volume = active_sink_construct_mono_volume (&update->volume);
-  priv->base_volume = update->base_volume;
-  priv->channel_map = update->channel_map;
+  slider_menu_item_update (priv->volume_slider_menuitem, update);
 
-  pa_volume_t vol = pa_cvolume_max (&update->volume);
-  gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
-
-  active_sink_volume_update (sink, volume_percent);  
-  active_sink_mute_update (sink, update->mute);  
-}
-
-// To the UI
-static void
-active_sink_volume_update (ActiveSink* self, gdouble percent)
-{
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
-  slider_menu_item_update (priv->volume_slider_menuitem, percent);  
-  SoundState state = active_sink_get_state_from_volume (self);
+  SoundState state = active_sink_get_state_from_volume (sink);
   if (priv->current_sound_state != state){
     priv->current_sound_state  = state;
     sound_service_dbus_update_sound_state (priv->service,
                                            priv->current_sound_state);
   }
+
+  active_sink_mute_update (sink, update->mute);  
 }
-
-// From the UI
-void 
-active_sink_update_volume (ActiveSink* self, gdouble percent)
-{
-  pa_cvolume new_volume;
-  pa_cvolume_init(&new_volume);
-  new_volume.channels = 1;
-  pa_volume_t new_volume_value = (pa_volume_t) ((percent * PA_VOLUME_NORM) / 100);
-  pa_cvolume_set(&new_volume, 1, new_volume_value);
-
-  ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
-
-  pa_cvolume_set(&priv->volume, priv->channel_map.channels, new_volume_value);
-  pm_update_volume (priv->index, new_volume);
-}
-
 
 gint
 active_sink_get_current_sink_input_index (ActiveSink* sink)
@@ -213,6 +167,7 @@ active_sink_mute_update (ActiveSink* self, gboolean muted)
   if (muted == TRUE){
     state = MUTED;
   }
+  // Only send signals if something has changed
   if (priv->current_sound_state != state){
     priv->current_sound_state = state;
     sound_service_dbus_update_sound_state (priv->service, state);
@@ -254,17 +209,6 @@ active_sink_get_state_from_volume (ActiveSink* self)
   return state;
 }
 
-pa_cvolume
-active_sink_construct_mono_volume (const pa_cvolume* vol)
-{
-  pa_cvolume new_volume;
-  pa_cvolume_init(&new_volume);
-  new_volume.channels = 1;
-  pa_volume_t max_vol = pa_cvolume_max(vol);
-  pa_cvolume_set(&new_volume, 1, max_vol);
-  return new_volume;
-}
-
 void
 active_sink_determine_blocking_state (ActiveSink* self)
 {
@@ -283,14 +227,15 @@ gint
 active_sink_get_index (ActiveSink* self)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (self);
-  return priv->index;
+  return slider_menu_item_get_sink_index (priv->volume_slider_menuitem);
 }
 
 gboolean
 active_sink_is_populated (ActiveSink* sink)
 {
   ActiveSinkPrivate* priv = ACTIVE_SINK_GET_PRIVATE (sink);
-  return (priv->index != -1);
+  return dbusmenu_menuitem_property_get_bool (DBUSMENU_MENUITEM (priv->volume_slider_menuitem),
+                                                                 DBUSMENU_MENUITEM_PROP_ENABLED);
 }
 
 void 
@@ -302,9 +247,6 @@ active_sink_deactivate (ActiveSink* self)
                                          priv->current_sound_state);  
   mute_menu_item_enable (priv->mute_menuitem, FALSE);
   slider_menu_item_enable (priv->volume_slider_menuitem, FALSE);
-  priv->index = -1;
-  g_free(priv->name);
-  priv->name = NULL;
 }
 
 SoundState

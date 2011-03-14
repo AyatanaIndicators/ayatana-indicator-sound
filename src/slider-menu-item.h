@@ -47,8 +47,14 @@ struct _SliderMenuItem {
 
 GType slider_menu_item_get_type (void);
 
-void slider_menu_item_update(SliderMenuItem* item, gdouble update);
+void slider_menu_item_update(SliderMenuItem* item, const pa_sink_info* update);
 void slider_menu_item_enable(SliderMenuItem* item, gboolean active);
+void slider_menu_item_populate (SliderMenuItem* self, const pa_sink_info* update);
+//void
+//active_sink_update (ActiveSink* sink,
+//                    const pa_sink_info* update)
+
+gint slider_menu_item_get_sink_index (SliderMenuItem* self);
 
 SliderMenuItem* slider_menu_item_new (ActiveSink* sink);
 

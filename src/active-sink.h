@@ -64,7 +64,6 @@ gboolean active_sink_is_populated (ActiveSink* sink);
 gint active_sink_get_index (ActiveSink* self);
 void active_sink_deactivate (ActiveSink* self);
 void active_sink_update_mute (ActiveSink* self, gboolean mute_update);
-void active_sink_update_volume (ActiveSink* self, gdouble percent);
 void active_sink_ensure_sink_is_unmuted (ActiveSink* self);
 
 // source and sinkinput/client related for VOIP functionality
