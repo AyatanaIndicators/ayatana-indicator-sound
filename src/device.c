@@ -94,7 +94,6 @@ device_populate (Device* self,
                       const pa_sink_info* update)
 {
   DevicePrivate* priv = DEVICE_GET_PRIVATE(self);
-  device_mute_update (self, update->mute);
   mute_menu_item_enable (priv->mute_menuitem, TRUE);
   slider_menu_item_populate (priv->volume_slider_menuitem, update);
   SoundState state = device_get_state_from_volume (self);
@@ -103,7 +102,7 @@ device_populate (Device* self,
     sound_service_dbus_update_sound_state (priv->service,
                                            priv->current_sound_state);
   }
-
+  device_mute_update (self, update->mute);
 }
 
 void
