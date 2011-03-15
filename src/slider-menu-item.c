@@ -28,9 +28,10 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 typedef struct _SliderMenuItemPrivate SliderMenuItemPrivate;
 
 struct _SliderMenuItemPrivate {
-  Device*         a_sink;
+  Device*             a_sink;
   gint                index;
   gchar*              name;
+  gboolean            mute;
   pa_cvolume          volume;
   pa_channel_map      channel_map;
   pa_volume_t         base_volume;
@@ -127,6 +128,7 @@ slider_menu_item_populate (SliderMenuItem* self, const pa_sink_info* update)
   priv->volume = slider_menu_item_construct_mono_volume (&update->volume);
   priv->base_volume = update->base_volume;
   priv->channel_map = update->channel_map;
+  priv->mute = update->mute;
 
   pa_volume_t vol = pa_cvolume_max (&update->volume);
   gdouble volume_percent = ((gdouble) vol * 100) / PA_VOLUME_NORM;
@@ -170,6 +172,14 @@ slider_menu_item_update (SliderMenuItem* self, const pa_sink_info* update)
   dbusmenu_menuitem_property_set_variant (DBUSMENU_MENUITEM(self),
                                           DBUSMENU_VOLUME_MENUITEM_LEVEL,
                                           new_volume);
+  if (priv->mute != update->mute){
+    priv->mute = update->mute;
+    g_debug ("volume menu item - update - mute = %i", update->mute);
+    GVariant* new_mute_update = g_variant_new_int32 (update->mute);
+    dbusmenu_menuitem_property_set_variant (DBUSMENU_MENUITEM(self),
+                                            DBUSMENU_VOLUME_MENUITEM_MUTE,
+                                            new_mute_update);
+  }
 }
 
 /*
