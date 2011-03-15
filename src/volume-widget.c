@@ -175,9 +175,15 @@ volume_widget_set_twin_item(VolumeWidget* self,
                    G_CALLBACK(volume_widget_property_update), self);
   gdouble initial_level = g_variant_get_double (dbusmenu_menuitem_property_get_variant(twin_item,
                                                 DBUSMENU_VOLUME_MENUITEM_LEVEL));
+  gint initial_mute = g_variant_get_int32 (dbusmenu_menuitem_property_get_variant(twin_item,
+                                           DBUSMENU_VOLUME_MENUITEM_MUTE));
+
   //g_debug("volume_widget_set_twin_item initial level = %f", initial_level);
   GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
   GtkRange *range = (GtkRange*)slider;
+  if(initial_mute == 1){
+    initial_level = 0;
+  }
   gtk_range_set_value(range, initial_level);
   update_accessible_desc(priv->indicator);
 }

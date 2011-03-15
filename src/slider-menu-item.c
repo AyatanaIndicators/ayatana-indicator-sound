@@ -76,7 +76,7 @@ slider_menu_item_init (SliderMenuItem *self)
 
   SliderMenuItemPrivate* priv = SLIDER_MENU_ITEM_GET_PRIVATE (self);
 
-  priv->index = -1;
+  priv->index = NOT_ACTIVE;
   priv->name = NULL;
 
   return;
@@ -136,6 +136,11 @@ slider_menu_item_populate (SliderMenuItem* self, const pa_sink_info* update)
   dbusmenu_menuitem_property_set_variant (DBUSMENU_MENUITEM(self),
                                           DBUSMENU_VOLUME_MENUITEM_LEVEL,
                                           new_volume);
+  GVariant* new_mute_update = g_variant_new_int32 (update->mute);
+  dbusmenu_menuitem_property_set_variant (DBUSMENU_MENUITEM(self),
+                                          DBUSMENU_VOLUME_MENUITEM_MUTE,
+                                          new_mute_update);
+
   slider_menu_item_enable (self, TRUE);
 }
 
@@ -195,7 +200,7 @@ slider_menu_item_enable (SliderMenuItem* self, gboolean active)
                                        DBUSMENU_MENUITEM_PROP_ENABLED,
                                        active);
   if(active == FALSE){
-    priv->index = -1;
+    priv->index = NOT_ACTIVE;
     if(priv->name != NULL){
       g_free(priv->name);
       priv->name = NULL;
