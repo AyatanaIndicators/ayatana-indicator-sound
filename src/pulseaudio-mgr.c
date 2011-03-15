@@ -226,11 +226,11 @@ pm_subscribed_events_callback (pa_context *c,
   case PA_SUBSCRIPTION_EVENT_SINK:
     
     // We don't care about any other sink other than the active one.
-    if (index != device_get_index (sink))
+    if (index != device_get_sink_index (sink))
       return;
       
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
-      device_deactivate (sink);
+      device_sink_deactivated (sink);
       
     }
     else{
@@ -308,7 +308,7 @@ pm_context_state_callback (pa_context *c, void *userdata)
     break;
   case PA_CONTEXT_FAILED:
     g_warning("PA_CONTEXT_FAILED - Is PulseAudio Daemon running ?");
-    device_deactivate (DEVICE (userdata));
+    device_sink_deactivated (DEVICE (userdata));
     if (reconnect_idle_id == 0){
       reconnect_idle_id = g_timeout_add_seconds (RECONNECT_DELAY,
                                                  reconnect_to_pulse,
@@ -362,7 +362,7 @@ pm_server_info_callback (pa_context *c,
 
   if (info == NULL) {
     g_warning("No PA server - get the hell out of here");
-    device_deactivate (DEVICE (userdata));
+    device_sink_deactivated (DEVICE (userdata));
     return;
   }
   // Go for the default sink
@@ -373,7 +373,7 @@ pm_server_info_callback (pa_context *c,
                                                        pm_default_sink_info_callback,
                                                        userdata) )) {
       g_warning("pa_context_get_sink_info_by_namet() failed");
-      device_deactivate (DEVICE (userdata));
+      device_sink_deactivated (DEVICE (userdata));
       pa_operation_unref(operation);
       return;
     }
@@ -382,7 +382,7 @@ pm_server_info_callback (pa_context *c,
                                                        pm_sink_info_callback,
                                                        userdata))) {
     g_warning("pa_context_get_sink_info_list() failed");
-    device_deactivate (DEVICE (userdata));
+    device_sink_deactivated (DEVICE (userdata));
     pa_operation_unref(operation);
     return;
   }
@@ -426,9 +426,9 @@ pm_sink_info_callback (pa_context *c,
       return;
     }
     Device* a_sink = DEVICE (userdata);
-    if (device_is_populated (a_sink) == FALSE &&
+    if (device_is_sink_populated (a_sink) == FALSE &&
         g_ascii_strncasecmp("auto_null", sink->name, 9) != 0){
-      device_populate (a_sink, sink);
+      device_sink_populate (a_sink, sink);
     }
   }
 }
@@ -448,11 +448,11 @@ pm_default_sink_info_callback (pa_context *c,
       return;
     }
     // Only repopulate if there is a change with regards the index
-    if (device_get_index (DEVICE (userdata)) == info->index)
+    if (device_get_sink_index (DEVICE (userdata)) == info->index)
       return;
     
     g_debug ("Pulse Server has handed us a new default sink");
-    device_populate (DEVICE (userdata), info);
+    device_sink_populate (DEVICE (userdata), info);
   }
 }
 
@@ -494,7 +494,7 @@ pm_sink_input_info_callback (pa_context *c,
     }
 
     // And finally check for the mute blocking state
-    if (device_get_index (a_sink) == info->sink){
+    if (device_get_sink_index (a_sink) == info->sink){
       device_determine_blocking_state (a_sink);
     }
   }
@@ -514,7 +514,7 @@ pm_update_device (pa_context *c,
       g_warning ("update_device - our user data is not what we think it should be or the info parameter is null");
       return;
     }
-    device_update (DEVICE(userdata), info);
+    device_sink_update (DEVICE(userdata), info);
   }
 }
 

@@ -90,7 +90,7 @@ device_finalize (GObject *object)
 }
 
 void
-device_populate (Device* self,
+device_sink_populate (Device* self,
                       const pa_sink_info* update)
 {
   DevicePrivate* priv = DEVICE_GET_PRIVATE(self);
@@ -106,33 +106,7 @@ device_populate (Device* self,
 }
 
 void
-device_activate_voip_item (Device* self, gint sink_input_index, gint client_index)
-{
-  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
-  if (voip_input_menu_item_is_interested (priv->voip_input_menu_item,
-                                          sink_input_index,
-                                          client_index)){
-    voip_input_menu_item_enable (priv->voip_input_menu_item, TRUE);
-  }
-}
-
-void
-device_deactivate_voip_source (Device* self, gboolean visible)
-{
-  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
-  visible &= voip_input_menu_item_is_active (priv->voip_input_menu_item);
-  voip_input_menu_item_deactivate_source (priv->voip_input_menu_item, visible);
-}
-
-void
-device_deactivate_voip_client (Device* self)
-{
-  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
-  voip_input_menu_item_deactivate_voip_client (priv->voip_input_menu_item);
-}
-
-void
-device_update (Device* self,
+device_sink_update (Device* self,
                     const pa_sink_info* update)
 {
   DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
@@ -222,22 +196,48 @@ device_determine_blocking_state (Device* self)
 }
 
 gint
-device_get_index (Device* self)
+device_get_sink_index (Device* self)
 {
   DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   return slider_menu_item_get_sink_index (priv->volume_slider_menuitem);
 }
 
 gboolean
-device_is_populated (Device* self)
+device_is_sink_populated (Device* self)
 {
   DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   return dbusmenu_menuitem_property_get_bool (DBUSMENU_MENUITEM (priv->volume_slider_menuitem),
                                                                  DBUSMENU_MENUITEM_PROP_ENABLED);
 }
 
+void
+device_activate_voip_item (Device* self, gint sink_input_index, gint client_index)
+{
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
+  if (voip_input_menu_item_is_interested (priv->voip_input_menu_item,
+                                          sink_input_index,
+                                          client_index)){
+    voip_input_menu_item_enable (priv->voip_input_menu_item, TRUE);
+  }
+}
+
+void
+device_deactivate_voip_source (Device* self, gboolean visible)
+{
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
+  visible &= voip_input_menu_item_is_active (priv->voip_input_menu_item);
+  voip_input_menu_item_deactivate_source (priv->voip_input_menu_item, visible);
+}
+
+void
+device_deactivate_voip_client (Device* self)
+{
+  DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
+  voip_input_menu_item_deactivate_voip_client (priv->voip_input_menu_item);
+}
+
 void 
-device_deactivate (Device* self)
+device_sink_deactivated (Device* self)
 {
   DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   priv->current_sound_state = UNAVAILABLE;
