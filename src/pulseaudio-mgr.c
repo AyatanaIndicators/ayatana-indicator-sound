@@ -68,7 +68,7 @@ static void pm_sink_input_info_callback (pa_context *c,
                                          const pa_sink_input_info *info,
                                          int eol,
                                          void *userdata);
-static void pm_update_active_sink (pa_context *c,
+static void pm_update_device (pa_context *c,
                                    const pa_sink_info *info,
                                    int eol,
                                    void *userdata);
@@ -89,11 +89,11 @@ static pa_glib_mainloop *pa_main_loop = NULL;
  Entry Point
  **/
 void 
-pm_establish_pulse_connection (ActiveSink* active_sink)
+pm_establish_pulse_connection (Device* device)
 {
   pa_main_loop = pa_glib_mainloop_new (g_main_context_default ());
   g_assert (pa_main_loop);
-  reconnect_to_pulse ((gpointer)active_sink);  
+  reconnect_to_pulse ((gpointer)device);
 }
 
 /**
@@ -119,7 +119,7 @@ reconnect_to_pulse (gpointer user_data)
 {
   g_debug("Attempt a pulse connection");
   // reset
-  g_return_val_if_fail (IS_ACTIVE_SINK (user_data), FALSE);
+  g_return_val_if_fail (IS_DEVICE (user_data), FALSE);
 
   connection_attempts += 1;
   if (pulse_context != NULL) {
@@ -216,38 +216,38 @@ pm_subscribed_events_callback (pa_context *c,
                                uint32_t index,
                                void* userdata)
 {
-  if (IS_ACTIVE_SINK (userdata) == FALSE){
+  if (IS_DEVICE (userdata) == FALSE){
     g_critical ("subscribed events callback - our userdata is not what we think it should be");
     return;
   }
-  ActiveSink* sink = ACTIVE_SINK (userdata);
+  Device* sink = DEVICE (userdata);
 
   switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) {
   case PA_SUBSCRIPTION_EVENT_SINK:
     
     // We don't care about any other sink other than the active one.
-    if (index != active_sink_get_index (sink))
+    if (index != device_get_index (sink))
       return;
       
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
-      active_sink_deactivate (sink);
+      device_deactivate (sink);
       
     }
     else{
       pa_operation_unref (pa_context_get_sink_info_by_index (c,
                                                              index,
-                                                             pm_update_active_sink,
+                                                             pm_update_device,
                                                              userdata) );
     }
     break;
   case PA_SUBSCRIPTION_EVENT_SOURCE:
     g_debug ("Looks like source event of some description - index = %i", index);
     // We don't care about any other sink other than the active one.
-    if (index != active_sink_get_source_index (sink))
+    if (index != device_get_source_index (sink))
         return;
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
       g_debug ("Source removal event - index = %i", index);
-      active_sink_deactivate_voip_source (sink, FALSE);
+      device_deactivate_voip_source (sink, FALSE);
     }
     else{
       pa_operation_unref (pa_context_get_source_info_by_index (c,
@@ -260,12 +260,12 @@ pm_subscribed_events_callback (pa_context *c,
     // We don't care about sink input removals.
     g_debug ("sink input event");
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
-      gint cached_index = active_sink_get_current_sink_input_index (sink);
+      gint cached_index = device_get_current_sink_input_index (sink);
 
       g_debug ("Just saw a sink input removal event - index = %i and cached index = %i", index, cached_index);
 
       if (index == cached_index){
-        active_sink_deactivate_voip_client (sink);
+        device_deactivate_voip_client (sink);
       }
     }
     else if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_NEW) {
@@ -308,7 +308,7 @@ pm_context_state_callback (pa_context *c, void *userdata)
     break;
   case PA_CONTEXT_FAILED:
     g_warning("PA_CONTEXT_FAILED - Is PulseAudio Daemon running ?");
-    active_sink_deactivate (ACTIVE_SINK (userdata));
+    device_deactivate (DEVICE (userdata));
     if (reconnect_idle_id == 0){
       reconnect_idle_id = g_timeout_add_seconds (RECONNECT_DELAY,
                                                  reconnect_to_pulse,
@@ -362,7 +362,7 @@ pm_server_info_callback (pa_context *c,
 
   if (info == NULL) {
     g_warning("No PA server - get the hell out of here");
-    active_sink_deactivate (ACTIVE_SINK (userdata));
+    device_deactivate (DEVICE (userdata));
     return;
   }
   // Go for the default sink
@@ -373,7 +373,7 @@ pm_server_info_callback (pa_context *c,
                                                        pm_default_sink_info_callback,
                                                        userdata) )) {
       g_warning("pa_context_get_sink_info_by_namet() failed");
-      active_sink_deactivate (ACTIVE_SINK (userdata));
+      device_deactivate (DEVICE (userdata));
       pa_operation_unref(operation);
       return;
     }
@@ -382,7 +382,7 @@ pm_server_info_callback (pa_context *c,
                                                        pm_sink_info_callback,
                                                        userdata))) {
     g_warning("pa_context_get_sink_info_list() failed");
-    active_sink_deactivate (ACTIVE_SINK (userdata));
+    device_deactivate (DEVICE (userdata));
     pa_operation_unref(operation);
     return;
   }
@@ -421,14 +421,14 @@ pm_sink_info_callback (pa_context *c,
     return;
   }
   else {
-    if (IS_ACTIVE_SINK (userdata) == FALSE || sink == NULL){
+    if (IS_DEVICE (userdata) == FALSE || sink == NULL){
       g_warning ("sink info callback - our user data is not what we think it should be or the sink parameter is null");
       return;
     }
-    ActiveSink* a_sink = ACTIVE_SINK (userdata);
-    if (active_sink_is_populated (a_sink) == FALSE &&
+    Device* a_sink = DEVICE (userdata);
+    if (device_is_populated (a_sink) == FALSE &&
         g_ascii_strncasecmp("auto_null", sink->name, 9) != 0){
-      active_sink_populate (a_sink, sink);
+      device_populate (a_sink, sink);
     }
   }
 }
@@ -443,16 +443,16 @@ pm_default_sink_info_callback (pa_context *c,
     return;
   } 
   else {
-    if (IS_ACTIVE_SINK (userdata) == FALSE || info == NULL){
+    if (IS_DEVICE (userdata) == FALSE || info == NULL){
       g_warning ("Default sink info callback - our user data is not what we think it should be or the info parameter is null");
       return;
     }
     // Only repopulate if there is a change with regards the index
-    if (active_sink_get_index (ACTIVE_SINK (userdata)) == info->index)
+    if (device_get_index (DEVICE (userdata)) == info->index)
       return;
     
     g_debug ("Pulse Server has handed us a new default sink");
-    active_sink_populate (ACTIVE_SINK (userdata), info);
+    device_populate (DEVICE (userdata), info);
   }
 }
 
@@ -466,18 +466,18 @@ pm_sink_input_info_callback (pa_context *c,
     return;
   }
   else {
-    if (info == NULL || IS_ACTIVE_SINK (userdata) == FALSE) {
+    if (info == NULL || IS_DEVICE (userdata) == FALSE) {
       g_warning("Sink input info callback : SINK INPUT INFO IS NULL or our user_data is not what we think it should be");
       return;
     }
 
-    if (IS_ACTIVE_SINK (userdata) == FALSE){
+    if (IS_DEVICE (userdata) == FALSE){
       g_warning ("sink input info callback - our user data is not what we think it should be");
       return;
     }
     // Check if this is Voip sink input
     gint result  = pa_proplist_contains (info->proplist, PA_PROP_MEDIA_ROLE);
-    ActiveSink* a_sink = ACTIVE_SINK (userdata);
+    Device* a_sink = DEVICE (userdata);
 
     if (result == 1){
       g_debug ("Sink input info has media role property");
@@ -485,7 +485,7 @@ pm_sink_input_info_callback (pa_context *c,
       g_debug ("prop role = %s", value);
       if (g_strcmp0 (value, "phone") == 0) {
         g_debug ("And yes its a VOIP app ... sink input index = %i", info->index);
-        active_sink_activate_voip_item (a_sink, (gint)info->index, (gint)info->client);
+        device_activate_voip_item (a_sink, (gint)info->index, (gint)info->client);
         // TODO to start with we will assume our source is the same as what this 'client'
         // is pointing at. This should probably be more intelligent :
         // query for the list of source output info's and going on the name of the client
@@ -494,14 +494,14 @@ pm_sink_input_info_callback (pa_context *c,
     }
 
     // And finally check for the mute blocking state
-    if (active_sink_get_index (a_sink) == info->sink){
-      active_sink_determine_blocking_state (a_sink);
+    if (device_get_index (a_sink) == info->sink){
+      device_determine_blocking_state (a_sink);
     }
   }
 }
 
 static void 
-pm_update_active_sink (pa_context *c,
+pm_update_device (pa_context *c,
                        const pa_sink_info *info,
                        int eol,
                        void *userdata)
@@ -510,11 +510,11 @@ pm_update_active_sink (pa_context *c,
     return;
   }
   else{
-    if (IS_ACTIVE_SINK (userdata) == FALSE || info == NULL){
-      g_warning ("update_active_sink - our user data is not what we think it should be or the info parameter is null");
+    if (IS_DEVICE (userdata) == FALSE || info == NULL){
+      g_warning ("update_device - our user data is not what we think it should be or the info parameter is null");
       return;
     }
-    active_sink_update (ACTIVE_SINK(userdata), info);
+    device_update (DEVICE(userdata), info);
   }
 }
 
@@ -551,16 +551,16 @@ pm_default_source_info_callback (pa_context *c,
     return;
   }
   else {
-    if (IS_ACTIVE_SINK (userdata) == FALSE || info == NULL){
+    if (IS_DEVICE (userdata) == FALSE || info == NULL){
       g_warning ("Default source info callback - our user data is not what we think it should be or the source info parameter is null");
       return;
     }
     // If there is an index change we need to change our cached source
-    if (active_sink_get_source_index (ACTIVE_SINK (userdata)) == info->index)
+    if (device_get_source_index (DEVICE (userdata)) == info->index)
       return;
     g_debug ("Pulse Server has handed us a new default source");
-    active_sink_deactivate_voip_source (ACTIVE_SINK (userdata), TRUE);
-    active_sink_update_voip_input_source (ACTIVE_SINK (userdata), info);
+    device_deactivate_voip_source (DEVICE (userdata), TRUE);
+    device_update_voip_input_source (DEVICE (userdata), info);
   }
 }
 
@@ -574,13 +574,13 @@ pm_source_info_callback (pa_context *c,
     return;
   }
   else {
-    if (IS_ACTIVE_SINK (userdata) == FALSE || info == NULL){
+    if (IS_DEVICE (userdata) == FALSE || info == NULL){
       g_warning ("source info callback - our user data is not what we think it should be or the source info parameter is null");
       return;
     }
     // For now we will take the first available
-    if (active_sink_is_voip_source_populated (ACTIVE_SINK (userdata)) == FALSE){
-      active_sink_update_voip_input_source (ACTIVE_SINK (userdata), info);
+    if (device_is_voip_source_populated (DEVICE (userdata)) == FALSE){
+      device_update_voip_input_source (DEVICE (userdata), info);
     }
   }
 }
@@ -595,11 +595,11 @@ pm_update_source_info_callback (pa_context *c,
     return;
   }
   else {
-    if (IS_ACTIVE_SINK (userdata) == FALSE || info == NULL ){
+    if (IS_DEVICE (userdata) == FALSE || info == NULL ){
       g_warning ("source info update callback - our user data is not what we think it should be or the source info paramter is null");
       return;
     }
     g_debug ("Got a source update for %s , index %i", info->name, info->index);
-    active_sink_update_voip_input_source (ACTIVE_SINK (userdata), info);
+    device_update_voip_input_source (DEVICE (userdata), info);
   }
 }

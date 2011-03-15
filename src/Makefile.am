@@ -92,8 +92,8 @@ indicator_sound_service_SOURCES = \
   sound-service.c \
   pulseaudio-mgr.h \
   pulseaudio-mgr.c \
-  active-sink.c \
-  active-sink.h \
+  device.c \
+  device.h \
   sound-service-dbus.h \
   sound-service-dbus.c \
   slider-menu-item.h \
