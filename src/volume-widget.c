@@ -83,7 +83,8 @@ volume_widget_init (VolumeWidget *self)
 
   priv->ido_volume_slider = ido_scale_menu_item_new_with_range ("VOLUME", IDO_RANGE_STYLE_DEFAULT,  0, 0, 100, 1);
   g_object_ref (priv->ido_volume_slider);
-  ido_scale_menu_item_set_style (IDO_SCALE_MENU_ITEM (priv->ido_volume_slider), IDO_SCALE_MENU_ITEM_STYLE_IMAGE); 
+  ido_scale_menu_item_set_primary_label (IDO_SCALE_MENU_ITEM(priv->ido_volume_slider), "VOLUME");
+  ido_scale_menu_item_set_style (IDO_SCALE_MENU_ITEM (priv->ido_volume_slider), IDO_SCALE_MENU_ITEM_STYLE_IMAGE);
   g_object_set(priv->ido_volume_slider, "reverse-scroll-events", TRUE, NULL);
 
   g_signal_connect (priv->ido_volume_slider,
