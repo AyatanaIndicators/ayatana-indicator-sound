@@ -58,11 +58,11 @@ GType device_get_type  (void) G_GNUC_CONST;
  */
 
 // Sink related
-void device_populate (Device* sink, const pa_sink_info* update);
-void device_update (Device* sink, const pa_sink_info* update);
-gboolean device_is_populated (Device* sink);
-gint device_get_index (Device* self);
-void device_deactivate (Device* self);
+void device_sink_populate (Device* sink, const pa_sink_info* update);
+void device_sink_update (Device* sink, const pa_sink_info* update);
+gboolean device_is_sink_populated (Device* sink);
+gint device_get_sink_index (Device* self);
+void device_sink_deactivated (Device* self);
 void device_update_mute (Device* self, gboolean mute_update);
 void device_ensure_sink_is_unmuted (Device* self);
 
