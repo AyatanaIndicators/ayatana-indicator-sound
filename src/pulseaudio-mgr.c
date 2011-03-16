@@ -483,7 +483,7 @@ pm_sink_input_info_callback (pa_context *c,
       g_debug ("Sink input info has media role property");
       const char* value = pa_proplist_gets (info->proplist, PA_PROP_MEDIA_ROLE);
       g_debug ("prop role = %s", value);
-      if (g_strcmp0 (value, "phone") == 0) {
+      if (g_strcmp0 (value, "phone") == 0 || g_strcmp0 (value, "production") == 0) {
         g_debug ("And yes its a VOIP app ... sink input index = %i", info->index);
         device_activate_voip_item (a_sink, (gint)info->index, (gint)info->client);
         // TODO to start with we will assume our source is the same as what this 'client'

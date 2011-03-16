@@ -484,19 +484,15 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
   IndicatorSound *indicator = INDICATOR_SOUND (data);
 
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
-/*
-  if(priv->volume_widget == NULL){
-    return FALSE;
-  }
-*/
-  gdouble current_value = 0;
-  gdouble new_value = 0;
-  const gdouble five_percent = 5;
-  
   GtkWidget *menuitem;
   menuitem = GTK_MENU_SHELL (widget)->active_menu_item;
 
   if (IDO_IS_SCALE_MENU_ITEM(menuitem) == TRUE){
+    gdouble current_value = 0;
+    gdouble new_value = 0;
+    const gdouble five_percent = 5;
+    gboolean is_voip_slider = FALSE;
+
     if (g_ascii_strcasecmp (ido_scale_menu_item_get_primary_label (IDO_SCALE_MENU_ITEM(menuitem)), "VOLUME") == 0) {
       g_debug ("vOLUME SLIDER KEY PRESS");
       GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));
@@ -514,6 +510,7 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
       g_return_val_if_fail(GTK_IS_RANGE(range), FALSE);
       current_value = gtk_range_get_value(range);
       new_value = current_value;
+      is_voip_slider = TRUE;
     }
 
     switch (event->keyval) {
@@ -537,9 +534,13 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
       break;
     }
     new_value = CLAMP(new_value, 0, 100);
-    if (new_value != current_value) {
-      //g_debug("Attempting to set the range from the key listener to %f", new_value);
-      volume_widget_update(VOLUME_WIDGET(priv->volume_widget), new_value);      
+    if (new_value != current_value){
+      if (is_voip_slider == TRUE){
+        voip_input_widget_update (VOIP_INPUT_WIDGET(priv->voip_widget), new_value);
+      }
+      else{
+        volume_widget_update (VOLUME_WIDGET(priv->volume_widget), new_value);
+      }
     }
   }
   else if (IS_TRANSPORT_WIDGET(menuitem) == TRUE) {
