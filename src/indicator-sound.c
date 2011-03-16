@@ -45,6 +45,7 @@ typedef struct _IndicatorSoundPrivate IndicatorSoundPrivate;
 struct _IndicatorSoundPrivate
 {
   GtkWidget* volume_widget;
+  GtkWidget* voip_widget;
   GList* transport_widgets_list;
   GDBusProxy *dbus_proxy; 
   SoundStateManager* state_manager;
@@ -443,11 +444,16 @@ new_voip_slider_widget (DbusmenuMenuitem * newitem,
 {
   g_debug("indicator-sound: new_voip_slider_widget");
   GtkWidget* voip_widget = NULL;
+  IndicatorObject *io = NULL;
 
   g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
+  io = g_object_get_data (G_OBJECT (client), "indicator");
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+
   voip_widget = voip_input_widget_new (newitem);
+  priv->voip_widget = voip_widget;
 
   GtkWidget* ido_slider_widget = voip_input_widget_get_ido_slider(VOIP_INPUT_WIDGET(voip_widget));
 
@@ -478,21 +484,38 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
   IndicatorSound *indicator = INDICATOR_SOUND (data);
 
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
+/*
   if(priv->volume_widget == NULL){
     return FALSE;
   }
-  
-  GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget)); 
-  GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)slider_widget);
-  GtkRange* range = (GtkRange*)slider;
-  g_return_val_if_fail(GTK_IS_RANGE(range), FALSE);
-  gdouble current_value = gtk_range_get_value(range);
-  gdouble new_value = current_value;
+*/
+  gdouble current_value = 0;
+  gdouble new_value = 0;
   const gdouble five_percent = 5;
+  
   GtkWidget *menuitem;
-
   menuitem = GTK_MENU_SHELL (widget)->active_menu_item;
-  if (IDO_IS_SCALE_MENU_ITEM(menuitem) == TRUE) {
+
+  if (IDO_IS_SCALE_MENU_ITEM(menuitem) == TRUE){
+    if (g_ascii_strcasecmp (ido_scale_menu_item_get_primary_label (IDO_SCALE_MENU_ITEM(menuitem)), "VOLUME") == 0) {
+      g_debug ("vOLUME SLIDER KEY PRESS");
+      GtkWidget* slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));
+      GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)slider_widget);
+      GtkRange* range = (GtkRange*)slider;
+      g_return_val_if_fail(GTK_IS_RANGE(range), FALSE);
+      current_value = gtk_range_get_value(range);
+      new_value = current_value;
+    }
+    else if (g_ascii_strcasecmp (ido_scale_menu_item_get_primary_label (IDO_SCALE_MENU_ITEM(menuitem)), "VOIP") == 0) {
+      g_debug ("VOIP SLIDER KEY PRESS");
+      GtkWidget* slider_widget = voip_input_widget_get_ido_slider(VOIP_INPUT_WIDGET(priv->voip_widget));
+      GtkWidget* slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)slider_widget);
+      GtkRange* range = (GtkRange*)slider;
+      g_return_val_if_fail(GTK_IS_RANGE(range), FALSE);
+      current_value = gtk_range_get_value(range);
+      new_value = current_value;
+    }
+
     switch (event->keyval) {
     case GDK_Right:
       digested = TRUE;
@@ -514,7 +537,7 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
       break;
     }
     new_value = CLAMP(new_value, 0, 100);
-    if (new_value != current_value && sound_state_manager_get_current_state (priv->state_manager) != MUTED) {
+    if (new_value != current_value) {
       //g_debug("Attempting to set the range from the key listener to %f", new_value);
       volume_widget_update(VOLUME_WIDGET(priv->volume_widget), new_value);      
     }
