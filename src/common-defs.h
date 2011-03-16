@@ -42,7 +42,8 @@ typedef enum {
 
 typedef enum {
   TRANSPORT_STATE_PLAYING,
-  TRANSPORT_STATE_PAUSED
+  TRANSPORT_STATE_PAUSED,
+  TRANSPORT_STATE_LAUNCHING
 }TransportState;
 
 #define NOT_ACTIVE                              -1

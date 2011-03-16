@@ -43,8 +43,9 @@ public class TransportMenuitem : PlayerItem
 
   public void handle_cached_action()
   {
-    if (this.cached_action != Transport.Action.NO_ACTION){ 
-      Timeout.add_seconds (4, send_cached_action);
+    if (this.cached_action != Transport.Action.NO_ACTION){
+      //send_cached_action();
+      Timeout.add_seconds (1, send_cached_action);
     }
   }
 
@@ -78,6 +79,7 @@ public class TransportMenuitem : PlayerItem
     else{
       this.cached_action = (Transport.Action)input;
       this.owner.instantiate();
+      this.property_set_int (MENUITEM_PLAY_STATE, (int)Transport.State.LAUNCHING);
     }
   } 
 

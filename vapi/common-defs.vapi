@@ -64,6 +64,7 @@ namespace Transport{
   }
   public enum State{
     PLAYING,
-    PAUSED
+    PAUSED,
+    LAUNCHING
   }
 }
