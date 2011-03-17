@@ -1,0 +1,14 @@
+namespace Config {
+
+  const string PREFIX = "@prefix@";
+  
+  const string DATADIR = "@DATADIR@";
+  
+  const string BINDIR = "@prefix@/bin";
+  
+  const string LOCALEDIR = "@DATADIR@/locale";
+  
+  const string PACKAGE = "@PACKAGE@";
+  
+  const string VERSION = "@VERSION@";
+}
