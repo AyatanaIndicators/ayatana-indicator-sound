@@ -19,6 +19,9 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __COMMON_DEFS_H__
 #define __COMMON_DEFS_H__
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 typedef enum {
   MUTED,
@@ -45,12 +48,13 @@ typedef enum {
   TRANSPORT_STATE_PAUSED
 }TransportState;
 
-#define NOT_ACTIVE                       -1
+#define NOT_ACTIVE                              -1
 #define DBUSMENU_PROPERTY_EMPTY                 -1
 
 /* DBUS Custom Items */
 #define DBUSMENU_VOLUME_MENUITEM_TYPE           "x-canonical-ido-volume-type"
 #define DBUSMENU_VOLUME_MENUITEM_LEVEL          "x-canonical-ido-volume-level"
+#define DBUSMENU_VOLUME_MENUITEM_MUTE           "x-canonical-ido-volume-mute"
 
 #define DBUSMENU_VOIP_INPUT_MENUITEM_TYPE       "x-canonical-ido-voip-input-type"
 #define DBUSMENU_VOIP_INPUT_MENUITEM_LEVEL      "x-canonical-ido-voip-input-level"
