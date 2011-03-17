@@ -34,15 +34,8 @@ public class PlaylistsMenuitem : PlayerItem
   {
     Object ( item_type: MENUITEM_TYPE, owner: parent );
   }
+
   construct{
-
-    GLib.Intl.textdomain (Config.PACKAGE);
-    GLib.Intl.bindtextdomain (Config.PACKAGE, Config.LOCALEDIR);
-    GLib.Intl.bind_textdomain_codeset (Config.PACKAGE, "UTF-8");
-    GLib.Intl.setlocale(GLib.LocaleCategory.ALL, "");
-
-    DesktopAppInfo.set_desktop_env ("GNOME");
-
     this.current_playlists = new HashMap<int, Dbusmenu.Menuitem>();
     this.root_item = new Menuitem();
 

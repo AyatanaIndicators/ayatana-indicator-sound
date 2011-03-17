@@ -51,11 +51,12 @@ main:
 int
 main (int argc, char ** argv)
 {
+  
   g_type_init();
-
-  setlocale (LC_ALL, "");
-  bindtextdomain (GETTEXT_PACKAGE, GNOMELOCALEDIR);
   textdomain (GETTEXT_PACKAGE);
+  bindtextdomain (GETTEXT_PACKAGE, GNOMELOCALEDIR);
+  bind_text_domain_codeset (GETTEXT_PACKAGE,  "UTF-8");
+  setlocale (LC_ALL, "");
 
   IndicatorService *service = indicator_service_new_version(INDICATOR_SOUND_DBUS_NAME,
                               INDICATOR_SOUND_DBUS_VERSION);
