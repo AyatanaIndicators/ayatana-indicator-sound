@@ -4,7 +4,10 @@ SUBDIRS = \
 	data \
 	po
 
-EXTRA_DIST = autogen.sh vapi/common-defs.vapi
+EXTRA_DIST = \
+  autogen.sh \
+  vapi/common-defs.vapi \
+  vapi/config.vapi
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-localinstall
 

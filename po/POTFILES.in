@@ -2,3 +2,4 @@
 src/indicator-sound.c
 src/mute-menu-item.c
 src/sound-service-dbus.c
+src/playlists-menu-item.c
