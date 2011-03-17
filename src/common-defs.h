@@ -19,7 +19,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __COMMON_DEFS_H__
 #define __COMMON_DEFS_H__
 
-
 typedef enum {
   MUTED,
   ZERO_LEVEL,

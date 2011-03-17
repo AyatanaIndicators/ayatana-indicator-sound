@@ -56,7 +56,8 @@ music_bridge_VALASOURCES = \
 	settings-manager.vala \
 	playlists-menu-item.vala \
 	freedesktop-interfaces.vala \
-	fetch-file.vala
+	fetch-file.vala \
+  config.vala
 
 
 music_bridge_VALAFLAGS = \
@@ -140,6 +141,7 @@ BUILT_SOURCES = \
   $(music_bridge_APIFILES) \
 	gen-sound-service.xml.h \
 	gen-sound-service.xml.c \
+  config.vala \
   $(music_bridge_VALASOURCES:.vala=.c)
   
 CLEANFILES = \
