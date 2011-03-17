@@ -19,6 +19,9 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __COMMON_DEFS_H__
 #define __COMMON_DEFS_H__
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 typedef enum {
   MUTED,

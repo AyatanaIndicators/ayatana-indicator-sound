@@ -56,8 +56,7 @@ music_bridge_VALASOURCES = \
 	settings-manager.vala \
 	playlists-menu-item.vala \
 	freedesktop-interfaces.vala \
-	fetch-file.vala
-
+	fetch-file.vala  
 
 music_bridge_VALAFLAGS = \
   --ccode \
@@ -69,10 +68,11 @@ music_bridge_VALAFLAGS = \
   --pkg gee-1.0 \
   --pkg Dbusmenu-0.4 \
   --pkg common-defs \
-	--pkg gio-2.0 \
-	--pkg gio-unix-2.0 \
-	--pkg gdk-pixbuf-2.0 \
-	--pkg libxml-2.0
+  --pkg config \
+  --pkg gio-2.0 \
+  --pkg gio-unix-2.0 \
+  --pkg gdk-pixbuf-2.0 \
+  --pkg libxml-2.0
 
  $(MAINTAINER_VALAFLAGS)
 
@@ -137,10 +137,10 @@ EXTRA_DIST = \
 #######################
 BUILT_SOURCES = \
 	music_bridge_vala.stamp \
-  $(music_bridge_APIFILES) \
+	$(music_bridge_APIFILES) \
 	gen-sound-service.xml.h \
 	gen-sound-service.xml.c \
-  $(music_bridge_VALASOURCES:.vala=.c)
+	$(music_bridge_VALASOURCES:.vala=.c)
   
 CLEANFILES = \
 	$(BUILT_SOURCES)
