@@ -68,10 +68,11 @@ music_bridge_VALAFLAGS = \
   --pkg gee-1.0 \
   --pkg Dbusmenu-0.4 \
   --pkg common-defs \
-	--pkg gio-2.0 \
-	--pkg gio-unix-2.0 \
-	--pkg gdk-pixbuf-2.0 \
-	--pkg libxml-2.0
+  --pkg config \
+  --pkg gio-2.0 \
+  --pkg gio-unix-2.0 \
+  --pkg gdk-pixbuf-2.0 \
+  --pkg libxml-2.0
 
  $(MAINTAINER_VALAFLAGS)
 
