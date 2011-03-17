@@ -22,7 +22,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib.h>
 #include <pulse/pulseaudio.h>
 #include <libdbusmenu-glib/menuitem.h>
-#include "active-sink.h"
+#include "device.h"
 
 G_BEGIN_DECLS
 
@@ -62,7 +62,7 @@ gint voip_input_menu_item_get_sink_input_index (VoipInputMenuItem* item);
 void voip_input_menu_item_deactivate_source (VoipInputMenuItem* item, gboolean visible);
 void voip_input_menu_item_deactivate_voip_client (VoipInputMenuItem* item);
 
-VoipInputMenuItem* voip_input_menu_item_new (ActiveSink* sink);
+VoipInputMenuItem* voip_input_menu_item_new (Device* sink);
 
 G_END_DECLS
 

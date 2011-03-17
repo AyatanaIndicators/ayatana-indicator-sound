@@ -29,7 +29,7 @@
 #include <libdbusmenu-glib/client.h>
 
 #include "sound-service-dbus.h"
-#include "active-sink.h"
+#include "device.h"
 #include "gen-sound-service.xml.h"
 #include "dbus-shared-names.h"
 
@@ -55,7 +55,7 @@ typedef struct _SoundServiceDbusPrivate SoundServiceDbusPrivate;
 struct _SoundServiceDbusPrivate {
   GDBusConnection*    connection;
   DbusmenuMenuitem*   root_menuitem;
-  ActiveSink*         active_sink;
+  Device*             device;
 };
 
 static GDBusNodeInfo *            node_info = NULL;
@@ -155,7 +155,7 @@ sound_service_dbus_create_root_item (SoundServiceDbus* self)
                                   paths);
   dbusmenu_server_set_root (server, priv->root_menuitem);
   g_object_unref (priv->root_menuitem);
-  priv->active_sink = active_sink_new (self);
+  priv->device = device_new (self);
   return priv->root_menuitem;
 }
 
@@ -272,8 +272,8 @@ bus_method_call (GDBusConnection * connection,
   SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (service);
 
   if (g_strcmp0(method, "GetSoundState") == 0) {
-    g_debug("Get state -  %i", active_sink_get_state (priv->active_sink));
-    retval =  g_variant_new ( "(i)", active_sink_get_state (priv->active_sink));    
+    g_debug("Get state -  %i", device_get_state (priv->device));
+    retval =  g_variant_new ( "(i)", device_get_state (priv->device));
   }   
   else if (g_strcmp0(method, "BlacklistMediaPlayer") == 0) {    
     gboolean blacklist;

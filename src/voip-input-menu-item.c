@@ -28,7 +28,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 typedef struct _VoipInputMenuItemPrivate VoipInputMenuItemPrivate;
 
 struct _VoipInputMenuItemPrivate {
-  ActiveSink*         a_sink;
+  Device*             a_sink;
   pa_cvolume          volume;
   gint                mute;
   guint32             volume_steps;
@@ -129,8 +129,6 @@ handle_event (DbusmenuMenuitem * mi,
       if (priv->mute == 1) {
         pm_update_mic_mute (priv->source_index, 0);
       }
-      //active_sink_update_volume (priv->a_sink, volume_input);
-      //active_sink_ensure_sink_is_unmuted (priv->a_sink);
     }
   }
 }
@@ -268,7 +266,7 @@ voip_input_menu_item_enable (VoipInputMenuItem* item,
 }
 
 VoipInputMenuItem*
-voip_input_menu_item_new (ActiveSink* sink)
+voip_input_menu_item_new (Device* sink)
 {
   VoipInputMenuItem *self = g_object_new(VOIP_INPUT_MENU_ITEM_TYPE, NULL);
   VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (self);

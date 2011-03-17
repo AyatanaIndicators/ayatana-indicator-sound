@@ -1,3 +1,14 @@
+indicator-sound (0.6.4-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Harmonize mute behaviour of both VOIP and volume slider (LP: #731870)
+    - keyboard handling for voip slider not working (LP: #732500)
+    - "Choose Playlist" needs to be marked for translation (LP: #736372)
+    - show record level control on PULSE_PROP_media.role=production 
+      (LP: #736049)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 17 Mar 2011 14:08:17 -0400
+
 indicator-sound (0.6.3-0ubuntu1) natty; urgency=low
 
   * New upstream release.

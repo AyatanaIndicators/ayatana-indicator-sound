@@ -17,10 +17,12 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using Config;
 using Dbusmenu;
 using DbusmenuPlaylists;
 using DbusmenuPlaylist;
 using Gee;
+
 
 public class PlaylistsMenuitem : PlayerItem
 {
@@ -31,12 +33,14 @@ public class PlaylistsMenuitem : PlayerItem
   {
     Object ( item_type: MENUITEM_TYPE, owner: parent );
   }
+
   construct{
     this.current_playlists = new HashMap<int, Dbusmenu.Menuitem>();
     this.root_item = new Menuitem();
 
-    this.root_item.property_set ( MENUITEM_PROP_LABEL, "Choose Playlist" );
+    this.root_item.property_set ( MENUITEM_PROP_LABEL, _("Choose Playlist") );
     this.root_item.property_set ( MENUITEM_PATH, "" );
+
   }
 
   public new void update (PlaylistDetails[] playlists)
@@ -74,7 +78,7 @@ public class PlaylistsMenuitem : PlayerItem
       }
       if (within == false){
         if (this.root_item.property_get (MENUITEM_PATH) == item.property_get (MENUITEM_PATH)){
-          this.root_item.property_set (MENUITEM_PROP_LABEL, "Choose Playlist");        
+          this.root_item.property_set (MENUITEM_PROP_LABEL, _("Choose Playlist"));        
         }
         this.root_item.child_delete (item);   
       }
@@ -118,7 +122,7 @@ public class PlaylistsMenuitem : PlayerItem
   public void active_playlist_update (PlaylistDetails detail)
   {
     var update = detail.name; 
-    if ( update == "" ) update = "Choose Playlist";
+    if ( update == "" ) update = _("Choose Playlist");
     this.root_item.property_set (MENUITEM_PROP_LABEL, update);  
     this.root_item.property_set (MENUITEM_PATH, detail.path);  
   }

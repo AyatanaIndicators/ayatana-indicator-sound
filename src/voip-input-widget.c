@@ -80,6 +80,8 @@ voip_input_widget_init (VoipInputWidget *self)
 
   priv->ido_voip_input_slider = ido_scale_menu_item_new_with_range ("VOLUME", IDO_RANGE_STYLE_DEFAULT,  0, 0, 100, 1);
   g_object_ref (priv->ido_voip_input_slider);
+  ido_scale_menu_item_set_primary_label (IDO_SCALE_MENU_ITEM(priv->ido_voip_input_slider), "VOIP");
+
   ido_scale_menu_item_set_style (IDO_SCALE_MENU_ITEM (priv->ido_voip_input_slider), IDO_SCALE_MENU_ITEM_STYLE_IMAGE);
   g_object_set(priv->ido_voip_input_slider, "reverse-scroll-events", TRUE, NULL);
 
@@ -95,7 +97,7 @@ voip_input_widget_init (VoipInputWidget *self)
   g_signal_connect(priv->ido_voip_input_slider, "slider-released", G_CALLBACK(voip_input_widget_slider_released), self);
 
   GtkWidget* primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)priv->ido_voip_input_slider);
-  GIcon * primary_gicon = g_themed_icon_new_with_default_fallbacks("audio-input-microphone-none-panel");
+  GIcon * primary_gicon = g_themed_icon_new_with_default_fallbacks("audio-input-microphone-zero-panel");
   gtk_image_set_from_gicon(GTK_IMAGE(primary_image), primary_gicon, GTK_ICON_SIZE_MENU);
   g_object_unref(primary_gicon);
 
