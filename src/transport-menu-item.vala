@@ -41,6 +41,10 @@ public class TransportMenuitem : PlayerItem
     this.cached_action = Transport.Action.NO_ACTION;
   }
 
+  /**
+  Please remove this timeout when the default player can handle mpris commands
+  immediately once it raises its dbus interface
+  **/
   public void handle_cached_action()
   {
     if (this.cached_action != Transport.Action.NO_ACTION){
