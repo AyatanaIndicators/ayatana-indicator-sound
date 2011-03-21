@@ -127,10 +127,10 @@ public class Mpris2Controller : GLib.Object
     Variant? artist_v = this.player.Metadata.lookup("xesam:artist");
     if(artist_v != null){
       Variant? v_artists = this.player.Metadata.lookup("xesam:artist");
-      debug("artists is of type %s", v_artists.get_type_string ());
+      //debug("artists is of type %s", v_artists.get_type_string ());
       string display_artists;
       if(v_artists.get_type_string() == "s"){
-        debug("SPOTIFY is that you ?");
+        //debug("SPOTIFY is that you ?");
         display_artists = v_artists.get_string();
       }
       else{
@@ -138,7 +138,7 @@ public class Mpris2Controller : GLib.Object
         display_artists = string.joinv(", ", artists);
       }
       changed_updates.replace("xesam:artist", display_artists);
-      debug("artist : %s", (string)changed_updates.lookup("xesam:artist"));
+      //debug("artist : %s", (string)changed_updates.lookup("xesam:artist"));
     }
     return changed_updates;
   }
@@ -226,12 +226,12 @@ public class Mpris2Controller : GLib.Object
                                                               false);
     }
     catch (IOError e){
-      debug("Could not fetch playlists because %s", e.message);   
+      //debug("Could not fetch playlists because %s", e.message);
       return;
     }
     
     if( current_playlists != null ){
-      debug( "Size of the playlist array = %i", current_playlists.length );
+      //debug( "Size of the playlist array = %i", current_playlists.length );
       PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
       playlists_item.update(current_playlists);
     }
@@ -244,7 +244,7 @@ public class Mpris2Controller : GLib.Object
   private bool fetch_active_playlist()
   {    
     if (this.playlists.ActivePlaylist.valid == false){
-      debug(" We don't have an active playlist");
+      //debug(" We don't have an active playlist");
     }    
     PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
     playlists_item.active_playlist_update ( this.playlists.ActivePlaylist.details );
@@ -257,7 +257,7 @@ public class Mpris2Controller : GLib.Object
       this.playlists.ActivatePlaylist.begin(path);
     }
     catch(IOError e){
-      debug("Could not activate playlist %s because %s", (string)path, e.message);     
+      //debug("Could not activate playlist %s because %s", (string)path, e.message);
     }
   }
 }

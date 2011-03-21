@@ -129,9 +129,9 @@ voip_input_widget_property_update (DbusmenuMenuitem* item, gchar* property,
   g_return_if_fail (IS_VOIP_INPUT_WIDGET (userdata));
   VoipInputWidget* mitem = VOIP_INPUT_WIDGET(userdata);
   VoipInputWidgetPrivate * priv = VOIP_INPUT_WIDGET_GET_PRIVATE(mitem);
-  //g_debug("scrub-widget::property_update for prop %s", property);
   if(g_ascii_strcasecmp(DBUSMENU_VOIP_INPUT_MENUITEM_LEVEL, property) == 0){
-    if(priv->grabbed == FALSE){
+    g_return_if_fail (g_variant_is_of_type (value, G_VARIANT_TYPE_DOUBLE));
+    if (priv->grabbed == FALSE){
       GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_voip_input_slider);
       GtkRange *range = (GtkRange*)slider;
       gdouble update = g_variant_get_double (value);
