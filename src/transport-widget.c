@@ -1742,7 +1742,9 @@ draw (GtkWidget* button, cairo_t *cr)
   }
   else if(priv->current_state == TRANSPORT_STATE_LAUNCHING)
   {
+/*
     g_debug ("launching in draw");
+*/
     _setup (&cr_surf, &surf, PLAY_WIDTH+6, PLAY_HEIGHT+6);
     _mask_play (cr_surf,
                 PLAY_PADDING,
@@ -1815,7 +1817,9 @@ transport_widget_fade_playbutton (gpointer userdata)
 {
   TransportWidget* bar = (TransportWidget*)userdata;
   g_return_val_if_fail(IS_TRANSPORT_WIDGET(bar), FALSE);
+/*
   g_debug ("fade in /out timeout");
+*/
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(bar);
   if (priv->launching_transparency == 1.0f){
     priv->fade_out = TRUE;

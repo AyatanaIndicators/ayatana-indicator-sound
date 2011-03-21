@@ -539,7 +539,7 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
         voip_input_widget_update (VOIP_INPUT_WIDGET(priv->voip_widget), new_value);
       }
       else{
-        volume_widget_update (VOLUME_WIDGET(priv->volume_widget), new_value);
+        volume_widget_update (VOLUME_WIDGET(priv->volume_widget), new_value, "keypress-update");
       }
     }
   }
@@ -660,7 +660,7 @@ indicator_sound_scroll (IndicatorObject *io, gint delta,
     value -= adj->step_increment;
   }
   //g_debug("indicator-sound-scroll - update slider with value %f", value);
-  volume_widget_update(VOLUME_WIDGET(priv->volume_widget), value);
+  volume_widget_update(VOLUME_WIDGET(priv->volume_widget), value, "scroll updates");
 
   sound_state_manager_show_notification (priv->state_manager, value);
 }
