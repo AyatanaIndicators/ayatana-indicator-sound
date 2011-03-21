@@ -22,6 +22,8 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "sound-service-dbus.h"
 #include "music-player-bridge.h"
 
+#include <locale.h>
+
 static GMainLoop *mainloop = NULL;
 
 /**********************************************************************************************************************/
@@ -39,8 +41,10 @@ service_shutdown (IndicatorService *service, gpointer user_data)
 {
   if (mainloop != NULL) {
     g_debug("Service shutdown !");
+/*
     close_pulse_activites();
     g_main_loop_quit(mainloop);
+*/
   }
   return;
 }

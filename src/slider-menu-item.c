@@ -135,7 +135,7 @@ slider_menu_item_populate (SliderMenuItem* self, const pa_sink_info* update)
   dbusmenu_menuitem_property_set_variant (DBUSMENU_MENUITEM(self),
                                           DBUSMENU_VOLUME_MENUITEM_LEVEL,
                                           new_volume);
-  GVariant* new_mute_update = g_variant_new_int32 (update->mute);
+  GVariant* new_mute_update = g_variant_new_boolean (update->mute == 1);
   dbusmenu_menuitem_property_set_variant (DBUSMENU_MENUITEM(self),
                                           DBUSMENU_VOLUME_MENUITEM_MUTE,
                                           new_mute_update);
@@ -188,7 +188,7 @@ slider_menu_item_update (SliderMenuItem* self, const pa_sink_info* update)
 /*
     g_debug ("volume menu item - update - mute on ui = %i", update->mute);
 */
-    GVariant* new_mute_update = g_variant_new_int32 (update->mute);
+    GVariant* new_mute_update = g_variant_new_boolean (update->mute == 1);
     dbusmenu_menuitem_property_set_variant (DBUSMENU_MENUITEM(self),
                                             DBUSMENU_VOLUME_MENUITEM_MUTE,
                                             new_mute_update);
