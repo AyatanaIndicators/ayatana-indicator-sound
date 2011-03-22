@@ -141,6 +141,7 @@ voip_input_widget_property_update (DbusmenuMenuitem* item, gchar* property,
   }
   if(g_ascii_strcasecmp(DBUSMENU_VOIP_INPUT_MENUITEM_MUTE, property) == 0){
     if(priv->grabbed == FALSE){
+      g_return_if_fail (g_variant_is_of_type (value, G_VARIANT_TYPE_INT32));
       GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_voip_input_slider);
       GtkRange *range = (GtkRange*)slider;
       gint update = g_variant_get_int32 (value);
@@ -149,8 +150,10 @@ voip_input_widget_property_update (DbusmenuMenuitem* item, gchar* property,
         level = 0;
       }
       else{
-        level = g_variant_get_double (dbusmenu_menuitem_property_get_variant (priv->twin_item,
-                                                                              DBUSMENU_VOIP_INPUT_MENUITEM_LEVEL));
+        GVariant* variant = dbusmenu_menuitem_property_get_variant (priv->twin_item,
+                                                                    DBUSMENU_VOIP_INPUT_MENUITEM_LEVEL);
+        g_return_if_fail (g_variant_is_of_type (variant, G_VARIANT_TYPE_DOUBLE));
+        level = g_variant_get_double (variant);
       }
       gtk_range_set_value(range, level);
 

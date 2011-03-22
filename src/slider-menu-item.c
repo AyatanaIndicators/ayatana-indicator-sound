@@ -69,9 +69,6 @@ slider_menu_item_class_init (SliderMenuItemClass *klass)
 static void
 slider_menu_item_init (SliderMenuItem *self)
 {
-/*
-  g_debug("Building new Slider Menu Item");
-*/
   dbusmenu_menuitem_property_set( DBUSMENU_MENUITEM(self),
                                   DBUSMENU_MENUITEM_PROP_TYPE,
                                   DBUSMENU_VOLUME_MENUITEM_TYPE );
@@ -109,9 +106,11 @@ handle_event (DbusmenuMenuitem * mi,
   SliderMenuItemPrivate* priv = SLIDER_MENU_ITEM_GET_PRIVATE (SLIDER_MENU_ITEM (mi));
   gdouble volume_input = g_variant_get_double (value);
 
+/*
   g_debug ("slider menu item handle event with value %f on name %s",
            volume_input,
            name);
+*/
 
   slider_menu_item_update_volume (SLIDER_MENU_ITEM (mi), volume_input);
   device_ensure_sink_is_unmuted (priv->a_sink);
@@ -148,8 +147,9 @@ static void
 slider_menu_item_update_volume (SliderMenuItem* self, gdouble percent)
 {
 
+/*
   g_debug ("slider menu item update volume - about to set the volume to %f", percent);
-
+*/
 
   pa_cvolume new_volume;
   pa_cvolume_init(&new_volume);
@@ -178,8 +178,9 @@ slider_menu_item_update (SliderMenuItem* self, const pa_sink_info* update)
 
   GVariant* new_volume = g_variant_new_double (volume_percent);
 
+/*
   g_debug ("slider menu item update - volume update to ui to %f", volume_percent);
-
+*/
 
   dbusmenu_menuitem_property_set_variant (DBUSMENU_MENUITEM(self),
                                           DBUSMENU_VOLUME_MENUITEM_LEVEL,
