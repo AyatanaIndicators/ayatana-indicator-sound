@@ -131,6 +131,12 @@ volume_widget_property_update( DbusmenuMenuitem* item, gchar* property,
   g_return_if_fail (IS_VOLUME_WIDGET (userdata)); 
   VolumeWidget* mitem = VOLUME_WIDGET(userdata);
   VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(mitem);
+
+  g_debug ("volume-widget::volume_widget_property_update for prop %s, is it a double %i",
+          property, g_variant_is_of_type (value, G_VARIANT_TYPE_DOUBLE) );
+  g_debug ("volume-widget::volume_widget_property_update for prop %s, is it a boolean %i",
+          property, g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN) );
+
   if(g_ascii_strcasecmp(DBUSMENU_VOLUME_MENUITEM_LEVEL, property) == 0){
     g_return_if_fail (g_variant_is_of_type (value, G_VARIANT_TYPE_DOUBLE) );
     if(priv->grabbed == FALSE){
@@ -139,7 +145,7 @@ volume_widget_property_update( DbusmenuMenuitem* item, gchar* property,
       gdouble update = g_variant_get_double (value);
       gtk_range_set_value(range, update);
       update_accessible_desc(priv->indicator);
-      g_debug ("volume-widget::volume_widget_property_update - mute - value %f", update);
+      g_debug ("volume-widget::volume_widget_property_update - volume - value %f", update);
     }
   }
   else if(g_ascii_strcasecmp(DBUSMENU_VOLUME_MENUITEM_MUTE, property) == 0){
