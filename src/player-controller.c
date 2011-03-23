@@ -533,7 +533,7 @@ void player_controller_update_layout (PlayerController* self) {
 		_tmp4_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT);
 		_tmp5_ = (PlayerItem*) _tmp4_;
 		_tmp6_ = g_app_info_get_id (self->priv->_app_info);
-		dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) _tmp5_, DBUSMENU_MENUITEM_PROP_VISIBLE, g_strcmp0 (_tmp6_, "banshee.desktop") == 0);
+		dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) _tmp5_, DBUSMENU_MENUITEM_PROP_VISIBLE, g_strcmp0 (_tmp6_, "banshee-1.desktop") == 0);
 		_g_object_unref0 (_tmp5_);
 		_g_object_unref0 (playlists_menuitem);
 		return;
@@ -550,7 +550,7 @@ void player_controller_update_layout (PlayerController* self) {
 	_g_object_unref0 (_tmp10_);
 	_g_object_unref0 (_tmp8_);
 	_tmp14_ = g_app_info_get_id (self->priv->_app_info);
-	if (g_strcmp0 (_tmp14_, "banshee.desktop") == 0) {
+	if (g_strcmp0 (_tmp14_, "banshee-1.desktop") == 0) {
 		gpointer _tmp15_ = NULL;
 		PlayerItem* _tmp16_;
 		TransportMenuitem* transport;
