@@ -97,7 +97,7 @@ voip_input_widget_init (VoipInputWidget *self)
   g_signal_connect(priv->ido_voip_input_slider, "slider-released", G_CALLBACK(voip_input_widget_slider_released), self);
 
   GtkWidget* primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)priv->ido_voip_input_slider);
-  GIcon * primary_gicon = g_themed_icon_new_with_default_fallbacks("audio-input-microphone-zero-panel");
+  GIcon * primary_gicon = g_themed_icon_new_with_default_fallbacks("audio-input-microphone-low-zero-panel");
   gtk_image_set_from_gicon(GTK_IMAGE(primary_image), primary_gicon, GTK_ICON_SIZE_MENU);
   g_object_unref(primary_gicon);
 
