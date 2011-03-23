@@ -426,6 +426,7 @@ GType transport_menuitem_get_type (void) G_GNUC_CONST;
 GType player_controller_get_type (void) G_GNUC_CONST;
 TransportMenuitem* transport_menuitem_new (PlayerController* parent);
 TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerController* parent);
+void transport_menuitem_handle_cached_action (TransportMenuitem* self);
 void transport_menuitem_change_play_state (TransportMenuitem* self, TransportState update);
 GeeHashSet* transport_menuitem_attributes_format (void);
 GType metadata_menuitem_get_type (void) G_GNUC_CONST;

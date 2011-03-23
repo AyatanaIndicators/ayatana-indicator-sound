@@ -34,6 +34,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 #include <gio/gio.h>
+#include <common-defs.h>
 
 
 #define TYPE_PLAYER_CONTROLLER (player_controller_get_type ())
@@ -86,6 +87,16 @@ typedef struct _PlaylistsMenuitemClass PlaylistsMenuitemClass;
 typedef struct _PlayerItemPrivate PlayerItemPrivate;
 typedef struct _PlaylistsMenuitemPrivate PlaylistsMenuitemPrivate;
 
+#define TYPE_TRANSPORT_MENUITEM (transport_menuitem_get_type ())
+#define TRANSPORT_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_TRANSPORT_MENUITEM, TransportMenuitem))
+#define TRANSPORT_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_TRANSPORT_MENUITEM, TransportMenuitemClass))
+#define IS_TRANSPORT_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_TRANSPORT_MENUITEM))
+#define IS_TRANSPORT_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_TRANSPORT_MENUITEM))
+#define TRANSPORT_MENUITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_TRANSPORT_MENUITEM, TransportMenuitemClass))
+
+typedef struct _TransportMenuitem TransportMenuitem;
+typedef struct _TransportMenuitemClass TransportMenuitemClass;
+
 #define TYPE_TITLE_MENUITEM (title_menuitem_get_type ())
 #define TITLE_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_TITLE_MENUITEM, TitleMenuitem))
 #define TITLE_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_TITLE_MENUITEM, TitleMenuitemClass))
@@ -105,16 +116,6 @@ typedef struct _TitleMenuitemClass TitleMenuitemClass;
 
 typedef struct _MetadataMenuitem MetadataMenuitem;
 typedef struct _MetadataMenuitemClass MetadataMenuitemClass;
-
-#define TYPE_TRANSPORT_MENUITEM (transport_menuitem_get_type ())
-#define TRANSPORT_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_TRANSPORT_MENUITEM, TransportMenuitem))
-#define TRANSPORT_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_TRANSPORT_MENUITEM, TransportMenuitemClass))
-#define IS_TRANSPORT_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_TRANSPORT_MENUITEM))
-#define IS_TRANSPORT_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_TRANSPORT_MENUITEM))
-#define TRANSPORT_MENUITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_TRANSPORT_MENUITEM, TransportMenuitemClass))
-
-typedef struct _TransportMenuitem TransportMenuitem;
-typedef struct _TransportMenuitemClass TransportMenuitemClass;
 
 struct _PlayerController {
 	GObject parent_instance;
@@ -211,12 +212,14 @@ void player_controller_remove_from_menu (PlayerController* self);
 static gboolean _bool_equal (const gboolean* s1, const gboolean* s2);
 GType playlists_menuitem_get_type (void) G_GNUC_CONST;
 void player_controller_hibernate (PlayerController* self);
+GType transport_menuitem_get_type (void) G_GNUC_CONST;
+void transport_menuitem_change_play_state (TransportMenuitem* self, TransportState update);
 void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
-GeeHashSet* transport_menuitem_attributes_format (void);
 GeeHashSet* metadata_menuitem_attributes_format (void);
 GType title_menuitem_get_type (void) G_GNUC_CONST;
 void title_menuitem_toggle_active_triangle (TitleMenuitem* self, gboolean update);
 gboolean player_item_populated (PlayerItem* self, GeeHashSet* attrs);
+void transport_menuitem_handle_cached_action (TransportMenuitem* self);
 PlayerItem* player_item_new (const gchar* type);
 PlayerItem* player_item_construct (GType object_type, const gchar* type);
 TitleMenuitem* title_menuitem_new (PlayerController* parent);
@@ -226,7 +229,6 @@ MetadataMenuitem* metadata_menuitem_construct (GType object_type);
 GType metadata_menuitem_get_type (void) G_GNUC_CONST;
 TransportMenuitem* transport_menuitem_new (PlayerController* parent);
 TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerController* parent);
-GType transport_menuitem_get_type (void) G_GNUC_CONST;
 PlaylistsMenuitem* playlists_menuitem_new (PlayerController* parent);
 PlaylistsMenuitem* playlists_menuitem_construct (GType object_type, PlayerController* parent);
 gint player_controller_get_menu_offset (PlayerController* self);
@@ -469,38 +471,35 @@ void player_controller_remove_from_menu (PlayerController* self) {
 void player_controller_hibernate (PlayerController* self) {
 	gpointer _tmp0_ = NULL;
 	PlayerItem* _tmp1_;
-	GeeHashSet* _tmp2_ = NULL;
-	GeeHashSet* _tmp3_;
-	gpointer _tmp4_ = NULL;
-	PlayerItem* _tmp5_;
-	GeeHashSet* _tmp6_ = NULL;
-	GeeHashSet* _tmp7_;
-	gpointer _tmp8_ = NULL;
-	PlayerItem* _tmp9_;
+	TransportMenuitem* transport;
+	gpointer _tmp2_ = NULL;
+	PlayerItem* _tmp3_;
+	GeeHashSet* _tmp4_ = NULL;
+	GeeHashSet* _tmp5_;
+	gpointer _tmp6_ = NULL;
+	PlayerItem* _tmp7_;
 	TitleMenuitem* title;
 	g_return_if_fail (self != NULL);
 	player_controller_update_state (self, PLAYER_CONTROLLER_STATE_OFFLINE);
 	_tmp0_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT);
 	_tmp1_ = (PlayerItem*) _tmp0_;
-	_tmp2_ = transport_menuitem_attributes_format ();
-	_tmp3_ = _tmp2_;
-	player_item_reset (_tmp1_, _tmp3_);
-	_g_object_unref0 (_tmp3_);
-	_g_object_unref0 (_tmp1_);
-	_tmp4_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
-	_tmp5_ = (PlayerItem*) _tmp4_;
-	_tmp6_ = metadata_menuitem_attributes_format ();
-	_tmp7_ = _tmp6_;
-	player_item_reset (_tmp5_, _tmp7_);
-	_g_object_unref0 (_tmp7_);
+	transport = IS_TRANSPORT_MENUITEM (_tmp1_) ? ((TransportMenuitem*) _tmp1_) : NULL;
+	transport_menuitem_change_play_state (transport, TRANSPORT_STATE_PAUSED);
+	_tmp2_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
+	_tmp3_ = (PlayerItem*) _tmp2_;
+	_tmp4_ = metadata_menuitem_attributes_format ();
+	_tmp5_ = _tmp4_;
+	player_item_reset (_tmp3_, _tmp5_);
 	_g_object_unref0 (_tmp5_);
-	_tmp8_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TITLE);
-	_tmp9_ = (PlayerItem*) _tmp8_;
-	title = IS_TITLE_MENUITEM (_tmp9_) ? ((TitleMenuitem*) _tmp9_) : NULL;
+	_g_object_unref0 (_tmp3_);
+	_tmp6_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TITLE);
+	_tmp7_ = (PlayerItem*) _tmp6_;
+	title = IS_TITLE_MENUITEM (_tmp7_) ? ((TitleMenuitem*) _tmp7_) : NULL;
 	title_menuitem_toggle_active_triangle (title, FALSE);
 	_g_object_unref0 (self->mpris_bridge);
 	self->mpris_bridge = NULL;
 	_g_object_unref0 (title);
+	_g_object_unref0 (transport);
 }
 
 
@@ -508,15 +507,14 @@ void player_controller_update_layout (PlayerController* self) {
 	gpointer _tmp0_ = NULL;
 	PlayerItem* _tmp1_;
 	PlaylistsMenuitem* playlists_menuitem;
-	gpointer _tmp6_ = NULL;
-	PlayerItem* _tmp7_;
-	gpointer _tmp8_ = NULL;
-	PlayerItem* _tmp9_;
-	GeeHashSet* _tmp10_ = NULL;
-	GeeHashSet* _tmp11_;
-	gboolean _tmp12_;
-	gpointer _tmp13_ = NULL;
-	PlayerItem* _tmp14_;
+	gpointer _tmp7_ = NULL;
+	PlayerItem* _tmp8_;
+	gpointer _tmp9_ = NULL;
+	PlayerItem* _tmp10_;
+	GeeHashSet* _tmp11_ = NULL;
+	GeeHashSet* _tmp12_;
+	gboolean _tmp13_;
+	const gchar* _tmp14_ = NULL;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLISTS);
 	_tmp1_ = (PlayerItem*) _tmp0_;
@@ -526,33 +524,49 @@ void player_controller_update_layout (PlayerController* self) {
 		PlayerItem* _tmp3_;
 		gpointer _tmp4_ = NULL;
 		PlayerItem* _tmp5_;
-		_tmp2_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT);
+		const gchar* _tmp6_ = NULL;
+		_tmp2_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
 		_tmp3_ = (PlayerItem*) _tmp2_;
 		dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) _tmp3_, DBUSMENU_MENUITEM_PROP_VISIBLE, FALSE);
 		_g_object_unref0 (_tmp3_);
-		_tmp4_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
-		_tmp5_ = (PlayerItem*) _tmp4_;
-		dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) _tmp5_, DBUSMENU_MENUITEM_PROP_VISIBLE, FALSE);
-		_g_object_unref0 (_tmp5_);
 		dbusmenu_menuitem_property_set_bool (playlists_menuitem->root_item, DBUSMENU_MENUITEM_PROP_VISIBLE, FALSE);
+		_tmp4_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT);
+		_tmp5_ = (PlayerItem*) _tmp4_;
+		_tmp6_ = g_app_info_get_id (self->priv->_app_info);
+		dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) _tmp5_, DBUSMENU_MENUITEM_PROP_VISIBLE, g_strcmp0 (_tmp6_, "banshee.desktop") == 0);
+		_g_object_unref0 (_tmp5_);
 		_g_object_unref0 (playlists_menuitem);
 		return;
 	}
-	_tmp6_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
-	_tmp7_ = (PlayerItem*) _tmp6_;
-	_tmp8_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
-	_tmp9_ = (PlayerItem*) _tmp8_;
-	_tmp10_ = metadata_menuitem_attributes_format ();
-	_tmp11_ = _tmp10_;
-	_tmp12_ = player_item_populated (_tmp9_, _tmp11_);
-	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) _tmp7_, DBUSMENU_MENUITEM_PROP_VISIBLE, _tmp12_);
-	_g_object_unref0 (_tmp11_);
-	_g_object_unref0 (_tmp9_);
-	_g_object_unref0 (_tmp7_);
-	_tmp13_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT);
-	_tmp14_ = (PlayerItem*) _tmp13_;
-	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) _tmp14_, DBUSMENU_MENUITEM_PROP_VISIBLE, TRUE);
-	_g_object_unref0 (_tmp14_);
+	_tmp7_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
+	_tmp8_ = (PlayerItem*) _tmp7_;
+	_tmp9_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
+	_tmp10_ = (PlayerItem*) _tmp9_;
+	_tmp11_ = metadata_menuitem_attributes_format ();
+	_tmp12_ = _tmp11_;
+	_tmp13_ = player_item_populated (_tmp10_, _tmp12_);
+	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) _tmp8_, DBUSMENU_MENUITEM_PROP_VISIBLE, _tmp13_);
+	_g_object_unref0 (_tmp12_);
+	_g_object_unref0 (_tmp10_);
+	_g_object_unref0 (_tmp8_);
+	_tmp14_ = g_app_info_get_id (self->priv->_app_info);
+	if (g_strcmp0 (_tmp14_, "banshee.desktop") == 0) {
+		gpointer _tmp15_ = NULL;
+		PlayerItem* _tmp16_;
+		TransportMenuitem* transport;
+		_tmp15_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT);
+		_tmp16_ = (PlayerItem*) _tmp15_;
+		transport = IS_TRANSPORT_MENUITEM (_tmp16_) ? ((TransportMenuitem*) _tmp16_) : NULL;
+		transport_menuitem_handle_cached_action (transport);
+		_g_object_unref0 (transport);
+	} else {
+		gpointer _tmp17_ = NULL;
+		PlayerItem* _tmp18_;
+		_tmp17_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT);
+		_tmp18_ = (PlayerItem*) _tmp17_;
+		dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) _tmp18_, DBUSMENU_MENUITEM_PROP_VISIBLE, TRUE);
+		_g_object_unref0 (_tmp18_);
+	}
 	dbusmenu_menuitem_property_set_bool (playlists_menuitem->root_item, DBUSMENU_MENUITEM_PROP_VISIBLE, *self->use_playlists);
 	_g_object_unref0 (playlists_menuitem);
 }

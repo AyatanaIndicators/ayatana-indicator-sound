@@ -344,7 +344,6 @@ MprisRoot* mpris2_controller_get_mpris2_root (Mpris2Controller* self);
 gchar* mpris_root_get_Identity (MprisRoot* self);
 GHashTable* mpris_player_get_Metadata (MprisPlayer* self);
 static GVariant* _variant_new1 (const gchar* value);
-static const gchar* _variant_get2 (GVariant* value);
 void mpris2_controller_initial_update (Mpris2Controller* self);
 void mpris2_controller_transport_update (Mpris2Controller* self, TransportAction command);
 void mpris_player_PlayPause (MprisPlayer* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
@@ -635,11 +634,6 @@ static GVariant* _variant_new1 (const gchar* value) {
 }
 
 
-static const gchar* _variant_get2 (GVariant* value) {
-	return g_variant_dup_string (value, NULL);
-}
-
-
 static GHashTable* mpris2_controller_clean_metadata (Mpris2Controller* self) {
 	GHashTable* result = NULL;
 	GHashTable* _tmp0_ = NULL;
@@ -667,11 +661,9 @@ static GHashTable* mpris2_controller_clean_metadata (Mpris2Controller* self) {
 		GVariant* _tmp9_;
 		GVariant* _tmp10_;
 		GVariant* v_artists;
-		const gchar* _tmp11_ = NULL;
 		gchar* display_artists = NULL;
-		const gchar* _tmp12_ = NULL;
-		gchar* _tmp18_;
-		gconstpointer _tmp19_ = NULL;
+		const gchar* _tmp11_ = NULL;
+		gchar* _tmp17_;
 		_tmp6_ = mpris_player_get_Metadata (self->priv->_player);
 		_tmp7_ = _tmp6_;
 		_tmp8_ = g_hash_table_lookup (_tmp7_, "xesam:artist");
@@ -680,36 +672,31 @@ static GHashTable* mpris2_controller_clean_metadata (Mpris2Controller* self) {
 		_g_hash_table_unref0 (_tmp7_);
 		v_artists = _tmp10_;
 		_tmp11_ = g_variant_get_type_string (v_artists);
-		g_debug ("mpris2-controller.vala:130: artists is of type %s", _tmp11_);
-		_tmp12_ = g_variant_get_type_string (v_artists);
-		if (g_strcmp0 (_tmp12_, "s") == 0) {
-			const gchar* _tmp13_ = NULL;
-			gchar* _tmp14_;
-			g_debug ("mpris2-controller.vala:133: SPOTIFY is that you ?");
-			_tmp13_ = g_variant_get_string (v_artists, NULL);
-			_tmp14_ = g_strdup (_tmp13_);
+		if (g_strcmp0 (_tmp11_, "s") == 0) {
+			const gchar* _tmp12_ = NULL;
+			gchar* _tmp13_;
+			_tmp12_ = g_variant_get_string (v_artists, NULL);
+			_tmp13_ = g_strdup (_tmp12_);
 			_g_free0 (display_artists);
-			display_artists = _tmp14_;
+			display_artists = _tmp13_;
 		} else {
-			size_t _tmp15_;
-			gchar** _tmp16_ = NULL;
+			size_t _tmp14_;
+			gchar** _tmp15_ = NULL;
 			gchar** artists;
 			gint artists_length1;
 			gint _artists_size_;
-			gchar* _tmp17_ = NULL;
-			_tmp16_ = g_variant_dup_strv (v_artists, &_tmp15_);
-			artists = _tmp16_;
-			artists_length1 = _tmp15_;
-			_artists_size_ = _tmp15_;
-			_tmp17_ = g_strjoinv (", ", artists);
+			gchar* _tmp16_ = NULL;
+			_tmp15_ = g_variant_dup_strv (v_artists, &_tmp14_);
+			artists = _tmp15_;
+			artists_length1 = _tmp14_;
+			_artists_size_ = _tmp14_;
+			_tmp16_ = g_strjoinv (", ", artists);
 			_g_free0 (display_artists);
-			display_artists = _tmp17_;
+			display_artists = _tmp16_;
 			artists = (_vala_array_free (artists, artists_length1, (GDestroyNotify) g_free), NULL);
 		}
-		_tmp18_ = g_strdup ("xesam:artist");
-		g_hash_table_replace (changed_updates, _tmp18_, _variant_new1 (display_artists));
-		_tmp19_ = g_hash_table_lookup (changed_updates, "xesam:artist");
-		g_debug ("mpris2-controller.vala:141: artist : %s", _variant_get2 ((GVariant*) _tmp19_));
+		_tmp17_ = g_strdup ("xesam:artist");
+		g_hash_table_replace (changed_updates, _tmp17_, _variant_new1 (display_artists));
 		_g_free0 (display_artists);
 		_g_variant_unref0 (v_artists);
 	}
@@ -977,7 +964,6 @@ static gboolean mpris2_controller_fetch_playlists_co (Mpris2ControllerFetchPlayl
 	{
 		data->e = data->_inner_error_;
 		data->_inner_error_ = NULL;
-		g_debug ("mpris2-controller.vala:229: Could not fetch playlists because %s", data->e->message);
 		_g_error_free0 (data->e);
 		data->current_playlists = (_vala_PlaylistDetails_array_free (data->current_playlists, data->current_playlists_length1), NULL);
 		if (data->_state_ == 0) {
@@ -996,7 +982,6 @@ static gboolean mpris2_controller_fetch_playlists_co (Mpris2ControllerFetchPlayl
 		return FALSE;
 	}
 	if (data->current_playlists != NULL) {
-		g_debug ("mpris2-controller.vala:234: Size of the playlist array = %i", data->current_playlists_length1);
 		data->_tmp3_ = NULL;
 		data->_tmp3_ = gee_abstract_list_get ((GeeAbstractList*) data->self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLISTS);
 		data->_tmp4_ = (PlayerItem*) data->_tmp3_;
@@ -1038,7 +1023,6 @@ static gboolean mpris2_controller_fetch_active_playlist (Mpris2Controller* self)
 	_tmp2_ = _tmp1_.valid == FALSE;
 	active_playlist_container_destroy (&_tmp1_);
 	if (_tmp2_) {
-		g_debug ("mpris2-controller.vala:247:  We don't have an active playlist");
 	}
 	_tmp3_ = gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLISTS);
 	_tmp4_ = (PlayerItem*) _tmp3_;
@@ -1064,7 +1048,6 @@ void mpris2_controller_activate_playlist (Mpris2Controller* self, const char* pa
 		GError * e;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		g_debug ("mpris2-controller.vala:260: Could not activate playlist %s because %s", (const gchar*) path, e->message);
 		_g_error_free0 (e);
 	}
 	__finally12:

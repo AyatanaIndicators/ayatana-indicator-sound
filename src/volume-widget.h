@@ -47,7 +47,7 @@ struct _VolumeWidget {
 GType volume_widget_get_type (void) G_GNUC_CONST;
 GtkWidget* volume_widget_new(DbusmenuMenuitem *item, IndicatorObject* io);
 GtkWidget* volume_widget_get_ido_slider(VolumeWidget* self);
-void volume_widget_update(VolumeWidget* self, gdouble update);
+void volume_widget_update(VolumeWidget* self, gdouble update, gchar* label);
 void volume_widget_tidy_up (GtkWidget *widget);
 gdouble volume_widget_get_current_volume ( GtkWidget *widget );
 

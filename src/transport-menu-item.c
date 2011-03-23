@@ -30,9 +30,9 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <libdbusmenu-glib/server.h>
 #include <libdbusmenu-glib/types.h>
 #include <common-defs.h>
+#include <gee.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gee.h>
 
 
 #define TYPE_PLAYER_ITEM (player_item_get_type ())
@@ -66,7 +66,6 @@ typedef struct _TransportMenuitemPrivate TransportMenuitemPrivate;
 
 typedef struct _PlayerController PlayerController;
 typedef struct _PlayerControllerClass PlayerControllerClass;
-#define _g_variant_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_unref (var), NULL)))
 typedef struct _PlayerControllerPrivate PlayerControllerPrivate;
 
 #define TYPE_MPRIS2_CONTROLLER (mpris2_controller_get_type ())
@@ -78,7 +77,10 @@ typedef struct _PlayerControllerPrivate PlayerControllerPrivate;
 
 typedef struct _Mpris2Controller Mpris2Controller;
 typedef struct _Mpris2ControllerClass Mpris2ControllerClass;
+#define _g_variant_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_unref (var), NULL)))
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
+
+#define PLAYER_CONTROLLER_TYPE_STATE (player_controller_state_get_type ())
 
 struct _PlayerItem {
 	DbusmenuMenuitem parent_instance;
@@ -98,6 +100,10 @@ struct _TransportMenuitemClass {
 	PlayerItemClass parent_class;
 };
 
+struct _TransportMenuitemPrivate {
+	TransportAction cached_action;
+};
+
 struct _PlayerController {
 	GObject parent_instance;
 	PlayerControllerPrivate * priv;
@@ -111,36 +117,84 @@ struct _PlayerControllerClass {
 	GObjectClass parent_class;
 };
 
+typedef enum  {
+	PLAYER_CONTROLLER_STATE_OFFLINE,
+	PLAYER_CONTROLLER_STATE_INSTANTIATING,
+	PLAYER_CONTROLLER_STATE_READY,
+	PLAYER_CONTROLLER_STATE_CONNECTED,
+	PLAYER_CONTROLLER_STATE_DISCONNECTED
+} PlayerControllerstate;
+
 
 static gpointer transport_menuitem_parent_class = NULL;
 
 GType player_item_get_type (void) G_GNUC_CONST;
 GType transport_menuitem_get_type (void) G_GNUC_CONST;
+#define TRANSPORT_MENUITEM_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_TRANSPORT_MENUITEM, TransportMenuitemPrivate))
 enum  {
 	TRANSPORT_MENUITEM_DUMMY_PROPERTY
 };
 GType player_controller_get_type (void) G_GNUC_CONST;
 TransportMenuitem* transport_menuitem_new (PlayerController* parent);
 TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerController* parent);
-void transport_menuitem_change_play_state (TransportMenuitem* self, TransportState update);
-static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const gchar* name, GVariant* input_value, guint timestamp);
+void transport_menuitem_handle_cached_action (TransportMenuitem* self);
+static gboolean transport_menuitem_send_cached_action (TransportMenuitem* self);
+static gboolean _transport_menuitem_send_cached_action_gsource_func (gpointer self);
 PlayerController* player_item_get_owner (PlayerItem* self);
 GType mpris2_controller_get_type (void) G_GNUC_CONST;
 void mpris2_controller_transport_update (Mpris2Controller* self, TransportAction command);
+void transport_menuitem_change_play_state (TransportMenuitem* self, TransportState update);
+static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const gchar* name, GVariant* input_value, guint timestamp);
+static gboolean transport_menuitem_get_running (TransportMenuitem* self);
+void player_controller_instantiate (PlayerController* self);
 GeeHashSet* transport_menuitem_attributes_format (void);
+GType player_controller_state_get_type (void) G_GNUC_CONST;
+static GObject * transport_menuitem_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
+static void transport_menuitem_finalize (GObject* obj);
+static void _vala_transport_menuitem_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 
 
 TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerController* parent) {
 	TransportMenuitem * self = NULL;
 	g_return_val_if_fail (parent != NULL, NULL);
 	self = (TransportMenuitem*) g_object_new (object_type, "item-type", DBUSMENU_TRANSPORT_MENUITEM_TYPE, "owner", parent, NULL);
-	dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE, 1);
 	return self;
 }
 
 
 TransportMenuitem* transport_menuitem_new (PlayerController* parent) {
 	return transport_menuitem_construct (TYPE_TRANSPORT_MENUITEM, parent);
+}
+
+
+/**
+  Please remove this timeout when the default player can handle mpris commands
+  immediately once it raises its dbus interface
+  **/
+static gboolean _transport_menuitem_send_cached_action_gsource_func (gpointer self) {
+	gboolean result;
+	result = transport_menuitem_send_cached_action (self);
+	return result;
+}
+
+
+void transport_menuitem_handle_cached_action (TransportMenuitem* self) {
+	g_return_if_fail (self != NULL);
+	if (self->priv->cached_action != TRANSPORT_ACTION_NO_ACTION) {
+		g_timeout_add_seconds_full (G_PRIORITY_DEFAULT, (guint) 1, _transport_menuitem_send_cached_action_gsource_func, g_object_ref (self), g_object_unref);
+	}
+}
+
+
+static gboolean transport_menuitem_send_cached_action (TransportMenuitem* self) {
+	gboolean result = FALSE;
+	PlayerController* _tmp0_ = NULL;
+	g_return_val_if_fail (self != NULL, FALSE);
+	_tmp0_ = player_item_get_owner ((PlayerItem*) self);
+	mpris2_controller_transport_update (_tmp0_->mpris_bridge, self->priv->cached_action);
+	self->priv->cached_action = TRANSPORT_ACTION_NO_ACTION;
+	result = FALSE;
+	return result;
 }
 
 
@@ -164,7 +218,7 @@ static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const 
 	gboolean _tmp1_;
 	gint32 _tmp3_;
 	gint32 input;
-	PlayerController* _tmp4_ = NULL;
+	gboolean _tmp4_;
 	self = (TransportMenuitem*) base;
 	g_return_if_fail (name != NULL);
 	g_return_if_fail (input_value != NULL);
@@ -179,8 +233,18 @@ static void transport_menuitem_real_handle_event (DbusmenuMenuitem* base, const 
 	}
 	_tmp3_ = g_variant_get_int32 (v);
 	input = _tmp3_;
-	_tmp4_ = player_item_get_owner ((PlayerItem*) self);
-	mpris2_controller_transport_update (_tmp4_->mpris_bridge, (TransportAction) input);
+	_tmp4_ = transport_menuitem_get_running (self);
+	if (_tmp4_ == TRUE) {
+		PlayerController* _tmp5_ = NULL;
+		_tmp5_ = player_item_get_owner ((PlayerItem*) self);
+		mpris2_controller_transport_update (_tmp5_->mpris_bridge, (TransportAction) input);
+	} else {
+		PlayerController* _tmp6_ = NULL;
+		self->priv->cached_action = (TransportAction) input;
+		_tmp6_ = player_item_get_owner ((PlayerItem*) self);
+		player_controller_instantiate (_tmp6_);
+		dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE, (gint) TRANSPORT_STATE_LAUNCHING);
+	}
 	_g_variant_unref0 (v);
 }
 
@@ -197,13 +261,48 @@ GeeHashSet* transport_menuitem_attributes_format (void) {
 }
 
 
+static gboolean transport_menuitem_get_running (TransportMenuitem* self) {
+	gboolean result;
+	PlayerController* _tmp0_ = NULL;
+	g_return_val_if_fail (self != NULL, FALSE);
+	_tmp0_ = player_item_get_owner ((PlayerItem*) self);
+	result = _tmp0_->current_state == PLAYER_CONTROLLER_STATE_CONNECTED;
+	return result;
+}
+
+
+static GObject * transport_menuitem_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties) {
+	GObject * obj;
+	GObjectClass * parent_class;
+	TransportMenuitem * self;
+	parent_class = G_OBJECT_CLASS (transport_menuitem_parent_class);
+	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
+	self = TRANSPORT_MENUITEM (obj);
+	dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE, (gint) TRANSPORT_STATE_PAUSED);
+	self->priv->cached_action = TRANSPORT_ACTION_NO_ACTION;
+	return obj;
+}
+
+
 static void transport_menuitem_class_init (TransportMenuitemClass * klass) {
 	transport_menuitem_parent_class = g_type_class_peek_parent (klass);
+	g_type_class_add_private (klass, sizeof (TransportMenuitemPrivate));
 	DBUSMENU_MENUITEM_CLASS (klass)->handle_event = transport_menuitem_real_handle_event;
+	G_OBJECT_CLASS (klass)->get_property = _vala_transport_menuitem_get_property;
+	G_OBJECT_CLASS (klass)->constructor = transport_menuitem_constructor;
+	G_OBJECT_CLASS (klass)->finalize = transport_menuitem_finalize;
 }
 
 
 static void transport_menuitem_instance_init (TransportMenuitem * self) {
+	self->priv = TRANSPORT_MENUITEM_GET_PRIVATE (self);
+}
+
+
+static void transport_menuitem_finalize (GObject* obj) {
+	TransportMenuitem * self;
+	self = TRANSPORT_MENUITEM (obj);
+	G_OBJECT_CLASS (transport_menuitem_parent_class)->finalize (obj);
 }
 
 
@@ -216,6 +315,17 @@ GType transport_menuitem_get_type (void) {
 		g_once_init_leave (&transport_menuitem_type_id__volatile, transport_menuitem_type_id);
 	}
 	return transport_menuitem_type_id__volatile;
+}
+
+
+static void _vala_transport_menuitem_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec) {
+	TransportMenuitem * self;
+	self = TRANSPORT_MENUITEM (object);
+	switch (property_id) {
+		default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+		break;
+	}
 }
 
 

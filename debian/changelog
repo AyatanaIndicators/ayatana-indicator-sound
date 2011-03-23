@@ -1,3 +1,15 @@
+indicator-sound (0.6.5-0ubuntu1) UNRELEASED; urgency=low
+
+  * New upstream release.
+    - Media player should be automatically started up when play button is 
+      pressed (LP: #714750)
+    - volume goes to zero when using some players like banshee or 
+      rhythmbox (LP: #730925)
+    - handle banshee id change (LP: #737447)
+    - filter out video playlists (LP: #739273)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 23 Mar 2011 12:03:02 -0400
+
 indicator-sound (0.6.4-0ubuntu1) natty; urgency=low
 
   * New upstream release.
