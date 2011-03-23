@@ -154,6 +154,12 @@ GeeArrayList* settings_manager_fetch_interested (SettingsManager* self) {
 			_tmp5_ = g_strdup (s_collection[s_it]);
 			s = _tmp5_;
 			{
+				gboolean _tmp6_;
+				_tmp6_ = gee_abstract_collection_contains ((GeeAbstractCollection*) list, s);
+				if (_tmp6_) {
+					_g_free0 (s);
+					continue;
+				}
 				if (_vala_string_array_contains (blacklisted, blacklisted_length1, s)) {
 					_g_free0 (s);
 					continue;
