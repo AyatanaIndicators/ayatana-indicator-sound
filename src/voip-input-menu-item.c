@@ -73,9 +73,6 @@ voip_input_menu_item_class_init (VoipInputMenuItemClass *klass)
 static void
 voip_input_menu_item_init (VoipInputMenuItem *self)
 {
-/*
-  g_debug("Building new Slider Menu Item");
-*/
   dbusmenu_menuitem_property_set( DBUSMENU_MENUITEM(self),
                                   DBUSMENU_MENUITEM_PROP_TYPE,
                                   DBUSMENU_VOIP_INPUT_MENUITEM_TYPE );
