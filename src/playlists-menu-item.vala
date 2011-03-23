@@ -46,8 +46,9 @@ public class PlaylistsMenuitem : PlayerItem
   public new void update (PlaylistDetails[] playlists)
   {
     foreach ( PlaylistDetails detail in playlists ){
-      
-      if (this.already_observed(detail)) continue;
+      // We don't want to list playlists which are for videos)'
+      if (this.already_observed(detail) || this.is_video_related(detail))
+        continue;
       
       Dbusmenu.Menuitem menuitem = new Menuitem();
       menuitem.property_set (MENUITEM_PROP_LABEL, detail.name);
@@ -116,6 +117,13 @@ public class PlaylistsMenuitem : PlayerItem
       var path = item.property_get (MENUITEM_PATH);
       if (new_detail.path == path) return true;
     }
+    return false;
+  }
+
+  private bool is_video_related (PlaylistDetails new_detail)
+  {
+    var location = (string)new_detail.path;
+    if (location.contains ("/VideoLibrarySource/")) return true;
     return false;
   }
 
