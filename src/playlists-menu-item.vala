@@ -80,7 +80,7 @@ public class PlaylistsMenuitem : PlayerItem
         if (this.root_item.property_get (MENUITEM_PATH) == item.property_get (MENUITEM_PATH)){
           this.root_item.property_set (MENUITEM_PROP_LABEL, _("Choose Playlist"));        
         }
-        this.root_item.child_delete (item);   
+        this.root_item.child_delete (item);
       }
     }
   }
