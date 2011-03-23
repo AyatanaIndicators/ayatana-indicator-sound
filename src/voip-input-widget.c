@@ -97,7 +97,7 @@ voip_input_widget_init (VoipInputWidget *self)
   g_signal_connect(priv->ido_voip_input_slider, "slider-released", G_CALLBACK(voip_input_widget_slider_released), self);
 
   GtkWidget* primary_image = ido_scale_menu_item_get_primary_image((IdoScaleMenuItem*)priv->ido_voip_input_slider);
-  GIcon * primary_gicon = g_themed_icon_new_with_default_fallbacks("audio-input-microphone-zero-panel");
+  GIcon * primary_gicon = g_themed_icon_new_with_default_fallbacks("audio-input-microphone-low-zero-panel");
   gtk_image_set_from_gicon(GTK_IMAGE(primary_image), primary_gicon, GTK_ICON_SIZE_MENU);
   g_object_unref(primary_gicon);
 
@@ -129,9 +129,9 @@ voip_input_widget_property_update (DbusmenuMenuitem* item, gchar* property,
   g_return_if_fail (IS_VOIP_INPUT_WIDGET (userdata));
   VoipInputWidget* mitem = VOIP_INPUT_WIDGET(userdata);
   VoipInputWidgetPrivate * priv = VOIP_INPUT_WIDGET_GET_PRIVATE(mitem);
-  //g_debug("scrub-widget::property_update for prop %s", property);
   if(g_ascii_strcasecmp(DBUSMENU_VOIP_INPUT_MENUITEM_LEVEL, property) == 0){
-    if(priv->grabbed == FALSE){
+    g_return_if_fail (g_variant_is_of_type (value, G_VARIANT_TYPE_DOUBLE));
+    if (priv->grabbed == FALSE){
       GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_voip_input_slider);
       GtkRange *range = (GtkRange*)slider;
       gdouble update = g_variant_get_double (value);
@@ -141,6 +141,7 @@ voip_input_widget_property_update (DbusmenuMenuitem* item, gchar* property,
   }
   if(g_ascii_strcasecmp(DBUSMENU_VOIP_INPUT_MENUITEM_MUTE, property) == 0){
     if(priv->grabbed == FALSE){
+      g_return_if_fail (g_variant_is_of_type (value, G_VARIANT_TYPE_INT32));
       GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_voip_input_slider);
       GtkRange *range = (GtkRange*)slider;
       gint update = g_variant_get_int32 (value);
@@ -149,8 +150,10 @@ voip_input_widget_property_update (DbusmenuMenuitem* item, gchar* property,
         level = 0;
       }
       else{
-        level = g_variant_get_double (dbusmenu_menuitem_property_get_variant (priv->twin_item,
-                                                                              DBUSMENU_VOIP_INPUT_MENUITEM_LEVEL));
+        GVariant* variant = dbusmenu_menuitem_property_get_variant (priv->twin_item,
+                                                                    DBUSMENU_VOIP_INPUT_MENUITEM_LEVEL);
+        g_return_if_fail (g_variant_is_of_type (variant, G_VARIANT_TYPE_DOUBLE));
+        level = g_variant_get_double (variant);
       }
       gtk_range_set_value(range, level);
 

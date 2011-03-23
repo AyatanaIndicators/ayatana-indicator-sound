@@ -46,15 +46,13 @@ public class PlaylistsMenuitem : PlayerItem
   public new void update (PlaylistDetails[] playlists)
   {
     foreach ( PlaylistDetails detail in playlists ){
-      
-      if (this.already_observed(detail)) continue;
+      // We don't want to list playlists which are for videos)'
+      if (this.already_observed(detail) || this.is_video_related(detail))
+        continue;
       
       Dbusmenu.Menuitem menuitem = new Menuitem();
       menuitem.property_set (MENUITEM_PROP_LABEL, detail.name);
-      var result = this.parse_icon_path (detail.icon_path);
-      if (result != null) {
-       menuitem.property_set (MENUITEM_PROP_ICON_NAME, (string)result);
-      }
+      menuitem.property_set (MENUITEM_PROP_ICON_NAME, "playlist-symbolic");
 
       menuitem.property_set (MENUITEM_PATH, (string)detail.path);
       menuitem.property_set_bool (MENUITEM_PROP_VISIBLE, true);
@@ -80,17 +78,9 @@ public class PlaylistsMenuitem : PlayerItem
         if (this.root_item.property_get (MENUITEM_PATH) == item.property_get (MENUITEM_PATH)){
           this.root_item.property_set (MENUITEM_PROP_LABEL, _("Choose Playlist"));        
         }
-        this.root_item.child_delete (item);   
+        this.root_item.child_delete (item);
       }
     }
-  }
-
-  private string? parse_icon_path (string path)  
-  {
-    if (path == "")return null;
-    var icon_file = File.new_for_path (path);
-    if (icon_file.get_path() == null)return null;
-    return icon_file.get_basename().split(".")[0];
   }
 
   public void update_individual_playlist (PlaylistDetails new_detail)
@@ -98,10 +88,6 @@ public class PlaylistsMenuitem : PlayerItem
     foreach ( Dbusmenu.Menuitem item in this.current_playlists.values ){
       if (new_detail.path == item.property_get (MENUITEM_PATH)){
         item.property_set (MENUITEM_PROP_LABEL, new_detail.name);
-        var result = this.parse_icon_path (new_detail.icon_path);
-        if (result != null) {
-          item.property_set (MENUITEM_PROP_ICON_NAME, result);
-        }
       }
     }
     // If its active make sure the name is updated on the root item.
@@ -116,6 +102,13 @@ public class PlaylistsMenuitem : PlayerItem
       var path = item.property_get (MENUITEM_PATH);
       if (new_detail.path == path) return true;
     }
+    return false;
+  }
+
+  private bool is_video_related (PlaylistDetails new_detail)
+  {
+    var location = (string)new_detail.path;
+    if (location.contains ("/VideoLibrarySource/")) return true;
     return false;
   }
 

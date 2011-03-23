@@ -128,7 +128,7 @@ static void
 volume_widget_property_update( DbusmenuMenuitem* item, gchar* property, 
                                GVariant* value, gpointer userdata)
 { 
-  g_return_if_fail (IS_VOLUME_WIDGET (userdata)); 
+  g_return_if_fail (IS_VOLUME_WIDGET(userdata)); 
   VolumeWidget* mitem = VOLUME_WIDGET(userdata);
   VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(mitem);
 
@@ -139,28 +139,37 @@ volume_widget_property_update( DbusmenuMenuitem* item, gchar* property,
       GtkRange *range = (GtkRange*)slider;
       gdouble update = g_variant_get_double (value);
       gtk_range_set_value(range, update);
+/*
+      g_debug ("volume-widget::volume_widget_property_update - volume - value %f", update);
+*/
       update_accessible_desc(priv->indicator);
     }
   }
-  if(g_ascii_strcasecmp(DBUSMENU_VOLUME_MENUITEM_MUTE, property) == 0){
-    g_debug ("volume widget - mute update ");
+  else if(g_ascii_strcasecmp(DBUSMENU_VOLUME_MENUITEM_MUTE, property) == 0){
+    g_return_if_fail (g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN));
     if(priv->grabbed == FALSE){
       GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
       GtkRange *range = (GtkRange*)slider;
-      gint update = g_variant_get_int32 (value);
+      gboolean update = g_variant_get_boolean (value);
       gdouble level;
 
-      g_debug ("volume widget - mute update %i", update);
-
-      if (update == 1){
+      if (update == TRUE){
         level = 0;
       }
       else{
-        level = g_variant_get_double (dbusmenu_menuitem_property_get_variant (priv->twin_item,
-                                                                              DBUSMENU_VOLUME_MENUITEM_LEVEL));
+        GVariant* variant = dbusmenu_menuitem_property_get_variant (priv->twin_item,
+                                                                    DBUSMENU_VOLUME_MENUITEM_LEVEL);
+/*
+        g_debug ("variant for the volume - is it null = %i", variant == NULL);
+*/
+        g_return_if_fail (g_variant_is_of_type (variant, G_VARIANT_TYPE_DOUBLE) );
+
+        level = g_variant_get_double (variant);
       }
+/*
+      g_debug ("volume-widget::volume_widget_property_update - mute - value %i and level = %f", update, level);
+*/
       gtk_range_set_value(range, level);
-      g_debug ("volume-widget - update mute with value %i", update);
     }
   }
 }
@@ -176,13 +185,13 @@ volume_widget_set_twin_item(VolumeWidget* self,
                    G_CALLBACK(volume_widget_property_update), self);
   gdouble initial_level = g_variant_get_double (dbusmenu_menuitem_property_get_variant(twin_item,
                                                 DBUSMENU_VOLUME_MENUITEM_LEVEL));
-  gint initial_mute = g_variant_get_int32 (dbusmenu_menuitem_property_get_variant(twin_item,
-                                           DBUSMENU_VOLUME_MENUITEM_MUTE));
+  gboolean initial_mute = g_variant_get_boolean (dbusmenu_menuitem_property_get_variant(twin_item,
+                                                 DBUSMENU_VOLUME_MENUITEM_MUTE));
 
   //g_debug("volume_widget_set_twin_item initial level = %f", initial_level);
   GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
   GtkRange *range = (GtkRange*)slider;
-  if(initial_mute == 1){
+  if(initial_mute == TRUE){
     initial_level = 0;
   }
   gtk_range_set_value(range, initial_level);
@@ -197,8 +206,12 @@ volume_widget_change_value_cb (GtkRange     *range,
 {
   g_return_val_if_fail (IS_VOLUME_WIDGET (user_data), FALSE);
   VolumeWidget* mitem = VOLUME_WIDGET(user_data);
-  //g_debug ("changed value %f", new_value);
-  volume_widget_update(mitem, new_value);
+
+/*
+  g_debug ("changed value %f", new_value);
+*/
+
+  volume_widget_update(mitem, new_value, "change-value");
   return FALSE;
 }
 
@@ -211,28 +224,35 @@ volume_widget_value_changed_cb (GtkRange *range, gpointer user_data)
 {
 
   g_return_val_if_fail (IS_VOLUME_WIDGET (user_data), FALSE);
-  VolumeWidget* mitem = VOLUME_WIDGET(user_data);
+  VolumeWidget* mitem = VOLUME_WIDGET (user_data);
   VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(mitem);
   GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
   gdouble current_value =  CLAMP(gtk_range_get_value(GTK_RANGE(slider)), 0, 100);
-  //g_debug ("value changed %f", gtk_range_get_value(GTK_RANGE(slider)));
-  gint mute = g_variant_get_int32 (dbusmenu_menuitem_property_get_variant (priv->twin_item,
-                                                                           DBUSMENU_VOLUME_MENUITEM_MUTE));
 
-  if((current_value == 0 && mute != 1) || current_value == 100){
-    volume_widget_update(mitem, current_value);
+  gboolean mute = g_variant_get_boolean (dbusmenu_menuitem_property_get_variant (priv->twin_item,
+                                                                                 DBUSMENU_VOLUME_MENUITEM_MUTE));
+  if((current_value == 0 && mute == FALSE) || current_value == 100){
+/*
+    g_debug ("value changed - actual set %f", current_value);
+*/
+    volume_widget_update (mitem, current_value, "value-changed");
   }
 
   return FALSE;
 }
 
 void 
-volume_widget_update(VolumeWidget* self, gdouble update)
+volume_widget_update(VolumeWidget* self, gdouble update, gchar* label)
 {
+  gchar* source = NULL;
+  source = label;
+  if (label == NULL){
+    source = "v widget update";
+  }
   VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(self);
   gdouble clamped = CLAMP(update, 0, 100);
   GVariant* new_volume = g_variant_new_double(clamped);
-  dbusmenu_menuitem_handle_event (priv->twin_item, "update", new_volume, 0);
+  dbusmenu_menuitem_handle_event (priv->twin_item, source, new_volume, 0);
 }
 
 GtkWidget*
