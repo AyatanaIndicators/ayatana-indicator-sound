@@ -46,15 +46,13 @@ public class PlaylistsMenuitem : PlayerItem
   public new void update (PlaylistDetails[] playlists)
   {
     foreach ( PlaylistDetails detail in playlists ){
-      
-      if (this.already_observed(detail)) continue;
+      // We don't want to list playlists which are for videos)'
+      if (this.already_observed(detail) || this.is_video_related(detail))
+        continue;
       
       Dbusmenu.Menuitem menuitem = new Menuitem();
       menuitem.property_set (MENUITEM_PROP_LABEL, detail.name);
-      var result = this.parse_icon_path (detail.icon_path);
-      if (result != null) {
-       menuitem.property_set (MENUITEM_PROP_ICON_NAME, (string)result);
-      }
+      menuitem.property_set (MENUITEM_PROP_ICON_NAME, "playlist-symbolic");
 
       menuitem.property_set (MENUITEM_PATH, (string)detail.path);
       menuitem.property_set_bool (MENUITEM_PROP_VISIBLE, true);
@@ -116,6 +114,13 @@ public class PlaylistsMenuitem : PlayerItem
       var path = item.property_get (MENUITEM_PATH);
       if (new_detail.path == path) return true;
     }
+    return false;
+  }
+
+  private bool is_video_related (PlaylistDetails new_detail)
+  {
+    var location = (string)new_detail.path;
+    if (location.contains ("/VideoLibrarySource/")) return true;
     return false;
   }
 
