@@ -73,7 +73,6 @@ voip_input_menu_item_class_init (VoipInputMenuItemClass *klass)
 static void
 voip_input_menu_item_init (VoipInputMenuItem *self)
 {
-  g_debug("Building new Slider Menu Item");
   dbusmenu_menuitem_property_set( DBUSMENU_MENUITEM(self),
                                   DBUSMENU_MENUITEM_PROP_TYPE,
                                   DBUSMENU_VOIP_INPUT_MENUITEM_TYPE );
@@ -117,7 +116,9 @@ handle_event (DbusmenuMenuitem * mi,
   if (value != NULL){
     if (IS_VOIP_INPUT_MENU_ITEM (mi)) {
       VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (VOIP_INPUT_MENU_ITEM (mi));
+/*
       g_debug ("Handle event in the voip input level backend instance - %f", percent);
+*/
       pa_cvolume new_volume;
       pa_cvolume_init(&new_volume);
       new_volume.channels = 1;
@@ -167,7 +168,9 @@ voip_input_menu_item_update (VoipInputMenuItem* item,
   // Only send over the mute updates if the state has changed.
   // in this order - volume first mute last!!
   if (priv->mute != source->mute){
+/*
     g_debug ("voip menu item - update - mute = %i", priv->mute);
+*/
     GVariant* new_mute_update = g_variant_new_int32 (source->mute);
     dbusmenu_menuitem_property_set_variant (DBUSMENU_MENUITEM(item),
                                             DBUSMENU_VOIP_INPUT_MENUITEM_MUTE,

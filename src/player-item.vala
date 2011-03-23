@@ -37,7 +37,7 @@ public class PlayerItem : Dbusmenu.Menuitem
 
   public void reset(HashSet<string> attrs){   
     foreach(string s in attrs){
-      debug("attempting to set prop %s to EMPTY", s);
+      //debug("attempting to set prop %s to EMPTY", s);
       this.property_set_int(s, EMPTY);
     }
   }
@@ -50,7 +50,7 @@ public class PlayerItem : Dbusmenu.Menuitem
    */
   public void update(HashTable<string, Variant?> data, HashSet<string> attributes)
   {
-    debug("PlayerItem::update()");
+    //debug("PlayerItem::update()");
     if(data == null){
       warning("PlayerItem::Update -> The hashtable was null - just leave it!");
       return;

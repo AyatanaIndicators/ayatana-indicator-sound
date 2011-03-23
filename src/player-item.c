@@ -145,7 +145,6 @@ void player_item_reset (PlayerItem* self, GeeHashSet* attrs) {
 			}
 			_tmp2_ = gee_iterator_get (_s_it);
 			s = (gchar*) _tmp2_;
-			g_debug ("player-item.vala:40: attempting to set prop %s to EMPTY", s);
 			dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, s, PLAYER_ITEM_EMPTY);
 			_g_free0 (s);
 		}
@@ -199,7 +198,6 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (data != NULL);
 	g_return_if_fail (attributes != NULL);
-	g_debug ("player-item.vala:53: PlayerItem::update()");
 	if (data == NULL) {
 		g_warning ("player-item.vala:55: PlayerItem::Update -> The hashtable was null - ju" \
 "st leave it!");

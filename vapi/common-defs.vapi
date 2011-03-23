@@ -59,10 +59,12 @@ namespace Transport{
     PLAY_PAUSE,
     NEXT,
     REWIND,
-    FORWIND
+    FORWIND,
+    NO_ACTION
   }
   public enum State{
     PLAYING,
-    PAUSED
+    PAUSED,
+    LAUNCHING
   }
 }
