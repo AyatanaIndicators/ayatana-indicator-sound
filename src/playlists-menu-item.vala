@@ -52,10 +52,7 @@ public class PlaylistsMenuitem : PlayerItem
       
       Dbusmenu.Menuitem menuitem = new Menuitem();
       menuitem.property_set (MENUITEM_PROP_LABEL, detail.name);
-      var result = this.parse_icon_path (detail.icon_path);
-      if (result != null) {
-       menuitem.property_set (MENUITEM_PROP_ICON_NAME, (string)result);
-      }
+      menuitem.property_set (MENUITEM_PROP_ICON_NAME, "playlist-symbolic");
 
       menuitem.property_set (MENUITEM_PATH, (string)detail.path);
       menuitem.property_set_bool (MENUITEM_PROP_VISIBLE, true);
