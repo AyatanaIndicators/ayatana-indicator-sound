@@ -76,7 +76,10 @@ static void pm_toggle_mute_for_every_sink_callback (pa_context *c,
                                                     const pa_sink_info *sink,
                                                     int eol,
                                                     void* userdata);
-
+static void pm_source_output_info_callback (pa_context *c,
+                                            const pa_source_output_info *info,
+                                            int eol,
+                                            void *userdata);
 
 static gboolean reconnect_to_pulse (gpointer user_data);
 
@@ -257,7 +260,6 @@ pm_subscribed_events_callback (pa_context *c,
     }
     break;
   case PA_SUBSCRIPTION_EVENT_SINK_INPUT:
-    // We don't care about sink input removals.
     g_debug ("sink input event");
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
       gint cached_index = device_get_current_sink_input_index (sink);
@@ -270,10 +272,24 @@ pm_subscribed_events_callback (pa_context *c,
     }
     else if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_NEW) {
       g_debug ("some new sink input event ? - index = %i", index);
-      // Determine if its a VOIP app or a maybe blocking state.
+      // Maybe blocking state ?.
       pa_operation_unref (pa_context_get_sink_input_info (c,
                                                           index,
                                                           pm_sink_input_info_callback, userdata));
+    }
+    break;
+  case PA_SUBSCRIPTION_EVENT_SOURCE_OUTPUT:
+    g_debug ("source output event");
+    if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
+      //gint cached_index = device_get_current_sink_input_index (sink);
+      //g_debug ("Just saw a sink input removal event - index = %i and cached index = %i", index, cached_index);
+    }
+    else if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_NEW) {
+      g_debug ("some new source output event ? - index = %i", index);
+      // Determine if its a VOIP app.
+      pa_operation_unref (pa_context_get_source_output_info (c,
+                                                            index,
+                                                            pm_source_output_info_callback, userdata));
     }
     break;
   case PA_SUBSCRIPTION_EVENT_SERVER:
@@ -333,6 +349,7 @@ pm_context_state_callback (pa_context *c, void *userdata)
                                    (PA_SUBSCRIPTION_MASK_SINK|
                                     PA_SUBSCRIPTION_MASK_SOURCE|
                                     PA_SUBSCRIPTION_MASK_SINK_INPUT|
+                                    PA_SUBSCRIPTION_MASK_SOURCE_OUTPUT|
                                     PA_SUBSCRIPTION_MASK_SERVER), NULL, NULL))) {
       g_warning("pa_context_subscribe() failed");
     
@@ -498,6 +515,15 @@ pm_sink_input_info_callback (pa_context *c,
       device_determine_blocking_state (a_sink);
     }
   }
+}
+
+static void
+pm_source_output_info_callback (pa_context *c,
+                                const pa_source_output_info *info,
+                                int eol,
+                                void *userdata)
+{
+
 }
 
 static void 
