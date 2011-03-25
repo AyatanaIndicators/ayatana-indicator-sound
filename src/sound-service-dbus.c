@@ -239,7 +239,8 @@ sound_service_dbus_update_sound_state (SoundServiceDbus* self,
 
   if (priv->connection == NULL ||
       g_dbus_connection_is_closed (priv->connection) == TRUE){
-    g_critical ("sound_service_dbus_update_sound_state - connection no good !!");
+    g_critical ("sound_service_dbus_update_sound_state - connection is %s !!",
+                priv->connection == NULL? "NULL" : "closed");
     return;
   }
 
