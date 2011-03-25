@@ -237,6 +237,13 @@ sound_service_dbus_update_sound_state (SoundServiceDbus* self,
 
   GError * error = NULL;
 
+  if (priv->connection == NULL ||
+      g_dbus_connection_is_closed (priv->connection) == TRUE){
+    g_critical ("sound_service_dbus_update_sound_state - connection is %s !!",
+                priv->connection == NULL? "NULL" : "closed");
+    return;
+  }
+
   g_debug ("emitting state signal with value %i", (int)new_state);
   g_dbus_connection_emit_signal( priv->connection,
                                  NULL,
@@ -246,9 +253,8 @@ sound_service_dbus_update_sound_state (SoundServiceDbus* self,
                                  v_output,
                                  &error );
   if (error != NULL) {
-    g_error("Unable to emit signal 'sinkinputwhilemuted' because : %s", error->message);
+    g_critical ("Unable to emit signal because : %s", error->message);
     g_error_free(error);
-    return;
   }
 }
 
