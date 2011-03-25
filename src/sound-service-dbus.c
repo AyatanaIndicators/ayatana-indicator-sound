@@ -239,7 +239,7 @@ sound_service_dbus_update_sound_state (SoundServiceDbus* self,
 
   if (priv->connection == NULL ||
       g_dbus_connection_is_closed (priv->connection) == TRUE){
-    g_warning ("sound_service_dbus_update_sound_state - connection no good !!");
+    g_critical ("sound_service_dbus_update_sound_state - connection no good !!");
     return;
   }
 
@@ -252,7 +252,7 @@ sound_service_dbus_update_sound_state (SoundServiceDbus* self,
                                  v_output,
                                  &error );
   if (error != NULL) {
-    g_error("Unable to emit signal because : %s", error->message);
+    g_critical ("Unable to emit signal because : %s", error->message);
     g_error_free(error);
   }
 }
