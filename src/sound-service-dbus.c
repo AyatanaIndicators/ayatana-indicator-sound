@@ -252,9 +252,8 @@ sound_service_dbus_update_sound_state (SoundServiceDbus* self,
                                  v_output,
                                  &error );
   if (error != NULL) {
-    g_error("Unable to emit signal 'sinkinputwhilemuted' because : %s", error->message);
+    g_error("Unable to emit signal because : %s", error->message);
     g_error_free(error);
-    return;
   }
 }
 
