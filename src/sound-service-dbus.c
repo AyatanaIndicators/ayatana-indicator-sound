@@ -237,6 +237,12 @@ sound_service_dbus_update_sound_state (SoundServiceDbus* self,
 
   GError * error = NULL;
 
+  if (priv->connection == NULL ||
+      g_dbus_connection_is_closed (priv->connection) == TRUE){
+    g_warning ("sound_service_dbus_update_sound_state - connection no good !!");
+    return;
+  }
+
   g_debug ("emitting state signal with value %i", (int)new_state);
   g_dbus_connection_emit_signal( priv->connection,
                                  NULL,
