@@ -57,7 +57,7 @@ public class Mpris2Controller : GLib.Object
       }
     }
     catch (IOError e) {
-      warning("Problems connecting to the session bus - %s", e.message);
+      critical("Problems connecting to the session bus - %s", e.message);
     }
   }
 
