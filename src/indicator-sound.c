@@ -137,6 +137,7 @@ indicator_sound_init (IndicatorSound *self)
   
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
   priv->volume_widget = NULL;
+  priv->voip_widget = NULL;
   priv->dbus_proxy = NULL;
   GList* t_list = NULL;
   priv->transport_widgets_list = t_list;
@@ -407,8 +408,14 @@ new_volume_slider_widget(DbusmenuMenuitem * newitem,
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
   io = g_object_get_data (G_OBJECT (client), "indicator");
-  volume_widget = volume_widget_new (newitem, io);
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+
+  if (priv->volume_widget != NULL){ 
+    volume_widget_tidy_up (priv->volume_widget);
+    gtk_widget_destroy (priv->volume_widget);
+    priv->volume_widget = NULL;
+  }
+  volume_widget = volume_widget_new (newitem, io);
   priv->volume_widget = volume_widget;
 
   GtkWidget* ido_slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));
@@ -451,6 +458,12 @@ new_voip_slider_widget (DbusmenuMenuitem * newitem,
 
   io = g_object_get_data (G_OBJECT (client), "indicator");
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+
+  if (priv->voip_widget != NULL){ 
+    voip_input_widget_tidy_up (priv->voip_widget);
+    gtk_widget_destroy (priv->voip_widget);
+    priv->voip_widget = NULL;
+  }
 
   voip_widget = voip_input_widget_new (newitem);
   priv->voip_widget = voip_widget;

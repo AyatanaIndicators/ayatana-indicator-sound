@@ -1,3 +1,12 @@
+indicator-sound (0.6.6.1-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Fix crash with SIGABRT (LP: #738051) (LP: #744304)
+    - ensure that if the service crashes the indicator will not show 
+      multiple sliders
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Mon, 04 Apr 2011 10:02:19 -0400
+
 indicator-sound (0.6.5.1-0ubuntu1) natty; urgency=low
 
   * New upstream release.
