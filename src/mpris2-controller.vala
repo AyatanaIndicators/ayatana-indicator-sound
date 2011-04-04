@@ -45,19 +45,19 @@ public class Mpris2Controller : GLib.Object
       this.player = Bus.get_proxy_sync ( BusType.SESSION,
                                          this.owner.dbus_name,
                                          "/org/mpris/MediaPlayer2" );
+      this.properties_interface = Bus.get_proxy_sync ( BusType.SESSION,
+                                                       "org.freedesktop.Properties.PropertiesChanged",
+                                                       "/org/mpris/MediaPlayer2" );
+      this.properties_interface.PropertiesChanged.connect ( property_changed_cb );
       if ( this.owner.use_playlists == true ){
         this.playlists = Bus.get_proxy_sync ( BusType.SESSION,
                                               this.owner.dbus_name,
                                               "/org/mpris/MediaPlayer2" );
         this.playlists.PlaylistChanged.connect (on_playlistdetails_changed);
       }
-      this.properties_interface = Bus.get_proxy_sync ( BusType.SESSION,
-                                                       "org.freedesktop.Properties.PropertiesChanged",
-                                                       "/org/mpris/MediaPlayer2" );
-      this.properties_interface.PropertiesChanged.connect ( property_changed_cb );
     }
     catch (IOError e) {
-      error("Problems connecting to the session bus - %s", e.message);
+      critical("Problems connecting to the session bus - %s", e.message);
     }
   }
 
@@ -68,7 +68,7 @@ public class Mpris2Controller : GLib.Object
     //debug("properties-changed for interface %s and owner %s", interface_source, this.owner.dbus_name);
     if ( changed_properties == null ||
         interface_source.has_prefix ( MPRIS_PREFIX ) == false ){
-      warning("Property-changed hash is null or this is an interface that doesn't concerns us");
+      warning("Property-changed hash is null or this is an interface that doesn't concern us");
       return;
     }
     Variant? play_v = changed_properties.lookup("PlaybackStatus");
@@ -124,6 +124,7 @@ public class Mpris2Controller : GLib.Object
   private GLib.HashTable<string, Variant?>? clean_metadata()
   { 
     GLib.HashTable<string, Variant?> changed_updates = this.player.Metadata; 
+    
     Variant? artist_v = this.player.Metadata.lookup("xesam:artist");
     if(artist_v != null){
       Variant? v_artists = this.player.Metadata.lookup("xesam:artist");
