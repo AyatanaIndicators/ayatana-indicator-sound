@@ -41,6 +41,9 @@ public class SettingsManager : GLib.Object
     var interested = this.settings.get_strv ("interested-media-players");
     var list = new ArrayList<string>();
     foreach(var s in interested){
+      if (s == "banshee-1"){
+        s = "banshee";
+      }
       if (s in list) continue;
       if (s in blacklisted) continue;
       list.add(s);      
