@@ -164,13 +164,10 @@ sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
 {
   SoundServiceDbusPrivate * priv = SOUND_SERVICE_DBUS_GET_PRIVATE(self);
 
-  // Mute button
-  // TODO this additions should be fixed position, i.e. add via position and not just append
-  // be explicit as it is fixed.
-  dbusmenu_menuitem_child_append (priv->root_menuitem, mute_item);
-  dbusmenu_menuitem_child_append (priv->root_menuitem, slider_item);
-  g_debug ("just about to add the slider %i", DBUSMENU_IS_MENUITEM(slider_item));
-  dbusmenu_menuitem_child_append (priv->root_menuitem, voip_input_menu_item);
+  // Mute, Volume and Voip widgets
+  dbusmenu_menuitem_child_add_position (priv->root_menuitem, mute_item, 0);
+  dbusmenu_menuitem_child_add_position (priv->root_menuitem, slider_item, 1);
+  dbusmenu_menuitem_child_add_position (priv->root_menuitem, voip_input_menu_item, 2);
 
   // Separator
   DbusmenuMenuitem* separator = dbusmenu_menuitem_new();
@@ -178,7 +175,7 @@ sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
   dbusmenu_menuitem_property_set (separator,
                                   DBUSMENU_MENUITEM_PROP_TYPE,
                                   DBUSMENU_CLIENT_TYPES_SEPARATOR);
-  dbusmenu_menuitem_child_append(priv->root_menuitem, separator);
+  dbusmenu_menuitem_child_add_position (priv->root_menuitem, separator, 3);
   g_object_unref (separator);
 
   // Sound preferences dialog
