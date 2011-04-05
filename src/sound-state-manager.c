@@ -24,6 +24,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "sound-state-manager.h"
 #include "dbus-shared-names.h"
+#include "sound-state.h"
 
 typedef struct _SoundStateManagerPrivate SoundStateManagerPrivate;
 
@@ -170,19 +171,20 @@ sound_state_manager_show_notification (SoundStateManager *self,
 
   char *icon;
   const int notify_value = CLAMP((int)value, -1, 101);
-  SoundState state = sound_state_manager_get_current_state (self);
+  
+  SoundState state = sound_state_get_from_volume ((int)value);
       
   if (state == ZERO_LEVEL) {
     // Not available for all the themes
-    icon = "audio-volume-off";
+    icon = "notification-audio-volume-off";
   } else if (state == LOW_LEVEL) {
-    icon = "audio-volume-low";
+    icon = "notification-audio-volume-low";
   } else if (state == MEDIUM_LEVEL) {
-    icon = "audio-volume-medium";
+    icon = "notification-audio-volume-medium";
   } else if (state == HIGH_LEVEL) {
-    icon = "audio-volume-high";
+    icon = "notification-audio-volume-high";
   } else {
-    icon = "audio-volume-muted";
+    icon = "notification-audio-volume-muted";
   }
 
   notify_notification_update(priv->notification, PACKAGE_NAME, NULL, icon);

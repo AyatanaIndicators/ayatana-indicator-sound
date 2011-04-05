@@ -23,6 +23,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "mute-menu-item.h"
 #include "voip-input-menu-item.h"
 #include "pulseaudio-mgr.h"
+#include "sound-state.h"
 
 typedef struct _DevicePrivate DevicePrivate;
 
@@ -164,21 +165,7 @@ device_get_state_from_volume (Device* self)
                                                         DBUSMENU_VOLUME_MENUITEM_LEVEL);
   gdouble volume_percent = g_variant_get_double (v);
 
-  SoundState state = LOW_LEVEL;
-
-  if (volume_percent < 30.0 && volume_percent > 0) {
-    state = LOW_LEVEL;
-  } 
-  else if (volume_percent < 70.0 && volume_percent >= 30.0) {
-    state = MEDIUM_LEVEL;
-  } 
-  else if (volume_percent >= 70.0) {
-    state = HIGH_LEVEL;
-  } 
-  else if (volume_percent == 0.0) {
-    state = ZERO_LEVEL;
-  }
-  return state;
+  return sound_state_get_from_volume ((int)volume_percent);
 }
 
 void
