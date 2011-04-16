@@ -195,6 +195,7 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
       //        priv->image_path->str); 
       if(GDK_IS_PIXBUF(pixbuf) == FALSE){
         //g_debug("problem loading the downloaded image just use the placeholder instead");
+        gtk_widget_set_size_request(GTK_WIDGET(priv->album_art), 60, 60);
         draw_album_art_placeholder(metadata);
         return TRUE;
       }
@@ -210,6 +211,7 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
     }
     return FALSE;       
   }
+  gtk_widget_set_size_request(GTK_WIDGET(priv->album_art), 60, 60);
   draw_album_art_placeholder(metadata);
   return TRUE;
 }
