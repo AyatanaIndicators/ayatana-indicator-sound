@@ -106,8 +106,7 @@ metadata_widget_init (MetadataWidget *self)
   
   g_signal_connect(priv->album_art, "expose-event", 
                    G_CALLBACK(metadata_image_expose),
-                   GTK_WIDGET(self));   
-  gtk_widget_set_size_request(GTK_WIDGET(priv->album_art), 60, 60); 
+                   GTK_WIDGET(self));
   
   gtk_box_pack_start (GTK_BOX (priv->hbox),
                       priv->album_art,
@@ -190,23 +189,24 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
     if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE ||
        priv->theme_change_occured == TRUE){
       priv->theme_change_occured = FALSE;         
-      GdkPixbuf* orig_pixbuf;
-      orig_pixbuf = gdk_pixbuf_new_from_file(priv->image_path->str, NULL);
+      GdkPixbuf* pixbuf;
+      pixbuf = gdk_pixbuf_new_from_file_at_size(priv->image_path->str, 60, 60, NULL);
       //g_debug("metadata_load_new_image -> pixbuf from %s",
       //        priv->image_path->str); 
-      if(GDK_IS_PIXBUF(orig_pixbuf) == FALSE){
+      if(GDK_IS_PIXBUF(pixbuf) == FALSE){
         //g_debug("problem loading the downloaded image just use the placeholder instead");
         draw_album_art_placeholder(metadata);
         return TRUE;
       }
-      GdkPixbuf* pixbuf;         
-      pixbuf = gdk_pixbuf_scale_simple(orig_pixbuf,60, 60, GDK_INTERP_BILINEAR);
       gtk_image_set_from_pixbuf(GTK_IMAGE(priv->album_art), pixbuf);
+      gtk_widget_set_size_request(GTK_WIDGET(priv->album_art),
+                                  gdk_pixbuf_get_width(pixbuf),
+                                  gdk_pixbuf_get_height(pixbuf));
+
       g_string_erase(priv->old_image_path, 0, -1);
       g_string_overwrite(priv->old_image_path, 0, priv->image_path->str);
 
-      g_object_unref(pixbuf);       
-      g_object_unref(orig_pixbuf);       
+      g_object_unref(pixbuf);
     }
     return FALSE;       
   }
