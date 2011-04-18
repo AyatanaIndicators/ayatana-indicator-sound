@@ -1,3 +1,13 @@
+indicator-sound (0.6.6.1-0ubuntu3) natty; urgency=low
+
+  * debian/patches/lp_750823.patch
+    - Place timeout in the mpris controller to accommodate flaky mpris dbus 
+      behaviour, it can be seen sometimes that the players emit a property 
+      changed on the metadata property but the actual value of the property 
+      which the service then tries to use is the old value (LP: #750823)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Mon, 18 Apr 2011 15:08:13 -0400
+
 indicator-sound (0.6.6.1-0ubuntu2) natty; urgency=low
 
   * debian/patches/lp_759390.patch

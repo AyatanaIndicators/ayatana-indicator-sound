@@ -1,0 +1,38 @@
+=== modified file 'src/mpris2-controller.vala'
+--- src/mpris2-controller.vala	2011-03-29 10:43:34 +0000
++++ src/mpris2-controller.vala	2011-04-18 19:02:26 +0000
+@@ -83,13 +83,7 @@
+     }
+     Variant? meta_v = changed_properties.lookup("Metadata");
+     if(meta_v != null){
+-      GLib.HashTable<string, Variant?> changed_updates = clean_metadata();
+-      PlayerItem metadata = this.owner.custom_items[PlayerController.widget_order.METADATA];
+-      metadata.reset ( MetadataMenuitem.attributes_format());
+-      metadata.update ( changed_updates, 
+-                        MetadataMenuitem.attributes_format());
+-      metadata.property_set_bool ( MENUITEM_PROP_VISIBLE,
+-                                   metadata.populated(MetadataMenuitem.attributes_format()));
++      Timeout.add (300, this.ensure_correct_metadata);
+     }
+     Variant? playlist_v = changed_properties.lookup("ActivePlaylist");
+     if ( playlist_v != null && this.owner.use_playlists == true ){
+@@ -113,7 +107,17 @@
+       title.alter_label (this.mpris2_root.Identity);
+     }
+   }
+-                                      
++  
++  private bool ensure_correct_metadata(){ 
++    GLib.HashTable<string, Variant?> changed_updates = clean_metadata();
++    PlayerItem metadata = this.owner.custom_items[PlayerController.widget_order.METADATA];
++    metadata.reset ( MetadataMenuitem.attributes_format());
++    metadata.update ( changed_updates, 
++                      MetadataMenuitem.attributes_format());
++    metadata.property_set_bool ( MENUITEM_PROP_VISIBLE,
++                                 metadata.populated(MetadataMenuitem.attributes_format()));  
++    return false;
++  }
+   private bool ensure_correct_playback_status(){
+     //debug("TEST playback status = %s", this.player.PlaybackStatus);
+     Transport.State p = (Transport.State)this.determine_play_state(this.player.PlaybackStatus);
+
