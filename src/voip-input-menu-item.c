@@ -35,7 +35,7 @@ struct _VoipInputMenuItemPrivate {
   pa_channel_map      channel_map;
   pa_volume_t         base_volume;
   gint                source_index;
-  gint                sink_input_index;
+  gint                source_output_index;
   gint                client_index;
 };
 
@@ -82,7 +82,7 @@ voip_input_menu_item_init (VoipInputMenuItem *self)
                                        FALSE );
 
   priv->source_index     = NOT_ACTIVE;
-  priv->sink_input_index = NOT_ACTIVE;
+  priv->source_output_index = NOT_ACTIVE;
   priv->client_index     = NOT_ACTIVE;
   priv->mute             = NOT_ACTIVE;
 }
@@ -183,18 +183,18 @@ voip_input_menu_item_update (VoipInputMenuItem* item,
 
 gboolean
 voip_input_menu_item_is_interested (VoipInputMenuItem* item,
-                                    gint sink_input_index,
+                                    gint source_output_index,
                                     gint client_index)
 {
   VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
   // Check to make sure we are not handling another voip beforehand and that we
   // have an active sink (might need to match up at start up)
-  if (priv->sink_input_index != NOT_ACTIVE &&
+  if (priv->source_output_index != NOT_ACTIVE &&
       priv->source_index != NOT_ACTIVE){
     return FALSE;
   }
   
-  priv->sink_input_index = sink_input_index;
+  priv->source_output_index = source_output_index;
   priv->client_index     = client_index;
 
   return TRUE;
@@ -204,7 +204,7 @@ gboolean
 voip_input_menu_item_is_active (VoipInputMenuItem* item)
 {
   VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
-  return (priv->sink_input_index != NOT_ACTIVE && priv->client_index != NOT_ACTIVE);
+  return (priv->source_output_index != NOT_ACTIVE && priv->client_index != NOT_ACTIVE);
 }
 
 
@@ -223,11 +223,11 @@ voip_input_menu_item_get_index (VoipInputMenuItem* item)
 }
 
 gint
-voip_input_menu_item_get_sink_input_index (VoipInputMenuItem* item)
+voip_input_menu_item_get_source_output_index (VoipInputMenuItem* item)
 {
   VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
 
-  return priv->sink_input_index;
+  return priv->source_output_index;
 }
 
 /**
@@ -250,7 +250,7 @@ voip_input_menu_item_deactivate_voip_client (VoipInputMenuItem* item)
 {
   VoipInputMenuItemPrivate* priv = VOIP_INPUT_MENU_ITEM_GET_PRIVATE (item);
   priv->client_index = NOT_ACTIVE;
-  priv->sink_input_index = NOT_ACTIVE;
+  priv->source_output_index = NOT_ACTIVE;
   voip_input_menu_item_enable (item, FALSE);
 }
 

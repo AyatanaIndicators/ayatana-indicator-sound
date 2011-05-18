@@ -50,14 +50,14 @@ void voip_input_menu_item_update (VoipInputMenuItem* item,
                                   const pa_source_info* source);
 void voip_input_menu_item_enable (VoipInputMenuItem* item, gboolean active);
 gboolean voip_input_menu_item_is_interested (VoipInputMenuItem* item,
-                                             gint sink_input_index,
+                                             gint source_output_index,
                                              gint client_index);
 gboolean voip_input_menu_item_is_active (VoipInputMenuItem* item);
 gboolean voip_input_menu_item_is_populated (VoipInputMenuItem* item);
 // TODO rename get source index
 gint voip_input_menu_item_get_index (VoipInputMenuItem* item);
 
-gint voip_input_menu_item_get_sink_input_index (VoipInputMenuItem* item);
+gint voip_input_menu_item_get_source_output_index (VoipInputMenuItem* item);
 
 void voip_input_menu_item_deactivate_source (VoipInputMenuItem* item, gboolean visible);
 void voip_input_menu_item_deactivate_voip_client (VoipInputMenuItem* item);
