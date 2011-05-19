@@ -76,7 +76,10 @@ static void pm_toggle_mute_for_every_sink_callback (pa_context *c,
                                                     const pa_sink_info *sink,
                                                     int eol,
                                                     void* userdata);
-
+static void pm_source_output_info_callback (pa_context *c,
+                                            const pa_source_output_info *info,
+                                            int eol,
+                                            void *userdata);
 
 static gboolean reconnect_to_pulse (gpointer user_data);
 
@@ -257,23 +260,29 @@ pm_subscribed_events_callback (pa_context *c,
     }
     break;
   case PA_SUBSCRIPTION_EVENT_SINK_INPUT:
-    // We don't care about sink input removals.
-    g_debug ("sink input event");
+    if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_NEW) {
+      g_debug ("some new sink input event ? - index = %i", index);
+      // Maybe blocking state ?.
+      pa_operation_unref (pa_context_get_sink_input_info (c,
+                                                          index,
+                                                          pm_sink_input_info_callback, userdata));
+    }
+    break;
+  case PA_SUBSCRIPTION_EVENT_SOURCE_OUTPUT:
+    g_debug ("source output event");
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
-      gint cached_index = device_get_current_sink_input_index (sink);
-
-      g_debug ("Just saw a sink input removal event - index = %i and cached index = %i", index, cached_index);
-
-      if (index == cached_index){
+      gint cached_source_output_index = device_get_voip_source_output_index (sink);
+      if (index == cached_source_output_index){
+        g_debug ("Just saw a source output removal event - index = %i and cached index = %i", index, cached_source_output_index);
         device_deactivate_voip_client (sink);
       }
     }
     else if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_NEW) {
-      g_debug ("some new sink input event ? - index = %i", index);
-      // Determine if its a VOIP app or a maybe blocking state.
-      pa_operation_unref (pa_context_get_sink_input_info (c,
-                                                          index,
-                                                          pm_sink_input_info_callback, userdata));
+      g_debug ("some new source output event ? - index = %i", index);
+      // Determine if its a VOIP app.
+      pa_operation_unref (pa_context_get_source_output_info (c,
+                                                            index,
+                                                            pm_source_output_info_callback, userdata));
     }
     break;
   case PA_SUBSCRIPTION_EVENT_SERVER:
@@ -333,6 +342,7 @@ pm_context_state_callback (pa_context *c, void *userdata)
                                    (PA_SUBSCRIPTION_MASK_SINK|
                                     PA_SUBSCRIPTION_MASK_SOURCE|
                                     PA_SUBSCRIPTION_MASK_SINK_INPUT|
+                                    PA_SUBSCRIPTION_MASK_SOURCE_OUTPUT|
                                     PA_SUBSCRIPTION_MASK_SERVER), NULL, NULL))) {
       g_warning("pa_context_subscribe() failed");
     
@@ -470,32 +480,45 @@ pm_sink_input_info_callback (pa_context *c,
       g_warning("Sink input info callback : SINK INPUT INFO IS NULL or our user_data is not what we think it should be");
       return;
     }
+    Device* a_sink = DEVICE (userdata);
+    // And finally check for the mute blocking state
+    if (device_get_sink_index (a_sink) == info->sink){
+      device_determine_blocking_state (a_sink);
+    }
+  }
+}
 
-    if (IS_DEVICE (userdata) == FALSE){
-      g_warning ("sink input info callback - our user data is not what we think it should be");
+static void
+pm_source_output_info_callback (pa_context *c,
+                                const pa_source_output_info *info,
+                                int eol,
+                                void *userdata)
+{
+  if (eol > 0) {
+    return;
+  }
+  else {
+    if (info == NULL || IS_DEVICE (userdata) == FALSE) {
+      g_warning("Source output callback: SOURCE OUTPUT INFO IS NULL or our user_data is not what we think it should be");
       return;
     }
+
     // Check if this is Voip sink input
     gint result  = pa_proplist_contains (info->proplist, PA_PROP_MEDIA_ROLE);
     Device* a_sink = DEVICE (userdata);
 
     if (result == 1){
-      g_debug ("Sink input info has media role property");
+      //g_debug ("Source output info has media role property");
       const char* value = pa_proplist_gets (info->proplist, PA_PROP_MEDIA_ROLE);
-      g_debug ("prop role = %s", value);
+      //g_debug ("prop role = %s", value);
       if (g_strcmp0 (value, "phone") == 0 || g_strcmp0 (value, "production") == 0) {
-        g_debug ("And yes its a VOIP app ... sink input index = %i", info->index);
+        g_debug ("We have a VOIP/PRODUCTION ! - index = %i", info->index);
         device_activate_voip_item (a_sink, (gint)info->index, (gint)info->client);
         // TODO to start with we will assume our source is the same as what this 'client'
         // is pointing at. This should probably be more intelligent :
         // query for the list of source output info's and going on the name of the client
         // from the sink input ensure our voip item is using the right source.
       }
-    }
-
-    // And finally check for the mute blocking state
-    if (device_get_sink_index (a_sink) == info->sink){
-      device_determine_blocking_state (a_sink);
     }
   }
 }
