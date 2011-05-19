@@ -10,6 +10,8 @@ libsoundmenu_la_SOURCES = \
             common-defs.h \
             indicator-sound.h \
             indicator-sound.c \
+            sound-state.c \
+            sound-state.h \
             sound-state-manager.c \
             sound-state-manager.h \
             transport-widget.c \
@@ -90,6 +92,8 @@ indicator_sound_service_SOURCES = \
   common-defs.h \
   sound-service.h \
   sound-service.c \
+  sound-state.c \
+  sound-state.h \
   pulseaudio-mgr.h \
   pulseaudio-mgr.c \
   device.c \

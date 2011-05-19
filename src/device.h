@@ -68,8 +68,8 @@ void device_ensure_sink_is_unmuted (Device* self);
 
 // source and sinkinput/client related for VOIP functionality
 void device_update_voip_input_source (Device* sink, const pa_source_info* update);
-void device_activate_voip_item (Device* sink, gint sink_input_index, gint client_index);
-gint device_get_current_sink_input_index (Device* sink);
+void device_activate_voip_item (Device* sink, gint source_output_index, gint client_index);
+gint device_get_voip_source_output_index (Device* sink);
 gboolean device_is_voip_source_populated (Device* sink);
 gint device_get_source_index (Device* self);
 void device_determine_blocking_state (Device* self);

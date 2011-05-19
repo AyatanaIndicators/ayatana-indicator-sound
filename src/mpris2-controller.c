@@ -472,7 +472,7 @@ void mpris2_controller_property_changed_cb (Mpris2Controller* self, const gchar*
 		_tmp0_ = _tmp1_ == FALSE;
 	}
 	if (_tmp0_) {
-		g_warning ("mpris2-controller.vala:71: Property-changed hash is null or this is an" \
+		g_warning ("mpris2-controller.vala:72: Property-changed hash is null or this is an" \
 " interface that doesn't concern us");
 		return;
 	}
@@ -989,7 +989,7 @@ static gboolean mpris2_controller_fetch_playlists_co (Mpris2ControllerFetchPlayl
 		playlists_menuitem_update (data->playlists_item, data->current_playlists, data->current_playlists_length1);
 		_g_object_unref0 (data->playlists_item);
 	} else {
-		g_warning ("mpris2-controller.vala:240:  Playlists are on but its returning no cur" \
+		g_warning ("mpris2-controller.vala:241:  Playlists are on but its returning no cur" \
 "rent_playlists");
 		data->_tmp5_ = FALSE;
 		data->_tmp6_ = __bool_dup0 (&data->_tmp5_);
@@ -1245,7 +1245,7 @@ static GObject * mpris2_controller_constructor (GType type, guint n_construct_pr
 		GError * e;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		g_critical ("mpris2-controller.vala:60: Problems connecting to the session bus - %s", e->message);
+		g_critical ("mpris2-controller.vala:61: Problems connecting to the session bus - %s", e->message);
 		_g_error_free0 (e);
 	}
 	__finally13:

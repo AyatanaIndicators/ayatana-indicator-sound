@@ -1,3 +1,18 @@
+indicator-sound (0.7.0-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    - Displayed cover don't keep the original ratio (LP: #654196)
+    - show record level control PULSE_PROP_media.role=production (LP: #736049)
+    - Volume notification is based on previous volume; should be based on 
+      the new volume (LP: #748831)
+    - [gnome3] Sound Preferences link doesn't work (LP: #759390)
+  * debian/patches/lp_759390.patch
+    - dropped, merged upstream
+  * debian/control
+    - renamed the libnotify4-dev build depends to libnotify-dev
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 19 May 2011 15:38:19 -0400
+
 indicator-sound (0.6.6.1-0ubuntu3) natty; urgency=low
 
   * debian/patches/lp_750823.patch

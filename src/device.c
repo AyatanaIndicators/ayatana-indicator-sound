@@ -23,6 +23,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "mute-menu-item.h"
 #include "voip-input-menu-item.h"
 #include "pulseaudio-mgr.h"
+#include "sound-state.h"
 
 typedef struct _DevicePrivate DevicePrivate;
 
@@ -123,10 +124,10 @@ device_sink_update (Device* self,
 }
 
 gint
-device_get_current_sink_input_index (Device* self)
+device_get_voip_source_output_index (Device* self)
 {
   DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
-  return voip_input_menu_item_get_sink_input_index (priv->voip_input_menu_item);
+  return voip_input_menu_item_get_source_output_index (priv->voip_input_menu_item);
 }
 
 static void 
@@ -164,21 +165,7 @@ device_get_state_from_volume (Device* self)
                                                         DBUSMENU_VOLUME_MENUITEM_LEVEL);
   gdouble volume_percent = g_variant_get_double (v);
 
-  SoundState state = LOW_LEVEL;
-
-  if (volume_percent < 30.0 && volume_percent > 0) {
-    state = LOW_LEVEL;
-  } 
-  else if (volume_percent < 70.0 && volume_percent >= 30.0) {
-    state = MEDIUM_LEVEL;
-  } 
-  else if (volume_percent >= 70.0) {
-    state = HIGH_LEVEL;
-  } 
-  else if (volume_percent == 0.0) {
-    state = ZERO_LEVEL;
-  }
-  return state;
+  return sound_state_get_from_volume ((int)volume_percent);
 }
 
 void
@@ -211,11 +198,11 @@ device_is_sink_populated (Device* self)
 }
 
 void
-device_activate_voip_item (Device* self, gint sink_input_index, gint client_index)
+device_activate_voip_item (Device* self, gint source_output_index, gint client_index)
 {
   DevicePrivate* priv = DEVICE_GET_PRIVATE (self);
   if (voip_input_menu_item_is_interested (priv->voip_input_menu_item,
-                                          sink_input_index,
+                                          source_output_index,
                                           client_index)){
     voip_input_menu_item_enable (priv->voip_input_menu_item, TRUE);
   }
