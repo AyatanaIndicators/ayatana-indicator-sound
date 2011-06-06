@@ -20,17 +20,21 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 using Dbusmenu;
 using Gee;
 using DbusmenuTrackSpecific;
+using Dbusmenu;
 
 public class TrackSpecificMenuitem : PlayerItem
 {
+  public Menuitem root_item{get; construct;}
+  
   public TrackSpecificMenuitem (PlayerController parent)
   {
     Object(item_type: MENUITEM_TYPE, owner: parent);    
   }
   construct
   {
-    this.property_set_bool (MENUITEM_PROP_VISIBLE, false);
-    this.property_set_bool (MENUITEM_PROP_ENABLED, false);    
-    this.property_set (MENUITEM_PROP_LABEL, "Like This");
+    this.root_item = new Menuitem();
+    this.root_item.property_set ( MENUITEM_PROP_LABEL, _("Like This") );
+    this.root_item.property_set_bool (MENUITEM_PROP_VISIBLE, false);
+    this.root_item.property_set_bool (MENUITEM_PROP_ENABLED, false);    
   }
 }

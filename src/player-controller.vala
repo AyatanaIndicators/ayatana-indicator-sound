@@ -109,10 +109,10 @@ public class PlayerController : GLib.Object
 
   public void enable_track_specific_items()
   {
-    this.custom_items[widget_order.TRACK_SPECIFIC].property_set_bool (MENUITEM_PROP_VISIBLE,
-                                                                      true);
-    this.custom_items[widget_order.TRACK_SPECIFIC].property_set_bool (MENUITEM_PROP_ENABLED,
-                                                                      true);
+    debug ("enable_track_specific_items");
+    TrackSpecificMenuitem menuitem = this.custom_items[widget_order.TRACK_SPECIFIC] as TrackSpecificMenuitem;
+    menuitem.root_item.property_set_bool (MENUITEM_PROP_VISIBLE, true);
+    menuitem.root_item.property_set_bool (MENUITEM_PROP_ENABLED, true);
   }
   
   private void establish_mpris_connection()
@@ -202,12 +202,16 @@ public class PlayerController : GLib.Object
     this.custom_items.add(playlist_menuitem);
     
     foreach(PlayerItem item in this.custom_items){
-      if (this.custom_items.index_of(item) != 5) {
-        root_menu.child_add_position(item, this.menu_offset + this.custom_items.index_of(item));
-      }
-      else{
+      if (this.custom_items.index_of(item) == 5) {
         PlaylistsMenuitem playlists_menuitem = item as PlaylistsMenuitem;
-        root_menu.child_add_position(playlists_menuitem.root_item, this.menu_offset + this.custom_items.index_of(item));              
+        root_menu.child_add_position(playlists_menuitem.root_item, this.menu_offset + this.custom_items.index_of(item));
+      }
+      else if (this.custom_items.index_of(item) == 4) {
+        TrackSpecificMenuitem trackspecific_menuitem = item as TrackSpecificMenuitem;
+        root_menu.child_add_position(trackspecific_menuitem.root_item, this.menu_offset + this.custom_items.index_of(item));
+      }      
+      else{
+        root_menu.child_add_position(item, this.menu_offset + this.custom_items.index_of(item));
       }
     }
   }
