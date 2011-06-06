@@ -27,7 +27,7 @@ public class MusicPlayerBridge : GLib.Object
 
   private SettingsManager settings_manager;
   private Dbusmenu.Menuitem root_menu;
-  private HashMap<string, PlayerController> registered_clients;  
+  private HashMap<string, PlayerController> registered_clients;
   private Mpris2Watcher watcher;
 
   public MusicPlayerBridge()

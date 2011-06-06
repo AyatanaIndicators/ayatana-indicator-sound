@@ -21,15 +21,13 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "pulseaudio-mgr.h"
 #include "sound-service-dbus.h"
 #include "music-player-bridge.h"
-
 #include <locale.h>
 
 static GMainLoop *mainloop = NULL;
-
+static MusicPlayerBridge* server;
 /**********************************************************************************************************************/
 //    Init and exit functions
 /**********************************************************************************************************************/
-
 /**
 service_shutdown:
 When the service interface starts to shutdown, we
@@ -47,13 +45,20 @@ service_shutdown (IndicatorService *service, gpointer user_data)
   return;
 }
 
+void 
+on_track_specific_item_requested (SoundServiceDbus* sound_service,
+                                  const gchar* desktop_id,
+                                  gpointer userdata)
+{
+  g_debug ("ON TRACK SPECIFIC ITEM REQUESTED %s", desktop_id);  
+}
+
 /**
 main:
 **/
 int
 main (int argc, char ** argv)
 {
-  
   g_type_init();
   textdomain (GETTEXT_PACKAGE);
   bindtextdomain (GETTEXT_PACKAGE, GNOMELOCALEDIR);
@@ -66,9 +71,12 @@ main (int argc, char ** argv)
                    G_CALLBACK(service_shutdown), NULL);
 
   SoundServiceDbus* sound_service = g_object_new(SOUND_SERVICE_DBUS_TYPE, NULL);
+  g_signal_connect(G_OBJECT(sound_service),
+                   "track-specific-item-requested",
+                   G_CALLBACK(on_track_specific_item_requested), NULL);
   
   DbusmenuMenuitem* root_menuitem = sound_service_dbus_create_root_item(sound_service);
-  MusicPlayerBridge* server = music_player_bridge_new();
+  server = music_player_bridge_new();
   music_player_bridge_set_root_menu_item(server, root_menuitem);
 
   // Run the loop

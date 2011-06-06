@@ -58,6 +58,14 @@ struct _SoundServiceDbusPrivate {
   Device*             device;
 };
 
+enum {
+  TRACK_SPECIFIC_ITEM,
+  PLAYER_SPECIFIC_ITEM,  
+  LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0 };
+
 static GDBusNodeInfo *            node_info = NULL;
 static GDBusInterfaceInfo *       interface_info = NULL;
 
@@ -110,6 +118,20 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
       g_error("Unable to find interface '" INDICATOR_SOUND_DBUS_INTERFACE "'");
     }
   }
+  signals[TRACK_SPECIFIC_ITEM] =  g_signal_new("track-specific-item-requested",
+                                                G_TYPE_FROM_CLASS (klass),
+                                                G_SIGNAL_RUN_LAST,
+                                                0,
+                                                NULL, NULL,
+                                                g_cclosure_marshal_VOID__STRING,
+                                                G_TYPE_NONE, 1, G_TYPE_STRING);  
+  signals[PLAYER_SPECIFIC_ITEM] =  g_signal_new("player-specific-item-requested",
+                                                G_TYPE_FROM_CLASS (klass),
+                                                G_SIGNAL_RUN_LAST,
+                                                0,
+                                                NULL, NULL,
+                                                g_cclosure_marshal_VOID__STRING,
+                                                G_TYPE_NONE, 1, G_TYPE_STRING);  
 }
 
 static void
@@ -185,7 +207,7 @@ sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
                                   DBUSMENU_MENUITEM_PROP_LABEL,
                                   _("Sound Preferences..."));
   dbusmenu_menuitem_child_append(priv->root_menuitem, settings_mi);
-  g_object_unref (settings_mi);  
+  g_object_unref (settings_mi);
   g_signal_connect(G_OBJECT(settings_mi), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED,
                    G_CALLBACK(show_sound_settings_dialog), NULL);  
 }
@@ -296,6 +318,16 @@ bus_method_call (GDBusConnection * connection,
     gboolean result = sound_service_dbus_is_blacklisted (service,
                                                          player_name);
     retval =  g_variant_new ("(b)", result);
+  }
+  else if (g_strcmp0(method, "EnableTrackSpecificItems") == 0) {
+    gchar* player_name;
+    g_variant_get (params, "(s)", &player_name);
+    g_debug ("EnableTrackSpecificItems - name %s", player_name);    
+    g_signal_emit (service,
+                   signals[TRACK_SPECIFIC_ITEM],
+                   0,
+                   player_name);
+    
   }
   else {
     g_warning("Calling method '%s' on the sound service but it's unknown", method); 
