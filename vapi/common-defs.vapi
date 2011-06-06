@@ -33,6 +33,11 @@ namespace DbusmenuTransport{
 }
 
 [CCode (cheader_filename = "common-defs.h")]
+namespace DbusmenuTrackSpecific{
+        public const string MENUITEM_TYPE;
+}
+
+[CCode (cheader_filename = "common-defs.h")]
 namespace DbusmenuTitle{
         public const string MENUITEM_TYPE;
         public const string MENUITEM_NAME;

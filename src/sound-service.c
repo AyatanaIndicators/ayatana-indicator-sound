@@ -24,7 +24,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <locale.h>
 
 static GMainLoop *mainloop = NULL;
-static MusicPlayerBridge* server;
+static MusicPlayerBridge* player_bridge;
 /**********************************************************************************************************************/
 //    Init and exit functions
 /**********************************************************************************************************************/
@@ -46,10 +46,20 @@ service_shutdown (IndicatorService *service, gpointer user_data)
 }
 
 void 
+on_player_specific_item_requested (SoundServiceDbus* sound_service,
+                                  const gchar* desktop_id,
+                                  gpointer userdata)
+{
+  music_player_bridge_enable_player_specific_items_for_client (player_bridge, desktop_id);
+  g_debug ("ON PLAYER SPECIFIC ITEM REQUESTED %s", desktop_id);  
+}
+
+void 
 on_track_specific_item_requested (SoundServiceDbus* sound_service,
                                   const gchar* desktop_id,
                                   gpointer userdata)
 {
+  music_player_bridge_enable_track_specific_items_for_client (player_bridge, desktop_id);
   g_debug ("ON TRACK SPECIFIC ITEM REQUESTED %s", desktop_id);  
 }
 
@@ -64,8 +74,8 @@ main (int argc, char ** argv)
   bindtextdomain (GETTEXT_PACKAGE, GNOMELOCALEDIR);
   setlocale (LC_ALL, "");
 
-  IndicatorService *service = indicator_service_new_version(INDICATOR_SOUND_DBUS_NAME,
-                              INDICATOR_SOUND_DBUS_VERSION);
+  IndicatorService *service = indicator_service_new_version (INDICATOR_SOUND_DBUS_NAME,
+                                                             INDICATOR_SOUND_DBUS_VERSION);
   g_signal_connect(G_OBJECT(service),
                    INDICATOR_SERVICE_SIGNAL_SHUTDOWN,
                    G_CALLBACK(service_shutdown), NULL);
@@ -74,10 +84,13 @@ main (int argc, char ** argv)
   g_signal_connect(G_OBJECT(sound_service),
                    "track-specific-item-requested",
                    G_CALLBACK(on_track_specific_item_requested), NULL);
+  g_signal_connect(G_OBJECT(sound_service),
+                   "player-specific-item-requested",
+                   G_CALLBACK(on_player_specific_item_requested), NULL);
   
-  DbusmenuMenuitem* root_menuitem = sound_service_dbus_create_root_item(sound_service);
-  server = music_player_bridge_new();
-  music_player_bridge_set_root_menu_item(server, root_menuitem);
+  DbusmenuMenuitem* root_menuitem = sound_service_dbus_create_root_item (sound_service);
+  player_bridge = music_player_bridge_new ();
+  music_player_bridge_set_root_menu_item (player_bridge, root_menuitem);
 
   // Run the loop
   mainloop = g_main_loop_new(NULL, FALSE);

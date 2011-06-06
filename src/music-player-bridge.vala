@@ -158,6 +158,21 @@ public class MusicPlayerBridge : GLib.Object
     this.watcher.client_disappeared.connect (this.client_has_vanished);
   }
 
+  public void enable_player_specific_items_for_client (string desktop_id)
+  {
+    // TODO
+  }
+
+  public void enable_track_specific_items_for_client (string desktop_id)
+  {
+    var mpris_key = determine_key ( desktop_id );
+    if (this.registered_clients.has_key (mpris_key) == false){
+      warning ("we don't have a client with desktop id %s registered", desktop_id);
+      return;
+    }
+    this.registered_clients[mpris_key].enable_track_specific_items();
+  }
+
   private static AppInfo? create_app_info ( string desktop )
   {
     DesktopAppInfo info = new DesktopAppInfo ( desktop ) ;

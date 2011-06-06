@@ -48,6 +48,7 @@ checkxml: $(srcdir)/sound-service.xml
 music_bridge_VALASOURCES = \
 	music-player-bridge.vala \
 	transport-menu-item.vala \
+	track-specific-menu-item.vala \
 	metadata-menu-item.vala \
 	title-menu-item.vala \
 	player-controller.vala \
