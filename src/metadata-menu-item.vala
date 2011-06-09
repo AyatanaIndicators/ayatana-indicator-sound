@@ -29,9 +29,9 @@ public class MetadataMenuitem : PlayerItem
   private static FetchFile fetcher;
   private string previous_temp_album_art_path;
   
-  public MetadataMenuitem()
+  public MetadataMenuitem (PlayerController parent)
   {
-    Object(item_type: MENUITEM_TYPE);   
+    Object(item_type: MENUITEM_TYPE, owner: parent);
     reset(attributes_format());
   }
   
@@ -39,6 +39,9 @@ public class MetadataMenuitem : PlayerItem
     MetadataMenuitem.clean_album_art_temp_dir();
     this.previous_temp_album_art_path = null;   
     this.album_art_cache_dir = MetadataMenuitem.create_album_art_temp_dir();
+    this.property_set(MENUITEM_PLAYER_NAME, this.owner.app_info.get_name());    
+    this.property_set(MENUITEM_PLAYER_ICON, this.owner.icon_name);    
+    this.property_set_bool(MENUITEM_PLAYER_RUNNING, false);            
   }
 
   private static void clean_album_art_temp_dir()
@@ -135,7 +138,7 @@ public class MetadataMenuitem : PlayerItem
       PixbufLoader loader = new PixbufLoader ();
       loader.write (update.data);
       loader.close ();
-      Pixbuf icon = loader.get_pixbuf ();       
+      Pixbuf icon = loader.get_pixbuf ();
       string path = this.album_art_cache_dir.concat("/downloaded-coverart-XXXXXX");
       int r = FileUtils.mkstemp(path);
       if(r != -1){
@@ -152,7 +155,31 @@ public class MetadataMenuitem : PlayerItem
               e.message);
     }       
   }     
+
+  public override void handle_event (string name,
+                                     Variant input_value,
+                                     uint timestamp)
+  {   
+    if(this.owner.current_state == PlayerController.state.OFFLINE)
+    {
+      this.owner.instantiate();
+    }
+    else if(this.owner.current_state == PlayerController.state.CONNECTED){
+      this.owner.mpris_bridge.expose();
+    }
+  }
   
+  public void alter_label (string new_title)
+  {
+    if (new_title == null) return;
+    this.property_set (MENUITEM_PLAYER_NAME, new_title);
+  }
+
+  public void toggle_active_triangle (bool update)
+  {
+    this.property_set_bool (MENUITEM_PLAYER_RUNNING, update);
+  }
+
   public static HashSet<string> attributes_format()
   {
     HashSet<string> attrs = new HashSet<string>();    
@@ -160,6 +187,9 @@ public class MetadataMenuitem : PlayerItem
     attrs.add(MENUITEM_ARTIST);
     attrs.add(MENUITEM_ALBUM);
     attrs.add(MENUITEM_ARTURL);
+    attrs.add(MENUITEM_PLAYER_NAME);
+    attrs.add(MENUITEM_PLAYER_ICON);
+    attrs.add(MENUITEM_PLAYER_RUNNING);
     return attrs;
-  } 
+  }
 }

@@ -24,6 +24,9 @@ namespace DbusmenuMetadata{
         public const string MENUITEM_TITLE;
         public const string MENUITEM_ALBUM;
         public const string MENUITEM_ARTURL;    
+        public const string MENUITEM_PLAYER_NAME;
+        public const string MENUITEM_PLAYER_ICON;
+        public const string MENUITEM_PLAYER_RUNNING;
 }
 
 [CCode (cheader_filename = "common-defs.h")]
@@ -33,11 +36,8 @@ namespace DbusmenuTransport{
 }
 
 [CCode (cheader_filename = "common-defs.h")]
-namespace DbusmenuTitle{
+namespace DbusmenuTrackSpecific{
         public const string MENUITEM_TYPE;
-        public const string MENUITEM_NAME;
-        public const string MENUITEM_ICON;
-        public const string MENUITEM_RUNNING;
 }
 
 [CCode (cheader_filename = "common-defs.h")]

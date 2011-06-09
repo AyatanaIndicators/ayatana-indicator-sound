@@ -94,10 +94,6 @@ static gboolean new_metadata_widget (DbusmenuMenuitem * newitem,
                                      DbusmenuMenuitem * parent,
                                      DbusmenuClient * client,
                                      gpointer user_data);
-static gboolean new_title_widget (DbusmenuMenuitem * newitem,
-                                  DbusmenuMenuitem * parent,
-                                  DbusmenuClient * client,
-                                  gpointer user_data);
 
 // DBUS communication
 static GDBusNodeInfo *node_info = NULL;
@@ -208,9 +204,6 @@ get_menu (IndicatorObject * io)
   dbusmenu_client_add_type_handler (DBUSMENU_CLIENT(client),
                                     DBUSMENU_METADATA_MENUITEM_TYPE,
                                     new_metadata_widget);
-  dbusmenu_client_add_type_handler (DBUSMENU_CLIENT(client),
-                                    DBUSMENU_TITLE_MENUITEM_TYPE,
-                                    new_title_widget);
   // Note: Not ideal but all key handling needs to be managed here and then 
   // delegated to the appropriate widget. 
   g_signal_connect (menu, "key-press-event", G_CALLBACK(key_press_cb), io);
@@ -369,7 +362,7 @@ new_metadata_widget (DbusmenuMenuitem * newitem,
   return TRUE;
 }
 
-static gboolean
+/*static gboolean
 new_title_widget(DbusmenuMenuitem * newitem,
                  DbusmenuMenuitem * parent,
                  DbusmenuClient * client,
@@ -391,7 +384,7 @@ new_title_widget(DbusmenuMenuitem * newitem,
                                   newitem,
                                   menu_title_widget, parent); 
   return TRUE;
-}
+}*/
 
 static gboolean
 new_volume_slider_widget(DbusmenuMenuitem * newitem,
