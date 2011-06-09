@@ -18,6 +18,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 using Gee;
+using Dbusmenu;
 using DbusmenuMetadata;
 using Gdk;
 
@@ -32,16 +33,17 @@ public class MetadataMenuitem : PlayerItem
   public MetadataMenuitem (PlayerController parent)
   {
     Object(item_type: MENUITEM_TYPE, owner: parent);
-    reset(attributes_format());
+    //reset(attributes_format());
   }
   
   construct{
     MetadataMenuitem.clean_album_art_temp_dir();
     this.previous_temp_album_art_path = null;   
     this.album_art_cache_dir = MetadataMenuitem.create_album_art_temp_dir();
-    this.property_set(MENUITEM_PLAYER_NAME, this.owner.app_info.get_name());    
-    this.property_set(MENUITEM_PLAYER_ICON, this.owner.icon_name);    
-    this.property_set_bool(MENUITEM_PLAYER_RUNNING, false);            
+    debug ("JUST ABOUT TO ATTEMPT PLAYER NAME SETTING %s", this.owner.app_info.get_name());
+    this.property_set (MENUITEM_PLAYER_NAME, this.owner.app_info.get_name());    
+    this.property_set (MENUITEM_PLAYER_ICON, this.owner.icon_name);    
+    this.property_set_bool (MENUITEM_PLAYER_RUNNING, false);            
   }
 
   private static void clean_album_art_temp_dir()

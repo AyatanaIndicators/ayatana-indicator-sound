@@ -70,6 +70,7 @@ public class PlayerController : GLib.Object
     this.construct_widgets();
     this.establish_mpris_connection();
     this.update_layout();
+    debug ("New player controller  for %s with icon name %s", this.app_info.get_name(), this.icon_name);
   }
 
   public void update_state(state new_state)
@@ -144,8 +145,10 @@ public class PlayerController : GLib.Object
   {     
     PlaylistsMenuitem playlists_menuitem = this.custom_items[widget_order.PLAYLISTS] as PlaylistsMenuitem;
     if(this.current_state != state.CONNECTED){
+      // TODO 
+      // For now just set the visibility to true so that I can figure out what todo here.
       this.custom_items[widget_order.METADATA].property_set_bool (MENUITEM_PROP_VISIBLE,
-                                                                  false);
+                                                                  true);
       playlists_menuitem.root_item.property_set_bool (MENUITEM_PROP_VISIBLE,
                                                       false );
       this.custom_items[widget_order.TRANSPORT].property_set_bool (MENUITEM_PROP_VISIBLE,

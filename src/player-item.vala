@@ -87,7 +87,7 @@ public class PlayerItem : Dbusmenu.Menuitem
         this.property_set_bool(property, v.get_boolean());
       }
     }
-    this.property_set_bool(MENUITEM_PROP_VISIBLE, populated(attributes));        
+    //this.property_set_bool(MENUITEM_PROP_VISIBLE, populated(attributes));        
   } 
   
   public bool populated(HashSet<string> attrs)

@@ -353,12 +353,19 @@ new_metadata_widget (DbusmenuMenuitem * newitem,
   g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
+
   metadata = metadata_widget_new (newitem);
+  
+  g_debug ("%s (\"%s\")", __func__,
+           dbusmenu_menuitem_property_get(newitem, DBUSMENU_METADATA_MENUITEM_PLAYER_NAME));
+  
   GtkMenuItem *menu_metadata_widget = GTK_MENU_ITEM(metadata);
 
   gtk_widget_show_all(metadata);
   dbusmenu_gtkclient_newitem_base (DBUSMENU_GTKCLIENT(client),
-                                   newitem, menu_metadata_widget, parent);
+                                   newitem,
+                                   menu_metadata_widget,
+                                   parent);
   return TRUE;
 }
 

@@ -28,6 +28,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <gtk/gtk.h>
 #include <glib.h>
 #include "transport-widget.h"
+#include <libindicator/indicator-image-helper.h>
 
 typedef struct _MetadataWidgetPrivate MetadataWidgetPrivate;
 
@@ -41,6 +42,7 @@ struct _MetadataWidgetPrivate
   GtkWidget* artist_label;
   GtkWidget* piece_label;
   GtkWidget* container_label;
+  GtkWidget* player_label;  
   DbusmenuMenuitem* twin_item;      
 };
 
@@ -56,7 +58,7 @@ static void metadata_widget_set_style     (GtkWidget* button, GtkStyle* style);
 static void metadata_widget_set_twin_item (MetadataWidget* self, DbusmenuMenuitem* twin_item);
 
 // keyevent consumers
-static gboolean metadata_widget_button_press_event (GtkWidget *menuitem, 
+static gboolean metadata_widget_button_release_event (GtkWidget *menuitem, 
                                                     GdkEventButton *event);
 // Dbusmenuitem properties update callback
 static void metadata_widget_property_update (DbusmenuMenuitem* item,
@@ -71,8 +73,12 @@ static void metadata_widget_selection_received_event_callback( GtkWidget        
                                                                 GtkSelectionData *data,
                                                                 guint             time,
                                                                 gpointer          user_data);
-G_DEFINE_TYPE (MetadataWidget, metadata_widget, GTK_TYPE_MENU_ITEM);
+static gboolean metadata_widget_triangle_draw_cb (GtkWidget *widget,
+                                                  GdkEventExpose *event,
+                                                  gpointer data);
+static void metadata_widget_set_icon (MetadataWidget *self);
 
+G_DEFINE_TYPE (MetadataWidget, metadata_widget, GTK_TYPE_IMAGE_MENU_ITEM);
 
 static void
 metadata_widget_class_init (MetadataWidgetClass *klass)
@@ -80,7 +86,7 @@ metadata_widget_class_init (MetadataWidgetClass *klass)
   GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass    *widget_class = GTK_WIDGET_CLASS (klass);
 
-  widget_class->button_press_event = metadata_widget_button_press_event;
+  widget_class->button_release_event = metadata_widget_button_release_event;
   
   g_type_class_add_private (klass, sizeof (MetadataWidgetPrivate));
 
@@ -91,8 +97,6 @@ metadata_widget_class_init (MetadataWidgetClass *klass)
 static void
 metadata_widget_init (MetadataWidget *self)
 {
-  //g_debug("MetadataWidget::metadata_widget_init");
-
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);
   GtkWidget *hbox;
 
@@ -375,8 +379,8 @@ metadata_widget_selection_received_event_callback (  GtkWidget        *widget,
 
 /* Suppress/consume keyevents */
 static gboolean
-metadata_widget_button_press_event (GtkWidget *menuitem, 
-                                  GdkEventButton *event)
+metadata_widget_button_release_event (GtkWidget *menuitem, 
+                                      GdkEventButton *event)
 {
   GtkClipboard* board = gtk_clipboard_get (GDK_NONE); 
 
@@ -454,9 +458,48 @@ metadata_widget_set_style(GtkWidget* metadata, GtkStyle* style)
   gtk_widget_queue_draw(GTK_WIDGET(metadata));  
 }
 
+static void 
+metadata_widget_set_icon (MetadataWidget *self)
+{
+  MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self); 
+
+  gint padding = 0;
+  gtk_widget_style_get(GTK_WIDGET(self), "horizontal-padding", &padding, NULL);
+  gint width, height;
+  gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
+  
+  GString* banshee_string = g_string_new ( "banshee" );
+  GString* app_panel = g_string_new ( g_utf8_strdown ( dbusmenu_menuitem_property_get(priv->twin_item, DBUSMENU_METADATA_MENUITEM_PLAYER_NAME),
+                                                    -1 ));
+  GtkWidget * icon = NULL;
+  
+  // Not ideal but apparently we want the banshee icon to be the greyscale one
+  // and any others to be the icon from the desktop file => colour.
+  if ( g_string_equal ( banshee_string, app_panel ) == TRUE &&
+      gtk_icon_theme_has_icon ( gtk_icon_theme_get_default(), app_panel->str ) ){
+    g_string_append ( app_panel, "-panel" );                                                   
+    icon = gtk_image_new_from_icon_name ( app_panel->str,
+                                          GTK_ICON_SIZE_MENU );    
+  }
+  else{
+    icon = gtk_image_new_from_icon_name ( g_strdup (dbusmenu_menuitem_property_get ( priv->twin_item, DBUSMENU_METADATA_MENUITEM_PLAYER_ICON )),
+                                          GTK_ICON_SIZE_MENU );
+  }
+  g_string_free ( app_panel, FALSE) ;
+  g_string_free ( banshee_string, FALSE) ;
+
+  gtk_widget_set_size_request(icon, width
+                                    + 5 /* ref triangle is 5x9 pixels */
+                                    + 1 /* padding */,
+                                    height);
+  gtk_misc_set_alignment(GTK_MISC(icon), 0.5 /* right aligned */, 0);
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(icon));
+  gtk_widget_show(icon);
+}
+
 static void
-metadata_widget_set_twin_item(MetadataWidget* self,
-                              DbusmenuMenuitem* twin_item)
+metadata_widget_set_twin_item (MetadataWidget* self,
+                               DbusmenuMenuitem* twin_item)
 {
   MetadataWidgetPrivate* priv = METADATA_WIDGET_GET_PRIVATE(self);
   priv->twin_item = twin_item;
@@ -479,17 +522,78 @@ metadata_widget_set_twin_item(MetadataWidget* self,
   g_string_erase(priv->image_path, 0, -1);
   const gchar *arturl = dbusmenu_menuitem_property_get( priv->twin_item,
                                                         DBUSMENU_METADATA_MENUITEM_ARTURL );
+
+  g_signal_connect_after (G_OBJECT (self),
+                         "expose_event",
+                          G_CALLBACK (metadata_widget_triangle_draw_cb),
+                          priv->twin_item);
+  
+  gtk_menu_item_set_label (GTK_MENU_ITEM(self),
+                           dbusmenu_menuitem_property_get(priv->twin_item,
+                                                          DBUSMENU_METADATA_MENUITEM_PLAYER_NAME));
+  
+  metadata_widget_set_icon(self);
+  
   if (arturl != NULL){
     g_string_overwrite( priv->image_path,
                         0,
                         arturl);
-
     // if its a remote image queue a redraw incase the download took too long
     if (g_str_has_prefix (arturl, g_get_user_cache_dir())){
       gtk_widget_queue_draw(GTK_WIDGET(self));                                                          
     }
   }
 }
+
+
+// Title related ...
+static gboolean
+metadata_widget_triangle_draw_cb (GtkWidget *widget, GdkEventExpose *event, gpointer data)
+{
+  GtkStyle *style;
+  cairo_t *cr;
+  int x, y, arrow_width, arrow_height;
+  
+  if (!GTK_IS_WIDGET (widget)) return FALSE;
+  if (!DBUSMENU_IS_MENUITEM (data)) return FALSE;
+
+  /* render the triangle indicator only if the application is running */
+  if (! dbusmenu_menuitem_property_get_bool (DBUSMENU_MENUITEM(data),
+                                             DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING)){   
+    return FALSE;
+  }
+  
+  /* get style */
+  style = gtk_widget_get_style (widget);
+
+  /* set arrow position / dimensions */
+  arrow_width = 5; /* the pixel-based reference triangle is 5x9 */
+  arrow_height = 9;
+  x = widget->allocation.x;
+  y = widget->allocation.y + widget->allocation.height/2.0 - (double)arrow_height/2.0;
+
+  /* initialize cairo drawing area */
+  cr = (cairo_t*) gdk_cairo_create (widget->window);
+
+  /* set line width */  
+  cairo_set_line_width (cr, 1.0);
+
+  /* cairo drawing code */
+  cairo_move_to (cr, x, y);
+  cairo_line_to (cr, x, y + arrow_height);
+  cairo_line_to (cr, x + arrow_width, y + (double)arrow_height/2.0);
+  cairo_close_path (cr);
+  cairo_set_source_rgb (cr, style->fg[gtk_widget_get_state(widget)].red/65535.0,
+                            style->fg[gtk_widget_get_state(widget)].green/65535.0,
+                            style->fg[gtk_widget_get_state(widget)].blue/65535.0);
+  cairo_fill (cr);
+
+  /* remember to destroy cairo context to avoid leaks */
+  cairo_destroy (cr);
+
+  return FALSE;
+}
+
 
  /**
  * transport_new:
@@ -500,6 +604,8 @@ metadata_widget_new(DbusmenuMenuitem *item)
 {
 
   GtkWidget* widget =  g_object_new(METADATA_WIDGET_TYPE, NULL);
+  gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (widget),
+                                             TRUE);
   metadata_widget_set_twin_item ( METADATA_WIDGET(widget),
                                   item );
   return widget;                  

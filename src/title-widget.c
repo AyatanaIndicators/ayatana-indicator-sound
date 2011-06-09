@@ -116,8 +116,7 @@ title_widget_set_icon(TitleWidget *self)
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(icon));
   gtk_widget_show(icon);
 }
-
-  
+ 
 static void
 title_widget_dispose (GObject *object)
 {
