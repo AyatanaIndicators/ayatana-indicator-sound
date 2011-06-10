@@ -74,9 +74,9 @@ static void metadata_widget_selection_received_event_callback( GtkWidget        
                                                                 GtkSelectionData *data,
                                                                 guint             time,
                                                                 gpointer          user_data);
-static gboolean metadata_widget_triangle_draw_cb (GtkWidget *widget,
-                                                  GdkEventExpose *event,
-                                                  gpointer data);
+static void metadata_widget_triangle_draw_cb (GtkWidget* widget,
+                                              MetadataWidget *meta);
+
 static void metadata_widget_set_icon (MetadataWidget *self);
 
 G_DEFINE_TYPE (MetadataWidget, metadata_widget, GTK_TYPE_IMAGE_MENU_ITEM);
@@ -170,7 +170,7 @@ metadata_widget_init (MetadataWidget *self)
 
   // player label
   GtkWidget* player_label;
-  player_label = gtk_label_new("TEST LABEL");
+  player_label = gtk_label_new("");
   gtk_misc_set_alignment(GTK_MISC(player_label), (gfloat)0, (gfloat)0);
   gtk_misc_set_padding (GTK_MISC(player_label), (gfloat)0, (gfloat)0);  
   gtk_widget_set_size_request (player_label, 140, 20);
@@ -186,8 +186,7 @@ metadata_widget_init (MetadataWidget *self)
   gtk_widget_hide (priv->piece_label);
   gtk_widget_hide (priv->container_label); 
   gtk_widget_hide (priv->album_art); 
-  gtk_widget_hide (priv->meta_data_v_box); 
-  
+  gtk_widget_hide (priv->meta_data_v_box);   
 }
 
 static void
@@ -212,12 +211,22 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 {
   g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
   MetadataWidget* widget = METADATA_WIDGET(user_data);
-  MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);   
-  draw_album_border(metadata, FALSE);  
+  MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);  
+
+  metadata_widget_triangle_draw_cb (metadata, widget);
+
+  if ( TRUE == dbusmenu_menuitem_property_get_bool (DBUSMENU_MENUITEM(priv->twin_item),
+                                                    DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS))
+  {
+    return TRUE;
+  }
+  
+  draw_album_border(metadata, FALSE);
+  
   if(priv->image_path->len > 0){
     if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE ||
        priv->theme_change_occured == TRUE){
-      priv->theme_change_occured = FALSE;         
+      priv->theme_change_occured = FALSE;
       GdkPixbuf* pixbuf;
       pixbuf = gdk_pixbuf_new_from_file_at_size(priv->image_path->str, 60, 60, NULL);
       //g_debug("metadata_load_new_image -> pixbuf from %s",
@@ -457,6 +466,13 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
       gtk_widget_queue_draw(GTK_WIDGET(mitem));
     }
   }
+  else if (g_ascii_strcasecmp (DBUSMENU_METADATA_MENUITEM_PLAYER_NAME, property) == 0){
+    gtk_label_set_label (GTK_LABEL (priv->player_label),
+                         g_variant_get_string(value, NULL));
+  }
+  else if (g_ascii_strcasecmp (DBUSMENU_METADATA_MENUITEM_PLAYER_ICON, property) == 0){
+    metadata_widget_set_icon (mitem);
+  }
   else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS, property) == 0){
 
     g_debug ("MetadataWidget::Prop update for DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS. Value = %i",
@@ -471,7 +487,6 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
       gtk_widget_hide (priv->album_art); 
       gtk_widget_hide (priv->meta_data_v_box); 
       gtk_widget_set_size_request(GTK_WIDGET(mitem), 200, 20); 
-                                               
     }
     else{
       gtk_widget_show (priv->meta_data_h_box);     
@@ -565,14 +580,14 @@ metadata_widget_set_twin_item (MetadataWidget* self,
   const gchar *arturl = dbusmenu_menuitem_property_get( priv->twin_item,
                                                         DBUSMENU_METADATA_MENUITEM_ARTURL );
 
-  g_signal_connect_after (G_OBJECT (self),
+  /*g_signal_connect_after (G_OBJECT (self),
                          "expose_event",
                           G_CALLBACK (metadata_widget_triangle_draw_cb),
-                          priv->twin_item);
+                          priv->twin_item);*/
   
-  gtk_menu_item_set_label (GTK_MENU_ITEM(self),
-                           dbusmenu_menuitem_property_get(priv->twin_item,
-                                                          DBUSMENU_METADATA_MENUITEM_PLAYER_NAME));
+  gtk_label_set_label (GTK_LABEL(priv->player_label),
+                       dbusmenu_menuitem_property_get(priv->twin_item,
+                                                      DBUSMENU_METADATA_MENUITEM_PLAYER_NAME));
   
   metadata_widget_set_icon(self);
   
@@ -587,22 +602,23 @@ metadata_widget_set_twin_item (MetadataWidget* self,
   }
 }
 
-
 // Title related ...
-static gboolean
-metadata_widget_triangle_draw_cb (GtkWidget *widget, GdkEventExpose *event, gpointer data)
+static void
+metadata_widget_triangle_draw_cb (GtkWidget* widget, MetadataWidget *meta)
 {
   GtkStyle *style;
   cairo_t *cr;
   int x, y, arrow_width, arrow_height;
   
-  if (!GTK_IS_WIDGET (widget)) return FALSE;
-  if (!DBUSMENU_IS_MENUITEM (data)) return FALSE;
-
+  g_return_if_fail (GTK_IS_WIDGET(widget));
+  
+  //MetadataWidget* widg = METADATA_WIDGET(widget);
+  MetadataWidgetPrivate* priv = METADATA_WIDGET_GET_PRIVATE (meta);
+  
   /* render the triangle indicator only if the application is running */
-  if (! dbusmenu_menuitem_property_get_bool (DBUSMENU_MENUITEM(data),
+  if (! dbusmenu_menuitem_property_get_bool (priv->twin_item,
                                              DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING)){   
-    return FALSE;
+    return;
   }
   
   /* get style */
@@ -629,13 +645,9 @@ metadata_widget_triangle_draw_cb (GtkWidget *widget, GdkEventExpose *event, gpoi
                             style->fg[gtk_widget_get_state(widget)].green/65535.0,
                             style->fg[gtk_widget_get_state(widget)].blue/65535.0);
   cairo_fill (cr);
-
   /* remember to destroy cairo context to avoid leaks */
   cairo_destroy (cr);
-
-  return FALSE;
 }
-
 
  /**
  * transport_new:

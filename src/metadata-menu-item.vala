@@ -38,12 +38,13 @@ public class MetadataMenuitem : PlayerItem
   
   construct{
     MetadataMenuitem.clean_album_art_temp_dir();
-    this.previous_temp_album_art_path = null;   
+    this.previous_temp_album_art_path = null;
     this.album_art_cache_dir = MetadataMenuitem.create_album_art_temp_dir();
     debug ("JUST ABOUT TO ATTEMPT PLAYER NAME SETTING %s", this.owner.app_info.get_name());
-    this.property_set (MENUITEM_PLAYER_NAME, this.owner.app_info.get_name());    
-    this.property_set (MENUITEM_PLAYER_ICON, this.owner.icon_name);    
-    this.property_set_bool (MENUITEM_PLAYER_RUNNING, false);            
+    this.property_set (MENUITEM_PLAYER_NAME, this.owner.app_info.get_name());
+    this.property_set (MENUITEM_PLAYER_ICON, this.owner.icon_name);
+    this.property_set_bool (MENUITEM_PLAYER_RUNNING, false);
+    this.property_set_bool (MENUITEM_HIDE_TRACK_DETAILS, true);
   }
 
   private static void clean_album_art_temp_dir()
