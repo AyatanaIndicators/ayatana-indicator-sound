@@ -35,14 +35,15 @@ typedef struct _MetadataWidgetPrivate MetadataWidgetPrivate;
 struct _MetadataWidgetPrivate
 {
   gboolean   theme_change_occured;
-  GtkWidget* hbox;
+  GtkWidget* meta_data_h_box;
+  GtkWidget* meta_data_v_box;  
   GtkWidget* album_art;
   GString*   image_path;
   GString*   old_image_path;
   GtkWidget* artist_label;
   GtkWidget* piece_label;
   GtkWidget* container_label;
-  GtkWidget* player_label;  
+  GtkWidget* player_label;
   DbusmenuMenuitem* twin_item;      
 };
 
@@ -94,14 +95,19 @@ metadata_widget_class_init (MetadataWidgetClass *klass)
   gobject_class->finalize = metadata_widget_finalize;
 }
 
+
+
 static void
 metadata_widget_init (MetadataWidget *self)
 {
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);
   GtkWidget *hbox;
+  GtkWidget *outer_v_box;
 
+  outer_v_box = gtk_vbox_new (FALSE, 0);
   hbox = gtk_hbox_new(FALSE, 0);
-  priv->hbox = hbox;
+  
+  priv->meta_data_h_box = hbox;
 
   // image
   priv->album_art = gtk_image_new();
@@ -112,7 +118,7 @@ metadata_widget_init (MetadataWidget *self)
                    G_CALLBACK(metadata_image_expose),
                    GTK_WIDGET(self));
   
-  gtk_box_pack_start (GTK_BOX (priv->hbox),
+  gtk_box_pack_start (GTK_BOX (priv->meta_data_h_box),
                       priv->album_art,
                       FALSE,
                       FALSE,
@@ -154,15 +160,34 @@ metadata_widget_init (MetadataWidget *self)
   gtk_box_pack_start (GTK_BOX (vbox), priv->artist_label, FALSE, FALSE, 0); 
   gtk_box_pack_start (GTK_BOX (vbox), priv->container_label, FALSE, FALSE, 0);  
   
-  gtk_box_pack_start (GTK_BOX (priv->hbox), vbox, FALSE, FALSE, 0); 
+  gtk_box_pack_start (GTK_BOX (priv->meta_data_h_box), vbox, FALSE, FALSE, 0); 
 
   g_signal_connect(self, "style-set", 
                    G_CALLBACK(metadata_widget_set_style), GTK_WIDGET(self));    
   g_signal_connect (self, "selection-received",
                    G_CALLBACK(metadata_widget_selection_received_event_callback),
                    GTK_WIDGET(self));   
-  gtk_widget_set_size_request(GTK_WIDGET(self), 200, 75); 
-  gtk_container_add (GTK_CONTAINER (self), hbox);
+
+  // player label
+  GtkWidget* player_label;
+  player_label = gtk_label_new("TEST LABEL");
+  gtk_misc_set_alignment(GTK_MISC(player_label), (gfloat)0, (gfloat)0);
+  gtk_misc_set_padding (GTK_MISC(player_label), (gfloat)0, (gfloat)0);  
+  gtk_widget_set_size_request (player_label, 140, 20);
+  priv->player_label = player_label;
+  
+  gtk_box_pack_start (GTK_BOX(outer_v_box), priv->player_label, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX(outer_v_box), priv->meta_data_h_box, FALSE, FALSE, 0);
+    
+  gtk_container_add (GTK_CONTAINER (self), outer_v_box);  
+  gtk_widget_set_size_request(GTK_WIDGET(self), 200, 20); 
+  gtk_widget_hide (priv->meta_data_h_box);
+  gtk_widget_hide (priv->artist_label);
+  gtk_widget_hide (priv->piece_label);
+  gtk_widget_hide (priv->container_label); 
+  gtk_widget_hide (priv->album_art); 
+  gtk_widget_hide (priv->meta_data_v_box); 
+  
 }
 
 static void
@@ -370,10 +395,6 @@ metadata_widget_selection_received_event_callback (  GtkWidget        *widget,
                                                      gpointer          user_data )
 
 {
-  //g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
-  //MetadataWidget* widget = METADATA_WIDGET(user_data);
-  //MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);   
-  g_debug("metadata_widget_selection_request_event_callback");
   draw_album_border(widget, TRUE);    
 }
 
@@ -435,7 +456,28 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
       //g_debug("the image update is a download so redraw");
       gtk_widget_queue_draw(GTK_WIDGET(mitem));
     }
-  }   
+  }
+  else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS, property) == 0){
+
+    g_debug ("MetadataWidget::Prop update for DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS. Value = %i",
+              dbusmenu_menuitem_property_get_bool (priv->twin_item, DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS));
+    
+    if (dbusmenu_menuitem_property_get_bool (priv->twin_item,
+                                             DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS) == TRUE){
+      gtk_widget_hide (priv->meta_data_h_box);
+      gtk_widget_hide (priv->artist_label);
+      gtk_widget_hide (priv->piece_label);
+      gtk_widget_hide (priv->container_label); 
+      gtk_widget_hide (priv->album_art); 
+      gtk_widget_hide (priv->meta_data_v_box); 
+      gtk_widget_set_size_request(GTK_WIDGET(mitem), 200, 20); 
+                                               
+    }
+    else{
+      gtk_widget_show (priv->meta_data_h_box);     
+      gtk_widget_set_size_request(GTK_WIDGET(mitem), 200, 85);       
+    }
+  }
 }
 
 static void

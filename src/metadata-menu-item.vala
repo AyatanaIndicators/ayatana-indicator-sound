@@ -182,6 +182,21 @@ public class MetadataMenuitem : PlayerItem
     this.property_set_bool (MENUITEM_PLAYER_RUNNING, update);
   }
 
+  public void collapse()
+  {
+    this.property_set_bool (MENUITEM_HIDE_TRACK_DETAILS,  true);
+  }
+
+  public void expand()
+  {
+    this.property_set_bool (MENUITEM_HIDE_TRACK_DETAILS, false);
+  }
+
+  public void populated()
+  {
+    //this.property_get (MENUITEM_TITLE
+  }
+
   public static HashSet<string> attributes_format()
   {
     HashSet<string> attrs = new HashSet<string>();    

@@ -75,6 +75,7 @@ typedef enum {
 #define DBUSMENU_METADATA_MENUITEM_PLAYER_NAME         "x-canonical-sound-menu-player-metadata-player-name"
 #define DBUSMENU_METADATA_MENUITEM_PLAYER_ICON         "x-canonical-sound-menu-player-metadata-player-icon"
 #define DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING      "x-canonical-sound-menu-player-metadata-player-running"
+#define DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS  "x-canonical-sound-menu-player-metadata-hide-track-details"
 
 #define DBUSMENU_SCRUB_MENUITEM_TYPE            "x-canonical-sound-menu-player-scrub-type"
 #define DBUSMENU_SCRUB_MENUITEM_DURATION        "x-canonical-sound-menu-player-scrub-mpris:length"
