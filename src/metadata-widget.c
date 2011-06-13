@@ -82,6 +82,8 @@ static gboolean metadata_widget_triangle_draw_cb ( GtkWidget *image,
                                                    gpointer user_data);
 
 static void metadata_widget_set_icon (MetadataWidget *self);
+static void metadata_widget_handle_resizing (MetadataWidget* self);
+
 
 G_DEFINE_TYPE (MetadataWidget, metadata_widget, GTK_TYPE_IMAGE_MENU_ITEM);
 
@@ -443,7 +445,6 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 
   if(g_variant_is_of_type(value, G_VARIANT_TYPE_INT32) == TRUE && 
      g_variant_get_int32(value) == DBUSMENU_PROPERTY_EMPTY){
-    //g_debug("Metadata widget: property update - reset");
     GVariant* new_value = g_variant_new_string ("");
     value = new_value;
   }
@@ -468,7 +469,6 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
     g_string_overwrite(priv->image_path, 0, g_variant_get_string (value, NULL));
     // if its a remote image queue a redraw incase the download took too long
     if (g_str_has_prefix(g_variant_get_string (value, NULL), g_get_user_cache_dir())){
-      //g_debug("the image update is a download so redraw");
       gtk_widget_queue_draw(GTK_WIDGET(mitem));
     }
   }
@@ -483,36 +483,43 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
 
     g_debug ("MetadataWidget::Prop update for DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS. Value = %i",
               dbusmenu_menuitem_property_get_bool (priv->twin_item, DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS));
-    
-    if (dbusmenu_menuitem_property_get_bool (priv->twin_item,
-                                             DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS) == TRUE){
-      gtk_widget_hide (priv->meta_data_h_box);
-      gtk_widget_hide (priv->artist_label);
-      gtk_widget_hide (priv->piece_label);
-      gtk_widget_hide (priv->container_label); 
-      gtk_widget_hide (priv->album_art); 
-      gtk_widget_hide (priv->meta_data_v_box); 
-      gtk_widget_set_size_request(GTK_WIDGET(mitem), 200, 20); 
-    }
-    else{
-
-      gtk_widget_show (priv->meta_data_h_box);     
-      gtk_widget_show (priv->artist_label);
-      gtk_widget_show (priv->piece_label);
-      gtk_widget_show (priv->container_label); 
-      gtk_widget_show (priv->album_art); 
-      gtk_widget_show (priv->meta_data_v_box); 
-
-      gtk_widget_set_size_request(GTK_WIDGET(mitem), 200, 85);   
-      // This is not working!
-      gtk_misc_set_alignment (GTK_MISC(gtk_image_menu_item_get_image (GTK_IMAGE_MENU_ITEM(mitem))),
-                              0.5 /* right aligned */,
-                              0);
-      gtk_widget_show( GTK_WIDGET(gtk_image_menu_item_get_image (GTK_IMAGE_MENU_ITEM(mitem))));
-
-    }
-    gtk_widget_queue_draw(GTK_WIDGET(mitem));    
+    metadata_widget_handle_resizing (mitem);
   }
+}
+
+static void 
+metadata_widget_handle_resizing (MetadataWidget* self)
+{
+  MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);
+  
+  if (dbusmenu_menuitem_property_get_bool (priv->twin_item,
+                                           DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS) == TRUE){
+    gtk_widget_hide (priv->meta_data_h_box);
+    gtk_widget_hide (priv->artist_label);
+    gtk_widget_hide (priv->piece_label);
+    gtk_widget_hide (priv->container_label); 
+    gtk_widget_hide (priv->album_art); 
+    gtk_widget_hide (priv->meta_data_v_box); 
+    gtk_widget_set_size_request(GTK_WIDGET(self), 200, 20); 
+  }
+  else{
+
+    gtk_widget_show (priv->meta_data_h_box);     
+    gtk_widget_show (priv->artist_label);
+    gtk_widget_show (priv->piece_label);
+    gtk_widget_show (priv->container_label); 
+    gtk_widget_show (priv->album_art); 
+    gtk_widget_show (priv->meta_data_v_box); 
+
+    gtk_widget_set_size_request(GTK_WIDGET(self), 200, 85);   
+    // This is not working!
+    gtk_misc_set_alignment (GTK_MISC(gtk_image_menu_item_get_image (GTK_IMAGE_MENU_ITEM(self))),
+                            0.5 /* right aligned */,
+                            0);
+    gtk_widget_show( GTK_WIDGET(gtk_image_menu_item_get_image (GTK_IMAGE_MENU_ITEM(self))));
+
+  }
+  gtk_widget_queue_draw(GTK_WIDGET(self));      
 }
 
 static void
@@ -615,6 +622,7 @@ metadata_widget_set_twin_item (MetadataWidget* self,
       gtk_widget_queue_draw(GTK_WIDGET(self));                                                          
     }
   }
+  metadata_widget_handle_resizing (self);  
 }
 
 // Draw the triangle if the player is running ...
