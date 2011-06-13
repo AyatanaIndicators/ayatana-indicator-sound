@@ -147,14 +147,14 @@ public class PlayerController : GLib.Object
     MetadataMenuitem metadata_menuitem = this.custom_items[widget_order.METADATA] as MetadataMenuitem;
     if(this.current_state != state.CONNECTED){
       // TODO 
-      metadata_menuitem.collapse ();
+      metadata_menuitem.should_collapse (true);
       playlists_menuitem.root_item.property_set_bool (MENUITEM_PROP_VISIBLE,
                                                       false );
       this.custom_items[widget_order.TRANSPORT].property_set_bool (MENUITEM_PROP_VISIBLE,
                                                                    this.app_info.get_id() == "banshee.desktop");         
       return; 
     }
-    metadata_menuitem.expand ();
+    metadata_menuitem.should_collapse (false);
     /*this.custom_items[widget_order.METADATA].property_set_bool (MENUITEM_PROP_VISIBLE,
                                                                 this.custom_items[widget_order.METADATA].populated(MetadataMenuitem.attributes_format()));*/
     if (this.app_info.get_id() == "banshee.desktop"){

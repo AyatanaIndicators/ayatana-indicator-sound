@@ -183,19 +183,9 @@ public class MetadataMenuitem : PlayerItem
     this.property_set_bool (MENUITEM_PLAYER_RUNNING, update);
   }
 
-  public void collapse()
+  public void should_collapse(bool collapse)
   {
-    this.property_set_bool (MENUITEM_HIDE_TRACK_DETAILS,  true);
-  }
-
-  public void expand()
-  {
-    this.property_set_bool (MENUITEM_HIDE_TRACK_DETAILS, false);
-  }
-
-  public void populated()
-  {
-    //this.property_get (MENUITEM_TITLE
+    this.property_set_bool (MENUITEM_HIDE_TRACK_DETAILS,  collapse);
   }
 
   public static HashSet<string> attributes_format()
@@ -208,6 +198,16 @@ public class MetadataMenuitem : PlayerItem
     attrs.add(MENUITEM_PLAYER_NAME);
     attrs.add(MENUITEM_PLAYER_ICON);
     attrs.add(MENUITEM_PLAYER_RUNNING);
+    return attrs;
+  }
+  
+  public static HashSet<string> relevant_attributes_for_ui()
+  {
+    HashSet<string> attrs = new HashSet<string>();    
+    attrs.add(MENUITEM_TITLE);
+    attrs.add(MENUITEM_ARTIST);
+    attrs.add(MENUITEM_ALBUM);
+    attrs.add(MENUITEM_ARTURL);    
     return attrs;
   }
 }
