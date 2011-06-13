@@ -180,6 +180,7 @@ public class MetadataMenuitem : PlayerItem
 
   public void toggle_active_triangle (bool update)
   {
+    debug ("toggle active triangle");
     this.property_set_bool (MENUITEM_PLAYER_RUNNING, update);
   }
 

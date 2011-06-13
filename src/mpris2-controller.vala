@@ -83,18 +83,16 @@ public class Mpris2Controller : GLib.Object
     }
     Variant? meta_v = changed_properties.lookup("Metadata");
     if(meta_v != null){
-      GLib.HashTable<string, Variant?> changed_updates = clean_metadata();
-      //MetadataMenuitem md = this.owner.custom_items[PlayerController.widget_order.METADATA] as MetadataMenuitem;      
-      //md.reset_track_details ();
-      
+      GLib.HashTable<string, Variant?> changed_updates = clean_metadata();      
       PlayerItem metadata = this.owner.custom_items[PlayerController.widget_order.METADATA];
       metadata.reset (MetadataMenuitem.relevant_attributes_for_ui());
       metadata.update ( changed_updates, 
                         MetadataMenuitem.attributes_format());
-      /*metadata.property_set_bool ( MENUITEM_PROP_VISIBLE,
-                                   metadata.populated(MetadataMenuitem.relevant_attributes_for_ui()));*/
-      debug ("metadata visibility = %s",
-              metadata.populated (MetadataMenuitem.relevant_attributes_for_ui()).to_string());
+      MetadataMenuitem md = this.owner.custom_items[PlayerController.widget_order.METADATA] as MetadataMenuitem;      
+      bool collapsing = !metadata.populated(MetadataMenuitem.relevant_attributes_for_ui());
+      md.should_collapse(collapsing);
+      
+      debug ("metadata should collapse = %s", collapsing.to_string());
     }
     Variant? playlist_v = changed_properties.lookup("ActivePlaylist");
     if ( playlist_v != null && this.owner.use_playlists == true ){
