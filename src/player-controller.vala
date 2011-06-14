@@ -135,9 +135,9 @@ public class PlayerController : GLib.Object
     update_state(PlayerController.state.OFFLINE);
     TransportMenuitem transport = this.custom_items[widget_order.TRANSPORT] as TransportMenuitem;
     transport.change_play_state (Transport.State.PAUSED);
-    this.custom_items[widget_order.METADATA].reset(MetadataMenuitem.attributes_format());
+    this.custom_items[widget_order.METADATA].reset(MetadataMenuitem.relevant_attributes_for_ui());
     MetadataMenuitem md = this.custom_items[widget_order.METADATA] as MetadataMenuitem;
-    md.toggle_active_triangle(false);
+    md.toggle_active_triangle (false);
     this.mpris_bridge = null;
   }
 
