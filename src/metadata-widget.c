@@ -216,13 +216,6 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
   MetadataWidget* widget = METADATA_WIDGET(user_data);
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);  
 
-  /*g_debug ("metadata expose - is the %s player running - %i",
-           dbusmenu_menuitem_property_get (priv->twin_item,
-                                           DBUSMENU_METADATA_MENUITEM_PLAYER_NAME),
-           dbusmenu_menuitem_property_get_bool (priv->twin_item,
-                                                DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING));
-  */
-
   if ( TRUE == dbusmenu_menuitem_property_get_bool (DBUSMENU_MENUITEM(priv->twin_item),
                                                     DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS))
   {
@@ -237,14 +230,13 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
       priv->theme_change_occured = FALSE;
       GdkPixbuf* pixbuf;
       pixbuf = gdk_pixbuf_new_from_file_at_size(priv->image_path->str, 60, 60, NULL);
-      //g_debug("metadata_load_new_image -> pixbuf from %s",
-      //        priv->image_path->str); 
+
       if(GDK_IS_PIXBUF(pixbuf) == FALSE){
-        //g_debug("problem loading the downloaded image just use the placeholder instead");
         gtk_widget_set_size_request(GTK_WIDGET(priv->album_art), 60, 60);
         draw_album_art_placeholder(metadata);
         return FALSE;
       }
+
       gtk_image_set_from_pixbuf(GTK_IMAGE(priv->album_art), pixbuf);
       gtk_widget_set_size_request(GTK_WIDGET(priv->album_art),
                                   gdk_pixbuf_get_width(pixbuf),
@@ -420,21 +412,40 @@ static gboolean
 metadata_widget_button_release_event (GtkWidget *menuitem, 
                                       GdkEventButton *event)
 {
-  GtkClipboard* board = gtk_clipboard_get (GDK_NONE); 
+  g_return_val_if_fail (IS_METADATA_WIDGET (menuitem), FALSE);
+  MetadataWidgetPrivate* priv = METADATA_WIDGET_GET_PRIVATE(METADATA_WIDGET(menuitem));
+  // For the left raise/launch the player
+  if (event->button == 1){
+    GVariant* new_title_event = g_variant_new_boolean(TRUE);
+    dbusmenu_menuitem_handle_event (priv->twin_item,
+                                    "Title menu event",
+                                    new_title_event,
+                                    0);
+  }
+  // For the right copy track details to clipboard only if the player is running
+  // and there is something there
+  else if (event->button == 3){
+    gboolean running = dbusmenu_menuitem_property_get_bool (priv->twin_item,
+                                                            DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING);
+    gboolean hidden = dbusmenu_menuitem_property_get_bool (priv->twin_item,
+                                                           DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS);
+    g_return_val_if_fail ( running, FALSE );
 
-  MetadataWidgetPrivate* priv = METADATA_WIDGET_GET_PRIVATE(METADATA_WIDGET(menuitem)); 
-  
-  gchar* contents = g_strdup_printf("artist: %s \ntitle: %s \nalbum: %s",
-                                    dbusmenu_menuitem_property_get(priv->twin_item,
-                                                        DBUSMENU_METADATA_MENUITEM_ARTIST),
-                                    dbusmenu_menuitem_property_get(priv->twin_item,
-                                                        DBUSMENU_METADATA_MENUITEM_TITLE),
-                                    dbusmenu_menuitem_property_get(priv->twin_item,
-                                                        DBUSMENU_METADATA_MENUITEM_ALBUM));
-  gtk_clipboard_set_text (board, contents, -1);
-  gtk_clipboard_store (board);
-  g_free(contents);
-  return FALSE;
+    g_return_val_if_fail ( !hidden, FALSE );
+    
+    GtkClipboard* board = gtk_clipboard_get (GDK_NONE); 
+    gchar* contents = g_strdup_printf("artist: %s \ntitle: %s \nalbum: %s",
+                                      dbusmenu_menuitem_property_get(priv->twin_item,
+                                                          DBUSMENU_METADATA_MENUITEM_ARTIST),
+                                      dbusmenu_menuitem_property_get(priv->twin_item,
+                                                          DBUSMENU_METADATA_MENUITEM_TITLE),
+                                      dbusmenu_menuitem_property_get(priv->twin_item,
+                                                          DBUSMENU_METADATA_MENUITEM_ALBUM));
+    gtk_clipboard_set_text (board, contents, -1);
+    gtk_clipboard_store (board);
+    g_free(contents);
+  }
+  return TRUE;
 }
 
 static void 
@@ -480,9 +491,6 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
     metadata_widget_set_icon (mitem);
   }
   else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS, property) == 0){
-
-    g_debug ("MetadataWidget::Prop update for DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS. Value = %i",
-              dbusmenu_menuitem_property_get_bool (priv->twin_item, DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS));
     metadata_widget_handle_resizing (mitem);
   }
 }
@@ -638,12 +646,6 @@ metadata_widget_triangle_draw_cb (GtkWidget *widget,
   GtkStyle *style;
   cairo_t *cr;
   int x, y, arrow_width, arrow_height;
-    
-
-  g_debug ("Triangle draw - is player running - %i", 
-           dbusmenu_menuitem_property_get_bool (priv->twin_item,
-                                                DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING));
-
                                                 
   if (! dbusmenu_menuitem_property_get_bool (priv->twin_item,
                                              DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING)){
