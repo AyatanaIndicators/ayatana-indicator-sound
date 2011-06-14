@@ -31,7 +31,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "indicator-sound.h"
 #include "transport-widget.h"
 #include "metadata-widget.h"
-#include "title-widget.h"
 #include "volume-widget.h"
 #include "voip-input-widget.h"
 #include "dbus-shared-names.h"
