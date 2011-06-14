@@ -87,12 +87,12 @@ public class Mpris2Controller : GLib.Object
       PlayerItem metadata = this.owner.custom_items[PlayerController.widget_order.METADATA];
       metadata.reset (MetadataMenuitem.relevant_attributes_for_ui());
       metadata.update ( changed_updates, 
-                        MetadataMenuitem.attributes_format());
+                        MetadataMenuitem.relevant_attributes_for_ui());
       MetadataMenuitem md = this.owner.custom_items[PlayerController.widget_order.METADATA] as MetadataMenuitem;      
       bool collapsing = !metadata.populated(MetadataMenuitem.relevant_attributes_for_ui());
       md.should_collapse(collapsing);
       
-      debug ("metadata should collapse = %s", collapsing.to_string());
+      debug ("Should metadata collapse %s", collapsing.to_string());
     }
     Variant? playlist_v = changed_properties.lookup("ActivePlaylist");
     if ( playlist_v != null && this.owner.use_playlists == true ){

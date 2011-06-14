@@ -232,6 +232,7 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
       pixbuf = gdk_pixbuf_new_from_file_at_size(priv->image_path->str, 60, 60, NULL);
 
       if(GDK_IS_PIXBUF(pixbuf) == FALSE){
+        gtk_image_clear ( GTK_IMAGE(priv->album_art));          
         gtk_widget_set_size_request(GTK_WIDGET(priv->album_art), 60, 60);
         draw_album_art_placeholder(metadata);
         return FALSE;
@@ -242,13 +243,14 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
                                   gdk_pixbuf_get_width(pixbuf),
                                   gdk_pixbuf_get_height(pixbuf));
 
-      g_string_erase(priv->old_image_path, 0, -1);
-      g_string_overwrite(priv->old_image_path, 0, priv->image_path->str);
+      g_string_erase (priv->old_image_path, 0, -1);
+      g_string_overwrite (priv->old_image_path, 0, priv->image_path->str);
 
       g_object_unref(pixbuf);
     }
     return FALSE;       
   }
+  gtk_image_clear (GTK_IMAGE(priv->album_art));  
   gtk_widget_set_size_request(GTK_WIDGET(priv->album_art), 60, 60);
   draw_album_art_placeholder(metadata);
   return FALSE;
@@ -347,6 +349,8 @@ draw_album_border(GtkWidget *metadata, gboolean selected)
 static void
 draw_album_art_placeholder(GtkWidget *metadata)
 {   
+  g_debug ("Attempting to draw the image !");
+    
   cairo_t *cr;  
   cr = gdk_cairo_create (metadata->window);
   GtkStyle *style;
@@ -479,9 +483,9 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
     g_string_erase(priv->image_path, 0, -1);
     g_string_overwrite(priv->image_path, 0, g_variant_get_string (value, NULL));
     // if its a remote image queue a redraw incase the download took too long
-    if (g_str_has_prefix(g_variant_get_string (value, NULL), g_get_user_cache_dir())){
-      gtk_widget_queue_draw(GTK_WIDGET(mitem));
-    }
+    //if (g_str_has_prefix(g_variant_get_string (value, NULL), g_get_user_cache_dir())){
+    gtk_widget_queue_draw(GTK_WIDGET(mitem));
+    //}
   }
   else if (g_ascii_strcasecmp (DBUSMENU_METADATA_MENUITEM_PLAYER_NAME, property) == 0){
     gtk_label_set_label (GTK_LABEL (priv->player_label),
@@ -656,8 +660,10 @@ metadata_widget_triangle_draw_cb (GtkWidget *widget,
 
   arrow_width = 5; 
   arrow_height = 9;
+  gint vertical_offset = 3;
+  
   x = widget->allocation.x;
-  y = widget->allocation.y + (double)arrow_height/2.0;
+  y = widget->allocation.y + (double)arrow_height/2.0 + vertical_offset;
   
   cr = (cairo_t*) gdk_cairo_create (widget->window);
 

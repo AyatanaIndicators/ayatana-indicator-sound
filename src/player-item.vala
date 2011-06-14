@@ -86,6 +86,7 @@ public class PlayerItem : Dbusmenu.Menuitem
         this.property_set_bool(property, v.get_boolean());
       }
     }
+    // TODO- is this only relevant for the metadata, if so please call for just that case
     this.property_set_bool(MENUITEM_PROP_VISIBLE, populated(attributes));        
   } 
   

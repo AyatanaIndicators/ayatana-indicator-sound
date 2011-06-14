@@ -104,10 +104,16 @@ public class MetadataMenuitem : PlayerItem
   public void fetch_art(string uri, string prop)
   {   
     File art_file = File.new_for_uri(uri);
-    if(art_file.is_native() == true){
+    if (art_file.is_native() == true){
+      if (art_file.query_exists() == false){
+        // Can't load the image, set prop to empty and return.
+        this.property_set_int ( prop, EMPTY );
+        return;
+      }
       string path;
       try{
-        path = Filename.from_uri ( uri.strip() );      
+        path = Filename.from_uri ( uri.strip() );  
+        debug ("Populating the artwork field with %s", uri.strip());    
         this.property_set ( prop, path );      
       }
       catch(ConvertError e){
@@ -150,7 +156,7 @@ public class MetadataMenuitem : PlayerItem
         if(this.previous_temp_album_art_path != null){
           FileUtils.remove(this.previous_temp_album_art_path);
         }     
-        this.previous_temp_album_art_path = path;       
+        this.previous_temp_album_art_path = path;
       }       
     }
     catch(GLib.Error e){
