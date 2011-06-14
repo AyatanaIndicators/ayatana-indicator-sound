@@ -183,7 +183,7 @@ metadata_widget_init (MetadataWidget *self)
   player_label = gtk_label_new("");
   gtk_misc_set_alignment(GTK_MISC(player_label), (gfloat)0, (gfloat)0);
   gtk_misc_set_padding (GTK_MISC(player_label), (gfloat)0, (gfloat)0);  
-  gtk_widget_set_size_request (player_label, 140, 20);
+  gtk_widget_set_size_request (player_label, 200, 25);
   priv->player_label = player_label;
   
   gtk_box_pack_start (GTK_BOX(outer_v_box), priv->player_label, FALSE, FALSE, 0);
@@ -511,7 +511,7 @@ metadata_widget_handle_resizing (MetadataWidget* self)
     gtk_widget_show (priv->album_art); 
     gtk_widget_show (priv->meta_data_v_box); 
 
-    gtk_widget_set_size_request(GTK_WIDGET(self), 200, 85);   
+    gtk_widget_set_size_request(GTK_WIDGET(self), 200, 95);   
     // This is not working!
     gtk_misc_set_alignment (GTK_MISC(gtk_image_menu_item_get_image (GTK_IMAGE_MENU_ITEM(self))),
                             0.5 /* right aligned */,

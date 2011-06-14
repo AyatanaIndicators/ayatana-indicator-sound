@@ -33,7 +33,6 @@ public class MetadataMenuitem : PlayerItem
   public MetadataMenuitem (PlayerController parent)
   {
     Object(item_type: MENUITEM_TYPE, owner: parent);
-    //reset(attributes_format());
   }
   
   construct{
@@ -45,6 +44,7 @@ public class MetadataMenuitem : PlayerItem
     this.property_set (MENUITEM_PLAYER_ICON, this.owner.icon_name);
     this.property_set_bool (MENUITEM_PLAYER_RUNNING, false);
     this.property_set_bool (MENUITEM_HIDE_TRACK_DETAILS, true);
+    reset (relevant_attributes_for_ui());
   }
 
   private static void clean_album_art_temp_dir()

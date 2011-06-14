@@ -154,9 +154,7 @@ public class PlayerController : GLib.Object
                                                                    this.app_info.get_id() == "banshee.desktop");         
       return; 
     }
-    metadata_menuitem.should_collapse (false);
-    /*this.custom_items[widget_order.METADATA].property_set_bool (MENUITEM_PROP_VISIBLE,
-                                                                this.custom_items[widget_order.METADATA].populated(MetadataMenuitem.attributes_format()));*/
+    metadata_menuitem.should_collapse (!this.custom_items[widget_order.METADATA].populated (MetadataMenuitem.relevant_attributes_for_ui()) );
     if (this.app_info.get_id() == "banshee.desktop"){
       TransportMenuitem transport = this.custom_items[widget_order.TRANSPORT] as TransportMenuitem;
       transport.handle_cached_action();
