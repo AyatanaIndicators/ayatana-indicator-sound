@@ -348,9 +348,7 @@ draw_album_border(GtkWidget *metadata, gboolean selected)
 
 static void
 draw_album_art_placeholder(GtkWidget *metadata)
-{   
-  g_debug ("Attempting to draw the image !");
-    
+{       
   cairo_t *cr;  
   cr = gdk_cairo_create (metadata->window);
   GtkStyle *style;
