@@ -368,30 +368,6 @@ new_metadata_widget (DbusmenuMenuitem * newitem,
   return TRUE;
 }
 
-/*static gboolean
-new_title_widget(DbusmenuMenuitem * newitem,
-                 DbusmenuMenuitem * parent,
-                 DbusmenuClient * client,
-                 gpointer user_data)
-{
-  g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
-  g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
-
-  g_debug ("%s (\"%s\")", __func__, dbusmenu_menuitem_property_get(newitem, DBUSMENU_TITLE_MENUITEM_NAME));
-
-  GtkWidget* title = NULL;
-
-  title = title_widget_new (newitem);
-  GtkMenuItem *menu_title_widget = GTK_MENU_ITEM(title);
-  
-  gtk_widget_show_all(title);
-
-  dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client),
-                                  newitem,
-                                  menu_title_widget, parent); 
-  return TRUE;
-}*/
-
 static gboolean
 new_volume_slider_widget(DbusmenuMenuitem * newitem,
                          DbusmenuMenuitem * parent,
