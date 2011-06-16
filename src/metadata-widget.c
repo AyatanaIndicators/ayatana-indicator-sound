@@ -590,7 +590,6 @@ metadata_widget_set_icon (MetadataWidget *self)
                                         (width > height) ? width : height,
                                         GTK_ICON_LOOKUP_GENERIC_FALLBACK, 
                                         NULL );  
-  gdk_pixbuf_ref (icon_buf);
   priv->icon_buf = icon_buf;
   g_string_free ( app_panel, TRUE);
   g_string_free ( banshee_string, TRUE);
