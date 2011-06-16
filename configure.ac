@@ -1,10 +1,10 @@
 
-AC_INIT(indicator-sound, 0.7.0, conor.curran@canonical.com)
+AC_INIT(indicator-sound, 0.7.1, conor.curran@canonical.com)
 
 AC_PREREQ(2.53)
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(indicator-sound, 0.7.0)
+AM_INIT_AUTOMAKE(indicator-sound, 0.7.1)
 
 AM_MAINTAINER_MODE
 
