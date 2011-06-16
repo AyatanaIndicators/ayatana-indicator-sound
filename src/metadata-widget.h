@@ -19,8 +19,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __METADATA_WIDGET_H__
 #define __METADATA_WIDGET_H__
 
-//#include <gtk/gtkmenuitem.h>
-#include <gtk/gtkimagemenuitem.h>
+#include <gtk/gtkmenuitem.h>
 #include <libdbusmenu-gtk/menuitem.h>
 
 G_BEGIN_DECLS
@@ -36,11 +35,11 @@ typedef struct _MetadataWidget      MetadataWidget;
 typedef struct _MetadataWidgetClass MetadataWidgetClass;
 
 struct _MetadataWidgetClass {
-  GtkImageMenuItemClass parent_class;
+  GtkMenuItemClass parent_class;
 };
 
 struct _MetadataWidget {
-  GtkImageMenuItem parent;
+  GtkMenuItem parent;
 };
 
 GType metadata_widget_get_type (void);

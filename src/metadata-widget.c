@@ -44,7 +44,6 @@ struct _MetadataWidgetPrivate
   GtkWidget* piece_label;
   GtkWidget* container_label;
   GtkWidget* player_label;
-  GtkWidget* player_icon;
   GdkPixbuf* icon_buf;
   DbusmenuMenuitem* twin_item;
 };
@@ -87,7 +86,7 @@ static void metadata_widget_set_icon (MetadataWidget *self);
 static void metadata_widget_handle_resizing (MetadataWidget* self);
 
 
-G_DEFINE_TYPE (MetadataWidget, metadata_widget, GTK_TYPE_IMAGE_MENU_ITEM);
+G_DEFINE_TYPE (MetadataWidget, metadata_widget, GTK_TYPE_MENU_ITEM);
 
 static void
 metadata_widget_class_init (MetadataWidgetClass *klass)
