@@ -142,7 +142,8 @@ public class PlayerController : GLib.Object
   }
 
   public void update_layout()
-  {     
+  {    
+    debug ("a call to update layout"); 
     PlaylistsMenuitem playlists_menuitem = this.custom_items[widget_order.PLAYLISTS] as PlaylistsMenuitem;
     MetadataMenuitem metadata_menuitem = this.custom_items[widget_order.METADATA] as MetadataMenuitem;
     if(this.current_state != state.CONNECTED){
