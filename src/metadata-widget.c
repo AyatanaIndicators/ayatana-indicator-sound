@@ -36,7 +36,7 @@ struct _MetadataWidgetPrivate
 {
   gboolean   theme_change_occured;
   GtkWidget* meta_data_h_box;
-  GtkWidget* meta_data_v_box;  
+  GtkWidget* meta_data_v_box;
   GtkWidget* album_art;
   GString*   image_path;
   GString*   old_image_path;
@@ -44,7 +44,8 @@ struct _MetadataWidgetPrivate
   GtkWidget* piece_label;
   GtkWidget* container_label;
   GtkWidget* player_label;
-  DbusmenuMenuitem* twin_item;      
+  GdkPixbuf* icon_buf;
+  DbusmenuMenuitem* twin_item;
 };
 
 #define METADATA_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), METADATA_WIDGET_TYPE, MetadataWidgetPrivate))
@@ -77,15 +78,15 @@ static void metadata_widget_selection_received_event_callback( GtkWidget        
                                                                 GtkSelectionData *data,
                                                                 guint             time,
                                                                 gpointer          user_data);
-static gboolean metadata_widget_triangle_draw_cb ( GtkWidget *image,
-                                                   GdkEventExpose *event,
-                                                   gpointer user_data);
+static gboolean metadata_widget_icon_triangle_draw_cb ( GtkWidget *image,
+                                                        GdkEventExpose *event,
+                                                        gpointer user_data );
 
 static void metadata_widget_set_icon (MetadataWidget *self);
 static void metadata_widget_handle_resizing (MetadataWidget* self);
 
 
-G_DEFINE_TYPE (MetadataWidget, metadata_widget, GTK_TYPE_IMAGE_MENU_ITEM);
+G_DEFINE_TYPE (MetadataWidget, metadata_widget, GTK_TYPE_MENU_ITEM);
 
 static void
 metadata_widget_class_init (MetadataWidgetClass *klass)
@@ -109,7 +110,8 @@ metadata_widget_init (MetadataWidget *self)
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);
   GtkWidget *hbox;
   GtkWidget *outer_v_box;
-
+  priv->icon_buf = NULL;
+    
   outer_v_box = gtk_vbox_new (FALSE, 0);
   hbox = gtk_hbox_new(FALSE, 0);
   
@@ -124,9 +126,9 @@ metadata_widget_init (MetadataWidget *self)
                    G_CALLBACK(metadata_image_expose),
                    GTK_WIDGET(self));
 
-  g_signal_connect(GTK_WIDGET(self), "expose-event", 
-                   G_CALLBACK(metadata_widget_triangle_draw_cb),
-                   GTK_WIDGET(self));
+  g_signal_connect_after (GTK_WIDGET(self), "expose-event", 
+                          G_CALLBACK(metadata_widget_icon_triangle_draw_cb),
+                          GTK_WIDGET(self));
   
   gtk_box_pack_start (GTK_BOX (priv->meta_data_h_box),
                       priv->album_art,
@@ -182,10 +184,10 @@ metadata_widget_init (MetadataWidget *self)
   GtkWidget* player_label;
   player_label = gtk_label_new("");
   gtk_misc_set_alignment(GTK_MISC(player_label), (gfloat)0, (gfloat)0);
-  gtk_misc_set_padding (GTK_MISC(player_label), (gfloat)0, (gfloat)0);  
+  gtk_misc_set_padding (GTK_MISC(player_label), (gfloat)1, (gfloat)0);  
   gtk_widget_set_size_request (player_label, 200, 25);
   priv->player_label = player_label;
-  
+      
   gtk_box_pack_start (GTK_BOX(outer_v_box), priv->player_label, FALSE, FALSE, 0);
   gtk_box_pack_start (GTK_BOX(outer_v_box), priv->meta_data_h_box, FALSE, FALSE, 0);
     
@@ -195,6 +197,11 @@ metadata_widget_init (MetadataWidget *self)
 static void
 metadata_widget_dispose (GObject *object)
 {
+  MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(METADATA_WIDGET(object)); 
+
+  if (priv->icon_buf != NULL){
+    gdk_pixbuf_unref(priv->icon_buf);
+  }
   G_OBJECT_CLASS (metadata_widget_parent_class)->dispose (object);
 }
 
@@ -381,7 +388,6 @@ draw_album_art_placeholder(GtkWidget *metadata)
 
   _color_shade ( &fg_normal, 0.78, &light_bottom_color );
   
-
   cairo_set_source_rgba (cr,
                          light_bottom_color.r, 
                          light_bottom_color.g,
@@ -389,14 +395,13 @@ draw_album_art_placeholder(GtkWidget *metadata)
                          1.0);
   
   pango_cairo_update_layout(cr, layout);
-  cairo_move_to (cr, alloc.x + alloc.width/6, alloc.y + alloc.height/8);  
+  cairo_move_to (cr, alloc.x + alloc.width/6, alloc.y + 3);  
   pango_cairo_show_layout(cr, layout);
 
   g_object_unref(layout); 
   g_object_unref(pcontext);
   g_string_free (string, TRUE);
   cairo_destroy (cr); 
-
 }
 
 static void
@@ -520,14 +525,7 @@ metadata_widget_handle_resizing (MetadataWidget* self)
     gtk_widget_show (priv->container_label); 
     gtk_widget_show (priv->album_art); 
     gtk_widget_show (priv->meta_data_v_box); 
-
     gtk_widget_set_size_request(GTK_WIDGET(self), 200, 95);   
-    // This is not working!
-    gtk_misc_set_alignment (GTK_MISC(gtk_image_menu_item_get_image (GTK_IMAGE_MENU_ITEM(self))),
-                            0.5 /* right aligned */,
-                            0);
-    gtk_widget_show( GTK_WIDGET(gtk_image_menu_item_get_image (GTK_IMAGE_MENU_ITEM(self))));
-
   }
   gtk_widget_queue_draw(GTK_WIDGET(self));      
 }
@@ -557,38 +555,44 @@ metadata_widget_set_icon (MetadataWidget *self)
 {
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self); 
 
+  if (priv->icon_buf != NULL){
+    gdk_pixbuf_unref(priv->icon_buf);
+    priv->icon_buf = NULL;    
+  }
+  
   gint padding = 0;
   gtk_widget_style_get(GTK_WIDGET(self), "horizontal-padding", &padding, NULL);
   gint width, height;
-  gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
+  gtk_icon_size_lookup (GTK_ICON_SIZE_MENU, &width, &height);
   
   GString* banshee_string = g_string_new ( "banshee" );
-  GString* app_panel = g_string_new ( g_utf8_strdown ( dbusmenu_menuitem_property_get(priv->twin_item, DBUSMENU_METADATA_MENUITEM_PLAYER_NAME),
-                                                    -1 ));
-  GtkWidget * icon = NULL;
+  GString* app_panel = g_string_new ( g_utf8_strdown (dbusmenu_menuitem_property_get(priv->twin_item, DBUSMENU_METADATA_MENUITEM_PLAYER_NAME),
+                                                     -1));
+  GdkPixbuf* icon_buf;
   
+  // Banshee Special case!  
   // Not ideal but apparently we want the banshee icon to be the greyscale one
   // and any others to be the icon from the desktop file => colour.
   if ( g_string_equal ( banshee_string, app_panel ) == TRUE &&
       gtk_icon_theme_has_icon ( gtk_icon_theme_get_default(), app_panel->str ) ){
-    g_string_append ( app_panel, "-panel" );                                                   
-    icon = gtk_image_new_from_icon_name ( app_panel->str,
-                                          GTK_ICON_SIZE_MENU );    
+    g_string_append ( app_panel, "-panel" );
   }
   else{
-    icon = gtk_image_new_from_icon_name ( g_strdup (dbusmenu_menuitem_property_get ( priv->twin_item, DBUSMENU_METADATA_MENUITEM_PLAYER_ICON )),
-                                          GTK_ICON_SIZE_MENU );
+    // Otherwise use what is stored in the props
+    g_string_erase (app_panel, 0, -1);
+    g_string_overwrite (app_panel,
+                        0,
+                        dbusmenu_menuitem_property_get ( priv->twin_item,
+                                                         DBUSMENU_METADATA_MENUITEM_PLAYER_ICON ));  
   }
-  g_string_free ( app_panel, FALSE) ;
-  g_string_free ( banshee_string, FALSE) ;
-
-  gtk_widget_set_size_request(icon, width
-                                    + 5 /* ref triangle is 5x9 pixels */
-                                    + 1 /* padding */,
-                                    height);
-  gtk_misc_set_alignment(GTK_MISC(icon), 0.5 /* right aligned */, 0);
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(self), GTK_WIDGET(icon));
-  gtk_widget_show(icon);
+  icon_buf = gtk_icon_theme_load_icon ( gtk_icon_theme_get_default(),
+                                        app_panel->str,
+                                        (width > height) ? width : height,
+                                        GTK_ICON_LOOKUP_GENERIC_FALLBACK, 
+                                        NULL );  
+  priv->icon_buf = icon_buf;
+  g_string_free ( app_panel, TRUE);
+  g_string_free ( banshee_string, TRUE);
 }
 
 static void
@@ -637,9 +641,9 @@ metadata_widget_set_twin_item (MetadataWidget* self,
 
 // Draw the triangle if the player is running ...
 static gboolean
-metadata_widget_triangle_draw_cb (GtkWidget *widget,
-                                  GdkEventExpose *event,
-                                  gpointer user_data)
+metadata_widget_icon_triangle_draw_cb (GtkWidget *widget,
+                                       GdkEventExpose *event,
+                                       gpointer user_data)
 {
   g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
   MetadataWidget* meta = METADATA_WIDGET(user_data);
@@ -647,34 +651,44 @@ metadata_widget_triangle_draw_cb (GtkWidget *widget,
   
   GtkStyle *style;
   cairo_t *cr;
-  int x, y, arrow_width, arrow_height;
-                                                
-  if (! dbusmenu_menuitem_property_get_bool (priv->twin_item,
-                                             DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING)){
-    return FALSE;
-  }
+  int x, y, arrow_width, arrow_height;               
+
+  gint offset = 3;
+  arrow_width = 5; 
+  arrow_height = 9;
   
   style = gtk_widget_get_style (widget);
 
-  arrow_width = 5; 
-  arrow_height = 9;
-  gint vertical_offset = 3;
+  cr = (cairo_t*) gdk_cairo_create (widget->window);  
   
   x = widget->allocation.x;
-  y = widget->allocation.y + (double)arrow_height/2.0 + vertical_offset;
+  y = widget->allocation.y;
+    
+  // Draw player icon  
+  if (priv->icon_buf != NULL){  
+    gdk_cairo_set_source_pixbuf (cr,
+                                 priv->icon_buf,
+                                 x + arrow_width + 1,
+                                 y + offset);
+    cairo_paint (cr);
+  }
+    
+  // Draw triangle but only if the player is running.
+  if (dbusmenu_menuitem_property_get_bool (priv->twin_item,
+                                             DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING)){
+    y += (double)arrow_height/2.0 + offset;
+    cairo_set_line_width (cr, 1.0);
+
+    cairo_move_to (cr, x, y);
+    cairo_line_to (cr, x, y + arrow_height);
+    cairo_line_to (cr, x + arrow_width, y + (double)arrow_height/2.0);
+    cairo_close_path (cr);
+    cairo_set_source_rgb (cr, style->fg[gtk_widget_get_state(widget)].red/65535.0,
+                              style->fg[gtk_widget_get_state(widget)].green/65535.0,
+                              style->fg[gtk_widget_get_state(widget)].blue/65535.0);
+    cairo_fill (cr);                                             
+  }
   
-  cr = (cairo_t*) gdk_cairo_create (widget->window);
-
-  cairo_set_line_width (cr, 1.0);
-
-  cairo_move_to (cr, x, y);
-  cairo_line_to (cr, x, y + arrow_height);
-  cairo_line_to (cr, x + arrow_width, y + (double)arrow_height/2.0);
-  cairo_close_path (cr);
-  cairo_set_source_rgb (cr, style->fg[gtk_widget_get_state(widget)].red/65535.0,
-                            style->fg[gtk_widget_get_state(widget)].green/65535.0,
-                            style->fg[gtk_widget_get_state(widget)].blue/65535.0);
-  cairo_fill (cr);
   cairo_destroy (cr);
   return FALSE;  
 }
@@ -686,10 +700,7 @@ metadata_widget_triangle_draw_cb (GtkWidget *widget,
 GtkWidget* 
 metadata_widget_new(DbusmenuMenuitem *item)
 {
-
   GtkWidget* widget =  g_object_new(METADATA_WIDGET_TYPE, NULL);
-  gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (widget),
-                                             TRUE);
   metadata_widget_set_twin_item ( METADATA_WIDGET(widget),
                                   item );
   return widget;                  

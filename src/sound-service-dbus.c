@@ -183,7 +183,7 @@ sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
 
   dbusmenu_menuitem_property_set( settings_mi,
                                   DBUSMENU_MENUITEM_PROP_LABEL,
-                                  _("Sound Settings"));
+                                  _("Sound Settings..."));
   dbusmenu_menuitem_child_append(priv->root_menuitem, settings_mi);
   g_object_unref (settings_mi);  
   g_signal_connect(G_OBJECT(settings_mi), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED,
