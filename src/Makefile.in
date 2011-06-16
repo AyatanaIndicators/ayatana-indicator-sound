@@ -77,7 +77,6 @@ am_libsoundmenu_la_OBJECTS = libsoundmenu_la-indicator-sound.lo \
 	libsoundmenu_la-sound-state-manager.lo \
 	libsoundmenu_la-transport-widget.lo \
 	libsoundmenu_la-metadata-widget.lo \
-	libsoundmenu_la-title-widget.lo \
 	libsoundmenu_la-volume-widget.lo \
 	libsoundmenu_la-voip-input-widget.lo \
 	libsoundmenu_la-gen-sound-service.xml.lo
@@ -93,7 +92,6 @@ PROGRAMS = $(libexec_PROGRAMS)
 am__objects_1 = indicator_sound_service-music-player-bridge.$(OBJEXT) \
 	indicator_sound_service-transport-menu-item.$(OBJEXT) \
 	indicator_sound_service-metadata-menu-item.$(OBJEXT) \
-	indicator_sound_service-title-menu-item.$(OBJEXT) \
 	indicator_sound_service-player-controller.$(OBJEXT) \
 	indicator_sound_service-mpris2-interfaces.$(OBJEXT) \
 	indicator_sound_service-mpris2-watcher.$(OBJEXT) \
@@ -331,8 +329,6 @@ libsoundmenu_la_SOURCES = \
             transport-widget.h \
             metadata-widget.c \
             metadata-widget.h \
-            title-widget.c \
-            title-widget.h \
             volume-widget.c \
             volume-widget.h \
             voip-input-widget.c \
@@ -356,7 +352,6 @@ music_bridge_VALASOURCES = \
 	music-player-bridge.vala \
 	transport-menu-item.vala \
 	metadata-menu-item.vala \
-	title-menu-item.vala \
 	player-controller.vala \
 	mpris2-interfaces.vala \
 	mpris2-watcher.vala \
@@ -581,7 +576,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-sound-service-dbus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-sound-service.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-sound-state.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-title-menu-item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-transport-menu-item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-voip-input-menu-item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-gen-sound-service.xml.Plo@am__quote@
@@ -589,7 +583,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-metadata-widget.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-sound-state-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-sound-state.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-title-widget.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-transport-widget.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-voip-input-widget.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-volume-widget.Plo@am__quote@
@@ -657,14 +650,6 @@ libsoundmenu_la-metadata-widget.lo: metadata-widget.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='metadata-widget.c' object='libsoundmenu_la-metadata-widget.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsoundmenu_la_CFLAGS) $(CFLAGS) -c -o libsoundmenu_la-metadata-widget.lo `test -f 'metadata-widget.c' || echo '$(srcdir)/'`metadata-widget.c
-
-libsoundmenu_la-title-widget.lo: title-widget.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsoundmenu_la_CFLAGS) $(CFLAGS) -MT libsoundmenu_la-title-widget.lo -MD -MP -MF $(DEPDIR)/libsoundmenu_la-title-widget.Tpo -c -o libsoundmenu_la-title-widget.lo `test -f 'title-widget.c' || echo '$(srcdir)/'`title-widget.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libsoundmenu_la-title-widget.Tpo $(DEPDIR)/libsoundmenu_la-title-widget.Plo
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='title-widget.c' object='libsoundmenu_la-title-widget.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsoundmenu_la_CFLAGS) $(CFLAGS) -c -o libsoundmenu_la-title-widget.lo `test -f 'title-widget.c' || echo '$(srcdir)/'`title-widget.c
 
 libsoundmenu_la-volume-widget.lo: volume-widget.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsoundmenu_la_CFLAGS) $(CFLAGS) -MT libsoundmenu_la-volume-widget.lo -MD -MP -MF $(DEPDIR)/libsoundmenu_la-volume-widget.Tpo -c -o libsoundmenu_la-volume-widget.lo `test -f 'volume-widget.c' || echo '$(srcdir)/'`volume-widget.c
@@ -881,22 +866,6 @@ indicator_sound_service-metadata-menu-item.obj: metadata-menu-item.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='metadata-menu-item.c' object='indicator_sound_service-metadata-menu-item.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-metadata-menu-item.obj `if test -f 'metadata-menu-item.c'; then $(CYGPATH_W) 'metadata-menu-item.c'; else $(CYGPATH_W) '$(srcdir)/metadata-menu-item.c'; fi`
-
-indicator_sound_service-title-menu-item.o: title-menu-item.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-title-menu-item.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-title-menu-item.Tpo -c -o indicator_sound_service-title-menu-item.o `test -f 'title-menu-item.c' || echo '$(srcdir)/'`title-menu-item.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-title-menu-item.Tpo $(DEPDIR)/indicator_sound_service-title-menu-item.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='title-menu-item.c' object='indicator_sound_service-title-menu-item.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-title-menu-item.o `test -f 'title-menu-item.c' || echo '$(srcdir)/'`title-menu-item.c
-
-indicator_sound_service-title-menu-item.obj: title-menu-item.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-title-menu-item.obj -MD -MP -MF $(DEPDIR)/indicator_sound_service-title-menu-item.Tpo -c -o indicator_sound_service-title-menu-item.obj `if test -f 'title-menu-item.c'; then $(CYGPATH_W) 'title-menu-item.c'; else $(CYGPATH_W) '$(srcdir)/title-menu-item.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-title-menu-item.Tpo $(DEPDIR)/indicator_sound_service-title-menu-item.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='title-menu-item.c' object='indicator_sound_service-title-menu-item.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-title-menu-item.obj `if test -f 'title-menu-item.c'; then $(CYGPATH_W) 'title-menu-item.c'; else $(CYGPATH_W) '$(srcdir)/title-menu-item.c'; fi`
 
 indicator_sound_service-player-controller.o: player-controller.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-player-controller.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-player-controller.Tpo -c -o indicator_sound_service-player-controller.o `test -f 'player-controller.c' || echo '$(srcdir)/'`player-controller.c

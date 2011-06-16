@@ -37,7 +37,6 @@ public class PlaylistsMenuitem : PlayerItem
   construct{
     this.current_playlists = new HashMap<int, Dbusmenu.Menuitem>();
     this.root_item = new Menuitem();
-
     this.root_item.property_set ( MENUITEM_PROP_LABEL, _("Choose Playlist") );
     this.root_item.property_set ( MENUITEM_PATH, "" );
 

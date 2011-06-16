@@ -1,3 +1,16 @@
+indicator-sound (0.7.1-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    - "Sound Preferences..." should be "Sound Settings" (LP: #785571)
+    - Not obvious what track info menu item does (LP: #699899)
+  * debian/patches/lp_750823.patch
+    - Dropped patch, merged upstream
+  * debian/control
+    - Updated standards version to 3.9.2
+    - Cleaned up description to quiet lintian
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 16 Jun 2011 21:21:27 -0400
+
 indicator-sound (0.7.0-0ubuntu1) oneiric; urgency=low
 
   * New upstream release.

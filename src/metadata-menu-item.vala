@@ -18,6 +18,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 using Gee;
+using Dbusmenu;
 using DbusmenuMetadata;
 using Gdk;
 
@@ -29,16 +30,21 @@ public class MetadataMenuitem : PlayerItem
   private static FetchFile fetcher;
   private string previous_temp_album_art_path;
   
-  public MetadataMenuitem()
+  public MetadataMenuitem (PlayerController parent)
   {
-    Object(item_type: MENUITEM_TYPE);   
-    reset(attributes_format());
+    Object(item_type: MENUITEM_TYPE, owner: parent);
   }
   
   construct{
     MetadataMenuitem.clean_album_art_temp_dir();
-    this.previous_temp_album_art_path = null;   
+    this.previous_temp_album_art_path = null;
     this.album_art_cache_dir = MetadataMenuitem.create_album_art_temp_dir();
+    debug ("JUST ABOUT TO ATTEMPT PLAYER NAME SETTING %s", this.owner.app_info.get_name());
+    this.property_set (MENUITEM_PLAYER_NAME, this.owner.app_info.get_name());
+    this.property_set (MENUITEM_PLAYER_ICON, this.owner.icon_name);
+    this.property_set_bool (MENUITEM_PLAYER_RUNNING, false);
+    this.property_set_bool (MENUITEM_HIDE_TRACK_DETAILS, true);
+    reset (relevant_attributes_for_ui());
   }
 
   private static void clean_album_art_temp_dir()
@@ -98,10 +104,16 @@ public class MetadataMenuitem : PlayerItem
   public void fetch_art(string uri, string prop)
   {   
     File art_file = File.new_for_uri(uri);
-    if(art_file.is_native() == true){
+    if (art_file.is_native() == true){
+      if (art_file.query_exists() == false){
+        // Can't load the image, set prop to empty and return.
+        this.property_set_int ( prop, EMPTY );
+        return;
+      }
       string path;
       try{
-        path = Filename.from_uri ( uri.strip() );      
+        path = Filename.from_uri ( uri.strip() );  
+        debug ("Populating the artwork field with %s", uri.strip());    
         this.property_set ( prop, path );      
       }
       catch(ConvertError e){
@@ -135,7 +147,7 @@ public class MetadataMenuitem : PlayerItem
       PixbufLoader loader = new PixbufLoader ();
       loader.write (update.data);
       loader.close ();
-      Pixbuf icon = loader.get_pixbuf ();       
+      Pixbuf icon = loader.get_pixbuf ();
       string path = this.album_art_cache_dir.concat("/downloaded-coverart-XXXXXX");
       int r = FileUtils.mkstemp(path);
       if(r != -1){
@@ -144,7 +156,7 @@ public class MetadataMenuitem : PlayerItem
         if(this.previous_temp_album_art_path != null){
           FileUtils.remove(this.previous_temp_album_art_path);
         }     
-        this.previous_temp_album_art_path = path;       
+        this.previous_temp_album_art_path = path;
       }       
     }
     catch(GLib.Error e){
@@ -152,7 +164,37 @@ public class MetadataMenuitem : PlayerItem
               e.message);
     }       
   }     
+
+  public override void handle_event (string name,
+                                     Variant input_value,
+                                     uint timestamp)
+  {   
+    if(this.owner.current_state == PlayerController.state.OFFLINE)
+    {
+      this.owner.instantiate();
+    }
+    else if(this.owner.current_state == PlayerController.state.CONNECTED){
+      this.owner.mpris_bridge.expose();
+    }
+  }
   
+  public void alter_label (string new_title)
+  {
+    if (new_title == null) return;
+    this.property_set (MENUITEM_PLAYER_NAME, new_title);
+  }
+
+  public void toggle_active_triangle (bool update)
+  {
+    debug ("toggle active triangle");
+    this.property_set_bool (MENUITEM_PLAYER_RUNNING, update);
+  }
+
+  public void should_collapse(bool collapse)
+  {
+    this.property_set_bool (MENUITEM_HIDE_TRACK_DETAILS,  collapse);
+  }
+
   public static HashSet<string> attributes_format()
   {
     HashSet<string> attrs = new HashSet<string>();    
@@ -160,6 +202,19 @@ public class MetadataMenuitem : PlayerItem
     attrs.add(MENUITEM_ARTIST);
     attrs.add(MENUITEM_ALBUM);
     attrs.add(MENUITEM_ARTURL);
+    attrs.add(MENUITEM_PLAYER_NAME);
+    attrs.add(MENUITEM_PLAYER_ICON);
+    attrs.add(MENUITEM_PLAYER_RUNNING);
     return attrs;
-  } 
+  }
+  
+  public static HashSet<string> relevant_attributes_for_ui()
+  {
+    HashSet<string> attrs = new HashSet<string>();    
+    attrs.add(MENUITEM_TITLE);
+    attrs.add(MENUITEM_ARTIST);
+    attrs.add(MENUITEM_ALBUM);
+    attrs.add(MENUITEM_ARTURL);    
+    return attrs;
+  }
 }
