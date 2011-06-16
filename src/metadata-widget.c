@@ -197,6 +197,11 @@ metadata_widget_init (MetadataWidget *self)
 static void
 metadata_widget_dispose (GObject *object)
 {
+  MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(METADATA_WIDGET(object)); 
+
+  if (priv->icon_buf != NULL){
+    gdk_pixbuf_unref(priv->icon_buf);
+  }
   G_OBJECT_CLASS (metadata_widget_parent_class)->dispose (object);
 }
 
@@ -548,11 +553,13 @@ metadata_widget_set_style(GtkWidget* metadata, GtkStyle* style)
 static void 
 metadata_widget_set_icon (MetadataWidget *self)
 {
-  //TODO 
-  //tidy preexisting pixbufs (if they exist) in the prop update for images.
-
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self); 
 
+  if (priv->icon_buf != NULL){
+    gdk_pixbuf_unref(priv->icon_buf);
+    priv->icon_buf = NULL;    
+  }
+  
   gint padding = 0;
   gtk_widget_style_get(GTK_WIDGET(self), "horizontal-padding", &padding, NULL);
   gint width, height;
@@ -568,7 +575,7 @@ metadata_widget_set_icon (MetadataWidget *self)
   // and any others to be the icon from the desktop file => colour.
   if ( g_string_equal ( banshee_string, app_panel ) == TRUE &&
       gtk_icon_theme_has_icon ( gtk_icon_theme_get_default(), app_panel->str ) ){
-    g_string_append ( app_panel, "-panel" );                                                   
+    g_string_append ( app_panel, "-panel" );
   }
   else{
     // Otherwise use what is stored in the props
@@ -585,8 +592,8 @@ metadata_widget_set_icon (MetadataWidget *self)
                                         NULL );  
   gdk_pixbuf_ref (icon_buf);
   priv->icon_buf = icon_buf;
-  g_string_free ( app_panel, FALSE);
-  g_string_free ( banshee_string, FALSE);
+  g_string_free ( app_panel, TRUE);
+  g_string_free ( banshee_string, TRUE);
 }
 
 static void
@@ -668,26 +675,23 @@ metadata_widget_icon_triangle_draw_cb (GtkWidget *widget,
   }
     
   // Draw triangle but only if the player is running.
-  if (! dbusmenu_menuitem_property_get_bool (priv->twin_item,
+  if (dbusmenu_menuitem_property_get_bool (priv->twin_item,
                                              DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING)){
-    cairo_destroy (cr);
-    return FALSE;
+    y += (double)arrow_height/2.0 + offset;
+    cairo_set_line_width (cr, 1.0);
+
+    cairo_move_to (cr, x, y);
+    cairo_line_to (cr, x, y + arrow_height);
+    cairo_line_to (cr, x + arrow_width, y + (double)arrow_height/2.0);
+    cairo_close_path (cr);
+    cairo_set_source_rgb (cr, style->fg[gtk_widget_get_state(widget)].red/65535.0,
+                              style->fg[gtk_widget_get_state(widget)].green/65535.0,
+                              style->fg[gtk_widget_get_state(widget)].blue/65535.0);
+    cairo_fill (cr);                                             
   }
-
   
-  y += (double)arrow_height/2.0 + offset;
-  cairo_set_line_width (cr, 1.0);
-
-  cairo_move_to (cr, x, y);
-  cairo_line_to (cr, x, y + arrow_height);
-  cairo_line_to (cr, x + arrow_width, y + (double)arrow_height/2.0);
-  cairo_close_path (cr);
-  cairo_set_source_rgb (cr, style->fg[gtk_widget_get_state(widget)].red/65535.0,
-                            style->fg[gtk_widget_get_state(widget)].green/65535.0,
-                            style->fg[gtk_widget_get_state(widget)].blue/65535.0);
-  cairo_fill (cr);
   cairo_destroy (cr);
-  return FALSE;
+  return FALSE;  
 }
 
  /**
