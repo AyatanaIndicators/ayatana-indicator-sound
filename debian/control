@@ -20,7 +20,7 @@ Build-Depends: debhelper (>= 7),
                libnotify-dev,
                valac-0.12,
                dh-autoreconf
-Standards-Version: 3.9.1
+Standards-Version: 3.9.2
 Homepage: https://launchpad.net/indicator-sound
 
 Package: indicator-sound
@@ -28,8 +28,6 @@ Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          pulseaudio
-Description: A system sound indicator.
- A system sound indicator which provides easy control of the PulseAudio sound 
+Description: System sound indicator.
+ System sound indicator which provides easy control of the PulseAudio sound 
  daemon.
-
-

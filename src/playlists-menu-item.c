@@ -482,7 +482,7 @@ static void playlists_menuitem_submenu_item_activated (PlaylistsMenuitem* self, 
 	g_return_if_fail (self != NULL);
 	_tmp0_ = gee_abstract_map_has_key ((GeeAbstractMap*) self->priv->current_playlists, GINT_TO_POINTER (menu_item_id));
 	if (!_tmp0_) {
-		g_warning ("playlists-menu-item.vala:126: item %i was activated but we don't have " \
+		g_warning ("playlists-menu-item.vala:125: item %i was activated but we don't have " \
 "a corresponding playlist", menu_item_id);
 		return;
 	}

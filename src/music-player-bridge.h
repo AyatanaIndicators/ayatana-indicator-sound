@@ -75,17 +75,6 @@ typedef struct _PlayerControllerClass PlayerControllerClass;
 typedef struct _MetadataMenuitem MetadataMenuitem;
 typedef struct _MetadataMenuitemClass MetadataMenuitemClass;
 typedef struct _MetadataMenuitemPrivate MetadataMenuitemPrivate;
-
-#define TYPE_TITLE_MENUITEM (title_menuitem_get_type ())
-#define TITLE_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_TITLE_MENUITEM, TitleMenuitem))
-#define TITLE_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_TITLE_MENUITEM, TitleMenuitemClass))
-#define IS_TITLE_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_TITLE_MENUITEM))
-#define IS_TITLE_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_TITLE_MENUITEM))
-#define TITLE_MENUITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_TITLE_MENUITEM, TitleMenuitemClass))
-
-typedef struct _TitleMenuitem TitleMenuitem;
-typedef struct _TitleMenuitemClass TitleMenuitemClass;
-typedef struct _TitleMenuitemPrivate TitleMenuitemPrivate;
 typedef struct _PlayerControllerPrivate PlayerControllerPrivate;
 
 #define TYPE_MPRIS2_CONTROLLER (mpris2_controller_get_type ())
@@ -249,15 +238,6 @@ struct _MetadataMenuitemClass {
 	PlayerItemClass parent_class;
 };
 
-struct _TitleMenuitem {
-	PlayerItem parent_instance;
-	TitleMenuitemPrivate * priv;
-};
-
-struct _TitleMenuitemClass {
-	PlayerItemClass parent_class;
-};
-
 struct _PlayerController {
 	GObject parent_instance;
 	PlayerControllerPrivate * priv;
@@ -273,7 +253,6 @@ struct _PlayerControllerClass {
 
 typedef enum  {
 	PLAYER_CONTROLLER_WIDGET_ORDER_SEPARATOR,
-	PLAYER_CONTROLLER_WIDGET_ORDER_TITLE,
 	PLAYER_CONTROLLER_WIDGET_ORDER_METADATA,
 	PLAYER_CONTROLLER_WIDGET_ORDER_TRANSPORT,
 	PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLISTS
@@ -432,20 +411,18 @@ GeeHashSet* transport_menuitem_attributes_format (void);
 GType metadata_menuitem_get_type (void) G_GNUC_CONST;
 extern gchar* metadata_menuitem_album_art_cache_dir;
 #define METADATA_MENUITEM_ALBUM_ART_DIR_SUFFIX "indicators/sound/album-art-cache"
-MetadataMenuitem* metadata_menuitem_new (void);
-MetadataMenuitem* metadata_menuitem_construct (GType object_type);
+MetadataMenuitem* metadata_menuitem_new (PlayerController* parent);
+MetadataMenuitem* metadata_menuitem_construct (GType object_type, PlayerController* parent);
 void metadata_menuitem_fetch_art (MetadataMenuitem* self, const gchar* uri, const gchar* prop);
+void metadata_menuitem_alter_label (MetadataMenuitem* self, const gchar* new_title);
+void metadata_menuitem_toggle_active_triangle (MetadataMenuitem* self, gboolean update);
+void metadata_menuitem_should_collapse (MetadataMenuitem* self, gboolean collapse);
 GeeHashSet* metadata_menuitem_attributes_format (void);
-GType title_menuitem_get_type (void) G_GNUC_CONST;
-TitleMenuitem* title_menuitem_new (PlayerController* parent);
-TitleMenuitem* title_menuitem_construct (GType object_type, PlayerController* parent);
-void title_menuitem_alter_label (TitleMenuitem* self, const gchar* new_title);
-void title_menuitem_toggle_active_triangle (TitleMenuitem* self, gboolean update);
-GeeHashSet* title_menuitem_attributes_format (void);
+GeeHashSet* metadata_menuitem_relevant_attributes_for_ui (void);
 GType mpris2_controller_get_type (void) G_GNUC_CONST;
 GType player_controller_widget_order_get_type (void) G_GNUC_CONST;
 GType player_controller_state_get_type (void) G_GNUC_CONST;
-#define PLAYER_CONTROLLER_WIDGET_QUANTITY 5
+#define PLAYER_CONTROLLER_WIDGET_QUANTITY 4
 PlayerController* player_controller_new (DbusmenuMenuitem* root, GAppInfo* app, const gchar* dbus_name, const gchar* icon_name, gint offset, gboolean* use_playlists, PlayerControllerstate initial_state);
 PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, GAppInfo* app, const gchar* dbus_name, const gchar* icon_name, gint offset, gboolean* use_playlists, PlayerControllerstate initial_state);
 void player_controller_update_state (PlayerController* self, PlayerControllerstate new_state);
@@ -542,6 +519,7 @@ GType free_desktop_properties_proxy_get_type (void) G_GNUC_CONST;
 guint free_desktop_properties_register_object (void* object, GDBusConnection* connection, const gchar* path, GError** error);
 FreeDesktopProperties* mpris2_controller_get_properties_interface (Mpris2Controller* self);
 PlayerController* mpris2_controller_get_owner (Mpris2Controller* self);
+#define PLAYER_ITEM_EMPTY (-1)
 PlayerItem* player_item_new (const gchar* type);
 PlayerItem* player_item_construct (GType object_type, const gchar* type);
 void player_item_reset (PlayerItem* self, GeeHashSet* attrs);

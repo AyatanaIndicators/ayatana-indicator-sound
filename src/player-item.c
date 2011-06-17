@@ -194,12 +194,11 @@ static gpointer _g_object_ref0 (gpointer self) {
 
 
 void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes) {
-	gboolean _tmp20_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (data != NULL);
 	g_return_if_fail (attributes != NULL);
 	if (data == NULL) {
-		g_warning ("player-item.vala:55: PlayerItem::Update -> The hashtable was null - ju" \
+		g_warning ("player-item.vala:54: PlayerItem::Update -> The hashtable was null - ju" \
 "st leave it!");
 		return;
 	}
@@ -298,8 +297,6 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 		}
 		_g_object_unref0 (_property_it);
 	}
-	_tmp20_ = player_item_populated (self, attributes);
-	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_MENUITEM_PROP_VISIBLE, _tmp20_);
 }
 
 

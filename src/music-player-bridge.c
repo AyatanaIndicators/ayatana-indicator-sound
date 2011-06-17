@@ -168,7 +168,7 @@ static gint music_player_bridge_calculate_menu_position (MusicPlayerBridge* self
 GType player_controller_state_get_type (void) G_GNUC_CONST;
 PlayerController* player_controller_new (DbusmenuMenuitem* root, GAppInfo* app, const gchar* dbus_name, const gchar* icon_name, gint offset, gboolean* use_playlists, PlayerControllerstate initial_state);
 PlayerController* player_controller_construct (GType object_type, DbusmenuMenuitem* root, GAppInfo* app, const gchar* dbus_name, const gchar* icon_name, gint offset, gboolean* use_playlists, PlayerControllerstate initial_state);
-#define PLAYER_CONTROLLER_WIDGET_QUANTITY 5
+#define PLAYER_CONTROLLER_WIDGET_QUANTITY 4
 void music_player_bridge_client_has_become_available (MusicPlayerBridge* self, const gchar* desktop, const gchar* dbus_name, gboolean use_playlists);
 gchar** settings_manager_fetch_blacklist (SettingsManager* self, int* result_length1);
 static gboolean _vala_string_array_contains (gchar** stack, int stack_length, gchar* needle);

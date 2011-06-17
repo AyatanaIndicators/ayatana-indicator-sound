@@ -32,10 +32,10 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 #include <common-defs.h>
-#include <gee.h>
 #include <gio/gio.h>
 #include <gdk-pixbuf/gdk-pixdata.h>
 #include <glib/gstdio.h>
+#include <gee.h>
 
 
 #define TYPE_PLAYER_ITEM (player_item_get_type ())
@@ -70,8 +70,31 @@ typedef struct _MetadataMenuitemPrivate MetadataMenuitemPrivate;
 typedef struct _FetchFile FetchFile;
 typedef struct _FetchFileClass FetchFileClass;
 #define _g_free0(var) (var = (g_free (var), NULL))
+
+#define TYPE_PLAYER_CONTROLLER (player_controller_get_type ())
+#define PLAYER_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PLAYER_CONTROLLER, PlayerController))
+#define PLAYER_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PLAYER_CONTROLLER, PlayerControllerClass))
+#define IS_PLAYER_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_PLAYER_CONTROLLER))
+#define IS_PLAYER_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_PLAYER_CONTROLLER))
+#define PLAYER_CONTROLLER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_PLAYER_CONTROLLER, PlayerControllerClass))
+
+typedef struct _PlayerController PlayerController;
+typedef struct _PlayerControllerClass PlayerControllerClass;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
+typedef struct _PlayerControllerPrivate PlayerControllerPrivate;
+
+#define TYPE_MPRIS2_CONTROLLER (mpris2_controller_get_type ())
+#define MPRIS2_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_MPRIS2_CONTROLLER, Mpris2Controller))
+#define MPRIS2_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_MPRIS2_CONTROLLER, Mpris2ControllerClass))
+#define IS_MPRIS2_CONTROLLER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_MPRIS2_CONTROLLER))
+#define IS_MPRIS2_CONTROLLER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_MPRIS2_CONTROLLER))
+#define MPRIS2_CONTROLLER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_MPRIS2_CONTROLLER, Mpris2ControllerClass))
+
+typedef struct _Mpris2Controller Mpris2Controller;
+typedef struct _Mpris2ControllerClass Mpris2ControllerClass;
+
+#define PLAYER_CONTROLLER_TYPE_STATE (player_controller_state_get_type ())
 
 struct _PlayerItem {
 	DbusmenuMenuitem parent_instance;
@@ -95,6 +118,27 @@ struct _MetadataMenuitemPrivate {
 	gchar* previous_temp_album_art_path;
 };
 
+struct _PlayerController {
+	GObject parent_instance;
+	PlayerControllerPrivate * priv;
+	gint current_state;
+	GeeArrayList* custom_items;
+	Mpris2Controller* mpris_bridge;
+	gboolean* use_playlists;
+};
+
+struct _PlayerControllerClass {
+	GObjectClass parent_class;
+};
+
+typedef enum  {
+	PLAYER_CONTROLLER_STATE_OFFLINE,
+	PLAYER_CONTROLLER_STATE_INSTANTIATING,
+	PLAYER_CONTROLLER_STATE_READY,
+	PLAYER_CONTROLLER_STATE_CONNECTED,
+	PLAYER_CONTROLLER_STATE_DISCONNECTED
+} PlayerControllerstate;
+
 
 static gpointer metadata_menuitem_parent_class = NULL;
 extern gchar* metadata_menuitem_album_art_cache_dir;
@@ -110,14 +154,14 @@ enum  {
 };
 GType fetch_file_get_type (void) G_GNUC_CONST;
 #define METADATA_MENUITEM_ALBUM_ART_DIR_SUFFIX "indicators/sound/album-art-cache"
-MetadataMenuitem* metadata_menuitem_new (void);
-MetadataMenuitem* metadata_menuitem_construct (GType object_type);
-void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
-GeeHashSet* metadata_menuitem_attributes_format (void);
+GType player_controller_get_type (void) G_GNUC_CONST;
+MetadataMenuitem* metadata_menuitem_new (PlayerController* parent);
+MetadataMenuitem* metadata_menuitem_construct (GType object_type, PlayerController* parent);
 static void metadata_menuitem_clean_album_art_temp_dir (void);
 static gboolean metadata_menuitem_delete_album_art_contents (GFile* dir);
 static gchar* metadata_menuitem_create_album_art_temp_dir (void);
 void metadata_menuitem_fetch_art (MetadataMenuitem* self, const gchar* uri, const gchar* prop);
+#define PLAYER_ITEM_EMPTY (-1)
 FetchFile* fetch_file_new (const gchar* uri, const gchar* prop);
 FetchFile* fetch_file_construct (GType object_type, const gchar* uri, const gchar* prop);
 static void _lambda0_ (MetadataMenuitem* self);
@@ -127,25 +171,34 @@ static void metadata_menuitem_on_fetcher_completed (MetadataMenuitem* self, GByt
 static void _metadata_menuitem_on_fetcher_completed_fetch_file_completed (FetchFile* _sender, GByteArray* data, const gchar* property, gpointer self);
 void fetch_file_fetch_data (FetchFile* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
 void fetch_file_fetch_data_finish (FetchFile* self, GAsyncResult* _res_);
+static void metadata_menuitem_real_handle_event (DbusmenuMenuitem* base, const gchar* name, GVariant* input_value, guint timestamp);
+PlayerController* player_item_get_owner (PlayerItem* self);
+GType mpris2_controller_get_type (void) G_GNUC_CONST;
+GType player_controller_state_get_type (void) G_GNUC_CONST;
+void player_controller_instantiate (PlayerController* self);
+void mpris2_controller_expose (Mpris2Controller* self);
+void metadata_menuitem_alter_label (MetadataMenuitem* self, const gchar* new_title);
+void metadata_menuitem_toggle_active_triangle (MetadataMenuitem* self, gboolean update);
+void metadata_menuitem_should_collapse (MetadataMenuitem* self, gboolean collapse);
+GeeHashSet* metadata_menuitem_attributes_format (void);
+GeeHashSet* metadata_menuitem_relevant_attributes_for_ui (void);
 static GObject * metadata_menuitem_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
+GAppInfo* player_controller_get_app_info (PlayerController* self);
+const gchar* player_controller_get_icon_name (PlayerController* self);
+void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
 static void metadata_menuitem_finalize (GObject* obj);
 
 
-MetadataMenuitem* metadata_menuitem_construct (GType object_type) {
+MetadataMenuitem* metadata_menuitem_construct (GType object_type, PlayerController* parent) {
 	MetadataMenuitem * self = NULL;
-	GeeHashSet* _tmp0_ = NULL;
-	GeeHashSet* _tmp1_;
-	self = (MetadataMenuitem*) g_object_new (object_type, "item-type", DBUSMENU_METADATA_MENUITEM_TYPE, NULL);
-	_tmp0_ = metadata_menuitem_attributes_format ();
-	_tmp1_ = _tmp0_;
-	player_item_reset ((PlayerItem*) self, _tmp1_);
-	_g_object_unref0 (_tmp1_);
+	g_return_val_if_fail (parent != NULL, NULL);
+	self = (MetadataMenuitem*) g_object_new (object_type, "item-type", DBUSMENU_METADATA_MENUITEM_TYPE, "owner", parent, NULL);
 	return self;
 }
 
 
-MetadataMenuitem* metadata_menuitem_new (void) {
-	return metadata_menuitem_construct (TYPE_METADATA_MENUITEM);
+MetadataMenuitem* metadata_menuitem_new (PlayerController* parent) {
+	return metadata_menuitem_construct (TYPE_METADATA_MENUITEM, parent);
 }
 
 
@@ -163,7 +216,7 @@ static void metadata_menuitem_clean_album_art_temp_dir (void) {
 	album_art_dir = _tmp2_;
 	_tmp3_ = metadata_menuitem_delete_album_art_contents (album_art_dir);
 	if (_tmp3_ == FALSE) {
-		g_warning ("metadata-menu-item.vala:52: could not remove the temp album art files " \
+		g_warning ("metadata-menu-item.vala:58: could not remove the temp album art files " \
 "%s", path);
 	}
 	_g_object_unref0 (album_art_dir);
@@ -182,7 +235,7 @@ static gchar* metadata_menuitem_create_album_art_temp_dir (void) {
 	path = _tmp1_;
 	_tmp2_ = g_mkdir (path, 0700);
 	if (_tmp2_ == (-1)) {
-		g_warning ("metadata-menu-item.vala:60: could not create a temp dir for remote alb" \
+		g_warning ("metadata-menu-item.vala:66: could not create a temp dir for remote alb" \
 "um art, it must have been created already");
 	}
 	result = path;
@@ -225,7 +278,7 @@ static gboolean metadata_menuitem_delete_album_art_contents (GFile* dir) {
 			goto __catch2_g_error;
 		}
 		_tmp2_ = g_file_info_get_name (file);
-		g_debug ("metadata-menu-item.vala:76: file name = %s", _tmp2_);
+		g_debug ("metadata-menu-item.vala:82: file name = %s", _tmp2_);
 		if (file == NULL) {
 			_g_object_unref0 (file);
 			break;
@@ -255,7 +308,7 @@ static gboolean metadata_menuitem_delete_album_art_contents (GFile* dir) {
 			_tmp8_ = string_to_string (error_->message);
 			_tmp9_ = g_strconcat ("Unable to delete file '", _tmp7_, ": ", _tmp8_, NULL);
 			_tmp10_ = _tmp9_;
-			g_warning ("metadata-menu-item.vala:86: %s", _tmp10_);
+			g_warning ("metadata-menu-item.vala:92: %s", _tmp10_);
 			_g_free0 (_tmp10_);
 			_g_free0 (_tmp6_);
 			_result_ = FALSE;
@@ -337,7 +390,7 @@ void metadata_menuitem_fetch_art (MetadataMenuitem* self, const gchar* uri, cons
 	GFile* _tmp0_ = NULL;
 	GFile* art_file;
 	gboolean _tmp1_;
-	FetchFile* _tmp7_ = NULL;
+	FetchFile* _tmp10_ = NULL;
 	GError * _inner_error_ = NULL;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (uri != NULL);
@@ -346,18 +399,27 @@ void metadata_menuitem_fetch_art (MetadataMenuitem* self, const gchar* uri, cons
 	art_file = _tmp0_;
 	_tmp1_ = g_file_is_native (art_file);
 	if (_tmp1_ == TRUE) {
+		gboolean _tmp2_;
 		gchar* path = NULL;
-		gchar* _tmp2_ = NULL;
-		gchar* _tmp3_;
-		gchar* _tmp4_ = NULL;
-		gchar* _tmp5_;
+		gchar* _tmp3_ = NULL;
+		gchar* _tmp4_;
+		gchar* _tmp5_ = NULL;
 		gchar* _tmp6_;
-		_tmp2_ = string_strip (uri);
-		_tmp3_ = _tmp2_;
-		_tmp4_ = g_filename_from_uri (_tmp3_, NULL, &_inner_error_);
-		_tmp5_ = _tmp4_;
-		_g_free0 (_tmp3_);
+		gchar* _tmp7_;
+		gchar* _tmp8_ = NULL;
+		gchar* _tmp9_;
+		_tmp2_ = g_file_query_exists (art_file, NULL);
+		if (_tmp2_ == FALSE) {
+			dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, prop, PLAYER_ITEM_EMPTY);
+			_g_object_unref0 (art_file);
+			return;
+		}
+		_tmp3_ = string_strip (uri);
+		_tmp4_ = _tmp3_;
+		_tmp5_ = g_filename_from_uri (_tmp4_, NULL, &_inner_error_);
 		_tmp6_ = _tmp5_;
+		_g_free0 (_tmp4_);
+		_tmp7_ = _tmp6_;
 		if (_inner_error_ != NULL) {
 			if (_inner_error_->domain == G_CONVERT_ERROR) {
 				goto __catch4_g_convert_error;
@@ -369,7 +431,11 @@ void metadata_menuitem_fetch_art (MetadataMenuitem* self, const gchar* uri, cons
 			return;
 		}
 		_g_free0 (path);
-		path = _tmp6_;
+		path = _tmp7_;
+		_tmp8_ = string_strip (uri);
+		_tmp9_ = _tmp8_;
+		g_debug ("metadata-menu-item.vala:116: Populating the artwork field with %s", _tmp9_);
+		_g_free0 (_tmp9_);
 		dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, prop, path);
 		goto __finally4;
 		__catch4_g_convert_error:
@@ -377,7 +443,7 @@ void metadata_menuitem_fetch_art (MetadataMenuitem* self, const gchar* uri, cons
 			GError * e;
 			e = _inner_error_;
 			_inner_error_ = NULL;
-			g_warning ("metadata-menu-item.vala:108: Problem converting URI %s to file path", uri);
+			g_warning ("metadata-menu-item.vala:120: Problem converting URI %s to file path", uri);
 			_g_error_free0 (e);
 		}
 		__finally4:
@@ -392,14 +458,14 @@ void metadata_menuitem_fetch_art (MetadataMenuitem* self, const gchar* uri, cons
 		_g_object_unref0 (art_file);
 		return;
 	}
-	g_debug ("metadata-menu-item.vala:114: fetch_art -remotely %s", metadata_menuitem_album_art_cache_dir);
+	g_debug ("metadata-menu-item.vala:126: fetch_art -remotely %s", metadata_menuitem_album_art_cache_dir);
 	if (metadata_menuitem_album_art_cache_dir == NULL) {
 		_g_object_unref0 (art_file);
 		return;
 	}
-	_tmp7_ = fetch_file_new (uri, prop);
+	_tmp10_ = fetch_file_new (uri, prop);
 	_g_object_unref0 (metadata_menuitem_fetcher);
-	metadata_menuitem_fetcher = _tmp7_;
+	metadata_menuitem_fetcher = _tmp10_;
 	g_signal_connect_object (metadata_menuitem_fetcher, "failed", (GCallback) __lambda0__fetch_file_failed, self, 0);
 	g_signal_connect_object (metadata_menuitem_fetcher, "completed", (GCallback) _metadata_menuitem_on_fetcher_completed_fetch_file_completed, self, 0);
 	fetch_file_fetch_data (metadata_menuitem_fetcher, NULL, NULL);
@@ -409,7 +475,7 @@ void metadata_menuitem_fetch_art (MetadataMenuitem* self, const gchar* uri, cons
 
 static void metadata_menuitem_on_fetcher_failed (MetadataMenuitem* self) {
 	g_return_if_fail (self != NULL);
-	g_warning ("metadata-menu-item.vala:129: on_fetcher_failed -> could not fetch artw" \
+	g_warning ("metadata-menu-item.vala:141: on_fetcher_failed -> could not fetch artw" \
 "ork");
 }
 
@@ -482,7 +548,7 @@ static void metadata_menuitem_on_fetcher_completed (MetadataMenuitem* self, GByt
 		GError * e;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		g_warning ("metadata-menu-item.vala:151: Problem creating file from bytearray fetc" \
+		g_warning ("metadata-menu-item.vala:163: Problem creating file from bytearray fetc" \
 "hed from the interweb - error: %s", e->message);
 		_g_error_free0 (e);
 	}
@@ -495,7 +561,71 @@ static void metadata_menuitem_on_fetcher_completed (MetadataMenuitem* self, GByt
 }
 
 
+static void metadata_menuitem_real_handle_event (DbusmenuMenuitem* base, const gchar* name, GVariant* input_value, guint timestamp) {
+	MetadataMenuitem * self;
+	PlayerController* _tmp0_ = NULL;
+	self = (MetadataMenuitem*) base;
+	g_return_if_fail (name != NULL);
+	g_return_if_fail (input_value != NULL);
+	_tmp0_ = player_item_get_owner ((PlayerItem*) self);
+	if (_tmp0_->current_state == PLAYER_CONTROLLER_STATE_OFFLINE) {
+		PlayerController* _tmp1_ = NULL;
+		_tmp1_ = player_item_get_owner ((PlayerItem*) self);
+		player_controller_instantiate (_tmp1_);
+	} else {
+		PlayerController* _tmp2_ = NULL;
+		_tmp2_ = player_item_get_owner ((PlayerItem*) self);
+		if (_tmp2_->current_state == PLAYER_CONTROLLER_STATE_CONNECTED) {
+			PlayerController* _tmp3_ = NULL;
+			_tmp3_ = player_item_get_owner ((PlayerItem*) self);
+			mpris2_controller_expose (_tmp3_->mpris_bridge);
+		}
+	}
+}
+
+
+void metadata_menuitem_alter_label (MetadataMenuitem* self, const gchar* new_title) {
+	g_return_if_fail (self != NULL);
+	g_return_if_fail (new_title != NULL);
+	if (new_title == NULL) {
+		return;
+	}
+	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_PLAYER_NAME, new_title);
+}
+
+
+void metadata_menuitem_toggle_active_triangle (MetadataMenuitem* self, gboolean update) {
+	g_return_if_fail (self != NULL);
+	g_debug ("metadata-menu-item.vala:189: toggle active triangle");
+	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING, update);
+}
+
+
+void metadata_menuitem_should_collapse (MetadataMenuitem* self, gboolean collapse) {
+	g_return_if_fail (self != NULL);
+	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS, collapse);
+}
+
+
 GeeHashSet* metadata_menuitem_attributes_format (void) {
+	GeeHashSet* result = NULL;
+	GeeHashSet* _tmp0_ = NULL;
+	GeeHashSet* attrs;
+	_tmp0_ = gee_hash_set_new (G_TYPE_STRING, (GBoxedCopyFunc) g_strdup, g_free, NULL, NULL);
+	attrs = _tmp0_;
+	gee_abstract_collection_add ((GeeAbstractCollection*) attrs, DBUSMENU_METADATA_MENUITEM_TITLE);
+	gee_abstract_collection_add ((GeeAbstractCollection*) attrs, DBUSMENU_METADATA_MENUITEM_ARTIST);
+	gee_abstract_collection_add ((GeeAbstractCollection*) attrs, DBUSMENU_METADATA_MENUITEM_ALBUM);
+	gee_abstract_collection_add ((GeeAbstractCollection*) attrs, DBUSMENU_METADATA_MENUITEM_ARTURL);
+	gee_abstract_collection_add ((GeeAbstractCollection*) attrs, DBUSMENU_METADATA_MENUITEM_PLAYER_NAME);
+	gee_abstract_collection_add ((GeeAbstractCollection*) attrs, DBUSMENU_METADATA_MENUITEM_PLAYER_ICON);
+	gee_abstract_collection_add ((GeeAbstractCollection*) attrs, DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING);
+	result = attrs;
+	return result;
+}
+
+
+GeeHashSet* metadata_menuitem_relevant_attributes_for_ui (void) {
 	GeeHashSet* result = NULL;
 	GeeHashSet* _tmp0_ = NULL;
 	GeeHashSet* attrs;
@@ -515,6 +645,16 @@ static GObject * metadata_menuitem_constructor (GType type, guint n_construct_pr
 	GObjectClass * parent_class;
 	MetadataMenuitem * self;
 	gchar* _tmp0_ = NULL;
+	PlayerController* _tmp1_ = NULL;
+	GAppInfo* _tmp2_ = NULL;
+	const gchar* _tmp3_ = NULL;
+	PlayerController* _tmp4_ = NULL;
+	GAppInfo* _tmp5_ = NULL;
+	const gchar* _tmp6_ = NULL;
+	PlayerController* _tmp7_ = NULL;
+	const gchar* _tmp8_ = NULL;
+	GeeHashSet* _tmp9_ = NULL;
+	GeeHashSet* _tmp10_;
 	parent_class = G_OBJECT_CLASS (metadata_menuitem_parent_class);
 	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
 	self = METADATA_MENUITEM (obj);
@@ -524,6 +664,24 @@ static GObject * metadata_menuitem_constructor (GType type, guint n_construct_pr
 	_tmp0_ = metadata_menuitem_create_album_art_temp_dir ();
 	_g_free0 (metadata_menuitem_album_art_cache_dir);
 	metadata_menuitem_album_art_cache_dir = _tmp0_;
+	_tmp1_ = player_item_get_owner ((PlayerItem*) self);
+	_tmp2_ = player_controller_get_app_info (_tmp1_);
+	_tmp3_ = g_app_info_get_name (_tmp2_);
+	g_debug ("metadata-menu-item.vala:42: JUST ABOUT TO ATTEMPT PLAYER NAME SETTING " \
+"%s", _tmp3_);
+	_tmp4_ = player_item_get_owner ((PlayerItem*) self);
+	_tmp5_ = player_controller_get_app_info (_tmp4_);
+	_tmp6_ = g_app_info_get_name (_tmp5_);
+	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_PLAYER_NAME, _tmp6_);
+	_tmp7_ = player_item_get_owner ((PlayerItem*) self);
+	_tmp8_ = player_controller_get_icon_name (_tmp7_);
+	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_PLAYER_ICON, _tmp8_);
+	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING, FALSE);
+	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS, TRUE);
+	_tmp9_ = metadata_menuitem_relevant_attributes_for_ui ();
+	_tmp10_ = _tmp9_;
+	player_item_reset ((PlayerItem*) self, _tmp10_);
+	_g_object_unref0 (_tmp10_);
 	return obj;
 }
 
@@ -531,6 +689,7 @@ static GObject * metadata_menuitem_constructor (GType type, guint n_construct_pr
 static void metadata_menuitem_class_init (MetadataMenuitemClass * klass) {
 	metadata_menuitem_parent_class = g_type_class_peek_parent (klass);
 	g_type_class_add_private (klass, sizeof (MetadataMenuitemPrivate));
+	DBUSMENU_MENUITEM_CLASS (klass)->handle_event = metadata_menuitem_real_handle_event;
 	G_OBJECT_CLASS (klass)->constructor = metadata_menuitem_constructor;
 	G_OBJECT_CLASS (klass)->finalize = metadata_menuitem_finalize;
 }
