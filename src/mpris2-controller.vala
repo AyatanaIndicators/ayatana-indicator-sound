@@ -16,7 +16,6 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along 
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 using Dbusmenu;
 using Transport;
 
@@ -84,13 +83,16 @@ public class Mpris2Controller : GLib.Object
     }
     Variant? meta_v = changed_properties.lookup("Metadata");
     if(meta_v != null){
-      GLib.HashTable<string, Variant?> changed_updates = clean_metadata();
+      GLib.HashTable<string, Variant?> changed_updates = clean_metadata();      
       PlayerItem metadata = this.owner.custom_items[PlayerController.widget_order.METADATA];
-      metadata.reset ( MetadataMenuitem.attributes_format());
+      metadata.reset (MetadataMenuitem.relevant_attributes_for_ui());
       metadata.update ( changed_updates, 
-                        MetadataMenuitem.attributes_format());
-      metadata.property_set_bool ( MENUITEM_PROP_VISIBLE,
-                                   metadata.populated(MetadataMenuitem.attributes_format()));
+                        MetadataMenuitem.relevant_attributes_for_ui());
+      MetadataMenuitem md = this.owner.custom_items[PlayerController.widget_order.METADATA] as MetadataMenuitem;      
+      bool collapsing = !metadata.populated(MetadataMenuitem.relevant_attributes_for_ui());
+      md.should_collapse(collapsing);
+      
+      debug ("Should metadata collapse %s", collapsing.to_string());
     }
     Variant? playlist_v = changed_properties.lookup("ActivePlaylist");
     if ( playlist_v != null && this.owner.use_playlists == true ){
@@ -110,8 +112,8 @@ public class Mpris2Controller : GLib.Object
     }
     Variant? identity_v = changed_properties.lookup("Identity");
     if (identity_v != null){
-      TitleMenuitem title = this.owner.custom_items[PlayerController.widget_order.TITLE] as TitleMenuitem;
-      title.alter_label (this.mpris2_root.Identity);
+      MetadataMenuitem md = this.owner.custom_items[PlayerController.widget_order.METADATA] as MetadataMenuitem;      
+      md.alter_label (this.mpris2_root.Identity);
     }
   }
                                       
@@ -163,8 +165,8 @@ public class Mpris2Controller : GLib.Object
       update = determine_play_state (this.player.PlaybackStatus);
     }
     if (this.mpris2_root.Identity != null){
-      TitleMenuitem title = this.owner.custom_items[PlayerController.widget_order.TITLE] as TitleMenuitem;
-      title.alter_label (this.mpris2_root.Identity);
+      MetadataMenuitem md = this.owner.custom_items[PlayerController.widget_order.METADATA] as MetadataMenuitem;      
+      md.alter_label (this.mpris2_root.Identity);
     }
     (this.owner.custom_items[PlayerController.widget_order.TRANSPORT] as TransportMenuitem).change_play_state (update);
     GLib.HashTable<string, Value?>? cleaned_metadata = this.clean_metadata();

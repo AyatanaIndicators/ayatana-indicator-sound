@@ -31,7 +31,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "indicator-sound.h"
 #include "transport-widget.h"
 #include "metadata-widget.h"
-#include "title-widget.h"
 #include "volume-widget.h"
 #include "voip-input-widget.h"
 #include "dbus-shared-names.h"
@@ -94,10 +93,6 @@ static gboolean new_metadata_widget (DbusmenuMenuitem * newitem,
                                      DbusmenuMenuitem * parent,
                                      DbusmenuClient * client,
                                      gpointer user_data);
-static gboolean new_title_widget (DbusmenuMenuitem * newitem,
-                                  DbusmenuMenuitem * parent,
-                                  DbusmenuClient * client,
-                                  gpointer user_data);
 
 // DBUS communication
 static GDBusNodeInfo *node_info = NULL;
@@ -208,9 +203,6 @@ get_menu (IndicatorObject * io)
   dbusmenu_client_add_type_handler (DBUSMENU_CLIENT(client),
                                     DBUSMENU_METADATA_MENUITEM_TYPE,
                                     new_metadata_widget);
-  dbusmenu_client_add_type_handler (DBUSMENU_CLIENT(client),
-                                    DBUSMENU_TITLE_MENUITEM_TYPE,
-                                    new_title_widget);
   // Note: Not ideal but all key handling needs to be managed here and then 
   // delegated to the appropriate widget. 
   g_signal_connect (menu, "key-press-event", G_CALLBACK(key_press_cb), io);
@@ -360,36 +352,19 @@ new_metadata_widget (DbusmenuMenuitem * newitem,
   g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
   g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
 
+
   metadata = metadata_widget_new (newitem);
+  
+  g_debug ("%s (\"%s\")", __func__,
+           dbusmenu_menuitem_property_get(newitem, DBUSMENU_METADATA_MENUITEM_PLAYER_NAME));
+  
   GtkMenuItem *menu_metadata_widget = GTK_MENU_ITEM(metadata);
 
   gtk_widget_show_all(metadata);
   dbusmenu_gtkclient_newitem_base (DBUSMENU_GTKCLIENT(client),
-                                   newitem, menu_metadata_widget, parent);
-  return TRUE;
-}
-
-static gboolean
-new_title_widget(DbusmenuMenuitem * newitem,
-                 DbusmenuMenuitem * parent,
-                 DbusmenuClient * client,
-                 gpointer user_data)
-{
-  g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
-  g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
-
-  g_debug ("%s (\"%s\")", __func__, dbusmenu_menuitem_property_get(newitem, DBUSMENU_TITLE_MENUITEM_NAME));
-
-  GtkWidget* title = NULL;
-
-  title = title_widget_new (newitem);
-  GtkMenuItem *menu_title_widget = GTK_MENU_ITEM(title);
-  
-  gtk_widget_show_all(title);
-
-  dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client),
-                                  newitem,
-                                  menu_title_widget, parent); 
+                                   newitem,
+                                   menu_metadata_widget,
+                                   parent);
   return TRUE;
 }
 
