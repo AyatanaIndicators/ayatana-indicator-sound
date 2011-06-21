@@ -18,13 +18,13 @@
     </method>
     <method name = "EnableTrackSpecificItems">
         <annotation name="org.freedesktop.DBus.GLib.Async" value="true"/>
-        <arg type='s' name='player_object_path' direction="in"/>
+        <arg type='o' name='player_object_path' direction="in"/>
         <arg type='s' name='player_desktop_id' direction="in"/>
     </method>
     <method name = "EnablePlayerSpecificItems">
         <annotation name="org.freedesktop.DBus.GLib.Async" value="true"/>
+        <arg type='o' name='player_object_path' direction="in"/>
         <arg type='s' name='player_desktop_id' direction="in"/>
-        <arg type='s' name='player_object_path' direction="in"/>
     </method>    
     <signal name="SoundStateUpdate">
       <arg name="new_state" type="i" direction="out"/>

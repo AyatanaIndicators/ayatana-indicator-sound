@@ -17,11 +17,12 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <locale.h>
+
 #include "sound-service.h"
 #include "pulseaudio-mgr.h"
 #include "sound-service-dbus.h"
 #include "music-player-bridge.h"
-#include <locale.h>
 
 static GMainLoop *mainloop = NULL;
 static MusicPlayerBridge* player_bridge;

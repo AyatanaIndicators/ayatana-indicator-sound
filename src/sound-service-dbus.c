@@ -32,6 +32,7 @@
 #include "device.h"
 #include "gen-sound-service.xml.h"
 #include "dbus-shared-names.h"
+#include "sound-service-marshal.h"
 
 // DBUS methods
 static void bus_method_call (GDBusConnection * connection,
@@ -123,7 +124,7 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
                                                 G_SIGNAL_RUN_LAST,
                                                 0,
                                                 NULL, NULL,
-                                                g_cclosure_marshal_VOID__STRING,
+                                                _sound_service_marshal_VOID__STRING_STRING,
                                                 G_TYPE_NONE, 2, G_TYPE_STRING,
                                                 G_TYPE_STRING);  
   signals[PLAYER_SPECIFIC_ITEM] =  g_signal_new("player-specific-item-requested",
@@ -131,7 +132,7 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
                                                 G_SIGNAL_RUN_LAST,
                                                 0,
                                                 NULL, NULL,
-                                                g_cclosure_marshal_VOID__STRING,
+                                                _sound_service_marshal_VOID__STRING_STRING,
                                                 G_TYPE_NONE, 2, G_TYPE_STRING,
                                                 G_TYPE_STRING);  
 }
@@ -321,23 +322,31 @@ bus_method_call (GDBusConnection * connection,
     retval =  g_variant_new ("(b)", result);
   }
   else if (g_strcmp0(method, "EnableTrackSpecificItems") == 0) {
-    gchar** player_object_path_and_id;
-    g_variant_get (params, "(ss)", &player_object_path_and_id);
-    /*g_debug ("EnableTrackSpecificItems - name %s", player_object_path);    
+    gchar* player_object_path;
+    gchar* player_id;
+    g_variant_get (params, "(os)", &player_object_path, &player_id);
+    //g_debug ("object path = %s and id = %s", player_object_path, player_id);
     g_signal_emit (service,
                    signals[TRACK_SPECIFIC_ITEM],
                    0,
-                   player_object_path);*/
+                   player_object_path,
+                   player_id);
+    g_free (player_object_path);
+    g_free (player_id);
     
   }
   else if (g_strcmp0(method, "EnablePlayerSpecificItems") == 0) {
-    /*gchar* player_object_path;
-    g_variant_get (params, "(s)", &player_object_path);
-    g_debug ("EnableTrackSpecificItems - name %s", player_object_path);    
+    gchar* player_object_path;
+    gchar* player_id;
+    g_variant_get (params, "(os)", &player_object_path, &player_id);
+    //g_debug ("object path = %s and id = %s", player_object_path, player_id);
     g_signal_emit (service,
-                   signals[TRACK_SPECIFIC_ITEM],
+                   signals[PLAYER_SPECIFIC_ITEM],
                    0,
-                   player_object_path);*/
+                   player_object_path,
+                   player_id);
+    g_free (player_object_path);
+    g_free (player_id);
   }
   else {
     g_warning("Calling method '%s' on the sound service but it's unknown", method); 
