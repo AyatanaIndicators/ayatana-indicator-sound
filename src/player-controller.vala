@@ -23,11 +23,10 @@ using Gee;
 
 public class PlayerController : GLib.Object
 {
-  public const int WIDGET_QUANTITY = 6;
+  public const int WIDGET_QUANTITY = 5;
 
   public static enum widget_order{
     SEPARATOR,
-    TITLE,
     METADATA,
     TRANSPORT,
     TRACK_SPECIFIC,
@@ -72,6 +71,7 @@ public class PlayerController : GLib.Object
     this.construct_widgets();
     this.establish_mpris_connection();
     this.update_layout();
+    debug ("New player controller  for %s with icon name %s", this.app_info.get_name(), this.icon_name);
   }
 
   public void update_state(state new_state)
@@ -144,26 +144,27 @@ public class PlayerController : GLib.Object
     update_state(PlayerController.state.OFFLINE);
     TransportMenuitem transport = this.custom_items[widget_order.TRANSPORT] as TransportMenuitem;
     transport.change_play_state (Transport.State.PAUSED);
-    this.custom_items[widget_order.METADATA].reset(MetadataMenuitem.attributes_format());
-    TitleMenuitem title = this.custom_items[widget_order.TITLE] as TitleMenuitem;
-    title.toggle_active_triangle(false); 
+    this.custom_items[widget_order.METADATA].reset(MetadataMenuitem.relevant_attributes_for_ui());
+    MetadataMenuitem md = this.custom_items[widget_order.METADATA] as MetadataMenuitem;
+    md.toggle_active_triangle (false);
     this.mpris_bridge = null;
   }
 
   public void update_layout()
-  {     
+  {    
+    debug ("a call to update layout"); 
     PlaylistsMenuitem playlists_menuitem = this.custom_items[widget_order.PLAYLISTS] as PlaylistsMenuitem;
+    MetadataMenuitem metadata_menuitem = this.custom_items[widget_order.METADATA] as MetadataMenuitem;
     if(this.current_state != state.CONNECTED){
-      this.custom_items[widget_order.METADATA].property_set_bool (MENUITEM_PROP_VISIBLE,
-                                                                  false);
+      // TODO 
+      metadata_menuitem.should_collapse (true);
       playlists_menuitem.root_item.property_set_bool (MENUITEM_PROP_VISIBLE,
                                                       false );
       this.custom_items[widget_order.TRANSPORT].property_set_bool (MENUITEM_PROP_VISIBLE,
                                                                    this.app_info.get_id() == "banshee.desktop");         
       return; 
     }
-    this.custom_items[widget_order.METADATA].property_set_bool (MENUITEM_PROP_VISIBLE,
-                                                                this.custom_items[widget_order.METADATA].populated(MetadataMenuitem.attributes_format()));    
+    metadata_menuitem.should_collapse (!this.custom_items[widget_order.METADATA].populated (MetadataMenuitem.relevant_attributes_for_ui()) );
     if (this.app_info.get_id() == "banshee.desktop"){
       TransportMenuitem transport = this.custom_items[widget_order.TRANSPORT] as TransportMenuitem;
       transport.handle_cached_action();
@@ -181,12 +182,8 @@ public class PlayerController : GLib.Object
     // Separator item
     this.custom_items.add(new PlayerItem(CLIENT_TYPES_SEPARATOR));
 
-    // Title item
-    TitleMenuitem title_menu_item = new TitleMenuitem(this);
-    this.custom_items.add(title_menu_item);
-
     // Metadata item
-    MetadataMenuitem metadata_item = new MetadataMenuitem();
+    MetadataMenuitem metadata_item = new MetadataMenuitem(this);
     this.custom_items.add(metadata_item);
 
     // Transport item
@@ -202,11 +199,11 @@ public class PlayerController : GLib.Object
     this.custom_items.add(playlist_menuitem);
     
     foreach(PlayerItem item in this.custom_items){
-      if (this.custom_items.index_of(item) == 5) {
+      if (this.custom_items.index_of(item) == 4) {
         PlaylistsMenuitem playlists_menuitem = item as PlaylistsMenuitem;
         root_menu.child_add_position(playlists_menuitem.root_item, this.menu_offset + this.custom_items.index_of(item));
       }
-      else if (this.custom_items.index_of(item) == 4) {
+      else if (this.custom_items.index_of(item) == 3) {
         TrackSpecificMenuitem trackspecific_menuitem = item as TrackSpecificMenuitem;
         root_menu.child_add_position(trackspecific_menuitem.root_item, this.menu_offset + this.custom_items.index_of(item));
       }      
@@ -220,8 +217,8 @@ public class PlayerController : GLib.Object
   {
     if(this.mpris_bridge.connected() == true){
       this.update_state(state.CONNECTED);
-      TitleMenuitem title = this.custom_items[widget_order.TITLE] as TitleMenuitem;
-      title.toggle_active_triangle(true);
+      MetadataMenuitem md = this.custom_items[widget_order.METADATA] as MetadataMenuitem;
+      md.toggle_active_triangle(true);
       this.mpris_bridge.initial_update();
     }
     else{

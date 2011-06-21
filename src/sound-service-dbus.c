@@ -124,14 +124,16 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
                                                 0,
                                                 NULL, NULL,
                                                 g_cclosure_marshal_VOID__STRING,
-                                                G_TYPE_NONE, 1, G_TYPE_STRING);  
+                                                G_TYPE_NONE, 2, G_TYPE_STRING,
+                                                G_TYPE_STRING);  
   signals[PLAYER_SPECIFIC_ITEM] =  g_signal_new("player-specific-item-requested",
                                                 G_TYPE_FROM_CLASS (klass),
                                                 G_SIGNAL_RUN_LAST,
                                                 0,
                                                 NULL, NULL,
                                                 g_cclosure_marshal_VOID__STRING,
-                                                G_TYPE_NONE, 1, G_TYPE_STRING);  
+                                                G_TYPE_NONE, 2, G_TYPE_STRING,
+                                                G_TYPE_STRING);  
 }
 
 static void

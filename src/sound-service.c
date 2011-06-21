@@ -47,8 +47,9 @@ service_shutdown (IndicatorService *service, gpointer user_data)
 
 void 
 on_player_specific_item_requested (SoundServiceDbus* sound_service,
-                                  const gchar* player_object_path,
-                                  gpointer userdata)
+                                   const gchar* desktop_id,
+                                   const gchar* player_object_path,
+                                   gpointer userdata)
 {
   music_player_bridge_enable_player_specific_items_for_client (player_bridge, desktop_id);
   g_debug ("ON PLAYER SPECIFIC ITEM REQUESTED %s", desktop_id);  
@@ -57,6 +58,7 @@ on_player_specific_item_requested (SoundServiceDbus* sound_service,
 void 
 on_track_specific_item_requested (SoundServiceDbus* sound_service,
                                   const gchar* desktop_id,
+                                  const gchar* player_object_path,
                                   gpointer userdata)
 {
   music_player_bridge_enable_track_specific_items_for_client (player_bridge, desktop_id);

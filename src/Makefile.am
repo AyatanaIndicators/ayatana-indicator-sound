@@ -18,8 +18,6 @@ libsoundmenu_la_SOURCES = \
             transport-widget.h \
             metadata-widget.c \
             metadata-widget.h \
-            title-widget.c \
-            title-widget.h \
             volume-widget.c \
             volume-widget.h \
             voip-input-widget.c \
@@ -50,7 +48,6 @@ music_bridge_VALASOURCES = \
 	transport-menu-item.vala \
 	track-specific-menu-item.vala \
 	metadata-menu-item.vala \
-	title-menu-item.vala \
 	player-controller.vala \
 	mpris2-interfaces.vala \
 	mpris2-watcher.vala \
