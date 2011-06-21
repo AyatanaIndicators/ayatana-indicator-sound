@@ -319,14 +319,23 @@ bus_method_call (GDBusConnection * connection,
     retval =  g_variant_new ("(b)", result);
   }
   else if (g_strcmp0(method, "EnableTrackSpecificItems") == 0) {
-    gchar* player_name;
-    g_variant_get (params, "(s)", &player_name);
-    g_debug ("EnableTrackSpecificItems - name %s", player_name);    
+    gchar** player_object_path_and_id;
+    g_variant_get (params, "(ss)", &player_object_path_and_id);
+    /*g_debug ("EnableTrackSpecificItems - name %s", player_object_path);    
     g_signal_emit (service,
                    signals[TRACK_SPECIFIC_ITEM],
                    0,
-                   player_name);
+                   player_object_path);*/
     
+  }
+  else if (g_strcmp0(method, "EnablePlayerSpecificItems") == 0) {
+    /*gchar* player_object_path;
+    g_variant_get (params, "(s)", &player_object_path);
+    g_debug ("EnableTrackSpecificItems - name %s", player_object_path);    
+    g_signal_emit (service,
+                   signals[TRACK_SPECIFIC_ITEM],
+                   0,
+                   player_object_path);*/
   }
   else {
     g_warning("Calling method '%s' on the sound service but it's unknown", method); 
