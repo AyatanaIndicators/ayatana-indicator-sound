@@ -325,7 +325,7 @@ bus_method_call (GDBusConnection * connection,
     gchar* player_object_path;
     gchar* player_id;
     g_variant_get (params, "(os)", &player_object_path, &player_id);
-    //g_debug ("object path = %s and id = %s", player_object_path, player_id);
+    g_debug ("object path = %s and id = %s", player_object_path, player_id);
     g_signal_emit (service,
                    signals[TRACK_SPECIFIC_ITEM],
                    0,

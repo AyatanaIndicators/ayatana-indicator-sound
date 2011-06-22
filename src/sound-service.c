@@ -52,7 +52,9 @@ on_player_specific_item_requested (SoundServiceDbus* sound_service,
                                    const gchar* player_object_path,
                                    gpointer userdata)
 {
-  music_player_bridge_enable_player_specific_items_for_client (player_bridge, desktop_id);
+  music_player_bridge_enable_player_specific_items_for_client (player_bridge,
+                                                               desktop_id,
+                                                               player_object_path);
   g_debug ("ON PLAYER SPECIFIC ITEM REQUESTED %s", desktop_id);  
 }
 
@@ -62,7 +64,9 @@ on_track_specific_item_requested (SoundServiceDbus* sound_service,
                                   const gchar* player_object_path,
                                   gpointer userdata)
 {
-  music_player_bridge_enable_track_specific_items_for_client (player_bridge, desktop_id);
+  music_player_bridge_enable_track_specific_items_for_client (player_bridge,
+                                                              desktop_id,
+                                                              player_object_path);
   g_debug ("ON TRACK SPECIFIC ITEM REQUESTED %s", desktop_id);  
 }
 

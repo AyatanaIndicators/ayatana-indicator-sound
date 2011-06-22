@@ -51,6 +51,7 @@ public class PlayerController : GLib.Object
   public int menu_offset { get; set;}
   public string icon_name { get; set; }
   public bool? use_playlists;
+  public Client track_specific_client;
   
   public PlayerController(Dbusmenu.Menuitem root,
                           GLib.AppInfo app,
@@ -107,12 +108,19 @@ public class PlayerController : GLib.Object
     }
   }
 
-  public void enable_track_specific_items()
+  public void enable_track_specific_items (string object_path)
   {
     debug ("enable_track_specific_items");
-    TrackSpecificMenuitem menuitem = this.custom_items[widget_order.TRACK_SPECIFIC] as TrackSpecificMenuitem;
+    track_specific_client = new Client (this.dbus_name, object_path);
+    track_specific_client.new_menuitem.connect (on_new_track_specific_menuitem);
+    /*TrackSpecificMenuitem menuitem = this.custom_items[widget_order.TRACK_SPECIFIC] as TrackSpecificMenuitem;
     menuitem.root_item.property_set_bool (MENUITEM_PROP_VISIBLE, true);
-    menuitem.root_item.property_set_bool (MENUITEM_PROP_ENABLED, true);
+    menuitem.root_item.property_set_bool (MENUITEM_PROP_ENABLED, true);*/
+  }
+
+  private void on_new_track_specific_menuitem (GLib.Object item)
+  {
+    debug ("New track specific item for %s", this.app_info.get_name());
   }
   
   private void establish_mpris_connection()
@@ -123,9 +131,8 @@ public class PlayerController : GLib.Object
     }
     debug ( " establish mpris connection - use playlists value = %s ",
             this.use_playlists.to_string() );
-
-    this.mpris_bridge = new Mpris2Controller(this); 
-    this.determine_state();
+    this.mpris_bridge = new Mpris2Controller (this);
+    this.determine_state ();
   }
   
   public void remove_from_menu()
