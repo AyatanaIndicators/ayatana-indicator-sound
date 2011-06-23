@@ -23,7 +23,11 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
+#if GTK_CHECK_VERSION(3, 0, 0)
+#include <libdbusmenu-gtk3/menu.h>
+#else
 #include <libdbusmenu-gtk/menu.h>
+#endif
 #include <libido/idoscalemenuitem.h>
 
 #include <gio/gio.h>
@@ -459,6 +463,26 @@ new_voip_slider_widget (DbusmenuMenuitem * newitem,
 //UI callbacks
 /******************************************************************/
 
+static GtkWidget *
+get_current_item (GtkContainer * container)
+{
+  GList *children = gtk_container_get_children (container);
+  GList *iter;
+  GtkWidget *rv = NULL;
+
+  /* Suprisingly, GTK+ doesn't really let us query "what is the currently
+     selected item?".  But it does note it internally by prelighting the
+     widget, so we watch for that. */
+  for (iter = children; iter; iter = iter->next) {
+    if (gtk_widget_get_state (GTK_WIDGET (iter->data)) & GTK_STATE_PRELIGHT) {
+      rv = GTK_WIDGET (iter->data);
+      break;
+    }
+  }
+
+  return rv;
+}
+
 /**
 key_press_cb:
 **/
@@ -473,7 +497,7 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
 
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(indicator);
   GtkWidget *menuitem;
-  menuitem = GTK_MENU_SHELL (widget)->active_menu_item;
+  menuitem = get_current_item (GTK_CONTAINER (widget));
 
   if (IDO_IS_SCALE_MENU_ITEM(menuitem) == TRUE){
     gdouble current_value = 0;
@@ -502,19 +526,19 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
     }
 
     switch (event->keyval) {
-    case GDK_Right:
+    case GDK_KEY_Right:
       digested = TRUE;
       new_value = current_value + five_percent;
       break;
-    case GDK_Left:
+    case GDK_KEY_Left:
       digested = TRUE;
       new_value = current_value - five_percent;
       break;
-    case GDK_plus:
+    case GDK_KEY_plus:
       digested = TRUE;
       new_value = current_value + five_percent;
       break;
-    case GDK_minus:
+    case GDK_KEY_minus:
       digested = TRUE;
       new_value = current_value - five_percent;
       break;
@@ -542,12 +566,12 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
     }
 
     switch (event->keyval) {
-    case GDK_Right:
+    case GDK_KEY_Right:
       transport_widget_react_to_key_press_event ( transport_widget,
                                                   TRANSPORT_ACTION_NEXT );
       digested = TRUE;         
       break;        
-    case GDK_Left:
+    case GDK_KEY_Left:
       transport_widget_react_to_key_press_event ( transport_widget,
                                                   TRANSPORT_ACTION_PREVIOUS );
       digested = TRUE;         
@@ -557,8 +581,8 @@ key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
                                                   TRANSPORT_ACTION_PLAY_PAUSE );
       digested = TRUE;         
       break;
-    case GDK_Up:
-    case GDK_Down:
+    case GDK_KEY_Up:
+    case GDK_KEY_Down:
       digested = FALSE;     
       break;
     default:
@@ -585,7 +609,7 @@ key_release_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
 
   GtkWidget *menuitem;
 
-  menuitem = GTK_MENU_SHELL (widget)->active_menu_item;
+  menuitem = get_current_item (GTK_CONTAINER (widget));
   if (IS_TRANSPORT_WIDGET(menuitem) == TRUE) {
     TransportWidget* transport_widget = NULL;
     GList* elem;
@@ -597,12 +621,12 @@ key_release_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
     }
 
     switch (event->keyval) {
-    case GDK_Right:
+    case GDK_KEY_Right:
       transport_widget_react_to_key_release_event ( transport_widget,
                                                     TRANSPORT_ACTION_NEXT );
       digested = TRUE;
       break;        
-    case GDK_Left:
+    case GDK_KEY_Left:
       transport_widget_react_to_key_release_event ( transport_widget,
                                                     TRANSPORT_ACTION_PREVIOUS );
       digested = TRUE;         
@@ -612,8 +636,8 @@ key_release_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
                                                     TRANSPORT_ACTION_PLAY_PAUSE );
       digested = TRUE;         
       break;
-    case GDK_Up:
-    case GDK_Down:
+    case GDK_KEY_Up:
+    case GDK_KEY_Down:
       digested = FALSE;     
       break;
     default:
@@ -643,9 +667,9 @@ indicator_sound_scroll (IndicatorObject *io, gint delta,
   GtkAdjustment *adj = gtk_range_get_adjustment (GTK_RANGE (slider));
   //g_debug("indicator-sound-scroll - current slider value %f", value);
   if (direction == INDICATOR_OBJECT_SCROLL_UP) {
-    value += adj->step_increment;
+    value += gtk_adjustment_get_step_increment (adj);
   } else {
-    value -= adj->step_increment;
+    value -= gtk_adjustment_get_step_increment (adj);
   }
   //g_debug("indicator-sound-scroll - update slider with value %f", value);
   volume_widget_update(VOLUME_WIDGET(priv->volume_widget), value, "scroll updates");
