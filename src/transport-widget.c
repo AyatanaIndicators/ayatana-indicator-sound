@@ -1232,12 +1232,14 @@ draw (GtkWidget* button, cairo_t *cr)
   cairo_surface_t*  surf = NULL;
   cairo_t*       cr_surf = NULL;
 
+#if ! GTK_CHECK_VERSION(3, 0, 0)
   GtkAllocation allocation;
   gtk_widget_get_allocation (button, &allocation);
   cairo_translate (cr, allocation.x, allocation.y);
   
   //g_debug("button x allocation = %i", allocation.x);
   //g_debug("button y allocation = %i", allocation.y);
+#endif
 
   GtkStyle *style;
 
