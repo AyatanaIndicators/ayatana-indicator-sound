@@ -59,14 +59,12 @@ static void metadata_widget_finalize      (GObject *object);
 static void metadata_widget_set_style     (GtkWidget* button, GtkStyle* style);
 static void metadata_widget_set_twin_item (MetadataWidget* self,
                                            DbusmenuMenuitem* twin_item);
-#if GTK_CHECK_VERSION(3, 0, 0)
 static void metadata_get_preferred_width (GtkWidget *widget,
             			                  gint      *minimal_width,
                         			      gint      *natural_width);
 static void metadata_get_preferred_height (GtkWidget *widget,
             			                   gint      *minimal_width,
                         			       gint      *natural_width);
-#endif
                         			      
 
 // keyevent consumers

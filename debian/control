@@ -5,15 +5,20 @@ Maintainer: Ubuntu Desktop Team <ubuntu-desktop@lists.ubuntu.com>
 XSBC-Original-Maintainer: Conor Curran <conor.curran@canonical.com>
 Build-Depends: debhelper (>= 7),
                cdbs (>= 0.4.41), 
+               quilt,
                autotools-dev,
                libglib2.0-dev (>= 2.22.3),
                libgtk2.0-dev (>= 2.12.0),
+               libgtk-3-dev,
                libdbusmenu-glib-dev (>= 0.3.101),
-               libdbusmenu-gtk-dev (>= 0.3.101) ,
+               libdbusmenu-gtk-dev (>= 0.3.101),
+               libdbusmenu-gtk3-dev (>= 0.3.101),
                libindicator-dev (>= 0.3.19),
+               libindicator3-dev (>= 0.3.19),
                libpulse-dev (>= 0.9.18),
                libpulse-mainloop-glib0 (>= 0.9.18),
                libido-0.1-dev (>= 0.1.11),
+               libido3-0.1-dev (>= 0.2.90),
                libgconf2-dev,
                libgee-dev,
                libxml2-dev,
@@ -28,6 +33,17 @@ Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          pulseaudio
+Description: System sound indicator.
+ System sound indicator which provides easy control of the PulseAudio sound 
+ daemon.
+
+Package: indicator-sound-gtk2
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         indicator-sound (= ${binary:Version}),
+         pulseaudio
+Replaces: indicator-sound (<< 0.7.1)
 Description: System sound indicator.
  System sound indicator which provides easy control of the PulseAudio sound 
  daemon.

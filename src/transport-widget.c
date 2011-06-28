@@ -31,7 +31,7 @@ Uses code from ctk
 
 #define RECT_WIDTH 130.0f
 #define Y 7.0f
-#define X 80.0f
+#define X 70.0f
 #define INNER_RADIUS 12.5
 #define MIDDLE_RADIUS 13.0f
 #define OUTER_RADIUS  14.5f
@@ -43,16 +43,16 @@ Uses code from ctk
 #define TRI_WIDTH  11.0f
 #define TRI_HEIGHT 13.0f
 #define TRI_OFFSET  6.0f
-#define PREV_X 78.0f
+#define PREV_X 68.0f
 #define PREV_Y 13.0f
-#define NEXT_X 156.0f
+#define NEXT_X 146.0f
 #define NEXT_Y 13.0f //prev_y
 #define PAUSE_WIDTH 21.0f
 #define PAUSE_HEIGHT 27.0f
 #define BAR_WIDTH 4.5f
 #define BAR_HEIGHT 24.0f
 #define BAR_OFFSET 10.0f
-#define PAUSE_X 121.0f
+#define PAUSE_X 111.0f
 #define PAUSE_Y 7.0f
 #define PLAY_WIDTH 28.0f
 #define PLAY_HEIGHT 29.0f
@@ -104,8 +104,10 @@ G_DEFINE_TYPE (TransportWidget, transport_widget, GTK_TYPE_MENU_ITEM);
 /* essentials */
 static void transport_widget_set_twin_item ( TransportWidget* self,
                                              DbusmenuMenuitem* twin_item);
+#if ! GTK_CHECK_VERSION(3, 0, 0)
 static gboolean transport_widget_expose ( GtkWidget *button, GdkEventExpose *event);
-static void draw (GtkWidget* button, cairo_t *cr);
+#endif
+static gboolean draw (GtkWidget* button, cairo_t *cr);
 
 /* UI and dbusmenu callbacks */
 static gboolean transport_widget_button_press_event   (GtkWidget      *menuitem,
@@ -133,8 +135,8 @@ static void transport_widget_react_to_button_release ( TransportWidget* button,
                                                        TransportAction command);
 static void transport_widget_toggle_play_pause ( TransportWidget* button,
                                                  TransportState update);
-static void transport_widget_select (GtkItem* menu, gpointer Userdata);
-static void transport_widget_deselect (GtkItem* menu, gpointer Userdata);
+static void transport_widget_select (GtkWidget* menu, gpointer Userdata);
+static void transport_widget_deselect (GtkWidget* menu, gpointer Userdata);
 static TransportAction transport_widget_collision_detection (gint x, gint y);
 static void transport_widget_start_timing (TransportWidget* widget);
 static gboolean transport_widget_trigger_seek (gpointer userdata);
@@ -155,7 +157,11 @@ transport_widget_class_init (TransportWidgetClass *klass)
   widget_class->button_release_event = transport_widget_button_release_event;
   widget_class->motion_notify_event = transport_widget_motion_notify_event;
   widget_class->leave_notify_event = transport_widget_leave_notify_event;
+#if GTK_CHECK_VERSION(3, 0, 0)
+  widget_class->draw = draw;
+#else
   widget_class->expose_event = transport_widget_expose;
+#endif
   
   gobject_class->dispose = transport_widget_dispose;
   gobject_class->finalize = transport_widget_finalize;
@@ -212,11 +218,11 @@ transport_widget_init (TransportWidget *self)
                     "notify",
                     G_CALLBACK (transport_widget_notify),
                     NULL);
-  g_signal_connect (GTK_ITEM(self),
+  g_signal_connect (G_OBJECT(self),
                     "select",
                     G_CALLBACK (transport_widget_select),
                     NULL);
-  g_signal_connect (GTK_ITEM(self),
+  g_signal_connect (G_OBJECT(self),
                     "deselect",
                     G_CALLBACK (transport_widget_deselect),
                     NULL);  
@@ -236,11 +242,12 @@ transport_widget_finalize (GObject *object)
   G_OBJECT_CLASS (transport_widget_parent_class)->finalize (object);
 }
 
+#if ! GTK_CHECK_VERSION(3, 0, 0)
 static gboolean
 transport_widget_expose (GtkWidget *button, GdkEventExpose *event)
 {
   cairo_t *cr;
-  cr = gdk_cairo_create (button->window);
+  cr = gdk_cairo_create (gtk_widget_get_window (button));
 
     //g_debug("In the playbutton's expose method, x = %i, y=%i and width: %i and height: %i'");
   cairo_rectangle (cr,
@@ -253,6 +260,7 @@ transport_widget_expose (GtkWidget *button, GdkEventExpose *event)
   cairo_destroy (cr);
   return FALSE;
 }
+#endif
 
 gboolean
 transport_widget_is_selected ( TransportWidget* widget )
@@ -434,7 +442,7 @@ transport_widget_button_release_event (GtkWidget *menuitem,
 }
 
 static void 
-transport_widget_select (GtkItem* item, gpointer Userdata)
+transport_widget_select (GtkWidget* item, gpointer Userdata)
 {
   TransportWidget* transport = TRANSPORT_WIDGET(item);
   TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport ); 
@@ -442,7 +450,7 @@ transport_widget_select (GtkItem* item, gpointer Userdata)
 }
 
 static void 
-transport_widget_deselect (GtkItem* item, gpointer Userdata)
+transport_widget_deselect (GtkWidget* item, gpointer Userdata)
 {
   TransportWidget* transport = TRANSPORT_WIDGET(item);
   TransportWidgetPrivate * priv = TRANSPORT_WIDGET_GET_PRIVATE ( transport ); 
@@ -1214,23 +1222,28 @@ _surface_blur (cairo_surface_t* surface,
   cairo_surface_mark_dirty (surface); 
 }
 
-static void
+static gboolean
 draw (GtkWidget* button, cairo_t *cr)
 {
-  g_return_if_fail(IS_TRANSPORT_WIDGET(button));
-  g_return_if_fail( cr != NULL );
+  g_return_val_if_fail(IS_TRANSPORT_WIDGET(button), FALSE);
+  g_return_val_if_fail(cr != NULL, FALSE);
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(button);  
 
   cairo_surface_t*  surf = NULL;
   cairo_t*       cr_surf = NULL;
 
-  cairo_translate (cr, button->allocation.x, button->allocation.y);
-  
-  //g_debug("button x allocation = %i", button->allocation.x);
-  //g_debug("button y allocation = %i", button->allocation.y);
+#if ! GTK_CHECK_VERSION(3, 0, 0)
+  GtkAllocation allocation;
+  gtk_widget_get_allocation (button, &allocation);
+  cairo_translate (cr, allocation.x, allocation.y);  
+#endif
 
   GtkStyle *style;
-
+  
+#if GTK_CHECK_VERSION(3, 0, 0)
+  gtk_style_context_add_class (gtk_widget_get_style_context (button),
+                               "menu");
+#endif
   CairoColorRGB bg_color, fg_color, bg_selected, bg_prelight;
   CairoColorRGB color_middle[2], color_middle_prelight[2], color_outer[2], color_outer_prelight[2],
                 color_play_outer[2], color_play_outer_prelight[2],
@@ -1795,6 +1808,8 @@ draw (GtkWidget* button, cairo_t *cr)
            FALSE);
     _finalize (cr, &cr_surf, &surf, PAUSE_X-0.5f, PAUSE_Y);
   }
+
+  return FALSE;
 }
 
 static void 
