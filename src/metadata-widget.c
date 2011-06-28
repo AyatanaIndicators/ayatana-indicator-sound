@@ -267,7 +267,7 @@ static void
 draw_album_border(GtkWidget *metadata, gboolean selected)
 {
   cairo_t *cr;  
-  cr = gdk_cairo_create (metadata->window);
+  cr = gdk_cairo_create (gtk_widget_get_window (metadata));
   GtkStyle *style;
   style = gtk_widget_get_style (metadata);
   
@@ -357,7 +357,7 @@ static void
 draw_album_art_placeholder(GtkWidget *metadata)
 {       
   cairo_t *cr;  
-  cr = gdk_cairo_create (metadata->window);
+  cr = gdk_cairo_create (gtk_widget_get_window (metadata));
   GtkStyle *style;
   style = gtk_widget_get_style (metadata);
   
@@ -659,10 +659,12 @@ metadata_widget_icon_triangle_draw_cb (GtkWidget *widget,
   
   style = gtk_widget_get_style (widget);
 
-  cr = (cairo_t*) gdk_cairo_create (widget->window);  
+  cr = (cairo_t*) gdk_cairo_create (gtk_widget_get_window (widget));  
   
-  x = widget->allocation.x;
-  y = widget->allocation.y;
+  GtkAllocation allocation;
+  gtk_widget_get_allocation (widget, &allocation);
+  x = allocation.x;
+  y = allocation.y;
     
   // Draw player icon  
   if (priv->icon_buf != NULL){  

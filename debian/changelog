@@ -1,4 +1,4 @@
-indicator-sound (0.7.1-0ubuntu1) oneiric; urgency=low
+indicator-sound (0.7.1-0ubuntu1) UNRELEASED; urgency=low
 
   * New upstream release.
     - "Sound Preferences..." should be "Sound Settings" (LP: #785571)
