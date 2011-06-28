@@ -31,7 +31,7 @@ Uses code from ctk
 
 #define RECT_WIDTH 130.0f
 #define Y 7.0f
-#define X 80.0f
+#define X 70.0f
 #define INNER_RADIUS 12.5
 #define MIDDLE_RADIUS 13.0f
 #define OUTER_RADIUS  14.5f
@@ -43,16 +43,16 @@ Uses code from ctk
 #define TRI_WIDTH  11.0f
 #define TRI_HEIGHT 13.0f
 #define TRI_OFFSET  6.0f
-#define PREV_X 78.0f
+#define PREV_X 68.0f
 #define PREV_Y 13.0f
-#define NEXT_X 156.0f
+#define NEXT_X 146.0f
 #define NEXT_Y 13.0f //prev_y
 #define PAUSE_WIDTH 21.0f
 #define PAUSE_HEIGHT 27.0f
 #define BAR_WIDTH 4.5f
 #define BAR_HEIGHT 24.0f
 #define BAR_OFFSET 10.0f
-#define PAUSE_X 121.0f
+#define PAUSE_X 111.0f
 #define PAUSE_Y 7.0f
 #define PLAY_WIDTH 28.0f
 #define PLAY_HEIGHT 29.0f

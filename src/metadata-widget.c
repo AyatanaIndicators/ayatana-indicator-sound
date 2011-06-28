@@ -46,6 +46,7 @@ struct _MetadataWidgetPrivate
   GtkWidget* player_label;
   GdkPixbuf* icon_buf;
   DbusmenuMenuitem* twin_item;
+  gint		 current_height;
 };
 
 #define METADATA_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), METADATA_WIDGET_TYPE, MetadataWidgetPrivate))
@@ -58,6 +59,13 @@ static void metadata_widget_finalize      (GObject *object);
 static void metadata_widget_set_style     (GtkWidget* button, GtkStyle* style);
 static void metadata_widget_set_twin_item (MetadataWidget* self,
                                            DbusmenuMenuitem* twin_item);
+static void metadata_get_preferred_width (GtkWidget *widget,
+            			                  gint      *minimal_width,
+                        			      gint      *natural_width);
+static void metadata_get_preferred_height (GtkWidget *widget,
+            			                   gint      *minimal_width,
+                        			       gint      *natural_width);
+                        			      
 
 // keyevent consumers
 static gboolean metadata_widget_button_release_event (GtkWidget *menuitem, 
@@ -70,6 +78,7 @@ static void metadata_widget_property_update (DbusmenuMenuitem* item,
 static void metadata_widget_style_labels ( MetadataWidget* self,
                                            GtkLabel* label);
 static void draw_album_art_placeholder (GtkWidget *metadata);
+
 static void draw_album_border (GtkWidget *metadata, gboolean selected);
 static void metadata_widget_selection_received_event_callback( GtkWidget        *widget,
                                                                 GtkSelectionData *data,
@@ -106,11 +115,35 @@ metadata_widget_class_init (MetadataWidgetClass *klass)
 
   widget_class->button_release_event = metadata_widget_button_release_event;
   
+  #if GTK_CHECK_VERSION(3, 0, 0)  
+  widget_class->get_preferred_width = metadata_get_preferred_width;
+  widget_class->get_preferred_height = metadata_get_preferred_height;
+  #endif
   g_type_class_add_private (klass, sizeof (MetadataWidgetPrivate));
 
   gobject_class->dispose = metadata_widget_dispose;
   gobject_class->finalize = metadata_widget_finalize;
 }
+
+#if GTK_CHECK_VERSION(3, 0, 0)  
+static void
+metadata_get_preferred_width (GtkWidget *widget,
+                              gint      *minimal_width,
+                              gint      *natural_width)
+{
+  *minimal_width = *natural_width = 200;
+}
+
+static void
+metadata_get_preferred_height (GtkWidget *widget,
+                               gint      *minimal_height,
+                               gint      *natural_height)
+{
+  //MetadataWidget* self = METADATA_WIDGET (widget);
+  //MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);	
+  *minimal_height = *natural_height = 95;//priv->current_height;
+}
+#endif
 
 static void
 metadata_widget_init (MetadataWidget *self)
@@ -124,13 +157,14 @@ metadata_widget_init (MetadataWidget *self)
   hbox = gtk_hbox_new(FALSE, 0);
   
   priv->meta_data_h_box = hbox;
-
+  priv->current_height = 1;
+  
   // image
   priv->album_art = gtk_image_new();
   priv->image_path = g_string_new("");
   priv->old_image_path = g_string_new("");
   
-  #if GTK_CHECK_VERSION(3, 0, 0)  
+  #if GTK_CHECK_VERSION(3, 0, 0) 
   g_signal_connect(priv->album_art, "draw", 
                    G_CALLBACK(metadata_image_expose_gtk_3),
                    GTK_WIDGET(self));
@@ -206,9 +240,14 @@ metadata_widget_init (MetadataWidget *self)
   priv->player_label = player_label;
       
   gtk_box_pack_start (GTK_BOX(outer_v_box), priv->player_label, FALSE, FALSE, 0);
+  
   gtk_box_pack_start (GTK_BOX(outer_v_box), priv->meta_data_h_box, FALSE, FALSE, 0);
     
   gtk_container_add (GTK_CONTAINER (self), outer_v_box);  
+  
+  gtk_widget_show_all (priv->meta_data_h_box);
+  gtk_widget_set_no_show_all (priv->meta_data_h_box, TRUE);
+  gtk_widget_hide (priv->meta_data_h_box);
 }
 
 static void
@@ -249,8 +288,8 @@ metadata_image_expose_gtk_3 (GtkWidget *metadata,
     return FALSE;
   }
   
-  draw_album_border(metadata, FALSE);
-  
+  draw_album_border (metadata, FALSE);
+
   if(priv->image_path->len > 0){
     if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE ||
        priv->theme_change_occured == TRUE){
@@ -305,14 +344,8 @@ metadata_widget_icon_triangle_draw_cb_gtk_3 (GtkWidget *widget,
   GtkAllocation allocation;
   gtk_widget_get_allocation (widget, &allocation);
   x = allocation.x;
-  y = allocation.y;
-
-  g_debug ("icon expose method");
+  y = 0;
     
-  if (cr == NULL){
-	g_debug ("Cairo context is null, get out of here");
-	return;
-  }
   // Draw player icon  
   if (priv->icon_buf != NULL){  
     gdk_cairo_set_source_pixbuf (cr,
@@ -328,6 +361,8 @@ metadata_widget_icon_triangle_draw_cb_gtk_3 (GtkWidget *widget,
     y += (double)arrow_height/2.0 + offset;
     cairo_set_line_width (cr, 1.0);
 
+	//g_debug ("triangle drawing");
+
     cairo_move_to (cr, x, y);
     cairo_line_to (cr, x, y + arrow_height);
     cairo_line_to (cr, x + arrow_width, y + (double)arrow_height/2.0);
@@ -338,7 +373,6 @@ metadata_widget_icon_triangle_draw_cb_gtk_3 (GtkWidget *widget,
     cairo_fill (cr);                                             
   }
   
-  cairo_destroy (cr);
   return FALSE;  
 }
 
@@ -695,25 +729,33 @@ metadata_widget_handle_resizing (MetadataWidget* self)
 {
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);
   
+  g_debug ("SHOW/HIDE TRACK DETAILS - %i",	dbusmenu_menuitem_property_get_bool (priv->twin_item, DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS));  
+  
   if (dbusmenu_menuitem_property_get_bool (priv->twin_item,
                                            DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS) == TRUE){
+    // TODO
+    // revert to hide                                             
+    #if GTK_CHECK_VERSION(3, 0, 0)  
+    gtk_widget_show (priv->meta_data_h_box);
+    #else
     gtk_widget_hide (priv->meta_data_h_box);
     gtk_widget_hide (priv->artist_label);
     gtk_widget_hide (priv->piece_label);
     gtk_widget_hide (priv->container_label); 
     gtk_widget_hide (priv->album_art); 
-    gtk_widget_hide (priv->meta_data_v_box); 
-    gtk_widget_set_size_request(GTK_WIDGET(self), 200, 20); 
+    gtk_widget_hide (priv->meta_data_v_box);
+    #endif 	
   }
   else{
-
+    #if GTK_CHECK_VERSION(3, 0, 0)  
+    gtk_widget_show (priv->meta_data_h_box);
+    #else    
     gtk_widget_show (priv->meta_data_h_box);     
     gtk_widget_show (priv->artist_label);
     gtk_widget_show (priv->piece_label);
     gtk_widget_show (priv->container_label); 
     gtk_widget_show (priv->album_art); 
-    gtk_widget_show (priv->meta_data_v_box); 
-    gtk_widget_set_size_request(GTK_WIDGET(self), 200, 95);   
+    #endif 
   }
   gtk_widget_queue_draw(GTK_WIDGET(self));      
 }
