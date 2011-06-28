@@ -1235,14 +1235,15 @@ draw (GtkWidget* button, cairo_t *cr)
 #if ! GTK_CHECK_VERSION(3, 0, 0)
   GtkAllocation allocation;
   gtk_widget_get_allocation (button, &allocation);
-  cairo_translate (cr, allocation.x, allocation.y);
-  
-  //g_debug("button x allocation = %i", allocation.x);
-  //g_debug("button y allocation = %i", allocation.y);
+  cairo_translate (cr, allocation.x, allocation.y);  
 #endif
 
   GtkStyle *style;
-
+  
+#if GTK_CHECK_VERSION(3, 0, 0)
+  gtk_style_context_add_class (gtk_widget_get_style_context (button),
+                               "menu");
+#endif
   CairoColorRGB bg_color, fg_color, bg_selected, bg_prelight;
   CairoColorRGB color_middle[2], color_middle_prelight[2], color_outer[2], color_outer_prelight[2],
                 color_play_outer[2], color_play_outer_prelight[2],

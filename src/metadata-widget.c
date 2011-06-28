@@ -490,6 +490,11 @@ draw_album_border(GtkWidget *metadata, gboolean selected)
 {
   cairo_t *cr;  
   cr = gdk_cairo_create (gtk_widget_get_window (metadata));
+  #if GTK_CHECK_VERSION(3, 0, 0)
+  gtk_style_context_add_class (gtk_widget_get_style_context (metadata),
+                               "menu");
+  #endif
+  
   GtkStyle *style;
   style = gtk_widget_get_style (metadata);
   
