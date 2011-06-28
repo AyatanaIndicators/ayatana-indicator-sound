@@ -5,6 +5,7 @@ Maintainer: Ubuntu Desktop Team <ubuntu-desktop@lists.ubuntu.com>
 XSBC-Original-Maintainer: Conor Curran <conor.curran@canonical.com>
 Build-Depends: debhelper (>= 7),
                cdbs (>= 0.4.41), 
+               quilt,
                autotools-dev,
                libglib2.0-dev (>= 2.22.3),
                libgtk2.0-dev (>= 2.12.0),

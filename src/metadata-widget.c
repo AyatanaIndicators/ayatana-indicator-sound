@@ -46,6 +46,7 @@ struct _MetadataWidgetPrivate
   GtkWidget* player_label;
   GdkPixbuf* icon_buf;
   DbusmenuMenuitem* twin_item;
+  gint		 current_height;
 };
 
 #define METADATA_WIDGET_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), METADATA_WIDGET_TYPE, MetadataWidgetPrivate))
@@ -55,12 +56,16 @@ static void metadata_widget_class_init    (MetadataWidgetClass *klass);
 static void metadata_widget_init          (MetadataWidget *self);
 static void metadata_widget_dispose       (GObject *object);
 static void metadata_widget_finalize      (GObject *object);
-static gboolean metadata_image_expose     (GtkWidget *image,
-                                           GdkEventExpose *event,
-                                           gpointer user_data);
 static void metadata_widget_set_style     (GtkWidget* button, GtkStyle* style);
 static void metadata_widget_set_twin_item (MetadataWidget* self,
                                            DbusmenuMenuitem* twin_item);
+static void metadata_get_preferred_width (GtkWidget *widget,
+            			                  gint      *minimal_width,
+                        			      gint      *natural_width);
+static void metadata_get_preferred_height (GtkWidget *widget,
+            			                   gint      *minimal_width,
+                        			       gint      *natural_width);
+                        			      
 
 // keyevent consumers
 static gboolean metadata_widget_button_release_event (GtkWidget *menuitem, 
@@ -72,15 +77,29 @@ static void metadata_widget_property_update (DbusmenuMenuitem* item,
                                              gpointer userdata);
 static void metadata_widget_style_labels ( MetadataWidget* self,
                                            GtkLabel* label);
-static void draw_album_art_placeholder ( GtkWidget *metadata);
-static void draw_album_border ( GtkWidget *metadata, gboolean selected);
+static void draw_album_art_placeholder (GtkWidget *metadata);
+
+static void draw_album_border (GtkWidget *metadata, gboolean selected);
 static void metadata_widget_selection_received_event_callback( GtkWidget        *widget,
                                                                 GtkSelectionData *data,
                                                                 guint             time,
                                                                 gpointer          user_data);
-static gboolean metadata_widget_icon_triangle_draw_cb ( GtkWidget *image,
-                                                        GdkEventExpose *event,
-                                                        gpointer user_data );
+
+#if GTK_CHECK_VERSION(3, 0, 0)  
+static gboolean metadata_widget_icon_triangle_draw_cb_gtk_3 (GtkWidget *image,
+															 cairo_t* cr,
+															 gpointer user_data);
+static gboolean metadata_image_expose_gtk_3 (GtkWidget *image,
+											 cairo_t* cr,
+											 gpointer user_data);
+#else
+static gboolean metadata_widget_icon_triangle_draw_cb (GtkWidget *image,
+                                                       GdkEventExpose *event,
+                                                       gpointer user_data);
+static gboolean metadata_image_expose (GtkWidget *image,
+                                       GdkEventExpose *event,
+                                       gpointer user_data);
+#endif
 
 static void metadata_widget_set_icon (MetadataWidget *self);
 static void metadata_widget_handle_resizing (MetadataWidget* self);
@@ -96,13 +115,35 @@ metadata_widget_class_init (MetadataWidgetClass *klass)
 
   widget_class->button_release_event = metadata_widget_button_release_event;
   
+  #if GTK_CHECK_VERSION(3, 0, 0)  
+  widget_class->get_preferred_width = metadata_get_preferred_width;
+  widget_class->get_preferred_height = metadata_get_preferred_height;
+  #endif
   g_type_class_add_private (klass, sizeof (MetadataWidgetPrivate));
 
   gobject_class->dispose = metadata_widget_dispose;
   gobject_class->finalize = metadata_widget_finalize;
 }
 
+#if GTK_CHECK_VERSION(3, 0, 0)  
+static void
+metadata_get_preferred_width (GtkWidget *widget,
+                              gint      *minimal_width,
+                              gint      *natural_width)
+{
+  *minimal_width = *natural_width = 200;
+}
 
+static void
+metadata_get_preferred_height (GtkWidget *widget,
+                               gint      *minimal_height,
+                               gint      *natural_height)
+{
+  //MetadataWidget* self = METADATA_WIDGET (widget);
+  //MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);	
+  *minimal_height = *natural_height = 95;//priv->current_height;
+}
+#endif
 
 static void
 metadata_widget_init (MetadataWidget *self)
@@ -116,20 +157,30 @@ metadata_widget_init (MetadataWidget *self)
   hbox = gtk_hbox_new(FALSE, 0);
   
   priv->meta_data_h_box = hbox;
-
+  priv->current_height = 1;
+  
   // image
   priv->album_art = gtk_image_new();
   priv->image_path = g_string_new("");
   priv->old_image_path = g_string_new("");
   
+  #if GTK_CHECK_VERSION(3, 0, 0) 
+  g_signal_connect(priv->album_art, "draw", 
+                   G_CALLBACK(metadata_image_expose_gtk_3),
+                   GTK_WIDGET(self));
+
+  g_signal_connect_after (GTK_WIDGET(self), "draw", 
+                          G_CALLBACK(metadata_widget_icon_triangle_draw_cb_gtk_3),
+                          GTK_WIDGET(self));
+  #else
   g_signal_connect(priv->album_art, "expose-event", 
                    G_CALLBACK(metadata_image_expose),
                    GTK_WIDGET(self));
 
   g_signal_connect_after (GTK_WIDGET(self), "expose-event", 
                           G_CALLBACK(metadata_widget_icon_triangle_draw_cb),
-                          GTK_WIDGET(self));
-  
+                          GTK_WIDGET(self));  
+  #endif
   gtk_box_pack_start (GTK_BOX (priv->meta_data_h_box),
                       priv->album_art,
                       FALSE,
@@ -189,9 +240,14 @@ metadata_widget_init (MetadataWidget *self)
   priv->player_label = player_label;
       
   gtk_box_pack_start (GTK_BOX(outer_v_box), priv->player_label, FALSE, FALSE, 0);
+  
   gtk_box_pack_start (GTK_BOX(outer_v_box), priv->meta_data_h_box, FALSE, FALSE, 0);
     
   gtk_container_add (GTK_CONTAINER (self), outer_v_box);  
+  
+  gtk_widget_show_all (priv->meta_data_h_box);
+  gtk_widget_set_no_show_all (priv->meta_data_h_box, TRUE);
+  gtk_widget_hide (priv->meta_data_h_box);
 }
 
 static void
@@ -211,13 +267,122 @@ metadata_widget_finalize (GObject *object)
   G_OBJECT_CLASS (metadata_widget_parent_class)->finalize (object);
 }
 
-
 /**
  * We override the expose method to enable primitive drawing of the 
  * empty album art image and rounded rectangles on the album art.
  */
+
+#if GTK_CHECK_VERSION(3, 0, 0)  
 static gboolean
-metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user_data)
+metadata_image_expose_gtk_3 (GtkWidget *metadata,
+							 cairo_t* cr,
+							 gpointer user_data)
+{
+  g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
+  MetadataWidget* widget = METADATA_WIDGET(user_data);
+  MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widget);  
+
+  if ( TRUE == dbusmenu_menuitem_property_get_bool (DBUSMENU_MENUITEM(priv->twin_item),
+                                                    DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS))
+  {
+    return FALSE;
+  }
+  
+  draw_album_border (metadata, FALSE);
+
+  if(priv->image_path->len > 0){
+    if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE ||
+       priv->theme_change_occured == TRUE){
+      priv->theme_change_occured = FALSE;
+      GdkPixbuf* pixbuf;
+      pixbuf = gdk_pixbuf_new_from_file_at_size(priv->image_path->str, 60, 60, NULL);
+
+      if(GDK_IS_PIXBUF(pixbuf) == FALSE){
+        gtk_image_clear ( GTK_IMAGE(priv->album_art));          
+        gtk_widget_set_size_request(GTK_WIDGET(priv->album_art), 60, 60);
+        draw_album_art_placeholder(metadata);
+        return FALSE;
+      }
+
+      gtk_image_set_from_pixbuf(GTK_IMAGE(priv->album_art), pixbuf);
+      gtk_widget_set_size_request(GTK_WIDGET(priv->album_art),
+                                  gdk_pixbuf_get_width(pixbuf),
+                                  gdk_pixbuf_get_height(pixbuf));
+
+      g_string_erase (priv->old_image_path, 0, -1);
+      g_string_overwrite (priv->old_image_path, 0, priv->image_path->str);
+      g_object_unref(pixbuf);
+    }
+    return FALSE;       
+  }
+  gtk_image_clear (GTK_IMAGE(priv->album_art));  
+  gtk_widget_set_size_request(GTK_WIDGET(priv->album_art), 60, 60);
+  draw_album_art_placeholder(metadata);
+  return FALSE;
+}
+
+// Draw the triangle if the player is running ...
+static gboolean
+metadata_widget_icon_triangle_draw_cb_gtk_3 (GtkWidget *widget,
+											 cairo_t* cr,
+											 gpointer user_data)
+{
+	
+  g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
+  MetadataWidget* meta = METADATA_WIDGET(user_data);
+  MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(meta);  
+
+  GtkStyle *style;
+  int x, y, arrow_width, arrow_height;               
+
+  gint offset = 3;
+  arrow_width = 5; 
+  arrow_height = 9;
+  
+  style = gtk_widget_get_style (widget);
+  
+  GtkAllocation allocation;
+  gtk_widget_get_allocation (widget, &allocation);
+  x = allocation.x;
+  y = 0;
+    
+  // Draw player icon  
+  if (priv->icon_buf != NULL){  
+    gdk_cairo_set_source_pixbuf (cr,
+                                 priv->icon_buf,
+                                 x + arrow_width + 1,
+                                 y + offset);
+    cairo_paint (cr);
+  }
+    
+  // Draw triangle but only if the player is running.
+  if (dbusmenu_menuitem_property_get_bool (priv->twin_item,
+                                             DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING)){
+    y += (double)arrow_height/2.0 + offset;
+    cairo_set_line_width (cr, 1.0);
+
+	//g_debug ("triangle drawing");
+
+    cairo_move_to (cr, x, y);
+    cairo_line_to (cr, x, y + arrow_height);
+    cairo_line_to (cr, x + arrow_width, y + (double)arrow_height/2.0);
+    cairo_close_path (cr);
+    cairo_set_source_rgb (cr, style->fg[gtk_widget_get_state(widget)].red/65535.0,
+                              style->fg[gtk_widget_get_state(widget)].green/65535.0,
+                              style->fg[gtk_widget_get_state(widget)].blue/65535.0);
+    cairo_fill (cr);                                             
+  }
+  
+  return FALSE;  
+}
+
+// GTK 2 Expose handler
+#else
+
+static gboolean
+metadata_image_expose (GtkWidget *metadata,
+					   GdkEventExpose *event,
+					   gpointer user_data)
 {
   g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
   MetadataWidget* widget = METADATA_WIDGET(user_data);
@@ -252,7 +417,6 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
 
       g_string_erase (priv->old_image_path, 0, -1);
       g_string_overwrite (priv->old_image_path, 0, priv->image_path->str);
-
       g_object_unref(pixbuf);
     }
     return FALSE;       
@@ -263,11 +427,74 @@ metadata_image_expose (GtkWidget *metadata, GdkEventExpose *event, gpointer user
   return FALSE;
 }
 
+
+// Draw the triangle if the player is running ...
+static gboolean
+metadata_widget_icon_triangle_draw_cb (GtkWidget *widget,
+                                       GdkEventExpose *event,
+                                       gpointer user_data)
+{
+  g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
+  MetadataWidget* meta = METADATA_WIDGET(user_data);
+  MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(meta);  
+
+  GtkStyle *style;
+  cairo_t *cr;
+  int x, y, arrow_width, arrow_height;               
+
+  gint offset = 3;
+  arrow_width = 5; 
+  arrow_height = 9;
+  
+  style = gtk_widget_get_style (widget);
+
+  cr = (cairo_t*) gdk_cairo_create (gtk_widget_get_window (widget));  
+  
+  GtkAllocation allocation;
+  gtk_widget_get_allocation (widget, &allocation);
+  x = allocation.x;
+  y = allocation.y;
+    
+  // Draw player icon  
+  if (priv->icon_buf != NULL){  
+    gdk_cairo_set_source_pixbuf (cr,
+                                 priv->icon_buf,
+                                 x + arrow_width + 1,
+                                 y + offset);
+    cairo_paint (cr);
+  }
+    
+  // Draw triangle but only if the player is running.
+  if (dbusmenu_menuitem_property_get_bool (priv->twin_item,
+                                             DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING)){
+    y += (double)arrow_height/2.0 + offset;
+    cairo_set_line_width (cr, 1.0);
+
+    cairo_move_to (cr, x, y);
+    cairo_line_to (cr, x, y + arrow_height);
+    cairo_line_to (cr, x + arrow_width, y + (double)arrow_height/2.0);
+    cairo_close_path (cr);
+    cairo_set_source_rgb (cr, style->fg[gtk_widget_get_state(widget)].red/65535.0,
+                              style->fg[gtk_widget_get_state(widget)].green/65535.0,
+                              style->fg[gtk_widget_get_state(widget)].blue/65535.0);
+    cairo_fill (cr);                                             
+  }
+  
+  cairo_destroy (cr);
+  return FALSE;  
+}
+#endif
+
 static void
 draw_album_border(GtkWidget *metadata, gboolean selected)
 {
   cairo_t *cr;  
   cr = gdk_cairo_create (gtk_widget_get_window (metadata));
+  #if GTK_CHECK_VERSION(3, 0, 0)
+  gtk_style_context_add_class (gtk_widget_get_style_context (metadata),
+                               "menu");
+  #endif
+  
   GtkStyle *style;
   style = gtk_widget_get_style (metadata);
   
@@ -507,25 +734,33 @@ metadata_widget_handle_resizing (MetadataWidget* self)
 {
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);
   
+  g_debug ("SHOW/HIDE TRACK DETAILS - %i",	dbusmenu_menuitem_property_get_bool (priv->twin_item, DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS));  
+  
   if (dbusmenu_menuitem_property_get_bool (priv->twin_item,
                                            DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS) == TRUE){
+    // TODO
+    // revert to hide                                             
+    #if GTK_CHECK_VERSION(3, 0, 0)  
+    gtk_widget_show (priv->meta_data_h_box);
+    #else
     gtk_widget_hide (priv->meta_data_h_box);
     gtk_widget_hide (priv->artist_label);
     gtk_widget_hide (priv->piece_label);
     gtk_widget_hide (priv->container_label); 
     gtk_widget_hide (priv->album_art); 
-    gtk_widget_hide (priv->meta_data_v_box); 
-    gtk_widget_set_size_request(GTK_WIDGET(self), 200, 20); 
+    gtk_widget_hide (priv->meta_data_v_box);
+    #endif 	
   }
   else{
-
+    #if GTK_CHECK_VERSION(3, 0, 0)  
+    gtk_widget_show (priv->meta_data_h_box);
+    #else    
     gtk_widget_show (priv->meta_data_h_box);     
     gtk_widget_show (priv->artist_label);
     gtk_widget_show (priv->piece_label);
     gtk_widget_show (priv->container_label); 
     gtk_widget_show (priv->album_art); 
-    gtk_widget_show (priv->meta_data_v_box); 
-    gtk_widget_set_size_request(GTK_WIDGET(self), 200, 95);   
+    #endif 
   }
   gtk_widget_queue_draw(GTK_WIDGET(self));      
 }
@@ -637,62 +872,6 @@ metadata_widget_set_twin_item (MetadataWidget* self,
     }
   }
   metadata_widget_handle_resizing (self);  
-}
-
-// Draw the triangle if the player is running ...
-static gboolean
-metadata_widget_icon_triangle_draw_cb (GtkWidget *widget,
-                                       GdkEventExpose *event,
-                                       gpointer user_data)
-{
-  g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
-  MetadataWidget* meta = METADATA_WIDGET(user_data);
-  MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(meta);  
-  
-  GtkStyle *style;
-  cairo_t *cr;
-  int x, y, arrow_width, arrow_height;               
-
-  gint offset = 3;
-  arrow_width = 5; 
-  arrow_height = 9;
-  
-  style = gtk_widget_get_style (widget);
-
-  cr = (cairo_t*) gdk_cairo_create (gtk_widget_get_window (widget));  
-  
-  GtkAllocation allocation;
-  gtk_widget_get_allocation (widget, &allocation);
-  x = allocation.x;
-  y = allocation.y;
-    
-  // Draw player icon  
-  if (priv->icon_buf != NULL){  
-    gdk_cairo_set_source_pixbuf (cr,
-                                 priv->icon_buf,
-                                 x + arrow_width + 1,
-                                 y + offset);
-    cairo_paint (cr);
-  }
-    
-  // Draw triangle but only if the player is running.
-  if (dbusmenu_menuitem_property_get_bool (priv->twin_item,
-                                             DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING)){
-    y += (double)arrow_height/2.0 + offset;
-    cairo_set_line_width (cr, 1.0);
-
-    cairo_move_to (cr, x, y);
-    cairo_line_to (cr, x, y + arrow_height);
-    cairo_line_to (cr, x + arrow_width, y + (double)arrow_height/2.0);
-    cairo_close_path (cr);
-    cairo_set_source_rgb (cr, style->fg[gtk_widget_get_state(widget)].red/65535.0,
-                              style->fg[gtk_widget_get_state(widget)].green/65535.0,
-                              style->fg[gtk_widget_get_state(widget)].blue/65535.0);
-    cairo_fill (cr);                                             
-  }
-  
-  cairo_destroy (cr);
-  return FALSE;  
 }
 
  /**
