@@ -31,7 +31,7 @@ Uses code from ctk
 
 #define RECT_WIDTH 130.0f
 #define Y 7.0f
-#define X 80.0f
+#define X 70.0f
 #define INNER_RADIUS 12.5
 #define MIDDLE_RADIUS 13.0f
 #define OUTER_RADIUS  14.5f
@@ -43,16 +43,16 @@ Uses code from ctk
 #define TRI_WIDTH  11.0f
 #define TRI_HEIGHT 13.0f
 #define TRI_OFFSET  6.0f
-#define PREV_X 78.0f
+#define PREV_X 68.0f
 #define PREV_Y 13.0f
-#define NEXT_X 156.0f
+#define NEXT_X 146.0f
 #define NEXT_Y 13.0f //prev_y
 #define PAUSE_WIDTH 21.0f
 #define PAUSE_HEIGHT 27.0f
 #define BAR_WIDTH 4.5f
 #define BAR_HEIGHT 24.0f
 #define BAR_OFFSET 10.0f
-#define PAUSE_X 121.0f
+#define PAUSE_X 111.0f
 #define PAUSE_Y 7.0f
 #define PLAY_WIDTH 28.0f
 #define PLAY_HEIGHT 29.0f
@@ -1232,15 +1232,18 @@ draw (GtkWidget* button, cairo_t *cr)
   cairo_surface_t*  surf = NULL;
   cairo_t*       cr_surf = NULL;
 
+#if ! GTK_CHECK_VERSION(3, 0, 0)
   GtkAllocation allocation;
   gtk_widget_get_allocation (button, &allocation);
-  cairo_translate (cr, allocation.x, allocation.y);
-  
-  //g_debug("button x allocation = %i", allocation.x);
-  //g_debug("button y allocation = %i", allocation.y);
+  cairo_translate (cr, allocation.x, allocation.y);  
+#endif
 
   GtkStyle *style;
-
+  
+#if GTK_CHECK_VERSION(3, 0, 0)
+  gtk_style_context_add_class (gtk_widget_get_style_context (button),
+                               "menu");
+#endif
   CairoColorRGB bg_color, fg_color, bg_selected, bg_prelight;
   CairoColorRGB color_middle[2], color_middle_prelight[2], color_outer[2], color_outer_prelight[2],
                 color_play_outer[2], color_play_outer_prelight[2],
