@@ -1,5 +1,4 @@
 /*
-This service primarily controls PulseAudio and is driven by the sound indicator menu on the panel.
 Copyright 2010 Canonical Ltd.
 
 Authors:
@@ -23,13 +22,12 @@ using Gee;
 
 public class PlayerController : GLib.Object
 {
-  public const int WIDGET_QUANTITY = 5;
+  public const int WIDGET_QUANTITY = 4;
 
   public static enum widget_order{
     SEPARATOR,
     METADATA,
     TRANSPORT,
-    TRACK_SPECIFIC,
     PLAYLISTS
   }
 
@@ -43,7 +41,7 @@ public class PlayerController : GLib.Object
   
   public int current_state = state.OFFLINE;
     
-  private Dbusmenu.Menuitem root_menu;
+  public Dbusmenu.Menuitem root_menu;
   public string dbus_name { get; set;}
   public ArrayList<PlayerItem> custom_items;
   public Mpris2Controller mpris_bridge;
@@ -51,7 +49,8 @@ public class PlayerController : GLib.Object
   public int menu_offset { get; set;}
   public string icon_name { get; set; }
   public bool? use_playlists;
-  public Client track_specific_client;
+  private SpecificItemsManager track_specific_mgr;
+  private SpecificItemsManager player_specific_mgr;
   
   public PlayerController(Dbusmenu.Menuitem root,
                           GLib.AppInfo app,
@@ -110,19 +109,14 @@ public class PlayerController : GLib.Object
 
   public void enable_track_specific_items (string object_path)
   { 
-    track_specific_client = new Client (this.dbus_name, object_path);
-    track_specific_client.root_changed.connect (on_new_track_specific_root_changed);
-    /*TrackSpecificMenuitem menuitem = this.custom_items[widget_order.TRACK_SPECIFIC] as TrackSpecificMenuitem;
-    menuitem.root_item.property_set_bool (MENUITEM_PROP_VISIBLE, true);
-    menuitem.root_item.property_set_bool (MENUITEM_PROP_ENABLED, true);*/
+    track_specific_mgr = new SpecificItemsManager (this, object_path);
   }
 
-  private void on_new_track_specific_root_changed (GLib.Object item)
-  {
-    debug ("!!!!!!!!!!!!!!!!!! - Root changed for track specific item %s",
-		   this.app_info.get_name());
+  public void enable_player_specific_items (string object_path)
+  { 
+    player_specific_mgr = new SpecificItemsManager (this, object_path);
   }
-  
+    
   private void establish_mpris_connection()
   {   
     if(this.current_state != state.READY || this.dbus_name == null ){
@@ -196,10 +190,6 @@ public class PlayerController : GLib.Object
     // Transport item
     TransportMenuitem transport_item = new TransportMenuitem(this);
     this.custom_items.add(transport_item);
-
-    // Track Specific item
-    TrackSpecificMenuitem track_specific_item = new TrackSpecificMenuitem(this);
-    this.custom_items.add(track_specific_item);
     
     // Playlist item
     PlaylistsMenuitem playlist_menuitem = new PlaylistsMenuitem(this);
@@ -210,10 +200,6 @@ public class PlayerController : GLib.Object
         PlaylistsMenuitem playlists_menuitem = item as PlaylistsMenuitem;
         root_menu.child_add_position(playlists_menuitem.root_item, this.menu_offset + this.custom_items.index_of(item));
       }
-      else if (this.custom_items.index_of(item) == 3) {
-        TrackSpecificMenuitem trackspecific_menuitem = item as TrackSpecificMenuitem;
-        root_menu.child_add_position(trackspecific_menuitem.root_item, this.menu_offset + this.custom_items.index_of(item));
-      }      
       else{
         root_menu.child_add_position(item, this.menu_offset + this.custom_items.index_of(item));
       }

@@ -50,7 +50,8 @@ glib_marshal_prefix = _sound_service_marshal
 music_bridge_VALASOURCES = \
 	music-player-bridge.vala \
 	transport-menu-item.vala \
-	track-specific-menu-item.vala \
+	track-specific-items-manager.vala \
+	player-specific-items-manager.vala \
 	metadata-menu-item.vala \
 	player-controller.vala \
 	mpris2-interfaces.vala \
