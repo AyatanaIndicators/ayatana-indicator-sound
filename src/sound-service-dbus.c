@@ -322,6 +322,7 @@ bus_method_call (GDBusConnection * connection,
     retval =  g_variant_new ("(b)", result);
   }
   else if (g_strcmp0(method, "EnableTrackSpecificItems") == 0) {
+    g_debug ("EnableTrackSpecificItems");
     gchar* player_object_path;
     gchar* player_id;
     g_variant_get (params, "(os)", &player_object_path, &player_id);

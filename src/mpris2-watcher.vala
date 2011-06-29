@@ -38,7 +38,7 @@ public class Mpris2Watcher : GLib.Object
       this.fdesktop_obj = Bus.get_proxy_sync ( BusType.SESSION,
                                                FREEDESKTOP_SERVICE,
                                                FREEDESKTOP_OBJECT,
-                                               DBusProxyFlags.DO_NOT_LOAD_PROPERTIES );      
+                                               DBusProxyFlags.DO_NOT_LOAD_PROPERTIES );
       this.fdesktop_obj.name_owner_changed.connect (this.name_changes_detected);      
       this.check_for_active_clients.begin();
     }

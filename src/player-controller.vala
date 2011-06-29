@@ -109,18 +109,18 @@ public class PlayerController : GLib.Object
   }
 
   public void enable_track_specific_items (string object_path)
-  {
-    debug ("enable_track_specific_items");
+  { 
     track_specific_client = new Client (this.dbus_name, object_path);
-    track_specific_client.new_menuitem.connect (on_new_track_specific_menuitem);
+    track_specific_client.root_changed.connect (on_new_track_specific_root_changed);
     /*TrackSpecificMenuitem menuitem = this.custom_items[widget_order.TRACK_SPECIFIC] as TrackSpecificMenuitem;
     menuitem.root_item.property_set_bool (MENUITEM_PROP_VISIBLE, true);
     menuitem.root_item.property_set_bool (MENUITEM_PROP_ENABLED, true);*/
   }
 
-  private void on_new_track_specific_menuitem (GLib.Object item)
+  private void on_new_track_specific_root_changed (GLib.Object item)
   {
-    debug ("New track specific item for %s", this.app_info.get_name());
+    debug ("!!!!!!!!!!!!!!!!!! - Root changed for track specific item %s",
+		   this.app_info.get_name());
   }
   
   private void establish_mpris_connection()

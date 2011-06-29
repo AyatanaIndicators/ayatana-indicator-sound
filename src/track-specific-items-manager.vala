@@ -1,5 +1,6 @@
 /*
-Copyright 2011 Canonical Ltd.
+This service primarily controls PulseAudio and is driven by the sound indicator menu on the panel.
+Copyright 2010 Canonical Ltd.
 
 Authors:
     Conor Curran <conor.curran@canonical.com>
@@ -19,22 +20,11 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Dbusmenu;
 using Gee;
-using DbusmenuTrackSpecific;
-using Dbusmenu;
 
-public class TrackSpecificMenuitem : PlayerItem
+public class TrackSpecificMenuitemsManager : GLib.Object
 {
-  public Menuitem root_item{get; construct;}
-  
-  public TrackSpecificMenuitem (PlayerController parent)
-  {
-    Object(item_type: MENUITEM_TYPE, owner: parent);    
-  }
-  construct
-  {
-    this.root_item = new Menuitem();
-    this.root_item.property_set ( MENUITEM_PROP_LABEL, _("Like This") );
-    this.root_item.property_set_bool (MENUITEM_PROP_VISIBLE, false);
-    this.root_item.property_set_bool (MENUITEM_PROP_ENABLED, false);    
-  }
+	public TrackSpecificMenuitemsManager()
+	{
+	}
 }
+
