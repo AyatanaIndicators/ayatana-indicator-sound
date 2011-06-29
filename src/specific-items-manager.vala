@@ -48,12 +48,12 @@ public class SpecificItemsManager : GLib.Object
     debug ("on_root_changed - size of children list : %i",
           (int)children.length());
     foreach (void* child in children) {
-      Dbusmenu.Menuitem* item = (Dbusmenu.Menuitem*)child;
-      Dbusmenu.MenuitemProxy proxy = new Dbusmenu.MenuitemProxy(*item);
+      unowned Dbusmenu.Menuitem item = (Dbusmenu.Menuitem)child;
+      Dbusmenu.MenuitemProxy proxy = new Dbusmenu.MenuitemProxy(item);
       proxy_items.add (proxy);
       debug ("Proxy item of label = %s added to collection",
-              item->property_get (MENUITEM_PROP_LABEL));
-      this.owner.root_menu.child_add_position (proxy.menu_item,
+              item.property_get (MENUITEM_PROP_LABEL));
+      this.owner.root_menu.child_add_position (proxy,
                                                this.owner.menu_offset + 3);
     }
   }
