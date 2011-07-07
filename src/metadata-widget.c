@@ -59,14 +59,6 @@ static void metadata_widget_finalize      (GObject *object);
 static void metadata_widget_set_style     (GtkWidget* button, GtkStyle* style);
 static void metadata_widget_set_twin_item (MetadataWidget* self,
                                            DbusmenuMenuitem* twin_item);
-static void metadata_get_preferred_width (GtkWidget *widget,
-            			                  gint      *minimal_width,
-                        			      gint      *natural_width);
-static void metadata_get_preferred_height (GtkWidget *widget,
-            			                   gint      *minimal_width,
-                        			       gint      *natural_width);
-                        			      
-
 // keyevent consumers
 static gboolean metadata_widget_button_release_event (GtkWidget *menuitem, 
                                                     GdkEventButton *event);
@@ -85,7 +77,7 @@ static void metadata_widget_selection_received_event_callback( GtkWidget        
                                                                 guint             time,
                                                                 gpointer          user_data);
 
-#if GTK_CHECK_VERSION(3, 0, 0)  
+#if GTK_CHECK_VERSION(3, 0, 0)
 static gboolean metadata_widget_icon_triangle_draw_cb_gtk_3 (GtkWidget *image,
 															 cairo_t* cr,
 															 gpointer user_data);
@@ -115,35 +107,11 @@ metadata_widget_class_init (MetadataWidgetClass *klass)
 
   widget_class->button_release_event = metadata_widget_button_release_event;
   
-  #if GTK_CHECK_VERSION(3, 0, 0)  
-  widget_class->get_preferred_width = metadata_get_preferred_width;
-  widget_class->get_preferred_height = metadata_get_preferred_height;
-  #endif
   g_type_class_add_private (klass, sizeof (MetadataWidgetPrivate));
 
   gobject_class->dispose = metadata_widget_dispose;
   gobject_class->finalize = metadata_widget_finalize;
 }
-
-#if GTK_CHECK_VERSION(3, 0, 0)  
-static void
-metadata_get_preferred_width (GtkWidget *widget,
-                              gint      *minimal_width,
-                              gint      *natural_width)
-{
-  *minimal_width = *natural_width = 200;
-}
-
-static void
-metadata_get_preferred_height (GtkWidget *widget,
-                               gint      *minimal_height,
-                               gint      *natural_height)
-{
-  //MetadataWidget* self = METADATA_WIDGET (widget);
-  //MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);	
-  *minimal_height = *natural_height = 95;//priv->current_height;
-}
-#endif
 
 static void
 metadata_widget_init (MetadataWidget *self)
@@ -712,10 +680,7 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
   else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_ARTURL, property) == 0){
     g_string_erase(priv->image_path, 0, -1);
     g_string_overwrite(priv->image_path, 0, g_variant_get_string (value, NULL));
-    // if its a remote image queue a redraw incase the download took too long
-    //if (g_str_has_prefix(g_variant_get_string (value, NULL), g_get_user_cache_dir())){
     gtk_widget_queue_draw(GTK_WIDGET(mitem));
-    //}
   }
   else if (g_ascii_strcasecmp (DBUSMENU_METADATA_MENUITEM_PLAYER_NAME, property) == 0){
     gtk_label_set_label (GTK_LABEL (priv->player_label),
@@ -733,34 +698,13 @@ static void
 metadata_widget_handle_resizing (MetadataWidget* self)
 {
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);
-  
-  g_debug ("SHOW/HIDE TRACK DETAILS - %i",	dbusmenu_menuitem_property_get_bool (priv->twin_item, DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS));  
-  
+    
   if (dbusmenu_menuitem_property_get_bool (priv->twin_item,
                                            DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS) == TRUE){
-    // TODO
-    // revert to hide                                             
-    #if GTK_CHECK_VERSION(3, 0, 0)  
-    gtk_widget_show (priv->meta_data_h_box);
-    #else
     gtk_widget_hide (priv->meta_data_h_box);
-    gtk_widget_hide (priv->artist_label);
-    gtk_widget_hide (priv->piece_label);
-    gtk_widget_hide (priv->container_label); 
-    gtk_widget_hide (priv->album_art); 
-    gtk_widget_hide (priv->meta_data_v_box);
-    #endif 	
   }
   else{
-    #if GTK_CHECK_VERSION(3, 0, 0)  
-    gtk_widget_show (priv->meta_data_h_box);
-    #else    
     gtk_widget_show (priv->meta_data_h_box);     
-    gtk_widget_show (priv->artist_label);
-    gtk_widget_show (priv->piece_label);
-    gtk_widget_show (priv->container_label); 
-    gtk_widget_show (priv->album_art); 
-    #endif 
   }
   gtk_widget_queue_draw(GTK_WIDGET(self));      
 }
