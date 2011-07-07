@@ -56,6 +56,7 @@ typedef struct _PlayerController PlayerController;
 typedef struct _PlayerControllerClass PlayerControllerClass;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 #define _g_free0(var) (var = (g_free (var), NULL))
+#define _g_variant_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_unref (var), NULL)))
 
 #define TYPE_METADATA_MENUITEM (metadata_menuitem_get_type ())
 #define METADATA_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_METADATA_MENUITEM, MetadataMenuitem))
@@ -66,7 +67,6 @@ typedef struct _PlayerControllerClass PlayerControllerClass;
 
 typedef struct _MetadataMenuitem MetadataMenuitem;
 typedef struct _MetadataMenuitemClass MetadataMenuitemClass;
-#define _g_variant_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_unref (var), NULL)))
 
 struct _PlayerItem {
 	DbusmenuMenuitem parent_instance;
@@ -237,6 +237,13 @@ void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attribu
 			_tmp6_ = g_hash_table_lookup (data, search_key);
 			_tmp7_ = _g_variant_ref0 ((GVariant*) _tmp6_);
 			v = _tmp7_;
+			if (v == NULL) {
+				_g_variant_unref0 (v);
+				_g_free0 (search_key);
+				input_keys = (_vala_array_free (input_keys, input_keys_length1, (GDestroyNotify) g_free), NULL);
+				_g_free0 (property);
+				continue;
+			}
 			_tmp8_ = g_variant_is_of_type (v, G_VARIANT_TYPE_STRING);
 			if (_tmp8_) {
 				const gchar* _tmp9_ = NULL;
