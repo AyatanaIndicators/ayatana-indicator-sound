@@ -72,8 +72,8 @@ static GtkLabel * get_label (IndicatorObject * io);
 static GtkImage * get_icon (IndicatorObject * io);
 static GtkMenu *  get_menu (IndicatorObject * io);
 static const gchar * get_accessible_desc (IndicatorObject * io);
-static void indicator_sound_scroll (IndicatorObject* io,
-                                    gint delta,
+static void indicator_sound_scroll (IndicatorObject * io,
+                                    IndicatorObjectEntry * entry, gint delta,
                                     IndicatorScrollDirection direction);
 
 //key/moust event handlers
@@ -124,7 +124,7 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
   io_class->get_image = get_icon;
   io_class->get_menu  = get_menu;
   io_class->get_accessible_desc = get_accessible_desc;
-  io_class->scroll    = indicator_sound_scroll;
+  io_class->entry_scrolled = indicator_sound_scroll;
 }
 
 static void
@@ -648,8 +648,8 @@ key_release_cb(GtkWidget* widget, GdkEventKey* event, gpointer data)
 }
 
 static void
-indicator_sound_scroll (IndicatorObject *io, gint delta, 
-                        IndicatorScrollDirection direction)
+indicator_sound_scroll (IndicatorObject * io, IndicatorObjectEntry * entry,
+                        gint delta, IndicatorScrollDirection direction)
 {
   //g_debug("indicator-sound-scroll - current slider value");
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));

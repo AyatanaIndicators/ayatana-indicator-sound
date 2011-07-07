@@ -137,8 +137,8 @@ typedef struct _TransportMenuitemClass TransportMenuitemClass;
 
 typedef struct _MetadataMenuitem MetadataMenuitem;
 typedef struct _MetadataMenuitemClass MetadataMenuitemClass;
-#define _g_hash_table_unref0(var) ((var == NULL) ? NULL : (var = (g_hash_table_unref (var), NULL)))
 #define _g_variant_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_unref (var), NULL)))
+#define _g_hash_table_unref0(var) ((var == NULL) ? NULL : (var = (g_hash_table_unref (var), NULL)))
 
 #define TYPE_PLAYLISTS_MENUITEM (playlists_menuitem_get_type ())
 #define PLAYLISTS_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PLAYLISTS_MENUITEM, PlaylistsMenuitem))
@@ -327,21 +327,23 @@ GType player_item_get_type (void) G_GNUC_CONST;
 GType player_controller_widget_order_get_type (void) G_GNUC_CONST;
 GType transport_menuitem_get_type (void) G_GNUC_CONST;
 void transport_menuitem_change_play_state (TransportMenuitem* self, TransportState update);
-static GHashTable* mpris2_controller_clean_metadata (Mpris2Controller* self);
-void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
-GeeHashSet* metadata_menuitem_relevant_attributes_for_ui (void);
-void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes);
-GType metadata_menuitem_get_type (void) G_GNUC_CONST;
-gboolean player_item_populated (PlayerItem* self, GeeHashSet* attrs);
-void metadata_menuitem_should_collapse (MetadataMenuitem* self, gboolean collapse);
+static gboolean mpris2_controller_ensure_correct_metadata (Mpris2Controller* self);
+static gboolean _mpris2_controller_ensure_correct_metadata_gsource_func (gpointer self);
 static gboolean _bool_equal (const gboolean* s1, const gboolean* s2);
 static gboolean mpris2_controller_fetch_active_playlist (Mpris2Controller* self);
 static gboolean _mpris2_controller_fetch_active_playlist_gsource_func (gpointer self);
 void mpris2_controller_fetch_playlists (Mpris2Controller* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
 void mpris2_controller_fetch_playlists_finish (Mpris2Controller* self, GAsyncResult* _res_);
+GType metadata_menuitem_get_type (void) G_GNUC_CONST;
 void metadata_menuitem_alter_label (MetadataMenuitem* self, const gchar* new_title);
 MprisRoot* mpris2_controller_get_mpris2_root (Mpris2Controller* self);
 gchar* mpris_root_get_Identity (MprisRoot* self);
+static GHashTable* mpris2_controller_clean_metadata (Mpris2Controller* self);
+void player_item_reset (PlayerItem* self, GeeHashSet* attrs);
+GeeHashSet* metadata_menuitem_relevant_attributes_for_ui (void);
+void player_item_update (PlayerItem* self, GHashTable* data, GeeHashSet* attributes);
+gboolean player_item_populated (PlayerItem* self, GeeHashSet* attrs);
+void metadata_menuitem_should_collapse (MetadataMenuitem* self, gboolean collapse);
 GHashTable* mpris_player_get_Metadata (MprisPlayer* self);
 static GVariant* _variant_new1 (const gchar* value);
 void mpris2_controller_initial_update (Mpris2Controller* self);
@@ -418,19 +420,10 @@ static gboolean _mpris2_controller_ensure_correct_playback_status_gsource_func (
 }
 
 
-static gchar* bool_to_string (gboolean self) {
-	gchar* result = NULL;
-	if (self) {
-		gchar* _tmp0_;
-		_tmp0_ = g_strdup ("true");
-		result = _tmp0_;
-		return result;
-	} else {
-		gchar* _tmp1_;
-		_tmp1_ = g_strdup ("false");
-		result = _tmp1_;
-		return result;
-	}
+static gboolean _mpris2_controller_ensure_correct_metadata_gsource_func (gpointer self) {
+	gboolean result;
+	result = mpris2_controller_ensure_correct_metadata (self);
+	return result;
 }
 
 
@@ -463,20 +456,20 @@ void mpris2_controller_property_changed_cb (Mpris2Controller* self, const gchar*
 	gconstpointer _tmp9_ = NULL;
 	GVariant* _tmp10_;
 	GVariant* meta_v;
-	gconstpointer _tmp25_ = NULL;
-	GVariant* _tmp26_;
+	gconstpointer _tmp11_ = NULL;
+	GVariant* _tmp12_;
 	GVariant* playlist_v;
-	gboolean _tmp27_ = FALSE;
-	gconstpointer _tmp29_ = NULL;
-	GVariant* _tmp30_;
+	gboolean _tmp13_ = FALSE;
+	gconstpointer _tmp15_ = NULL;
+	GVariant* _tmp16_;
 	GVariant* playlist_count_v;
-	gboolean _tmp31_ = FALSE;
-	gconstpointer _tmp33_ = NULL;
-	GVariant* _tmp34_;
+	gboolean _tmp17_ = FALSE;
+	gconstpointer _tmp19_ = NULL;
+	GVariant* _tmp20_;
 	GVariant* playlist_orderings_v;
-	gboolean _tmp35_ = FALSE;
-	gconstpointer _tmp37_ = NULL;
-	GVariant* _tmp38_;
+	gboolean _tmp21_ = FALSE;
+	gconstpointer _tmp23_ = NULL;
+	GVariant* _tmp24_;
 	GVariant* identity_v;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (interface_source != NULL);
@@ -489,7 +482,7 @@ void mpris2_controller_property_changed_cb (Mpris2Controller* self, const gchar*
 		_tmp0_ = _tmp1_ == FALSE;
 	}
 	if (_tmp0_) {
-		g_warning ("mpris2-controller.vala:71: Property-changed hash is null or this is an" \
+		g_warning ("mpris2-controller.vala:77: Property-changed hash is null or this is an" \
 " interface that doesn't concern us");
 		return;
 	}
@@ -520,111 +513,65 @@ void mpris2_controller_property_changed_cb (Mpris2Controller* self, const gchar*
 	_tmp10_ = _g_variant_ref0 ((GVariant*) _tmp9_);
 	meta_v = _tmp10_;
 	if (meta_v != NULL) {
-		GHashTable* _tmp11_ = NULL;
-		GHashTable* changed_updates;
-		gpointer _tmp12_ = NULL;
-		PlayerItem* metadata;
-		GeeHashSet* _tmp13_ = NULL;
-		GeeHashSet* _tmp14_;
-		GeeHashSet* _tmp15_ = NULL;
-		GeeHashSet* _tmp16_;
-		gpointer _tmp17_ = NULL;
-		PlayerItem* _tmp18_;
-		MetadataMenuitem* md;
-		GeeHashSet* _tmp19_ = NULL;
-		GeeHashSet* _tmp20_;
-		gboolean _tmp21_;
-		gboolean _tmp22_;
-		gboolean collapsing;
-		gchar* _tmp23_ = NULL;
-		gchar* _tmp24_;
-		_tmp11_ = mpris2_controller_clean_metadata (self);
-		changed_updates = _tmp11_;
-		_tmp12_ = gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
-		metadata = (PlayerItem*) _tmp12_;
-		_tmp13_ = metadata_menuitem_relevant_attributes_for_ui ();
-		_tmp14_ = _tmp13_;
-		player_item_reset (metadata, _tmp14_);
-		_g_object_unref0 (_tmp14_);
-		_tmp15_ = metadata_menuitem_relevant_attributes_for_ui ();
-		_tmp16_ = _tmp15_;
-		player_item_update (metadata, changed_updates, _tmp16_);
-		_g_object_unref0 (_tmp16_);
-		_tmp17_ = gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
-		_tmp18_ = (PlayerItem*) _tmp17_;
-		md = IS_METADATA_MENUITEM (_tmp18_) ? ((MetadataMenuitem*) _tmp18_) : NULL;
-		_tmp19_ = metadata_menuitem_relevant_attributes_for_ui ();
-		_tmp20_ = _tmp19_;
-		_tmp21_ = player_item_populated (metadata, _tmp20_);
-		_tmp22_ = !_tmp21_;
-		_g_object_unref0 (_tmp20_);
-		collapsing = _tmp22_;
-		metadata_menuitem_should_collapse (md, collapsing);
-		_tmp23_ = bool_to_string (collapsing);
-		_tmp24_ = _tmp23_;
-		g_debug ("mpris2-controller.vala:95: Should metadata collapse %s", _tmp24_);
-		_g_free0 (_tmp24_);
-		_g_object_unref0 (md);
-		_g_object_unref0 (metadata);
-		_g_hash_table_unref0 (changed_updates);
+		g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 200, _mpris2_controller_ensure_correct_metadata_gsource_func, g_object_ref (self), g_object_unref);
 	}
-	_tmp25_ = g_hash_table_lookup (changed_properties, "ActivePlaylist");
-	_tmp26_ = _g_variant_ref0 ((GVariant*) _tmp25_);
-	playlist_v = _tmp26_;
+	_tmp11_ = g_hash_table_lookup (changed_properties, "ActivePlaylist");
+	_tmp12_ = _g_variant_ref0 ((GVariant*) _tmp11_);
+	playlist_v = _tmp12_;
 	if (playlist_v != NULL) {
-		gboolean _tmp28_;
-		_tmp28_ = TRUE;
-		_tmp27_ = _bool_equal (self->priv->_owner->use_playlists, &_tmp28_) == TRUE;
+		gboolean _tmp14_;
+		_tmp14_ = TRUE;
+		_tmp13_ = _bool_equal (self->priv->_owner->use_playlists, &_tmp14_) == TRUE;
 	} else {
-		_tmp27_ = FALSE;
+		_tmp13_ = FALSE;
 	}
-	if (_tmp27_) {
+	if (_tmp13_) {
 		g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 300, _mpris2_controller_fetch_active_playlist_gsource_func, g_object_ref (self), g_object_unref);
 	}
-	_tmp29_ = g_hash_table_lookup (changed_properties, "PlaylistCount");
-	_tmp30_ = _g_variant_ref0 ((GVariant*) _tmp29_);
-	playlist_count_v = _tmp30_;
+	_tmp15_ = g_hash_table_lookup (changed_properties, "PlaylistCount");
+	_tmp16_ = _g_variant_ref0 ((GVariant*) _tmp15_);
+	playlist_count_v = _tmp16_;
 	if (playlist_count_v != NULL) {
-		gboolean _tmp32_;
-		_tmp32_ = TRUE;
-		_tmp31_ = _bool_equal (self->priv->_owner->use_playlists, &_tmp32_) == TRUE;
+		gboolean _tmp18_;
+		_tmp18_ = TRUE;
+		_tmp17_ = _bool_equal (self->priv->_owner->use_playlists, &_tmp18_) == TRUE;
 	} else {
-		_tmp31_ = FALSE;
+		_tmp17_ = FALSE;
 	}
-	if (_tmp31_) {
+	if (_tmp17_) {
 		mpris2_controller_fetch_playlists (self, NULL, NULL);
 		mpris2_controller_fetch_active_playlist (self);
 	}
-	_tmp33_ = g_hash_table_lookup (changed_properties, "Orderings");
-	_tmp34_ = _g_variant_ref0 ((GVariant*) _tmp33_);
-	playlist_orderings_v = _tmp34_;
+	_tmp19_ = g_hash_table_lookup (changed_properties, "Orderings");
+	_tmp20_ = _g_variant_ref0 ((GVariant*) _tmp19_);
+	playlist_orderings_v = _tmp20_;
 	if (playlist_orderings_v != NULL) {
-		gboolean _tmp36_;
-		_tmp36_ = TRUE;
-		_tmp35_ = _bool_equal (self->priv->_owner->use_playlists, &_tmp36_) == TRUE;
+		gboolean _tmp22_;
+		_tmp22_ = TRUE;
+		_tmp21_ = _bool_equal (self->priv->_owner->use_playlists, &_tmp22_) == TRUE;
 	} else {
-		_tmp35_ = FALSE;
+		_tmp21_ = FALSE;
 	}
-	if (_tmp35_) {
+	if (_tmp21_) {
 		mpris2_controller_fetch_playlists (self, NULL, NULL);
 		mpris2_controller_fetch_active_playlist (self);
 	}
-	_tmp37_ = g_hash_table_lookup (changed_properties, "Identity");
-	_tmp38_ = _g_variant_ref0 ((GVariant*) _tmp37_);
-	identity_v = _tmp38_;
+	_tmp23_ = g_hash_table_lookup (changed_properties, "Identity");
+	_tmp24_ = _g_variant_ref0 ((GVariant*) _tmp23_);
+	identity_v = _tmp24_;
 	if (identity_v != NULL) {
-		gpointer _tmp39_ = NULL;
-		PlayerItem* _tmp40_;
+		gpointer _tmp25_ = NULL;
+		PlayerItem* _tmp26_;
 		MetadataMenuitem* md;
-		gchar* _tmp41_ = NULL;
-		gchar* _tmp42_;
-		_tmp39_ = gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
-		_tmp40_ = (PlayerItem*) _tmp39_;
-		md = IS_METADATA_MENUITEM (_tmp40_) ? ((MetadataMenuitem*) _tmp40_) : NULL;
-		_tmp41_ = mpris_root_get_Identity (self->priv->_mpris2_root);
-		_tmp42_ = _tmp41_;
-		metadata_menuitem_alter_label (md, _tmp42_);
-		_g_free0 (_tmp42_);
+		gchar* _tmp27_ = NULL;
+		gchar* _tmp28_;
+		_tmp25_ = gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
+		_tmp26_ = (PlayerItem*) _tmp25_;
+		md = IS_METADATA_MENUITEM (_tmp26_) ? ((MetadataMenuitem*) _tmp26_) : NULL;
+		_tmp27_ = mpris_root_get_Identity (self->priv->_mpris2_root);
+		_tmp28_ = _tmp27_;
+		metadata_menuitem_alter_label (md, _tmp28_);
+		_g_free0 (_tmp28_);
 		_g_object_unref0 (md);
 	}
 	_g_variant_unref0 (identity_v);
@@ -633,6 +580,55 @@ void mpris2_controller_property_changed_cb (Mpris2Controller* self, const gchar*
 	_g_variant_unref0 (playlist_v);
 	_g_variant_unref0 (meta_v);
 	_g_variant_unref0 (play_v);
+}
+
+
+static gboolean mpris2_controller_ensure_correct_metadata (Mpris2Controller* self) {
+	gboolean result = FALSE;
+	GHashTable* _tmp0_ = NULL;
+	GHashTable* changed_updates;
+	gpointer _tmp1_ = NULL;
+	PlayerItem* metadata;
+	GeeHashSet* _tmp2_ = NULL;
+	GeeHashSet* _tmp3_;
+	GeeHashSet* _tmp4_ = NULL;
+	GeeHashSet* _tmp5_;
+	gpointer _tmp6_ = NULL;
+	PlayerItem* _tmp7_;
+	MetadataMenuitem* md;
+	GeeHashSet* _tmp8_ = NULL;
+	GeeHashSet* _tmp9_;
+	gboolean _tmp10_;
+	gboolean _tmp11_;
+	gboolean collapsing;
+	g_return_val_if_fail (self != NULL, FALSE);
+	_tmp0_ = mpris2_controller_clean_metadata (self);
+	changed_updates = _tmp0_;
+	_tmp1_ = gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
+	metadata = (PlayerItem*) _tmp1_;
+	_tmp2_ = metadata_menuitem_relevant_attributes_for_ui ();
+	_tmp3_ = _tmp2_;
+	player_item_reset (metadata, _tmp3_);
+	_g_object_unref0 (_tmp3_);
+	_tmp4_ = metadata_menuitem_relevant_attributes_for_ui ();
+	_tmp5_ = _tmp4_;
+	player_item_update (metadata, changed_updates, _tmp5_);
+	_g_object_unref0 (_tmp5_);
+	_tmp6_ = gee_abstract_list_get ((GeeAbstractList*) self->priv->_owner->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_METADATA);
+	_tmp7_ = (PlayerItem*) _tmp6_;
+	md = IS_METADATA_MENUITEM (_tmp7_) ? ((MetadataMenuitem*) _tmp7_) : NULL;
+	_tmp8_ = metadata_menuitem_relevant_attributes_for_ui ();
+	_tmp9_ = _tmp8_;
+	_tmp10_ = player_item_populated (metadata, _tmp9_);
+	_tmp11_ = !_tmp10_;
+	_g_object_unref0 (_tmp9_);
+	collapsing = _tmp11_;
+	metadata_menuitem_should_collapse (md, collapsing);
+	result = FALSE;
+	_g_object_unref0 (md);
+	_g_object_unref0 (metadata);
+	_g_hash_table_unref0 (changed_updates);
+	return result;
 }
 
 
@@ -689,50 +685,36 @@ static GHashTable* mpris2_controller_clean_metadata (Mpris2Controller* self) {
 	_g_hash_table_unref0 (_tmp2_);
 	artist_v = _tmp5_;
 	if (artist_v != NULL) {
-		GHashTable* _tmp6_ = NULL;
-		GHashTable* _tmp7_;
-		gconstpointer _tmp8_ = NULL;
-		GVariant* _tmp9_;
-		GVariant* _tmp10_;
-		GVariant* v_artists;
 		gchar* display_artists = NULL;
-		const gchar* _tmp11_ = NULL;
-		gchar* _tmp17_;
-		_tmp6_ = mpris_player_get_Metadata (self->priv->_player);
-		_tmp7_ = _tmp6_;
-		_tmp8_ = g_hash_table_lookup (_tmp7_, "xesam:artist");
-		_tmp9_ = _g_variant_ref0 ((GVariant*) _tmp8_);
-		_tmp10_ = _tmp9_;
-		_g_hash_table_unref0 (_tmp7_);
-		v_artists = _tmp10_;
-		_tmp11_ = g_variant_get_type_string (v_artists);
-		if (g_strcmp0 (_tmp11_, "s") == 0) {
-			const gchar* _tmp12_ = NULL;
-			gchar* _tmp13_;
-			_tmp12_ = g_variant_get_string (v_artists, NULL);
-			_tmp13_ = g_strdup (_tmp12_);
+		const gchar* _tmp6_ = NULL;
+		gchar* _tmp12_;
+		_tmp6_ = g_variant_get_type_string (artist_v);
+		if (g_strcmp0 (_tmp6_, "s") == 0) {
+			const gchar* _tmp7_ = NULL;
+			gchar* _tmp8_;
+			_tmp7_ = g_variant_get_string (artist_v, NULL);
+			_tmp8_ = g_strdup (_tmp7_);
 			_g_free0 (display_artists);
-			display_artists = _tmp13_;
+			display_artists = _tmp8_;
 		} else {
-			size_t _tmp14_;
-			gchar** _tmp15_ = NULL;
+			size_t _tmp9_;
+			gchar** _tmp10_ = NULL;
 			gchar** artists;
 			gint artists_length1;
 			gint _artists_size_;
-			gchar* _tmp16_ = NULL;
-			_tmp15_ = g_variant_dup_strv (v_artists, &_tmp14_);
-			artists = _tmp15_;
-			artists_length1 = _tmp14_;
-			_artists_size_ = _tmp14_;
-			_tmp16_ = g_strjoinv (", ", artists);
+			gchar* _tmp11_ = NULL;
+			_tmp10_ = g_variant_dup_strv (artist_v, &_tmp9_);
+			artists = _tmp10_;
+			artists_length1 = _tmp9_;
+			_artists_size_ = _tmp9_;
+			_tmp11_ = g_strjoinv (", ", artists);
 			_g_free0 (display_artists);
-			display_artists = _tmp16_;
+			display_artists = _tmp11_;
 			artists = (_vala_array_free (artists, artists_length1, (GDestroyNotify) g_free), NULL);
 		}
-		_tmp17_ = g_strdup ("xesam:artist");
-		g_hash_table_replace (changed_updates, _tmp17_, _variant_new1 (display_artists));
+		_tmp12_ = g_strdup ("xesam:artist");
+		g_hash_table_replace (changed_updates, _tmp12_, _variant_new1 (display_artists));
 		_g_free0 (display_artists);
-		_g_variant_unref0 (v_artists);
 	}
 	result = changed_updates;
 	_g_variant_unref0 (artist_v);
@@ -1023,7 +1005,7 @@ static gboolean mpris2_controller_fetch_playlists_co (Mpris2ControllerFetchPlayl
 		playlists_menuitem_update (data->playlists_item, data->current_playlists, data->current_playlists_length1);
 		_g_object_unref0 (data->playlists_item);
 	} else {
-		g_warning ("mpris2-controller.vala:243:  Playlists are on but its returning no cur" \
+		g_warning ("mpris2-controller.vala:242:  Playlists are on but its returning no cur" \
 "rent_playlists");
 		data->_tmp5_ = FALSE;
 		data->_tmp6_ = __bool_dup0 (&data->_tmp5_);
@@ -1082,6 +1064,7 @@ void mpris2_controller_activate_playlist (Mpris2Controller* self, const char* pa
 		GError * e;
 		e = _inner_error_;
 		_inner_error_ = NULL;
+		g_warning ("mpris2-controller.vala:264: Could not activate playlist %s because %s", (const gchar*) path, e->message);
 		_g_error_free0 (e);
 	}
 	__finally12:
@@ -1279,7 +1262,7 @@ static GObject * mpris2_controller_constructor (GType type, guint n_construct_pr
 		GError * e;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		g_critical ("mpris2-controller.vala:60: Problems connecting to the session bus - %s", e->message);
+		g_critical ("mpris2-controller.vala:56: Problems connecting to the session bus - %s", e->message);
 		_g_error_free0 (e);
 	}
 	__finally13:

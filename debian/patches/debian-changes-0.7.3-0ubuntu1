@@ -1,0 +1,56 @@
+Description: Upstream changes introduced in version 0.7.3-0ubuntu1
+ This patch has been created by dpkg-source during the package build.
+ Here's the last changelog entry, hopefully it gives details on why
+ those changes were made:
+ .
+ indicator-sound (0.7.3-0ubuntu1) oneiric; urgency=low
+ .
+   * New upstream release.
+     - libindicator scroll signals (LP: #804618)
+     - metadatawidget collapse (LP: #806439)
+   * debian/control
+     - Bumped build depends for libindicator to 0.3.90
+   * debian/patches/gtk3_define.patch
+     - dropped
+   * configure.ac
+     - Fixup pkgconfig check for libindicator-0.4
+   * debian/rules
+     - Added autoreconf.mk
+ .
+ The person named in the Author field signed this changelog entry.
+Author: Ken VanDine <ken.vandine@canonical.com>
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/804618
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/806439
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: http://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: <YYYY-MM-DD>
+
+--- indicator-sound-0.7.3.orig/configure.ac
++++ indicator-sound-0.7.3/configure.ac
+@@ -115,12 +115,12 @@ AS_IF([test "x$with_localinstall" = "xye
+ 	],
+ 	[AS_IF([test "x$with_gtk" = "x2"],
+ 		[
+-		INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator`
+-		INDICATORICONSDIR=`$PKG_CONFIG --variable=iconsdir indicator`
++		INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator-0.4`
++		INDICATORICONSDIR=`$PKG_CONFIG --variable=iconsdir indicator-0.4`
+ 		],
+ 		[
+-		INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator3`
+-		INDICATORICONSDIR=`$PKG_CONFIG --variable=iconsdir indicator3`
++		INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator3-0.4`
++		INDICATORICONSDIR=`$PKG_CONFIG --variable=iconsdir indicator3-0.4`
+ 		])])
+ AC_SUBST(INDICATORDIR)
+ AC_SUBST(INDICATORICONSDIR)
