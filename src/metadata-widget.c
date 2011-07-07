@@ -698,9 +698,7 @@ static void
 metadata_widget_handle_resizing (MetadataWidget* self)
 {
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);
-  
-  //g_debug ("SHOW/HIDE TRACK DETAILS - %i",	dbusmenu_menuitem_property_get_bool (priv->twin_item, DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS));  
-  
+    
   if (dbusmenu_menuitem_property_get_bool (priv->twin_item,
                                            DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS) == TRUE){
     gtk_widget_hide (priv->meta_data_h_box);
