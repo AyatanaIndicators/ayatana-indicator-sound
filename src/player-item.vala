@@ -61,6 +61,8 @@ public class PlayerItem : Dbusmenu.Menuitem
       //debug("search key = %s", search_key);
       Variant? v = data.lookup(search_key);
       
+      if (v == null) continue;
+      
       if (v.is_of_type ( VariantType.STRING )){
         string update = v.get_string().strip();
         //debug("with value : %s", update);

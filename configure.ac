@@ -1,10 +1,10 @@
 
-AC_INIT(indicator-sound, 0.7.2, conor.curran@canonical.com)
+AC_INIT(indicator-sound, 0.7.3, conor.curran@canonical.com)
 
 AC_PREREQ(2.53)
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(indicator-sound, 0.7.2)
+AM_INIT_AUTOMAKE(indicator-sound, 0.7.3)
 
 AM_MAINTAINER_MODE
 
@@ -55,26 +55,26 @@ AC_SUBST(PULSEAUDIO_LIBS)
 
 AS_IF([test "x$with_gtk" = x3],
     [PKG_CHECK_MODULES(APPLET, gtk+-3.0 >= $GTK3_REQUIRED_VERSION
-                               indicator3 >= $INDICATOR_REQUIRED_VERSION
+                               indicator3-0.4 >= $INDICATOR_REQUIRED_VERSION
                                dbusmenu-gtk3-0.4 >= $DBUSMENUGTK_REQUIRED_VERSION
                                libido3-0.1 >= $INDICATOR_DISPLAY_OBJECTS
                                libnotify >= $LIBNOTIFY_REQUIRED_VERSION)
 
      PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib-0.4 >= $DBUSMENUGLIB_REQUIRED_VERSION
-                                     indicator3
+                                     indicator3-0.4
                                      gee-1.0
                                      gio-unix-2.0
                                      libxml-2.0)
         ],
       [test "x$with_gtk" = x2],
     [PKG_CHECK_MODULES(APPLET, gtk+-2.0 >= $GTK_REQUIRED_VERSION
-                               indicator >= $INDICATOR_REQUIRED_VERSION
+                               indicator-0.4 >= $INDICATOR_REQUIRED_VERSION
                                dbusmenu-gtk-0.4 >= $DBUSMENUGTK_REQUIRED_VERSION
                                libido-0.1 >= $INDICATOR_DISPLAY_OBJECTS
                                libnotify >= $LIBNOTIFY_REQUIRED_VERSION)
 
      PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib-0.4 >= $DBUSMENUGLIB_REQUIRED_VERSION
-                                     indicator
+                                     indicator-0.4
                                      gee-1.0
                                      gio-unix-2.0
                                      libxml-2.0)
