@@ -79,8 +79,7 @@ static void indicator_sound_scroll (IndicatorObject * io,
                                     IndicatorScrollDirection direction);
 static void indicator_sound_middle_click (IndicatorObject * io,
                                           IndicatorObjectEntry * entry,
-                                          guint time, gint x, gint y,
-                                          gpointer data);
+                                          guint time, gpointer data);
 
 //key/moust event handlers
 static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
@@ -724,7 +723,7 @@ indicator_sound_scroll (IndicatorObject * io, IndicatorObjectEntry * entry,
 
 static void
 indicator_sound_middle_click (IndicatorObject * io, IndicatorObjectEntry * entry,
-                              guint time, gint x, gint y, gpointer data)
+                              guint time, gpointer data)
 {
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
   g_return_if_fail (priv);
