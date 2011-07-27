@@ -76,6 +76,9 @@ typedef struct _TransportWidgetPrivate TransportWidgetPrivate;
 
 struct _TransportWidgetPrivate
 {
+  GtkWidget*          offscreen_window;
+  GtkWidget*          spinner;
+  
   TransportAction     current_command;
   TransportAction     key_event;
   TransportAction     motion_event;
@@ -170,7 +173,12 @@ transport_widget_class_init (TransportWidgetClass *klass)
 static void
 transport_widget_init (TransportWidget *self)
 {
-  TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(self);  
+  TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(self);
+  
+  priv->spinner = gtk_spinner_new();
+  priv->offscreen_window = gtk_offscreen_window_new();
+  gtk_container_add( GTK_CONTAINER(priv->offscreen_window), priv->spinner); 
+  
   priv->current_command = TRANSPORT_ACTION_NO_ACTION;
   priv->current_state = TRANSPORT_STATE_PAUSED;
   priv->key_event = TRANSPORT_ACTION_NO_ACTION;
@@ -1755,9 +1763,8 @@ draw (GtkWidget* button, cairo_t *cr)
   }
   else if(priv->current_state == TRANSPORT_STATE_LAUNCHING)
   {
-/*
     g_debug ("launching in draw");
-*/
+    
     _setup (&cr_surf, &surf, PLAY_WIDTH+6, PLAY_HEIGHT+6);
     _mask_play (cr_surf,
                 PLAY_PADDING,
