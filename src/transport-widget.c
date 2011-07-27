@@ -177,7 +177,7 @@ transport_widget_init (TransportWidget *self)
   
   priv->spinner = gtk_spinner_new();
   priv->offscreen_window = gtk_offscreen_window_new();
-  gtk_container_add( GTK_CONTAINER(priv->offscreen_window), priv->spinner); 
+  gtk_container_add( GTK_CONTAINER(priv->offscreen_window), priv->spinner);
   
   priv->current_command = TRANSPORT_ACTION_NO_ACTION;
   priv->current_state = TRANSPORT_STATE_PAUSED;
@@ -257,7 +257,7 @@ transport_widget_expose (GtkWidget *button, GdkEventExpose *event)
   cairo_t *cr;
   cr = gdk_cairo_create (gtk_widget_get_window (button));
 
-    //g_debug("In the playbutton's expose method, x = %i, y=%i and width: %i and height: %i'");
+  g_debug("In the playbutton's expose method, x = %i, y=%i and width: %i and height: %i'");
   cairo_rectangle (cr,
                      event->area.x, event->area.y,
                      event->area.width, event->area.height);
@@ -283,7 +283,7 @@ transport_widget_toggle_play_pause(TransportWidget* button,
 {
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(button);
   priv->current_state = update;
-  //g_debug("TransportWidget::toggle play state : %i", priv->current_state); 
+  g_debug("TransportWidget::toggle play state : %i", priv->current_state); 
   gtk_widget_queue_draw (GTK_WIDGET(button));
 }
 
@@ -314,6 +314,8 @@ static gboolean
 transport_widget_motion_notify_event (GtkWidget *menuitem, 
                                       GdkEventMotion *event)
 {
+  g_debug("transport_widget_motion_notify_event()");
+  
   g_return_val_if_fail ( IS_TRANSPORT_WIDGET(menuitem), FALSE );
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE ( TRANSPORT_WIDGET(menuitem) );
   TransportAction result = transport_widget_determine_motion_event ( TRANSPORT_WIDGET(menuitem),
@@ -335,6 +337,8 @@ static gboolean
 transport_widget_leave_notify_event (GtkWidget *menuitem, 
                                      GdkEventCrossing *event)
 {
+  g_debug("transport_widget_leave_notify_event()");
+  
   g_return_val_if_fail ( IS_TRANSPORT_WIDGET(menuitem), FALSE );
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE ( TRANSPORT_WIDGET(menuitem) );
   
@@ -349,6 +353,8 @@ static gboolean
 transport_widget_button_press_event (GtkWidget *menuitem, 
                                      GdkEventButton *event)
 {
+  g_debug("transport_widget_button_press_event()");
+  
   g_return_val_if_fail ( IS_TRANSPORT_WIDGET(menuitem), FALSE );
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE ( TRANSPORT_WIDGET(menuitem) );
   TransportAction result = transport_widget_determine_button_event ( TRANSPORT_WIDGET(menuitem),
@@ -1236,7 +1242,9 @@ draw (GtkWidget* button, cairo_t *cr)
   g_return_val_if_fail(IS_TRANSPORT_WIDGET(button), FALSE);
   g_return_val_if_fail(cr != NULL, FALSE);
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(button);  
-
+  
+  //g_debug("transport-widget draw()");
+  
   cairo_surface_t*  surf = NULL;
   cairo_t*       cr_surf = NULL;
 
@@ -1763,7 +1771,7 @@ draw (GtkWidget* button, cairo_t *cr)
   }
   else if(priv->current_state == TRANSPORT_STATE_LAUNCHING)
   {
-    g_debug ("launching in draw");
+    //g_debug ("===launching in draw===");
     
     _setup (&cr_surf, &surf, PLAY_WIDTH+6, PLAY_HEIGHT+6);
     _mask_play (cr_surf,
@@ -1839,9 +1847,7 @@ transport_widget_fade_playbutton (gpointer userdata)
 {
   TransportWidget* bar = (TransportWidget*)userdata;
   g_return_val_if_fail(IS_TRANSPORT_WIDGET(bar), FALSE);
-/*
-  g_debug ("fade in /out timeout");
-*/
+  //g_debug ("fade in /out timeout");
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(bar);
   if (priv->launching_transparency == 1.0f){
     priv->fade_out = TRUE;
@@ -1874,13 +1880,14 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
   if(g_ascii_strcasecmp(DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE, property) == 0)
   {
     TransportState new_state = (TransportState)g_variant_get_int32(value);
-    //g_debug("transport_widget_update_state - with value  %i", update_value);
+    //g_debug("transport_widget_update_state - with value  %i", new_state);
     if (new_state == TRANSPORT_STATE_LAUNCHING){
       priv->current_state = TRANSPORT_STATE_LAUNCHING;
       priv->launching_timer = g_timeout_add (100,
                                              transport_widget_fade_playbutton,
                                              bar);
-      //g_debug("TransportWidget::toggle play state : %i", priv->current_state);
+      g_debug("TransportWidget::toggle play state : %i", priv->current_state);
+      gtk_spinner_start( (GtkSpinner*)priv->spinner);
     }
     else{
       if (priv->launching_timer != 0){
@@ -1890,6 +1897,7 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
         priv->launching_transparency = 1.0f;
       }
       transport_widget_toggle_play_pause(bar, new_state);
+      gtk_spinner_stop( (GtkSpinner*)priv->spinner);
     }
   }
 }
