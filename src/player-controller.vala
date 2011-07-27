@@ -143,11 +143,12 @@ public class PlayerController : GLib.Object
 
   public void update_layout()
   {    
-    debug ("a call to update layout"); 
+    debug ("player-controller update_layout()"); 
     PlaylistsMenuitem playlists_menuitem = this.custom_items[widget_order.PLAYLISTS] as PlaylistsMenuitem;
     MetadataMenuitem metadata_menuitem = this.custom_items[widget_order.METADATA] as MetadataMenuitem;
     if(this.current_state != state.CONNECTED){
       // TODO 
+      debug("\tthis.current_state != state.CONNECTED, setting Transport property bool to %s now",this.app_info.get_id() );
       metadata_menuitem.should_collapse (true);
       playlists_menuitem.root_item.property_set_bool (MENUITEM_PROP_VISIBLE,
                                                       false );

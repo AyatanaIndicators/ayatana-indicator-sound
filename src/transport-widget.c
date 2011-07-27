@@ -177,6 +177,10 @@ transport_widget_init (TransportWidget *self)
   
   priv->spinner = gtk_spinner_new();
   priv->offscreen_window = gtk_offscreen_window_new();
+  
+  g_assert(priv->spinner);
+  g_assert(priv->offscreen_window);
+  
   gtk_container_add( GTK_CONTAINER(priv->offscreen_window), priv->spinner);
   
   priv->current_command = TRANSPORT_ACTION_NO_ACTION;
@@ -257,7 +261,7 @@ transport_widget_expose (GtkWidget *button, GdkEventExpose *event)
   cairo_t *cr;
   cr = gdk_cairo_create (gtk_widget_get_window (button));
 
-  g_debug("In the playbutton's expose method, x = %i, y=%i and width: %i and height: %i'");
+  //g_debug("In the playbutton's expose method, x = %i, y=%i and width: %i and height: %i'");
   cairo_rectangle (cr,
                      event->area.x, event->area.y,
                      event->area.width, event->area.height);
@@ -283,7 +287,7 @@ transport_widget_toggle_play_pause(TransportWidget* button,
 {
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(button);
   priv->current_state = update;
-  g_debug("TransportWidget::toggle play state : %i", priv->current_state); 
+  //g_debug("TransportWidget::toggle play state : %i", priv->current_state); 
   gtk_widget_queue_draw (GTK_WIDGET(button));
 }
 
@@ -314,7 +318,7 @@ static gboolean
 transport_widget_motion_notify_event (GtkWidget *menuitem, 
                                       GdkEventMotion *event)
 {
-  g_debug("transport_widget_motion_notify_event()");
+  //g_debug("transport_widget_motion_notify_event()");
   
   g_return_val_if_fail ( IS_TRANSPORT_WIDGET(menuitem), FALSE );
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE ( TRANSPORT_WIDGET(menuitem) );
@@ -337,7 +341,7 @@ static gboolean
 transport_widget_leave_notify_event (GtkWidget *menuitem, 
                                      GdkEventCrossing *event)
 {
-  g_debug("transport_widget_leave_notify_event()");
+  //g_debug("transport_widget_leave_notify_event()");
   
   g_return_val_if_fail ( IS_TRANSPORT_WIDGET(menuitem), FALSE );
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE ( TRANSPORT_WIDGET(menuitem) );
@@ -353,7 +357,7 @@ static gboolean
 transport_widget_button_press_event (GtkWidget *menuitem, 
                                      GdkEventButton *event)
 {
-  g_debug("transport_widget_button_press_event()");
+  //g_debug("transport_widget_button_press_event()");
   
   g_return_val_if_fail ( IS_TRANSPORT_WIDGET(menuitem), FALSE );
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE ( TRANSPORT_WIDGET(menuitem) );
@@ -1771,8 +1775,16 @@ draw (GtkWidget* button, cairo_t *cr)
   }
   else if(priv->current_state == TRANSPORT_STATE_LAUNCHING)
   {
-    //g_debug ("===launching in draw===");
+    g_debug ("launching in draw");
     
+    GtkOffscreenWindow* tmp_offscreen_win = (GtkOffscreenWindow*)priv->offscreen_window;
+    
+    cairo_t *tmp_cr = cairo_create( gtk_offscreen_window_get_surface( tmp_offscreen_win ) );
+    
+    cairo_set_source_surface( tmp_cr, surf, 0, 0 );
+    cairo_paint(tmp_cr);
+    
+    /*
     _setup (&cr_surf, &surf, PLAY_WIDTH+6, PLAY_HEIGHT+6);
     _mask_play (cr_surf,
                 PLAY_PADDING,
@@ -1822,6 +1834,7 @@ draw (GtkWidget* button, cairo_t *cr)
            BUTTON_LAUNCHING_END,
            FALSE);
     _finalize (cr, &cr_surf, &surf, PAUSE_X-0.5f, PAUSE_Y);
+    */
   }
 
   return FALSE;
