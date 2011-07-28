@@ -18,6 +18,8 @@ libsoundmenu_la_SOURCES = \
             transport-widget.h \
             metadata-widget.c \
             metadata-widget.h \
+            mute-widget.c \
+            mute-widget.h \
             volume-widget.c \
             volume-widget.h \
             voip-input-widget.c \

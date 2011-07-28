@@ -77,6 +77,7 @@ am_libsoundmenu_la_OBJECTS = libsoundmenu_la-indicator-sound.lo \
 	libsoundmenu_la-sound-state-manager.lo \
 	libsoundmenu_la-transport-widget.lo \
 	libsoundmenu_la-metadata-widget.lo \
+	libsoundmenu_la-mute-widget.lo \
 	libsoundmenu_la-volume-widget.lo \
 	libsoundmenu_la-voip-input-widget.lo \
 	libsoundmenu_la-gen-sound-service.xml.lo
@@ -331,6 +332,8 @@ libsoundmenu_la_SOURCES = \
             transport-widget.h \
             metadata-widget.c \
             metadata-widget.h \
+            mute-widget.c \
+            mute-widget.h \
             volume-widget.c \
             volume-widget.h \
             voip-input-widget.c \
@@ -583,6 +586,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-gen-sound-service.xml.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-indicator-sound.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-metadata-widget.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-mute-widget.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-sound-state-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-sound-state.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-transport-widget.Plo@am__quote@
@@ -652,6 +656,14 @@ libsoundmenu_la-metadata-widget.lo: metadata-widget.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='metadata-widget.c' object='libsoundmenu_la-metadata-widget.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsoundmenu_la_CFLAGS) $(CFLAGS) -c -o libsoundmenu_la-metadata-widget.lo `test -f 'metadata-widget.c' || echo '$(srcdir)/'`metadata-widget.c
+
+libsoundmenu_la-mute-widget.lo: mute-widget.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsoundmenu_la_CFLAGS) $(CFLAGS) -MT libsoundmenu_la-mute-widget.lo -MD -MP -MF $(DEPDIR)/libsoundmenu_la-mute-widget.Tpo -c -o libsoundmenu_la-mute-widget.lo `test -f 'mute-widget.c' || echo '$(srcdir)/'`mute-widget.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libsoundmenu_la-mute-widget.Tpo $(DEPDIR)/libsoundmenu_la-mute-widget.Plo
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mute-widget.c' object='libsoundmenu_la-mute-widget.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsoundmenu_la_CFLAGS) $(CFLAGS) -c -o libsoundmenu_la-mute-widget.lo `test -f 'mute-widget.c' || echo '$(srcdir)/'`mute-widget.c
 
 libsoundmenu_la-volume-widget.lo: volume-widget.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsoundmenu_la_CFLAGS) $(CFLAGS) -MT libsoundmenu_la-volume-widget.lo -MD -MP -MF $(DEPDIR)/libsoundmenu_la-volume-widget.Tpo -c -o libsoundmenu_la-volume-widget.lo `test -f 'volume-widget.c' || echo '$(srcdir)/'`volume-widget.c
