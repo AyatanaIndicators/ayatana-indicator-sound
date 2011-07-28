@@ -1,10 +1,10 @@
 
-AC_INIT(indicator-sound, 0.7.3, conor.curran@canonical.com)
+AC_INIT(indicator-sound, 0.7.4, conor.curran@canonical.com)
 
 AC_PREREQ(2.53)
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(indicator-sound, 0.7.3)
+AM_INIT_AUTOMAKE(indicator-sound, 0.7.4)
 
 AM_MAINTAINER_MODE
 
@@ -115,12 +115,12 @@ AS_IF([test "x$with_localinstall" = "xyes"],
 	],
 	[AS_IF([test "x$with_gtk" = "x2"],
 		[
-		INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator`
-		INDICATORICONSDIR=`$PKG_CONFIG --variable=iconsdir indicator`
+		INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator-0.4`
+		INDICATORICONSDIR=`$PKG_CONFIG --variable=iconsdir indicator-0.4`
 		],
 		[
-		INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator3`
-		INDICATORICONSDIR=`$PKG_CONFIG --variable=iconsdir indicator3`
+		INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator3-0.4`
+		INDICATORICONSDIR=`$PKG_CONFIG --variable=iconsdir indicator3-0.4`
 		])])
 AC_SUBST(INDICATORDIR)
 AC_SUBST(INDICATORICONSDIR)
