@@ -76,9 +76,6 @@ typedef struct _TransportWidgetPrivate TransportWidgetPrivate;
 
 struct _TransportWidgetPrivate
 {
-  GtkWidget*          offscreen_window;
-  GtkWidget*          spinner;
-  
   TransportAction     current_command;
   TransportAction     key_event;
   TransportAction     motion_event;
@@ -92,6 +89,9 @@ struct _TransportWidgetPrivate
   gdouble             launching_transparency;
   gboolean            fade_out;
 };
+
+static GtkStyleContext *spinner_style_context;
+static GtkWidgetPath *spinner_widget_path;
 
 // TODO refactor the UI handlers, consolidate functionality between key press /release
 // and button press / release.
@@ -175,13 +175,15 @@ transport_widget_init (TransportWidget *self)
 {
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(self);
   
-  priv->spinner = gtk_spinner_new();
-  priv->offscreen_window = gtk_offscreen_window_new();
+  spinner_widget_path   = gtk_widget_path_new();
+  spinner_style_context = gtk_style_context_new();
   
-  g_assert(priv->spinner);
-  g_assert(priv->offscreen_window);
-  
-  gtk_container_add( GTK_CONTAINER(priv->offscreen_window), priv->spinner);
+  gtk_widget_path_iter_set_name (spinner_widget_path, -1 , "IndicatorSoundSpinner");
+  gtk_widget_path_append_type (spinner_widget_path, GTK_TYPE_SPINNER);
+
+  gtk_style_context_set_path (spinner_style_context, spinner_widget_path);
+  gtk_style_context_add_class (spinner_style_context, GTK_STYLE_CLASS_SPINNER);
+  gtk_style_context_set_state (spinner_style_context, GTK_STATE_FLAG_ACTIVE); 
   
   priv->current_command = TRANSPORT_ACTION_NO_ACTION;
   priv->current_state = TRANSPORT_STATE_PAUSED;
@@ -245,12 +247,16 @@ transport_widget_init (TransportWidget *self)
 static void
 transport_widget_dispose (GObject *object)
 {
+  g_object_unref (spinner_style_context);
+  
   G_OBJECT_CLASS (transport_widget_parent_class)->dispose (object);
 }
 
 static void
 transport_widget_finalize (GObject *object)
 {
+  gtk_widget_path_free (spinner_widget_path);
+  
   G_OBJECT_CLASS (transport_widget_parent_class)->finalize (object);
 }
 
@@ -1777,29 +1783,11 @@ draw (GtkWidget* button, cairo_t *cr)
   {
     g_debug ("launching in draw");
     
-    GtkStyleContext *style_context = gtk_style_context_new ();
-
-	GtkWidgetPath *widget_path = gtk_widget_path_new ();
-	gtk_widget_path_iter_set_name (widget_path, -1 , "indicator-sound-spinner");
-	gtk_widget_path_append_type (widget_path, GTK_TYPE_SPINNER);
-
-	gtk_style_context_set_path (style_context, widget_path);
-	gtk_style_context_add_class (style_context, GTK_STYLE_CLASS_SPINNER);
-
-/*
-	gtk_style_context_notify_state_change(style_context,
-                                          gtk_widget_get_window(self),
-										  NULL,
-										  GTK_STATE_ACTIVE,
-										  TRUE);
-*/
-	gtk_render_activity (style_context, cr, 106, 6 , 30, 30);
-
-	//cairo_mark_dirty (cr);
-
-	gtk_widget_path_free (widget_path);
-	g_object_unref (style_context);
+	gtk_style_context_set_state (spinner_style_context, GTK_STATE_FLAG_ACTIVE); 
+	gtk_render_activity (spinner_style_context, cr, 106, 6 , 30, 30);
     
+    // need to redraw the cairo context here, cairo_paint() doesn't seem to do it
+    cairo_paint(cr);
     
     /*
     GtkOffscreenWindow* tmp_offscreen_win = (GtkOffscreenWindow*)priv->offscreen_window;
@@ -1926,7 +1914,6 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
                                              transport_widget_fade_playbutton,
                                              bar);
       g_debug("TransportWidget::toggle play state : %i", priv->current_state);
-      gtk_spinner_start( (GtkSpinner*)priv->spinner);
     }
     else{
       if (priv->launching_timer != 0){
@@ -1936,7 +1923,6 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
         priv->launching_transparency = 1.0f;
       }
       transport_widget_toggle_play_pause(bar, new_state);
-      gtk_spinner_stop( (GtkSpinner*)priv->spinner);
     }
   }
 }
