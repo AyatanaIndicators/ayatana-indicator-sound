@@ -187,8 +187,12 @@ transport_widget_init (TransportWidget *self)
   
   //g_object_set (gtk_settings_get_default (), "gtk-enable-animations", TRUE, NULL);
   
-  gtk_widget_path_iter_set_name (spinner_widget_path, 0 , "IndicatorSoundSpinner");
   gtk_widget_path_append_type (spinner_widget_path, GTK_TYPE_SPINNER);
+  gtk_widget_path_iter_set_name (spinner_widget_path, 1 , "IndicatorSoundSpinner");
+  
+  gtk_widget_path_iter_add_class(spinner_widget_path,-1,GTK_STYLE_CLASS_SPINNER);
+  
+  gtk_style_context_add_class(spinner_style_context,GTK_STYLE_CLASS_SPINNER);
 
   gtk_style_context_set_path (spinner_style_context, spinner_widget_path);
   gtk_style_context_add_class (spinner_style_context, GTK_STYLE_CLASS_SPINNER);
@@ -1790,6 +1794,8 @@ draw (GtkWidget* button, cairo_t *cr)
   }
   else if(priv->current_state == TRANSPORT_STATE_LAUNCHING)
   {
+	gtk_style_context_set_state (spinner_style_context, GTK_STATE_FLAG_ACTIVE);
+	
 	gdouble progress;
 	gtk_style_context_state_is_running(spinner_style_context, GTK_STATE_ACTIVE, &progress);
 	
@@ -1929,7 +1935,6 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
                                              transport_widget_fade_playbutton,
                                              bar);
       g_debug("TransportWidget::toggle play state : %i", priv->current_state);
-      gtk_style_context_set_state (spinner_style_context, GTK_STATE_FLAG_ACTIVE);
     }
     else{
       if (priv->launching_timer != 0){
