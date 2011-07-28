@@ -63,6 +63,11 @@ mute_menu_item_init (MuteMenuItem *self)
   MuteMenuItemPrivate* priv = MUTE_MENU_ITEM_GET_PRIVATE(self);
   priv->button = NULL;
   priv->button = dbusmenu_menuitem_new();
+
+  dbusmenu_menuitem_property_set(priv->button,
+                                 DBUSMENU_MENUITEM_PROP_TYPE,
+                                 DBUSMENU_MUTE_MENUITEM_TYPE);
+
   dbusmenu_menuitem_property_set_bool (priv->button,
                                        DBUSMENU_MENUITEM_PROP_VISIBLE,
                                        TRUE);
