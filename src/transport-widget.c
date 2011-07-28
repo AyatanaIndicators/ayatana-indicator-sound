@@ -1801,7 +1801,9 @@ draw (GtkWidget* button, cairo_t *cr)
     // state 0 = NORMAL
     // state 1 = ACTIVE
     
-    g_debug ("launching in draw state: %i and progress %f", state, progress  );
+    g_debug ("Is state active: %i and progress %f",
+              state == GTK_STATE_FLAG_ACTIVE,
+              progress  );
     gtk_render_activity (spinner_style_context, cr, 106, 6 , 30, 30);
     g_debug ("context style is running ? = %i", 
               gtk_style_context_state_is_running (spinner_style_context,
