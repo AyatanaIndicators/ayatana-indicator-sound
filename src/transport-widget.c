@@ -85,13 +85,11 @@ struct _TransportWidgetPrivate
   gboolean            has_focus;
   gint                hold_timer;
   gint                skip_frequency;
-  gint                launching_timer;
-  gdouble             launching_transparency;
-  gboolean            fade_out;
 };
 
-static GtkStyleContext *spinner_style_context;
-static GtkWidgetPath *spinner_widget_path;
+static GList *transport_widget_list = NULL;
+static GtkStyleContext *spinner_style_context = NULL;
+static GtkWidgetPath *spinner_widget_path = NULL;
 
 // TODO refactor the UI handlers, consolidate functionality between key press /release
 // and button press / release.
@@ -144,7 +142,6 @@ static TransportAction transport_widget_collision_detection (gint x, gint y);
 static void transport_widget_start_timing (TransportWidget* widget);
 static gboolean transport_widget_trigger_seek (gpointer userdata);
 static gboolean transport_widget_seek (gpointer userdata);
-static gboolean transport_widget_fade_playbutton (gpointer userdata);
 
 
 /// Init functions //////////////////////////////////////////////////////////
@@ -174,29 +171,23 @@ static void
 transport_widget_init (TransportWidget *self)
 {
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(self);
-  
-  spinner_widget_path   = gtk_widget_path_new();
-  spinner_style_context = gtk_style_context_new();
-  
-  
-  /*
-  gtk_settings_set_string_property(	gtk_settings_get_default(),
-									"gtk-enable-animations",
-									const gchar *v_string,
-									const gchar *origin); */
-  
-  //g_object_set (gtk_settings_get_default (), "gtk-enable-animations", TRUE, NULL);
-  
-  gtk_widget_path_append_type (spinner_widget_path, GTK_TYPE_SPINNER);
-  gtk_widget_path_iter_set_name (spinner_widget_path, 1 , "IndicatorSoundSpinner");
-  
-  gtk_widget_path_iter_add_class(spinner_widget_path,-1,GTK_STYLE_CLASS_SPINNER);
-  
-  gtk_style_context_add_class(spinner_style_context,GTK_STYLE_CLASS_SPINNER);
 
-  gtk_style_context_set_path (spinner_style_context, spinner_widget_path);
-  gtk_style_context_add_class (spinner_style_context, GTK_STYLE_CLASS_SPINNER);
-  gtk_style_context_set_state (spinner_style_context, GTK_STATE_FLAG_NORMAL); 
+  if (transport_widget_list == NULL){
+    /* append the object to the static linked list. */
+    transport_widget_list = g_list_append (transport_widget_list, self);
+
+    /* create widget path */
+    spinner_widget_path = gtk_widget_path_new();
+
+    gtk_widget_path_iter_set_name (spinner_widget_path, -1 , "IndicatorSoundSpinner");
+    gtk_widget_path_append_type (spinner_widget_path, GTK_TYPE_SPINNER);
+
+    /* create style context and append path */
+    spinner_style_context = gtk_style_context_new();
+
+    gtk_style_context_set_path (spinner_style_context, spinner_widget_path);
+    gtk_style_context_add_class (spinner_style_context, GTK_STYLE_CLASS_SPINNER);
+  }
   
   priv->current_command = TRANSPORT_ACTION_NO_ACTION;
   priv->current_state = TRANSPORT_STATE_PAUSED;
@@ -205,9 +196,6 @@ transport_widget_init (TransportWidget *self)
   priv->has_focus = FALSE;
   priv->hold_timer = 0;
   priv->skip_frequency = 0;
-  priv->launching_timer = 0;
-  priv->launching_transparency = 1.0f;
-  priv->fade_out = TRUE;
   priv->command_coordinates =  g_hash_table_new_full(g_direct_hash,
                                                       g_direct_equal,
                                                       NULL,
@@ -260,7 +248,19 @@ transport_widget_init (TransportWidget *self)
 static void
 transport_widget_dispose (GObject *object)
 {
-  g_object_unref (spinner_style_context);
+  transport_widget_list = g_list_remove (transport_widget_list, object);
+
+  if (transport_widget_list == NULL){
+    if (spinner_widget_path != NULL){
+      gtk_widget_path_free (spinner_widget_path);
+      spinner_widget_path = NULL;
+    }
+
+    if (spinner_style_context != NULL){
+      g_object_unref (spinner_style_context);
+      spinner_style_context = NULL;
+    }
+  }
   
   G_OBJECT_CLASS (transport_widget_parent_class)->dispose (object);
 }
@@ -268,7 +268,7 @@ transport_widget_dispose (GObject *object)
 static void
 transport_widget_finalize (GObject *object)
 {
-  gtk_widget_path_free (spinner_widget_path);
+ 
   
   G_OBJECT_CLASS (transport_widget_parent_class)->finalize (object);
 }
@@ -306,7 +306,6 @@ transport_widget_toggle_play_pause(TransportWidget* button,
 {
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(button);
   priv->current_state = update;
-  //g_debug("TransportWidget::toggle play state : %i", priv->current_state); 
   gtk_widget_queue_draw (GTK_WIDGET(button));
 }
 
@@ -1259,8 +1258,6 @@ _surface_blur (cairo_surface_t* surface,
   cairo_surface_mark_dirty (surface); 
 }
 
-static gdouble progress = 0.0;
-
 static gboolean
 draw (GtkWidget* button, cairo_t *cr)
 {
@@ -1796,85 +1793,8 @@ draw (GtkWidget* button, cairo_t *cr)
   }
   else if(priv->current_state == TRANSPORT_STATE_LAUNCHING)
   {
-    
-    GtkStateFlags state = gtk_style_context_get_state(spinner_style_context); 
-    // state 0 = NORMAL
-    // state 1 = ACTIVE
-    
-    g_debug ("Is state active: %i and progress %f",
-              state == GTK_STATE_FLAG_ACTIVE,
-              progress  );
-    gtk_render_activity (spinner_style_context, cr, 106, 6 , 30, 30);
-    g_debug ("context style is running ? = %i", 
-              gtk_style_context_state_is_running (spinner_style_context,
-                                                  GTK_STATE_ACTIVE,
-                                                  &progress));
-      
-      // need to redraw the cairo context here, cairo_paint() doesn't seem to do it
-    cairo_paint(cr);
-    
-    /*
-    GtkOffscreenWindow* tmp_offscreen_win = (GtkOffscreenWindow*)priv->offscreen_window;
-    
-    cairo_t *tmp_cr = cairo_create( gtk_offscreen_window_get_surface( tmp_offscreen_win ) );
-    
-    cairo_set_source_surface( tmp_cr, surf, 0, 0 );
-    cairo_paint(tmp_cr);
-    */
-    
-    /*
-    _setup (&cr_surf, &surf, PLAY_WIDTH+6, PLAY_HEIGHT+6);
-    _mask_play (cr_surf,
-                PLAY_PADDING,
-                PLAY_PADDING,
-                PLAY_WIDTH - (2*PLAY_PADDING),
-                PLAY_HEIGHT - (2*PLAY_PADDING));
-
-    double BUTTON_SHADOW_LAUNCHING[] = {color_button[3].r,
-                                        color_button[3].g,
-                                        color_button[3].b,
-                                        priv->launching_transparency};
-    double BUTTON_LAUNCHING_END[] = {color_button[0].r,
-                                     color_button[0].g,
-                                     color_button[0].b,
-                                     priv->launching_transparency};
-    double BUTTON_LAUNCHING_START[] = {color_button[1].r,
-                                       color_button[1].g,
-                                       color_button[1].b,
-                                       priv->launching_transparency};
-    _fill (cr_surf,
-           PLAY_PADDING,
-           PLAY_PADDING,
-           PLAY_WIDTH - (2*PLAY_PADDING),
-           PLAY_HEIGHT - (2*PLAY_PADDING),
-           BUTTON_SHADOW_LAUNCHING,
-           BUTTON_SHADOW_LAUNCHING,
-           FALSE);
-    _surface_blur (surf, 3);
-    _finalize_repaint (cr, &cr_surf, &surf, PAUSE_X-0.5f, PAUSE_Y + 0.5f, 3);
-    
-    // draw play-button
-    _setup (&cr_surf, &surf, PLAY_WIDTH, PLAY_HEIGHT);
-    cairo_set_line_width (cr, 10.5);
-    cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
-    cairo_set_line_join(cr, CAIRO_LINE_JOIN_ROUND);
-    _mask_play (cr_surf,
-                PLAY_PADDING,
-                PLAY_PADDING,
-                PLAY_WIDTH - (2*PLAY_PADDING),
-                PLAY_HEIGHT - (2*PLAY_PADDING));
-    _fill (cr_surf,
-           PLAY_PADDING,
-           PLAY_PADDING,
-           PLAY_WIDTH - (2*PLAY_PADDING),
-           PLAY_HEIGHT - (2*PLAY_PADDING),
-           BUTTON_LAUNCHING_START,
-           BUTTON_LAUNCHING_END,
-           FALSE);
-    _finalize (cr, &cr_surf, &surf, PAUSE_X-0.5f, PAUSE_Y);
-    */
+    gtk_render_activity (spinner_style_context, cr, 106, 6 , 30, 30);      
   }
-
   return FALSE;
 }
 
@@ -1891,29 +1811,6 @@ transport_widget_set_twin_item(TransportWidget* self,
     //g_debug("TRANSPORT WIDGET - INITIAL UPDATE = %i", initial_state);
     transport_widget_toggle_play_pause (self,
                                        (TransportState)initial_state);
-}
-
-static gboolean
-transport_widget_fade_playbutton (gpointer userdata)
-{
-  TransportWidget* bar = (TransportWidget*)userdata;
-  g_return_val_if_fail(IS_TRANSPORT_WIDGET(bar), FALSE);
-  //g_debug ("fade in /out timeout");
-  TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(bar);
-  if (priv->launching_transparency == 1.0f){
-    priv->fade_out = TRUE;
-  }
-  else if (priv->launching_transparency <= 0.3F){
-    priv->fade_out = FALSE;
-  }
-  if (priv->fade_out == TRUE){
-    priv->launching_transparency -= 0.05f;
-  }
-  else{
-    priv->launching_transparency += 0.05f;
-  }
-  gtk_widget_queue_draw (GTK_WIDGET(bar));
-  return TRUE;
 }
 
 /**
@@ -1937,24 +1834,14 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
       gtk_style_context_notify_state_change (spinner_style_context, 
                                              gtk_widget_get_window ( GTK_WIDGET(userdata)),
                                              NULL,
-                                             GTK_STATE_PRELIGHT,
+                                             GTK_STATE_FLAG_ACTIVE,
                                              TRUE);
-
       gtk_style_context_set_state (spinner_style_context, GTK_STATE_FLAG_ACTIVE);
-                                             
+
       priv->current_state = TRANSPORT_STATE_LAUNCHING;
-      priv->launching_timer = g_timeout_add (100,
-                                             transport_widget_fade_playbutton,
-                                             bar);
       g_debug("TransportWidget::toggle play state : %i", priv->current_state);
     }
     else{
-      if (priv->launching_timer != 0){
-        g_source_remove (priv->launching_timer);
-        priv->launching_timer = 0;
-        priv->fade_out = TRUE;
-        priv->launching_transparency = 1.0f;
-      }
       transport_widget_toggle_play_pause(bar, new_state);
     }
   }
