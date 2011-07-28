@@ -178,7 +178,16 @@ transport_widget_init (TransportWidget *self)
   spinner_widget_path   = gtk_widget_path_new();
   spinner_style_context = gtk_style_context_new();
   
-  gtk_widget_path_iter_set_name (spinner_widget_path, -1 , "IndicatorSoundSpinner");
+  
+  /*
+  gtk_settings_set_string_property(	gtk_settings_get_default(),
+									"gtk-enable-animations",
+									const gchar *v_string,
+									const gchar *origin); */
+  
+  //g_object_set (gtk_settings_get_default (), "gtk-enable-animations", TRUE, NULL);
+  
+  gtk_widget_path_iter_set_name (spinner_widget_path, 0 , "IndicatorSoundSpinner");
   gtk_widget_path_append_type (spinner_widget_path, GTK_TYPE_SPINNER);
 
   gtk_style_context_set_path (spinner_style_context, spinner_widget_path);
