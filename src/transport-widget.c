@@ -1777,12 +1777,38 @@ draw (GtkWidget* button, cairo_t *cr)
   {
     g_debug ("launching in draw");
     
+    GtkStyleContext *style_context = gtk_style_context_new ();
+
+	GtkWidgetPath *widget_path = gtk_widget_path_new ();
+	gtk_widget_path_iter_set_name (widget_path, -1 , "indicator-sound-spinner");
+	gtk_widget_path_append_type (widget_path, GTK_TYPE_SPINNER);
+
+	gtk_style_context_set_path (style_context, widget_path);
+	gtk_style_context_add_class (style_context, GTK_STYLE_CLASS_SPINNER);
+
+/*
+	gtk_style_context_notify_state_change(style_context,
+                                          gtk_widget_get_window(self),
+										  NULL,
+										  GTK_STATE_ACTIVE,
+										  TRUE);
+*/
+	gtk_render_activity (style_context, cr, 106, 6 , 30, 30);
+
+	//cairo_mark_dirty (cr);
+
+	gtk_widget_path_free (widget_path);
+	g_object_unref (style_context);
+    
+    
+    /*
     GtkOffscreenWindow* tmp_offscreen_win = (GtkOffscreenWindow*)priv->offscreen_window;
     
     cairo_t *tmp_cr = cairo_create( gtk_offscreen_window_get_surface( tmp_offscreen_win ) );
     
     cairo_set_source_surface( tmp_cr, surf, 0, 0 );
     cairo_paint(tmp_cr);
+    */
     
     /*
     _setup (&cr_surf, &surf, PLAY_WIDTH+6, PLAY_HEIGHT+6);
