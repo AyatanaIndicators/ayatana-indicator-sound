@@ -183,7 +183,7 @@ transport_widget_init (TransportWidget *self)
 
   gtk_style_context_set_path (spinner_style_context, spinner_widget_path);
   gtk_style_context_add_class (spinner_style_context, GTK_STYLE_CLASS_SPINNER);
-  gtk_style_context_set_state (spinner_style_context, GTK_STATE_FLAG_ACTIVE); 
+  gtk_style_context_set_state (spinner_style_context, GTK_STATE_FLAG_NORMAL); 
   
   priv->current_command = TRANSPORT_ACTION_NO_ACTION;
   priv->current_state = TRANSPORT_STATE_PAUSED;
@@ -267,7 +267,7 @@ transport_widget_expose (GtkWidget *button, GdkEventExpose *event)
   cairo_t *cr;
   cr = gdk_cairo_create (gtk_widget_get_window (button));
 
-  //g_debug("In the playbutton's expose method, x = %i, y=%i and width: %i and height: %i'");
+  g_debug("In the playbutton's expose method, x = %i, y=%i and width: %i and height: %i'");
   cairo_rectangle (cr,
                      event->area.x, event->area.y,
                      event->area.width, event->area.height);
@@ -1781,9 +1781,15 @@ draw (GtkWidget* button, cairo_t *cr)
   }
   else if(priv->current_state == TRANSPORT_STATE_LAUNCHING)
   {
-    g_debug ("launching in draw");
+	gdouble progress;
+	gtk_style_context_state_is_running(spinner_style_context, GTK_STATE_ACTIVE, &progress);
+	
+	GtkStateFlags state = gtk_style_context_get_state(spinner_style_context); 
+	// state 0 = NORMAL
+	// state 1 = ACTIVE
+	
+    g_debug ("launching in draw state: %i, %f", state ,progress );
     
-	gtk_style_context_set_state (spinner_style_context, GTK_STATE_FLAG_ACTIVE); 
 	gtk_render_activity (spinner_style_context, cr, 106, 6 , 30, 30);
     
     // need to redraw the cairo context here, cairo_paint() doesn't seem to do it
@@ -1914,6 +1920,7 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
                                              transport_widget_fade_playbutton,
                                              bar);
       g_debug("TransportWidget::toggle play state : %i", priv->current_state);
+      gtk_style_context_set_state (spinner_style_context, GTK_STATE_FLAG_ACTIVE);
     }
     else{
       if (priv->launching_timer != 0){
