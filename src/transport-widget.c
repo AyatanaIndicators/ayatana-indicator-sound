@@ -1259,6 +1259,8 @@ _surface_blur (cairo_surface_t* surface,
   cairo_surface_mark_dirty (surface); 
 }
 
+static gdouble progress = 0.0;
+
 static gboolean
 draw (GtkWidget* button, cairo_t *cr)
 {
@@ -1794,20 +1796,19 @@ draw (GtkWidget* button, cairo_t *cr)
   }
   else if(priv->current_state == TRANSPORT_STATE_LAUNCHING)
   {
-	gtk_style_context_set_state (spinner_style_context, GTK_STATE_FLAG_ACTIVE);
-	
-	gdouble progress;
-	gtk_style_context_state_is_running(spinner_style_context, GTK_STATE_ACTIVE, &progress);
-	
-	GtkStateFlags state = gtk_style_context_get_state(spinner_style_context); 
-	// state 0 = NORMAL
-	// state 1 = ACTIVE
-	
-    g_debug ("launching in draw state: %i, %f", state ,progress );
     
-	gtk_render_activity (spinner_style_context, cr, 106, 6 , 30, 30);
+    GtkStateFlags state = gtk_style_context_get_state(spinner_style_context); 
+    // state 0 = NORMAL
+    // state 1 = ACTIVE
     
-    // need to redraw the cairo context here, cairo_paint() doesn't seem to do it
+    g_debug ("launching in draw state: %i and progress %f", state, progress  );
+    gtk_render_activity (spinner_style_context, cr, 106, 6 , 30, 30);
+    g_debug ("context style is running ? = %i", 
+              gtk_style_context_state_is_running (spinner_style_context,
+                                                  GTK_STATE_ACTIVE,
+                                                  &progress));
+      
+      // need to redraw the cairo context here, cairo_paint() doesn't seem to do it
     cairo_paint(cr);
     
     /*
@@ -1912,6 +1913,7 @@ transport_widget_fade_playbutton (gpointer userdata)
   gtk_widget_queue_draw (GTK_WIDGET(bar));
   return TRUE;
 }
+
 /**
 * transport_widget_update_state()
 * Callback for updates from the other side of dbus
@@ -1930,6 +1932,14 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
     TransportState new_state = (TransportState)g_variant_get_int32(value);
     //g_debug("transport_widget_update_state - with value  %i", new_state);
     if (new_state == TRANSPORT_STATE_LAUNCHING){
+      gtk_style_context_notify_state_change (spinner_style_context, 
+                                             gtk_widget_get_window ( GTK_WIDGET(userdata)),
+                                             NULL,
+                                             GTK_STATE_PRELIGHT,
+                                             TRUE);
+
+      gtk_style_context_set_state (spinner_style_context, GTK_STATE_FLAG_ACTIVE);
+                                             
       priv->current_state = TRANSPORT_STATE_LAUNCHING;
       priv->launching_timer = g_timeout_add (100,
                                              transport_widget_fade_playbutton,
