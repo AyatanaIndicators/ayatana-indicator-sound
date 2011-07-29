@@ -1,4 +1,4 @@
-indicator-sound (0.7.4.1-0ubuntu1) UNRELEASED; urgency=low
+indicator-sound (0.7.4.1-0ubuntu1) oneiric; urgency=low
 
   * New upstream release.
     - menu resizes on reopen   (LP: #809275)
