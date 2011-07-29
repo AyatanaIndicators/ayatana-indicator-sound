@@ -87,9 +87,11 @@ struct _TransportWidgetPrivate
   gint                skip_frequency;
 };
 
+#if GTK_CHECK_VERSION(3, 0, 0)
 static GList *transport_widget_list = NULL;
 static GtkStyleContext *spinner_style_context = NULL;
 static GtkWidgetPath *spinner_widget_path = NULL;
+#endif
 
 // TODO refactor the UI handlers, consolidate functionality between key press /release
 // and button press / release.
@@ -171,7 +173,7 @@ static void
 transport_widget_init (TransportWidget *self)
 {
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(self);
-
+  #if GTK_CHECK_VERSION(3, 0, 0)
   if (transport_widget_list == NULL){
     /* append the object to the static linked list. */
     transport_widget_list = g_list_append (transport_widget_list, self);
@@ -188,7 +190,7 @@ transport_widget_init (TransportWidget *self)
     gtk_style_context_set_path (spinner_style_context, spinner_widget_path);
     gtk_style_context_add_class (spinner_style_context, GTK_STYLE_CLASS_SPINNER);
   }
-  
+  #endif
   priv->current_command = TRANSPORT_ACTION_NO_ACTION;
   priv->current_state = TRANSPORT_STATE_PAUSED;
   priv->key_event = TRANSPORT_ACTION_NO_ACTION;
@@ -248,6 +250,7 @@ transport_widget_init (TransportWidget *self)
 static void
 transport_widget_dispose (GObject *object)
 {
+  #if GTK_CHECK_VERSION(3, 0, 0)  
   transport_widget_list = g_list_remove (transport_widget_list, object);
 
   if (transport_widget_list == NULL){
@@ -261,7 +264,7 @@ transport_widget_dispose (GObject *object)
       spinner_style_context = NULL;
     }
   }
-  
+  #endif
   G_OBJECT_CLASS (transport_widget_parent_class)->dispose (object);
 }
 
@@ -280,7 +283,6 @@ transport_widget_expose (GtkWidget *button, GdkEventExpose *event)
   cairo_t *cr;
   cr = gdk_cairo_create (gtk_widget_get_window (button));
 
-  g_debug("In the playbutton's expose method, x = %i, y=%i and width: %i and height: %i'");
   cairo_rectangle (cr,
                      event->area.x, event->area.y,
                      event->area.width, event->area.height);
@@ -1791,10 +1793,13 @@ draw (GtkWidget* button, cairo_t *cr)
            FALSE);
     _finalize (cr, &cr_surf, &surf, PAUSE_X-0.5f, PAUSE_Y);
   }
+  #if GTK_CHECK_VERSION(3, 0, 0)
   else if(priv->current_state == TRANSPORT_STATE_LAUNCHING)
   {
+    
     gtk_render_activity (spinner_style_context, cr, 106, 6 , 30, 30);      
   }
+  #endif
   return FALSE;
 }
 
@@ -1831,12 +1836,14 @@ transport_widget_property_update(DbusmenuMenuitem* item, gchar* property,
     TransportState new_state = (TransportState)g_variant_get_int32(value);
     //g_debug("transport_widget_update_state - with value  %i", new_state);
     if (new_state == TRANSPORT_STATE_LAUNCHING){
+      #if GTK_CHECK_VERSION(3, 0, 0)
       gtk_style_context_notify_state_change (spinner_style_context, 
                                              gtk_widget_get_window ( GTK_WIDGET(userdata)),
                                              NULL,
                                              GTK_STATE_FLAG_ACTIVE,
                                              TRUE);
       gtk_style_context_set_state (spinner_style_context, GTK_STATE_FLAG_ACTIVE);
+      #endif
 
       priv->current_state = TRANSPORT_STATE_LAUNCHING;
       g_debug("TransportWidget::toggle play state : %i", priv->current_state);
