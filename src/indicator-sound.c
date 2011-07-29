@@ -39,6 +39,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "voip-input-widget.h"
 #include "dbus-shared-names.h"
 #include "sound-state-manager.h"
+#include "mute-widget.h"
 
 #include "gen-sound-service.xml.h"
 #include "common-defs.h"
@@ -49,6 +50,7 @@ struct _IndicatorSoundPrivate
 {
   GtkWidget* volume_widget;
   GtkWidget* voip_widget;
+  MuteWidget *mute_widget;
   GList* transport_widgets_list;
   GDBusProxy *dbus_proxy; 
   SoundStateManager* state_manager;
@@ -75,6 +77,9 @@ static const gchar * get_accessible_desc (IndicatorObject * io);
 static void indicator_sound_scroll (IndicatorObject * io,
                                     IndicatorObjectEntry * entry, gint delta,
                                     IndicatorScrollDirection direction);
+static void indicator_sound_middle_click (IndicatorObject * io,
+                                          IndicatorObjectEntry * entry,
+                                          guint time, gpointer data);
 
 //key/moust event handlers
 static gboolean key_press_cb(GtkWidget* widget, GdkEventKey* event, gpointer data);
@@ -94,6 +99,10 @@ static gboolean new_transport_widget (DbusmenuMenuitem * newitem,
                                       DbusmenuClient * client,
                                       gpointer user_data);                                     
 static gboolean new_metadata_widget (DbusmenuMenuitem * newitem,
+                                     DbusmenuMenuitem * parent,
+                                     DbusmenuClient * client,
+                                     gpointer user_data);
+static gboolean new_mute_widget (DbusmenuMenuitem * newitem,
                                      DbusmenuMenuitem * parent,
                                      DbusmenuClient * client,
                                      gpointer user_data);
@@ -125,6 +134,7 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
   io_class->get_menu  = get_menu;
   io_class->get_accessible_desc = get_accessible_desc;
   io_class->entry_scrolled = indicator_sound_scroll;
+  io_class->secondary_activate = indicator_sound_middle_click;
 }
 
 static void
@@ -137,6 +147,7 @@ indicator_sound_init (IndicatorSound *self)
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
   priv->volume_widget = NULL;
   priv->voip_widget = NULL;
+  priv->mute_widget = NULL;
   priv->dbus_proxy = NULL;
   GList* t_list = NULL;
   priv->transport_widgets_list = t_list;
@@ -207,6 +218,9 @@ get_menu (IndicatorObject * io)
   dbusmenu_client_add_type_handler (DBUSMENU_CLIENT(client),
                                     DBUSMENU_METADATA_MENUITEM_TYPE,
                                     new_metadata_widget);
+  dbusmenu_client_add_type_handler (DBUSMENU_CLIENT(client),
+                                    DBUSMENU_MUTE_MENUITEM_TYPE,
+                                    new_mute_widget);
   // Note: Not ideal but all key handling needs to be managed here and then 
   // delegated to the appropriate widget. 
   g_signal_connect (menu, "key-press-event", G_CALLBACK(key_press_cb), io);
@@ -459,6 +473,36 @@ new_voip_slider_widget (DbusmenuMenuitem * newitem,
   return TRUE;
 }
 
+static gboolean
+new_mute_widget(DbusmenuMenuitem * newitem,
+                DbusmenuMenuitem * parent,
+                DbusmenuClient * client,
+                gpointer user_data)
+{
+  IndicatorObject *io = NULL;
+
+  g_return_val_if_fail(DBUSMENU_IS_MENUITEM(newitem), FALSE);
+  g_return_val_if_fail(DBUSMENU_IS_GTKCLIENT(client), FALSE);
+
+  io = g_object_get_data (G_OBJECT (client), "indicator");
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+  
+  if (priv->mute_widget != NULL){ 
+    g_object_unref (priv->mute_widget);
+    priv->mute_widget = NULL;
+  }
+
+  priv->mute_widget = mute_widget_new(newitem);
+  GtkMenuItem *item = mute_widget_get_menu_item (priv->mute_widget);
+
+  dbusmenu_gtkclient_newitem_base(DBUSMENU_GTKCLIENT(client),
+                                  newitem,
+                                  item,
+                                  parent);
+
+  return TRUE;
+}
+
 /*******************************************************************/
 //UI callbacks
 /******************************************************************/
@@ -675,6 +719,16 @@ indicator_sound_scroll (IndicatorObject * io, IndicatorObjectEntry * entry,
   volume_widget_update(VOLUME_WIDGET(priv->volume_widget), value, "scroll updates");
 
   sound_state_manager_show_notification (priv->state_manager, value);
+}
+
+static void
+indicator_sound_middle_click (IndicatorObject * io, IndicatorObjectEntry * entry,
+                              guint time, gpointer data)
+{
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+  g_return_if_fail (priv);
+
+  mute_widget_toggle(priv->mute_widget);
 }
 
 void

@@ -1,3 +1,15 @@
+indicator-sound (0.7.4.1-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    - menu resizes on reopen   (LP: #809275)
+    - pulse indication of SoundMenu play button not strong 
+      enough (LP: #742251)
+  * debian/rules
+    - Moved autoreconf to the top
+  * New upstream release.
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 29 Jul 2011 13:21:41 -0400
+
 indicator-sound (0.7.3-0ubuntu1) oneiric; urgency=low
 
   * New upstream release.

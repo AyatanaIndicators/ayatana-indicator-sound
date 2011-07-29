@@ -77,7 +77,12 @@ static void metadata_widget_selection_received_event_callback( GtkWidget        
                                                                 guint             time,
                                                                 gpointer          user_data);
 
+                                                                
+
 #if GTK_CHECK_VERSION(3, 0, 0)
+static void metadata_widget_get_preferred_width (GtkWidget* self,
+                                                 gint* minimum_width,
+                                                 gint* natural_width);
 static gboolean metadata_widget_icon_triangle_draw_cb_gtk_3 (GtkWidget *image,
 															 cairo_t* cr,
 															 gpointer user_data);
@@ -106,7 +111,9 @@ metadata_widget_class_init (MetadataWidgetClass *klass)
   GtkWidgetClass    *widget_class = GTK_WIDGET_CLASS (klass);
 
   widget_class->button_release_event = metadata_widget_button_release_event;
-  
+  #if GTK_CHECK_VERSION(3, 0, 0)
+  widget_class->get_preferred_width = metadata_widget_get_preferred_width;  
+  #endif
   g_type_class_add_private (klass, sizeof (MetadataWidgetPrivate));
 
   gobject_class->dispose = metadata_widget_dispose;
@@ -163,6 +170,7 @@ metadata_widget_init (MetadataWidget *self)
   gtk_misc_set_alignment(GTK_MISC(artist), (gfloat)0, (gfloat)0);
   gtk_misc_set_padding (GTK_MISC(artist), (gfloat)10, (gfloat)0);
   gtk_widget_set_size_request (artist, 140, 15);
+
   gtk_label_set_ellipsize(GTK_LABEL(artist), PANGO_ELLIPSIZE_MIDDLE); 
   metadata_widget_style_labels(self, GTK_LABEL(artist));
   priv->artist_label = artist;
@@ -172,6 +180,7 @@ metadata_widget_init (MetadataWidget *self)
   piece = gtk_label_new("");
   gtk_misc_set_alignment(GTK_MISC(piece), (gfloat)0, (gfloat)0);
   gtk_misc_set_padding (GTK_MISC(piece), (gfloat)10, (gfloat)-5);
+  
   gtk_widget_set_size_request (piece, 140, 15);
   gtk_label_set_ellipsize(GTK_LABEL(piece), PANGO_ELLIPSIZE_MIDDLE);
   metadata_widget_style_labels(self, GTK_LABEL(piece));
@@ -183,6 +192,7 @@ metadata_widget_init (MetadataWidget *self)
   gtk_misc_set_alignment(GTK_MISC(container), (gfloat)0, (gfloat)0);
   gtk_misc_set_padding (GTK_MISC(container), (gfloat)10, (gfloat)0);  
   gtk_widget_set_size_request (container, 140, 15);
+
   gtk_label_set_ellipsize(GTK_LABEL(container), PANGO_ELLIPSIZE_MIDDLE);  
   metadata_widget_style_labels(self, GTK_LABEL(container));
   priv->container_label = container;
@@ -215,6 +225,7 @@ metadata_widget_init (MetadataWidget *self)
   
   gtk_widget_show_all (priv->meta_data_h_box);
   gtk_widget_set_no_show_all (priv->meta_data_h_box, TRUE);
+  
   gtk_widget_hide (priv->meta_data_h_box);
 }
 
@@ -235,12 +246,19 @@ metadata_widget_finalize (GObject *object)
   G_OBJECT_CLASS (metadata_widget_parent_class)->finalize (object);
 }
 
+
+#if GTK_CHECK_VERSION(3, 0, 0)  
+static void
+metadata_widget_get_preferred_width (GtkWidget* self,
+                                     gint* minimum_width,
+                                     gint* natural_width)
+{
+  *minimum_width = *natural_width =  200;
+}
 /**
  * We override the expose method to enable primitive drawing of the 
  * empty album art image and rounded rectangles on the album art.
  */
-
-#if GTK_CHECK_VERSION(3, 0, 0)  
 static gboolean
 metadata_image_expose_gtk_3 (GtkWidget *metadata,
 							 cairo_t* cr,
