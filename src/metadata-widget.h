@@ -19,8 +19,12 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __METADATA_WIDGET_H__
 #define __METADATA_WIDGET_H__
 
-#include <gtk/gtkmenuitem.h>
+#include <gtk/gtk.h>
+#if GTK_CHECK_VERSION(3, 0, 0)
+#include <libdbusmenu-gtk3/menuitem.h>
+#else
 #include <libdbusmenu-gtk/menuitem.h>
+#endif
 
 G_BEGIN_DECLS
 

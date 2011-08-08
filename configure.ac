@@ -1,10 +1,10 @@
 
-AC_INIT(indicator-sound, 0.7.1, conor.curran@canonical.com)
+AC_INIT(indicator-sound, 0.7.4.1, conor.curran@canonical.com)
 
 AC_PREREQ(2.53)
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(indicator-sound, 0.7.1)
+AM_INIT_AUTOMAKE(indicator-sound, 0.7.4.1)
 
 AM_MAINTAINER_MODE
 
@@ -26,10 +26,21 @@ m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 AC_PATH_PROG([GLIB_GENMARSHAL], [glib-genmarshal])
 
 ###########################
+# GTK+ version option
+###########################
+
+AC_ARG_WITH([gtk],
+  [AS_HELP_STRING([--with-gtk],
+    [Which version of gtk to use for the indicator @<:@default=3@:>@])],
+  [],
+  [with_gtk=3])
+
+###########################
 # Dependencies 
 ###########################  
 
-GTK_REQUIRED_VERSION=2.12
+GTK_REQUIRED_VERSION=2.22
+GTK3_REQUIRED_VERSION=3.0
 INDICATOR_REQUIRED_VERSION=0.3.19
 DBUSMENUGTK_REQUIRED_VERSION=0.3.101
 POLKIT_REQUIRED_VERSION=0.92
@@ -39,26 +50,42 @@ DBUSMENUGLIB_REQUIRED_VERSION=0.3.101
 GIO_2_0_REQUIRED_VERSION=2.25.13
 LIBNOTIFY_REQUIRED_VERSION=0.7.0
 
-PKG_CHECK_MODULES(APPLET, gtk+-2.0 >= $GTK_REQUIRED_VERSION
-                          indicator >= $INDICATOR_REQUIRED_VERSION
-                          dbusmenu-gtk-0.4 >= $DBUSMENUGTK_REQUIRED_VERSION
-                          libido-0.1 >= $INDICATOR_DISPLAY_OBJECTS
-                          libnotify >= $LIBNOTIFY_REQUIRED_VERSION)
-                          
-AC_SUBST(APPLET_CFLAGS)
-AC_SUBST(APPLET_LIBS)
-
-
 PKG_CHECK_MODULES(PULSEAUDIO, libpulse-mainloop-glib >= $PULSE_AUDIO_REQUIRED_VERSION
                               gio-unix-2.0)
 AC_SUBST(PULSEAUDIO_CFLAGS)
 AC_SUBST(PULSEAUDIO_LIBS)
 
-PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib-0.4 >= $DBUSMENUGLIB_REQUIRED_VERSION
-                                indicator >= $INDICATOR_REQUIRED_VERSION
-                                gee-1.0
-                                gio-unix-2.0
-                                libxml-2.0)
+AS_IF([test "x$with_gtk" = x3],
+    [PKG_CHECK_MODULES(APPLET, gtk+-3.0 >= $GTK3_REQUIRED_VERSION
+                               indicator3-0.4 >= $INDICATOR_REQUIRED_VERSION
+                               dbusmenu-gtk3-0.4 >= $DBUSMENUGTK_REQUIRED_VERSION
+                               libido3-0.1 >= $INDICATOR_DISPLAY_OBJECTS
+                               libnotify >= $LIBNOTIFY_REQUIRED_VERSION)
+
+     PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib-0.4 >= $DBUSMENUGLIB_REQUIRED_VERSION
+                                     indicator3-0.4
+                                     gee-1.0
+                                     gio-unix-2.0
+                                     libxml-2.0)
+        ],
+      [test "x$with_gtk" = x2],
+    [PKG_CHECK_MODULES(APPLET, gtk+-2.0 >= $GTK_REQUIRED_VERSION
+                               indicator-0.4 >= $INDICATOR_REQUIRED_VERSION
+                               dbusmenu-gtk-0.4 >= $DBUSMENUGTK_REQUIRED_VERSION
+                               libido-0.1 >= $INDICATOR_DISPLAY_OBJECTS
+                               libnotify >= $LIBNOTIFY_REQUIRED_VERSION)
+
+     PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib-0.4 >= $DBUSMENUGLIB_REQUIRED_VERSION
+                                     indicator-0.4
+                                     gee-1.0
+                                     gio-unix-2.0
+                                     libxml-2.0)
+        ],
+    [AC_MSG_FAILURE([Value for --with-gtk was neither 2 nor 3])]
+)
+AC_SUBST(APPLET_CFLAGS)
+AC_SUBST(APPLET_LIBS)
+
 AC_SUBST(SOUNDSERVICE_CFLAGS)
 AC_SUBST(SOUNDSERVICE_LIBS)
 
@@ -83,13 +110,20 @@ AC_ARG_ENABLE(localinstall, AS_HELP_STRING([--enable-localinstall], [install all
 # Indicator Info
 ###########################
 
-if test "x$with_localinstall" = "xyes"; then
+AS_IF([test "x$with_localinstall" = "xyes"],
+	[
 	INDICATORDIR="${libdir}/indicators/2/"
-	INDICATORICONSDIR="${datadir}/indicator-applet/icons/"
-else
-	INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator`
-	INDICATORICONSDIR=`$PKG_CONFIG --variable=iconsdir indicator`
-fi
+	INDICATORICONSDIR="${datadir}/indicator-sound/icons/"
+	],
+	[AS_IF([test "x$with_gtk" = "x2"],
+		[
+		INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator-0.4`
+		INDICATORICONSDIR=`$PKG_CONFIG --variable=iconsdir indicator-0.4`
+		],
+		[
+		INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator3-0.4`
+		INDICATORICONSDIR=`$PKG_CONFIG --variable=iconsdir indicator3-0.4`
+		])])
 AC_SUBST(INDICATORDIR)
 AC_SUBST(INDICATORICONSDIR)
 
@@ -163,4 +197,5 @@ AC_MSG_NOTICE([
 SUS Indicator Configuration:
 
 	Prefix:        $prefix
+	GTK+:          $with_gtk
 ])
