@@ -22,13 +22,22 @@ using Gee;
 
 public class SpecificItemsManager : GLib.Object
 {
+  public static enum category{
+    TRACK,
+    PLAYER
+  }
+
 	private PlayerController owner {get; set;}
   private string dbus_path;
   private Dbusmenu.Client client;
   private Gee.ArrayList<Dbusmenu.MenuitemProxy> proxy_items;
-  
-  public SpecificItemsManager (PlayerController controller, string path)
+  private int of_type;
+   
+  public SpecificItemsManager (PlayerController controller,
+                               string path,
+                               category which_type)
 	{
+    this.of_type = which_type;
     this.proxy_items = new ArrayList<Dbusmenu.MenuitemProxy>();
     this.owner = controller;
     this.dbus_path = path;
@@ -36,25 +45,38 @@ public class SpecificItemsManager : GLib.Object
     this.client.root_changed.connect (on_root_changed);
 	}
   
+  private int figure_out_positioning()
+  {
+    int specific_item_count = this.proxy_items.size;
+    if (this.of_type == category.TRACK){
+      return this.owner.menu_offset + 2 + specific_item_count; 
+    }
+    return (int)this.owner.root_menu.get_children().length();
+  }
+  
   private void on_root_changed (GLib.Object newroot)
   {
-    Dbusmenu.Menuitem root = this.client.get_root();
+    Dbusmenu.Menuitem? root = this.client.get_root();
     root.child_added.connect (on_child_added);
     root.child_removed.connect (on_child_removed);
 
     // Fetch what children are there already.
+    if (root == null){
+      debug ("root disappeared -remove proxyitems");
+      return;  
+    }
     GLib.List<weak void*> children = root.get_children().copy();
     
     debug ("on_root_changed - size of children list : %i",
           (int)children.length());
     foreach (void* child in children) {
+      int pos = figure_out_positioning();
       unowned Dbusmenu.Menuitem item = (Dbusmenu.Menuitem)child;
       Dbusmenu.MenuitemProxy proxy = new Dbusmenu.MenuitemProxy(item);
       proxy_items.add (proxy);
       debug ("Proxy item of label = %s added to collection",
               item.property_get (MENUITEM_PROP_LABEL));
-      this.owner.root_menu.child_add_position (proxy,
-                                               this.owner.menu_offset + 3);
+      this.owner.root_menu.child_add_position (proxy, pos);
     }
   }
   

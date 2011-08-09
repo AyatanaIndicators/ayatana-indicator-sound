@@ -109,12 +109,16 @@ public class PlayerController : GLib.Object
 
   public void enable_track_specific_items (string object_path)
   { 
-    track_specific_mgr = new SpecificItemsManager (this, object_path);
+    track_specific_mgr = new SpecificItemsManager (this,
+                                                   object_path,
+                                                   SpecificItemsManager.category.TRACK);
   }
 
   public void enable_player_specific_items (string object_path)
   { 
-    player_specific_mgr = new SpecificItemsManager (this, object_path);
+    player_specific_mgr = new SpecificItemsManager (this,
+                                                    object_path,
+                                                    SpecificItemsManager.category.PLAYER);
   }
     
   private void establish_mpris_connection()
@@ -201,7 +205,8 @@ public class PlayerController : GLib.Object
         root_menu.child_add_position(playlists_menuitem.root_item, this.menu_offset + this.custom_items.index_of(item));
       }
       else{
-        root_menu.child_add_position(item, this.menu_offset + this.custom_items.index_of(item));
+        root_menu.child_add_position (item,
+                                      this.menu_offset + this.custom_items.index_of(item));
       }
     }
   }
