@@ -122,6 +122,7 @@ struct _PlayerController {
 	GObject parent_instance;
 	PlayerControllerPrivate * priv;
 	gint current_state;
+	DbusmenuMenuitem* root_menu;
 	GeeArrayList* custom_items;
 	Mpris2Controller* mpris_bridge;
 	gboolean* use_playlists;

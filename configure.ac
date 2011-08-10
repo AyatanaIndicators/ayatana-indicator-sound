@@ -1,10 +1,10 @@
 
-AC_INIT(indicator-sound, 0.7.4.1, conor.curran@canonical.com)
+AC_INIT(indicator-sound, 0.7.5, conor.curran@canonical.com)
 
 AC_PREREQ(2.53)
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(indicator-sound, 0.7.4.1)
+AM_INIT_AUTOMAKE(indicator-sound, 0.7.5)
 
 AM_MAINTAINER_MODE
 
@@ -22,6 +22,8 @@ AC_SUBST(VERSION)
 AC_CONFIG_MACRO_DIR([m4])
 
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
+
+AC_PATH_PROG([GLIB_GENMARSHAL], [glib-genmarshal])
 
 ###########################
 # GTK+ version option
@@ -130,6 +132,7 @@ AC_SUBST(INDICATORICONSDIR)
 ###########################
 
 GLIB_GSETTINGS
+GLIB_GENMARSHAL
 
 ###########################
 # DBus Service Info

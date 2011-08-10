@@ -27,7 +27,7 @@ public class MusicPlayerBridge : GLib.Object
 
   private SettingsManager settings_manager;
   private Dbusmenu.Menuitem root_menu;
-  private HashMap<string, PlayerController> registered_clients;  
+  private HashMap<string, PlayerController> registered_clients;
   private Mpris2Watcher watcher;
 
   public MusicPlayerBridge()
@@ -158,10 +158,31 @@ public class MusicPlayerBridge : GLib.Object
     this.watcher.client_disappeared.connect (this.client_has_vanished);
   }
 
+  public void enable_player_specific_items_for_client (string object_path,
+                                                       string desktop_id)
+  {
+    var mpris_key = determine_key ( desktop_id );
+    if (this.registered_clients.has_key (mpris_key) == false){
+      warning ("we don't have a client with desktop id %s registered", desktop_id);
+      return;
+    }
+    this.registered_clients[mpris_key].enable_player_specific_items(object_path);
+  }
+
+  public void enable_track_specific_items_for_client (string object_path,
+                                                      string desktop_id)
+  {
+    var mpris_key = determine_key ( desktop_id );
+    if (this.registered_clients.has_key (mpris_key) == false){
+      warning ("we don't have a client with desktop id %s registered", desktop_id);
+      return;
+    }
+    this.registered_clients[mpris_key].enable_track_specific_items(object_path);
+  }
+
   private static AppInfo? create_app_info ( string desktop )
   {
-    DesktopAppInfo info = new DesktopAppInfo ( desktop ) ;
-
+    DesktopAppInfo info = new DesktopAppInfo ( desktop );
     if ( desktop == null || info == null ){
       warning ( "Could not create a desktopappinfo instance from app: %s", desktop );
       return null;

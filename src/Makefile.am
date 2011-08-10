@@ -32,6 +32,7 @@ libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -Werror -DG_LOG_DOMAIN=\"Indicat
 libsoundmenu_la_LIBADD = $(APPLET_LIBS)
 libsoundmenu_la_LDFLAGS = -module -avoid-version
 
+
 checkxml: $(srcdir)/sound-service.xml
 	@xmllint -valid -noout $<
 	@echo $< checks out ok
@@ -41,6 +42,9 @@ checkxml: $(srcdir)/sound-service.xml
 # Sound Service 
 ####################################################################
 
+glib_marshal_list = sound-service-marshal.list
+glib_marshal_prefix = _sound_service_marshal
+
 
 #####################
 # Sound service vala
@@ -48,6 +52,7 @@ checkxml: $(srcdir)/sound-service.xml
 music_bridge_VALASOURCES = \
 	music-player-bridge.vala \
 	transport-menu-item.vala \
+	specific-items-manager.vala \
 	metadata-menu-item.vala \
 	player-controller.vala \
 	mpris2-interfaces.vala \
@@ -107,6 +112,8 @@ indicator_sound_service_SOURCES = \
   mute-menu-item.c \
   gen-sound-service.xml.h \
   gen-sound-service.xml.c \
+  sound-service-marshal.c \
+  sound-service-marshal.h \
   $(music_bridge_VALASOURCES:.vala=.c)
 
 indicator_sound_service_CFLAGS = $(PULSEAUDIO_CFLAGS) $(SOUNDSERVICE_CFLAGS) $(GCONF_CFLAGS) -DLIBEXECDIR=\"$(libexecdir)\" -Wall
@@ -147,3 +154,7 @@ BUILT_SOURCES = \
   
 CLEANFILES = \
 	$(BUILT_SOURCES)
+
+DISTCLEANFILES = 
+
+include $(top_srcdir)/Makefile.am.marshal

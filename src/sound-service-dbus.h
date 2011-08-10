@@ -53,7 +53,7 @@ struct _SoundServiceDbusClass {
 
 GType sound_service_dbus_get_type  (void) G_GNUC_CONST;
 
-DbusmenuMenuitem* sound_service_dbus_create_root_item (SoundServiceDbus* self);
+DbusmenuMenuitem* sound_service_dbus_create_root_item (SoundServiceDbus* self, gboolean greeter_mode);
 void sound_service_dbus_update_sound_state (SoundServiceDbus* self, SoundState new_state);
 void sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
                                            DbusmenuMenuitem* mute_item,

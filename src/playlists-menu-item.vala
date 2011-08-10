@@ -39,7 +39,6 @@ public class PlaylistsMenuitem : PlayerItem
     this.root_item = new Menuitem();
     this.root_item.property_set ( MENUITEM_PROP_LABEL, _("Choose Playlist") );
     this.root_item.property_set ( MENUITEM_PATH, "" );
-
   }
 
   public new void update (PlaylistDetails[] playlists)
