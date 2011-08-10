@@ -67,6 +67,8 @@ typedef enum {
 #define DBUSMENU_TRANSPORT_MENUITEM_TYPE        "x-canonical-sound-menu-player-transport-type"
 #define DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE  "x-canonical-sound-menu-player-transport-state"
 
+#define DBUSMENU_TRACK_SPECIFIC_MENUITEM_TYPE   "x-canonical-sound-menu-player-track-specific-type"
+
 #define DBUSMENU_METADATA_MENUITEM_TYPE                "x-canonical-sound-menu-player-metadata-type"
 #define DBUSMENU_METADATA_MENUITEM_ARTIST              "x-canonical-sound-menu-player-metadata-xesam:artist"
 #define DBUSMENU_METADATA_MENUITEM_TITLE               "x-canonical-sound-menu-player-metadata-xesam:title"
