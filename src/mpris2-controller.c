@@ -26,7 +26,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 #include <common-defs.h>
-#include <gee.h>
 #include <libdbusmenu-glib/client.h>
 #include <libdbusmenu-glib/dbusmenu-glib.h>
 #include <libdbusmenu-glib/enum-types.h>
@@ -34,6 +33,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <libdbusmenu-glib/menuitem.h>
 #include <libdbusmenu-glib/server.h>
 #include <libdbusmenu-glib/types.h>
+#include <gee.h>
 
 
 #define TYPE_MPRIS2_CONTROLLER (mpris2_controller_get_type ())
@@ -238,6 +238,7 @@ struct _PlayerController {
 	GObject parent_instance;
 	PlayerControllerPrivate * priv;
 	gint current_state;
+	DbusmenuMenuitem* root_menu;
 	GeeArrayList* custom_items;
 	Mpris2Controller* mpris_bridge;
 	gboolean* use_playlists;

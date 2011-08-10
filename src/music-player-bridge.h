@@ -65,6 +65,19 @@ typedef struct _TransportMenuitemPrivate TransportMenuitemPrivate;
 typedef struct _PlayerController PlayerController;
 typedef struct _PlayerControllerClass PlayerControllerClass;
 
+#define TYPE_SPECIFIC_ITEMS_MANAGER (specific_items_manager_get_type ())
+#define SPECIFIC_ITEMS_MANAGER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_SPECIFIC_ITEMS_MANAGER, SpecificItemsManager))
+#define SPECIFIC_ITEMS_MANAGER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_SPECIFIC_ITEMS_MANAGER, SpecificItemsManagerClass))
+#define IS_SPECIFIC_ITEMS_MANAGER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_SPECIFIC_ITEMS_MANAGER))
+#define IS_SPECIFIC_ITEMS_MANAGER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_SPECIFIC_ITEMS_MANAGER))
+#define SPECIFIC_ITEMS_MANAGER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_SPECIFIC_ITEMS_MANAGER, SpecificItemsManagerClass))
+
+typedef struct _SpecificItemsManager SpecificItemsManager;
+typedef struct _SpecificItemsManagerClass SpecificItemsManagerClass;
+typedef struct _SpecificItemsManagerPrivate SpecificItemsManagerPrivate;
+
+#define SPECIFIC_ITEMS_MANAGER_TYPE_CATEGORY (specific_items_manager_category_get_type ())
+
 #define TYPE_METADATA_MENUITEM (metadata_menuitem_get_type ())
 #define METADATA_MENUITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_METADATA_MENUITEM, MetadataMenuitem))
 #define METADATA_MENUITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_METADATA_MENUITEM, MetadataMenuitemClass))
@@ -229,6 +242,20 @@ struct _TransportMenuitemClass {
 	PlayerItemClass parent_class;
 };
 
+struct _SpecificItemsManager {
+	GObject parent_instance;
+	SpecificItemsManagerPrivate * priv;
+};
+
+struct _SpecificItemsManagerClass {
+	GObjectClass parent_class;
+};
+
+typedef enum  {
+	SPECIFIC_ITEMS_MANAGER_CATEGORY_TRACK,
+	SPECIFIC_ITEMS_MANAGER_CATEGORY_PLAYER
+} SpecificItemsManagercategory;
+
 struct _MetadataMenuitem {
 	PlayerItem parent_instance;
 	MetadataMenuitemPrivate * priv;
@@ -242,6 +269,7 @@ struct _PlayerController {
 	GObject parent_instance;
 	PlayerControllerPrivate * priv;
 	gint current_state;
+	DbusmenuMenuitem* root_menu;
 	GeeArrayList* custom_items;
 	Mpris2Controller* mpris_bridge;
 	gboolean* use_playlists;
@@ -400,6 +428,8 @@ MusicPlayerBridge* music_player_bridge_construct (GType object_type);
 void music_player_bridge_client_has_become_available (MusicPlayerBridge* self, const gchar* desktop, const gchar* dbus_name, gboolean use_playlists);
 void music_player_bridge_client_has_vanished (MusicPlayerBridge* self, const gchar* mpris_root_interface);
 void music_player_bridge_set_root_menu_item (MusicPlayerBridge* self, DbusmenuMenuitem* menu);
+void music_player_bridge_enable_player_specific_items_for_client (MusicPlayerBridge* self, const gchar* object_path, const gchar* desktop_id);
+void music_player_bridge_enable_track_specific_items_for_client (MusicPlayerBridge* self, const gchar* object_path, const gchar* desktop_id);
 GType player_item_get_type (void) G_GNUC_CONST;
 GType transport_menuitem_get_type (void) G_GNUC_CONST;
 GType player_controller_get_type (void) G_GNUC_CONST;
@@ -408,6 +438,11 @@ TransportMenuitem* transport_menuitem_construct (GType object_type, PlayerContro
 void transport_menuitem_handle_cached_action (TransportMenuitem* self);
 void transport_menuitem_change_play_state (TransportMenuitem* self, TransportState update);
 GeeHashSet* transport_menuitem_attributes_format (void);
+GType specific_items_manager_get_type (void) G_GNUC_CONST;
+GType specific_items_manager_category_get_type (void) G_GNUC_CONST;
+SpecificItemsManager* specific_items_manager_new (PlayerController* controller, const gchar* path, SpecificItemsManagercategory which_type);
+SpecificItemsManager* specific_items_manager_construct (GType object_type, PlayerController* controller, const gchar* path, SpecificItemsManagercategory which_type);
+GeeArrayList* specific_items_manager_get_proxy_items (SpecificItemsManager* self);
 GType metadata_menuitem_get_type (void) G_GNUC_CONST;
 extern gchar* metadata_menuitem_album_art_cache_dir;
 #define METADATA_MENUITEM_ALBUM_ART_DIR_SUFFIX "indicators/sound/album-art-cache"
@@ -428,6 +463,9 @@ PlayerController* player_controller_construct (GType object_type, DbusmenuMenuit
 void player_controller_update_state (PlayerController* self, PlayerControllerstate new_state);
 void player_controller_activate (PlayerController* self, const gchar* dbus_name);
 void player_controller_instantiate (PlayerController* self);
+void player_controller_enable_track_specific_items (PlayerController* self, const gchar* object_path);
+void player_controller_enable_player_specific_items (PlayerController* self, const gchar* object_path);
+gint player_controller_track_specific_count (PlayerController* self);
 void player_controller_remove_from_menu (PlayerController* self);
 void player_controller_hibernate (PlayerController* self);
 void player_controller_update_layout (PlayerController* self);

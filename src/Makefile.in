@@ -15,6 +15,22 @@
 
 @SET_MAKE@
 
+# Rules for generating marshal files using glib-genmarshal
+#
+# Define:
+# 	glib_marshal_list = marshal list file
+# 	glib_marshal_prefix = prefix for marshal functions
+#
+# before including Makefile.am.marshal. You will also need to have
+# the following targets already defined:
+#
+# 	CLEANFILES
+#	DISTCLEANFILES
+#	BUILT_SOURCES
+#	EXTRA_DIST
+#
+# Author: Emmanuele Bassi <ebassi@linux.intel.com>
+
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
@@ -36,13 +52,11 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 libexec_PROGRAMS = indicator-sound-service$(EXEEXT)
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(top_srcdir)/Makefile.am.marshal
 subdir = src
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/intltool.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -95,6 +109,7 @@ libsoundmenu_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 PROGRAMS = $(libexec_PROGRAMS)
 am__objects_1 = indicator_sound_service-music-player-bridge.$(OBJEXT) \
 	indicator_sound_service-transport-menu-item.$(OBJEXT) \
+	indicator_sound_service-specific-items-manager.$(OBJEXT) \
 	indicator_sound_service-metadata-menu-item.$(OBJEXT) \
 	indicator_sound_service-player-controller.$(OBJEXT) \
 	indicator_sound_service-mpris2-interfaces.$(OBJEXT) \
@@ -115,6 +130,7 @@ am_indicator_sound_service_OBJECTS =  \
 	indicator_sound_service-voip-input-menu-item.$(OBJEXT) \
 	indicator_sound_service-mute-menu-item.$(OBJEXT) \
 	indicator_sound_service-gen-sound-service.xml.$(OBJEXT) \
+	indicator_sound_service-sound-service-marshal.$(OBJEXT) \
 	$(am__objects_1)
 indicator_sound_service_OBJECTS =  \
 	$(am_indicator_sound_service_OBJECTS)
@@ -196,6 +212,7 @@ GCONF_SCHEMA_CONFIG_SOURCE = @GCONF_SCHEMA_CONFIG_SOURCE@
 GCONF_SCHEMA_FILE_DIR = @GCONF_SCHEMA_FILE_DIR@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
 GLIB_COMPILE_SCHEMAS = @GLIB_COMPILE_SCHEMAS@
+GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
 GNOMELOCALEDIR = @GNOMELOCALEDIR@
@@ -352,6 +369,8 @@ libsoundmenu_la_LDFLAGS = -module -avoid-version
 ####################################################################
 # Sound Service 
 ####################################################################
+glib_marshal_list = sound-service-marshal.list
+glib_marshal_prefix = _sound_service_marshal
 
 #####################
 # Sound service vala
@@ -359,6 +378,7 @@ libsoundmenu_la_LDFLAGS = -module -avoid-version
 music_bridge_VALASOURCES = \
 	music-player-bridge.vala \
 	transport-menu-item.vala \
+	specific-items-manager.vala \
 	metadata-menu-item.vala \
 	player-controller.vala \
 	mpris2-interfaces.vala \
@@ -413,6 +433,8 @@ indicator_sound_service_SOURCES = \
   mute-menu-item.c \
   gen-sound-service.xml.h \
   gen-sound-service.xml.c \
+  sound-service-marshal.c \
+  sound-service-marshal.h \
   $(music_bridge_VALASOURCES:.vala=.c)
 
 indicator_sound_service_CFLAGS = $(PULSEAUDIO_CFLAGS) $(SOUNDSERVICE_CFLAGS) $(GCONF_CFLAGS) -DLIBEXECDIR=\"$(libexecdir)\" -Wall
@@ -424,32 +446,25 @@ indicator_sound_service_LDADD = $(PULSEAUDIO_LIBS) $(SOUNDSERVICE_LIBS) $(GCONF_
 DBUS_SPECS = \
   sound-service.xml
 
-EXTRA_DIST = \
-  $(DBUS_SPECS) \
-  sound-service.xml \
-  $(music_bridge_APIFILES) \
-  $(music_bridge_VALASOURCES)
-
+EXTRA_DIST = $(DBUS_SPECS) sound-service.xml $(music_bridge_APIFILES) \
+	$(music_bridge_VALASOURCES) $(glib_marshal_list)
 
 #######################
 # Stuff to clean Stuff
 #######################
-BUILT_SOURCES = \
-	music_bridge_vala.stamp \
-	$(music_bridge_APIFILES) \
-	gen-sound-service.xml.h \
-	gen-sound-service.xml.c \
-	$(music_bridge_VALASOURCES:.vala=.c)
-
-CLEANFILES = \
-	$(BUILT_SOURCES)
-
+BUILT_SOURCES = music_bridge_vala.stamp $(music_bridge_APIFILES) \
+	gen-sound-service.xml.h gen-sound-service.xml.c \
+	$(music_bridge_VALASOURCES:.vala=.c) $(marshal_h) $(marshal_c)
+CLEANFILES = $(BUILT_SOURCES) stamp-marshal
+DISTCLEANFILES = $(marshal_h) $(marshal_c)
+marshal_h = $(glib_marshal_list:.list=.h)
+marshal_c = $(glib_marshal_list:.list=.c)
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/Makefile.am.marshal $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -582,8 +597,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-settings-manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-slider-menu-item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-sound-service-dbus.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-sound-service-marshal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-sound-service.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-sound-state.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-specific-items-manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-transport-menu-item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indicator_sound_service-voip-input-menu-item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsoundmenu_la-gen-sound-service.xml.Plo@am__quote@
@@ -836,6 +853,22 @@ indicator_sound_service-gen-sound-service.xml.obj: gen-sound-service.xml.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-gen-sound-service.xml.obj `if test -f 'gen-sound-service.xml.c'; then $(CYGPATH_W) 'gen-sound-service.xml.c'; else $(CYGPATH_W) '$(srcdir)/gen-sound-service.xml.c'; fi`
 
+indicator_sound_service-sound-service-marshal.o: sound-service-marshal.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-sound-service-marshal.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-sound-service-marshal.Tpo -c -o indicator_sound_service-sound-service-marshal.o `test -f 'sound-service-marshal.c' || echo '$(srcdir)/'`sound-service-marshal.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-sound-service-marshal.Tpo $(DEPDIR)/indicator_sound_service-sound-service-marshal.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sound-service-marshal.c' object='indicator_sound_service-sound-service-marshal.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-sound-service-marshal.o `test -f 'sound-service-marshal.c' || echo '$(srcdir)/'`sound-service-marshal.c
+
+indicator_sound_service-sound-service-marshal.obj: sound-service-marshal.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-sound-service-marshal.obj -MD -MP -MF $(DEPDIR)/indicator_sound_service-sound-service-marshal.Tpo -c -o indicator_sound_service-sound-service-marshal.obj `if test -f 'sound-service-marshal.c'; then $(CYGPATH_W) 'sound-service-marshal.c'; else $(CYGPATH_W) '$(srcdir)/sound-service-marshal.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-sound-service-marshal.Tpo $(DEPDIR)/indicator_sound_service-sound-service-marshal.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sound-service-marshal.c' object='indicator_sound_service-sound-service-marshal.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-sound-service-marshal.obj `if test -f 'sound-service-marshal.c'; then $(CYGPATH_W) 'sound-service-marshal.c'; else $(CYGPATH_W) '$(srcdir)/sound-service-marshal.c'; fi`
+
 indicator_sound_service-music-player-bridge.o: music-player-bridge.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-music-player-bridge.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-music-player-bridge.Tpo -c -o indicator_sound_service-music-player-bridge.o `test -f 'music-player-bridge.c' || echo '$(srcdir)/'`music-player-bridge.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-music-player-bridge.Tpo $(DEPDIR)/indicator_sound_service-music-player-bridge.Po
@@ -867,6 +900,22 @@ indicator_sound_service-transport-menu-item.obj: transport-menu-item.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='transport-menu-item.c' object='indicator_sound_service-transport-menu-item.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-transport-menu-item.obj `if test -f 'transport-menu-item.c'; then $(CYGPATH_W) 'transport-menu-item.c'; else $(CYGPATH_W) '$(srcdir)/transport-menu-item.c'; fi`
+
+indicator_sound_service-specific-items-manager.o: specific-items-manager.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-specific-items-manager.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-specific-items-manager.Tpo -c -o indicator_sound_service-specific-items-manager.o `test -f 'specific-items-manager.c' || echo '$(srcdir)/'`specific-items-manager.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-specific-items-manager.Tpo $(DEPDIR)/indicator_sound_service-specific-items-manager.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='specific-items-manager.c' object='indicator_sound_service-specific-items-manager.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-specific-items-manager.o `test -f 'specific-items-manager.c' || echo '$(srcdir)/'`specific-items-manager.c
+
+indicator_sound_service-specific-items-manager.obj: specific-items-manager.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-specific-items-manager.obj -MD -MP -MF $(DEPDIR)/indicator_sound_service-specific-items-manager.Tpo -c -o indicator_sound_service-specific-items-manager.obj `if test -f 'specific-items-manager.c'; then $(CYGPATH_W) 'specific-items-manager.c'; else $(CYGPATH_W) '$(srcdir)/specific-items-manager.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/indicator_sound_service-specific-items-manager.Tpo $(DEPDIR)/indicator_sound_service-specific-items-manager.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='specific-items-manager.c' object='indicator_sound_service-specific-items-manager.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -c -o indicator_sound_service-specific-items-manager.obj `if test -f 'specific-items-manager.c'; then $(CYGPATH_W) 'specific-items-manager.c'; else $(CYGPATH_W) '$(srcdir)/specific-items-manager.c'; fi`
 
 indicator_sound_service-metadata-menu-item.o: metadata-menu-item.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_sound_service_CFLAGS) $(CFLAGS) -MT indicator_sound_service-metadata-menu-item.o -MD -MP -MF $(DEPDIR)/indicator_sound_service-metadata-menu-item.Tpo -c -o indicator_sound_service-metadata-menu-item.o `test -f 'metadata-menu-item.c' || echo '$(srcdir)/'`metadata-menu-item.c
@@ -1147,6 +1196,7 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -1262,6 +1312,27 @@ gen-%.xml.c: %.xml
 	@echo "const char * _$(subst -,_,$(subst .,_,$(basename $(notdir $<)))) = " > $@
 	@sed -e "s:\":\\\\\":g" -e s:^:\": -e s:\$$:\\\\n\": $< >> $@
 	@echo ";" >> $@
+
+stamp-marshal: $(glib_marshal_list)
+	$(QUIET_GEN)$(GLIB_GENMARSHAL) \
+		--prefix=$(glib_marshal_prefix) \
+		--header \
+	$(srcdir)/$(glib_marshal_list) > xgen-mh \
+	&& (cmp -s xgen-mh $(marshal_h) || cp -f xgen-mh $(marshal_h)) \
+	&& rm -f xgen-mh \
+	&& echo timestamp > $(@F)
+
+$(marshal_h): stamp-marshal
+	@true
+
+$(marshal_c): $(marshal_h)
+	$(QUIET_GEN)(echo "#include \"$(marshal_h)\"" ; \
+	$(GLIB_GENMARSHAL) \
+		--prefix=$(glib_marshal_prefix) \
+		--body \
+	$(srcdir)/$(glib_marshal_list)) > xgen-mc \
+	&& cp xgen-mc $(marshal_c) \
+	&& rm -f xgen-mc
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

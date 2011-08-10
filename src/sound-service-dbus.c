@@ -32,6 +32,7 @@
 #include "device.h"
 #include "gen-sound-service.xml.h"
 #include "dbus-shared-names.h"
+#include "sound-service-marshal.h"
 
 // DBUS methods
 static void bus_method_call (GDBusConnection * connection,
@@ -56,7 +57,16 @@ struct _SoundServiceDbusPrivate {
   GDBusConnection*    connection;
   DbusmenuMenuitem*   root_menuitem;
   Device*             device;
+  gboolean            greeter_mode;
 };
+
+enum {
+  TRACK_SPECIFIC_ITEM,
+  PLAYER_SPECIFIC_ITEM,  
+  LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0 };
 
 static GDBusNodeInfo *            node_info = NULL;
 static GDBusInterfaceInfo *       interface_info = NULL;
@@ -110,6 +120,22 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
       g_error("Unable to find interface '" INDICATOR_SOUND_DBUS_INTERFACE "'");
     }
   }
+  signals[TRACK_SPECIFIC_ITEM] =  g_signal_new("track-specific-item-requested",
+                                                G_TYPE_FROM_CLASS (klass),
+                                                G_SIGNAL_RUN_LAST,
+                                                0,
+                                                NULL, NULL,
+                                                _sound_service_marshal_VOID__STRING_STRING,
+                                                G_TYPE_NONE, 2, G_TYPE_STRING,
+                                                G_TYPE_STRING);  
+  signals[PLAYER_SPECIFIC_ITEM] =  g_signal_new("player-specific-item-requested",
+                                                G_TYPE_FROM_CLASS (klass),
+                                                G_SIGNAL_RUN_LAST,
+                                                0,
+                                                NULL, NULL,
+                                                _sound_service_marshal_VOID__STRING_STRING,
+                                                G_TYPE_NONE, 2, G_TYPE_STRING,
+                                                G_TYPE_STRING);  
 }
 
 static void
@@ -144,11 +170,11 @@ sound_service_dbus_init (SoundServiceDbus *self)
 }
 
 DbusmenuMenuitem*
-sound_service_dbus_create_root_item (SoundServiceDbus* self)
+sound_service_dbus_create_root_item (SoundServiceDbus* self, gboolean greeter_mode)
 {
   SoundServiceDbusPrivate * priv = SOUND_SERVICE_DBUS_GET_PRIVATE(self);
+  priv->greeter_mode = greeter_mode;
   priv->root_menuitem = dbusmenu_menuitem_new();
-  //g_debug("Root ID: %d", dbusmenu_menuitem_get_id(priv->root_menuitem));
   DbusmenuServer *server = dbusmenu_server_new (INDICATOR_SOUND_MENU_DBUS_OBJECT_PATH);
   dbusmenu_server_set_root (server, priv->root_menuitem);
   g_object_unref (priv->root_menuitem);
@@ -169,25 +195,27 @@ sound_service_dbus_build_sound_menu ( SoundServiceDbus* self,
   dbusmenu_menuitem_child_add_position (priv->root_menuitem, slider_item, 1);
   dbusmenu_menuitem_child_add_position (priv->root_menuitem, voip_input_menu_item, 2);
 
-  // Separator
-  DbusmenuMenuitem* separator = dbusmenu_menuitem_new();
+  if (!priv->greeter_mode) {
+    // Separator
+    DbusmenuMenuitem* separator = dbusmenu_menuitem_new();
 
-  dbusmenu_menuitem_property_set (separator,
-                                  DBUSMENU_MENUITEM_PROP_TYPE,
-                                  DBUSMENU_CLIENT_TYPES_SEPARATOR);
-  dbusmenu_menuitem_child_add_position (priv->root_menuitem, separator, 3);
-  g_object_unref (separator);
+    dbusmenu_menuitem_property_set (separator,
+                                    DBUSMENU_MENUITEM_PROP_TYPE,
+                                    DBUSMENU_CLIENT_TYPES_SEPARATOR);
+    dbusmenu_menuitem_child_add_position (priv->root_menuitem, separator, 3);
+    g_object_unref (separator);
 
-  // Sound preferences dialog
-  DbusmenuMenuitem* settings_mi = dbusmenu_menuitem_new();
+    // Sound preferences dialog
+    DbusmenuMenuitem* settings_mi = dbusmenu_menuitem_new();
 
-  dbusmenu_menuitem_property_set( settings_mi,
-                                  DBUSMENU_MENUITEM_PROP_LABEL,
-                                  _("Sound Settings..."));
-  dbusmenu_menuitem_child_append(priv->root_menuitem, settings_mi);
-  g_object_unref (settings_mi);  
-  g_signal_connect(G_OBJECT(settings_mi), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED,
-                   G_CALLBACK(show_sound_settings_dialog), NULL);  
+    dbusmenu_menuitem_property_set( settings_mi,
+                                    DBUSMENU_MENUITEM_PROP_LABEL,
+                                    _("Sound Settings..."));
+    dbusmenu_menuitem_child_append(priv->root_menuitem, settings_mi);
+    g_object_unref (settings_mi);  
+    g_signal_connect(G_OBJECT(settings_mi), DBUSMENU_MENUITEM_SIGNAL_ITEM_ACTIVATED,
+                     G_CALLBACK(show_sound_settings_dialog), NULL);  
+  }
 }
 
 /**
@@ -296,6 +324,36 @@ bus_method_call (GDBusConnection * connection,
     gboolean result = sound_service_dbus_is_blacklisted (service,
                                                          player_name);
     retval =  g_variant_new ("(b)", result);
+  }
+  else if (g_strcmp0(method, "EnableTrackSpecificItems") == 0) {
+    g_debug ("EnableTrackSpecificItems");
+    gchar* player_object_path;
+    gchar* player_id;
+    g_variant_get (params, "(os)", &player_object_path, &player_id);
+    //g_debug ("object path = %s and id = %s", player_object_path, player_id);
+    g_signal_emit (service,
+                   signals[TRACK_SPECIFIC_ITEM],
+                   0,
+                   player_object_path,
+                   player_id);
+    g_free (player_object_path);
+    g_free (player_id);
+    
+  }
+  else if (g_strcmp0(method, "EnablePlayerSpecificItems") == 0) {
+    gchar* player_object_path;
+    gchar* player_id;
+    g_variant_get (params, "(os)", &player_object_path, &player_id);
+    g_debug ("PLayer specific item - object path = %s and id = %s",
+            player_object_path,
+            player_id);
+    g_signal_emit (service,
+                   signals[PLAYER_SPECIFIC_ITEM],
+                   0,
+                   player_object_path,
+                   player_id);
+    g_free (player_object_path);
+    g_free (player_id);
   }
   else {
     g_warning("Calling method '%s' on the sound service but it's unknown", method); 

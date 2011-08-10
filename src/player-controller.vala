@@ -1,5 +1,4 @@
 /*
-This service primarily controls PulseAudio and is driven by the sound indicator menu on the panel.
 Copyright 2010 Canonical Ltd.
 
 Authors:
@@ -42,7 +41,7 @@ public class PlayerController : GLib.Object
   
   public int current_state = state.OFFLINE;
     
-  private Dbusmenu.Menuitem root_menu;
+  public Dbusmenu.Menuitem root_menu;
   public string dbus_name { get; set;}
   public ArrayList<PlayerItem> custom_items;
   public Mpris2Controller mpris_bridge;
@@ -50,6 +49,8 @@ public class PlayerController : GLib.Object
   public int menu_offset { get; set;}
   public string icon_name { get; set; }
   public bool? use_playlists;
+  private SpecificItemsManager track_specific_mgr;
+  private SpecificItemsManager player_specific_mgr;
   
   public PlayerController(Dbusmenu.Menuitem root,
                           GLib.AppInfo app,
@@ -105,7 +106,33 @@ public class PlayerController : GLib.Object
                                                                 error.message );
     }
   }
+
+  public void enable_track_specific_items (string object_path)
+  { 
+    if (this.track_specific_mgr == null){
+      track_specific_mgr = new SpecificItemsManager (this,
+                                                     object_path,
+                                                     SpecificItemsManager.category.TRACK);
+    }
+  }
+
+  public void enable_player_specific_items (string object_path)
+  { 
+    if (this.player_specific_mgr == null){
+      player_specific_mgr = new SpecificItemsManager (this,
+                                                      object_path,
+                                                      SpecificItemsManager.category.PLAYER);
+    }
+  }
   
+  public int track_specific_count ()
+  {
+    if (this.track_specific_mgr == null) {
+      return 0;    
+    }
+    return this.track_specific_mgr.proxy_items.size;
+  }  
+    
   private void establish_mpris_connection()
   {   
     if(this.current_state != state.READY || this.dbus_name == null ){
@@ -114,9 +141,8 @@ public class PlayerController : GLib.Object
     }
     debug ( " establish mpris connection - use playlists value = %s ",
             this.use_playlists.to_string() );
-
-    this.mpris_bridge = new Mpris2Controller(this); 
-    this.determine_state();
+    this.mpris_bridge = new Mpris2Controller (this);
+    this.determine_state ();
   }
   
   public void remove_from_menu()
@@ -186,16 +212,17 @@ public class PlayerController : GLib.Object
     this.custom_items.add(playlist_menuitem);
     
     foreach(PlayerItem item in this.custom_items){
-      if (this.custom_items.index_of(item) == 3) {
+      if (this.custom_items.index_of(item) == 4) {
         PlaylistsMenuitem playlists_menuitem = item as PlaylistsMenuitem;
         root_menu.child_add_position(playlists_menuitem.root_item, this.menu_offset + this.custom_items.index_of(item));
       }
       else{
-        root_menu.child_add_position(item, this.menu_offset + this.custom_items.index_of(item));
+        root_menu.child_add_position (item,
+                                      this.menu_offset + this.custom_items.index_of(item));
       }
     }
   }
-   
+     
   private void determine_state()
   {
     if(this.mpris_bridge.connected() == true){
