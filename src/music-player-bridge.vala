@@ -161,7 +161,12 @@ public class MusicPlayerBridge : GLib.Object
   public void enable_player_specific_items_for_client (string object_path,
                                                        string desktop_id)
   {
-    // TODO
+    var mpris_key = determine_key ( desktop_id );
+    if (this.registered_clients.has_key (mpris_key) == false){
+      warning ("we don't have a client with desktop id %s registered", desktop_id);
+      return;
+    }
+    this.registered_clients[mpris_key].enable_player_specific_items(object_path);
   }
 
   public void enable_track_specific_items_for_client (string object_path,

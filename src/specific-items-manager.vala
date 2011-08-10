@@ -51,8 +51,7 @@ public class SpecificItemsManager : GLib.Object
   {
     int result = 0 ;
     if (this.of_type == category.TRACK){
-      int specific_item_count = this.proxy_items.size;
-      result = this.owner.menu_offset + 4 + specific_item_count; 
+      result = this.owner.menu_offset + 4 + this.proxy_items.size; 
     }
     else if (this.of_type == category.PLAYER){
       int pos = this.owner.menu_offset + 4 + this.owner.track_specific_count();
@@ -70,7 +69,8 @@ public class SpecificItemsManager : GLib.Object
       foreach(var p in proxy_items){
         this.owner.root_menu.child_delete (p);  
       }      
-      this.proxy_items.clear();// = null;
+      this.proxy_items.clear();
+      debug ("array list size is now %i", this.proxy_items.size);
       //this.proxy_items = new ArrayList<Dbusmenu.MenuitemProxy>();      
       return;  
     }
@@ -82,8 +82,6 @@ public class SpecificItemsManager : GLib.Object
     // Fetch what children are there already.
     GLib.List<weak void*> children = root.get_children().copy();
     
-    debug ("on_root_changed - size of children list : %i",
-          (int)children.length());
     foreach (void* child in children) {
       int pos = figure_out_positioning();
       unowned Dbusmenu.Menuitem item = (Dbusmenu.Menuitem)child;

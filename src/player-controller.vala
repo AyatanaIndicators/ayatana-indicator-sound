@@ -109,17 +109,20 @@ public class PlayerController : GLib.Object
 
   public void enable_track_specific_items (string object_path)
   { 
-    track_specific_mgr = new SpecificItemsManager (this,
-                                                   object_path,
-                                                   SpecificItemsManager.category.TRACK);
+    if (this.track_specific_mgr == null){
+      track_specific_mgr = new SpecificItemsManager (this,
+                                                     object_path,
+                                                     SpecificItemsManager.category.TRACK);
+    }
   }
 
   public void enable_player_specific_items (string object_path)
   { 
-    debug ("Player specific item");
-    player_specific_mgr = new SpecificItemsManager (this,
-                                                    object_path,
-                                                    SpecificItemsManager.category.PLAYER);
+    if (this.player_specific_mgr == null){
+      player_specific_mgr = new SpecificItemsManager (this,
+                                                      object_path,
+                                                      SpecificItemsManager.category.PLAYER);
+    }
   }
   
   public int track_specific_count ()
