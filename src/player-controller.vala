@@ -116,10 +116,19 @@ public class PlayerController : GLib.Object
 
   public void enable_player_specific_items (string object_path)
   { 
+    debug ("Player specific item");
     player_specific_mgr = new SpecificItemsManager (this,
                                                     object_path,
                                                     SpecificItemsManager.category.PLAYER);
   }
+  
+  public int track_specific_count ()
+  {
+    if (this.track_specific_mgr == null) {
+      return 0;    
+    }
+    return this.track_specific_mgr.proxy_items.size;
+  }  
     
   private void establish_mpris_connection()
   {   
@@ -210,7 +219,7 @@ public class PlayerController : GLib.Object
       }
     }
   }
-   
+     
   private void determine_state()
   {
     if(this.mpris_bridge.connected() == true){

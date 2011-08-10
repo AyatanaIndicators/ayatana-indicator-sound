@@ -30,7 +30,7 @@ public class SpecificItemsManager : GLib.Object
 	private PlayerController owner {get; set;}
   private string dbus_path;
   private Dbusmenu.Client client;
-  private Gee.ArrayList<Dbusmenu.MenuitemProxy> proxy_items;
+  public Gee.ArrayList<Dbusmenu.MenuitemProxy> proxy_items {get; construct;}
   private int of_type;
    
   public SpecificItemsManager (PlayerController controller,
@@ -38,33 +38,48 @@ public class SpecificItemsManager : GLib.Object
                                category which_type)
 	{
     this.of_type = which_type;
-    this.proxy_items = new ArrayList<Dbusmenu.MenuitemProxy>();
     this.owner = controller;
     this.dbus_path = path;
     this.client = new Dbusmenu.Client (this.owner.dbus_name, this.dbus_path);
     this.client.root_changed.connect (on_root_changed);
 	}
+  construct{
+    this.proxy_items = new ArrayList<Dbusmenu.MenuitemProxy>();    
+  }
   
   private int figure_out_positioning()
   {
-    int specific_item_count = this.proxy_items.size;
+    int result = 0 ;
     if (this.of_type == category.TRACK){
-      return this.owner.menu_offset + 2 + specific_item_count; 
+      int specific_item_count = this.proxy_items.size;
+      result = this.owner.menu_offset + 4 + specific_item_count; 
     }
-    return (int)this.owner.root_menu.get_children().length();
+    else if (this.of_type == category.PLAYER){
+      int pos = this.owner.menu_offset + 4 + this.owner.track_specific_count();
+      pos  += this.owner.use_playlists == true ? 1 : 0;
+      result = pos;
+    }
+    debug ("!!!!! Menu pos of type %i is = %i", this.of_type, result);
+    return result;
   }
   
-  private void on_root_changed (GLib.Object newroot)
+  private void on_root_changed (GLib.Object? newroot)
   {
+    if (newroot == null){
+      debug ("root disappeared -remove proxyitems");
+      foreach(var p in proxy_items){
+        this.owner.root_menu.child_delete (p);  
+      }      
+      this.proxy_items.clear();// = null;
+      //this.proxy_items = new ArrayList<Dbusmenu.MenuitemProxy>();      
+      return;  
+    }
+    
     Dbusmenu.Menuitem? root = this.client.get_root();
     root.child_added.connect (on_child_added);
     root.child_removed.connect (on_child_removed);
 
     // Fetch what children are there already.
-    if (root == null){
-      debug ("root disappeared -remove proxyitems");
-      return;  
-    }
     GLib.List<weak void*> children = root.get_children().copy();
     
     debug ("on_root_changed - size of children list : %i",
@@ -77,6 +92,7 @@ public class SpecificItemsManager : GLib.Object
       debug ("Proxy item of label = %s added to collection",
               item.property_get (MENUITEM_PROP_LABEL));
       this.owner.root_menu.child_add_position (proxy, pos);
+    
     }
   }
   
