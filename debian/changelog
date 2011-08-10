@@ -1,3 +1,11 @@
+indicator-sound (0.7.5-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    - Don't allow starting programs via the greeter indicators (LP: #811853)
+    - support libunity's Track and Player specific items (LP: #824050)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 10 Aug 2011 12:51:49 -0400
+
 indicator-sound (0.7.4.1-0ubuntu1) oneiric; urgency=low
 
   * New upstream release.

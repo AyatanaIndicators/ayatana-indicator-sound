@@ -52,7 +52,6 @@ namespace DbusmenuPlaylist{
         public const string MENUITEM_PATH;
 }
 
-
 [CCode (cprefix ="Transport", cheader_filename = "common-defs.h")]
 namespace Transport{
   public enum Action{
