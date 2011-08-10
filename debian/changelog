@@ -1,4 +1,4 @@
-indicator-sound (0.7.5-0ubuntu1) UNRELEASED; urgency=low
+indicator-sound (0.7.5-0ubuntu1) oneiric; urgency=low
 
   * New upstream release.
     - Don't allow starting programs via the greeter indicators (LP: #811853)
