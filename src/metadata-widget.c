@@ -665,7 +665,7 @@ metadata_widget_button_release_event (GtkWidget *menuitem,
     gtk_clipboard_store (board);
     g_free(contents);
   }
-  return TRUE;
+  return FALSE;
 }
 
 static void 
