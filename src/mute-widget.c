@@ -131,11 +131,5 @@ mute_widget_new (DbusmenuMenuitem *item)
   if (g_variant_is_of_type(label, G_VARIANT_TYPE_STRING))
     gtk_menu_item_set_label(priv->gitem, g_variant_get_string(label, NULL));
 
-  if (label)
-  {
-    g_debug("Added a new Mute Widget %s", g_variant_print(label, FALSE));
-    g_variant_unref(label);
-  }
-
   return widget;
 }
