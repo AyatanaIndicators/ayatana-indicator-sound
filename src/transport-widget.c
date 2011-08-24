@@ -1286,7 +1286,7 @@ draw (GtkWidget* button, cairo_t *cr)
   
 #if GTK_CHECK_VERSION(3, 0, 0)
   gtk_style_context_add_class (gtk_widget_get_style_context (button),
-                               "menu");
+                               GTK_STYLE_CLASS_MENU);
 #endif
   CairoColorRGB bg_color, fg_color, bg_selected, bg_prelight;
   CairoColorRGB color_middle[2], color_middle_prelight[2], color_outer[2], color_outer_prelight[2],
