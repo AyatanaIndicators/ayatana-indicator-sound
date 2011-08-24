@@ -181,13 +181,17 @@ transport_widget_init (TransportWidget *self)
     /* create widget path */
     spinner_widget_path = gtk_widget_path_new();
 
-    gtk_widget_path_iter_set_name (spinner_widget_path, -1 , "IndicatorSoundSpinner");
+    gtk_widget_path_iter_set_name (spinner_widget_path, -1 , "IndicatorSound");
+    gtk_widget_path_append_type (spinner_widget_path, GTK_TYPE_MENU);
+    gtk_widget_path_append_type (spinner_widget_path, GTK_TYPE_MENU_ITEM);
     gtk_widget_path_append_type (spinner_widget_path, GTK_TYPE_SPINNER);
 
     /* create style context and append path */
     spinner_style_context = gtk_style_context_new();
 
     gtk_style_context_set_path (spinner_style_context, spinner_widget_path);
+    gtk_style_context_add_class (spinner_style_context, GTK_STYLE_CLASS_MENU);
+    gtk_style_context_add_class (spinner_style_context, GTK_STYLE_CLASS_MENUITEM);
     gtk_style_context_add_class (spinner_style_context, GTK_STYLE_CLASS_SPINNER);
   }
   #endif
