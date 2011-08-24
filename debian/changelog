@@ -1,3 +1,10 @@
+indicator-sound (0.7.6.1-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    - theming fix for the spinner
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 24 Aug 2011 16:09:29 -0400
+
 indicator-sound (0.7.6-0ubuntu1) oneiric; urgency=low
 
   * New upstream release.
