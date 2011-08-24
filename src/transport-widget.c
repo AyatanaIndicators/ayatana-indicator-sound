@@ -1418,7 +1418,7 @@ draw (GtkWidget* button, cairo_t *cr)
     draw_gradient (cr,
                    RECT_WIDTH / 2 + X,
                    Y + 1,
-                   (RECT_WIDTH - 7)/2,
+                   (RECT_WIDTH - 4.5)/2,
                    MIDDLE_RADIUS,
                    INNER_COMPRESSED_START,
                    INNER_COMPRESSED_END);
@@ -1470,7 +1470,7 @@ draw (GtkWidget* button, cairo_t *cr)
     draw_gradient (cr,
                    RECT_WIDTH / 2 + X,
                    Y + 1,
-                   (RECT_WIDTH - 7)/2,
+                   (RECT_WIDTH - 4.5)/2,
                    MIDDLE_RADIUS,
                    MIDDLE_START_PRELIGHT,
                    MIDDLE_END_PRELIGHT);
