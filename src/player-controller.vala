@@ -24,7 +24,7 @@ public class PlayerController : GLib.Object
 {
   public const int WIDGET_QUANTITY = 4;
 
-  public static enum widget_order{
+  public enum widget_order{
     SEPARATOR,
     METADATA,
     TRANSPORT,

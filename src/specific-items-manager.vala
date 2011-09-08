@@ -22,7 +22,7 @@ using Gee;
 
 public class SpecificItemsManager : GLib.Object
 {
-  public static enum category{
+  public enum category{
     TRACK,
     PLAYER
   }
