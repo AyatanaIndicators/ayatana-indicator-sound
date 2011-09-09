@@ -30,6 +30,8 @@ public class PlayerController : GLib.Object
     TRANSPORT,
     PLAYLISTS
   }
+  
+  
 
   public enum state{
     OFFLINE,
@@ -169,7 +171,6 @@ public class PlayerController : GLib.Object
 
   public void update_layout()
   {    
-    debug ("a call to update layout"); 
     PlaylistsMenuitem playlists_menuitem = this.custom_items[widget_order.PLAYLISTS] as PlaylistsMenuitem;
     MetadataMenuitem metadata_menuitem = this.custom_items[widget_order.METADATA] as MetadataMenuitem;
     if(this.current_state != state.CONNECTED){
@@ -190,6 +191,7 @@ public class PlayerController : GLib.Object
       this.custom_items[widget_order.TRANSPORT].property_set_bool (MENUITEM_PROP_VISIBLE,
                                                                    true);         
     }
+    debug ("SETTING PLAYLISTS MENUITEM TO %s", this.use_playlists.to_string());
     playlists_menuitem.root_item.property_set_bool ( MENUITEM_PROP_VISIBLE,
                                                      this.use_playlists );
   }
@@ -212,7 +214,7 @@ public class PlayerController : GLib.Object
     this.custom_items.add(playlist_menuitem);
     
     foreach(PlayerItem item in this.custom_items){
-      if (this.custom_items.index_of(item) == 4) {
+      if (this.custom_items.index_of(item) == WIDGET_QUANTITY-1) {
         PlaylistsMenuitem playlists_menuitem = item as PlaylistsMenuitem;
         root_menu.child_add_position(playlists_menuitem.root_item, this.menu_offset + this.custom_items.index_of(item));
       }

@@ -131,7 +131,7 @@ public class MusicPlayerBridge : GLib.Object
       this.registered_clients[mpris_key].use_playlists = use_playlists;
       this.registered_clients[mpris_key].update_state ( PlayerController.state.READY );
       this.registered_clients[mpris_key].activate ( dbus_name );
-      debug("Application has already registered - awaken the hibernation: %s \n", dbus_name );
+      debug("Application has already registered - awaken the hibernation: %s with playlists %s \n", dbus_name, use_playlists.to_string() );
     }
   }
   
