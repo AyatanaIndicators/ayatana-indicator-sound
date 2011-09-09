@@ -174,7 +174,6 @@ public class PlayerController : GLib.Object
     PlaylistsMenuitem playlists_menuitem = this.custom_items[widget_order.PLAYLISTS] as PlaylistsMenuitem;
     MetadataMenuitem metadata_menuitem = this.custom_items[widget_order.METADATA] as MetadataMenuitem;
     if(this.current_state != state.CONNECTED){
-      // TODO 
       metadata_menuitem.should_collapse (true);
       playlists_menuitem.root_item.property_set_bool (MENUITEM_PROP_VISIBLE,
                                                       false );
@@ -191,7 +190,6 @@ public class PlayerController : GLib.Object
       this.custom_items[widget_order.TRANSPORT].property_set_bool (MENUITEM_PROP_VISIBLE,
                                                                    true);         
     }
-    debug ("SETTING PLAYLISTS MENUITEM TO %s", this.use_playlists.to_string());
     playlists_menuitem.root_item.property_set_bool ( MENUITEM_PROP_VISIBLE,
                                                      this.use_playlists );
   }
