@@ -1,3 +1,10 @@
+indicator-sound (0.7.7.0-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release
+  * add 01_fix_FTBFS.patch for needed -lm link
+
+ -- Didier Roche <didrocks@ubuntu.com>  Tue, 13 Sep 2011 10:20:29 +0200
+
 indicator-sound (0.7.6.1-0ubuntu1) oneiric; urgency=low
 
   * New upstream release.

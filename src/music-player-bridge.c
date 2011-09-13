@@ -367,6 +367,22 @@ static gpointer __bool_dup0 (gpointer self) {
 }
 
 
+static gchar* bool_to_string (gboolean self) {
+	gchar* result = NULL;
+	if (self) {
+		gchar* _tmp0_;
+		_tmp0_ = g_strdup ("true");
+		result = _tmp0_;
+		return result;
+	} else {
+		gchar* _tmp1_;
+		_tmp1_ = g_strdup ("false");
+		result = _tmp1_;
+		return result;
+	}
+}
+
+
 void music_player_bridge_client_has_become_available (MusicPlayerBridge* self, const gchar* desktop, const gchar* dbus_name, gboolean use_playlists) {
 	gboolean _tmp0_ = FALSE;
 	gint _tmp1_;
@@ -453,6 +469,8 @@ void music_player_bridge_client_has_become_available (MusicPlayerBridge* self, c
 		PlayerController* _tmp21_;
 		gpointer _tmp22_ = NULL;
 		PlayerController* _tmp23_;
+		gchar* _tmp24_ = NULL;
+		gchar* _tmp25_;
 		_tmp17_ = gee_abstract_map_get ((GeeAbstractMap*) self->priv->registered_clients, mpris_key);
 		_tmp18_ = (PlayerController*) _tmp17_;
 		_tmp19_ = __bool_dup0 (&use_playlists);
@@ -467,8 +485,11 @@ void music_player_bridge_client_has_become_available (MusicPlayerBridge* self, c
 		_tmp23_ = (PlayerController*) _tmp22_;
 		player_controller_activate (_tmp23_, dbus_name);
 		_g_object_unref0 (_tmp23_);
+		_tmp24_ = bool_to_string (use_playlists);
+		_tmp25_ = _tmp24_;
 		g_debug ("music-player-bridge.vala:134: Application has already registered - awa" \
-"ken the hibernation: %s \n", dbus_name);
+"ken the hibernation: %s with playlists %s \n", dbus_name, _tmp25_);
+		_g_free0 (_tmp25_);
 	}
 	_g_free0 (mpris_key);
 	_g_object_unref0 (app_info);

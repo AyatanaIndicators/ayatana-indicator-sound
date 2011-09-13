@@ -260,6 +260,7 @@ void playlists_menuitem_update (PlaylistsMenuitem* self, PlaylistDetails* playli
 				_tmp6_ = dbusmenu_menuitem_get_id (_data1_->menuitem);
 				gee_abstract_map_set ((GeeAbstractMap*) self->priv->current_playlists, GINT_TO_POINTER (_tmp6_), _data1_->menuitem);
 				dbusmenu_menuitem_child_append (self->root_item, _data1_->menuitem);
+				g_debug ("playlists-menu-item.vala:65: populating valid playlists %s", detail.name);
 				playlist_details_destroy (&detail);
 				block1_data_unref (_data1_);
 				_data1_ = NULL;
@@ -483,7 +484,7 @@ static void playlists_menuitem_submenu_item_activated (PlaylistsMenuitem* self, 
 	g_return_if_fail (self != NULL);
 	_tmp0_ = gee_abstract_map_has_key ((GeeAbstractMap*) self->priv->current_playlists, GINT_TO_POINTER (menu_item_id));
 	if (!_tmp0_) {
-		g_warning ("playlists-menu-item.vala:124: item %i was activated but we don't have " \
+		g_warning ("playlists-menu-item.vala:125: item %i was activated but we don't have " \
 "a corresponding playlist", menu_item_id);
 		return;
 	}

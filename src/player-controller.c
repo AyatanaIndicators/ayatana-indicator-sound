@@ -323,7 +323,7 @@ PlayerController* player_controller_construct (GType object_type, DbusmenuMenuit
 	player_controller_establish_mpris_connection (self);
 	player_controller_update_layout (self);
 	_tmp3_ = g_app_info_get_name (self->priv->_app_info);
-	g_debug ("player-controller.vala:74: New player controller  for %s with icon nam" \
+	g_debug ("player-controller.vala:76: New player controller  for %s with icon nam" \
 "e %s", _tmp3_, self->priv->_icon_name);
 	return self;
 }
@@ -338,7 +338,7 @@ void player_controller_update_state (PlayerController* self, PlayerControllersta
 	const gchar* _tmp0_ = NULL;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = g_app_info_get_name (self->priv->_app_info);
-	g_debug ("player-controller.vala:79: update_state - player controller %s : new s" \
+	g_debug ("player-controller.vala:81: update_state - player controller %s : new s" \
 "tate %i", _tmp0_, (gint) new_state);
 	self->current_state = (gint) new_state;
 	player_controller_update_layout (self);
@@ -358,7 +358,7 @@ void player_controller_instantiate (PlayerController* self) {
 	GError * _inner_error_ = NULL;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = g_app_info_get_name (self->priv->_app_info);
-	g_debug ("player-controller.vala:99: instantiate in player controller for %s", _tmp0_);
+	g_debug ("player-controller.vala:101: instantiate in player controller for %s", _tmp0_);
 	g_app_info_launch (self->priv->_app_info, NULL, NULL, &_inner_error_);
 	if (_inner_error_ != NULL) {
 		goto __catch6_g_error;
@@ -372,7 +372,7 @@ void player_controller_instantiate (PlayerController* self) {
 		_error_ = _inner_error_;
 		_inner_error_ = NULL;
 		_tmp1_ = g_app_info_get_name (self->priv->_app_info);
-		g_warning ("player-controller.vala:105: Failed to launch app %s with error message" \
+		g_warning ("player-controller.vala:107: Failed to launch app %s with error message" \
 ": %s", _tmp1_, _error_->message);
 		_g_error_free0 (_error_);
 	}
@@ -453,13 +453,13 @@ static void player_controller_establish_mpris_connection (PlayerController* self
 		_tmp0_ = self->priv->_dbus_name == NULL;
 	}
 	if (_tmp0_) {
-		g_debug ("player-controller.vala:139: establish_mpris_connection - Not ready to " \
+		g_debug ("player-controller.vala:141: establish_mpris_connection - Not ready to " \
 "connect");
 		return;
 	}
 	_tmp1_ = bool_to_string (*self->use_playlists);
 	_tmp2_ = _tmp1_;
-	g_debug ("player-controller.vala:142:  establish mpris connection - use playlist" \
+	g_debug ("player-controller.vala:144:  establish mpris connection - use playlist" \
 "s value = %s ", _tmp2_);
 	_g_free0 (_tmp2_);
 	_tmp3_ = mpris2_controller_new (self);
@@ -574,7 +574,6 @@ void player_controller_update_layout (PlayerController* self) {
 	gboolean _tmp11_;
 	const gchar* _tmp12_ = NULL;
 	g_return_if_fail (self != NULL);
-	g_debug ("player-controller.vala:172: a call to update layout");
 	_tmp0_ = gee_abstract_list_get ((GeeAbstractList*) self->custom_items, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLISTS);
 	_tmp1_ = (PlayerItem*) _tmp0_;
 	playlists_menuitem = IS_PLAYLISTS_MENUITEM (_tmp1_) ? ((PlaylistsMenuitem*) _tmp1_) : NULL;
@@ -673,7 +672,7 @@ static void player_controller_construct_widgets (PlayerController* self) {
 			_tmp7_ = gee_abstract_list_get ((GeeAbstractList*) _item_list, _item_index);
 			item = (PlayerItem*) _tmp7_;
 			_tmp8_ = gee_abstract_list_index_of ((GeeAbstractList*) self->custom_items, item);
-			if (_tmp8_ == 4) {
+			if (_tmp8_ == (PLAYER_CONTROLLER_WIDGET_QUANTITY - 1)) {
 				PlayerItem* _tmp9_;
 				PlaylistsMenuitem* _tmp10_;
 				PlaylistsMenuitem* playlists_menuitem;

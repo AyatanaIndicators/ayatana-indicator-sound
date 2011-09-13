@@ -314,6 +314,7 @@ enum  {
 	MPRIS2_CONTROLLER_PROPERTIES_INTERFACE,
 	MPRIS2_CONTROLLER_OWNER
 };
+#define MPRIS2_CONTROLLER_MAX_PLAYLIST_COUNT 20
 Mpris2Controller* mpris2_controller_new (PlayerController* ctrl);
 Mpris2Controller* mpris2_controller_construct (GType object_type, PlayerController* ctrl);
 void mpris2_controller_property_changed_cb (Mpris2Controller* self, const gchar* interface_source, GHashTable* changed_properties, gchar** invalid, int invalid_length1);
@@ -483,7 +484,7 @@ void mpris2_controller_property_changed_cb (Mpris2Controller* self, const gchar*
 		_tmp0_ = _tmp1_ == FALSE;
 	}
 	if (_tmp0_) {
-		g_warning ("mpris2-controller.vala:77: Property-changed hash is null or this is an" \
+		g_warning ("mpris2-controller.vala:78: Property-changed hash is null or this is an" \
 " interface that doesn't concern us");
 		return;
 	}
@@ -955,7 +956,7 @@ static gboolean mpris2_controller_fetch_playlists_co (Mpris2ControllerFetchPlayl
 	data->current_playlists_length1 = 0;
 	data->_current_playlists_size_ = 0;
 	data->_state_ = 1;
-	mpris_playlists_GetPlaylists (data->self->priv->_playlists, (guint32) 0, (guint32) 10, "Alphabetical", FALSE, mpris2_controller_fetch_playlists_ready, data);
+	mpris_playlists_GetPlaylists (data->self->priv->_playlists, (guint32) 0, (guint32) MPRIS2_CONTROLLER_MAX_PLAYLIST_COUNT, "Alphabetical", FALSE, mpris2_controller_fetch_playlists_ready, data);
 	return FALSE;
 	_state_1:
 	data->_tmp1_ = NULL;
@@ -1006,7 +1007,7 @@ static gboolean mpris2_controller_fetch_playlists_co (Mpris2ControllerFetchPlayl
 		playlists_menuitem_update (data->playlists_item, data->current_playlists, data->current_playlists_length1);
 		_g_object_unref0 (data->playlists_item);
 	} else {
-		g_warning ("mpris2-controller.vala:242:  Playlists are on but its returning no cur" \
+		g_warning ("mpris2-controller.vala:243:  Playlists are on but its returning no cur" \
 "rent_playlists");
 		data->_tmp5_ = FALSE;
 		data->_tmp6_ = __bool_dup0 (&data->_tmp5_);
@@ -1065,7 +1066,7 @@ void mpris2_controller_activate_playlist (Mpris2Controller* self, const char* pa
 		GError * e;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		g_warning ("mpris2-controller.vala:264: Could not activate playlist %s because %s", (const gchar*) path, e->message);
+		g_warning ("mpris2-controller.vala:265: Could not activate playlist %s because %s", (const gchar*) path, e->message);
 		_g_error_free0 (e);
 	}
 	__finally12:
@@ -1263,7 +1264,7 @@ static GObject * mpris2_controller_constructor (GType type, guint n_construct_pr
 		GError * e;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		g_critical ("mpris2-controller.vala:56: Problems connecting to the session bus - %s", e->message);
+		g_critical ("mpris2-controller.vala:57: Problems connecting to the session bus - %s", e->message);
 		_g_error_free0 (e);
 	}
 	__finally13:
