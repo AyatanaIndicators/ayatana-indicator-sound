@@ -181,10 +181,10 @@ transport_widget_init (TransportWidget *self)
     /* create widget path */
     spinner_widget_path = gtk_widget_path_new();
 
-    gtk_widget_path_iter_set_name (spinner_widget_path, -1 , "IndicatorSound");
     gtk_widget_path_append_type (spinner_widget_path, GTK_TYPE_MENU);
     gtk_widget_path_append_type (spinner_widget_path, GTK_TYPE_MENU_ITEM);
-    gtk_widget_path_append_type (spinner_widget_path, GTK_TYPE_SPINNER);
+    gint pos = gtk_widget_path_append_type (spinner_widget_path, GTK_TYPE_SPINNER);
+    gtk_widget_path_iter_set_name (spinner_widget_path, pos, "IndicatorSoundSpinner");
 
     /* create style context and append path */
     spinner_style_context = gtk_style_context_new();
@@ -1800,8 +1800,8 @@ draw (GtkWidget* button, cairo_t *cr)
   #if GTK_CHECK_VERSION(3, 0, 0)
   else if(priv->current_state == TRANSPORT_STATE_LAUNCHING)
   {
-    
-    gtk_render_activity (spinner_style_context, cr, 106, 6 , 30, 30);      
+    // the spinner is not aligned, why? because the play button has odd width/height numbers
+    gtk_render_activity (spinner_style_context, cr, 106, 6, 30, 30);
   }
   #endif
   return FALSE;

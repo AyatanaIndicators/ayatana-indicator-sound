@@ -137,6 +137,7 @@ static void specific_items_manager_on_root_changed (SpecificItemsManager* self, 
 static void _specific_items_manager_on_root_changed_dbusmenu_client_root_changed (DbusmenuClient* _sender, GObject* newroot, gpointer self);
 static gint specific_items_manager_figure_out_positioning (SpecificItemsManager* self);
 gint player_controller_get_menu_offset (PlayerController* self);
+#define PLAYER_CONTROLLER_WIDGET_QUANTITY 4
 GeeArrayList* specific_items_manager_get_proxy_items (SpecificItemsManager* self);
 gint player_controller_track_specific_count (PlayerController* self);
 GType player_item_get_type (void) G_GNUC_CONST;
@@ -221,7 +222,7 @@ static gint specific_items_manager_figure_out_positioning (SpecificItemsManager*
 		gint _tmp1_;
 		_tmp0_ = player_controller_get_menu_offset (self->priv->_owner);
 		_tmp1_ = gee_collection_get_size ((GeeCollection*) self->priv->_proxy_items);
-		_result_ = (_tmp0_ + 4) + _tmp1_;
+		_result_ = (_tmp0_ + PLAYER_CONTROLLER_WIDGET_QUANTITY) + _tmp1_;
 	} else {
 		if (self->priv->of_type == SPECIFIC_ITEMS_MANAGER_CATEGORY_PLAYER) {
 			gint _tmp2_;
@@ -231,7 +232,7 @@ static gint specific_items_manager_figure_out_positioning (SpecificItemsManager*
 			gboolean _tmp5_;
 			_tmp2_ = player_controller_get_menu_offset (self->priv->_owner);
 			_tmp3_ = player_controller_track_specific_count (self->priv->_owner);
-			pos = (_tmp2_ + 4) + _tmp3_;
+			pos = (_tmp2_ + PLAYER_CONTROLLER_WIDGET_QUANTITY) + _tmp3_;
 			_tmp5_ = TRUE;
 			if (_bool_equal (self->priv->_owner->use_playlists, &_tmp5_) == TRUE) {
 				_tmp4_ = 1;
@@ -242,7 +243,7 @@ static gint specific_items_manager_figure_out_positioning (SpecificItemsManager*
 			_result_ = pos;
 		}
 	}
-	g_debug ("specific-items-manager.vala:61: !!!!! Menu pos of type %i is = %i", self->priv->of_type, _result_);
+	g_debug ("specific-items-manager.vala:63: !!!!! Menu pos of type %i is = %i", self->priv->of_type, _result_);
 	result = _result_;
 	return result;
 }
@@ -273,7 +274,7 @@ static void specific_items_manager_on_root_changed (SpecificItemsManager* self, 
 	g_return_if_fail (self != NULL);
 	if (newroot == NULL) {
 		gint _tmp3_;
-		g_debug ("specific-items-manager.vala:68: root disappeared -remove proxyitems");
+		g_debug ("specific-items-manager.vala:70: root disappeared -remove proxyitems");
 		{
 			GeeArrayList* _tmp0_;
 			GeeArrayList* _p_list;
@@ -301,7 +302,7 @@ static void specific_items_manager_on_root_changed (SpecificItemsManager* self, 
 		}
 		gee_abstract_collection_clear ((GeeAbstractCollection*) self->priv->_proxy_items);
 		_tmp3_ = gee_collection_get_size ((GeeCollection*) self->priv->_proxy_items);
-		g_debug ("specific-items-manager.vala:73: array list size is now %i", _tmp3_);
+		g_debug ("specific-items-manager.vala:75: array list size is now %i", _tmp3_);
 		return;
 	}
 	_tmp4_ = dbusmenu_client_get_root (self->priv->client);
@@ -333,7 +334,7 @@ static void specific_items_manager_on_root_changed (SpecificItemsManager* self, 
 				proxy = _tmp9_;
 				gee_abstract_collection_add ((GeeAbstractCollection*) self->priv->_proxy_items, proxy);
 				_tmp10_ = dbusmenu_menuitem_property_get (item, DBUSMENU_MENUITEM_PROP_LABEL);
-				g_debug ("specific-items-manager.vala:90: Proxy item of label = %s added to coll" \
+				g_debug ("specific-items-manager.vala:92: Proxy item of label = %s added to coll" \
 "ection", _tmp10_);
 				dbusmenu_menuitem_child_add_position (self->priv->_owner->root_menu, (DbusmenuMenuitem*) proxy, (guint) pos);
 				_g_object_unref0 (proxy);
@@ -348,14 +349,14 @@ static void specific_items_manager_on_root_changed (SpecificItemsManager* self, 
 static void specific_items_manager_on_child_added (SpecificItemsManager* self, GObject* child, guint position) {
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (child != NULL);
-	g_debug ("specific-items-manager.vala:99: On child added Specific root node");
+	g_debug ("specific-items-manager.vala:101: On child added Specific root node");
 }
 
 
 static void specific_items_manager_on_child_removed (SpecificItemsManager* self, GObject* child) {
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (child != NULL);
-	g_debug ("specific-items-manager.vala:104: On child removed Specific root node");
+	g_debug ("specific-items-manager.vala:106: On child removed Specific root node");
 }
 
 

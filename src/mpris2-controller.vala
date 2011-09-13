@@ -21,11 +21,12 @@ using Transport;
 
 public class Mpris2Controller : GLib.Object
 {
+  public const int MAX_PLAYLIST_COUNT = 20;
+
   public MprisRoot mpris2_root {get; construct;}    
   public MprisPlayer player {get; construct;}
   public MprisPlaylists playlists {get; construct;}
   public FreeDesktopProperties properties_interface {get; construct;}
-
   public PlayerController owner {get; construct;}
 
   public Mpris2Controller(PlayerController ctrl)
@@ -226,7 +227,7 @@ public class Mpris2Controller : GLib.Object
     
     try{   
       current_playlists =  yield this.playlists.GetPlaylists (0,
-                                                              10,
+                                                              MAX_PLAYLIST_COUNT,
                                                               "Alphabetical",
                                                               false);
     }

@@ -539,6 +539,7 @@ Mpris2Watcher* mpris2_watcher_new (void);
 Mpris2Watcher* mpris2_watcher_construct (GType object_type);
 void mpris2_watcher_check_for_active_clients (Mpris2Watcher* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
 void mpris2_watcher_check_for_active_clients_finish (Mpris2Watcher* self, GAsyncResult* _res_);
+#define MPRIS2_CONTROLLER_MAX_PLAYLIST_COUNT 20
 Mpris2Controller* mpris2_controller_new (PlayerController* ctrl);
 Mpris2Controller* mpris2_controller_construct (GType object_type, PlayerController* ctrl);
 void mpris2_controller_property_changed_cb (Mpris2Controller* self, const gchar* interface_source, GHashTable* changed_properties, gchar** invalid, int invalid_length1);
