@@ -113,7 +113,8 @@ handle_event (DbusmenuMenuitem * mi,
 */
 
   slider_menu_item_update_volume (SLIDER_MENU_ITEM (mi), volume_input);
-  device_ensure_sink_is_unmuted (priv->a_sink);
+  if (volume_input > 0)  
+    device_ensure_sink_is_unmuted (priv->a_sink);
 }
 
 
