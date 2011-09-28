@@ -1,3 +1,12 @@
+indicator-sound (0.7.8-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    - indicator-sound interferes with gnome-settings-daemon (LP: #855557)
+  * debian/patches/01_fix_FTBFS.patch
+    - Dropped, fixed upstream
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 28 Sep 2011 14:34:38 -0400
+
 indicator-sound (0.7.7.0-0ubuntu1) oneiric; urgency=low
 
   * New upstream release
