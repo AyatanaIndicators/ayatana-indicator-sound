@@ -22,7 +22,7 @@ using Gee;
 
 public class SpecificItemsManager : GLib.Object
 {
-  public static enum category{
+  public enum category{
     TRACK,
     PLAYER
   }
@@ -51,10 +51,12 @@ public class SpecificItemsManager : GLib.Object
   {
     int result = 0 ;
     if (this.of_type == category.TRACK){
-      result = this.owner.menu_offset + 4 + this.proxy_items.size; 
+      result = this.owner.menu_offset + this.owner.WIDGET_QUANTITY + this.proxy_items.size; 
     }
     else if (this.of_type == category.PLAYER){
-      int pos = this.owner.menu_offset + 4 + this.owner.track_specific_count();
+      int pos = this.owner.menu_offset + this.owner.WIDGET_QUANTITY + this.owner.track_specific_count();
+      //Surely the playlists item is there whether its visible or not ?
+      //TODO test playlists and player specific item positioning.
       pos  += this.owner.use_playlists == true ? 1 : 0;
       result = pos;
     }

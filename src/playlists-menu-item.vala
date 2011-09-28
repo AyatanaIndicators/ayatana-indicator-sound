@@ -62,6 +62,7 @@ public class PlaylistsMenuitem : PlayerItem
       );
       this.current_playlists.set( menuitem.id, menuitem ); 
       this.root_item.child_append( menuitem );
+      debug ("populating valid playlists %s", detail.name);
     }
     // Finally remove any that might have been deleted
     foreach (Dbusmenu.Menuitem item in this.current_playlists.values) {
