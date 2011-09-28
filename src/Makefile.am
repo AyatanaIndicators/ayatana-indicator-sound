@@ -29,7 +29,7 @@ libsoundmenu_la_SOURCES = \
             dbus-shared-names.h
 
 libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -Werror -DG_LOG_DOMAIN=\"Indicator-Sound\"
-libsoundmenu_la_LIBADD = $(APPLET_LIBS)
+libsoundmenu_la_LIBADD = $(APPLET_LIBS) -lm
 libsoundmenu_la_LDFLAGS = -module -avoid-version
 
 
@@ -66,7 +66,6 @@ music_bridge_VALASOURCES = \
 
 music_bridge_VALAFLAGS = \
   --ccode \
-  --disable-dbus-transformation \
   -H music-player-bridge.h -d . \
   --vapidir=$(top_srcdir)/vapi/ \
   --vapidir=./ \
