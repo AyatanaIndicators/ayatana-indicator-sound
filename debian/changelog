@@ -1,3 +1,10 @@
+indicator-sound (0.7.9-0ubuntu1) oneiric-proposed; urgency=low
+
+  * New upstream release.
+    - Protect against source indexes that are lower than 0 (LP: #850662)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 13 Oct 2011 13:53:21 -0400
+
 indicator-sound (0.7.8-0ubuntu1) oneiric; urgency=low
 
   * New upstream release.
