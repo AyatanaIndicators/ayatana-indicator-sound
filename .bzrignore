@@ -82,3 +82,9 @@ data/com.canonical.indicators.sound.gschema.valid
 tests/libmockpulse.la
 tests/libmockpulse_la-mockpulse.lo
 src/libsoundmenu_la-gen-sound-service.xml.lo
+src/libsoundmenu_la-mute-widget.lo
+src/libsoundmenu_la-sound-state-manager.lo
+src/libsoundmenu_la-sound-state.lo
+src/libsoundmenu_la-voip-input-widget.lo
+src/specific-items-manager.c
+src/stamp-marshal
