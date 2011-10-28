@@ -1,3 +1,16 @@
+indicator-sound (0.7.9.1-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+    - indicator-sound-service crashed with SIGABRT in raise() (LP: #840986)
+    - don't let the menu grow wide enough to push off the screen (LP: #873006)
+    - bump the limit for number of playlists to 20 (LP: #835384)
+    - indicator-sound-service crashed with SIGSEGV (LP: #864732)
+    - Music player icon is not top-aligned (LP: #874454)
+  * debian/control
+    - build with valac-0.14
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 28 Oct 2011 09:45:22 -0400
+
 indicator-sound (0.7.9-0ubuntu1) oneiric-proposed; urgency=low
 
   * New upstream release.
