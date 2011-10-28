@@ -49,7 +49,8 @@ public class PlaylistsMenuitem : PlayerItem
         continue;
       
       Dbusmenu.Menuitem menuitem = new Menuitem();
-      menuitem.property_set (MENUITEM_PROP_LABEL, detail.name);
+      menuitem.property_set (MENUITEM_PROP_LABEL,
+                             truncate_item_label_if_needs_be (detail.name));
       menuitem.property_set (MENUITEM_PROP_ICON_NAME, "playlist-symbolic");
 
       menuitem.property_set (MENUITEM_PATH, (string)detail.path);
@@ -86,12 +87,14 @@ public class PlaylistsMenuitem : PlayerItem
   {
     foreach ( Dbusmenu.Menuitem item in this.current_playlists.values ){
       if (new_detail.path == item.property_get (MENUITEM_PATH)){
-        item.property_set (MENUITEM_PROP_LABEL, new_detail.name);
+        item.property_set (MENUITEM_PROP_LABEL, 
+                           truncate_item_label_if_needs_be (new_detail.name));
       }
     }
     // If its active make sure the name is updated on the root item.
     if (this.root_item.property_get (MENUITEM_PATH) == new_detail.path) {
-      this.root_item.property_set (MENUITEM_PROP_LABEL, new_detail.name);          
+      this.root_item.property_set (MENUITEM_PROP_LABEL,
+                                   truncate_item_label_if_needs_be (new_detail.name));          
     }
   }
                                                   
@@ -115,7 +118,8 @@ public class PlaylistsMenuitem : PlayerItem
   {
     var update = detail.name; 
     if ( update == "" ) update = _("Choose Playlist");
-    this.root_item.property_set (MENUITEM_PROP_LABEL, update);  
+    this.root_item.property_set (MENUITEM_PROP_LABEL,
+                                 truncate_item_label_if_needs_be(update));  
     this.root_item.property_set (MENUITEM_PATH, detail.path);  
   }
   
@@ -127,6 +131,16 @@ public class PlaylistsMenuitem : PlayerItem
       return;
     }
     this.owner.mpris_bridge.activate_playlist ( (GLib.ObjectPath)this.current_playlists[menu_item_id].property_get (MENUITEM_PATH) );
+  }
+  
+  private string truncate_item_label_if_needs_be(string item_label)
+  {
+    var result = item_label;
+    if (item_label.char_count(-1) > 17){
+      result = item_label.slice ((long)0, (long)15);
+      result += "…";
+    }
+    return result;
   }
   
   public static HashSet<string> attributes_format()

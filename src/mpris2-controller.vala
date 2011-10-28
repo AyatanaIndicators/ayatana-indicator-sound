@@ -21,7 +21,7 @@ using Transport;
 
 public class Mpris2Controller : GLib.Object
 {
-  public const int MAX_PLAYLIST_COUNT = 20;
+  public const int MAX_PLAYLIST_COUNT = 100;
 
   public MprisRoot mpris2_root {get; construct;}    
   public MprisPlayer player {get; construct;}
