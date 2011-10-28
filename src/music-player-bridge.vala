@@ -229,14 +229,13 @@ public class MusicPlayerBridge : GLib.Object
   {
     var result = desktop_or_interface;
     var tokens = desktop_or_interface.split( "." );
-    if ( tokens.length > 1 ){
+    if (tokens != null && tokens.length > 1){
       result = tokens[tokens.length - 1];  
     }
     var temp = result.split("-");
-    if (temp.length > 1){
+    if (temp != null && temp.length > 1){
       result = temp[0];
     }
-    debug("determine key result = %s", result);
     return result;        
   }
   

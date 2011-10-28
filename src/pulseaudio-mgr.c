@@ -175,7 +175,7 @@ void
 pm_update_volume (gint sink_index, pa_cvolume new_volume)
 {
   // LP: #850662 
-  if (sink_index < 0){
+  if (sink_index < 0 || pulse_context == NULL){
     return;
   }
   pa_operation_unref (pa_context_set_sink_volume_by_index (pulse_context,
@@ -197,7 +197,7 @@ void
 pm_update_mic_gain (gint source_index, pa_cvolume new_gain)
 {
   // LP: #850662
-  if (source_index < 0){
+  if (source_index < 0 || pulse_context == NULL){
     return;
   }
   pa_operation_unref (pa_context_set_source_volume_by_index (pulse_context,

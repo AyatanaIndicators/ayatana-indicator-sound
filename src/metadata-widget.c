@@ -331,7 +331,7 @@ metadata_widget_icon_triangle_draw_cb_gtk_3 (GtkWidget *widget,
   x = allocation.x;
   y = 0;
 
-  gint offset = (allocation.height - gdk_pixbuf_get_height (priv->icon_buf)) / 2;
+  gint offset = gdk_pixbuf_get_height (priv->icon_buf) / 3;
 
   // Draw player icon  
   if (priv->icon_buf != NULL){  
@@ -345,7 +345,8 @@ metadata_widget_icon_triangle_draw_cb_gtk_3 (GtkWidget *widget,
   // Draw triangle but only if the player is running.
   if (dbusmenu_menuitem_property_get_bool (priv->twin_item,
                                              DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING)){
-    y += allocation.height/2.0 - (double)arrow_height/2.0;
+    y += gdk_pixbuf_get_height (priv->icon_buf) / 3 + 3;
+    //allocation.height/2.0 - (double)arrow_height/2.0;
     cairo_set_line_width (cr, 1.0);
 
 	//g_debug ("triangle drawing");
