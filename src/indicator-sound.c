@@ -74,6 +74,7 @@ static GtkLabel * get_label (IndicatorObject * io);
 static GtkImage * get_icon (IndicatorObject * io);
 static GtkMenu *  get_menu (IndicatorObject * io);
 static const gchar * get_accessible_desc (IndicatorObject * io);
+static const gchar * get_name_hint (IndicatorObject * io);
 static void indicator_sound_scroll (IndicatorObject * io,
                                     IndicatorObjectEntry * entry, gint delta,
                                     IndicatorScrollDirection direction);
@@ -133,6 +134,7 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
   io_class->get_image = get_icon;
   io_class->get_menu  = get_menu;
   io_class->get_accessible_desc = get_accessible_desc;
+  io_class->get_name_hint = get_name_hint;
   io_class->entry_scrolled = indicator_sound_scroll;
   io_class->secondary_activate = indicator_sound_middle_click;
 }
@@ -241,6 +243,10 @@ get_accessible_desc (IndicatorObject * io)
   return NULL;
 }
 
+static const gchar * get_name_hint (IndicatorObject * io)
+{
+  return "indicator-sound";
+}
 
 static void
 connection_changed (IndicatorServiceManager * sm,
