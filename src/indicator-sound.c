@@ -54,6 +54,7 @@ struct _IndicatorSoundPrivate
   GList* transport_widgets_list;
   GDBusProxy *dbus_proxy; 
   SoundStateManager* state_manager;
+  gchar *cached_accessible_desc;
 };
 
 #define INDICATOR_SOUND_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), INDICATOR_SOUND_TYPE, IndicatorSoundPrivate))
@@ -154,6 +155,7 @@ indicator_sound_init (IndicatorSound *self)
   GList* t_list = NULL;
   priv->transport_widgets_list = t_list;
   priv->state_manager = g_object_new (SOUND_TYPE_STATE_MANAGER, NULL);
+  priv->cached_accessible_desc = NULL;
 
   g_signal_connect ( G_OBJECT(self->service),
                      INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE,
@@ -170,17 +172,23 @@ indicator_sound_dispose (GObject *object)
     g_object_unref(G_OBJECT(self->service));
     self->service = NULL;
   }
-  g_list_free ( priv->transport_widgets_list );
+  g_list_free (priv->transport_widgets_list);
 
   G_OBJECT_CLASS (indicator_sound_parent_class)->dispose (object);
-  return;
 }
 
 static void
 indicator_sound_finalize (GObject *object)
 {
+  IndicatorSound * self = INDICATOR_SOUND(object);
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
+
+  if (priv->cached_accessible_desc) {
+    g_free (priv->cached_accessible_desc);
+    priv->cached_accessible_desc = NULL;
+  }
+
   G_OBJECT_CLASS (indicator_sound_parent_class)->finalize (object);
-  return;
 }
 
 static GtkLabel *
@@ -236,16 +244,19 @@ get_accessible_desc (IndicatorObject * io)
 {
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(io);
 
-  if (priv->volume_widget != NULL){
-    return g_strdup_printf(_("Volume (%'.0f%%)"), volume_widget_get_current_volume(priv->volume_widget));
+  if (priv->volume_widget != NULL) {
+    gchar *old_desc = priv->cached_accessible_desc;
+    priv->cached_accessible_desc = g_strdup_printf(_("Volume (%'.0f%%)"), volume_widget_get_current_volume (priv->volume_widget));
+    g_free (old_desc);
+    return priv->cached_accessible_desc;
   }
 
   return NULL;
 }
 
-static const gchar * get_name_hint (IndicatorObject * io)
+static const gchar *get_name_hint (IndicatorObject * io)
 {
-  return "indicator-sound";
+  return PACKAGE_NAME;
 }
 
 static void
