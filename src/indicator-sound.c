@@ -54,7 +54,7 @@ struct _IndicatorSoundPrivate
   GList* transport_widgets_list;
   GDBusProxy *dbus_proxy; 
   SoundStateManager* state_manager;
-  gchar *cached_accessible_desc;
+  gchar *accessible_desc;
 };
 
 #define INDICATOR_SOUND_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), INDICATOR_SOUND_TYPE, IndicatorSoundPrivate))
@@ -155,7 +155,7 @@ indicator_sound_init (IndicatorSound *self)
   GList* t_list = NULL;
   priv->transport_widgets_list = t_list;
   priv->state_manager = g_object_new (SOUND_TYPE_STATE_MANAGER, NULL);
-  priv->cached_accessible_desc = NULL;
+  priv->accessible_desc = NULL;
 
   g_signal_connect ( G_OBJECT(self->service),
                      INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE,
@@ -183,9 +183,9 @@ indicator_sound_finalize (GObject *object)
   IndicatorSound * self = INDICATOR_SOUND(object);
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
 
-  if (priv->cached_accessible_desc) {
-    g_free (priv->cached_accessible_desc);
-    priv->cached_accessible_desc = NULL;
+  if (priv->accessible_desc) {
+    g_free (priv->accessible_desc);
+    priv->accessible_desc = NULL;
   }
 
   G_OBJECT_CLASS (indicator_sound_parent_class)->finalize (object);
@@ -243,15 +243,7 @@ static const gchar *
 get_accessible_desc (IndicatorObject * io)
 {
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(io);
-
-  if (priv->volume_widget != NULL) {
-    gchar *old_desc = priv->cached_accessible_desc;
-    priv->cached_accessible_desc = g_strdup_printf(_("Volume (%'.0f%%)"), volume_widget_get_current_volume (priv->volume_widget));
-    g_free (old_desc);
-    return priv->cached_accessible_desc;
-  }
-
-  return NULL;
+  return priv->accessible_desc;
 }
 
 static const gchar *get_name_hint (IndicatorObject * io)
@@ -742,7 +734,7 @@ static void
 indicator_sound_middle_click (IndicatorObject * io, IndicatorObjectEntry * entry,
                               guint time, gpointer data)
 {
-  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(io);
   g_return_if_fail (priv);
 
   mute_widget_toggle(priv->mute_widget);
@@ -751,9 +743,23 @@ indicator_sound_middle_click (IndicatorObject * io, IndicatorObjectEntry * entry
 void
 update_accessible_desc (IndicatorObject * io)
 {
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(io);
   GList *entries = indicator_object_get_entries(io);
   IndicatorObjectEntry * entry = (IndicatorObjectEntry *)entries->data;
-  entry->accessible_desc = get_accessible_desc(io);
+
+  gchar *old_desc = priv->accessible_desc;
+
+  if (priv->volume_widget) {
+    priv->accessible_desc = g_strdup_printf(_("Volume (%'.0f%%)"),
+                                            volume_widget_get_current_volume (priv->volume_widget));
+  }
+  else {
+    priv->accessible_desc = NULL;
+  }
+
+  entry->accessible_desc = priv->accessible_desc;
+  g_free (old_desc);
+
   g_signal_emit(G_OBJECT(io),
                 INDICATOR_OBJECT_SIGNAL_ACCESSIBLE_DESC_UPDATE_ID,
                 0,
