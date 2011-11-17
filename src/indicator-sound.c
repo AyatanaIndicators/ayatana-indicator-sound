@@ -718,7 +718,8 @@ indicator_sound_scroll (IndicatorObject * io, IndicatorObjectEntry * entry,
   //g_debug("indicator-sound-scroll - update slider with value %f", value);
   volume_widget_update(VOLUME_WIDGET(priv->volume_widget), value, "scroll updates");
 
-  sound_state_manager_show_notification (priv->state_manager, value);
+  if (!gtk_widget_get_mapped(GTK_WIDGET (entry->menu)))
+    sound_state_manager_show_notification (priv->state_manager, value);
 }
 
 static void
