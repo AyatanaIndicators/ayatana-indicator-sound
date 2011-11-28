@@ -561,15 +561,15 @@ transport_widget_collision_detection ( gint x,
 {
   TransportAction event = TRANSPORT_ACTION_NO_ACTION;
   
-  if (x > 57 && x < 102
+  if (x > 67 && x < 112
       && y > 12 && y < 40){
     event = TRANSPORT_ACTION_PREVIOUS;
   }
-  else if (x > 101 && x < 143
+  else if (x > 111 && x < 153
            && y > 5 && y < 47){
     event = TRANSPORT_ACTION_PLAY_PAUSE;
   }
-  else if (x > 142 && x < 187
+  else if (x > 152 && x < 197
            && y > 12 && y < 40){
     event = TRANSPORT_ACTION_NEXT;
   }   
