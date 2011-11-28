@@ -1,3 +1,11 @@
+indicator-sound (0.7.9.1-0ubuntu2) precise; urgency=low
+
+  * debian/patches/fix-864405.patch:
+    - Clicking on left 25% of "Pause/Play" circle clicks "Previous".
+      (LP: #864405)
+
+ -- Omer Akram <om26er@ubuntu.com>  Mon, 28 Nov 2011 23:03:20 +0500
+
 indicator-sound (0.7.9.1-0ubuntu1) precise; urgency=low
 
   * New upstream release.
