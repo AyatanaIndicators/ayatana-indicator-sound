@@ -1,3 +1,13 @@
+indicator-sound (0.8.0.0-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+  * debian/control
+    - removed build depends for libgconf2-dev
+  * debian/patches/fix-864405.patch
+    - dropped, merged upstream
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 01 Dec 2011 14:33:34 -0500
+
 indicator-sound (0.7.9.1-0ubuntu2) precise; urgency=low
 
   * debian/patches/fix-864405.patch:
