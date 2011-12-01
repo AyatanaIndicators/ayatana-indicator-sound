@@ -195,7 +195,6 @@ volume_widget_set_twin_item(VolumeWidget* self,
     initial_level = 0;
   }
   gtk_range_set_value(range, initial_level);
-  update_accessible_desc(priv->indicator);
 }
 
 static gboolean
