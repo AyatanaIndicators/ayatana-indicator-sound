@@ -419,6 +419,9 @@ new_volume_slider_widget(DbusmenuMenuitem * newitem,
   }
   volume_widget = volume_widget_new (newitem, io);
   priv->volume_widget = volume_widget;
+  // Don't forget to set the accessible desc.
+  update_accessible_desc (io);
+  
 
   GtkWidget* ido_slider_widget = volume_widget_get_ido_slider(VOLUME_WIDGET(priv->volume_widget));
 
@@ -759,8 +762,7 @@ update_accessible_desc (IndicatorObject * io)
   }
 
   entry->accessible_desc = priv->accessible_desc;
-  g_free (old_desc);
-
+  g_free (old_desc); 
   g_signal_emit(G_OBJECT(io),
                 INDICATOR_OBJECT_SIGNAL_ACCESSIBLE_DESC_UPDATE_ID,
                 0,
