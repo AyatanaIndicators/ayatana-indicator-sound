@@ -89,16 +89,6 @@ AC_SUBST(APPLET_LIBS)
 AC_SUBST(SOUNDSERVICE_CFLAGS)
 AC_SUBST(SOUNDSERVICE_LIBS)
 
-AC_PATH_PROG(GCONFTOOL, gconftool-2)
-dnl Specify the gconf configuration source,
-dnl default to xml::$(sysconfdir)/gconf/gconf.xml.defaults
-
-AM_GCONF_SOURCE_2
-
-PKG_CHECK_MODULES(GCONF, gconf-2.0 >= 2.0)
-AC_SUBST(GCONF_CFLAGS)
-AC_SUBST(GCONF_LIBS)
-
 ###########################
 # Check to see if we're local
 ###########################
