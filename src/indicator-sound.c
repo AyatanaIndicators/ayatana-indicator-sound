@@ -54,6 +54,7 @@ struct _IndicatorSoundPrivate
   GList* transport_widgets_list;
   GDBusProxy *dbus_proxy; 
   SoundStateManager* state_manager;
+  gchar *accessible_desc;
 };
 
 #define INDICATOR_SOUND_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), INDICATOR_SOUND_TYPE, IndicatorSoundPrivate))
@@ -74,6 +75,7 @@ static GtkLabel * get_label (IndicatorObject * io);
 static GtkImage * get_icon (IndicatorObject * io);
 static GtkMenu *  get_menu (IndicatorObject * io);
 static const gchar * get_accessible_desc (IndicatorObject * io);
+static const gchar * get_name_hint (IndicatorObject * io);
 static void indicator_sound_scroll (IndicatorObject * io,
                                     IndicatorObjectEntry * entry, gint delta,
                                     IndicatorScrollDirection direction);
@@ -133,6 +135,7 @@ indicator_sound_class_init (IndicatorSoundClass *klass)
   io_class->get_image = get_icon;
   io_class->get_menu  = get_menu;
   io_class->get_accessible_desc = get_accessible_desc;
+  io_class->get_name_hint = get_name_hint;
   io_class->entry_scrolled = indicator_sound_scroll;
   io_class->secondary_activate = indicator_sound_middle_click;
 }
@@ -152,6 +155,7 @@ indicator_sound_init (IndicatorSound *self)
   GList* t_list = NULL;
   priv->transport_widgets_list = t_list;
   priv->state_manager = g_object_new (SOUND_TYPE_STATE_MANAGER, NULL);
+  priv->accessible_desc = NULL;
 
   g_signal_connect ( G_OBJECT(self->service),
                      INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE,
@@ -168,17 +172,23 @@ indicator_sound_dispose (GObject *object)
     g_object_unref(G_OBJECT(self->service));
     self->service = NULL;
   }
-  g_list_free ( priv->transport_widgets_list );
+  g_list_free (priv->transport_widgets_list);
 
   G_OBJECT_CLASS (indicator_sound_parent_class)->dispose (object);
-  return;
 }
 
 static void
 indicator_sound_finalize (GObject *object)
 {
+  IndicatorSound * self = INDICATOR_SOUND(object);
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
+
+  if (priv->accessible_desc) {
+    g_free (priv->accessible_desc);
+    priv->accessible_desc = NULL;
+  }
+
   G_OBJECT_CLASS (indicator_sound_parent_class)->finalize (object);
-  return;
 }
 
 static GtkLabel *
@@ -233,14 +243,13 @@ static const gchar *
 get_accessible_desc (IndicatorObject * io)
 {
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(io);
-
-  if (priv->volume_widget != NULL){
-    return g_strdup_printf(_("Volume (%'.0f%%)"), volume_widget_get_current_volume(priv->volume_widget));
-  }
-
-  return NULL;
+  return priv->accessible_desc;
 }
 
+static const gchar *get_name_hint (IndicatorObject * io)
+{
+  return PACKAGE_NAME;
+}
 
 static void
 connection_changed (IndicatorServiceManager * sm,
@@ -725,7 +734,7 @@ static void
 indicator_sound_middle_click (IndicatorObject * io, IndicatorObjectEntry * entry,
                               guint time, gpointer data)
 {
-  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(INDICATOR_SOUND (io));
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(io);
   g_return_if_fail (priv);
 
   mute_widget_toggle(priv->mute_widget);
@@ -734,9 +743,23 @@ indicator_sound_middle_click (IndicatorObject * io, IndicatorObjectEntry * entry
 void
 update_accessible_desc (IndicatorObject * io)
 {
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(io);
   GList *entries = indicator_object_get_entries(io);
   IndicatorObjectEntry * entry = (IndicatorObjectEntry *)entries->data;
-  entry->accessible_desc = get_accessible_desc(io);
+
+  gchar *old_desc = priv->accessible_desc;
+
+  if (priv->volume_widget) {
+    priv->accessible_desc = g_strdup_printf(_("Volume (%'.0f%%)"),
+                                            volume_widget_get_current_volume (priv->volume_widget));
+  }
+  else {
+    priv->accessible_desc = NULL;
+  }
+
+  entry->accessible_desc = priv->accessible_desc;
+  g_free (old_desc);
+
   g_signal_emit(G_OBJECT(io),
                 INDICATOR_OBJECT_SIGNAL_ACCESSIBLE_DESC_UPDATE_ID,
                 0,
