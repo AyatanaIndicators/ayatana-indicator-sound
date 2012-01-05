@@ -80,6 +80,8 @@ sound_state_manager_init (SoundStateManager* self)
 
   priv->settings_manager = g_settings_new("com.canonical.indicators.sound");
 
+  sound_state_manager_notification_init (self);
+  
   sound_state_manager_prepare_state_image_names (self);
   sound_state_manager_prepare_blocked_animation (self);
 
@@ -132,13 +134,6 @@ sound_state_manager_class_init (SoundStateManagerClass *klass)
 static void
 sound_state_manager_notification_init (SoundStateManager* self)
 {
-  static gboolean initialized = FALSE;
-
-  /* one-time lazy initialization */
-  if (initialized)
-    return;
-  initialized = TRUE;
-
   SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
 
   if (!notify_init(PACKAGE_NAME))
@@ -169,8 +164,6 @@ sound_state_manager_show_notification (SoundStateManager *self,
 {
   SoundStateManagerPrivate* priv = SOUND_STATE_MANAGER_GET_PRIVATE(self);
 
-  sound_state_manager_notification_init (self);
-  
   if (priv->notification == NULL || 
       g_settings_get_boolean (priv->settings_manager, "show-notify-osd-on-scroll") == FALSE){
     return;

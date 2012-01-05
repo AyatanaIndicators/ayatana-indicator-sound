@@ -28,7 +28,7 @@ libsoundmenu_la_SOURCES = \
             gen-sound-service.xml.c \
             dbus-shared-names.h
 
-libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -DG_LOG_DOMAIN=\"Indicator-Sound\"
+libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -Werror -DG_LOG_DOMAIN=\"Indicator-Sound\"
 libsoundmenu_la_LIBADD = $(APPLET_LIBS) -lm
 libsoundmenu_la_LDFLAGS = -module -avoid-version
 
