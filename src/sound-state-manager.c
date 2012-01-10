@@ -78,7 +78,7 @@ sound_state_manager_init (SoundStateManager* self)
   priv->notification = NULL;  
   priv->settings_manager = NULL;
 
-  priv->settings_manager = g_settings_new("com.canonical.indicators.sound");
+  priv->settings_manager = g_settings_new("com.canonical.indicator.sound");
 
   sound_state_manager_notification_init (self);
   

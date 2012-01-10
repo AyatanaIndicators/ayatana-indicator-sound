@@ -24,7 +24,7 @@ using Gdk;
 
 public class MetadataMenuitem : PlayerItem
 {
-  public const string ALBUM_ART_DIR_SUFFIX = "indicators/sound/album-art-cache"; 
+  public const string ALBUM_ART_DIR_SUFFIX = "indicator/sound/album-art-cache"; 
   
   public static string album_art_cache_dir;
   private static FetchFile fetcher;

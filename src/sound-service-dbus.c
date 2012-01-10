@@ -378,7 +378,7 @@ static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
   gchar *str;
   GVariantBuilder builder;
 
-  our_settings  = g_settings_new ("com.canonical.indicators.sound");
+  our_settings  = g_settings_new ("com.canonical.indicator.sound");
   the_black_list = g_settings_get_value (our_settings,
                                          "blacklisted-media-players");  
   g_variant_iter_init (&iter, the_black_list);
@@ -459,7 +459,7 @@ static gboolean sound_service_dbus_is_blacklisted (SoundServiceDbus *self,
   g_return_val_if_fail (player_name != NULL, FALSE);
   g_return_val_if_fail (IS_SOUND_SERVICE_DBUS (self), FALSE);
 
-  our_settings = g_settings_new ("com.canonical.indicators.sound");
+  our_settings = g_settings_new ("com.canonical.indicator.sound");
   the_black_list = g_settings_get_value (our_settings,
                                          "blacklisted-media-players");
   g_variant_iter_init (&iter, the_black_list);
