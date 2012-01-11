@@ -78,11 +78,11 @@ public class MetadataMenuitem : PlayerItem
       while (true)
         {
           var file = e.next_file (null);
-
-          debug("file name = %s", file.get_name());
           
           if (file == null)         
             break;
+
+          debug("file name = %s", file.get_name());
 
           var child = dir.get_child (file.get_name ());
 
