@@ -127,9 +127,19 @@ metadata_widget_init (MetadataWidget *self)
   GtkWidget *hbox;
   GtkWidget *outer_v_box;
   priv->icon_buf = NULL;
-    
-  outer_v_box = gtk_vbox_new (FALSE, 0);
+  
+  #if GTK_CHECK_VERSION(3, 0, 0)  
+  outer_v_box = gtk_box_new (FALSE, 0);
+  #else
+  outer_v_box = gtk_vbox_new (FALSE, 0);  
+  #endif
+ 
+  #if GTK_CHECK_VERSION(3, 0, 0)  
+  hbox = gtk_box_new(FALSE, 0);
+  #else
   hbox = gtk_hbox_new(FALSE, 0);
+  #endif
+ 
   
   priv->meta_data_h_box = hbox;
   priv->current_height = 1;
@@ -162,7 +172,13 @@ metadata_widget_init (MetadataWidget *self)
                       FALSE,
                       1); 
   priv->theme_change_occured = FALSE;
+
+  #if GTK_CHECK_VERSION(3, 0, 0)  
+  GtkWidget* vbox = gtk_box_new(FALSE, 0);
+  #else
   GtkWidget* vbox = gtk_vbox_new(FALSE, 0);
+  #endif
+  
   
   // artist
   GtkWidget* artist;
@@ -235,7 +251,11 @@ metadata_widget_dispose (GObject *object)
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(METADATA_WIDGET(object)); 
 
   if (priv->icon_buf != NULL){
-    gdk_pixbuf_unref(priv->icon_buf);
+    #if GTK_CHECK_VERSION(3, 0, 0)  
+      g_object_unref(priv->icon_buf);  
+    #else
+      gdk_pixbuf_unref(priv->icon_buf);
+    #endif
   }
   G_OBJECT_CLASS (metadata_widget_parent_class)->dispose (object);
 }
@@ -756,7 +776,11 @@ metadata_widget_set_icon (MetadataWidget *self)
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self); 
 
   if (priv->icon_buf != NULL){
-    gdk_pixbuf_unref(priv->icon_buf);
+    #if GTK_CHECK_VERSION(3, 0, 0)  
+      g_object_unref(priv->icon_buf);  
+    #else
+      gdk_pixbuf_unref(priv->icon_buf);
+    #endif	  
     priv->icon_buf = NULL;    
   }
   
