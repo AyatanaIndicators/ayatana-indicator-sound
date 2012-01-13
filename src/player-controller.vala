@@ -178,11 +178,11 @@ public class PlayerController : GLib.Object
       playlists_menuitem.root_item.property_set_bool (MENUITEM_PROP_VISIBLE,
                                                       false );
       this.custom_items[widget_order.TRANSPORT].property_set_bool (MENUITEM_PROP_VISIBLE,
-                                                                   this.app_info.get_id() == "banshee.desktop");         
+                                                                   this.app_info.get_id() == "rhythmbox.desktop");         
       return; 
     }
     metadata_menuitem.should_collapse (!this.custom_items[widget_order.METADATA].populated (MetadataMenuitem.relevant_attributes_for_ui()) );
-    if (this.app_info.get_id() == "banshee.desktop"){
+    if (this.app_info.get_id() == "rhythmbox.desktop"){
       TransportMenuitem transport = this.custom_items[widget_order.TRANSPORT] as TransportMenuitem;
       transport.handle_cached_action();
     }
