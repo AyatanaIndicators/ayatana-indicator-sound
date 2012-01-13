@@ -11,7 +11,7 @@
     </key>
     <key name="interested-media-players" type="as">
       <summary>A list of applications which at some point have registered with the sound menu</summary>
-      <default>[ 'banshee' ]</default>
+      <default>[ 'rhythmbox' ]</default>
       <description>
         Each media player which abides by the MPRIS2 spec will automatically appear in the menu.
         This array should contain the desktop file names (minus .desktop suffix) of applications which
