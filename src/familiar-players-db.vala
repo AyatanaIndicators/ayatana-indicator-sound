@@ -45,7 +45,7 @@ public class FamiliarPlayersDB : GLib.Object
       this.write_db();
     }
     
-    this.dir_name = build_filename(get_user_cache_dir(), "indicators", "sound");
+    this.dir_name = build_filename(get_user_cache_dir(), "indicator", "sound");
     this.file_name = build_filename(this.dir_name, "familiar-players-db.keyfile");
     if(create_key_file() && check_for_keys() && load_data_from_key_file()){
       debug("keyfiles in place and ready for action");      
