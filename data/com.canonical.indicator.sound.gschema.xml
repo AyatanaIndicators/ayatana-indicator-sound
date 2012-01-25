@@ -34,5 +34,12 @@
         updated volume value will be shown (if supported by your notification daemon).
       </description>
     </key>
+    <key name="visible" type="b">
+      <default>true</default>
+      <summary>Whether or not to show the sound indicator in the menu bar.</summary>
+      <description>
+        Whether or not to show the sound indicator in the menu bar.
+      </description>
+    </key>
   </schema>
 </schemalist>
