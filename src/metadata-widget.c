@@ -790,8 +790,9 @@ metadata_widget_set_icon (MetadataWidget *self)
   gtk_icon_size_lookup (GTK_ICON_SIZE_MENU, &width, &height);
   
   GString* banshee_string = g_string_new ( "banshee" );
-  GString* app_panel = g_string_new ( g_utf8_strdown (dbusmenu_menuitem_property_get(priv->twin_item, DBUSMENU_METADATA_MENUITEM_PLAYER_NAME),
-                                                     -1));
+  gchar * tmp = g_utf8_strdown (dbusmenu_menuitem_property_get(priv->twin_item, DBUSMENU_METADATA_MENUITEM_PLAYER_NAME), -1);
+  GString* app_panel = g_string_new (tmp);
+  g_free (tmp);
   GdkPixbuf* icon_buf;
   
   // Banshee Special case!  
