@@ -264,6 +264,10 @@ metadata_widget_dispose (GObject *object)
 static void
 metadata_widget_finalize (GObject *object)
 {
+  MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(METADATA_WIDGET(object)); 
+  g_string_free (priv->image_path, TRUE);
+  g_string_free (priv->old_image_path, TRUE);
+
   G_OBJECT_CLASS (metadata_widget_parent_class)->finalize (object);
 }
 
