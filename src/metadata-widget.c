@@ -256,6 +256,7 @@ metadata_widget_dispose (GObject *object)
     #else
       gdk_pixbuf_unref(priv->icon_buf);
     #endif
+      priv->icon_buf = NULL;
   }
   G_OBJECT_CLASS (metadata_widget_parent_class)->dispose (object);
 }
