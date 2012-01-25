@@ -1,4 +1,4 @@
-indicator-sound (0.8.0.0-0ubuntu3) UNRELEASED; urgency=low
+indicator-sound (0.8.0.0-0ubuntu3) precise; urgency=low
 
   * rebuild for libindicator7
   * debian/rules
@@ -6,7 +6,7 @@ indicator-sound (0.8.0.0-0ubuntu3) UNRELEASED; urgency=low
   * -debian/patches/disable_Werror.patch
     - disabled in debian/rules instead
 
- -- Ken VanDine <ken.vandine@canonical.com>  Tue, 24 Jan 2012 12:58:33 -0500
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 25 Jan 2012 10:00:00 -0500
 
 indicator-sound (0.8.0.0-0ubuntu2) precise; urgency=low
 
