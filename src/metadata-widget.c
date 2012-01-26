@@ -256,6 +256,7 @@ metadata_widget_dispose (GObject *object)
     #else
       gdk_pixbuf_unref(priv->icon_buf);
     #endif
+      priv->icon_buf = NULL;
   }
   G_OBJECT_CLASS (metadata_widget_parent_class)->dispose (object);
 }
@@ -263,6 +264,10 @@ metadata_widget_dispose (GObject *object)
 static void
 metadata_widget_finalize (GObject *object)
 {
+  MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(METADATA_WIDGET(object)); 
+  g_string_free (priv->image_path, TRUE);
+  g_string_free (priv->old_image_path, TRUE);
+
   G_OBJECT_CLASS (metadata_widget_parent_class)->finalize (object);
 }
 
@@ -790,8 +795,9 @@ metadata_widget_set_icon (MetadataWidget *self)
   gtk_icon_size_lookup (GTK_ICON_SIZE_MENU, &width, &height);
   
   GString* banshee_string = g_string_new ( "banshee" );
-  GString* app_panel = g_string_new ( g_utf8_strdown (dbusmenu_menuitem_property_get(priv->twin_item, DBUSMENU_METADATA_MENUITEM_PLAYER_NAME),
-                                                     -1));
+  gchar * tmp = g_utf8_strdown (dbusmenu_menuitem_property_get(priv->twin_item, DBUSMENU_METADATA_MENUITEM_PLAYER_NAME), -1);
+  GString* app_panel = g_string_new (tmp);
+  g_free (tmp);
   GdkPixbuf* icon_buf;
   
   // Banshee Special case!  
