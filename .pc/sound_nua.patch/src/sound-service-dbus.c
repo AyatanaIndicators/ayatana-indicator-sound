@@ -228,7 +228,7 @@ show_sound_settings_dialog (DbusmenuMenuitem *mi,
 {
   GError * error = NULL;
   if (!g_spawn_command_line_async("gnome-volume-control --page=applications", &error) &&
-      !g_spawn_command_line_async("gnome-control-center sound-nua", &error) && 
+      !g_spawn_command_line_async("gnome-control-center sound", &error) && 
       !g_spawn_command_line_async("xfce4-mixer", &error))
   {
     g_warning("Unable to show dialog: %s", error->message);
