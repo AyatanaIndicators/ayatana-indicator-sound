@@ -5,6 +5,8 @@ indicator-sound (0.8.1.0-0ubuntu1) UNRELEASED; urgency=low
     - Avoid spawning notification daemon at startup (lp: #912150)
     - Creation of album-art-cache folder (lp: #799383)
     - schema id & path are inconsistent with other indicators (lp: #914377)
+  * debian/patches/correct_ldflags_use.patch:
+    - typo fix in ldflags use
 
  -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 14 Feb 2012 19:29:14 +0100
 
