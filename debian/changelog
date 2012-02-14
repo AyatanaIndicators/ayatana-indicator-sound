@@ -1,4 +1,4 @@
-indicator-sound (0.8.1.0-0ubuntu1) UNRELEASED; urgency=low
+indicator-sound (0.8.1.0-0ubuntu1) precise; urgency=low
 
   * New upstream release.
     - No easy way to turn the sound menu on/off (lp: #829648)
@@ -8,7 +8,7 @@ indicator-sound (0.8.1.0-0ubuntu1) UNRELEASED; urgency=low
   * debian/patches/correct_ldflags_use.patch:
     - typo fix in ldflags use
 
- -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 14 Feb 2012 19:29:14 +0100
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 14 Feb 2012 19:46:41 +0100
 
 indicator-sound (0.8.0.0-0ubuntu4) precise; urgency=low
 
