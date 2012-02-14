@@ -24,7 +24,7 @@ using Gdk;
 
 public class MetadataMenuitem : PlayerItem
 {
-  public const string ALBUM_ART_DIR_SUFFIX = "indicators/sound/album-art-cache"; 
+  public const string ALBUM_ART_DIR_SUFFIX = "indicator/sound/album-art-cache"; 
   
   public static string album_art_cache_dir;
   private static FetchFile fetcher;
@@ -62,8 +62,8 @@ public class MetadataMenuitem : PlayerItem
   private static string? create_album_art_temp_dir()
   {
     string path = GLib.Path.build_filename(Environment.get_user_cache_dir(), ALBUM_ART_DIR_SUFFIX);
-    if(DirUtils.create(path, 0700) == -1){
-      warning("could not create a temp dir for remote album art, it must have been created already");
+    if(DirUtils.create_with_parents(path, 0700) == -1){
+      warning("could not create temp dir %s for remote album art, it must have been created already", path);
     }
     return path;
   }
@@ -78,11 +78,11 @@ public class MetadataMenuitem : PlayerItem
       while (true)
         {
           var file = e.next_file (null);
-
-          debug("file name = %s", file.get_name());
           
           if (file == null)         
             break;
+
+          debug("file name = %s", file.get_name());
 
           var child = dir.get_child (file.get_name ());
 

@@ -138,7 +138,7 @@ reconnect_to_pulse (gpointer user_data)
                     "Indicator Sound");
   pa_proplist_sets (proplist,
                     PA_PROP_APPLICATION_ID,
-                    "com.canonical.indicators.sound");
+                    "com.canonical.indicator.sound");
   pa_proplist_sets (proplist,
                     PA_PROP_APPLICATION_ICON_NAME,
                     "multimedia-volume-control");

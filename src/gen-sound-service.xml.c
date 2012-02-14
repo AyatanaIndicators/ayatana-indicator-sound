@@ -1,7 +1,7 @@
 const char * _sound_service = 
 "<!DOCTYPE node PUBLIC \"-//freedesktop//DTD D-BUS Object Introspection 1.0//EN\" \"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd\">\n"
-"<node name=\"/com/canonical/indicators/sound\">\n"
-"  <interface name=\"com.canonical.indicators.sound\">\n"
+"<node name=\"/com/canonical/indicator/sound\">\n"
+"  <interface name=\"com.canonical.indicator.sound\">\n"
 "    <method name = \"BlacklistMediaPlayer\">\n"
 "        <annotation name=\"org.freedesktop.DBus.GLib.Async\" value=\"true\"/>\n"
 "        <arg type='s' name='player_desktop_name' direction=\"in\"/>\n"
