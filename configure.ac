@@ -1,10 +1,10 @@
 
-AC_INIT(indicator-sound, 0.8.0.0, conor.curran@canonical.com)
+AC_INIT(indicator-sound, 0.8.1.0, conor.curran@canonical.com)
 
 AC_PREREQ(2.53)
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(indicator-sound, 0.8.0.0)
+AM_INIT_AUTOMAKE(indicator-sound, 0.8.1.0)
 
 AM_MAINTAINER_MODE
 
@@ -42,7 +42,7 @@ AC_ARG_WITH([gtk],
 GTK_REQUIRED_VERSION=2.22
 GTK3_REQUIRED_VERSION=3.0
 INDICATOR_REQUIRED_VERSION=0.3.19
-DBUSMENUGTK_REQUIRED_VERSION=0.3.101
+DBUSMENUGTK_REQUIRED_VERSION=0.5.90
 POLKIT_REQUIRED_VERSION=0.92
 PULSE_AUDIO_REQUIRED_VERSION=0.9.19
 INDICATOR_DISPLAY_OBJECTS=0.1.11
@@ -88,6 +88,16 @@ AC_SUBST(APPLET_LIBS)
 
 AC_SUBST(SOUNDSERVICE_CFLAGS)
 AC_SUBST(SOUNDSERVICE_LIBS)
+
+###########################
+# gcov coverage reporting
+###########################
+
+m4_include([m4/gcov.m4])
+AC_TDD_GCOV
+AC_SUBST(COVERAGE_CFLAGS)
+AC_SUBST(COVERAGE_CXXFLAGS)
+AC_SUBST(COVERAGE_LDFLAGS)
 
 ###########################
 # Check to see if we're local
@@ -188,4 +198,5 @@ SUS Indicator Configuration:
 
 	Prefix:        $prefix
 	GTK+:          $with_gtk
+	gcov:          $use_gcov
 ])

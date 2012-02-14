@@ -78,7 +78,6 @@ volume_widget_class_init (VolumeWidgetClass *klass)
 static void
 volume_widget_init (VolumeWidget *self)
 {
-  //g_debug("VolumeWidget::volume_widget_init");
   VolumeWidgetPrivate * priv = VOLUME_WIDGET_GET_PRIVATE(self);
 
   priv->ido_volume_slider = ido_scale_menu_item_new_with_range ("VOLUME", IDO_RANGE_STYLE_DEFAULT,  0, 0, 100, 1);
