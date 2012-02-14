@@ -23,11 +23,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
-#if GTK_CHECK_VERSION(3, 0, 0)
-#include <libdbusmenu-gtk3/menu.h>
-#else
 #include <libdbusmenu-gtk/menu.h>
-#endif
 #include <libido/idoscalemenuitem.h>
 
 #include <gio/gio.h>
@@ -55,9 +51,12 @@ struct _IndicatorSoundPrivate
   GDBusProxy *dbus_proxy; 
   SoundStateManager* state_manager;
   gchar *accessible_desc;
+  GSettings *settings;
 };
 
 #define INDICATOR_SOUND_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), INDICATOR_SOUND_TYPE, IndicatorSoundPrivate))
+
+#define SOUND_INDICATOR_GSETTINGS_SCHEMA_ID "com.canonical.indicator.sound"
 
 // GObject Boiler plate
 INDICATOR_SET_VERSION
@@ -119,6 +118,10 @@ static void connection_changed (IndicatorServiceManager * sm,
                                 gboolean connected,
                                 gpointer userdata);
 
+// Visiblity
+static void settings_init (IndicatorSound * self);
+
+
 static void
 indicator_sound_class_init (IndicatorSoundClass *klass)
 {
@@ -156,6 +159,9 @@ indicator_sound_init (IndicatorSound *self)
   priv->transport_widgets_list = t_list;
   priv->state_manager = g_object_new (SOUND_TYPE_STATE_MANAGER, NULL);
   priv->accessible_desc = NULL;
+  priv->settings = NULL;
+
+  settings_init (self);
 
   g_signal_connect ( G_OBJECT(self->service),
                      INDICATOR_SERVICE_MANAGER_SIGNAL_CONNECTION_CHANGE,
@@ -167,6 +173,11 @@ indicator_sound_dispose (GObject *object)
 {
   IndicatorSound * self = INDICATOR_SOUND(object);
   IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
+
+  if (priv->settings != NULL) {
+    g_object_unref (G_OBJECT(priv->settings));
+    priv->settings = NULL;
+  }
 
   if (self->service != NULL) {
     g_object_unref(G_OBJECT(self->service));
@@ -747,10 +758,12 @@ indicator_sound_middle_click (IndicatorObject * io, IndicatorObjectEntry * entry
 void
 update_accessible_desc (IndicatorObject * io)
 {
-  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(io);
   GList *entries = indicator_object_get_entries(io);
+  if (!entries)
+    return;
   IndicatorObjectEntry * entry = (IndicatorObjectEntry *)entries->data;
 
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(io);
   gchar *old_desc = priv->accessible_desc;
 
   if (priv->volume_widget) {
@@ -769,4 +782,51 @@ update_accessible_desc (IndicatorObject * io)
                 entry,
                 TRUE);
   g_list_free(entries);
+}
+
+/***
+****
+***/
+
+#define VISIBLE_KEY "visible"
+
+static void
+on_visible_changed (GSettings * settings, gchar * key, gpointer user_data)
+{
+  g_return_if_fail (!g_strcmp0 (key, VISIBLE_KEY));
+
+  IndicatorObject * io = INDICATOR_OBJECT(user_data);
+  const gboolean visible = g_settings_get_boolean (settings, key);
+  indicator_object_set_visible (io, visible);
+  if (visible)
+    update_accessible_desc (io); // requires an entry
+}
+
+static void
+settings_init (IndicatorSound *self)
+{
+  const char * schema = SOUND_INDICATOR_GSETTINGS_SCHEMA_ID;
+
+  gint i;
+  gboolean schema_exists = FALSE;
+  const char * const * schemas = g_settings_list_schemas ();
+  for (i=0; !schema_exists && schemas && schemas[i]; i++)
+    if (!g_strcmp0 (schema, schemas[i]))
+      schema_exists = TRUE;
+
+  IndicatorSoundPrivate* priv = INDICATOR_SOUND_GET_PRIVATE(self);
+  if (schema_exists) {
+    priv->settings = g_settings_new (schema);
+  } else {
+    priv->settings = NULL;
+  }
+
+  if (priv->settings != NULL) {
+    g_signal_connect (G_OBJECT(priv->settings), "changed::" VISIBLE_KEY,
+                      G_CALLBACK(on_visible_changed), self);
+    const gboolean b = g_settings_get_boolean (priv->settings, VISIBLE_KEY);
+    g_object_set (G_OBJECT(self),
+                  "indicator-object-default-visibility", b,
+                  NULL);
+  }
 }

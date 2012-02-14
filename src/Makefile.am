@@ -28,9 +28,14 @@ libsoundmenu_la_SOURCES = \
             gen-sound-service.xml.c \
             dbus-shared-names.h
 
-libsoundmenu_la_CFLAGS = $(APPLET_CFLAGS) -Wall -Werror -DG_LOG_DOMAIN=\"Indicator-Sound\"
+libsoundmenu_la_CFLAGS = \
+	$(APPLET_CFLAGS) \
+	$(COVERAGE_CFLAGS) \
+	-Wall -Werror -DG_LOG_DOMAIN=\"Indicator-Sound\"
 libsoundmenu_la_LIBADD = $(APPLET_LIBS) -lm
-libsoundmenu_la_LDFLAGS = -module -avoid-version
+libsoundmenu_la_LDFLAGS = 
+	$(COVERAGE_LDFLAGS) \
+	-module -avoid-version
 
 
 checkxml: $(srcdir)/sound-service.xml
@@ -115,8 +120,13 @@ indicator_sound_service_SOURCES = \
   sound-service-marshal.h \
   $(music_bridge_VALASOURCES:.vala=.c)
 
-indicator_sound_service_CFLAGS = $(PULSEAUDIO_CFLAGS) $(SOUNDSERVICE_CFLAGS) $(GCONF_CFLAGS) -DLIBEXECDIR=\"$(libexecdir)\" -Wall
+indicator_sound_service_CFLAGS = $(PULSEAUDIO_CFLAGS) \
+	$(SOUNDSERVICE_CFLAGS) \
+	$(GCONF_CFLAGS) \
+	$(COVERAGE_CFLAGS) \
+	-DLIBEXECDIR=\"$(libexecdir)\" -Wall
 indicator_sound_service_LDADD = $(PULSEAUDIO_LIBS) $(SOUNDSERVICE_LIBS) $(GCONF_LIBS)
+indicator_sound_service_LDFLAGS = $(COVERAGE_LDFLAGS)
 
 #########################
 # Service xml compilation
