@@ -1,7 +1,7 @@
 SUBDIRS = icons
 
 gsettings_SCHEMAS = \
-  com.canonical.indicators.sound.gschema.xml
+  com.canonical.indicator.sound.gschema.xml
 @GSETTINGS_RULES@
 
 dbus_servicesdir = $(DBUSSERVICEDIR)
