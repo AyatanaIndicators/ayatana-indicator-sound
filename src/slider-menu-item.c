@@ -77,7 +77,6 @@ slider_menu_item_init (SliderMenuItem *self)
 
   priv->index = NOT_ACTIVE;
   priv->name = NULL;
-
   return;
 }
 
@@ -147,21 +146,25 @@ slider_menu_item_populate (SliderMenuItem* self, const pa_sink_info* update)
 static void
 slider_menu_item_update_volume (SliderMenuItem* self, gdouble percent)
 {
+  g_return_if_fail (IS_SLIDER_MENU_ITEM (self));
 
-/*
-  g_debug ("slider menu item update volume - about to set the volume to %f", percent);
-*/
-
-  pa_cvolume new_volume;
-  pa_cvolume_init(&new_volume);
-  new_volume.channels = 1;
+  pa_cvolume mono_new_volume;
+  pa_cvolume_init(&mono_new_volume);
+  mono_new_volume.channels = 1;
   pa_volume_t new_volume_value = (pa_volume_t) ((percent * PA_VOLUME_NORM) / 100);
-  pa_cvolume_set(&new_volume, 1, new_volume_value);
+  pa_cvolume_set(&mono_new_volume, 1, new_volume_value);
 
   SliderMenuItemPrivate* priv = SLIDER_MENU_ITEM_GET_PRIVATE (self);
-
+  if (!pa_cvolume_valid (&mono_new_volume)){
+    g_warning ("Invalid volume - ignore it!");
+    return;
+  }
+  if (!pa_channel_map_valid(&priv->channel_map)){
+    g_warning ("Invalid channel map - ignore update volume!");
+    return;      
+  }
   pa_cvolume_set(&priv->volume, priv->channel_map.channels, new_volume_value);
-  pm_update_volume (priv->index, new_volume);
+  pm_update_volume (priv->index, mono_new_volume);
 }
 
 // To the UI
