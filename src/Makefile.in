@@ -383,7 +383,10 @@ libsoundmenu_la_CFLAGS = \
 	-Wall -Werror -DG_LOG_DOMAIN=\"Indicator-Sound\"
 
 libsoundmenu_la_LIBADD = $(APPLET_LIBS) -lm
-libsoundmenu_la_LDFLAGS = 
+libsoundmenu_la_LDFLAGS = \
+	$(COVERAGE_LDFLAGS) \
+	-module -avoid-version
+
 
 ####################################################################
 # Sound Service 
@@ -1264,8 +1267,6 @@ uninstall-am: uninstall-libexecPROGRAMS \
 	pdf pdf-am ps ps-am tags uninstall uninstall-am \
 	uninstall-libexecPROGRAMS uninstall-soundmenulibLTLIBRARIES
 
-	$(COVERAGE_LDFLAGS) \
-	-module -avoid-version
 
 checkxml: $(srcdir)/sound-service.xml
 	@xmllint -valid -noout $<
