@@ -1,4 +1,4 @@
-indicator-sound (0.8.2.0-0ubuntu1) UNRELEASED; urgency=low
+indicator-sound (0.8.2.0-0ubuntu1) precise; urgency=low
 
   * New upstream release.
     - crashed with SIGABRT in pa_cvolume_set (LP: #900117)
@@ -6,8 +6,10 @@ indicator-sound (0.8.2.0-0ubuntu1) UNRELEASED; urgency=low
     - album artwork misaligned and not visible (LP: #933359)
     - unity-panel-service crashed with SIGSEGV in 
       transport_widget_is_selected (LP: #882109)
+  * -debian/patches/correct_ldflags_use.patch
+    - fixed upstream
 
- -- Ken VanDine <ken.vandine@canonical.com>  Wed, 22 Feb 2012 15:55:26 -0500
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 22 Feb 2012 16:41:12 -0500
 
 indicator-sound (0.8.1.0-0ubuntu1) precise; urgency=low
 
