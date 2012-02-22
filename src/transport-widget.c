@@ -309,6 +309,7 @@ transport_widget_expose (GtkWidget *button, GdkEventExpose *event)
 gboolean
 transport_widget_is_selected ( TransportWidget* widget )
 {
+  g_return_val_if_fail (IS_TRANSPORT_WIDGET (widget), FALSE);
   TransportWidgetPrivate* priv = TRANSPORT_WIDGET_GET_PRIVATE(widget);
   return priv->has_focus;
 }

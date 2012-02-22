@@ -33,7 +33,7 @@ libsoundmenu_la_CFLAGS = \
 	$(COVERAGE_CFLAGS) \
 	-Wall -Werror -DG_LOG_DOMAIN=\"Indicator-Sound\"
 libsoundmenu_la_LIBADD = $(APPLET_LIBS) -lm
-libsoundmenu_la_LDFLAGS = \  
+libsoundmenu_la_LDFLAGS = \ 
 	$(COVERAGE_LDFLAGS) \
 	-module -avoid-version
 

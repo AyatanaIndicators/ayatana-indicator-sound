@@ -1,3 +1,16 @@
+indicator-sound (0.8.2.0-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+    - crashed with SIGABRT in pa_cvolume_set (LP: #900117)
+    - Mouse on coverart flushes the sound menu (LP: #927733)
+    - album artwork misaligned and not visible (LP: #933359)
+    - unity-panel-service crashed with SIGSEGV in 
+      transport_widget_is_selected (LP: #882109)
+  * -debian/patches/correct_ldflags_use.patch
+    - fixed upstream
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 22 Feb 2012 16:41:12 -0500
+
 indicator-sound (0.8.1.0-0ubuntu1) precise; urgency=low
 
   * New upstream release.

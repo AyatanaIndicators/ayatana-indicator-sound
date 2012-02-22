@@ -174,7 +174,6 @@ reconnect_to_pulse (gpointer user_data)
 void
 pm_update_volume (gint sink_index, pa_cvolume new_volume)
 {
-  // LP: #850662 
   if (sink_index < 0 || pulse_context == NULL){
     return;
   }
