@@ -168,8 +168,8 @@ metadata_widget_init (MetadataWidget *self)
   #endif
   gtk_box_pack_start (GTK_BOX (priv->meta_data_h_box),
                       priv->album_art,
-                      TRUE,
-                      TRUE,
+                      FALSE,
+                      FALSE,
                       1); 
   priv->theme_change_occured = FALSE;
 
@@ -281,7 +281,7 @@ metadata_widget_get_preferred_width (GtkWidget* self,
 }
 /**
  * We override the expose method to enable primitive drawing of the 
- * empty album art image and rounded rectangles on the album art.
+ * empty album art image.
  */
 static gboolean
 metadata_image_expose_gtk_3 (GtkWidget *metadata,
@@ -298,8 +298,6 @@ metadata_image_expose_gtk_3 (GtkWidget *metadata,
     return FALSE;
   }
   
-  draw_album_border (metadata, FALSE);
-
   if(priv->image_path->len > 0){
     if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE ||
        priv->theme_change_occured == TRUE){
@@ -310,6 +308,7 @@ metadata_image_expose_gtk_3 (GtkWidget *metadata,
       if(GDK_IS_PIXBUF(pixbuf) == FALSE){
         gtk_image_clear ( GTK_IMAGE(priv->album_art));          
         gtk_widget_set_size_request(GTK_WIDGET(priv->album_art), 60, 60);
+        draw_album_border (metadata, FALSE);  
         draw_album_art_placeholder(metadata);
         return FALSE;
       }
@@ -319,6 +318,7 @@ metadata_image_expose_gtk_3 (GtkWidget *metadata,
                                   gdk_pixbuf_get_width(pixbuf),
                                   gdk_pixbuf_get_height(pixbuf));
 
+      draw_album_border (metadata, FALSE);  
       g_string_erase (priv->old_image_path, 0, -1);
       g_string_overwrite (priv->old_image_path, 0, priv->image_path->str);
       g_object_unref(pixbuf);
@@ -327,6 +327,7 @@ metadata_image_expose_gtk_3 (GtkWidget *metadata,
   }
   gtk_image_clear (GTK_IMAGE(priv->album_art));  
   gtk_widget_set_size_request(GTK_WIDGET(priv->album_art), 60, 60);
+  draw_album_border (metadata, FALSE);    
   draw_album_art_placeholder(metadata);
   return FALSE;
 }
@@ -499,7 +500,8 @@ metadata_widget_icon_triangle_draw_cb (GtkWidget *widget,
 #endif
 
 static void
-draw_album_border(GtkWidget *metadata, gboolean selected)
+draw_album_border(GtkWidget *metadata,
+                  gboolean selected)
 {
   cairo_t *cr;  
   cr = gdk_cairo_create (gtk_widget_get_window (metadata));

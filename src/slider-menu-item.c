@@ -77,6 +77,7 @@ slider_menu_item_init (SliderMenuItem *self)
 
   priv->index = NOT_ACTIVE;
   priv->name = NULL;
+
   return;
 }
 
@@ -152,6 +153,12 @@ slider_menu_item_update_volume (SliderMenuItem* self, gdouble percent)
   pa_cvolume_init(&mono_new_volume);
   mono_new_volume.channels = 1;
   pa_volume_t new_volume_value = (pa_volume_t) ((percent * PA_VOLUME_NORM) / 100);
+  
+  if (new_volume_value == PA_VOLUME_INVALID || new_volume_value >= PA_VOLUME_MAX){
+    g_warning ("slider_menu_item_update_volume - volume is out of range !");
+    return;
+  }
+  
   pa_cvolume_set(&mono_new_volume, 1, new_volume_value);
 
   SliderMenuItemPrivate* priv = SLIDER_MENU_ITEM_GET_PRIVATE (self);
