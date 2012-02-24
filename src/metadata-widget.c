@@ -229,7 +229,7 @@ metadata_widget_init (MetadataWidget *self)
   GtkWidget* player_label;
   player_label = gtk_label_new ("");
   gtk_misc_set_alignment(GTK_MISC(player_label), (gfloat)0, (gfloat)0);
-  gtk_misc_set_padding (GTK_MISC(player_label), (gfloat)1, (gfloat)0);
+  gtk_misc_set_padding (GTK_MISC(player_label), (gfloat)1, (gfloat)2);
   gtk_widget_set_size_request (player_label, 150, 24);
   priv->player_label = player_label;
       
