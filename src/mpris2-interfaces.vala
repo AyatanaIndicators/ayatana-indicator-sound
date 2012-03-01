@@ -57,7 +57,7 @@ public struct PlaylistDetails{
 // Active playlist property container
 public struct ActivePlaylistContainer{
   public bool valid;
-  public PlaylistDetails details;
+  public PlaylistDetails? details;
 }
 
 [DBus (name = "org.mpris.MediaPlayer2.Playlists")]
