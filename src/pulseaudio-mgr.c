@@ -177,6 +177,12 @@ pm_update_volume (gint sink_index, pa_cvolume new_volume)
     g_warning ("pm_update_volume sink index is negative or the context is null");    
     return;
   }
+  
+  if (pa_context_get_state (pulse_context) != PA_CONTEXT_READY ){
+    g_warning ("pm_update_volume context is not in a ready state");    
+    return;    
+  }
+
   pa_operation *operation = NULL;
   
   operation = pa_context_set_sink_volume_by_index (pulse_context,
@@ -198,6 +204,12 @@ pm_update_mute (gboolean update)
     g_warning ("pm_update_mute - the context is null");    
     return;
   }
+
+  if (pa_context_get_state (pulse_context) != PA_CONTEXT_READY ){
+    g_warning ("pm_update_mute context is not in a ready state");    
+    return;    
+  }
+
   pa_operation *operation = NULL;
   
   operation =  pa_context_get_sink_info_list (pulse_context,
@@ -217,6 +229,12 @@ pm_update_mic_gain (gint source_index, pa_cvolume new_gain)
     g_warning ("pm_update_mic_gain source index is negative or the context is null");        
     return;
   }  
+
+  if (pa_context_get_state (pulse_context) != PA_CONTEXT_READY ){
+    g_warning ("pm_update_mic_gain context is not in a ready state");    
+    return;    
+  }
+  
   pa_operation *operation = NULL;
   
   operation = pa_context_set_source_volume_by_index (pulse_context,
@@ -237,6 +255,12 @@ pm_update_mic_mute (gint source_index, gint mute_update)
   if (source_index < 0){
     return;
   }
+
+  if (pa_context_get_state (pulse_context) != PA_CONTEXT_READY ){
+    g_warning ("pm_update_mic_mute context is not in a ready state");    
+    return;    
+  }
+
   pa_operation *operation = NULL;
 
   operation = pa_context_set_source_mute_by_index (pulse_context,
