@@ -121,7 +121,6 @@ static gboolean
 reconnect_to_pulse (gpointer user_data)
 {
   g_debug("Attempt a pulse connection");
-  // reset
   g_return_val_if_fail (IS_DEVICE (user_data), FALSE);
 
   connection_attempts += 1;
@@ -175,50 +174,83 @@ void
 pm_update_volume (gint sink_index, pa_cvolume new_volume)
 {
   if (sink_index < 0 || pulse_context == NULL){
+    g_warning ("pm_update_volume sink index is negative or the context is null");    
     return;
   }
-  pa_operation_unref (pa_context_set_sink_volume_by_index (pulse_context,
-                                                           sink_index,
-                                                           &new_volume,
-                                                           NULL,
-                                                           NULL) );
+  pa_operation *operation = NULL;
+  
+  operation = pa_context_set_sink_volume_by_index (pulse_context,
+                                                   sink_index,
+                                                   &new_volume,
+                                                   NULL,
+                                                   NULL);
+  if (!operation){
+    g_warning ("pm_update_volume operation failed for some reason");
+    return;
+  }                                                    
+  pa_operation_unref (operation);
 }
 
 void
 pm_update_mute (gboolean update)
 {
-  pa_operation_unref (pa_context_get_sink_info_list (pulse_context,
-                                                     pm_toggle_mute_for_every_sink_callback,
-                                                     GINT_TO_POINTER (update)));
+  if (pulse_context == NULL){
+    g_warning ("pm_update_mute - the context is null");    
+    return;
+  }
+  pa_operation *operation = NULL;
+  
+  operation =  pa_context_get_sink_info_list (pulse_context,
+                                              pm_toggle_mute_for_every_sink_callback,
+                                              GINT_TO_POINTER (update));
+  if (!operation){
+    g_warning ("pm_update_mute operation failed for some reason");
+    return;
+  }  
+  pa_operation_unref (operation);
 }
 
 void
 pm_update_mic_gain (gint source_index, pa_cvolume new_gain)
 {
-  // LP: #850662
   if (source_index < 0 || pulse_context == NULL){
+    g_warning ("pm_update_mic_gain source index is negative or the context is null");        
+    return;
+  }  
+  pa_operation *operation = NULL;
+  
+  operation = pa_context_set_source_volume_by_index (pulse_context,
+                                                     source_index,
+                                                     &new_gain,
+                                                     NULL,
+                                                     NULL);
+  if (!operation){
+    g_warning ("pm_update_mic_gain operation failed for some reason");
     return;
   }
-  pa_operation_unref (pa_context_set_source_volume_by_index (pulse_context,
-                                                             source_index,
-                                                             &new_gain,
-                                                             NULL,
-                                                             NULL) );
+  pa_operation_unref (operation);                                                     
 }
 
 void
 pm_update_mic_mute (gint source_index, gint mute_update)
 {
-    // LP: #850662
-    if (source_index < 0){
-      return;
-    }
-    pa_operation_unref (pa_context_set_source_mute_by_index (pulse_context,
-                                                             source_index,
-                                                             mute_update,
-                                                             NULL,
-                                                             NULL));
+  if (source_index < 0){
+    return;
+  }
+  pa_operation *operation = NULL;
+
+  operation = pa_context_set_source_mute_by_index (pulse_context,
+                                                   source_index,
+                                                   mute_update,
+                                                   NULL,
+                                                   NULL);
+  if (!operation){
+    g_warning ("pm_update_mic_mute operation failed for some reason");
+    return;
+  }
+  pa_operation_unref (operation);                                                   
 }
+
 /**********************************************************************************************************************/
 //    Pulse-Audio asychronous call-backs
 /**********************************************************************************************************************/
@@ -308,8 +340,6 @@ pm_subscribed_events_callback (pa_context *c,
   }
 }
 
-
-
 static void
 pm_context_state_callback (pa_context *c, void *userdata)
 {
@@ -337,6 +367,12 @@ pm_context_state_callback (pa_context *c, void *userdata)
     break;
   case PA_CONTEXT_TERMINATED:
     g_debug ("Terminated");
+    device_sink_deactivated (DEVICE (userdata));
+
+    if (reconnect_idle_id != 0){
+      g_source_remove (reconnect_idle_id);
+      reconnect_idle_id = 0;
+    }
     break;
   case PA_CONTEXT_READY:
     connection_attempts = 0;
