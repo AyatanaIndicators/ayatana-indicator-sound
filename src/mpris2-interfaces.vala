@@ -49,15 +49,15 @@ public interface MprisPlayer : Object {
 
 // Playlist container
 public struct PlaylistDetails{
-  public ObjectPath path;
-  public string name;
-  public string icon_path;
+  public ObjectPath? path;
+  public string? name;
+  public string? icon_path;
 }
 
 // Active playlist property container
 public struct ActivePlaylistContainer{
   public bool valid;
-  public PlaylistDetails details;
+  public PlaylistDetails? details;
 }
 
 [DBus (name = "org.mpris.MediaPlayer2.Playlists")]
@@ -69,7 +69,7 @@ public interface MprisPlaylists : Object {
   
   //methods
   public abstract async void ActivatePlaylist(ObjectPath playlist_id) throws IOError;
-  public abstract async PlaylistDetails[] GetPlaylists (  uint32 index,
+  public abstract async PlaylistDetails[]? GetPlaylists ( int32 index,
                                                           uint32 max_count,
                                                           string order,
                                                           bool reverse_order ) throws IOError;

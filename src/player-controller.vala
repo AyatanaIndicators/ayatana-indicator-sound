@@ -30,8 +30,6 @@ public class PlayerController : GLib.Object
     TRANSPORT,
     PLAYLISTS
   }
-  
-  
 
   public enum state{
     OFFLINE,

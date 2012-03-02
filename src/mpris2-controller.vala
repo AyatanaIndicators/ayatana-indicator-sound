@@ -248,8 +248,7 @@ public class Mpris2Controller : GLib.Object
   private bool fetch_active_playlist()
   {    
     if (this.playlists.ActivePlaylist.valid == false){
-      // TODO 
-      // What happens here ?
+      return false;
     }    
     PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
     playlists_item.active_playlist_update ( this.playlists.ActivePlaylist.details );
