@@ -58,6 +58,7 @@ struct _SoundServiceDbusPrivate {
   DbusmenuMenuitem*   root_menuitem;
   Device*             device;
   gboolean            greeter_mode;
+  guint               registration_id;
 };
 
 enum {
@@ -155,18 +156,18 @@ sound_service_dbus_init (SoundServiceDbus *self)
     return;
   }
   /* register the service on it */
-  g_dbus_connection_register_object (priv->connection,
-                                     INDICATOR_SOUND_SERVICE_DBUS_OBJECT_PATH,
-                                     interface_info,
-                                     &interface_table,
-                                     self,
-                                     NULL,
-                                     &error);
-	if (error != NULL) {
-		g_error("Unable to register the object to DBus: %s", error->message);
-		g_error_free(error);
-		return;
-	}
+  priv->registration_id = g_dbus_connection_register_object (priv->connection,
+                                                             INDICATOR_SOUND_SERVICE_DBUS_OBJECT_PATH,
+                                                             interface_info,
+                                                             &interface_table,
+                                                             self,
+                                                             NULL,
+                                                             &error);
+  if (error != NULL) {
+    g_error("Unable to register the object to DBus: %s", error->message);
+    g_error_free(error);
+    return;
+  }
 }
 
 DbusmenuMenuitem*
@@ -239,6 +240,15 @@ show_sound_settings_dialog (DbusmenuMenuitem *mi,
 static void
 sound_service_dbus_dispose (GObject *object)
 {
+  SoundServiceDbusPrivate *priv = SOUND_SERVICE_DBUS_GET_PRIVATE (object);
+
+  if (priv->connection && priv->registration_id) {
+    g_dbus_connection_unregister_object (priv->connection, priv->registration_id);
+    priv->registration_id = 0;
+  }
+
+  g_clear_object(&priv->connection);
+
   G_OBJECT_CLASS (sound_service_dbus_parent_class)->dispose (object);
   //TODO dispose of the active sink instance !
   return;

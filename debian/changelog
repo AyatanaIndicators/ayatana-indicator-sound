@@ -1,3 +1,14 @@
+indicator-sound (0.8.3.0-0ubuntu1) UNRELEASED; urgency=low
+
+  * New upstream release.
+    - Fixed memory corruption issue (LP: #897218)
+    - crashed with SIGABRT in pa_operation_unref (LP: #908682)
+    - Banshee shown in sound menu after removal until reboot (LP: #771202)
+    - Coverity PASS_BY_VALUE - CID 10620 (LP: #937451)
+    - App icon and name are not aligned (LP: #939929)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 02 Mar 2012 11:26:41 -0500
+
 indicator-sound (0.8.2.0-0ubuntu1) precise; urgency=low
 
   * New upstream release.

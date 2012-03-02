@@ -46,7 +46,7 @@ public class SettingsManager : GLib.Object
       }
       if (s in list) continue;
       if (s in blacklisted) continue;
-      list.add(s);      
+      list.add(s);
     }
     return list;
   }
@@ -54,6 +54,20 @@ public class SettingsManager : GLib.Object
   public void clear_list()
   {
     this.settings.reset("interested-media-players");
+  }
+  
+  public void remove_interested (string app_desktop_name)
+  {
+    var already_interested = this.settings.get_strv ("interested-media-players");
+    var list = new ArrayList<string>();
+
+    foreach (var s in already_interested){
+      if (s == app_desktop_name) continue;
+      list.add (s);
+    }
+    this.settings.set_strv("interested-media-players",
+                            list.to_array());
+    this.settings.apply();    
   }
   
   public void add_interested (string app_desktop_name)
