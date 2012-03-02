@@ -28,6 +28,7 @@ public class MusicPlayerBridge : GLib.Object
   private SettingsManager settings_manager;
   private Dbusmenu.Menuitem root_menu;
   private HashMap<string, PlayerController> registered_clients;
+  private HashMap<string, string> file_monitors;
   private Mpris2Watcher watcher;
 
   public MusicPlayerBridge()
@@ -36,6 +37,7 @@ public class MusicPlayerBridge : GLib.Object
   
   construct{
     this.registered_clients = new HashMap<string, PlayerController> ();
+    this.file_monitors = new HashMap<string, string> ();
     this.settings_manager = new SettingsManager();
     this.settings_manager.blacklist_updates.connect ( this.on_blacklist_update );
   }
@@ -74,9 +76,54 @@ public class MusicPlayerBridge : GLib.Object
                                                      calculate_menu_position(),
                                                      null,
                                                      PlayerController.state.OFFLINE );
-      this.registered_clients.set(mpris_key, ctrl);
+      this.registered_clients.set(mpris_key, ctrl);  
+      this.establish_file_monitoring (app_info, mpris_key);
     }
   }
+  
+  private void establish_file_monitoring (AppInfo info, string mpris_key){
+      DesktopAppInfo desktop_info = info as DesktopAppInfo;
+      var file_path = desktop_info.get_filename ();
+      File f = File.new_for_path (file_path);
+      FileMonitor monitor;
+      try {
+        monitor = f.monitor (FileMonitorFlags.SEND_MOVED, null);
+      }
+      catch (Error e){
+        warning ("Unable to create a file monitor for %s", info.get_name());
+        return;
+      }
+      this.file_monitors.set (file_path, mpris_key);
+      // Finally watch for a change.
+      monitor.changed.connect ((desktop_file, other_file, event_type) => {
+        this.relevant_desktop_file_changed (desktop_file, other_file, event_type, monitor);
+      });
+  }
+  
+  private void relevant_desktop_file_changed (File desktop_file,
+                                              File? other_file,
+                                              FileMonitorEvent event_type,
+                                              FileMonitor monitor)
+  {
+    if (event_type != FileMonitorEvent.DELETED)
+      return;
+      
+    string? path = desktop_file.get_path ();
+    if (path == null){
+      warning ("relevant_desktop_file_changed is returning a file with no path !");
+      return;
+    }
+    if (!this.file_monitors.has_key (path)){
+      warning ("relevant_desktop_file_changed is returning a file which we know nothing about - %s",
+                path);
+      return;
+    }  
+    this.registered_clients[this.file_monitors[path]].remove_from_menu();
+    this.settings_manager.remove_interested (this.file_monitors[path]);
+    this.registered_clients.unset (this.file_monitors[path]);    
+    monitor.cancel ();
+    monitor.unref();
+  }                                              
 
   private int calculate_menu_position()
   {
@@ -125,6 +172,7 @@ public class MusicPlayerBridge : GLib.Object
       this.registered_clients.set ( mpris_key, ctrl );
       debug ( "Have not seen this %s before, new controller created.", desktop );        
       this.settings_manager.add_interested ( desktop );
+      this.establish_file_monitoring (app_info, mpris_key);      
       debug ( "application added to the interested list" );
     }
     else{
