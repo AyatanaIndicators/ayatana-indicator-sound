@@ -528,7 +528,7 @@ draw_album_border(GtkWidget *metadata,
   bg_normal.g = style->bg[0].green/65535.0;
   bg_normal.b = style->bg[0].blue/65535.0;
 
-  gint state = selected ? 5 : 0;
+  const gint state = selected ? GTK_STATE_SELECTED : GTK_STATE_NORMAL;
   
   fg_normal.r = style->fg[state].red/65535.0;
   fg_normal.g = style->fg[state].green/65535.0;
