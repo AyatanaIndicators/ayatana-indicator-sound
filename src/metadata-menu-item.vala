@@ -178,7 +178,7 @@ public class MetadataMenuitem : PlayerItem
     }
   }
   
-  public void alter_label (string new_title)
+  public void alter_label (string? new_title)
   {
     if (new_title == null) return;
     this.property_set (MENUITEM_PLAYER_NAME, new_title);
