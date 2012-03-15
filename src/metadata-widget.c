@@ -444,7 +444,8 @@ metadata_image_expose (GtkWidget *metadata,
     }
     return FALSE;       
   }
-  clear_album_art (GTK_IMAGE(priv->album_art));          
+  clear_album_art (GTK_IMAGE(priv->album_art));  
+  g_string_erase (priv->old_image_path, 0, -1);            
   gtk_widget_set_size_request(GTK_WIDGET(priv->album_art), 60, 60);
   draw_album_art_placeholder(metadata);
   return FALSE;
