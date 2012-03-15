@@ -138,8 +138,7 @@ metadata_widget_init (MetadataWidget *self)
   hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
   #else
   hbox = gtk_hbox_new(FALSE, 0);
-  #endif
- 
+  #endif 
   
   priv->meta_data_h_box = hbox;
   priv->current_height = 1;
@@ -270,6 +269,18 @@ metadata_widget_finalize (GObject *object)
   G_OBJECT_CLASS (metadata_widget_parent_class)->finalize (object);
 }
 
+/**
+* Make sure to only clear the album art only when it is not empty
+* Otherwise it will continuously call queue_draw after each empty call.
+*/
+static void 
+clear_album_art (GtkImage* album_art)
+{
+  if (gtk_image_get_storage_type(album_art) != GTK_IMAGE_EMPTY){  
+    gtk_image_clear (album_art);  
+  }  
+}
+
 
 #if GTK_CHECK_VERSION(3, 0, 0)  
 static void
@@ -279,6 +290,7 @@ metadata_widget_get_preferred_width (GtkWidget* self,
 {
   *minimum_width = *natural_width =  200;
 }
+
 /**
  * We override the expose method to enable primitive drawing of the 
  * empty album art image.
@@ -298,15 +310,16 @@ metadata_image_expose_gtk_3 (GtkWidget *metadata,
     return FALSE;
   }
   
-  if(priv->image_path->len > 0){
-    if(g_string_equal(priv->image_path, priv->old_image_path) == FALSE ||
+  if((guint)priv->image_path->len != 0){
+
+    if(g_string_equal (priv->image_path, priv->old_image_path) == FALSE ||
        priv->theme_change_occured == TRUE){
       priv->theme_change_occured = FALSE;
       GdkPixbuf* pixbuf;
       pixbuf = gdk_pixbuf_new_from_file_at_size(priv->image_path->str, 60, 60, NULL);
-
+      
       if(GDK_IS_PIXBUF(pixbuf) == FALSE){
-        gtk_image_clear ( GTK_IMAGE(priv->album_art));          
+        clear_album_art (GTK_IMAGE(priv->album_art));          
         gtk_widget_set_size_request(GTK_WIDGET(priv->album_art), 60, 60);
         draw_album_border (metadata, FALSE);  
         draw_album_art_placeholder(metadata);
@@ -325,9 +338,10 @@ metadata_image_expose_gtk_3 (GtkWidget *metadata,
     }
     return FALSE;       
   }
-  gtk_image_clear (GTK_IMAGE(priv->album_art));  
+  clear_album_art (GTK_IMAGE(priv->album_art));  
+  g_string_erase (priv->old_image_path, 0, -1);  
   gtk_widget_set_size_request(GTK_WIDGET(priv->album_art), 60, 60);
-  draw_album_border (metadata, FALSE);    
+  draw_album_border (metadata, FALSE);
   draw_album_art_placeholder(metadata);
   return FALSE;
 }
@@ -337,8 +351,7 @@ static gboolean
 metadata_widget_icon_triangle_draw_cb_gtk_3 (GtkWidget *widget,
 											 cairo_t* cr,
 											 gpointer user_data)
-{
-	
+{	
   g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
   MetadataWidget* meta = METADATA_WIDGET(user_data);
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(meta);  
@@ -371,10 +384,7 @@ metadata_widget_icon_triangle_draw_cb_gtk_3 (GtkWidget *widget,
   if (dbusmenu_menuitem_property_get_bool (priv->twin_item,
                                              DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING)){
     y += gdk_pixbuf_get_height (priv->icon_buf) / 3 + 3;
-    //allocation.height/2.0 - (double)arrow_height/2.0;
     cairo_set_line_width (cr, 1.0);
-
-	//g_debug ("triangle drawing");
 
     cairo_move_to (cr, x, y);
     cairo_line_to (cr, x, y + arrow_height);
@@ -417,7 +427,7 @@ metadata_image_expose (GtkWidget *metadata,
       pixbuf = gdk_pixbuf_new_from_file_at_size(priv->image_path->str, 60, 60, NULL);
 
       if(GDK_IS_PIXBUF(pixbuf) == FALSE){
-        gtk_image_clear ( GTK_IMAGE(priv->album_art));          
+        clear_album_art (GTK_IMAGE(priv->album_art));          
         gtk_widget_set_size_request(GTK_WIDGET(priv->album_art), 60, 60);
         draw_album_art_placeholder(metadata);
         return FALSE;
@@ -434,7 +444,7 @@ metadata_image_expose (GtkWidget *metadata,
     }
     return FALSE;       
   }
-  gtk_image_clear (GTK_IMAGE(priv->album_art));  
+  clear_album_art (GTK_IMAGE(priv->album_art));          
   gtk_widget_set_size_request(GTK_WIDGET(priv->album_art), 60, 60);
   draw_album_art_placeholder(metadata);
   return FALSE;
@@ -597,7 +607,7 @@ draw_album_border(GtkWidget *metadata,
 
 static void
 draw_album_art_placeholder(GtkWidget *metadata)
-{       
+{         
   cairo_t *cr;  
   cr = gdk_cairo_create (gtk_widget_get_window (metadata));
   GtkStyle *style;
@@ -726,7 +736,7 @@ metadata_widget_property_update(DbusmenuMenuitem* item, gchar* property,
   } 
   else if(g_ascii_strcasecmp(DBUSMENU_METADATA_MENUITEM_ARTURL, property) == 0){
     g_string_erase(priv->image_path, 0, -1);
-    g_string_overwrite(priv->image_path, 0, g_variant_get_string (value, NULL));
+    g_string_overwrite (priv->image_path, 0, g_variant_get_string (value, NULL));
     gtk_widget_queue_draw(GTK_WIDGET(mitem));
   }
   else if (g_ascii_strcasecmp (DBUSMENU_METADATA_MENUITEM_PLAYER_NAME, property) == 0){
@@ -753,7 +763,7 @@ metadata_widget_handle_resizing (MetadataWidget* self)
   else{
     gtk_widget_show (priv->meta_data_h_box);     
   }
-  gtk_widget_queue_draw(GTK_WIDGET(self));      
+  gtk_widget_queue_draw(GTK_WIDGET(self));
 }
 
 static void
@@ -773,7 +783,7 @@ metadata_widget_set_style(GtkWidget* metadata, GtkStyle* style)
   MetadataWidget* widg = METADATA_WIDGET(metadata);
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(widg); 
   priv->theme_change_occured = TRUE;    
-  gtk_widget_queue_draw(GTK_WIDGET(metadata));  
+  gtk_widget_queue_draw (GTK_WIDGET(metadata));  
 }
 
 static void 
