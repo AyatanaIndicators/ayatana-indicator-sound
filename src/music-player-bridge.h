@@ -345,7 +345,7 @@ struct _MprisPlaylistsIface {
 	GTypeInterface parent_iface;
 	void (*ActivatePlaylist) (MprisPlaylists* self, const char* playlist_id, GAsyncReadyCallback _callback_, gpointer _user_data_);
 	void (*ActivatePlaylist_finish) (MprisPlaylists* self, GAsyncResult* _res_, GError** error);
-	void (*GetPlaylists) (MprisPlaylists* self, gint32 index, guint32 max_count, const gchar* order, gboolean reverse_order, GAsyncReadyCallback _callback_, gpointer _user_data_);
+	void (*GetPlaylists) (MprisPlaylists* self, guint32 index, guint32 max_count, const gchar* order, gboolean reverse_order, GAsyncReadyCallback _callback_, gpointer _user_data_);
 	PlaylistDetails* (*GetPlaylists_finish) (MprisPlaylists* self, GAsyncResult* _res_, int* result_length1, GError** error);
 	gchar** (*get_Orderings) (MprisPlaylists* self, int* result_length1);
 	void (*set_Orderings) (MprisPlaylists* self, gchar** value, int value_length1);
@@ -526,7 +526,7 @@ guint mpris_playlists_register_object (void* object, GDBusConnection* connection
 GType mpris_playlists_get_type (void) G_GNUC_CONST;
 void mpris_playlists_ActivatePlaylist (MprisPlaylists* self, const char* playlist_id, GAsyncReadyCallback _callback_, gpointer _user_data_);
 void mpris_playlists_ActivatePlaylist_finish (MprisPlaylists* self, GAsyncResult* _res_, GError** error);
-void mpris_playlists_GetPlaylists (MprisPlaylists* self, gint32 index, guint32 max_count, const gchar* order, gboolean reverse_order, GAsyncReadyCallback _callback_, gpointer _user_data_);
+void mpris_playlists_GetPlaylists (MprisPlaylists* self, guint32 index, guint32 max_count, const gchar* order, gboolean reverse_order, GAsyncReadyCallback _callback_, gpointer _user_data_);
 PlaylistDetails* mpris_playlists_GetPlaylists_finish (MprisPlaylists* self, GAsyncResult* _res_, int* result_length1, GError** error);
 gchar** mpris_playlists_get_Orderings (MprisPlaylists* self, int* result_length1);
 void mpris_playlists_set_Orderings (MprisPlaylists* self, gchar** value, int value_length1);

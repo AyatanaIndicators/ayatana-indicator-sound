@@ -1,3 +1,18 @@
+indicator-sound (0.8.4.0-0ubuntu1) UNRELEASED; urgency=low
+
+  * New upstream release.
+    - indicator-sound "Choose Playlist" menu item does nothing when using 
+      Rhythmbox (LP: #952550)
+    - crashed with SIGSEGV in g_strdup() (LP: #946607)
+    - crashed with SIGABRT in pa_operation_unref() (LP: #944148)
+    - crashed with signal 5 in g_type_create_instance() (LP: #921755)
+    - slider on unmute resets volume (LP: #921065)
+    - play controls not exposed in HUD (LP: #949032)
+    - unity-panel-service at 100% cpu when opened /w rb without album 
+      cover (LP: #806848)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 16 Mar 2012 13:50:45 -0400
+
 indicator-sound (0.8.3.0-0ubuntu2) precise; urgency=low
 
   * debian/patches/sound_nua.patch
