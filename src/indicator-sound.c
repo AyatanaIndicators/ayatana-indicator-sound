@@ -299,8 +299,8 @@ connection_changed (IndicatorServiceManager * sm,
     node_info = g_dbus_node_info_new_for_xml ( _sound_service,
                                                 &error );
     if (error != NULL) {
-      g_warning( "Failed to get create interface info from xml: %s",
-                 error->message );
+      g_critical ( "Failed to get create interface info from xml: %s",
+                  error->message );
       g_error_free(error);
       return;
     }
@@ -310,7 +310,7 @@ connection_changed (IndicatorServiceManager * sm,
     interface_info = g_dbus_node_info_lookup_interface (node_info,
                                                         INDICATOR_SOUND_DBUS_INTERFACE);
     if (interface_info == NULL) {
-      g_error("Unable to find interface '" INDICATOR_SOUND_DBUS_INTERFACE "'");
+      g_critical ("Unable to find interface '" INDICATOR_SOUND_DBUS_INTERFACE "'");
     }
   }
   
@@ -339,7 +339,7 @@ static void create_connection_to_service (GObject *source_object,
   priv->dbus_proxy = g_dbus_proxy_new_finish(res, &error);
 
   if (error != NULL) {
-    g_warning("Failed to get dbus proxy: %s", error->message);
+    g_critical ("Failed to get dbus proxy: %s", error->message);
     g_error_free(error);
     return;
   }

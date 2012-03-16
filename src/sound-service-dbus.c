@@ -107,7 +107,7 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
 
     node_info = g_dbus_node_info_new_for_xml(_sound_service, &error);
     if (error != NULL) {
-      g_error("Unable to parse Indicator Service Interface description: %s",
+      g_critical ("Unable to parse Indicator Service Interface description: %s",
                error->message);
       g_error_free(error);
     }
@@ -118,7 +118,7 @@ sound_service_dbus_class_init (SoundServiceDbusClass *klass)
                                                         INDICATOR_SOUND_DBUS_INTERFACE);
 
     if (interface_info == NULL) {
-      g_error("Unable to find interface '" INDICATOR_SOUND_DBUS_INTERFACE "'");
+      g_critical("Unable to find interface '" INDICATOR_SOUND_DBUS_INTERFACE "'");
     }
   }
   signals[TRACK_SPECIFIC_ITEM] =  g_signal_new("track-specific-item-requested",
@@ -151,8 +151,8 @@ sound_service_dbus_init (SoundServiceDbus *self)
   priv->connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
 
   if (error != NULL) {
-    g_error("sound-service-dbus:Unable to connect to the session bus when creating indicator sound service : %s", error->message);
-    g_error_free(error);
+    g_critical ("sound-service-dbus:Unable to connect to the session bus when creating indicator sound service : %s", error->message);
+    g_error_free (error);
     return;
   }
   /* register the service on it */
@@ -164,9 +164,8 @@ sound_service_dbus_init (SoundServiceDbus *self)
                                                              NULL,
                                                              &error);
   if (error != NULL) {
-    g_error("Unable to register the object to DBus: %s", error->message);
-    g_error_free(error);
-    return;
+    g_critical ("Unable to register the sound service on DBus: %s", error->message);
+    g_error_free (error);
   }
 }
 
@@ -275,12 +274,12 @@ sound_service_dbus_update_sound_state (SoundServiceDbus* self,
 
   if (priv->connection == NULL ||
       g_dbus_connection_is_closed (priv->connection) == TRUE){
-    g_critical ("sound_service_dbus_update_sound_state - connection is %s !!",
+    g_critical ("sound_service_dbus_update_sound_state - dbus connection is %s !!",
                 priv->connection == NULL? "NULL" : "closed");
     return;
   }
 
-  g_debug ("emitting state signal with value %i", (int)new_state);
+  //g_debug ("emitting state signal with value %i", (int)new_state);
   g_dbus_connection_emit_signal( priv->connection,
                                  NULL,
                                  INDICATOR_SOUND_SERVICE_DBUS_OBJECT_PATH,
