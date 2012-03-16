@@ -212,7 +212,7 @@ struct _MprisPlaylistsIface {
 	GTypeInterface parent_iface;
 	void (*ActivatePlaylist) (MprisPlaylists* self, const char* playlist_id, GAsyncReadyCallback _callback_, gpointer _user_data_);
 	void (*ActivatePlaylist_finish) (MprisPlaylists* self, GAsyncResult* _res_, GError** error);
-	void (*GetPlaylists) (MprisPlaylists* self, gint32 index, guint32 max_count, const gchar* order, gboolean reverse_order, GAsyncReadyCallback _callback_, gpointer _user_data_);
+	void (*GetPlaylists) (MprisPlaylists* self, guint32 index, guint32 max_count, const gchar* order, gboolean reverse_order, GAsyncReadyCallback _callback_, gpointer _user_data_);
 	PlaylistDetails* (*GetPlaylists_finish) (MprisPlaylists* self, GAsyncResult* _res_, int* result_length1, GError** error);
 	gchar** (*get_Orderings) (MprisPlaylists* self, int* result_length1);
 	void (*set_Orderings) (MprisPlaylists* self, gchar** value, int value_length1);
@@ -377,7 +377,7 @@ void playlists_menuitem_update_individual_playlist (PlaylistsMenuitem* self, Pla
 static void mpris2_controller_fetch_playlists_data_free (gpointer _data);
 static gboolean mpris2_controller_fetch_playlists_co (Mpris2ControllerFetchPlaylistsData* _data_);
 MprisPlaylists* mpris2_controller_get_playlists (Mpris2Controller* self);
-void mpris_playlists_GetPlaylists (MprisPlaylists* self, gint32 index, guint32 max_count, const gchar* order, gboolean reverse_order, GAsyncReadyCallback _callback_, gpointer _user_data_);
+void mpris_playlists_GetPlaylists (MprisPlaylists* self, guint32 index, guint32 max_count, const gchar* order, gboolean reverse_order, GAsyncReadyCallback _callback_, gpointer _user_data_);
 PlaylistDetails* mpris_playlists_GetPlaylists_finish (MprisPlaylists* self, GAsyncResult* _res_, int* result_length1, GError** error);
 static void mpris2_controller_fetch_playlists_ready (GObject* source_object, GAsyncResult* _res_, gpointer _user_data_);
 static void _vala_PlaylistDetails_array_free (PlaylistDetails* array, gint array_length);
@@ -1148,7 +1148,7 @@ static gboolean mpris2_controller_fetch_playlists_co (Mpris2ControllerFetchPlayl
 		_data_->_tmp0_ = _data_->self->priv->_playlists;
 		_data_->_tmp1_ = 0;
 		_data_->_state_ = 1;
-		mpris_playlists_GetPlaylists (_data_->_tmp0_, (gint32) 0, (guint32) MPRIS2_CONTROLLER_MAX_PLAYLIST_COUNT, "Alphabetical", FALSE, mpris2_controller_fetch_playlists_ready, _data_);
+		mpris_playlists_GetPlaylists (_data_->_tmp0_, (guint32) 0, (guint32) MPRIS2_CONTROLLER_MAX_PLAYLIST_COUNT, "Alphabetical", FALSE, mpris2_controller_fetch_playlists_ready, _data_);
 		return FALSE;
 		_state_1:
 		_data_->_tmp2_ = NULL;
