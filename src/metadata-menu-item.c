@@ -721,7 +721,6 @@ void metadata_menuitem_alter_label (MetadataMenuitem* self, const gchar* new_tit
 	const gchar* _tmp0_;
 	const gchar* _tmp1_;
 	g_return_if_fail (self != NULL);
-	g_return_if_fail (new_title != NULL);
 	_tmp0_ = new_title;
 	if (_tmp0_ == NULL) {
 		return;
@@ -793,15 +792,10 @@ static GObject * metadata_menuitem_constructor (GType type, guint n_construct_pr
 	const gchar* _tmp5_ = NULL;
 	PlayerController* _tmp6_;
 	PlayerController* _tmp7_;
-	GAppInfo* _tmp8_;
-	GAppInfo* _tmp9_;
-	const gchar* _tmp10_ = NULL;
-	PlayerController* _tmp11_;
-	PlayerController* _tmp12_;
-	const gchar* _tmp13_;
-	const gchar* _tmp14_;
-	GeeHashSet* _tmp15_ = NULL;
-	GeeHashSet* _tmp16_;
+	const gchar* _tmp8_;
+	const gchar* _tmp9_;
+	GeeHashSet* _tmp10_ = NULL;
+	GeeHashSet* _tmp11_;
 	parent_class = G_OBJECT_CLASS (metadata_menuitem_parent_class);
 	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
 	self = METADATA_MENUITEM (obj);
@@ -816,25 +810,18 @@ static GObject * metadata_menuitem_constructor (GType type, guint n_construct_pr
 	_tmp3_ = player_controller_get_app_info (_tmp2_);
 	_tmp4_ = _tmp3_;
 	_tmp5_ = g_app_info_get_name (_tmp4_);
-	g_debug ("metadata-menu-item.vala:42: JUST ABOUT TO ATTEMPT PLAYER NAME SETTING " \
-"%s", _tmp5_);
+	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_PLAYER_NAME, _tmp5_);
 	_tmp6_ = player_item_get_owner ((PlayerItem*) self);
 	_tmp7_ = _tmp6_;
-	_tmp8_ = player_controller_get_app_info (_tmp7_);
+	_tmp8_ = player_controller_get_icon_name (_tmp7_);
 	_tmp9_ = _tmp8_;
-	_tmp10_ = g_app_info_get_name (_tmp9_);
-	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_PLAYER_NAME, _tmp10_);
-	_tmp11_ = player_item_get_owner ((PlayerItem*) self);
-	_tmp12_ = _tmp11_;
-	_tmp13_ = player_controller_get_icon_name (_tmp12_);
-	_tmp14_ = _tmp13_;
-	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_PLAYER_ICON, _tmp14_);
+	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_PLAYER_ICON, _tmp9_);
 	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING, FALSE);
 	dbusmenu_menuitem_property_set_bool ((DbusmenuMenuitem*) self, DBUSMENU_METADATA_MENUITEM_HIDE_TRACK_DETAILS, TRUE);
-	_tmp15_ = metadata_menuitem_relevant_attributes_for_ui ();
-	_tmp16_ = _tmp15_;
-	player_item_reset ((PlayerItem*) self, _tmp16_);
-	_g_object_unref0 (_tmp16_);
+	_tmp10_ = metadata_menuitem_relevant_attributes_for_ui ();
+	_tmp11_ = _tmp10_;
+	player_item_reset ((PlayerItem*) self, _tmp11_);
+	_g_object_unref0 (_tmp11_);
 	return obj;
 }
 

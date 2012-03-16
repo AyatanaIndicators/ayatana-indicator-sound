@@ -33,6 +33,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <gee.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gio/gio.h>
 
 
 #define TYPE_PLAYER_ITEM (player_item_get_type ())
@@ -151,6 +152,7 @@ void player_controller_instantiate (PlayerController* self);
 GeeHashSet* transport_menuitem_attributes_format (void);
 GType player_controller_state_get_type (void) G_GNUC_CONST;
 static GObject * transport_menuitem_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
+GAppInfo* player_controller_get_app_info (PlayerController* self);
 static void transport_menuitem_finalize (GObject* obj);
 static void _vala_transport_menuitem_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 
@@ -314,10 +316,21 @@ static GObject * transport_menuitem_constructor (GType type, guint n_construct_p
 	GObject * obj;
 	GObjectClass * parent_class;
 	TransportMenuitem * self;
+	PlayerController* _tmp0_;
+	PlayerController* _tmp1_;
+	GAppInfo* _tmp2_;
+	GAppInfo* _tmp3_;
+	const gchar* _tmp4_ = NULL;
 	parent_class = G_OBJECT_CLASS (transport_menuitem_parent_class);
 	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
 	self = TRANSPORT_MENUITEM (obj);
 	dbusmenu_menuitem_property_set_int ((DbusmenuMenuitem*) self, DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE, (gint) TRANSPORT_STATE_PAUSED);
+	_tmp0_ = player_item_get_owner ((PlayerItem*) self);
+	_tmp1_ = _tmp0_;
+	_tmp2_ = player_controller_get_app_info (_tmp1_);
+	_tmp3_ = _tmp2_;
+	_tmp4_ = g_app_info_get_name (_tmp3_);
+	dbusmenu_menuitem_property_set ((DbusmenuMenuitem*) self, DBUSMENU_MENUITEM_PROP_LABEL, _tmp4_);
 	self->priv->cached_action = TRANSPORT_ACTION_NO_ACTION;
 	return obj;
 }

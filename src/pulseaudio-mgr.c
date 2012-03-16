@@ -218,7 +218,7 @@ pm_update_mute (gboolean update)
   if (!operation){
     g_warning ("pm_update_mute operation failed for some reason");
     return;
-  }  
+  }
   pa_operation_unref (operation);
 }
 
@@ -401,27 +401,39 @@ pm_context_state_callback (pa_context *c, void *userdata)
   case PA_CONTEXT_READY:
     connection_attempts = 0;
     g_debug("PA_CONTEXT_READY");
+    
     if (reconnect_idle_id != 0){
       g_source_remove (reconnect_idle_id);
       reconnect_idle_id = 0;
     }
-    pa_operation *o;
 
     pa_context_set_subscribe_callback(c, pm_subscribed_events_callback, userdata);
+    pa_operation *o = NULL;
 
-    if (!(o = pa_context_subscribe (c, (pa_subscription_mask_t)
-                                   (PA_SUBSCRIPTION_MASK_SINK|
-                                    PA_SUBSCRIPTION_MASK_SOURCE|
-                                    PA_SUBSCRIPTION_MASK_SINK_INPUT|
-                                    PA_SUBSCRIPTION_MASK_SOURCE_OUTPUT|
-                                    PA_SUBSCRIPTION_MASK_SERVER), NULL, NULL))) {
-      g_warning("pa_context_subscribe() failed");
+    o = pa_context_subscribe (c, (pa_subscription_mask_t)
+                                 (PA_SUBSCRIPTION_MASK_SINK|
+                                  PA_SUBSCRIPTION_MASK_SOURCE|
+                                  PA_SUBSCRIPTION_MASK_SINK_INPUT|
+                                  PA_SUBSCRIPTION_MASK_SOURCE_OUTPUT|
+                                  PA_SUBSCRIPTION_MASK_SERVER),
+                                  NULL,
+                                  NULL);
+                                   
     
+    if (!o){
+      g_critical("pa_context_subscribe() failed - ?");
+      return;
     }
 
-    if (!(o = pa_context_get_server_info (c, pm_server_info_callback, userdata))) {
-      g_warning("Initial - pa_context_get_server_info() failed");
+    pa_operation_unref(o);
+
+    o = pa_context_get_server_info (c, pm_server_info_callback, userdata);
+
+    if (!o){
+      g_warning("pa_context_get_server_info() failed - ?");
+      return;
     }
+    
     pa_operation_unref(o);
       
     break;
@@ -621,17 +633,23 @@ pm_toggle_mute_for_every_sink_callback (pa_context *c,
   if (eol > 0) {
     return;
   }
-  else {
-    if (sink == NULL) {
-      g_warning ("toggle_mute cb - sink parameter is null - why ?");
-      return;
-    }
-    pa_operation_unref (pa_context_set_sink_mute_by_index (c,
-                                                           sink->index,
-                                                           GPOINTER_TO_INT(userdata),
-                                                           NULL,
-                                                           NULL));
+
+  if (sink == NULL) {
+    g_warning ("toggle_mute cb - sink parameter is null - why ?");
+    return;
   }
+
+  pa_operation *operation = NULL;
+  operation =  pa_context_set_sink_mute_by_index (c,
+                                                  sink->index,
+                                                  GPOINTER_TO_INT(userdata),
+                                                  NULL,
+                                                  NULL);
+  if (!operation){
+    g_warning ("pm_update_mic_mute operation failed for some reason");
+    return;
+  }
+  pa_operation_unref (operation);
 }
 
 // Source info related callbacks
