@@ -38,6 +38,7 @@ public class TransportMenuitem : PlayerItem
   }
   construct{
     this.property_set_int(MENUITEM_PLAY_STATE, (int)Transport.State.PAUSED);
+    this.property_set (MENUITEM_PROP_LABEL, this.owner.app_info.get_name());
     this.cached_action = Transport.Action.NO_ACTION;
   }
 

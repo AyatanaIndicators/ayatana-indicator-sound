@@ -174,7 +174,7 @@ public class PlayerController : GLib.Object
     if(this.current_state != state.CONNECTED){
       metadata_menuitem.should_collapse (true);
       playlists_menuitem.root_item.property_set_bool (MENUITEM_PROP_VISIBLE,
-                                                      false );
+                                                      false);
       this.custom_items[widget_order.TRANSPORT].property_set_bool (MENUITEM_PROP_VISIBLE,
                                                                    this.app_info.get_id() == "rhythmbox.desktop");         
       return; 
