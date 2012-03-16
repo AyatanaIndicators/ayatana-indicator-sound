@@ -228,13 +228,20 @@ show_sound_settings_dialog (DbusmenuMenuitem *mi,
                             gpointer user_data)
 {
   GError * error = NULL;
+  gchar* cmd;
+  if (!g_strcmp0 (g_getenv ("XDG_CURRENT_DESKTOP"), "Unity"))
+    cmd = "gnome-control-center sound-nua";
+  else
+    cmd = "gnome-control-center sound";
+
   if (!g_spawn_command_line_async("gnome-volume-control --page=applications", &error) &&
-      !g_spawn_command_line_async("gnome-control-center sound-nua", &error) && 
+          !g_spawn_command_line_async(cmd, &error) && 
       !g_spawn_command_line_async("xfce4-mixer", &error))
   {
     g_warning("Unable to show dialog: %s", error->message);
     g_error_free(error);
   }
+  g_free (cmd);
 }
 
 static void

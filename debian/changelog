@@ -1,3 +1,10 @@
+indicator-sound (0.8.3.0-0ubuntu2) precise; urgency=low
+
+  * debian/patches/sound_nua.patch
+    - Sound Settings link doesn't work in GNOME Classic (LP: #941704)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 16 Mar 2012 13:39:03 -0400
+
 indicator-sound (0.8.3.0-0ubuntu1) precise; urgency=low
 
   * New upstream release.
