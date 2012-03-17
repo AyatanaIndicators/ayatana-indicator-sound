@@ -17,10 +17,11 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "indicator-sound.h"
 #include <math.h>
 #include <glib.h>
 #include <glib-object.h>
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include <libdbusmenu-gtk/menu.h>
@@ -28,7 +29,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <gio/gio.h>
 
-#include "indicator-sound.h"
 #include "transport-widget.h"
 #include "metadata-widget.h"
 #include "volume-widget.h"
