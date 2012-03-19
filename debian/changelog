@@ -1,9 +1,13 @@
-indicator-sound (0.8.4.0-0ubuntu2) UNRELEASED; urgency=low
+indicator-sound (0.8.4.1-0ubuntu1) precise; urgency=low
 
+  * New upstream release.
+    - fix i18n of indicator-sound's accessible description (LP: #957517)
+    - don't abort isound via g_error() if it can't connect to the 
+      bus (LP: #953111)
   * debian/patches/sound_nua.patch
     - don't try to free a static string (LP: #957387)
 
- -- Ken VanDine <ken.vandine@canonical.com>  Mon, 19 Mar 2012 10:54:55 -0400
+ -- Ken VanDine <ken.vandine@canonical.com>  Mon, 19 Mar 2012 11:22:00 -0400
 
 indicator-sound (0.8.4.0-0ubuntu1) precise; urgency=low
 
