@@ -22,7 +22,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "config.h"
 #endif
 
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 #include "metadata-widget.h"
 #include "common-defs.h"
 #include <gtk/gtk.h>
