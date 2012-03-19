@@ -240,7 +240,6 @@ show_sound_settings_dialog (DbusmenuMenuitem *mi,
     g_warning("Unable to show dialog: %s", error->message);
     g_error_free(error);
   }
-  g_free (cmd);
 }
 
 static void

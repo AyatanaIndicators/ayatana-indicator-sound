@@ -1,7 +1,7 @@
 === modified file 'src/sound-service-dbus.c'
---- old/src/sound-service-dbus.c	2012-03-02 16:34:50 +0000
-+++ new/src/sound-service-dbus.c	2012-03-16 17:24:56 +0000
-@@ -228,13 +228,20 @@
+--- old/src/sound-service-dbus.c	2012-03-16 17:59:34 +0000
++++ new/src/sound-service-dbus.c	2012-03-19 14:54:30 +0000
+@@ -227,8 +227,14 @@
                              gpointer user_data)
  {
    GError * error = NULL;
@@ -17,10 +17,4 @@
        !g_spawn_command_line_async("xfce4-mixer", &error))
    {
      g_warning("Unable to show dialog: %s", error->message);
-     g_error_free(error);
-   }
-+  g_free (cmd);
- }
- 
- static void
 
