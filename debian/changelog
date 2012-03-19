@@ -1,3 +1,10 @@
+indicator-sound (0.8.4.0-0ubuntu2) UNRELEASED; urgency=low
+
+  * debian/patches/sound_nua.patch
+    - don't try to free a static string (LP: #957387)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Mon, 19 Mar 2012 10:54:55 -0400
+
 indicator-sound (0.8.4.0-0ubuntu1) precise; urgency=low
 
   * New upstream release.
