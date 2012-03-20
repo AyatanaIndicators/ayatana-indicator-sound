@@ -1,3 +1,10 @@
+indicator-sound (0.8.4.1-0ubuntu2) precise; urgency=low
+
+  * debian/patches/lp_945827.patch
+    - fix for a playlist crasher (LP: #945827)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 20 Mar 2012 16:40:24 -0400
+
 indicator-sound (0.8.4.1-0ubuntu1) precise; urgency=low
 
   * New upstream release.
