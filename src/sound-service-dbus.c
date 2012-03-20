@@ -82,11 +82,11 @@ static void sound_service_dbus_finalize   (GObject *object);
 static void show_sound_settings_dialog (DbusmenuMenuitem *mi,
                                         gpointer user_data);
 static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
-                                                     gchar* player_name,
+                                                     const gchar* player_name,
                                                      gboolean blacklist); 
 
 static gboolean sound_service_dbus_is_blacklisted (SoundServiceDbus* self,
-                                                   gchar* player_name);
+                                                   const gchar* player_name);
 
 G_DEFINE_TYPE (SoundServiceDbus, sound_service_dbus, G_TYPE_OBJECT);
 
@@ -315,8 +315,8 @@ bus_method_call (GDBusConnection * connection,
   }   
   else if (g_strcmp0(method, "BlacklistMediaPlayer") == 0) {    
     gboolean blacklist;
-    gchar* player_name;
-    g_variant_get (params, "(sb)", &player_name, &blacklist);
+    const gchar* player_name;
+    g_variant_get (params, "(&sb)", &player_name, &blacklist);
                    
     g_debug ("BlacklistMediaPlayer - bool %i", blacklist); 
     g_debug ("BlacklistMediaPlayer - name %s", player_name); 
@@ -326,8 +326,8 @@ bus_method_call (GDBusConnection * connection,
     retval =  g_variant_new ("(b)", result);
   }
   else if (g_strcmp0(method, "IsBlacklisted") == 0) {
-    gchar* player_name;
-    g_variant_get (params, "(s)", &player_name);
+    const gchar* player_name;
+    g_variant_get (params, "(&s)", &player_name);
 
     g_debug ("IsBlacklisted - name %s", player_name);
     gboolean result = sound_service_dbus_is_blacklisted (service,
@@ -374,7 +374,7 @@ bus_method_call (GDBusConnection * connection,
  TODO - Works nicely but refactor into at least two different methods
 **/
 static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
-                                                     gchar* player_name,
+                                                     const gchar* player_name,
                                                      gboolean blacklist) 
 {
   g_return_val_if_fail (player_name != NULL, FALSE);
@@ -457,7 +457,7 @@ static gboolean sound_service_dbus_blacklist_player (SoundServiceDbus* self,
 }
 
 static gboolean sound_service_dbus_is_blacklisted (SoundServiceDbus *self,
-                                                   gchar            *player_name)
+                                                   const gchar      *player_name)
 {
   GSettings    *our_settings;
   GVariant     *the_black_list;
