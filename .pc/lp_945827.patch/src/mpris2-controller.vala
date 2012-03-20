@@ -92,7 +92,7 @@ public class Mpris2Controller : GLib.Object
     }
     Variant? playlist_v = changed_properties.lookup("ActivePlaylist");
     if ( playlist_v != null && this.owner.use_playlists == true ){
-      Timeout.add (500, this.fetch_active_playlist);
+      Timeout.add (300, this.fetch_active_playlist);
     }
     Variant? playlist_count_v = changed_properties.lookup("PlaylistCount");
     if ( playlist_count_v != null && this.owner.use_playlists == true ){
@@ -240,30 +240,14 @@ public class Mpris2Controller : GLib.Object
       playlists_item.update(current_playlists);
     }
     else{
-      warning(" Playlists are on but %s is returning no current_playlists ?",
-              this.owner.app_info.get_name());
+      warning(" Playlists are on but its returning no current_playlists" );
       this.owner.use_playlists = false;
     }
   }
 
-  private bool validate_playlists_details()
-  {
-    if (this.playlists.ActivePlaylist.valid == false){
-      return false;
-    }    
-    if (this.playlists.ActivePlaylist.details == null){
-      return false;
-    }
-    if (this.playlists.ActivePlaylist.details.path == null ||
-        this.playlists.ActivePlaylist.details.name == null){
-      return false;      
-    } 
-    return true;
-  }
-
   private bool fetch_active_playlist()
   {    
-    if (this.validate_playlists_details() == false){
+    if (this.playlists.ActivePlaylist.valid == false){
       return false;
     }    
     PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;

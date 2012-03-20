@@ -1,0 +1,449 @@
+=== modified file 'src/metadata-widget.c'
+--- old/src/metadata-widget.c	2012-03-19 14:58:53 +0000
++++ new/src/metadata-widget.c	2012-03-20 20:19:44 +0000
+@@ -228,7 +228,7 @@
+   GtkWidget* player_label;
+   player_label = gtk_label_new ("");
+   gtk_misc_set_alignment(GTK_MISC(player_label), (gfloat)0, (gfloat)0);
+-  gtk_misc_set_padding (GTK_MISC(player_label), (gfloat)1, (gfloat)4);
++  gtk_misc_set_padding (GTK_MISC(player_label), (gfloat)1, (gfloat)3);
+   gtk_widget_set_size_request (player_label, 150, 24);
+   priv->player_label = player_label;
+       
+
+=== modified file 'src/mpris2-controller.c'
+--- old/src/mpris2-controller.c	2012-03-16 17:50:43 +0000
++++ new/src/mpris2-controller.c	2012-03-20 20:25:46 +0000
+@@ -151,6 +151,7 @@
+ typedef struct _PlaylistsMenuitemClass PlaylistsMenuitemClass;
+ #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
+ typedef struct _Mpris2ControllerFetchPlaylistsData Mpris2ControllerFetchPlaylistsData;
++#define _active_playlist_container_free0(var) ((var == NULL) ? NULL : (var = (active_playlist_container_free (var), NULL)))
+ 
+ struct _Mpris2Controller {
+ 	GObject parent_instance;
+@@ -218,7 +219,7 @@
+ 	void (*set_Orderings) (MprisPlaylists* self, gchar** value, int value_length1);
+ 	guint32 (*get_PlaylistCount) (MprisPlaylists* self);
+ 	void (*set_PlaylistCount) (MprisPlaylists* self, guint32 value);
+-	void (*get_ActivePlaylist) (MprisPlaylists* self, ActivePlaylistContainer* value);
++	ActivePlaylistContainer* (*get_ActivePlaylist) (MprisPlaylists* self);
+ 	void (*set_ActivePlaylist) (MprisPlaylists* self, ActivePlaylistContainer* value);
+ };
+ 
+@@ -281,8 +282,12 @@
+ 	PlaylistDetails* _tmp9_;
+ 	gint _tmp9__length1;
+ 	PlayerController* _tmp10_;
+-	gboolean _tmp11_;
+-	gboolean* _tmp12_;
++	GAppInfo* _tmp11_;
++	GAppInfo* _tmp12_;
++	const gchar* _tmp13_;
++	PlayerController* _tmp14_;
++	gboolean _tmp15_;
++	gboolean* _tmp16_;
+ 	GError * _inner_error_;
+ };
+ 
+@@ -382,8 +387,10 @@
+ static void mpris2_controller_fetch_playlists_ready (GObject* source_object, GAsyncResult* _res_, gpointer _user_data_);
+ static void _vala_PlaylistDetails_array_free (PlaylistDetails* array, gint array_length);
+ void playlists_menuitem_update (PlaylistsMenuitem* self, PlaylistDetails* playlists, int playlists_length1);
++GAppInfo* player_controller_get_app_info (PlayerController* self);
+ static gboolean* _bool_dup (gboolean* self);
+-void mpris_playlists_get_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* result);
++static gboolean mpris2_controller_validate_playlists_details (Mpris2Controller* self);
++ActivePlaylistContainer* mpris_playlists_get_ActivePlaylist (MprisPlaylists* self);
+ void playlists_menuitem_active_playlist_update (PlaylistsMenuitem* self, PlaylistDetails* detail);
+ void mpris2_controller_activate_playlist (Mpris2Controller* self, const char* path);
+ void mpris_playlists_ActivatePlaylist (MprisPlaylists* self, const char* playlist_id, GAsyncReadyCallback _callback_, gpointer _user_data_);
+@@ -580,7 +587,7 @@
+ 	}
+ 	_tmp31_ = _tmp26_;
+ 	if (_tmp31_) {
+-		g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 300, _mpris2_controller_fetch_active_playlist_gsource_func, g_object_ref (self), g_object_unref);
++		g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 500, _mpris2_controller_fetch_active_playlist_gsource_func, g_object_ref (self), g_object_unref);
+ 	}
+ 	_tmp32_ = changed_properties;
+ 	_tmp33_ = g_hash_table_lookup (_tmp32_, "PlaylistCount");
+@@ -1206,13 +1213,18 @@
+ 		playlists_menuitem_update (_data_->_tmp8_, _data_->_tmp9_, _data_->_tmp9__length1);
+ 		_g_object_unref0 (_data_->playlists_item);
+ 	} else {
+-		g_warning ("mpris2-controller.vala:243:  Playlists are on but its returning no cur" \
+-"rent_playlists");
+ 		_data_->_tmp10_ = _data_->self->priv->_owner;
+-		_data_->_tmp11_ = FALSE;
+-		_data_->_tmp12_ = __bool_dup0 (&_data_->_tmp11_);
+-		_g_free0 (_data_->_tmp10_->use_playlists);
+-		_data_->_tmp10_->use_playlists = _data_->_tmp12_;
++		_data_->_tmp11_ = player_controller_get_app_info (_data_->_tmp10_);
++		_data_->_tmp12_ = _data_->_tmp11_;
++		_data_->_tmp13_ = NULL;
++		_data_->_tmp13_ = g_app_info_get_name (_data_->_tmp12_);
++		g_warning ("mpris2-controller.vala:243:  Playlists are on but %s is returning no c" \
++"urrent_playlists ?", _data_->_tmp13_);
++		_data_->_tmp14_ = _data_->self->priv->_owner;
++		_data_->_tmp15_ = FALSE;
++		_data_->_tmp16_ = __bool_dup0 (&_data_->_tmp15_);
++		_g_free0 (_data_->_tmp14_->use_playlists);
++		_data_->_tmp14_->use_playlists = _data_->_tmp16_;
+ 	}
+ 	_data_->current_playlists = (_vala_PlaylistDetails_array_free (_data_->current_playlists, _data_->current_playlists_length1), NULL);
+ 	if (_data_->_state_ == 0) {
+@@ -1225,50 +1237,121 @@
+ }
+ 
+ 
+-static gboolean mpris2_controller_fetch_active_playlist (Mpris2Controller* self) {
++static gboolean mpris2_controller_validate_playlists_details (Mpris2Controller* self) {
+ 	gboolean result = FALSE;
+ 	MprisPlaylists* _tmp0_;
+-	ActivePlaylistContainer _tmp1_;
+-	ActivePlaylistContainer _tmp2_;
+-	ActivePlaylistContainer _tmp3_;
++	ActivePlaylistContainer* _tmp1_;
++	ActivePlaylistContainer* _tmp2_;
++	ActivePlaylistContainer* _tmp3_;
+ 	gboolean _tmp4_;
+ 	gboolean _tmp5_;
+-	PlayerController* _tmp6_;
+-	GeeArrayList* _tmp7_;
+-	gpointer _tmp8_ = NULL;
+-	PlaylistsMenuitem* playlists_item;
+-	PlaylistsMenuitem* _tmp9_;
+-	MprisPlaylists* _tmp10_;
+-	ActivePlaylistContainer _tmp11_;
+-	ActivePlaylistContainer _tmp12_;
+-	ActivePlaylistContainer _tmp13_;
+-	PlaylistDetails* _tmp14_;
+-	PlaylistDetails _tmp15_;
++	MprisPlaylists* _tmp6_;
++	ActivePlaylistContainer* _tmp7_;
++	ActivePlaylistContainer* _tmp8_;
++	ActivePlaylistContainer* _tmp9_;
++	PlaylistDetails* _tmp10_;
++	gboolean _tmp11_;
++	gboolean _tmp12_ = FALSE;
++	MprisPlaylists* _tmp13_;
++	ActivePlaylistContainer* _tmp14_;
++	ActivePlaylistContainer* _tmp15_;
++	ActivePlaylistContainer* _tmp16_;
++	PlaylistDetails* _tmp17_;
++	const char* _tmp18_;
++	gboolean _tmp19_;
++	gboolean _tmp26_;
+ 	g_return_val_if_fail (self != NULL, FALSE);
+ 	_tmp0_ = self->priv->_playlists;
+-	mpris_playlists_get_ActivePlaylist (_tmp0_, &_tmp1_);
++	_tmp1_ = mpris_playlists_get_ActivePlaylist (_tmp0_);
+ 	_tmp2_ = _tmp1_;
+ 	_tmp3_ = _tmp2_;
+-	_tmp4_ = _tmp3_.valid;
++	_tmp4_ = (*_tmp3_).valid;
+ 	_tmp5_ = _tmp4_ == FALSE;
+-	active_playlist_container_destroy (&_tmp3_);
++	_active_playlist_container_free0 (_tmp3_);
+ 	if (_tmp5_) {
+ 		result = FALSE;
+ 		return result;
+ 	}
+-	_tmp6_ = self->priv->_owner;
+-	_tmp7_ = _tmp6_->custom_items;
+-	_tmp8_ = gee_abstract_list_get ((GeeAbstractList*) _tmp7_, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLISTS);
+-	playlists_item = IS_PLAYLISTS_MENUITEM ((PlayerItem*) _tmp8_) ? ((PlaylistsMenuitem*) ((PlayerItem*) _tmp8_)) : NULL;
+-	_tmp9_ = playlists_item;
+-	_tmp10_ = self->priv->_playlists;
+-	mpris_playlists_get_ActivePlaylist (_tmp10_, &_tmp11_);
+-	_tmp12_ = _tmp11_;
+-	_tmp13_ = _tmp12_;
+-	_tmp14_ = _tmp13_.details;
+-	_tmp15_ = *_tmp14_;
+-	playlists_menuitem_active_playlist_update (_tmp9_, &_tmp15_);
+-	active_playlist_container_destroy (&_tmp13_);
++	_tmp6_ = self->priv->_playlists;
++	_tmp7_ = mpris_playlists_get_ActivePlaylist (_tmp6_);
++	_tmp8_ = _tmp7_;
++	_tmp9_ = _tmp8_;
++	_tmp10_ = (*_tmp9_).details;
++	_tmp11_ = _tmp10_ == NULL;
++	_active_playlist_container_free0 (_tmp9_);
++	if (_tmp11_) {
++		result = FALSE;
++		return result;
++	}
++	_tmp13_ = self->priv->_playlists;
++	_tmp14_ = mpris_playlists_get_ActivePlaylist (_tmp13_);
++	_tmp15_ = _tmp14_;
++	_tmp16_ = _tmp15_;
++	_tmp17_ = (*_tmp16_).details;
++	_tmp18_ = (*_tmp17_).path;
++	_tmp19_ = _tmp18_ == NULL;
++	_active_playlist_container_free0 (_tmp16_);
++	if (_tmp19_) {
++		_tmp12_ = TRUE;
++	} else {
++		MprisPlaylists* _tmp20_;
++		ActivePlaylistContainer* _tmp21_;
++		ActivePlaylistContainer* _tmp22_;
++		ActivePlaylistContainer* _tmp23_;
++		PlaylistDetails* _tmp24_;
++		const gchar* _tmp25_;
++		_tmp20_ = self->priv->_playlists;
++		_tmp21_ = mpris_playlists_get_ActivePlaylist (_tmp20_);
++		_tmp22_ = _tmp21_;
++		_tmp23_ = _tmp22_;
++		_tmp24_ = (*_tmp23_).details;
++		_tmp25_ = (*_tmp24_).name;
++		_tmp12_ = _tmp25_ == NULL;
++		_active_playlist_container_free0 (_tmp23_);
++	}
++	_tmp26_ = _tmp12_;
++	if (_tmp26_) {
++		result = FALSE;
++		return result;
++	}
++	result = TRUE;
++	return result;
++}
++
++
++static gboolean mpris2_controller_fetch_active_playlist (Mpris2Controller* self) {
++	gboolean result = FALSE;
++	gboolean _tmp0_ = FALSE;
++	PlayerController* _tmp1_;
++	GeeArrayList* _tmp2_;
++	gpointer _tmp3_ = NULL;
++	PlaylistsMenuitem* playlists_item;
++	PlaylistsMenuitem* _tmp4_;
++	MprisPlaylists* _tmp5_;
++	ActivePlaylistContainer* _tmp6_;
++	ActivePlaylistContainer* _tmp7_;
++	ActivePlaylistContainer* _tmp8_;
++	PlaylistDetails* _tmp9_;
++	PlaylistDetails _tmp10_;
++	g_return_val_if_fail (self != NULL, FALSE);
++	_tmp0_ = mpris2_controller_validate_playlists_details (self);
++	if (_tmp0_ == FALSE) {
++		result = FALSE;
++		return result;
++	}
++	_tmp1_ = self->priv->_owner;
++	_tmp2_ = _tmp1_->custom_items;
++	_tmp3_ = gee_abstract_list_get ((GeeAbstractList*) _tmp2_, (gint) PLAYER_CONTROLLER_WIDGET_ORDER_PLAYLISTS);
++	playlists_item = IS_PLAYLISTS_MENUITEM ((PlayerItem*) _tmp3_) ? ((PlaylistsMenuitem*) ((PlayerItem*) _tmp3_)) : NULL;
++	_tmp4_ = playlists_item;
++	_tmp5_ = self->priv->_playlists;
++	_tmp6_ = mpris_playlists_get_ActivePlaylist (_tmp5_);
++	_tmp7_ = _tmp6_;
++	_tmp8_ = _tmp7_;
++	_tmp9_ = (*_tmp8_).details;
++	_tmp10_ = *_tmp9_;
++	playlists_menuitem_active_playlist_update (_tmp4_, &_tmp10_);
++	_active_playlist_container_free0 (_tmp8_);
+ 	result = FALSE;
+ 	_g_object_unref0 (playlists_item);
+ 	return result;
+@@ -1298,7 +1381,7 @@
+ 		_tmp2_ = path;
+ 		_tmp3_ = e;
+ 		_tmp4_ = _tmp3_->message;
+-		g_warning ("mpris2-controller.vala:264: Could not activate playlist %s because %s", (const gchar*) _tmp2_, _tmp4_);
++		g_warning ("mpris2-controller.vala:280: Could not activate playlist %s because %s", (const gchar*) _tmp2_, _tmp4_);
+ 		_g_error_free0 (e);
+ 	}
+ 	__finally13:
+
+=== modified file 'src/mpris2-controller.vala'
+--- old/src/mpris2-controller.vala	2012-03-02 16:26:40 +0000
++++ new/src/mpris2-controller.vala	2012-03-20 20:19:44 +0000
+@@ -92,7 +92,7 @@
+     }
+     Variant? playlist_v = changed_properties.lookup("ActivePlaylist");
+     if ( playlist_v != null && this.owner.use_playlists == true ){
+-      Timeout.add (300, this.fetch_active_playlist);
++      Timeout.add (500, this.fetch_active_playlist);
+     }
+     Variant? playlist_count_v = changed_properties.lookup("PlaylistCount");
+     if ( playlist_count_v != null && this.owner.use_playlists == true ){
+@@ -240,14 +240,30 @@
+       playlists_item.update(current_playlists);
+     }
+     else{
+-      warning(" Playlists are on but its returning no current_playlists" );
++      warning(" Playlists are on but %s is returning no current_playlists ?",
++              this.owner.app_info.get_name());
+       this.owner.use_playlists = false;
+     }
+   }
+ 
++  private bool validate_playlists_details()
++  {
++    if (this.playlists.ActivePlaylist.valid == false){
++      return false;
++    }    
++    if (this.playlists.ActivePlaylist.details == null){
++      return false;
++    }
++    if (this.playlists.ActivePlaylist.details.path == null ||
++        this.playlists.ActivePlaylist.details.name == null){
++      return false;      
++    } 
++    return true;
++  }
++
+   private bool fetch_active_playlist()
+   {    
+-    if (this.playlists.ActivePlaylist.valid == false){
++    if (this.validate_playlists_details() == false){
+       return false;
+     }    
+     PlaylistsMenuitem playlists_item = this.owner.custom_items[PlayerController.widget_order.PLAYLISTS] as PlaylistsMenuitem;
+
+=== modified file 'src/mpris2-interfaces.c'
+--- old/src/mpris2-interfaces.c	2012-03-16 17:59:34 +0000
++++ new/src/mpris2-interfaces.c	2012-03-20 20:25:53 +0000
+@@ -70,6 +70,7 @@
+ #define TYPE_MPRIS_PLAYLISTS_PROXY (mpris_playlists_proxy_get_type ())
+ typedef GDBusProxy MprisPlaylistsProxy;
+ typedef GDBusProxyClass MprisPlaylistsProxyClass;
++#define _active_playlist_container_free0(var) ((var == NULL) ? NULL : (var = (active_playlist_container_free (var), NULL)))
+ 
+ struct _MprisRootIface {
+ 	GTypeInterface parent_iface;
+@@ -128,7 +129,7 @@
+ 	void (*set_Orderings) (MprisPlaylists* self, gchar** value, int value_length1);
+ 	guint32 (*get_PlaylistCount) (MprisPlaylists* self);
+ 	void (*set_PlaylistCount) (MprisPlaylists* self, guint32 value);
+-	void (*get_ActivePlaylist) (MprisPlaylists* self, ActivePlaylistContainer* value);
++	ActivePlaylistContainer* (*get_ActivePlaylist) (MprisPlaylists* self);
+ 	void (*set_ActivePlaylist) (MprisPlaylists* self, ActivePlaylistContainer* value);
+ };
+ 
+@@ -263,7 +264,7 @@
+ void mpris_playlists_set_Orderings (MprisPlaylists* self, gchar** value, int value_length1);
+ guint32 mpris_playlists_get_PlaylistCount (MprisPlaylists* self);
+ void mpris_playlists_set_PlaylistCount (MprisPlaylists* self, guint32 value);
+-void mpris_playlists_get_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* result);
++ActivePlaylistContainer* mpris_playlists_get_ActivePlaylist (MprisPlaylists* self);
+ void mpris_playlists_set_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* value);
+ static void g_cclosure_user_marshal_VOID__BOXED (GClosure * closure, GValue * return_value, guint n_param_values, const GValue * param_values, gpointer invocation_hint, gpointer marshal_data);
+ static void mpris_playlists_proxy_g_signal (GDBusProxy* proxy, const gchar* sender_name, const gchar* signal_name, GVariant* parameters);
+@@ -276,7 +277,7 @@
+ static void mpris_playlists_dbus_proxy_set_Orderings (MprisPlaylists* self, gchar** value, int value_length1);
+ static guint32 mpris_playlists_dbus_proxy_get_PlaylistCount (MprisPlaylists* self);
+ static void mpris_playlists_dbus_proxy_set_PlaylistCount (MprisPlaylists* self, guint32 value);
+-static void mpris_playlists_dbus_proxy_get_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* result);
++static ActivePlaylistContainer* mpris_playlists_dbus_proxy_get_ActivePlaylist (MprisPlaylists* self);
+ static void mpris_playlists_dbus_proxy_set_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* value);
+ static void mpris_playlists_proxy_mpris_playlists_interface_init (MprisPlaylistsIface* iface);
+ static void _dbus_mpris_playlists_ActivatePlaylist (MprisPlaylists* self, GVariant* parameters, GDBusMethodInvocation* invocation);
+@@ -1879,9 +1880,9 @@
+ }
+ 
+ 
+-void mpris_playlists_get_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* result) {
+-	g_return_if_fail (self != NULL);
+-	MPRIS_PLAYLISTS_GET_INTERFACE (self)->get_ActivePlaylist (self, result);
++ActivePlaylistContainer* mpris_playlists_get_ActivePlaylist (MprisPlaylists* self) {
++	g_return_val_if_fail (self != NULL, NULL);
++	return MPRIS_PLAYLISTS_GET_INTERFACE (self)->get_ActivePlaylist (self);
+ }
+ 
+ 
+@@ -2211,8 +2212,9 @@
+ }
+ 
+ 
+-static void mpris_playlists_dbus_proxy_get_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* result) {
++static ActivePlaylistContainer* mpris_playlists_dbus_proxy_get_ActivePlaylist (MprisPlaylists* self) {
+ 	GVariant *_inner_reply;
++	ActivePlaylistContainer* _result;
+ 	ActivePlaylistContainer _tmp39_;
+ 	GVariantIter _tmp40_;
+ 	GVariant* _tmp41_;
+@@ -2233,7 +2235,7 @@
+ 		_arguments = g_variant_builder_end (&_arguments_builder);
+ 		_reply = g_dbus_proxy_call_sync ((GDBusProxy *) self, "org.freedesktop.DBus.Properties.Get", _arguments, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL);
+ 		if (!_reply) {
+-			return;
++			return NULL;
+ 		}
+ 		g_variant_get (_reply, "(v)", &_inner_reply);
+ 		g_variant_unref (_reply);
+@@ -2255,9 +2257,9 @@
+ 	g_variant_unref (_tmp47_);
+ 	_tmp39_.details = g_memdup (&_tmp43_, sizeof (PlaylistDetails));
+ 	g_variant_unref (_tmp42_);
+-	*result = _tmp39_;
++	_result = g_memdup (&_tmp39_, sizeof (ActivePlaylistContainer));
+ 	g_variant_unref (_inner_reply);
+-	return;
++	return _result;
+ }
+ 
+ 
+@@ -2462,20 +2464,20 @@
+ 
+ 
+ static GVariant* _dbus_mpris_playlists_get_ActivePlaylist (MprisPlaylists* self) {
+-	ActivePlaylistContainer result = {0};
++	ActivePlaylistContainer* result;
+ 	GVariantBuilder _tmp62_;
+ 	GVariantBuilder _tmp63_;
+ 	GVariant* _reply;
+-	mpris_playlists_get_ActivePlaylist (self, &result);
++	result = mpris_playlists_get_ActivePlaylist (self);
+ 	g_variant_builder_init (&_tmp62_, G_VARIANT_TYPE_TUPLE);
+-	g_variant_builder_add_value (&_tmp62_, g_variant_new_boolean (result.valid));
++	g_variant_builder_add_value (&_tmp62_, g_variant_new_boolean ((*result).valid));
+ 	g_variant_builder_init (&_tmp63_, G_VARIANT_TYPE_TUPLE);
+-	g_variant_builder_add_value (&_tmp63_, g_variant_new_object_path ((*result.details).path));
+-	g_variant_builder_add_value (&_tmp63_, g_variant_new_string ((*result.details).name));
+-	g_variant_builder_add_value (&_tmp63_, g_variant_new_string ((*result.details).icon_path));
++	g_variant_builder_add_value (&_tmp63_, g_variant_new_object_path ((*(*result).details).path));
++	g_variant_builder_add_value (&_tmp63_, g_variant_new_string ((*(*result).details).name));
++	g_variant_builder_add_value (&_tmp63_, g_variant_new_string ((*(*result).details).icon_path));
+ 	g_variant_builder_add_value (&_tmp62_, g_variant_builder_end (&_tmp63_));
+ 	_reply = g_variant_builder_end (&_tmp62_);
+-	active_playlist_container_destroy (&result);
++	_active_playlist_container_free0 (result);
+ 	return _reply;
+ }
+ 
+@@ -2534,7 +2536,7 @@
+ 
+ 
+ static void _dbus_mpris_playlists_set_ActivePlaylist (MprisPlaylists* self, GVariant* _value) {
+-	ActivePlaylistContainer value = {0};
++	ActivePlaylistContainer* value = NULL;
+ 	ActivePlaylistContainer _tmp67_;
+ 	GVariantIter _tmp68_;
+ 	GVariant* _tmp69_;
+@@ -2561,9 +2563,9 @@
+ 	g_variant_unref (_tmp75_);
+ 	_tmp67_.details = g_memdup (&_tmp71_, sizeof (PlaylistDetails));
+ 	g_variant_unref (_tmp70_);
+-	value = _tmp67_;
++	value = g_memdup (&_tmp67_, sizeof (ActivePlaylistContainer));
+ 	mpris_playlists_set_ActivePlaylist (self, &value);
+-	active_playlist_container_destroy (&value);
++	_active_playlist_container_free0 (value);
+ }
+ 
+ 
+
+=== modified file 'src/mpris2-interfaces.vala'
+--- old/src/mpris2-interfaces.vala	2012-03-16 17:59:34 +0000
++++ new/src/mpris2-interfaces.vala	2012-03-20 20:19:44 +0000
+@@ -65,7 +65,7 @@
+   //properties
+   public abstract string[] Orderings{owned get; set;}
+   public abstract uint32 PlaylistCount{owned get; set;}
+-  public abstract ActivePlaylistContainer ActivePlaylist {owned get; set;}
++  public abstract ActivePlaylistContainer? ActivePlaylist {owned get; set;}
+   
+   //methods
+   public abstract async void ActivatePlaylist(ObjectPath playlist_id) throws IOError;
+
