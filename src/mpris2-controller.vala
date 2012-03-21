@@ -248,6 +248,9 @@ public class Mpris2Controller : GLib.Object
 
   private bool validate_playlists_details()
   {
+    if (this.playlists.ActivePlaylist == null){
+      return false;
+    }
     if (this.playlists.ActivePlaylist.valid == false){
       return false;
     }    
