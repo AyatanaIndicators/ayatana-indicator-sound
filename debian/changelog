@@ -1,3 +1,10 @@
+indicator-sound (0.8.4.1-0ubuntu3) precise; urgency=low
+
+  * debian/patches/lp_960846.patch
+    - check that the active playlists container is not null (LP: #960846)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 21 Mar 2012 11:00:15 -0400
+
 indicator-sound (0.8.4.1-0ubuntu2) precise; urgency=low
 
   * debian/patches/lp_945827.patch
