@@ -1,0 +1,17 @@
+Description: Use pavucontrol on Xubuntu by default
+ Xfce4-mixer uses gstreamer0.10-pulseaudio, which doesn't provide full access
+ to all audio channels, only to 'Master'.
+Author: Lionel Le Folgoc <mrpouit@ubuntu.com>
+Last-Update: 2012-03-21
+
+--- indicator-sound-0.8.4.1.orig/src/sound-service-dbus.c
++++ indicator-sound-0.8.4.1/src/sound-service-dbus.c
+@@ -230,6 +230,8 @@ show_sound_settings_dialog (DbusmenuMenu
+   gchar* cmd;
+   if (!g_strcmp0 (g_getenv ("XDG_CURRENT_DESKTOP"), "Unity"))
+     cmd = "gnome-control-center sound-nua";
++  else if (!g_strcmp0 (g_getenv ("DESKTOP_SESSION"), "xubuntu"))
++    cmd = "pavucontrol";
+   else
+     cmd = "gnome-control-center sound";
+ 
