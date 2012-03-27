@@ -1,14 +1,22 @@
 
 # Coverage targets
 
+.PHONY: clean-gcno clean-gcda \
+	coverage-html generate-coverage-html clean-coverage-html \
+	coverage-gcovr generate-coverage-gcovr clean-coverage-gcovr
+
+clean-local: clean-gcno clean-coverage-html clean-coverage-gcovr
+
 if HAVE_GCOV
 
-.PHONY: clean-gcda
+clean-gcno:
+	@echo Removing old coverage instrumentation
+	-find -name '*.gcno' -print | xargs -r rm
+
 clean-gcda:
 	@echo Removing old coverage results
 	-find -name '*.gcda' -print | xargs -r rm
   
-.PHONY: coverage-html generate-coverage-html clean-coverage-html
 coverage-html: clean-gcda
 	-$(MAKE) $(AM_MAKEFLAGS) -k check
 	$(MAKE) $(AM_MAKEFLAGS) generate-coverage-html
@@ -21,14 +29,9 @@ generate-coverage-html:
 clean-coverage-html: clean-gcda
 	-$(LCOV) --directory $(top_builddir) -z
 	-rm -rf coverage.info coveragereport
-  
-.PHONY: clean-local
-clean-local: clean-coverage-html
-	
 
 if HAVE_GCOVR
 
-.PHONY: coverage-gcovr generate-coverage-gcovr clean-coverage-gcovr
 coverage-gcovr: clean-gcda
 	-$(MAKE) $(AM_MAKEFLAGS) -k check
 	$(MAKE) $(AM_MAKEFLAGS) generate-coverage-gcovr
