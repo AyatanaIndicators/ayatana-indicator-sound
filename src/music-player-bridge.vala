@@ -85,19 +85,20 @@ public class MusicPlayerBridge : GLib.Object
       DesktopAppInfo desktop_info = info as DesktopAppInfo;
       var file_path = desktop_info.get_filename ();
       File f = File.new_for_path (file_path);
-      FileMonitor monitor;
       try {
-        monitor = f.monitor (FileMonitorFlags.SEND_MOVED, null);
+        FileMonitor monitor = f.monitor (FileMonitorFlags.SEND_MOVED, null);
+        unowned FileMonitor weak_monitor = monitor;
+        monitor.changed.connect ((desktop_file, other_file, event_type) => {
+          this.relevant_desktop_file_changed (desktop_file, other_file, event_type, weak_monitor);
+        });
+        monitor.ref(); // will be unref()ed by relevant_desktop_file_changed()
+        GLib.debug ("monitoring file '%s'", file_path);
+        this.file_monitors.set (file_path, mpris_key);
       }
       catch (Error e){
         warning ("Unable to create a file monitor for %s", info.get_name());
         return;
       }
-      this.file_monitors.set (file_path, mpris_key);
-      // Finally watch for a change.
-      monitor.changed.connect ((desktop_file, other_file, event_type) => {
-        this.relevant_desktop_file_changed (desktop_file, other_file, event_type, monitor);
-      });
   }
   
   private void relevant_desktop_file_changed (File desktop_file,
@@ -117,10 +118,13 @@ public class MusicPlayerBridge : GLib.Object
       warning ("relevant_desktop_file_changed is returning a file which we know nothing about - %s",
                 path);
       return;
-    }  
-    this.registered_clients[this.file_monitors[path]].remove_from_menu();
-    this.settings_manager.remove_interested (this.file_monitors[path]);
-    this.registered_clients.unset (this.file_monitors[path]);    
+    }
+
+    var mpris_key = this.file_monitors[path];
+    GLib.debug ("file \"%s\" was removed; stopping monitoring \"%s\"", path, mpris_key);
+    this.registered_clients[mpris_key].remove_from_menu();
+    this.settings_manager.remove_interested (mpris_key);
+    this.registered_clients.unset (mpris_key);
     monitor.cancel ();
     monitor.unref();
   }                                              
