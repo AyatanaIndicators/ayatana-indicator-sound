@@ -40,7 +40,6 @@ void test_libindicator_sound_init()
 void test_libindicator_determine_state()
 {
 	IndicatorObject * sound_menu = indicator_object_new_from_file(TOP_BUILD_DIR "/src/.libs/libsoundmenu.so");
-    prepare_for_tests(sound_menu);
 
     determine_state_from_volume(40);
 	g_assert(get_state() == STATE_MEDIUM);
@@ -59,7 +58,6 @@ void test_libindicator_determine_state()
 
 void test_libindicator_image_names()
 {
-    prepare_state_machine();
 
     gchar* muted_name = get_state_image_name(STATE_MUTED);        
     g_assert(g_ascii_strncasecmp("audio-volume-muted-panel", muted_name, strlen("audio-volume-muted-panel")) == 0);
@@ -82,7 +80,7 @@ void test_libindicator_image_names()
     gchar* none_name = get_state_image_name(STATE_SINKS_NONE);        
     g_assert(g_ascii_strncasecmp("audio-output-none-panel", none_name, strlen("audio-output-none-panel")) == 0);
     
-    tidy_up_hash();
+    //tidy_up_hash();
 }
 
 
