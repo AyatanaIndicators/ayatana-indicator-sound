@@ -143,12 +143,6 @@ metadata_widget_init (MetadataWidget *self)
   priv->meta_data_h_box = hbox;
   priv->current_height = 1;
   
-  GtkWidget* spacer;
-  spacer = gtk_alignment_new (0,0,1,10);
-  gtk_widget_show (spacer);
-  gtk_container_add (GTK_CONTAINER (priv->meta_data_h_box), spacer);
-  gtk_alignment_set_padding (GTK_ALIGNMENT (spacer),10,10,10,10);
-
   // image
   priv->album_art = gtk_image_new();
   priv->image_path = g_string_new("");
@@ -244,6 +238,10 @@ metadata_widget_init (MetadataWidget *self)
 
   gtk_misc_set_alignment (GTK_MISC(priv->player_icon), 1.0 /* right aligned */, 0.5);
   gtk_box_pack_start (GTK_BOX (tophbox), priv->player_icon, FALSE, FALSE, 0);
+  GtkWidget* spacer;
+  spacer = gtk_alignment_new (0,0,0,0);
+  gtk_container_add (GTK_CONTAINER (spacer), priv->meta_data_h_box);
+  gtk_alignment_set_padding (GTK_ALIGNMENT (spacer),5,0,0,0);
 
   // player label
   GtkWidget* player_label;
@@ -253,7 +251,7 @@ metadata_widget_init (MetadataWidget *self)
   gtk_box_pack_start (GTK_BOX (tophbox), priv->player_label, TRUE, TRUE, 0);
       
   gtk_box_pack_start (GTK_BOX(outer_v_box), tophbox, FALSE, FALSE, 0);
-  gtk_box_pack_start (GTK_BOX(outer_v_box), priv->meta_data_h_box, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX(outer_v_box), spacer, FALSE, FALSE, 0);
   
   gtk_container_add (GTK_CONTAINER (self), outer_v_box);  
   
@@ -266,16 +264,6 @@ metadata_widget_init (MetadataWidget *self)
 static void
 metadata_widget_dispose (GObject *object)
 {
-  //MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(METADATA_WIDGET(object)); 
-
-  /*if (priv->icon_buf != NULL){
-    #if GTK_CHECK_VERSION(3, 0, 0)  
-      g_object_unref(priv->icon_buf);  
-    #else
-      gdk_pixbuf_unref(priv->icon_buf);
-    #endif
-      priv->icon_buf = NULL;
-  }*/
   G_OBJECT_CLASS (metadata_widget_parent_class)->dispose (object);
 }
 
@@ -369,12 +357,18 @@ metadata_image_expose_gtk_3 (GtkWidget *metadata,
 // Draw the triangle if the player is running ...
 static gboolean
 metadata_widget_icon_triangle_draw_cb_gtk_3 (GtkWidget *widget,
-											 cairo_t* cr,
-											 gpointer user_data)
+                      											 cairo_t* cr,
+                      											 gpointer user_data)
 {	
-  /*g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
-  MetadataWidget* meta = METADATA_WIDGET(user_data);
+  g_return_val_if_fail (IS_METADATA_WIDGET (user_data), FALSE);
+  MetadataWidget* meta = METADATA_WIDGET (user_data);
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(meta);  
+
+  gboolean running = dbusmenu_menuitem_property_get_bool (priv->twin_item,
+                                                          DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING);
+
+  if (!running)
+    return FALSE;
 
   GtkStyle *style;
   int x, y, arrow_width, arrow_height;
@@ -389,32 +383,18 @@ metadata_widget_icon_triangle_draw_cb_gtk_3 (GtkWidget *widget,
   x = allocation.x;
   y = 0;
 
-  gint offset = gdk_pixbuf_get_height (priv->icon_buf) / 3;
-
-  // Draw player icon  
-  /*if (priv->icon_buf != NULL){  
-    gdk_cairo_set_source_pixbuf (cr,
-                                 priv->icon_buf,
-                                 x + arrow_width + 1,
-                                 y + offset);
-    cairo_paint (cr);
-  }*/
-
   // Draw triangle but only if the player is running.
-  /*if (dbusmenu_menuitem_property_get_bool (priv->twin_item,
-                                             DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING)){
-    y += gdk_pixbuf_get_height (priv->icon_buf) / 3 + 3;
-    cairo_set_line_width (cr, 1.0);
+  y += gtk_image_get_pixel_size (GTK_IMAGE (priv->player_icon)) / 3 + 5;
+  cairo_set_line_width (cr, 1.0);
 
-    cairo_move_to (cr, x, y);
-    cairo_line_to (cr, x, y + arrow_height);
-    cairo_line_to (cr, x + arrow_width, y + (double)arrow_height/2.0);
-    cairo_close_path (cr);
-    cairo_set_source_rgb (cr, style->fg[gtk_widget_get_state(widget)].red/65535.0,
-                              style->fg[gtk_widget_get_state(widget)].green/65535.0,
-                              style->fg[gtk_widget_get_state(widget)].blue/65535.0);
-    cairo_fill (cr);                                             
-  }*/
+  cairo_move_to (cr, x, y);
+  cairo_line_to (cr, x, y + arrow_height);
+  cairo_line_to (cr, x + arrow_width, y + (double)arrow_height/2.0);
+  cairo_close_path (cr);
+  cairo_set_source_rgb (cr, style->fg[gtk_widget_get_state(widget)].red/65535.0,
+                            style->fg[gtk_widget_get_state(widget)].green/65535.0,
+                            style->fg[gtk_widget_get_state(widget)].blue/65535.0);
+  cairo_fill (cr);                                             
   
   return FALSE;  
 }
@@ -478,13 +458,16 @@ metadata_widget_icon_triangle_draw_cb (GtkWidget *widget,
                                        GdkEventExpose *event,
                                        gpointer user_data)
 {
-  /*g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
+  g_return_val_if_fail(IS_METADATA_WIDGET(user_data), FALSE);
 
   MetadataWidget* meta = METADATA_WIDGET(user_data);
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(meta);  
 
-  g_return_val_if_fail (dbusmenu_menuitem_property_get_bool (priv->twin_item,
-                                                             DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING), FALSE);
+  gboolean running = dbusmenu_menuitem_property_get_bool (priv->twin_item,
+                                                          DBUSMENU_METADATA_MENUITEM_PLAYER_RUNNING);
+
+  if (!running)
+    return FALSE;
 
   GtkStyle *style;
   cairo_t *cr;
@@ -502,19 +485,8 @@ metadata_widget_icon_triangle_draw_cb (GtkWidget *widget,
   x = allocation.x;
   y = allocation.y;
 
-  gint offset = (allocation.height - gdk_pixbuf_get_height (priv->icon_buf)) / 2;
-
-  // Draw player icon  
-  /*if (priv->icon_buf != NULL){  
-    gdk_cairo_set_source_pixbuf (cr,
-                                 priv->icon_buf,
-                                 x + arrow_width + 1,
-                                 y + offset);
-    cairo_paint (cr);
-  }*/
-
   // Draw triangle but only if the player is running.
-  /*y += allocation.height/2.0 - (double)arrow_height/2.0;
+  y += allocation.height/2.0 - (double)arrow_height/2.0;
   cairo_set_line_width (cr, 1.0);
 
   cairo_move_to (cr, x, y);
@@ -526,7 +498,7 @@ metadata_widget_icon_triangle_draw_cb (GtkWidget *widget,
                             style->fg[gtk_widget_get_state(widget)].blue/65535.0);
   cairo_fill (cr);                                             
   
-  cairo_destroy (cr);*/
+  cairo_destroy (cr);
   return FALSE;  
 }
 #endif
@@ -811,27 +783,12 @@ metadata_widget_set_style(GtkWidget* metadata, GtkStyle* style)
 static void 
 metadata_widget_set_icon (MetadataWidget *self)
 {
-  MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self); 
+  MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);   
 
-  /*if (priv->icon_buf != NULL){
-    #if GTK_CHECK_VERSION(3, 0, 0)  
-      g_object_unref(priv->icon_buf);  
-    #else
-      gdk_pixbuf_unref(priv->icon_buf);
-    #endif	  
-    priv->icon_buf = NULL;    
-  }
-  
-  gint padding = 0;
-  gtk_widget_style_get(GTK_WIDGET(self), "horizontal-padding", &padding, NULL);
-  gint width, height;
-  gtk_icon_size_lookup (GTK_ICON_SIZE_MENU, &width, &height);*/
-  
   GString* banshee_string = g_string_new ( "banshee" );
   gchar * tmp = g_utf8_strdown (dbusmenu_menuitem_property_get(priv->twin_item, DBUSMENU_METADATA_MENUITEM_PLAYER_NAME), -1);
   GString* app_panel = g_string_new (tmp);
   g_free (tmp);
-  //GdkPixbuf* icon_buf;
   
   // Banshee Special case!  
   // Not ideal but apparently we want the banshee icon to be the greyscale one
@@ -851,12 +808,6 @@ metadata_widget_set_icon (MetadataWidget *self)
   
   gtk_image_set_from_icon_name(GTK_IMAGE (priv->player_icon), app_panel->str, GTK_ICON_SIZE_MENU);
 
-  /*icon_buf = gtk_icon_theme_load_icon ( gtk_icon_theme_get_default(),
-                                        app_panel->str,
-                                        (width > height) ? width : height,
-                                        GTK_ICON_LOOKUP_GENERIC_FALLBACK, 
-                                        NULL );  
-  priv->icon_buf = icon_buf;*/
   g_string_free ( app_panel, TRUE);
   g_string_free ( banshee_string, TRUE);
 }
