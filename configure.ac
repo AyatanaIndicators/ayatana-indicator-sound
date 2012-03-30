@@ -183,7 +183,6 @@ AC_OUTPUT([
 Makefile
 src/Makefile
 data/Makefile
-tests/Makefile
 data/icons/Makefile
 data/icons/16x16/Makefile
 data/icons/16x16/status/Makefile
