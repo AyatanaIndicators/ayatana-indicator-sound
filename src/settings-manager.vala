@@ -58,27 +58,31 @@ public class SettingsManager : GLib.Object
   
   public void remove_interested (string app_desktop_name)
   {
-    var already_interested = this.settings.get_strv ("interested-media-players");
-    var list = new ArrayList<string>();
+    const string key = "interested-media-players";
+    var players = new GLib.VariantBuilder (new VariantType ("as")); // array of strings
 
-    foreach (var s in already_interested){
-      if (s == app_desktop_name) continue;
-      list.add (s);
+    foreach (var player in this.settings.get_strv (key)) {
+      if (player != app_desktop_name)
+        players.add ("s", player);
     }
-    this.settings.set_strv("interested-media-players",
-                            list.to_array());
-    this.settings.apply();    
+
+    this.settings.set_value(key, players.end());
+    this.settings.apply();
   }
   
   public void add_interested (string app_desktop_name)
   {
-    var already_interested = this.settings.get_strv ("interested-media-players");
-    foreach (var s in already_interested){
-      if ( s == app_desktop_name ) return;
+    const string key = "interested-media-players";
+    var players = new GLib.VariantBuilder (new VariantType ("as")); // array of strings
+
+    foreach (var player in this.settings.get_strv (key)) {
+      if (player == app_desktop_name)
+        return;
+      players.add ("s", player);
     }
-    already_interested += (app_desktop_name);
-    this.settings.set_strv( "interested-media-players",
-                             already_interested );
+
+    players.add ("s", app_desktop_name);
+    this.settings.set_value(key, players.end());
     this.settings.apply();
   }
 
