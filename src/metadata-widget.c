@@ -143,6 +143,12 @@ metadata_widget_init (MetadataWidget *self)
   priv->meta_data_h_box = hbox;
   priv->current_height = 1;
   
+  GtkWidget* spacer;
+  spacer = gtk_alignment_new (0,0,1,10);
+  gtk_widget_show (spacer);
+  gtk_container_add (GTK_CONTAINER (priv->meta_data_h_box), spacer);
+  gtk_alignment_set_padding (GTK_ALIGNMENT (spacer),10,10,10,10);
+
   // image
   priv->album_art = gtk_image_new();
   priv->image_path = g_string_new("");
@@ -247,7 +253,7 @@ metadata_widget_init (MetadataWidget *self)
   gtk_box_pack_start (GTK_BOX (tophbox), priv->player_label, TRUE, TRUE, 0);
       
   gtk_box_pack_start (GTK_BOX(outer_v_box), tophbox, FALSE, FALSE, 0);
-  gtk_box_pack_start (GTK_BOX(outer_v_box), priv->meta_data_h_box, FALSE, FALSE, 5);
+  gtk_box_pack_start (GTK_BOX(outer_v_box), priv->meta_data_h_box, FALSE, FALSE, 0);
   
   gtk_container_add (GTK_CONTAINER (self), outer_v_box);  
   
