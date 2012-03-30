@@ -1,10 +1,10 @@
 
-AC_INIT(indicator-sound, 0.8.4.1, conor.curran@canonical.com)
+AC_INIT(indicator-sound, 0.8.5.0, conor.curran@canonical.com)
 
 AC_PREREQ(2.53)
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(indicator-sound, 0.8.4.1)
+AM_INIT_AUTOMAKE(indicator-sound, 0.8.5.0)
 
 AM_MAINTAINER_MODE
 
@@ -95,6 +95,9 @@ AC_SUBST(SOUNDSERVICE_LIBS)
 
 m4_include([m4/gcov.m4])
 AC_TDD_GCOV
+AM_CONDITIONAL([HAVE_GCOV], [test "x$ac_cv_check_gcov" = xyes])
+AM_CONDITIONAL([HAVE_LCOV], [test "x$ac_cv_check_lcov" = xyes])
+AM_CONDITIONAL([HAVE_GCOVR], [test "x$ac_cv_check_gcovr" = xyes])
 AC_SUBST(COVERAGE_CFLAGS)
 AC_SUBST(COVERAGE_CXXFLAGS)
 AC_SUBST(COVERAGE_LDFLAGS)

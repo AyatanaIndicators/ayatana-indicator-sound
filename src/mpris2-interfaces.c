@@ -70,6 +70,7 @@ typedef struct _MprisPlaylistsIface MprisPlaylistsIface;
 #define TYPE_MPRIS_PLAYLISTS_PROXY (mpris_playlists_proxy_get_type ())
 typedef GDBusProxy MprisPlaylistsProxy;
 typedef GDBusProxyClass MprisPlaylistsProxyClass;
+#define _active_playlist_container_free0(var) ((var == NULL) ? NULL : (var = (active_playlist_container_free (var), NULL)))
 
 struct _MprisRootIface {
 	GTypeInterface parent_iface;
@@ -128,7 +129,7 @@ struct _MprisPlaylistsIface {
 	void (*set_Orderings) (MprisPlaylists* self, gchar** value, int value_length1);
 	guint32 (*get_PlaylistCount) (MprisPlaylists* self);
 	void (*set_PlaylistCount) (MprisPlaylists* self, guint32 value);
-	void (*get_ActivePlaylist) (MprisPlaylists* self, ActivePlaylistContainer* value);
+	ActivePlaylistContainer* (*get_ActivePlaylist) (MprisPlaylists* self);
 	void (*set_ActivePlaylist) (MprisPlaylists* self, ActivePlaylistContainer* value);
 };
 
@@ -263,7 +264,7 @@ gchar** mpris_playlists_get_Orderings (MprisPlaylists* self, int* result_length1
 void mpris_playlists_set_Orderings (MprisPlaylists* self, gchar** value, int value_length1);
 guint32 mpris_playlists_get_PlaylistCount (MprisPlaylists* self);
 void mpris_playlists_set_PlaylistCount (MprisPlaylists* self, guint32 value);
-void mpris_playlists_get_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* result);
+ActivePlaylistContainer* mpris_playlists_get_ActivePlaylist (MprisPlaylists* self);
 void mpris_playlists_set_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* value);
 static void g_cclosure_user_marshal_VOID__BOXED (GClosure * closure, GValue * return_value, guint n_param_values, const GValue * param_values, gpointer invocation_hint, gpointer marshal_data);
 static void mpris_playlists_proxy_g_signal (GDBusProxy* proxy, const gchar* sender_name, const gchar* signal_name, GVariant* parameters);
@@ -276,7 +277,7 @@ static gchar** mpris_playlists_dbus_proxy_get_Orderings (MprisPlaylists* self, i
 static void mpris_playlists_dbus_proxy_set_Orderings (MprisPlaylists* self, gchar** value, int value_length1);
 static guint32 mpris_playlists_dbus_proxy_get_PlaylistCount (MprisPlaylists* self);
 static void mpris_playlists_dbus_proxy_set_PlaylistCount (MprisPlaylists* self, guint32 value);
-static void mpris_playlists_dbus_proxy_get_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* result);
+static ActivePlaylistContainer* mpris_playlists_dbus_proxy_get_ActivePlaylist (MprisPlaylists* self);
 static void mpris_playlists_dbus_proxy_set_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* value);
 static void mpris_playlists_proxy_mpris_playlists_interface_init (MprisPlaylistsIface* iface);
 static void _dbus_mpris_playlists_ActivatePlaylist (MprisPlaylists* self, GVariant* parameters, GDBusMethodInvocation* invocation);
@@ -1879,9 +1880,9 @@ void mpris_playlists_set_PlaylistCount (MprisPlaylists* self, guint32 value) {
 }
 
 
-void mpris_playlists_get_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* result) {
-	g_return_if_fail (self != NULL);
-	MPRIS_PLAYLISTS_GET_INTERFACE (self)->get_ActivePlaylist (self, result);
+ActivePlaylistContainer* mpris_playlists_get_ActivePlaylist (MprisPlaylists* self) {
+	g_return_val_if_fail (self != NULL, NULL);
+	return MPRIS_PLAYLISTS_GET_INTERFACE (self)->get_ActivePlaylist (self);
 }
 
 
@@ -2211,8 +2212,9 @@ static void mpris_playlists_dbus_proxy_set_PlaylistCount (MprisPlaylists* self, 
 }
 
 
-static void mpris_playlists_dbus_proxy_get_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* result) {
+static ActivePlaylistContainer* mpris_playlists_dbus_proxy_get_ActivePlaylist (MprisPlaylists* self) {
 	GVariant *_inner_reply;
+	ActivePlaylistContainer* _result;
 	ActivePlaylistContainer _tmp39_;
 	GVariantIter _tmp40_;
 	GVariant* _tmp41_;
@@ -2233,7 +2235,7 @@ static void mpris_playlists_dbus_proxy_get_ActivePlaylist (MprisPlaylists* self,
 		_arguments = g_variant_builder_end (&_arguments_builder);
 		_reply = g_dbus_proxy_call_sync ((GDBusProxy *) self, "org.freedesktop.DBus.Properties.Get", _arguments, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL);
 		if (!_reply) {
-			return;
+			return NULL;
 		}
 		g_variant_get (_reply, "(v)", &_inner_reply);
 		g_variant_unref (_reply);
@@ -2255,9 +2257,9 @@ static void mpris_playlists_dbus_proxy_get_ActivePlaylist (MprisPlaylists* self,
 	g_variant_unref (_tmp47_);
 	_tmp39_.details = g_memdup (&_tmp43_, sizeof (PlaylistDetails));
 	g_variant_unref (_tmp42_);
-	*result = _tmp39_;
+	_result = g_memdup (&_tmp39_, sizeof (ActivePlaylistContainer));
 	g_variant_unref (_inner_reply);
-	return;
+	return _result;
 }
 
 
@@ -2462,20 +2464,20 @@ static GVariant* _dbus_mpris_playlists_get_PlaylistCount (MprisPlaylists* self) 
 
 
 static GVariant* _dbus_mpris_playlists_get_ActivePlaylist (MprisPlaylists* self) {
-	ActivePlaylistContainer result = {0};
+	ActivePlaylistContainer* result;
 	GVariantBuilder _tmp62_;
 	GVariantBuilder _tmp63_;
 	GVariant* _reply;
-	mpris_playlists_get_ActivePlaylist (self, &result);
+	result = mpris_playlists_get_ActivePlaylist (self);
 	g_variant_builder_init (&_tmp62_, G_VARIANT_TYPE_TUPLE);
-	g_variant_builder_add_value (&_tmp62_, g_variant_new_boolean (result.valid));
+	g_variant_builder_add_value (&_tmp62_, g_variant_new_boolean ((*result).valid));
 	g_variant_builder_init (&_tmp63_, G_VARIANT_TYPE_TUPLE);
-	g_variant_builder_add_value (&_tmp63_, g_variant_new_object_path ((*result.details).path));
-	g_variant_builder_add_value (&_tmp63_, g_variant_new_string ((*result.details).name));
-	g_variant_builder_add_value (&_tmp63_, g_variant_new_string ((*result.details).icon_path));
+	g_variant_builder_add_value (&_tmp63_, g_variant_new_object_path ((*(*result).details).path));
+	g_variant_builder_add_value (&_tmp63_, g_variant_new_string ((*(*result).details).name));
+	g_variant_builder_add_value (&_tmp63_, g_variant_new_string ((*(*result).details).icon_path));
 	g_variant_builder_add_value (&_tmp62_, g_variant_builder_end (&_tmp63_));
 	_reply = g_variant_builder_end (&_tmp62_);
-	active_playlist_container_destroy (&result);
+	_active_playlist_container_free0 (result);
 	return _reply;
 }
 
@@ -2534,7 +2536,7 @@ static void _dbus_mpris_playlists_set_PlaylistCount (MprisPlaylists* self, GVari
 
 
 static void _dbus_mpris_playlists_set_ActivePlaylist (MprisPlaylists* self, GVariant* _value) {
-	ActivePlaylistContainer value = {0};
+	ActivePlaylistContainer* value = NULL;
 	ActivePlaylistContainer _tmp67_;
 	GVariantIter _tmp68_;
 	GVariant* _tmp69_;
@@ -2561,9 +2563,9 @@ static void _dbus_mpris_playlists_set_ActivePlaylist (MprisPlaylists* self, GVar
 	g_variant_unref (_tmp75_);
 	_tmp67_.details = g_memdup (&_tmp71_, sizeof (PlaylistDetails));
 	g_variant_unref (_tmp70_);
-	value = _tmp67_;
+	value = g_memdup (&_tmp67_, sizeof (ActivePlaylistContainer));
 	mpris_playlists_set_ActivePlaylist (self, &value);
-	active_playlist_container_destroy (&value);
+	_active_playlist_container_free0 (value);
 }
 
 

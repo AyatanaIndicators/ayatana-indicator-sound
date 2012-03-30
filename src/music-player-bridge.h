@@ -351,7 +351,7 @@ struct _MprisPlaylistsIface {
 	void (*set_Orderings) (MprisPlaylists* self, gchar** value, int value_length1);
 	guint32 (*get_PlaylistCount) (MprisPlaylists* self);
 	void (*set_PlaylistCount) (MprisPlaylists* self, guint32 value);
-	void (*get_ActivePlaylist) (MprisPlaylists* self, ActivePlaylistContainer* value);
+	ActivePlaylistContainer* (*get_ActivePlaylist) (MprisPlaylists* self);
 	void (*set_ActivePlaylist) (MprisPlaylists* self, ActivePlaylistContainer* value);
 };
 
@@ -532,7 +532,7 @@ gchar** mpris_playlists_get_Orderings (MprisPlaylists* self, int* result_length1
 void mpris_playlists_set_Orderings (MprisPlaylists* self, gchar** value, int value_length1);
 guint32 mpris_playlists_get_PlaylistCount (MprisPlaylists* self);
 void mpris_playlists_set_PlaylistCount (MprisPlaylists* self, guint32 value);
-void mpris_playlists_get_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* result);
+ActivePlaylistContainer* mpris_playlists_get_ActivePlaylist (MprisPlaylists* self);
 void mpris_playlists_set_ActivePlaylist (MprisPlaylists* self, ActivePlaylistContainer* value);
 GType mpris2_watcher_get_type (void) G_GNUC_CONST;
 Mpris2Watcher* mpris2_watcher_new (void);
