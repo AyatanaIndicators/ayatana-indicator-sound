@@ -31,7 +31,7 @@ libsoundmenu_la_SOURCES = \
 libsoundmenu_la_CFLAGS = \
 	$(APPLET_CFLAGS) \
 	$(COVERAGE_CFLAGS) \
-	-Wall -DG_LOG_DOMAIN=\"Indicator-Sound\"
+	-Wall -Werror -DG_LOG_DOMAIN=\"Indicator-Sound\"
 libsoundmenu_la_LIBADD = $(APPLET_LIBS) -lm
 libsoundmenu_la_LDFLAGS = \ 
 	$(COVERAGE_LDFLAGS) \

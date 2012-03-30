@@ -126,7 +126,6 @@ metadata_widget_init (MetadataWidget *self)
   MetadataWidgetPrivate * priv = METADATA_WIDGET_GET_PRIVATE(self);
   GtkWidget *hbox;
   GtkWidget *outer_v_box;
-  //priv->icon_buf = NULL;
   
   #if GTK_CHECK_VERSION(3, 0, 0)  
   outer_v_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
