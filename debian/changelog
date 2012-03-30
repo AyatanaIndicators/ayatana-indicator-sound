@@ -1,3 +1,11 @@
+indicator-sound (0.8.4.1-0ubuntu4) precise; urgency=low
+
+  * debian/patches:
+    - sound_xubuntu.patch: added, prefer pavucontrol over xfce4-mixer on
+      Xubuntu. (lp: #961745)
+
+ -- Lionel Le Folgoc <mrpouit@ubuntu.com>  Thu, 22 Mar 2012 00:17:34 +0100
+
 indicator-sound (0.8.4.1-0ubuntu3) precise; urgency=low
 
   * debian/patches/lp_960846.patch
