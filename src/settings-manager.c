@@ -40,6 +40,9 @@ typedef struct _SettingsManagerClass SettingsManagerClass;
 typedef struct _SettingsManagerPrivate SettingsManagerPrivate;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 #define _g_free0(var) (var = (g_free (var), NULL))
+#define _g_variant_type_free0(var) ((var == NULL) ? NULL : (var = (g_variant_type_free (var), NULL)))
+#define _g_variant_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_unref (var), NULL)))
+#define _g_variant_builder_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_builder_unref (var), NULL)))
 
 struct _SettingsManager {
 	GObject parent_instance;
@@ -70,7 +73,6 @@ static gboolean _vala_string_array_contains (gchar** stack, int stack_length, gc
 void settings_manager_clear_list (SettingsManager* self);
 void settings_manager_remove_interested (SettingsManager* self, const gchar* app_desktop_name);
 void settings_manager_add_interested (SettingsManager* self, const gchar* app_desktop_name);
-static void _vala_array_add1 (gchar*** array, int* length, int* size, gchar* value);
 static void settings_manager_on_blacklist_event (SettingsManager* self);
 static void g_cclosure_user_marshal_VOID__BOXED_INT (GClosure * closure, GValue * return_value, guint n_param_values, const GValue * param_values, gpointer invocation_hint, gpointer marshal_data);
 static GObject * settings_manager_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
@@ -223,152 +225,143 @@ void settings_manager_clear_list (SettingsManager* self) {
 
 
 void settings_manager_remove_interested (SettingsManager* self, const gchar* app_desktop_name) {
-	GSettings* _tmp0_;
-	gchar** _tmp1_;
-	gchar** _tmp2_ = NULL;
-	gchar** already_interested;
-	gint already_interested_length1;
-	gint _already_interested_size_;
-	GeeArrayList* _tmp3_;
-	GeeArrayList* list;
-	gchar** _tmp4_;
-	gint _tmp4__length1;
-	GSettings* _tmp10_;
-	GeeArrayList* _tmp11_;
-	gint _tmp12_ = 0;
-	gpointer* _tmp13_ = NULL;
-	gchar** _tmp14_;
-	gint _tmp14__length1;
-	GSettings* _tmp15_;
+	static const char key[] = "interested-media-players";
+	GVariantType* _tmp0_;
+	GVariantType* _tmp1_;
+	GVariantBuilder* _tmp2_;
+	GVariantBuilder* _tmp3_;
+	GVariantBuilder* players;
+	GSettings* _tmp4_;
+	gchar** _tmp5_;
+	gchar** _tmp6_ = NULL;
+	GSettings* _tmp12_;
+	GVariantBuilder* _tmp13_;
+	GVariant* _tmp14_ = NULL;
+	GVariant* _tmp15_;
+	GSettings* _tmp16_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (app_desktop_name != NULL);
-	_tmp0_ = self->priv->settings;
-	_tmp2_ = _tmp1_ = g_settings_get_strv (_tmp0_, "interested-media-players");
-	already_interested = _tmp2_;
-	already_interested_length1 = _vala_array_length (_tmp1_);
-	_already_interested_size_ = already_interested_length1;
-	_tmp3_ = gee_array_list_new (G_TYPE_STRING, (GBoxedCopyFunc) g_strdup, g_free, NULL);
-	list = _tmp3_;
-	_tmp4_ = already_interested;
-	_tmp4__length1 = already_interested_length1;
+	_tmp0_ = g_variant_type_new ("as");
+	_tmp1_ = _tmp0_;
+	_tmp2_ = g_variant_builder_new (_tmp1_);
+	_tmp3_ = _tmp2_;
+	_g_variant_type_free0 (_tmp1_);
+	players = _tmp3_;
+	_tmp4_ = self->priv->settings;
+	_tmp6_ = _tmp5_ = g_settings_get_strv (_tmp4_, key);
 	{
-		gchar** s_collection = NULL;
-		gint s_collection_length1 = 0;
-		gint _s_collection_size_ = 0;
-		gint s_it = 0;
-		s_collection = _tmp4_;
-		s_collection_length1 = _tmp4__length1;
-		for (s_it = 0; s_it < _tmp4__length1; s_it = s_it + 1) {
-			gchar* _tmp5_;
-			gchar* s = NULL;
-			_tmp5_ = g_strdup (s_collection[s_it]);
-			s = _tmp5_;
+		gchar** player_collection = NULL;
+		gint player_collection_length1 = 0;
+		gint _player_collection_size_ = 0;
+		gint player_it = 0;
+		player_collection = _tmp6_;
+		player_collection_length1 = _vala_array_length (_tmp5_);
+		for (player_it = 0; player_it < _vala_array_length (_tmp5_); player_it = player_it + 1) {
+			gchar* _tmp7_;
+			gchar* player = NULL;
+			_tmp7_ = g_strdup (player_collection[player_it]);
+			player = _tmp7_;
 			{
-				const gchar* _tmp6_;
-				const gchar* _tmp7_;
-				GeeArrayList* _tmp8_;
+				const gchar* _tmp8_;
 				const gchar* _tmp9_;
-				_tmp6_ = s;
-				_tmp7_ = app_desktop_name;
-				if (g_strcmp0 (_tmp6_, _tmp7_) == 0) {
-					_g_free0 (s);
-					continue;
+				_tmp8_ = player;
+				_tmp9_ = app_desktop_name;
+				if (g_strcmp0 (_tmp8_, _tmp9_) != 0) {
+					GVariantBuilder* _tmp10_;
+					const gchar* _tmp11_;
+					_tmp10_ = players;
+					_tmp11_ = player;
+					g_variant_builder_add (_tmp10_, "s", _tmp11_, NULL);
 				}
-				_tmp8_ = list;
-				_tmp9_ = s;
-				gee_abstract_collection_add ((GeeAbstractCollection*) _tmp8_, _tmp9_);
-				_g_free0 (s);
+				_g_free0 (player);
 			}
 		}
+		player_collection = (_vala_array_free (player_collection, player_collection_length1, (GDestroyNotify) g_free), NULL);
 	}
-	_tmp10_ = self->priv->settings;
-	_tmp11_ = list;
-	_tmp13_ = gee_abstract_collection_to_array ((GeeAbstractCollection*) _tmp11_, &_tmp12_);
-	_tmp14_ = _tmp13_;
-	_tmp14__length1 = _tmp12_;
-	g_settings_set_strv (_tmp10_, "interested-media-players", _tmp14_);
-	_tmp14_ = (_vala_array_free (_tmp14_, _tmp14__length1, (GDestroyNotify) g_free), NULL);
-	_tmp15_ = self->priv->settings;
-	g_settings_apply (_tmp15_);
-	_g_object_unref0 (list);
-	already_interested = (_vala_array_free (already_interested, already_interested_length1, (GDestroyNotify) g_free), NULL);
-}
-
-
-static void _vala_array_add1 (gchar*** array, int* length, int* size, gchar* value) {
-	if ((*length) == (*size)) {
-		*size = (*size) ? (2 * (*size)) : 4;
-		*array = g_renew (gchar*, *array, (*size) + 1);
-	}
-	(*array)[(*length)++] = value;
-	(*array)[*length] = NULL;
+	_tmp12_ = self->priv->settings;
+	_tmp13_ = players;
+	_tmp14_ = g_variant_builder_end (_tmp13_);
+	_tmp15_ = g_variant_ref_sink (_tmp14_);
+	g_settings_set_value (_tmp12_, key, _tmp15_);
+	_g_variant_unref0 (_tmp15_);
+	_tmp16_ = self->priv->settings;
+	g_settings_apply (_tmp16_);
+	_g_variant_builder_unref0 (players);
 }
 
 
 void settings_manager_add_interested (SettingsManager* self, const gchar* app_desktop_name) {
-	GSettings* _tmp0_;
-	gchar** _tmp1_;
-	gchar** _tmp2_ = NULL;
-	gchar** already_interested;
-	gint already_interested_length1;
-	gint _already_interested_size_;
-	gchar** _tmp3_;
-	gint _tmp3__length1;
-	gchar** _tmp7_;
-	gint _tmp7__length1;
-	const gchar* _tmp8_;
-	gchar* _tmp9_;
-	GSettings* _tmp10_;
-	gchar** _tmp11_;
-	gint _tmp11__length1;
-	GSettings* _tmp12_;
+	static const char key[] = "interested-media-players";
+	GVariantType* _tmp0_;
+	GVariantType* _tmp1_;
+	GVariantBuilder* _tmp2_;
+	GVariantBuilder* _tmp3_;
+	GVariantBuilder* players;
+	GSettings* _tmp4_;
+	gchar** _tmp5_;
+	gchar** _tmp6_ = NULL;
+	GVariantBuilder* _tmp12_;
+	const gchar* _tmp13_;
+	GSettings* _tmp14_;
+	GVariantBuilder* _tmp15_;
+	GVariant* _tmp16_ = NULL;
+	GVariant* _tmp17_;
+	GSettings* _tmp18_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (app_desktop_name != NULL);
-	_tmp0_ = self->priv->settings;
-	_tmp2_ = _tmp1_ = g_settings_get_strv (_tmp0_, "interested-media-players");
-	already_interested = _tmp2_;
-	already_interested_length1 = _vala_array_length (_tmp1_);
-	_already_interested_size_ = already_interested_length1;
-	_tmp3_ = already_interested;
-	_tmp3__length1 = already_interested_length1;
+	_tmp0_ = g_variant_type_new ("as");
+	_tmp1_ = _tmp0_;
+	_tmp2_ = g_variant_builder_new (_tmp1_);
+	_tmp3_ = _tmp2_;
+	_g_variant_type_free0 (_tmp1_);
+	players = _tmp3_;
+	_tmp4_ = self->priv->settings;
+	_tmp6_ = _tmp5_ = g_settings_get_strv (_tmp4_, key);
 	{
-		gchar** s_collection = NULL;
-		gint s_collection_length1 = 0;
-		gint _s_collection_size_ = 0;
-		gint s_it = 0;
-		s_collection = _tmp3_;
-		s_collection_length1 = _tmp3__length1;
-		for (s_it = 0; s_it < _tmp3__length1; s_it = s_it + 1) {
-			gchar* _tmp4_;
-			gchar* s = NULL;
-			_tmp4_ = g_strdup (s_collection[s_it]);
-			s = _tmp4_;
+		gchar** player_collection = NULL;
+		gint player_collection_length1 = 0;
+		gint _player_collection_size_ = 0;
+		gint player_it = 0;
+		player_collection = _tmp6_;
+		player_collection_length1 = _vala_array_length (_tmp5_);
+		for (player_it = 0; player_it < _vala_array_length (_tmp5_); player_it = player_it + 1) {
+			gchar* _tmp7_;
+			gchar* player = NULL;
+			_tmp7_ = g_strdup (player_collection[player_it]);
+			player = _tmp7_;
 			{
-				const gchar* _tmp5_;
-				const gchar* _tmp6_;
-				_tmp5_ = s;
-				_tmp6_ = app_desktop_name;
-				if (g_strcmp0 (_tmp5_, _tmp6_) == 0) {
-					_g_free0 (s);
-					already_interested = (_vala_array_free (already_interested, already_interested_length1, (GDestroyNotify) g_free), NULL);
+				const gchar* _tmp8_;
+				const gchar* _tmp9_;
+				GVariantBuilder* _tmp10_;
+				const gchar* _tmp11_;
+				_tmp8_ = player;
+				_tmp9_ = app_desktop_name;
+				if (g_strcmp0 (_tmp8_, _tmp9_) == 0) {
+					_g_free0 (player);
+					player_collection = (_vala_array_free (player_collection, player_collection_length1, (GDestroyNotify) g_free), NULL);
+					_g_variant_builder_unref0 (players);
 					return;
 				}
-				_g_free0 (s);
+				_tmp10_ = players;
+				_tmp11_ = player;
+				g_variant_builder_add (_tmp10_, "s", _tmp11_, NULL);
+				_g_free0 (player);
 			}
 		}
+		player_collection = (_vala_array_free (player_collection, player_collection_length1, (GDestroyNotify) g_free), NULL);
 	}
-	_tmp7_ = already_interested;
-	_tmp7__length1 = already_interested_length1;
-	_tmp8_ = app_desktop_name;
-	_tmp9_ = g_strdup (_tmp8_);
-	_vala_array_add1 (&already_interested, &already_interested_length1, &_already_interested_size_, _tmp9_);
-	_tmp10_ = self->priv->settings;
-	_tmp11_ = already_interested;
-	_tmp11__length1 = already_interested_length1;
-	g_settings_set_strv (_tmp10_, "interested-media-players", _tmp11_);
-	_tmp12_ = self->priv->settings;
-	g_settings_apply (_tmp12_);
-	already_interested = (_vala_array_free (already_interested, already_interested_length1, (GDestroyNotify) g_free), NULL);
+	_tmp12_ = players;
+	_tmp13_ = app_desktop_name;
+	g_variant_builder_add (_tmp12_, "s", _tmp13_, NULL);
+	_tmp14_ = self->priv->settings;
+	_tmp15_ = players;
+	_tmp16_ = g_variant_builder_end (_tmp15_);
+	_tmp17_ = g_variant_ref_sink (_tmp16_);
+	g_settings_set_value (_tmp14_, key, _tmp17_);
+	_g_variant_unref0 (_tmp17_);
+	_tmp18_ = self->priv->settings;
+	g_settings_apply (_tmp18_);
+	_g_variant_builder_unref0 (players);
 }
 
 
