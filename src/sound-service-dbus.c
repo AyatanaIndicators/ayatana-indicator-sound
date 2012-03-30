@@ -227,16 +227,8 @@ show_sound_settings_dialog (DbusmenuMenuitem *mi,
                             gpointer user_data)
 {
   GError * error = NULL;
-  gchar* cmd;
-  if (!g_strcmp0 (g_getenv ("XDG_CURRENT_DESKTOP"), "Unity"))
-    cmd = "gnome-control-center sound-nua";
-  else if (!g_strcmp0 (g_getenv ("DESKTOP_SESSION"), "xubuntu"))
-    cmd = "pavucontrol";
-  else
-    cmd = "gnome-control-center sound";
-
   if (!g_spawn_command_line_async("gnome-volume-control --page=applications", &error) &&
-          !g_spawn_command_line_async(cmd, &error) && 
+      !g_spawn_command_line_async("gnome-control-center sound", &error) && 
       !g_spawn_command_line_async("xfce4-mixer", &error))
   {
     g_warning("Unable to show dialog: %s", error->message);

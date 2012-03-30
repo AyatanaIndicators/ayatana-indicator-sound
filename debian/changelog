@@ -1,4 +1,4 @@
-indicator-sound (0.8.5.0-0ubuntu1) UNRELEASED; urgency=low
+indicator-sound (0.8.5.0-0ubuntu1) precise; urgency=low
 
   * New upstream release.
     - Inconsistency between messaging menu and sound menu pips (LP: #933593)
@@ -8,8 +8,10 @@ indicator-sound (0.8.5.0-0ubuntu1) UNRELEASED; urgency=low
       monitoring (LP: #965848)
     - minor memory leaks in blacklist handling (LP: #960578)
     - FIX (LP: FIX)
+  * -debian/patches/lp_945827.patch, debian/patches/lp_960846.patch
+     - dropped, merged upstream
 
- -- Ken VanDine <ken.vandine@canonical.com>  Fri, 30 Mar 2012 14:08:21 -0400
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 30 Mar 2012 14:45:03 -0400
 
 indicator-sound (0.8.4.1-0ubuntu4) precise; urgency=low
 
