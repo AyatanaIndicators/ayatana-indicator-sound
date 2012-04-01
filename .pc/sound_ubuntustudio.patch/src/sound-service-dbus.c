@@ -232,8 +232,6 @@ show_sound_settings_dialog (DbusmenuMenuitem *mi,
     cmd = "gnome-control-center sound-nua";
   else if (!g_strcmp0 (g_getenv ("DESKTOP_SESSION"), "xubuntu"))
     cmd = "pavucontrol";
- else if (!g_strcmp0 (g_getenv ("DESKTOP_SESSION"), "ubuntustudio"))
-    cmd = "pavucontrol";
   else
     cmd = "gnome-control-center sound";
 
