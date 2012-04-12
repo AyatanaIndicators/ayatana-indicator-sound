@@ -144,10 +144,10 @@ volume_widget_property_update( DbusmenuMenuitem* item, gchar* property,
       g_debug ("volume-widget::volume_widget_property_update - volume - value %f", update);
 */
       AtkObject* atk_object;
-      atk_object = gtk_widget_get_accessible(GTK_WIDGET(range));
+      atk_object = gtk_widget_get_accessible (slider);
       if (atk_object != NULL){
         gchar* desc = g_strdup_printf(_("Volume (%'.0f%%)"),
-                                        volume_widget_get_current_volume (GTK_WIDGET (userdata)));      
+                                        update);      
         atk_object_set_name (atk_object, desc);
       }
       update_accessible_desc(priv->indicator);
