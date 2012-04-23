@@ -208,6 +208,13 @@ volume_widget_set_twin_item(VolumeWidget* self,
     initial_level = 0;
   }
   gtk_range_set_value(range, initial_level);
+  gchar* desc = g_strdup_printf(_("Volume (%'.0f%%)"),
+                                  initial_level);      
+  dbusmenu_menuitem_property_set (priv->twin_item,
+                                  DBUSMENU_MENUITEM_PROP_ACCESSIBLE_DESC,
+                                  desc);
+  g_free (desc);
+  
 }
 
 static gboolean
