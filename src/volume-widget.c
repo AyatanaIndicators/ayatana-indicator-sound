@@ -142,14 +142,19 @@ volume_widget_property_update( DbusmenuMenuitem* item, gchar* property,
       gtk_range_set_value(range, update);
 /*
       g_debug ("volume-widget::volume_widget_property_update - volume - value %f", update);
-*/
       AtkObject* atk_object;
-      atk_object = gtk_widget_get_accessible (slider);
+      atk_object = gtk_widget_get_accessible (priv->ido_volume_slider);
       if (atk_object != NULL){
-        gchar* desc = g_strdup_printf(_("Volume (%'.0f%%)"),
-                                        update);      
         atk_object_set_name (atk_object, desc);
-      }
+      
+      }*/
+
+      gchar* desc = g_strdup_printf(_("Volume (%'.0f%%)"),
+                                      update);      
+      dbusmenu_menuitem_property_set (priv->twin_item,
+                                      DBUSMENU_MENUITEM_PROP_ACCESSIBLE_DESC,
+                                      desc);
+      g_free (desc);
       update_accessible_desc(priv->indicator);
     }
   }
