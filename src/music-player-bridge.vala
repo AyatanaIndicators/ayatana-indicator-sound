@@ -163,7 +163,6 @@ public class MusicPlayerBridge : GLib.Object
     }
     
     var mpris_key = determine_key ( desktop );
-    // Are we sure clients will appear like this with the new registration method in place. 
     if ( this.registered_clients.has_key (mpris_key) == false ){
       debug("New client has registered that we have not seen before: %s", dbus_name );
       PlayerController ctrl = new PlayerController ( this.root_menu,
@@ -189,14 +188,14 @@ public class MusicPlayerBridge : GLib.Object
   
   public void client_has_vanished ( string mpris_root_interface )
   {
-    debug("MusicPlayerBridge -> client with dbus interface %s has vanished",
+    debug("\n MusicPlayerBridge -> client with dbus interface %s has vanished",
            mpris_root_interface );
     if (root_menu != null){
-      debug("attempt to remove %s", mpris_root_interface);
+      debug("\n attempt to remove %s", mpris_root_interface);
       var mpris_key = determine_key ( mpris_root_interface );
       if ( mpris_key != null && this.registered_clients.has_key(mpris_key)){
         registered_clients[mpris_key].hibernate();
-        debug("Successively offlined client %s", mpris_key);       
+        debug("\n Successively offlined client %s", mpris_key);       
       }
     }
   }
@@ -286,8 +285,8 @@ public class MusicPlayerBridge : GLib.Object
     }
     var temp = result.split("-");
     if (temp != null && temp.length > 1){
-      result = temp[0];
-    }
+      result = temp[1];
+    }    
     return result;        
   }
   
