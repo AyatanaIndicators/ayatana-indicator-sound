@@ -1,4 +1,4 @@
-indicator-sound (0.8.5.0-0ubuntu3) UNRELEASED; urgency=low
+indicator-sound (0.8.5.0-0ubuntu3) quantal; urgency=low
 
   * debian/patches/lp_992262.patch
     - fix sound indicator not working after amarok close (LP: #992262)
