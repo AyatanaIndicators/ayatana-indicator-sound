@@ -1,3 +1,11 @@
+indicator-sound (0.8.5.0-0ubuntu2) precise; urgency=low
+
+  * debian/patches:
+    - sound_ubuntustudio.patch: added to prefer pavucontrol as the
+      mixer app in Ubuntu Studio. (LP: #972749)
+
+ -- Janne Jokitalo (astraljava) <astraljava@kapsi.fi>  Sun, 01 Apr 2012 21:45:34 +0300
+
 indicator-sound (0.8.5.0-0ubuntu1) precise; urgency=low
 
   * New upstream release.
