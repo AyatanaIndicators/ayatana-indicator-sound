@@ -278,14 +278,20 @@ public class MusicPlayerBridge : GLib.Object
    */
   private static string? determine_key(owned string desktop_or_interface)
   {
+    // handle the special case of amarok, (kde4-amarok desktop file name) 
+    if (desktop_or_interface.contains("amarok")){
+      return "amarok";
+    }
+    
     var result = desktop_or_interface;
+
     var tokens = desktop_or_interface.split( "." );
     if (tokens != null && tokens.length > 1){
       result = tokens[tokens.length - 1];  
-    }
+    }    
     var temp = result.split("-");
     if (temp != null && temp.length > 1){
-      result = temp[1];
+      result = temp[0];
     }    
     return result;        
   }
