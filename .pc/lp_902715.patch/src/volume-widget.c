@@ -135,28 +135,16 @@ volume_widget_property_update( DbusmenuMenuitem* item, gchar* property,
 
   if(g_ascii_strcasecmp(DBUSMENU_VOLUME_MENUITEM_LEVEL, property) == 0){
     g_return_if_fail (g_variant_is_of_type (value, G_VARIANT_TYPE_DOUBLE) );
-    gdouble update = g_variant_get_double (value);
-
     if(priv->grabbed == FALSE){
       GtkWidget *slider = ido_scale_menu_item_get_scale((IdoScaleMenuItem*)priv->ido_volume_slider);
       GtkRange *range = (GtkRange*)slider;
+      gdouble update = g_variant_get_double (value);
       gtk_range_set_value(range, update);
 /*
       g_debug ("volume-widget::volume_widget_property_update - volume - value %f", update);
-      AtkObject* atk_object;
-      atk_object = gtk_widget_get_accessible (priv->ido_volume_slider);
-      if (atk_object != NULL){
-        atk_object_set_name (atk_object, desc);
-      
-      }*/
+*/
+      update_accessible_desc(priv->indicator);
     }
-    gchar* desc = g_strdup_printf(_("Volume (%'.0f%%)"),
-                                    update);      
-    dbusmenu_menuitem_property_set (priv->twin_item,
-                                    DBUSMENU_MENUITEM_PROP_ACCESSIBLE_DESC,
-                                    desc);
-    g_free (desc);
-    update_accessible_desc(priv->indicator);    
   }
   else if(g_ascii_strcasecmp(DBUSMENU_VOLUME_MENUITEM_MUTE, property) == 0){
     g_return_if_fail (g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN));
@@ -208,13 +196,6 @@ volume_widget_set_twin_item(VolumeWidget* self,
     initial_level = 0;
   }
   gtk_range_set_value(range, initial_level);
-  gchar* desc = g_strdup_printf(_("Volume (%'.0f%%)"),
-                                  initial_level);      
-  dbusmenu_menuitem_property_set (priv->twin_item,
-                                  DBUSMENU_MENUITEM_PROP_ACCESSIBLE_DESC,
-                                  desc);
-  g_free (desc);
-
 }
 
 static gboolean

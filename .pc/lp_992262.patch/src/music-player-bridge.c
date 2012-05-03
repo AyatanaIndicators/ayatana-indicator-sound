@@ -798,7 +798,7 @@ void music_player_bridge_client_has_become_available (MusicPlayerBridge* self, c
 		GAppInfo* _tmp43_;
 		const gchar* _tmp44_;
 		_tmp26_ = dbus_name;
-		g_debug ("music-player-bridge.vala:167: New client has registered that we have n" \
+		g_debug ("music-player-bridge.vala:168: New client has registered that we have n" \
 "ot seen before: %s", _tmp26_);
 		_tmp27_ = self->priv->root_menu;
 		_tmp28_ = app_info;
@@ -817,7 +817,7 @@ void music_player_bridge_client_has_become_available (MusicPlayerBridge* self, c
 		_tmp39_ = ctrl;
 		gee_abstract_map_set ((GeeAbstractMap*) _tmp37_, _tmp38_, _tmp39_);
 		_tmp40_ = desktop;
-		g_debug ("music-player-bridge.vala:176: Have not seen this %s before, new contro" \
+		g_debug ("music-player-bridge.vala:177: Have not seen this %s before, new contro" \
 "ller created.", _tmp40_);
 		_tmp41_ = self->priv->settings_manager;
 		_tmp42_ = desktop;
@@ -825,7 +825,7 @@ void music_player_bridge_client_has_become_available (MusicPlayerBridge* self, c
 		_tmp43_ = app_info;
 		_tmp44_ = mpris_key;
 		music_player_bridge_establish_file_monitoring (self, _tmp43_, _tmp44_);
-		g_debug ("music-player-bridge.vala:179: application added to the interested list");
+		g_debug ("music-player-bridge.vala:180: application added to the interested list");
 		_g_object_unref0 (ctrl);
 	} else {
 		GeeHashMap* _tmp45_;
@@ -873,7 +873,7 @@ void music_player_bridge_client_has_become_available (MusicPlayerBridge* self, c
 		_tmp61_ = use_playlists;
 		_tmp62_ = bool_to_string (_tmp61_);
 		_tmp63_ = _tmp62_;
-		g_debug ("music-player-bridge.vala:185: Application has already registered - awa" \
+		g_debug ("music-player-bridge.vala:186: Application has already registered - awa" \
 "ken the hibernation: %s with playlists %s \n", _tmp60_, _tmp63_);
 		_g_free0 (_tmp63_);
 	}
@@ -888,8 +888,8 @@ void music_player_bridge_client_has_vanished (MusicPlayerBridge* self, const gch
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (mpris_root_interface != NULL);
 	_tmp0_ = mpris_root_interface;
-	g_debug ("music-player-bridge.vala:191: \n" \
-" MusicPlayerBridge -> client with dbus interface %s has vanished", _tmp0_);
+	g_debug ("music-player-bridge.vala:192: MusicPlayerBridge -> client with dbus in" \
+"terface %s has vanished", _tmp0_);
 	_tmp1_ = self->priv->root_menu;
 	if (_tmp1_ != NULL) {
 		const gchar* _tmp2_;
@@ -901,7 +901,7 @@ void music_player_bridge_client_has_vanished (MusicPlayerBridge* self, const gch
 		const gchar* _tmp7_;
 		gboolean _tmp11_;
 		_tmp2_ = mpris_root_interface;
-		g_debug ("music-player-bridge.vala:194: \n attempt to remove %s", _tmp2_);
+		g_debug ("music-player-bridge.vala:195: attempt to remove %s", _tmp2_);
 		_tmp3_ = mpris_root_interface;
 		_tmp4_ = g_strdup (_tmp3_);
 		_tmp5_ = music_player_bridge_determine_key (_tmp4_);
@@ -932,7 +932,7 @@ void music_player_bridge_client_has_vanished (MusicPlayerBridge* self, const gch
 			player_controller_hibernate (_tmp15_);
 			_g_object_unref0 (_tmp15_);
 			_tmp16_ = mpris_key;
-			g_debug ("music-player-bridge.vala:198: \n Successively offlined client %s", _tmp16_);
+			g_debug ("music-player-bridge.vala:199: Successively offlined client %s", _tmp16_);
 		}
 		_g_free0 (mpris_key);
 	}
@@ -998,7 +998,7 @@ void music_player_bridge_enable_player_specific_items_for_client (MusicPlayerBri
 	if (_tmp5_ == FALSE) {
 		const gchar* _tmp6_;
 		_tmp6_ = desktop_id;
-		g_warning ("music-player-bridge.vala:217: we don't have a client with desktop id %" \
+		g_warning ("music-player-bridge.vala:218: we don't have a client with desktop id %" \
 "s registered", _tmp6_);
 		_g_free0 (mpris_key);
 		return;
@@ -1040,7 +1040,7 @@ void music_player_bridge_enable_track_specific_items_for_client (MusicPlayerBrid
 	if (_tmp5_ == FALSE) {
 		const gchar* _tmp6_;
 		_tmp6_ = desktop_id;
-		g_warning ("music-player-bridge.vala:228: we don't have a client with desktop id %" \
+		g_warning ("music-player-bridge.vala:229: we don't have a client with desktop id %" \
 "s registered", _tmp6_);
 		_g_free0 (mpris_key);
 		return;
@@ -1083,7 +1083,7 @@ static GAppInfo* music_player_bridge_create_app_info (const gchar* desktop) {
 	if (_tmp5_) {
 		const gchar* _tmp6_;
 		_tmp6_ = desktop;
-		g_warning ("music-player-bridge.vala:238: Could not create a desktopappinfo instan" \
+		g_warning ("music-player-bridge.vala:239: Could not create a desktopappinfo instan" \
 "ce from app: %s", _tmp6_);
 		result = NULL;
 		_g_object_unref0 (info);
@@ -1147,7 +1147,7 @@ static gchar* music_player_bridge_fetch_icon_name (const gchar* desktop) {
 		GError* _error_ = NULL;
 		_error_ = _inner_error_;
 		_inner_error_ = NULL;
-		g_warning ("music-player-bridge.vala:254: Error loading keyfile - FileError");
+		g_warning ("music-player-bridge.vala:255: Error loading keyfile - FileError");
 		result = NULL;
 		_g_error_free0 (_error_);
 		_g_key_file_free0 (desktop_keyfile);
@@ -1160,7 +1160,7 @@ static gchar* music_player_bridge_fetch_icon_name (const gchar* desktop) {
 		GError* _error_ = NULL;
 		_error_ = _inner_error_;
 		_inner_error_ = NULL;
-		g_warning ("music-player-bridge.vala:258: Error loading keyfile - KeyFileError");
+		g_warning ("music-player-bridge.vala:259: Error loading keyfile - KeyFileError");
 		result = NULL;
 		_g_error_free0 (_error_);
 		_g_key_file_free0 (desktop_keyfile);
@@ -1203,7 +1203,7 @@ static gchar* music_player_bridge_fetch_icon_name (const gchar* desktop) {
 		GError* _error_ = NULL;
 		_error_ = _inner_error_;
 		_inner_error_ = NULL;
-		g_warning ("music-player-bridge.vala:267: Error trying to fetch the icon name from" \
+		g_warning ("music-player-bridge.vala:268: Error trying to fetch the icon name from" \
 " the keyfile");
 		result = NULL;
 		_g_error_free0 (_error_);
@@ -1220,120 +1220,96 @@ static gchar* music_player_bridge_fetch_icon_name (const gchar* desktop) {
 }
 
 
-static gboolean string_contains (const gchar* self, const gchar* needle) {
-	gboolean result = FALSE;
-	const gchar* _tmp0_;
-	gchar* _tmp1_ = NULL;
-	g_return_val_if_fail (self != NULL, FALSE);
-	g_return_val_if_fail (needle != NULL, FALSE);
-	_tmp0_ = needle;
-	_tmp1_ = strstr ((gchar*) self, (gchar*) _tmp0_);
-	result = _tmp1_ != NULL;
-	return result;
-}
-
-
 static gchar* music_player_bridge_determine_key (gchar* desktop_or_interface) {
 	gchar* result = NULL;
 	const gchar* _tmp0_;
-	gboolean _tmp1_ = FALSE;
-	const gchar* _tmp3_;
-	gchar* _tmp4_;
+	gchar* _tmp1_;
 	gchar* _result_;
-	const gchar* _tmp5_;
-	gchar** _tmp6_;
-	gchar** _tmp7_ = NULL;
+	const gchar* _tmp2_;
+	gchar** _tmp3_;
+	gchar** _tmp4_ = NULL;
 	gchar** tokens;
 	gint tokens_length1;
 	gint _tokens_size_;
-	gboolean _tmp8_ = FALSE;
-	gchar** _tmp9_;
-	gint _tmp9__length1;
-	gboolean _tmp11_;
-	const gchar* _tmp16_;
-	gchar** _tmp17_;
-	gchar** _tmp18_ = NULL;
+	gboolean _tmp5_ = FALSE;
+	gchar** _tmp6_;
+	gint _tmp6__length1;
+	gboolean _tmp8_;
+	const gchar* _tmp13_;
+	gchar** _tmp14_;
+	gchar** _tmp15_ = NULL;
 	gchar** temp;
 	gint temp_length1;
 	gint _temp_size_;
-	gboolean _tmp19_ = FALSE;
-	gchar** _tmp20_;
-	gint _tmp20__length1;
-	gboolean _tmp22_;
+	gboolean _tmp16_ = FALSE;
+	gchar** _tmp17_;
+	gint _tmp17__length1;
+	gboolean _tmp19_;
 	g_return_val_if_fail (desktop_or_interface != NULL, NULL);
 	_tmp0_ = desktop_or_interface;
-	_tmp1_ = string_contains (_tmp0_, "amarok");
-	if (_tmp1_) {
-		gchar* _tmp2_;
-		_tmp2_ = g_strdup ("amarok");
-		result = _tmp2_;
-		_g_free0 (desktop_or_interface);
-		return result;
-	}
-	_tmp3_ = desktop_or_interface;
-	_tmp4_ = g_strdup (_tmp3_);
-	_result_ = _tmp4_;
-	_tmp5_ = desktop_or_interface;
-	_tmp7_ = _tmp6_ = g_strsplit (_tmp5_, ".", 0);
-	tokens = _tmp7_;
-	tokens_length1 = _vala_array_length (_tmp6_);
+	_tmp1_ = g_strdup (_tmp0_);
+	_result_ = _tmp1_;
+	_tmp2_ = desktop_or_interface;
+	_tmp4_ = _tmp3_ = g_strsplit (_tmp2_, ".", 0);
+	tokens = _tmp4_;
+	tokens_length1 = _vala_array_length (_tmp3_);
 	_tokens_size_ = tokens_length1;
-	_tmp9_ = tokens;
-	_tmp9__length1 = tokens_length1;
-	if (_tmp9_ != NULL) {
+	_tmp6_ = tokens;
+	_tmp6__length1 = tokens_length1;
+	if (_tmp6_ != NULL) {
+		gchar** _tmp7_;
+		gint _tmp7__length1;
+		_tmp7_ = tokens;
+		_tmp7__length1 = tokens_length1;
+		_tmp5_ = _tmp7__length1 > 1;
+	} else {
+		_tmp5_ = FALSE;
+	}
+	_tmp8_ = _tmp5_;
+	if (_tmp8_) {
+		gchar** _tmp9_;
+		gint _tmp9__length1;
 		gchar** _tmp10_;
 		gint _tmp10__length1;
+		const gchar* _tmp11_;
+		gchar* _tmp12_;
+		_tmp9_ = tokens;
+		_tmp9__length1 = tokens_length1;
 		_tmp10_ = tokens;
 		_tmp10__length1 = tokens_length1;
-		_tmp8_ = _tmp10__length1 > 1;
-	} else {
-		_tmp8_ = FALSE;
-	}
-	_tmp11_ = _tmp8_;
-	if (_tmp11_) {
-		gchar** _tmp12_;
-		gint _tmp12__length1;
-		gchar** _tmp13_;
-		gint _tmp13__length1;
-		const gchar* _tmp14_;
-		gchar* _tmp15_;
-		_tmp12_ = tokens;
-		_tmp12__length1 = tokens_length1;
-		_tmp13_ = tokens;
-		_tmp13__length1 = tokens_length1;
-		_tmp14_ = _tmp12_[_tmp13__length1 - 1];
-		_tmp15_ = g_strdup (_tmp14_);
+		_tmp11_ = _tmp9_[_tmp10__length1 - 1];
+		_tmp12_ = g_strdup (_tmp11_);
 		_g_free0 (_result_);
-		_result_ = _tmp15_;
+		_result_ = _tmp12_;
 	}
-	_tmp16_ = _result_;
-	_tmp18_ = _tmp17_ = g_strsplit (_tmp16_, "-", 0);
-	temp = _tmp18_;
-	temp_length1 = _vala_array_length (_tmp17_);
+	_tmp13_ = _result_;
+	_tmp15_ = _tmp14_ = g_strsplit (_tmp13_, "-", 0);
+	temp = _tmp15_;
+	temp_length1 = _vala_array_length (_tmp14_);
 	_temp_size_ = temp_length1;
-	_tmp20_ = temp;
-	_tmp20__length1 = temp_length1;
-	if (_tmp20_ != NULL) {
-		gchar** _tmp21_;
-		gint _tmp21__length1;
-		_tmp21_ = temp;
-		_tmp21__length1 = temp_length1;
-		_tmp19_ = _tmp21__length1 > 1;
+	_tmp17_ = temp;
+	_tmp17__length1 = temp_length1;
+	if (_tmp17_ != NULL) {
+		gchar** _tmp18_;
+		gint _tmp18__length1;
+		_tmp18_ = temp;
+		_tmp18__length1 = temp_length1;
+		_tmp16_ = _tmp18__length1 > 1;
 	} else {
-		_tmp19_ = FALSE;
+		_tmp16_ = FALSE;
 	}
-	_tmp22_ = _tmp19_;
-	if (_tmp22_) {
-		gchar** _tmp23_;
-		gint _tmp23__length1;
-		const gchar* _tmp24_;
-		gchar* _tmp25_;
-		_tmp23_ = temp;
-		_tmp23__length1 = temp_length1;
-		_tmp24_ = _tmp23_[0];
-		_tmp25_ = g_strdup (_tmp24_);
+	_tmp19_ = _tmp16_;
+	if (_tmp19_) {
+		gchar** _tmp20_;
+		gint _tmp20__length1;
+		const gchar* _tmp21_;
+		gchar* _tmp22_;
+		_tmp20_ = temp;
+		_tmp20__length1 = temp_length1;
+		_tmp21_ = _tmp20_[0];
+		_tmp22_ = g_strdup (_tmp21_);
 		_g_free0 (_result_);
-		_result_ = _tmp25_;
+		_result_ = _tmp22_;
 	}
 	result = _result_;
 	temp = (_vala_array_free (temp, temp_length1, (GDestroyNotify) g_free), NULL);

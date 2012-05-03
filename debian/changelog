@@ -1,3 +1,18 @@
+indicator-sound (0.8.5.0-0ubuntu3) quantal; urgency=low
+
+  * debian/patches/lp_992262.patch
+    - fix sound indicator not working after amarok close (LP: #992262)
+  * debian/patches/lp_902715.patch
+    - Partial fix which sets the accessibility property on the volume
+      slider menu item. Previously this was achieved by sending a signal
+      on the indicator object but now it seems the way to update orca is
+      to set/update the appropriate property on the menuitem.  Orca doesn't
+      broadcast volume updates on slider movement but at least it updates
+      when the user moves to the item on the menu, previously it was entirely
+      silent. (LP: #902715)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 03 May 2012 16:07:19 -0700
+
 indicator-sound (0.8.5.0-0ubuntu2) precise; urgency=low
 
   * debian/patches:
