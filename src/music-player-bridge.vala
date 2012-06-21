@@ -40,6 +40,7 @@ public class MusicPlayerBridge : GLib.Object
     this.file_monitors = new HashMap<string, string> ();
     this.settings_manager = new SettingsManager();
     this.settings_manager.blacklist_updates.connect ( this.on_blacklist_update );
+    this.settings_manager.preferred_updates.connect ( this.on_preferred_update );
   }
   
   private void on_blacklist_update ( string[] blacklist )
@@ -58,8 +59,26 @@ public class MusicPlayerBridge : GLib.Object
     this.watcher.check_for_active_clients.begin();
   }
 
+  private void on_preferred_update ( Gee.ArrayList<string> preferred )
+  {
+    debug ("Preferred players update. Clearing current preferred players...");
+
+    foreach (var player_controller in this.registered_clients.values) {
+      player_controller.set_as_preferred (false);
+    }
+
+    foreach (var s in preferred) {
+      string key = this.determine_key (s);
+      if (this.registered_clients.has_key (key)) {
+        debug ("Setting %s as preferred player", key);
+        this.registered_clients[key].set_as_preferred (true);
+      }
+    }
+  }
+
   private void try_to_add_inactive_familiar_clients()
   {
+    var preferred_players = this.settings_manager.fetch_preferred ();
     foreach ( string desktop in this.settings_manager.fetch_interested()){
       debug ( "interested client found : %s", desktop );
       AppInfo? app_info = create_app_info ( desktop.concat( ".desktop" ) );
@@ -68,14 +87,16 @@ public class MusicPlayerBridge : GLib.Object
                    desktop );
         continue;
       }
-      var mpris_key = determine_key ( desktop );
+      bool is_preferred = desktop in preferred_players;
       PlayerController ctrl = new PlayerController ( this.root_menu, 
                                                      app_info,
                                                      null,
                                                      this.fetch_icon_name(desktop),
                                                      calculate_menu_position(),
                                                      null,
-                                                     PlayerController.state.OFFLINE );
+                                                     PlayerController.state.OFFLINE,
+                                                     is_preferred );
+      var mpris_key = determine_key ( desktop );
       this.registered_clients.set(mpris_key, ctrl);  
       this.establish_file_monitoring (app_info, mpris_key);
     }
@@ -163,6 +184,8 @@ public class MusicPlayerBridge : GLib.Object
     }
     
     var mpris_key = determine_key ( desktop );
+    bool is_preferred = desktop in this.settings_manager.fetch_preferred ();    
+    
     if ( this.registered_clients.has_key (mpris_key) == false ){
       debug("New client has registered that we have not seen before: %s", dbus_name );
       PlayerController ctrl = new PlayerController ( this.root_menu,
@@ -171,7 +194,8 @@ public class MusicPlayerBridge : GLib.Object
                                                      this.fetch_icon_name(desktop),                                                    
                                                      this.calculate_menu_position(),
                                                      use_playlists,
-                                                     PlayerController.state.READY );
+                                                     PlayerController.state.READY,
+                                                     is_preferred);
       this.registered_clients.set ( mpris_key, ctrl );
       debug ( "Have not seen this %s before, new controller created.", desktop );        
       this.settings_manager.add_interested ( desktop );
