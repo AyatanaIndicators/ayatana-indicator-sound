@@ -1,3 +1,16 @@
+indicator-sound (12.10.0-0ubuntu1) UNRELEASED; urgency=low
+
+  * New upstream release.
+    - Allow setting preferred media players through a settings key.
+    - Fix sound indicator not working after Amarok close.
+    - Explicit handling of Ardour
+    - Fix deprecated GTK+ API calls
+  * debian/patches/lp_992262.patch:
+  * debian/patches/lp_902715.patch:
+    - dropped, the fix is in the new version
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 12 Jul 2012 19:52:13 +0200
+
 indicator-sound (0.8.5.0-0ubuntu3) quantal; urgency=low
 
   * debian/patches/lp_992262.patch
