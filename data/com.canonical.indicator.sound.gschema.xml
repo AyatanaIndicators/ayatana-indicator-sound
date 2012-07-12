@@ -18,6 +18,13 @@
         have at some point appeared in the menU. This allows the menu remember and display offlined applications.
       </description>
     </key>
+    <key name="preferred-media-players" type="as">
+      <summary>A list of applications that will have player controls visible all the time</summary>
+      <default>[ 'rhythmbox' ]</default>
+      <description>
+        A list of applications that will have player controls visible all the time
+      </description>
+    </key>
     <key name="global-mute" type="b">
       <default>false</default>
       <summary>Initial setting for global mute (mute all) on the menu </summary>
