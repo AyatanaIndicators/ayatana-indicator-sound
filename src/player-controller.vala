@@ -40,7 +40,7 @@ public class PlayerController : GLib.Object
   }
   
   public int current_state = state.OFFLINE;
-    
+
   public Dbusmenu.Menuitem root_menu;
   public string dbus_name { get; set;}
   public ArrayList<PlayerItem> custom_items;
@@ -49,6 +49,7 @@ public class PlayerController : GLib.Object
   public int menu_offset { get; set;}
   public string icon_name { get; set; }
   public bool? use_playlists;
+  public bool is_preferred { get; private set; }
   private SpecificItemsManager track_specific_mgr;
   private SpecificItemsManager player_specific_mgr;
   
@@ -58,7 +59,8 @@ public class PlayerController : GLib.Object
                           string icon_name,
                           int offset,
                           bool? use_playlists,
-                          state initial_state)
+                          state initial_state,
+                          bool is_preferred)
   {
     this.use_playlists = use_playlists;
     this.root_menu = root;
@@ -68,6 +70,8 @@ public class PlayerController : GLib.Object
     this.custom_items = new ArrayList<PlayerItem>();
     this.current_state = initial_state;
     this.menu_offset = offset;
+    this.is_preferred = is_preferred;
+
     this.construct_widgets();
     this.establish_mpris_connection();
     this.update_layout();
@@ -156,6 +160,11 @@ public class PlayerController : GLib.Object
     }
   }
 
+  public void set_as_preferred (bool val) {
+  	this.is_preferred = val;
+  	this.update_layout();
+  }
+
   public void hibernate()
   {
     update_state(PlayerController.state.OFFLINE);
@@ -175,12 +184,14 @@ public class PlayerController : GLib.Object
       metadata_menuitem.should_collapse (true);
       playlists_menuitem.root_item.property_set_bool (MENUITEM_PROP_VISIBLE,
                                                       false);
-      this.custom_items[widget_order.TRANSPORT].property_set_bool (MENUITEM_PROP_VISIBLE,
-                                                                   this.app_info.get_id() == "rhythmbox.desktop");         
+      this.custom_items[widget_order.TRANSPORT].property_set_bool (MENUITEM_PROP_VISIBLE, is_preferred);        
       return; 
     }
-    metadata_menuitem.should_collapse (!this.custom_items[widget_order.METADATA].populated (MetadataMenuitem.relevant_attributes_for_ui()) );
-    if (this.app_info.get_id() == "rhythmbox.desktop"){
+
+    bool should_collapse = !this.custom_items[widget_order.METADATA].populated (MetadataMenuitem.relevant_attributes_for_ui());
+    metadata_menuitem.should_collapse (should_collapse);
+
+    if (is_preferred){
       TransportMenuitem transport = this.custom_items[widget_order.TRANSPORT] as TransportMenuitem;
       transport.handle_cached_action();
     }
