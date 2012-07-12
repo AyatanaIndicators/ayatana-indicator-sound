@@ -22,12 +22,14 @@ public class SettingsManager : GLib.Object
 {
   private Settings settings;
   public signal void blacklist_updates ( string[] new_blacklist );
+  public signal void preferred_updates (Gee.ArrayList<string> new_preferred);
   
   public SettingsManager ( ){
   }
   construct{
     this.settings = new Settings ("com.canonical.indicator.sound");
-    this.settings.changed["blacklisted-media-players"].connect (on_blacklist_event);    
+    this.settings.changed["blacklisted-media-players"].connect (on_blacklist_event);
+    this.settings.changed["preferred-media-players"].connect (on_preferred_event);
   }
    
   public string[] fetch_blacklist()
@@ -35,9 +37,24 @@ public class SettingsManager : GLib.Object
     return this.settings.get_strv ("blacklisted-media-players");
   }
 
+  public ArrayList<string> fetch_preferred()
+  {
+    var list = new ArrayList<string>();
+
+    var preferred = this.settings.get_strv ("preferred-media-players");
+    var interested = fetch_interested ();
+
+    foreach (var s in preferred) {
+      if (!(s in list) && interested.contains (s))
+        list.add (s);
+    }
+
+    return list;
+  }
+
   public ArrayList<string> fetch_interested()
   {
-    var blacklisted = this.settings.get_strv ("blacklisted-media-players");
+    var blacklisted = fetch_blacklist ();
     var interested = this.settings.get_strv ("interested-media-players");
     var list = new ArrayList<string>();
     foreach(var s in interested){
@@ -89,6 +106,11 @@ public class SettingsManager : GLib.Object
   private void on_blacklist_event()
   {
     this.blacklist_updates(this.settings.get_strv ("blacklisted-media-players"));        
+  }
+
+  private void on_preferred_event()
+  {
+    this.preferred_updates (this.fetch_preferred());
   }
 
   // Convenient debug method inorder to provide visability over 
