@@ -26,21 +26,10 @@ m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 AC_PATH_PROG([GLIB_GENMARSHAL], [glib-genmarshal])
 
 ###########################
-# GTK+ version option
-###########################
-
-AC_ARG_WITH([gtk],
-  [AS_HELP_STRING([--with-gtk],
-    [Which version of gtk to use for the indicator @<:@default=3@:>@])],
-  [],
-  [with_gtk=3])
-
-###########################
 # Dependencies 
 ###########################  
 
-GTK_REQUIRED_VERSION=2.22
-GTK3_REQUIRED_VERSION=3.0
+GTK_REQUIRED_VERSION=3.0
 INDICATOR_REQUIRED_VERSION=0.3.19
 DBUSMENUGTK_REQUIRED_VERSION=0.5.90
 POLKIT_REQUIRED_VERSION=0.92
@@ -55,34 +44,18 @@ PKG_CHECK_MODULES(PULSEAUDIO, libpulse-mainloop-glib >= $PULSE_AUDIO_REQUIRED_VE
 AC_SUBST(PULSEAUDIO_CFLAGS)
 AC_SUBST(PULSEAUDIO_LIBS)
 
-AS_IF([test "x$with_gtk" = x3],
-    [PKG_CHECK_MODULES(APPLET, gtk+-3.0 >= $GTK3_REQUIRED_VERSION
-                               indicator3-0.4 >= $INDICATOR_REQUIRED_VERSION
-                               dbusmenu-gtk3-0.4 >= $DBUSMENUGTK_REQUIRED_VERSION
-                               libido3-0.1 >= $INDICATOR_DISPLAY_OBJECTS
-                               libnotify >= $LIBNOTIFY_REQUIRED_VERSION)
+PKG_CHECK_MODULES(APPLET, gtk+-3.0 >= $GTK_REQUIRED_VERSION
+                          indicator3-0.4 >= $INDICATOR_REQUIRED_VERSION
+                          dbusmenu-gtk3-0.4 >= $DBUSMENUGTK_REQUIRED_VERSION
+                          libido3-0.1 >= $INDICATOR_DISPLAY_OBJECTS
+                          libnotify >= $LIBNOTIFY_REQUIRED_VERSION)
 
-     PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib-0.4 >= $DBUSMENUGLIB_REQUIRED_VERSION
-                                     indicator3-0.4
-                                     gee-1.0
-                                     gio-unix-2.0
-                                     libxml-2.0)
-        ],
-      [test "x$with_gtk" = x2],
-    [PKG_CHECK_MODULES(APPLET, gtk+-2.0 >= $GTK_REQUIRED_VERSION
-                               indicator-0.4 >= $INDICATOR_REQUIRED_VERSION
-                               dbusmenu-gtk-0.4 >= $DBUSMENUGTK_REQUIRED_VERSION
-                               libido-0.1 >= $INDICATOR_DISPLAY_OBJECTS
-                               libnotify >= $LIBNOTIFY_REQUIRED_VERSION)
+PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib-0.4 >= $DBUSMENUGLIB_REQUIRED_VERSION
+                                indicator3-0.4
+                                gee-1.0
+                                gio-unix-2.0
+                                libxml-2.0)
 
-     PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib-0.4 >= $DBUSMENUGLIB_REQUIRED_VERSION
-                                     indicator-0.4
-                                     gee-1.0
-                                     gio-unix-2.0
-                                     libxml-2.0)
-        ],
-    [AC_MSG_FAILURE([Value for --with-gtk was neither 2 nor 3])]
-)
 AC_SUBST(APPLET_CFLAGS)
 AC_SUBST(APPLET_LIBS)
 
@@ -118,15 +91,10 @@ AS_IF([test "x$with_localinstall" = "xyes"],
 	INDICATORDIR="${libdir}/indicators/2/"
 	INDICATORICONSDIR="${datadir}/indicator-sound/icons/"
 	],
-	[AS_IF([test "x$with_gtk" = "x2"],
-		[
-		INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator-0.4`
-		INDICATORICONSDIR=`$PKG_CONFIG --variable=iconsdir indicator-0.4`
-		],
-		[
-		INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator3-0.4`
-		INDICATORICONSDIR=`$PKG_CONFIG --variable=iconsdir indicator3-0.4`
-		])])
+	[
+	INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator3-0.4`
+	INDICATORICONSDIR=`$PKG_CONFIG --variable=iconsdir indicator3-0.4`
+	])
 AC_SUBST(INDICATORDIR)
 AC_SUBST(INDICATORICONSDIR)
 
@@ -200,6 +168,5 @@ AC_MSG_NOTICE([
 SUS Indicator Configuration:
 
 	Prefix:        $prefix
-	GTK+:          $with_gtk
 	gcov:          $use_gcov
 ])
