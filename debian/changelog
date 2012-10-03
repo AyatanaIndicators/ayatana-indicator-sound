@@ -1,3 +1,9 @@
+indicator-sound (12.10.1-0ubuntu1) UNRELEASED; urgency=low
+
+  * New upstream release.
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 03 Oct 2012 21:51:21 +0200
+
 indicator-sound (12.10.0-0ubuntu2) quantal; urgency=low
 
   * Drop GTK2 build since ido stopped providing support for that version

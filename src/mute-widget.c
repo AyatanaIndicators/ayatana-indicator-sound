@@ -21,7 +21,6 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "config.h"
 #endif
 
-#include <glib/gi18n.h>
 #include <glib.h>
 #include "mute-widget.h"
 #include "common-defs.h"
