@@ -29,6 +29,7 @@ public class MusicPlayerBridge : GLib.Object
   private Dbusmenu.Menuitem root_menu;
   private HashMap<string, PlayerController> registered_clients;
   private HashMap<string, string> file_monitors;
+  private HashMap<string, string> mpris_to_desktop;
   private Mpris2Watcher watcher;
 
   public MusicPlayerBridge()
@@ -38,6 +39,7 @@ public class MusicPlayerBridge : GLib.Object
   construct{
     this.registered_clients = new HashMap<string, PlayerController> ();
     this.file_monitors = new HashMap<string, string> ();
+    this.mpris_to_desktop = new HashMap<string, string> ();
     this.settings_manager = new SettingsManager();
     this.settings_manager.blacklist_updates.connect ( this.on_blacklist_update );
     this.settings_manager.preferred_updates.connect ( this.on_preferred_update );
@@ -47,8 +49,8 @@ public class MusicPlayerBridge : GLib.Object
   {
     debug("some blacklist update");
 
-    foreach(var s in blacklist){
-      string key = this.determine_key (s);
+    foreach(var desktop_id in blacklist){
+      string key = desktop_id;
       if (this.registered_clients.has_key (key)){
         debug ("Apparently %s is now blacklisted - remove thy self", key);
         this.registered_clients[key].remove_from_menu();
@@ -67,8 +69,8 @@ public class MusicPlayerBridge : GLib.Object
       player_controller.set_as_preferred (false);
     }
 
-    foreach (var s in preferred) {
-      string key = this.determine_key (s);
+    foreach (var desktop_id in preferred) {
+      string key = desktop_id;
       if (this.registered_clients.has_key (key)) {
         debug ("Setting %s as preferred player", key);
         this.registered_clients[key].set_as_preferred (true);
@@ -96,7 +98,7 @@ public class MusicPlayerBridge : GLib.Object
                                                      null,
                                                      PlayerController.state.OFFLINE,
                                                      is_preferred );
-      var mpris_key = determine_key ( desktop );
+      var mpris_key = desktop;
       this.registered_clients.set(mpris_key, ctrl);  
       this.establish_file_monitoring (app_info, mpris_key);
     }
@@ -183,9 +185,10 @@ public class MusicPlayerBridge : GLib.Object
       return;
     }
     
-    var mpris_key = determine_key ( desktop );
+    var mpris_key = desktop;
     bool is_preferred = desktop in this.settings_manager.fetch_preferred ();    
     
+    mpris_to_desktop.set (dbus_name, desktop);
     if ( this.registered_clients.has_key (mpris_key) == false ){
       debug("New client has registered that we have not seen before: %s", dbus_name );
       PlayerController ctrl = new PlayerController ( this.root_menu,
@@ -216,10 +219,13 @@ public class MusicPlayerBridge : GLib.Object
            mpris_root_interface );
     if (root_menu != null){
       debug("\n attempt to remove %s", mpris_root_interface);
-      var mpris_key = determine_key ( mpris_root_interface );
-      if ( mpris_key != null && this.registered_clients.has_key(mpris_key)){
-        registered_clients[mpris_key].hibernate();
-        debug("\n Successively offlined client %s", mpris_key);       
+      if (mpris_to_desktop.has_key(mpris_root_interface)){
+        var mpris_key = mpris_to_desktop[mpris_root_interface];
+        mpris_to_desktop.unset(mpris_root_interface);
+        if ( mpris_key != null && this.registered_clients.has_key(mpris_key)){
+          registered_clients[mpris_key].hibernate();
+          debug("\n Successively offlined client %s", mpris_key);       
+        }
       }
     }
   }
@@ -236,7 +242,7 @@ public class MusicPlayerBridge : GLib.Object
   public void enable_player_specific_items_for_client (string object_path,
                                                        string desktop_id)
   {
-    var mpris_key = determine_key ( desktop_id );
+    var mpris_key = desktop_id;
     if (this.registered_clients.has_key (mpris_key) == false){
       warning ("we don't have a client with desktop id %s registered", desktop_id);
       return;
@@ -247,7 +253,7 @@ public class MusicPlayerBridge : GLib.Object
   public void enable_track_specific_items_for_client (string object_path,
                                                       string desktop_id)
   {
-    var mpris_key = determine_key ( desktop_id );
+    var mpris_key = desktop_id;
     if (this.registered_clients.has_key (mpris_key) == false){
       warning ("we don't have a client with desktop id %s registered", desktop_id);
       return;
@@ -292,34 +298,6 @@ public class MusicPlayerBridge : GLib.Object
       return null;
     } 
   }
-
-  /*
-    Messy but necessary method to consolidate desktop filesnames and mpris dbus
-    names into the one single word string (used as the key in the players hash).
-    So this means that we can determine the key for the players_hash from the 
-    dbus interface name or the desktop file name, at startup offline/online and 
-    shutdown.
-   */
-  private static string? determine_key(owned string desktop_or_interface)
-  {
-    // handle the special case of amarok, (kde4-amarok desktop file name) 
-    if (desktop_or_interface.contains("amarok")){
-      return "amarok";
-    }
-    
-    var result = desktop_or_interface;
-
-    var tokens = desktop_or_interface.split( "." );
-    if (tokens != null && tokens.length > 1){
-      result = tokens[tokens.length - 1];  
-    }    
-    var temp = result.split("-");
-    if (temp != null && temp.length > 1){
-      result = temp[0];
-    }    
-    return result;        
-  }
-  
 }
 
 
