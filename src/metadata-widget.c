@@ -804,8 +804,18 @@ metadata_widget_set_icon (MetadataWidget *self)
                         dbusmenu_menuitem_property_get ( priv->twin_item,
                                                          DBUSMENU_METADATA_MENUITEM_PLAYER_ICON ));  
   }
-  
-  gtk_image_set_from_icon_name(GTK_IMAGE (priv->player_icon), app_panel->str, GTK_ICON_SIZE_MENU);
+
+  const GtkIconSize icon_size = GTK_ICON_SIZE_MENU;
+  if (g_path_is_absolute(app_panel->str) && g_file_test (app_panel->str, G_FILE_TEST_IS_REGULAR)){
+    gint width, height;
+    gtk_icon_size_lookup (icon_size, &width, &height);
+    GdkPixbuf *pix = gdk_pixbuf_new_from_file_at_scale(app_panel->str, width, height, TRUE, NULL);
+    gtk_image_set_from_pixbuf (GTK_IMAGE (priv->player_icon), pix);
+    g_object_unref (pix);
+  }
+  else{
+    gtk_image_set_from_icon_name(GTK_IMAGE (priv->player_icon), app_panel->str, icon_size);
+  }
 
   g_string_free ( app_panel, TRUE);
   g_string_free ( banshee_string, TRUE);
