@@ -1,9 +1,9 @@
-indicator-sound (12.10.1-0ubuntu2~ppa1) UNRELEASED; urgency=low
+indicator-sound (12.10.1-0ubuntu2~ppa1) quantal; urgency=low
 
   * debian/control: update to debhelper 9.0
   * debian/rules: change to debhelper 9.0
 
- -- Allan LeSage <allan.lesage@canonical.com>  Fri, 26 Oct 2012 16:31:06 +0200
+ -- Allan LeSage <allan.lesage@canonical.com>  Fri, 26 Oct 2012 16:35:12 +0200
 
 indicator-sound (12.10.1-0ubuntu1) quantal; urgency=low
 
