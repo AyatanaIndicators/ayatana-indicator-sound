@@ -1,3 +1,15 @@
+indicator-sound (12.10.1-0ubuntu2) raring; urgency=low
+
+  [ Allan LeSage ]
+  * debian/control: update to debhelper 9.0
+  * debian/rules: change to debhelper 9.0
+
+  [ Ken VanDine ]
+  * debian/control
+    - build depend on dh-translations
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 30 Oct 2012 21:34:14 +0000
+
 indicator-sound (12.10.1-0ubuntu1) quantal; urgency=low
 
   * New upstream release.
