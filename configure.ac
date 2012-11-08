@@ -1,10 +1,9 @@
-
-AC_INIT(indicator-sound, 12.10.1, conor.curran@canonical.com)
+AC_INIT([indicator-sound],[12.10.1],[conor.curran@canonical.com])
+AC_CONFIG_SRCDIR([src/sound-service.c])
+AM_INIT_AUTOMAKE([check-news])
+AC_CONFIG_HEADERS([config.h])
 
 AC_PREREQ(2.53)
-
-AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(indicator-sound, 12.10.1)
 
 AM_MAINTAINER_MODE
 
