@@ -1,0 +1,10 @@
+#!/usr/bin/make -f
+
+
+%:
+	dh $@ --with translations,autoreconf
+
+override_dh_install:
+	find debian/indicator-sound/usr/lib -name *.la -delete
+	find debian/indicator-sound/usr/lib -name *.a -delete
+	dh_install --fail-missing
