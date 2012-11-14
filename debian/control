@@ -19,15 +19,21 @@ Build-Depends: debhelper (>= 9.0),
                libnotify-dev,
                valac-0.18,
                dh-autoreconf,
-               dh-translations
+               dh-translations,
+               gnome-common,
 Standards-Version: 3.9.3
 Homepage: https://launchpad.net/indicator-sound
+# If you aren't a member of ~indicator-applet-developers but need to upload
+# packaging changes, # just go ahead.  ~indicator-applet-developers will notice
+# and sync up the code again.
+Vcs-Bzr: https://code.launchpad.net/~indicator-applet-developers/indicator-sound/trunk.13.04
+Vcs-Browser: https://bazaar.launchpad.net/~indicator-applet-developers/indicator-sound/trunk.13.04/files
 
 Package: indicator-sound
 Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         pulseaudio
+         pulseaudio,
 Description: System sound indicator.
  System sound indicator which provides easy control of the PulseAudio sound 
  daemon.
