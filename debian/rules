@@ -1,8 +1,12 @@
 #!/usr/bin/make -f
 
+export DPKG_GENSYMBOLS_CHECK_LEVEL=4
 
 %:
 	dh $@ --with translations,autoreconf
+
+override_dh_autoreconf:
+	NOCONFIGURE=1 dh_autoreconf ./autogen.sh
 
 override_dh_install:
 	find debian/indicator-sound/usr/lib -name *.la -delete

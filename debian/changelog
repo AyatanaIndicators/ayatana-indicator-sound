@@ -4,6 +4,9 @@ indicator-sound (12.10.2-0ubuntu1) UNRELEASED; urgency=low
     - add gnome-common to Build-Depends for use by dh_autoreconf.
     - update style for constency: use trailing commas at the end of dep lists.
     - Add Vcs-Bzr, Vcs-Browser fields with comment for uploaders.
+  * debian/rules:
+    - override dh_autoreconf to use autogen.sh for the reconfiguration process.
+    - add export DPKG_GENSYMBOLS_CHECK_LEVEL=4.
 
  -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Wed, 14 Nov 2012 10:01:19 -0500
 
