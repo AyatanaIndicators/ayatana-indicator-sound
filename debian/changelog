@@ -7,6 +7,7 @@ indicator-sound (12.10.2-0ubuntu1) UNRELEASED; urgency=low
   * debian/rules:
     - override dh_autoreconf to use autogen.sh for the reconfiguration process.
     - add export DPKG_GENSYMBOLS_CHECK_LEVEL=4.
+  * debian/compat: bump to compat level 9.
 
  -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Wed, 14 Nov 2012 10:01:19 -0500
 
