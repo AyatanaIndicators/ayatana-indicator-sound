@@ -4,8 +4,12 @@ Priority: extra
 Maintainer: Ubuntu Desktop Team <ubuntu-desktop@lists.ubuntu.com>
 XSBC-Original-Maintainer: Conor Curran <conor.curran@canonical.com>
 Build-Depends: debhelper (>= 9.0),
+               dh-autoreconf,
+               dh-translations,
                quilt,
+               gnome-common,
                autotools-dev,
+               valac-0.18,
                libglib2.0-dev (>= 2.22.3),
                libgtk-3-dev,
                libdbusmenu-glib-dev (>= 0.5.90),
@@ -17,10 +21,6 @@ Build-Depends: debhelper (>= 9.0),
                libgee-dev,
                libxml2-dev,
                libnotify-dev,
-               valac-0.18,
-               dh-autoreconf,
-               dh-translations,
-               gnome-common,
 Standards-Version: 3.9.3
 Homepage: https://launchpad.net/indicator-sound
 # If you aren't a member of ~indicator-applet-developers but need to upload
