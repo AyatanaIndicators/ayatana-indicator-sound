@@ -1,0 +1,40 @@
+Source: indicator-sound
+Section: sound
+Priority: extra
+Maintainer: Ubuntu Desktop Team <ubuntu-desktop@lists.ubuntu.com>
+XSBC-Original-Maintainer: Conor Curran <conor.curran@canonical.com>
+Build-Depends: debhelper (>= 9.0),
+               dh-autoreconf,
+               dh-translations,
+               quilt,
+               gnome-common,
+               autotools-dev,
+               valac-0.18,
+               libglib2.0-dev (>= 2.22.3),
+               libgtk-3-dev,
+               libdbusmenu-glib-dev (>= 0.5.90),
+               libdbusmenu-gtk3-dev (>= 0.5.90),
+               libindicator3-dev (>= 0.3.90),
+               libpulse-dev (>= 0.9.18),
+               libpulse-mainloop-glib0 (>= 0.9.18),
+               libido3-0.1-dev (>= 0.2.90),
+               libgee-dev,
+               libxml2-dev,
+               libnotify-dev,
+Standards-Version: 3.9.3
+Homepage: https://launchpad.net/indicator-sound
+# If you aren't a member of ~indicator-applet-developers but need to upload
+# packaging changes, just go ahead.  ~indicator-applet-developers will notice
+# and sync up the code again.
+Vcs-Bzr: https://code.launchpad.net/~indicator-applet-developers/indicator-sound/trunk.13.04
+Vcs-Browser: https://bazaar.launchpad.net/~indicator-applet-developers/indicator-sound/trunk.13.04/files
+
+Package: indicator-sound
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         pulseaudio,
+Description: System sound indicator.
+ System sound indicator which provides easy control of the PulseAudio sound 
+ daemon.
+
