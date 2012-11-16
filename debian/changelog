@@ -11,6 +11,10 @@ indicator-sound (12.10.2-0ubuntu1) UNRELEASED; urgency=low
   * debian/compat: bump to compat level 9.
   * debian/source/format: migrate back to source format 1.0 for consistency
     with the rest of the indicator stack.
+  * Automatic snapshot from revision 337 (bootstrap):
+    - Add 'check-news' to AM_INIT_AUTOMAKE. (LP: #1075753)
+    - Remove the determine_key function. (LP: #1064255)
+    - Use the file path directly if it's an absolute path. (LP: #1024705)
 
  -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Wed, 14 Nov 2012 10:01:19 -0500
 
