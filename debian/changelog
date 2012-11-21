@@ -1,5 +1,6 @@
-indicator-sound (12.10.2-0ubuntu1) UNRELEASED; urgency=low
+indicator-sound (12.10.2daily12.11.21.1-0ubuntu1) raring; urgency=low
 
+  [ Mathieu Trudel-Lapierre ]
   * debian/control:
     - add gnome-common to Build-Depends for use by dh_autoreconf.
     - update style for constency: use trailing commas at the end of dep lists.
@@ -16,7 +17,10 @@ indicator-sound (12.10.2-0ubuntu1) UNRELEASED; urgency=low
     - Remove the determine_key function. (LP: #1064255)
     - Use the file path directly if it's an absolute path. (LP: #1024705)
 
- -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Wed, 14 Nov 2012 10:01:19 -0500
+  [ Automatic PS uploader ]
+  * Automatic snapshot from revision 339
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Wed, 21 Nov 2012 11:47:58 +0000
 
 indicator-sound (12.10.1-0ubuntu2) raring; urgency=low
 
