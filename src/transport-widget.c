@@ -1301,6 +1301,15 @@ draw (GtkWidget* button, cairo_t *cr)
                 color_play_outer[2], color_play_outer_prelight[2],
                 color_button[4], color_button_shadow, color_inner[2], color_inner_compressed[2];
 
+  /* Use the menu's style instead of that of the menuitem ('button' is a
+   * menuitem that is packed in a menu directly).  The menuitem's style
+   * can't be used due to a change in light-themes (lp #1130183).
+   * Menuitems now have a transparent background, which confuses
+   * GtkStyle.
+   *
+   * This is a workaround until this code gets refactored to use
+   * GtkStyleContext.
+   */
   style = gtk_widget_get_style (gtk_widget_get_parent (button));
 
   bg_color.r = style->bg[0].red/65535.0;
