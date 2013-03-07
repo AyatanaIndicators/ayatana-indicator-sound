@@ -28,32 +28,22 @@ AC_PATH_PROG([GLIB_GENMARSHAL], [glib-genmarshal])
 # Dependencies 
 ###########################  
 
-GTK_REQUIRED_VERSION=3.0
-INDICATOR_REQUIRED_VERSION=0.3.19
-DBUSMENUGTK_REQUIRED_VERSION=0.5.90
 POLKIT_REQUIRED_VERSION=0.92
 PULSE_AUDIO_REQUIRED_VERSION=0.9.19
-INDICATOR_DISPLAY_OBJECTS=0.1.11
 DBUSMENUGLIB_REQUIRED_VERSION=0.3.101
 GIO_2_0_REQUIRED_VERSION=2.25.13
-LIBNOTIFY_REQUIRED_VERSION=0.7.0
 
 PKG_CHECK_MODULES(PULSEAUDIO, libpulse-mainloop-glib >= $PULSE_AUDIO_REQUIRED_VERSION
                               gio-unix-2.0)
 AC_SUBST(PULSEAUDIO_CFLAGS)
 AC_SUBST(PULSEAUDIO_LIBS)
 
-PKG_CHECK_MODULES(APPLET, gtk+-3.0 >= $GTK_REQUIRED_VERSION
-                          indicator3-0.4 >= $INDICATOR_REQUIRED_VERSION
-                          dbusmenu-gtk3-0.4 >= $DBUSMENUGTK_REQUIRED_VERSION
-                          libido3-0.1 >= $INDICATOR_DISPLAY_OBJECTS
-                          libnotify >= $LIBNOTIFY_REQUIRED_VERSION)
-
 PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib-0.4 >= $DBUSMENUGLIB_REQUIRED_VERSION
                                 indicator3-0.4
                                 gee-1.0
                                 gio-unix-2.0
-                                libxml-2.0)
+                                libxml-2.0
+                                gdk-pixbuf-2.0)
 
 AC_SUBST(APPLET_CFLAGS)
 AC_SUBST(APPLET_LIBS)
@@ -80,22 +70,6 @@ AC_SUBST(COVERAGE_LDFLAGS)
 
 with_localinstall="no"
 AC_ARG_ENABLE(localinstall, AS_HELP_STRING([--enable-localinstall], [install all of the files localy instead of system directories (for distcheck)]), with_localinstall=$enableval, with_localinstall=no)
-
-###########################
-# Indicator Info
-###########################
-
-AS_IF([test "x$with_localinstall" = "xyes"],
-	[
-	INDICATORDIR="${libdir}/indicators/2/"
-	INDICATORICONSDIR="${datadir}/indicator-sound/icons/"
-	],
-	[
-	INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator3-0.4`
-	INDICATORICONSDIR=`$PKG_CONFIG --variable=iconsdir indicator3-0.4`
-	])
-AC_SUBST(INDICATORDIR)
-AC_SUBST(INDICATORICONSDIR)
 
 ###########################
 # Grab the GSettings Macros

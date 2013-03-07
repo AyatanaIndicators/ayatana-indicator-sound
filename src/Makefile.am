@@ -1,43 +1,5 @@
 libexec_PROGRAMS = indicator-sound-service
 
-###################
-# Indicator Stuff
-###################
-
-soundmenulibdir = $(INDICATORDIR)
-soundmenulib_LTLIBRARIES = libsoundmenu.la
-libsoundmenu_la_SOURCES = \
-            common-defs.h \
-            indicator-sound.h \
-            indicator-sound.c \
-            sound-state.c \
-            sound-state.h \
-            sound-state-manager.c \
-            sound-state-manager.h \
-            transport-widget.c \
-            transport-widget.h \
-            metadata-widget.c \
-            metadata-widget.h \
-            mute-widget.c \
-            mute-widget.h \
-            volume-widget.c \
-            volume-widget.h \
-            voip-input-widget.c \
-            voip-input-widget.h \
-            gen-sound-service.xml.h \
-            gen-sound-service.xml.c \
-            dbus-shared-names.h
-
-libsoundmenu_la_CFLAGS = \
-	$(APPLET_CFLAGS) \
-	$(COVERAGE_CFLAGS) \
-	-Wall -Werror -DG_LOG_DOMAIN=\"Indicator-Sound\"
-libsoundmenu_la_LIBADD = $(APPLET_LIBS) -lm
-libsoundmenu_la_LDFLAGS = \ 
-	$(COVERAGE_LDFLAGS) \
-	-module -avoid-version
-
-
 checkxml: $(srcdir)/sound-service.xml
 	@xmllint -valid -noout $<
 	@echo $< checks out ok
