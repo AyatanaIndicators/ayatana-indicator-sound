@@ -17,6 +17,8 @@ glib_marshal_prefix = _sound_service_marshal
 # Sound service vala
 #####################
 music_bridge_VALASOURCES = \
+	service.vala \
+	main.vala \
 	music-player-bridge.vala \
 	transport-menu-item.vala \
 	specific-items-manager.vala \
@@ -44,7 +46,9 @@ music_bridge_VALAFLAGS = \
   --pkg gio-2.0 \
   --pkg gio-unix-2.0 \
   --pkg gdk-pixbuf-2.0 \
-  --pkg libxml-2.0
+  --pkg libxml-2.0 \
+  --pkg libpulse \
+  --target-glib=2.36
 
  $(MAINTAINER_VALAFLAGS)
 
@@ -60,8 +64,6 @@ music_bridge_vala.stamp $(music_bridge_APIFILES): $(music_bridge_VALASOURCES)
 ###############################
 indicator_sound_service_SOURCES = \
   common-defs.h \
-  sound-service.h \
-  sound-service.c \
   sound-state.c \
   sound-state.h \
   pulseaudio-mgr.h \
