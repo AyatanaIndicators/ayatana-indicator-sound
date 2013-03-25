@@ -1,6 +1,5 @@
 [encoding: UTF-8]
-src/indicator-sound.c
+src/service.vala
 src/mute-menu-item.c
 src/playlists-menu-item.c
 src/sound-service-dbus.c
-src/volume-widget.c
