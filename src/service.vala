@@ -86,6 +86,8 @@ public class IndicatorSound.Service {
 			volume_action.set_state (volume);
 		});
 
+		this.volume_control.bind_property ("ready", volume_action, "enabled", BindingFlags.SYNC_CREATE);
+
 		return volume_action;
 	}
 

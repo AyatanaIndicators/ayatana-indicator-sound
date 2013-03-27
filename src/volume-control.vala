@@ -31,8 +31,10 @@ public class VolumeControl : Object
 	private bool   _mute = true;
 	private double _volume = 0.0;
 
-	public signal void ready ();
 	public signal void volume_changed (double v);
+
+	/** true when connected to the pulse server */
+	public bool ready { get; set; }
 
 	public VolumeControl ()
 	{
@@ -47,7 +49,7 @@ public class VolumeControl : Object
 
 		context = new PulseAudio.Context (loop.get_api(), null, props);
 
-		context.set_state_callback (notify_cb);
+		context.set_state_callback (context_state_callback);
 
 		if (context.connect(null, Context.Flags.NOFAIL, null) < 0)
 		{
@@ -95,25 +97,23 @@ public class VolumeControl : Object
 		context.get_server_info (server_info_cb_for_props);
 	}
 
-	private void notify_cb (Context c)
+	private void context_state_callback (Context c)
 	{
 		if (c.get_state () == Context.State.READY)
 		{
 			c.subscribe (PulseAudio.Context.SubscriptionMask.SINK);
 			c.set_subscribe_callback (context_events_cb);
 			get_properties ();
-			ready ();
+			this.ready = true;
 		}
+		else
+			this.ready = false;
 	}
 
 	/* Mute operations */
 	public void set_mute (bool mute)
 	{
-		if (context.get_state () != Context.State.READY)
-		{
-			warning ("Could not mute: PulseAudio server connection is not ready.");
-			return;
-		}
+		return_if_fail (context.get_state () == Context.State.READY);
 
 		context.get_sink_info_list ((context, sink, eol) => {
 			if (sink != null)
@@ -175,11 +175,8 @@ public class VolumeControl : Object
 
 	public void set_volume (double volume)
 	{
-		if (context.get_state () != Context.State.READY)
-		{
-			warning ("Could not change volume: PulseAudio server connection is not ready.");
-			return;
-		}
+		return_if_fail (context.get_state () == Context.State.READY);
+
 		_volume = volume;
 
 		context.get_server_info (server_info_cb_for_set_volume);
