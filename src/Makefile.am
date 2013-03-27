@@ -19,6 +19,7 @@ glib_marshal_prefix = _sound_service_marshal
 music_bridge_VALASOURCES = \
 	service.vala \
 	main.vala \
+	volume-control.vala \
 	music-player-bridge.vala \
 	transport-menu-item.vala \
 	specific-items-manager.vala \
@@ -48,6 +49,8 @@ music_bridge_VALAFLAGS = \
   --pkg gdk-pixbuf-2.0 \
   --pkg libxml-2.0 \
   --pkg libpulse \
+  --pkg libpulse-mainloop-glib \
+  --pkg pulseaudio-mgr \
   --target-glib=2.36
 
  $(MAINTAINER_VALAFLAGS)
