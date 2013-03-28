@@ -20,6 +20,8 @@ music_bridge_VALASOURCES = \
 	service.vala \
 	main.vala \
 	volume-control.vala \
+	media-player.vala \
+	media-player-list.vala \
 	music-player-bridge.vala \
 	transport-menu-item.vala \
 	specific-items-manager.vala \

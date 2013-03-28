@@ -2,6 +2,9 @@
 public class IndicatorSound.Service {
 	public Service () {
 		this.volume_control = new VolumeControl ();
+
+		this.players = new MediaPlayerList ();
+		this.players.player_added.connect (player_added);
 	}
 
 	public int run () {
@@ -28,6 +31,8 @@ public class IndicatorSound.Service {
 	SimpleActionGroup actions;
 	Menu menu;
 	VolumeControl volume_control;
+	MediaPlayerList players;
+	uint player_action_update_id;
 
 	void activate_settings (SimpleAction action, Variant? param) {
 		try {
@@ -41,7 +46,7 @@ public class IndicatorSound.Service {
 		var submenu = new Menu ();
 		submenu.append ("Mute", "indicator.mute");
 
-		var slider = new MenuItem ("null", "indicator.volume");
+		var slider = new MenuItem (null, "indicator.volume");
 		slider.set_attribute ("x-canonical-type", "s", "com.canonical.unity.slider");
 		submenu.append_item (slider);
 
@@ -110,5 +115,38 @@ public class IndicatorSound.Service {
 
 	void name_lost (DBusConnection connection, string name) {
 		this.loop.quit ();
+	}
+
+	bool update_player_action (MediaPlayer player) {
+		var builder = new VariantBuilder (new VariantType ("a{sv}"));
+		builder.add ("{sv}", "running", new Variant ("b", player.is_running));
+		var state = builder.end ();
+
+		SimpleAction? action = this.actions.lookup (player.id) as SimpleAction;
+		if (action == null) {
+			action = new SimpleAction.stateful (player.id, null, state);
+			action.activate.connect ( () => { player.launch (); });
+			this.actions.insert (action);
+		}
+		else {
+			action.set_state (state);
+		}
+
+		this.player_action_update_id = 0;
+		return false;
+	}
+
+	void eventually_update_player_action (MediaPlayer player) {
+		if (player_action_update_id == 0)
+			this.player_action_update_id = Idle.add ( () => this.update_player_action (player) );
+	}
+
+	void player_added (MediaPlayer player) {
+		var item = new MenuItem (player.name, player.id);
+		item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
+		this.menu.insert_item (this.menu.get_n_items () -1, item);
+
+		eventually_update_player_action (player);
+		player.notify.connect ( () => eventually_update_player_action (player) );
 	}
 }
