@@ -81,6 +81,7 @@ music_bridge_VALAFLAGS = \
   --pkg config \
   --pkg gio-2.0 \
   --pkg gio-unix-2.0 \
+  --pkg gdk-3.0 \
   --pkg gdk-pixbuf-2.0 \
   --pkg libxml-2.0
 
