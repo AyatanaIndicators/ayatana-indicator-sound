@@ -67,7 +67,8 @@ music_bridge_VALASOURCES = \
 	settings-manager.vala \
 	playlists-menu-item.vala \
 	freedesktop-interfaces.vala \
-	fetch-file.vala  
+	fetch-file.vala \
+	gtk-application-player.vala
 
 music_bridge_VALAFLAGS = \
   --ccode \
