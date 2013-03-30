@@ -45,6 +45,7 @@ public class PlayerController : GLib.Object
   public string dbus_name { get; set;}
   public ArrayList<PlayerItem> custom_items;
   public Mpris2Controller mpris_bridge;
+  public GtkApplicationPlayer gtk_app_player;
   public AppInfo? app_info { get; set;}
   public int menu_offset { get; set;}
   public string icon_name { get; set; }
@@ -149,6 +150,7 @@ public class PlayerController : GLib.Object
     debug ( " establish mpris connection - use playlists value = %s ",
             this.use_playlists.to_string() );
     this.mpris_bridge = new Mpris2Controller (this);
+    this.gtk_app_player = new GtkApplicationPlayer (this);
     this.determine_state ();
   }
   
