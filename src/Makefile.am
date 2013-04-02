@@ -68,7 +68,7 @@ music_bridge_VALASOURCES = \
 	playlists-menu-item.vala \
 	freedesktop-interfaces.vala \
 	fetch-file.vala \
-	player-windows-activator.vala
+	player-activator.vala
 
 music_bridge_VALAFLAGS = \
   --ccode \

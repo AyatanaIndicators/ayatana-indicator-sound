@@ -69,7 +69,7 @@ public class PlayerActivator : GLib.Object
     data["desktop-startup-id"] = context.get_startup_notify_id(this.owner.app_info, new GLib.List<GLib.File>());
 
     try {
-        this.gtk_application.Activate(data);
+      this.gtk_application.Activate(data);
     }
     catch (IOError e) {
       return false;
@@ -172,12 +172,27 @@ public class PlayerActivator : GLib.Object
     var dpy = Gdk.Display.get_default();
 
     foreach (var win in this.bamf_application.get_windows()) {
-      if (win.get_window_type() != Bamf.WindowType.NORMAL)
-        continue;
+      X.Window xid = 0;
 
-      var xwin = Gdk.X11Window.foreign_new_for_display(dpy, win.get_xid());
-      xwin.focus(timestamp);
-      focused = true;
+      if (win is Bamf.Window) {
+        if (win.get_window_type() != Bamf.WindowType.NORMAL)
+          continue;
+
+        xid = win.get_xid();
+      }
+      else if (win is Bamf.Tab)
+      {
+        xid = (X.Window) (win as Bamf.Tab).get_xid();
+      }
+
+      if (xid > 0) {
+        var xwin = Gdk.X11Window.foreign_new_for_display(dpy, xid);
+
+        if (xwin != null) {
+          xwin.focus(timestamp);
+          focused = true;
+        }
+      }
     }
 
     return focused;
