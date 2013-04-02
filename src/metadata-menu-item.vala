@@ -177,7 +177,7 @@ public class MetadataMenuitem : PlayerItem
       this.owner.instantiate(timestamp);
     }
     else if (this.owner.current_state == PlayerController.state.CONNECTED) {
-      this.owner.gtk_app_player.activate(timestamp);
+      this.owner.player_activator.activate(timestamp);
       this.owner.mpris_bridge.expose(timestamp);
     }
   }
