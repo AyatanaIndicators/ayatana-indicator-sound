@@ -180,8 +180,7 @@ public class PlayerActivator : GLib.Object
 
         xid = win.get_xid();
       }
-      else if (win is Bamf.Tab)
-      {
+      else if (win is Bamf.Tab) {
         xid = (X.Window) (win as Bamf.Tab).get_xid();
       }
 
