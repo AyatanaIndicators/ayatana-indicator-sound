@@ -1,10 +1,24 @@
 
 public class IndicatorSound.Service {
 	public Service () {
+		this.settings = new Settings ("com.canonical.indicator.sound");
+
 		this.volume_control = new VolumeControl ();
 
 		this.players = new MediaPlayerList ();
-		this.players.player_added.connect (player_added);
+		this.players.player_added.connect (this.player_added);
+
+		this.actions = new SimpleActionGroup ();
+		this.actions.add_entries (action_entries, this);
+		this.actions.add_action (this.create_mute_action ());
+		this.actions.add_action (this.create_volume_action ());
+
+		this.menu = create_base_menu ();
+
+		this.players.sync (settings.get_strv ("preferred-media-players"));
+		this.settings.changed["preferred-media-players"].connect ( () => {
+			this.players.sync (settings.get_strv ("preferred-media-players"));
+		});
 	}
 
 	public int run () {
@@ -30,6 +44,7 @@ public class IndicatorSound.Service {
 	MainLoop loop;
 	SimpleActionGroup actions;
 	Menu menu;
+	Settings settings;
 	VolumeControl volume_control;
 	MediaPlayerList players;
 	uint player_action_update_id;
@@ -97,14 +112,6 @@ public class IndicatorSound.Service {
 	}
 
 	void bus_acquired (DBusConnection connection, string name) {
-		this.actions = new SimpleActionGroup ();
-		this.actions.add_entries (action_entries, this);
-
-		this.actions.add_action (this.create_mute_action ());
-		this.actions.add_action (this.create_volume_action ());
-
-		this.menu = create_base_menu ();
-
 		try {
 			connection.export_action_group ("/com/canonical/indicator/sound", this.actions);
 			connection.export_menu_model ("/com/canonical/indicator/sound/desktop", this.menu);

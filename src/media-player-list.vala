@@ -37,26 +37,73 @@ public class MediaPlayerList {
 		}
 	}
 
-	public signal void player_added (MediaPlayer player);
-
-	HashTable<string, MediaPlayer> _players;
-	Mpris2Watcher mpris_watcher;
-
-	void player_appeared (string desktop_id, string dbus_name, bool use_playlists) {
-		var appinfo = new DesktopAppInfo (desktop_id + ".desktop");
-		if (appinfo == null) {
-			warning ("unable to find application '%s'", desktop_id);
-			return;
-		}
-
+	/**
+	 * Adds the player associated with @desktop_id.  Does nothing if such a player already exists.
+	 */
+	public MediaPlayer? insert (string desktop_id) {
+		message ("inserting %s", desktop_id);
 		MediaPlayer? player = this._players.lookup (desktop_id);
+
 		if (player == null) {
+			message ("  Really.");
+			var appinfo = new DesktopAppInfo (desktop_id + ".desktop");
+			if (appinfo == null) {
+				warning ("unable to find application '%s'", desktop_id);
+				return null;
+			}
+
 			player = new MediaPlayer (appinfo);
 			this._players.insert (player.id, player);
 			this.player_added (player);
 		}
 
-		player.attach (dbus_name);
+		return player;
+	}
+
+	/**
+	 * Removes the player associated with @desktop_id, unless it is currently running.
+	 */
+	public void remove (string desktop_id) {
+		MediaPlayer? player = this._players.lookup (desktop_id);
+
+		if (player != null && !player.is_running) {
+			this._players.remove (desktop_id);
+			this.player_removed (player);
+		}
+	}
+
+	/**
+	 * Synchronizes the player list with @desktop_ids.  After this call, this list will only contain the players
+	 * in @desktop_ids.  Players that were running but are not in @desktop_ids will remain in the list.
+	 */
+	public void sync (string[] desktop_ids) {
+
+		/* hash desktop_ids for faster lookup */
+		var hash = new HashTable<string, unowned string> (str_hash, str_equal);
+		foreach (var id in desktop_ids)
+			hash.add (id);
+
+		/* remove players that are not desktop_ids */
+		foreach (var id in this._players.get_keys ()) {
+			if (!hash.contains (id))
+				this.remove (id);
+		}
+
+		/* insert all players (insert() takes care of not adding a player twice */
+		foreach (var id in desktop_ids)
+			this.insert (id);
+	}
+
+	public signal void player_added (MediaPlayer player);
+	public signal void player_removed (MediaPlayer player);
+
+	HashTable<string, MediaPlayer> _players;
+	Mpris2Watcher mpris_watcher;
+
+	void player_appeared (string desktop_id, string dbus_name, bool use_playlists) {
+		var player = this.insert (desktop_id);
+		if (player != null)
+			player.attach (dbus_name);
 	}
 
 	void player_disappeared (string dbus_name) {
