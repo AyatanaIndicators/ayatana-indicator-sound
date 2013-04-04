@@ -46,7 +46,7 @@ public class MediaPlayerList {
 
 		if (player == null) {
 			message ("  Really.");
-			var appinfo = new DesktopAppInfo (desktop_id + ".desktop");
+			var appinfo = new DesktopAppInfo (desktop_id.has_suffix (".desktop") ? desktop_id : desktop_id + ".desktop");
 			if (appinfo == null) {
 				warning ("unable to find application '%s'", desktop_id);
 				return null;

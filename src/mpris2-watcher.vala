@@ -66,7 +66,7 @@ public class Mpris2Watcher : GLib.Object
         MprisRoot? mpris2_root = this.create_mpris_root(address);
         if (mpris2_root == null) return;
         bool use_playlists = this.supports_playlists ( address );
-        client_appeared (mpris2_root.DesktopEntry, address, use_playlists);
+        client_appeared (mpris2_root.DesktopEntry + ".desktop", address, use_playlists);
       }
     }
   }
@@ -87,7 +87,7 @@ public class Mpris2Watcher : GLib.Object
     else if (previous_owner == "" && current_owner != "") {
       debug ("Client '%s' has appeared", name);
       bool use_playlists = this.supports_playlists ( name );
-      client_appeared (mpris2_root.DesktopEntry, name, use_playlists);
+      client_appeared (mpris2_root.DesktopEntry + ".desktop", name, use_playlists);
     }
   }
 
