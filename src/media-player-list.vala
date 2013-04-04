@@ -57,11 +57,9 @@ public class MediaPlayerList {
 	 * Adds the player associated with @desktop_id.  Does nothing if such a player already exists.
 	 */
 	public MediaPlayer? insert (string desktop_id) {
-		message ("inserting %s", desktop_id);
 		MediaPlayer? player = this._players.lookup (desktop_id);
 
 		if (player == null) {
-			message ("  Really.");
 			var appinfo = new DesktopAppInfo (desktop_id.has_suffix (".desktop") ? desktop_id : desktop_id + ".desktop");
 			if (appinfo == null) {
 				warning ("unable to find application '%s'", desktop_id);
