@@ -21,8 +21,6 @@ AC_CONFIG_MACRO_DIR([m4])
 
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
-AC_PATH_PROG([GLIB_GENMARSHAL], [glib-genmarshal])
-
 ###########################
 # Dependencies 
 ###########################  
@@ -75,7 +73,6 @@ AC_ARG_ENABLE(localinstall, AS_HELP_STRING([--enable-localinstall], [install all
 ###########################
 
 GLIB_GSETTINGS
-GLIB_GENMARSHAL
 
 ###########################
 # DBus Service Info

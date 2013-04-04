@@ -1,13 +1,5 @@
 libexec_PROGRAMS = indicator-sound-service
 
-####################################################################
-# Sound Service 
-####################################################################
-
-glib_marshal_list = sound-service-marshal.list
-glib_marshal_prefix = _sound_service_marshal
-
-
 #####################
 # Sound service vala
 #####################
@@ -80,5 +72,3 @@ CLEANFILES = \
 	$(BUILT_SOURCES)
 
 DISTCLEANFILES = 
-
-include $(top_srcdir)/Makefile.am.marshal
