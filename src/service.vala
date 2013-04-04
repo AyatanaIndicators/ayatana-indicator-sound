@@ -32,7 +32,8 @@ public class IndicatorSound.Service {
 		this.actions.add_action (this.create_mute_action ());
 		this.actions.add_action (this.create_volume_action ());
 
-		this.menu = create_base_menu ();
+		this.menu = create_menu ();
+		this.root_menu = create_root_menu (this.menu);
 
 		this.players.sync (settings.get_strv ("preferred-media-players"));
 		this.settings.changed["preferred-media-players"].connect ( () => {
@@ -62,6 +63,7 @@ public class IndicatorSound.Service {
 
 	MainLoop loop;
 	SimpleActionGroup actions;
+	Menu root_menu;
 	Menu menu;
 	Settings settings;
 	VolumeControl volume_control;
@@ -76,22 +78,26 @@ public class IndicatorSound.Service {
 		}
 	}
 
-	static Menu create_base_menu () {
-		var submenu = new Menu ();
-		submenu.append ("Mute", "indicator.mute");
-
-		var slider = new MenuItem (null, "indicator.volume");
-		slider.set_attribute ("x-canonical-type", "s", "com.canonical.unity.slider");
-		submenu.append_item (slider);
-
-		submenu.append ("Sound Settings…", "indicator.settings");
-
+	static Menu create_root_menu (Menu submenu) {
 		var root = new MenuItem (null, "indicator.root");
 		root.set_attribute ("x-canonical-type", "s", "com.canonical.indicator.root");
 		root.set_submenu (submenu);
 
 		var menu = new Menu ();
 		menu.append_item (root);
+
+		return menu;
+	}
+
+	static Menu create_menu () {
+		var menu = new Menu ();
+		menu.append ("Mute", "indicator.mute");
+
+		var slider = new MenuItem (null, "indicator.volume");
+		slider.set_attribute ("x-canonical-type", "s", "com.canonical.unity.slider");
+		menu.append_item (slider);
+
+		menu.append ("Sound Settings…", "indicator.settings");
 
 		return menu;
 	}
@@ -133,7 +139,7 @@ public class IndicatorSound.Service {
 	void bus_acquired (DBusConnection connection, string name) {
 		try {
 			connection.export_action_group ("/com/canonical/indicator/sound", this.actions);
-			connection.export_menu_model ("/com/canonical/indicator/sound/desktop", this.menu);
+			connection.export_menu_model ("/com/canonical/indicator/sound/desktop", this.root_menu);
 		} catch (Error e) {
 			critical ("%s", e.message);
 		}
