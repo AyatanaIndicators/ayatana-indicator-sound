@@ -143,21 +143,17 @@ public class IndicatorSound.Service {
 		this.loop.quit ();
 	}
 
+	Variant action_state_for_player (MediaPlayer player) {
+		var builder = new VariantBuilder (new VariantType ("a{sv}"));
+		builder.add ("{sv}", "running", new Variant ("b", player.is_running));
+		return builder.end ();
+	}
+
 	bool update_player_actions () {
 		foreach (var player in this.players) {
-			var builder = new VariantBuilder (new VariantType ("a{sv}"));
-			builder.add ("{sv}", "running", new Variant ("b", player.is_running));
-			var state = builder.end ();
-
 			SimpleAction? action = this.actions.lookup (player.id) as SimpleAction;
-			if (action == null) {
-				action = new SimpleAction.stateful (player.id, null, state);
-				action.activate.connect ( () => { player.launch (); });
-				this.actions.insert (action);
-			}
-			else {
-				action.set_state (state);
-			}
+			if (action != null)
+				action.set_state (this.action_state_for_player (player));
 		}
 
 		this.player_action_update_id = 0;
@@ -174,7 +170,10 @@ public class IndicatorSound.Service {
 		item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
 		this.menu.insert_item (this.menu.get_n_items () -1, item);
 
-		eventually_update_player_actions ();
+		SimpleAction action = new SimpleAction.stateful (player.id, null, this.action_state_for_player (player));
+		action.activate.connect ( () => { player.launch (); });
+		this.actions.insert (action);
+
 		player.notify.connect (this.eventually_update_player_actions);
 	}
 
