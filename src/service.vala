@@ -165,6 +165,13 @@ public class IndicatorSound.Service {
 			this.player_action_update_id = Idle.add (this.update_player_actions);
 	}
 
+	void update_preferred_players () {
+		var builder = new VariantBuilder (VariantType.STRING_ARRAY);
+		foreach (var player in this.players)
+			builder.add ("s", player.id);
+		this.settings.set_value ("preferred-media-players", builder.end ());
+	}
+
 	void player_added (MediaPlayer player) {
 		var item = new MenuItem (player.name, player.id);
 		item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
@@ -175,6 +182,8 @@ public class IndicatorSound.Service {
 		this.actions.insert (action);
 
 		player.notify.connect (this.eventually_update_player_actions);
+
+		this.update_preferred_players ();
 	}
 
 	void player_removed (MediaPlayer player) {
@@ -189,5 +198,7 @@ public class IndicatorSound.Service {
 				break;
 			}
 		}
+
+		this.update_preferred_players ();
 	}
 }
