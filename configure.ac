@@ -24,28 +24,15 @@ m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 # Dependencies 
 ###########################  
 
-POLKIT_REQUIRED_VERSION=0.92
 PULSE_AUDIO_REQUIRED_VERSION=0.9.19
-DBUSMENUGLIB_REQUIRED_VERSION=0.3.101
 GIO_2_0_REQUIRED_VERSION=2.25.13
 
 PKG_CHECK_MODULES(PULSEAUDIO, libpulse-mainloop-glib >= $PULSE_AUDIO_REQUIRED_VERSION
                               gio-unix-2.0)
-AC_SUBST(PULSEAUDIO_CFLAGS)
-AC_SUBST(PULSEAUDIO_LIBS)
 
-PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib-0.4 >= $DBUSMENUGLIB_REQUIRED_VERSION
-                                indicator3-0.4
-                                gee-1.0
+PKG_CHECK_MODULES(SOUNDSERVICE, gee-1.0
                                 gio-unix-2.0
-                                libxml-2.0
-                                gdk-pixbuf-2.0)
-
-AC_SUBST(APPLET_CFLAGS)
-AC_SUBST(APPLET_LIBS)
-
-AC_SUBST(SOUNDSERVICE_CFLAGS)
-AC_SUBST(SOUNDSERVICE_LIBS)
+                                libxml-2.0)
 
 ###########################
 # gcov coverage reporting
