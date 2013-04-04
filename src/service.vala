@@ -7,6 +7,7 @@ public class IndicatorSound.Service {
 
 		this.players = new MediaPlayerList ();
 		this.players.player_added.connect (this.player_added);
+		this.players.player_removed.connect (this.player_removed);
 
 		this.actions = new SimpleActionGroup ();
 		this.actions.add_entries (action_entries, this);
@@ -157,5 +158,19 @@ public class IndicatorSound.Service {
 
 		eventually_update_player_actions ();
 		player.notify.connect (this.eventually_update_player_actions);
+	}
+
+	void player_removed (MediaPlayer player) {
+		this.actions.remove (player.id);
+
+		int n = this.menu.get_n_items ();
+		for (int i = 0; i < n; i++) {
+			string action;
+			this.menu.get_item_attribute (i, "action", "s", out action);
+			if (action == player.id) {
+				this.menu.remove (i);
+				break;
+			}
+		}
 	}
 }
