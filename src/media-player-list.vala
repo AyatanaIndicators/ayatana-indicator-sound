@@ -31,10 +31,26 @@ public class MediaPlayerList {
 		this.mpris_watcher.client_disappeared.connect (this.player_disappeared);
 	}
 
-	public List<MediaPlayer> players {
-		owned get {
-			return this._players.get_values ();
+	/* only valid while the list is not changed */
+	public class Iterator {
+		HashTableIter<string, MediaPlayer> iter;
+
+		public Iterator (MediaPlayerList list) {
+			this.iter = HashTableIter<string, MediaPlayer> (list._players);
 		}
+
+		public MediaPlayer? next_value () {
+			MediaPlayer? player;
+
+			if (this.iter.next (null, out player))
+				return player;
+			else
+				return null;
+		}
+	}
+
+	public Iterator iterator () {
+		return new Iterator (this);
 	}
 
 	/**
