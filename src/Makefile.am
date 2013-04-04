@@ -1,9 +1,7 @@
 libexec_PROGRAMS = indicator-sound-service
 
-#####################
-# Sound service vala
-#####################
-music_bridge_VALASOURCES = \
+indicator_sound_service_SOURCES = \
+	common-defs.h \
 	service.vala \
 	main.vala \
 	volume-control.vala \
@@ -13,9 +11,8 @@ music_bridge_VALASOURCES = \
 	mpris2-watcher.vala \
 	freedesktop-interfaces.vala
 
-music_bridge_VALAFLAGS = \
+indicator_sound_service_VALAFLAGS = \
   --ccode \
-  -H music-player-bridge.h -d . \
   --vapidir=$(top_srcdir)/vapi/ \
   --vapidir=./ \
   --thread \
@@ -31,22 +28,6 @@ music_bridge_VALAFLAGS = \
   --pkg libpulse-mainloop-glib \
   --target-glib=2.36
 
- $(MAINTAINER_VALAFLAGS)
-
-music_bridge_APIFILES = \
-  music-player-bridge.h 
-
-music_bridge_vala.stamp $(music_bridge_APIFILES): $(music_bridge_VALASOURCES)
-	$(AM_V_GEN) $(VALAC) $(music_bridge_VALAFLAGS) $^
-	touch music_bridge_vala.stamp
-
-###############################
-# Sound Service C
-###############################
-indicator_sound_service_SOURCES = \
-  common-defs.h \
-  $(music_bridge_VALASOURCES:.vala=.c)
-
 indicator_sound_service_CFLAGS = $(PULSEAUDIO_CFLAGS) \
 	$(SOUNDSERVICE_CFLAGS) \
 	$(GCONF_CFLAGS) \
@@ -54,21 +35,3 @@ indicator_sound_service_CFLAGS = $(PULSEAUDIO_CFLAGS) \
 	-DLIBEXECDIR=\"$(libexecdir)\" -Wall
 indicator_sound_service_LDADD = $(PULSEAUDIO_LIBS) $(SOUNDSERVICE_LIBS) $(GCONF_LIBS)
 indicator_sound_service_LDFLAGS = $(COVERAGE_LDFLAGS)
-
-EXTRA_DIST = \
-  $(DBUS_SPECS) \
-  $(music_bridge_APIFILES) \
-  $(music_bridge_VALASOURCES)
-  
-#######################
-# Stuff to clean Stuff
-#######################
-BUILT_SOURCES = \
-	music_bridge_vala.stamp \
-	$(music_bridge_APIFILES) \
-	$(music_bridge_VALASOURCES:.vala=.c)
-  
-CLEANFILES = \
-	$(BUILT_SOURCES)
-
-DISTCLEANFILES = 
