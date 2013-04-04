@@ -1,5 +1,4 @@
 AC_INIT([indicator-sound],[12.10.1],[conor.curran@canonical.com])
-AC_CONFIG_SRCDIR([src/sound-service.c])
 AM_INIT_AUTOMAKE([check-news])
 AC_CONFIG_HEADERS([config.h])
 
