@@ -208,9 +208,9 @@ public class Mpris2Controller : GLib.Object
     return (this.player != null && this.mpris2_root != null);
   }
 
-  public void expose(uint timestamp)
+  public void expose(uint timestmap)
   {
-    if(this.connected() == true){
+    if (this.connected() == true) {
       this.mpris2_root.Raise.begin();
     }
   }
