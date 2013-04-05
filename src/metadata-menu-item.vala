@@ -168,13 +168,16 @@ public class MetadataMenuitem : PlayerItem
   public override void handle_event (string name,
                                      Variant input_value,
                                      uint timestamp)
-  {   
+  {
+    if (name != Dbusmenu.MENUITEM_EVENT_ACTIVATED)
+      return;
+
     if(this.owner.current_state == PlayerController.state.OFFLINE)
     {
-      this.owner.instantiate();
+      this.owner.instantiate(timestamp);
     }
     else if(this.owner.current_state == PlayerController.state.CONNECTED){
-      this.owner.mpris_bridge.expose();
+      this.owner.mpris_bridge.expose(timestamp);
     }
   }
   

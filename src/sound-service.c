@@ -88,7 +88,7 @@ main (int argc, char ** argv)
 {
   gboolean greeter_mode;
   
-  g_type_init();
+  gdk_init(&argc, &argv); 
   textdomain (GETTEXT_PACKAGE);
   bindtextdomain (GETTEXT_PACKAGE, GNOMELOCALEDIR);
   setlocale (LC_ALL, "");

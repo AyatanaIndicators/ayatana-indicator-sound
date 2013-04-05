@@ -70,6 +70,9 @@ public class TransportMenuitem : PlayerItem
                                     Variant input_value,
                                     uint timestamp)
   {
+    if (name != Dbusmenu.MENUITEM_EVENT_ACTIVATED)
+      return;
+
     Variant v = input_value;
     if ( input_value.is_of_type (VariantType.VARIANT)){
       v = input_value.get_variant();
@@ -82,7 +85,7 @@ public class TransportMenuitem : PlayerItem
     }
     else{
       this.cached_action = (Transport.Action)input;
-      this.owner.instantiate();
+      this.owner.instantiate(timestamp);
       this.property_set_int (MENUITEM_PLAY_STATE, (int)Transport.State.LAUNCHING);
     }
   } 

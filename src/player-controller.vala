@@ -98,11 +98,14 @@ public class PlayerController : GLib.Object
    There is a need to wait before the application is on DBus before attempting to access its mpris address
    Hence only when the it has registered with us via libindicate do we attempt to kick off mpris communication
    */
-  public void instantiate()
+  public void instantiate(uint timestamp)
   {
     debug("instantiate in player controller for %s", this.app_info.get_name() );
+
     try{
-      this.app_info.launch(null, null);
+      var context = Gdk.Display.get_default().get_app_launch_context();
+      context.set_timestamp(timestamp);
+      this.app_info.launch(null, context);
       this.update_state(state.INSTANTIATING);
     }
     catch(GLib.Error error){
