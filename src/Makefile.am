@@ -68,7 +68,7 @@ music_bridge_VALASOURCES = \
 	playlists-menu-item.vala \
 	freedesktop-interfaces.vala \
 	fetch-file.vala \
-	gtk-application-player.vala
+	player-activator.vala
 
 music_bridge_VALAFLAGS = \
   --ccode \
@@ -83,7 +83,9 @@ music_bridge_VALAFLAGS = \
   --pkg gio-2.0 \
   --pkg gio-unix-2.0 \
   --pkg gdk-3.0 \
+  --pkg gdk-x11-3.0 \
   --pkg gdk-pixbuf-2.0 \
+  --pkg libbamf3 \
   --pkg libxml-2.0
 
  $(MAINTAINER_VALAFLAGS)

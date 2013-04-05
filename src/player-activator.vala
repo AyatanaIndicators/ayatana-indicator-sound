@@ -4,16 +4,16 @@ Copyright 2013 Canonical Ltd.
 Authors:
     Marco Trevisan <marco.trevisan@canonical.com>
 
-This program is free software: you can redistribute it and/or modify it 
-under the terms of the GNU General Public License version 3, as published 
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License version 3, as published
 by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful, but 
-WITHOUT ANY WARRANTY; without even the implied warranties of 
-MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR 
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranties of
+MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR
 PURPOSE.  See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along 
+You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
@@ -22,24 +22,44 @@ public interface DBusGtkApplication : Object {
   public abstract void Activate(GLib.HashTable<string, Variant?> platform_data) throws IOError;
 }
 
-public class GtkApplicationPlayer : GLib.Object
+public class PlayerActivator : GLib.Object
 {
   public PlayerController owner {get; construct;}
 
   private bool gtk_application_searched = false;
   private DBusGtkApplication gtk_application;
+  private Bamf.Application bamf_application;
 
-  public GtkApplicationPlayer(PlayerController ctrl)
+  private const uint MAX_BAMF_APPLICATION_WAIT_MS = 1000;
+  private int64 last_check_time;
+
+  public PlayerActivator(PlayerController ctrl)
   {
     GLib.Object(owner: ctrl);
   }
 
   public void activate(uint timestamp)
   {
+    if (!activate_gtk_appplication(timestamp)) {
+      if (!activate_bamf_appplication(timestamp)) {
+        // Let's wait BAMF to update its windows list
+        this.last_check_time = get_monotonic_time();
+
+        Idle.add(() => {
+          bool activated = activate_bamf_appplication(timestamp);
+          int64 waited = (get_monotonic_time() - this.last_check_time) / 1000;
+          return !activated && waited < MAX_BAMF_APPLICATION_WAIT_MS;
+        });
+      }
+    }
+  }
+
+  private bool activate_gtk_appplication(uint timestamp)
+  {
     this.setup_gtk_application();
 
     if (this.gtk_application == null) {
-      return;
+      return false;
     }
 
     var context = Gdk.Display.get_default().get_app_launch_context();
@@ -49,9 +69,13 @@ public class GtkApplicationPlayer : GLib.Object
     data["desktop-startup-id"] = context.get_startup_notify_id(this.owner.app_info, new GLib.List<GLib.File>());
 
     try {
-    	this.gtk_application.Activate(data);
+      this.gtk_application.Activate(data);
     }
-    catch (IOError e) {}
+    catch (IOError e) {
+      return false;
+    }
+
+    return true;
   }
 
   private void setup_gtk_application()
@@ -79,7 +103,7 @@ public class GtkApplicationPlayer : GLib.Object
 
   private void find_iface_path(DBusConnection connection, string name, string path, string target_iface, out string found_path)
   {
-  	found_path = null;
+    found_path = null;
     DBusNodeInfo node = null;
 
     try {
@@ -119,5 +143,57 @@ public class GtkApplicationPlayer : GLib.Object
         return;
       }
     }
+  }
+
+  private void setup_bamf_application()
+  {
+    this.bamf_application = null;
+    var desktop_app = this.owner.app_info as DesktopAppInfo;
+
+    if (desktop_app == null)
+      return;
+
+    foreach (var app in Bamf.Matcher.get_default().get_applications()) {
+      if (app.get_desktop_file() == desktop_app.get_filename()) {
+        this.bamf_application = app;
+        break;
+      }
+    }
+  }
+
+  private bool activate_bamf_appplication(uint timestamp)
+  {
+    this.setup_bamf_application();
+
+    if (this.bamf_application == null)
+      return false;
+
+    bool focused = false;
+    var dpy = Gdk.Display.get_default();
+
+    foreach (var win in this.bamf_application.get_windows()) {
+      X.Window xid = 0;
+
+      if (win is Bamf.Window) {
+        if (win.get_window_type() != Bamf.WindowType.NORMAL)
+          continue;
+
+        xid = win.get_xid();
+      }
+      else if (win is Bamf.Tab) {
+        xid = (X.Window) (win as Bamf.Tab).get_xid();
+      }
+
+      if (xid > 0) {
+        var xwin = Gdk.X11Window.foreign_new_for_display(dpy, xid);
+
+        if (xwin != null) {
+          xwin.focus(timestamp);
+          focused = true;
+        }
+      }
+    }
+
+    return focused;
   }
 }

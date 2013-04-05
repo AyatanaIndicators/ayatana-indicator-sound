@@ -52,7 +52,9 @@ PKG_CHECK_MODULES(APPLET, gtk+-3.0 >= $GTK_REQUIRED_VERSION
 PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib-0.4 >= $DBUSMENUGLIB_REQUIRED_VERSION
                                 indicator3-0.4
                                 gee-1.0
+                                gdk-x11-3.0
                                 gio-unix-2.0
+                                libbamf3
                                 libxml-2.0)
 
 AC_SUBST(APPLET_CFLAGS)
