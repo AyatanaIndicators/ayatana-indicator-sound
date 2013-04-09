@@ -152,6 +152,13 @@ public class IndicatorSound.Service {
 	Variant action_state_for_player (MediaPlayer player) {
 		var builder = new VariantBuilder (new VariantType ("a{sv}"));
 		builder.add ("{sv}", "running", new Variant ("b", player.is_running));
+		builder.add ("{sv}", "state", new Variant ("s", player.state));
+		if (player.current_track != null) {
+			builder.add ("{sv}", "title", new Variant ("s", player.current_track.title));
+			builder.add ("{sv}", "artist", new Variant ("s", player.current_track.artist));
+			builder.add ("{sv}", "album", new Variant ("s", player.current_track.album));
+			builder.add ("{sv}", "art-url", new Variant ("s", player.current_track.art_url));
+		}
 		return builder.end ();
 	}
 

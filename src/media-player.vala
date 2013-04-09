@@ -65,6 +65,30 @@ public class MediaPlayer: Object {
 		}
 	}
 
+	public string state {
+		get {
+			if (this.proxy != null && this.proxy.PlaybackStatus == "Playing")
+				return "Playing";
+			else
+				return "Paused";
+		}
+	}
+
+	public class Track : Object {
+		public string artist { get; construct; }
+		public string title { get; construct; }
+		public string album { get; construct; }
+		public string art_url { get; construct; }
+
+		public Track (string artist, string title, string album, string art_url) {
+			Object (artist: artist, title: title, album: album, art_url: art_url);
+		}
+	}
+
+	public Track current_track {
+		get; set;
+	}
+
 	/**
 	 * Attach this object to a process of the associated media player.  The player must own @dbus_name and
 	 * implement the org.mpris.MediaPlayer2.Player interface.
@@ -78,7 +102,7 @@ public class MediaPlayer: Object {
 
 		this._dbus_name = dbus_name;
 		Bus.get_proxy.begin<MprisPlayer> (BusType.SESSION, dbus_name, "/org/mpris/MediaPlayer2",
-										  DBusProxyFlags.NONE, null, got_proxy);
+										  DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, got_proxy);
 	}
 
 	/**
@@ -114,11 +138,56 @@ public class MediaPlayer: Object {
 	void got_proxy (Object? obj, AsyncResult res) {
 		try {
 			this.proxy = Bus.get_proxy.end (res);
+
+			/* Connecting to GDBusProxy's "g-properties-changed" signal here, because vala's dbus objects don't
+			 * emit notify signals */
+			var gproxy = this.proxy as DBusProxy;
+			gproxy.g_properties_changed.connect (this.proxy_properties_changed);
+
 			this.notify_property ("is-running");
+			this.notify_property ("state");
+			this.update_current_track (gproxy.get_cached_property ("Metadata"));
 		}
 		catch (Error e) {
 			this._dbus_name = null;
 			warning ("unable to attach to media player: %s", e.message);
+		}
+	}
+
+	/* some players (e.g. Spotify) don't follow the spec closely and pass single strings in metadata fields
+	 * where an array of string is expected */
+	static string sanitize_metadata_value (Variant? v) {
+		if (v == null)
+			return "";
+		else if (v.is_of_type (VariantType.STRING))
+			return v.get_string ();
+		else if (v.is_of_type (VariantType.STRING_ARRAY))
+			return string.joinv (",", v.get_strv ());
+
+		warn_if_reached ();
+		return "";
+	}
+
+	void proxy_properties_changed (DBusProxy proxy, Variant changed_properties, string[] invalidated_properties) {
+		if (changed_properties.lookup ("PlaybackStatus", "s", null))
+			this.notify_property ("state");
+
+		var metadata = changed_properties.lookup_value ("Metadata", new VariantType ("a{sv}"));
+		if (metadata != null)
+			this.update_current_track (metadata);
+	}
+
+	void update_current_track (Variant metadata) {
+		if (metadata != null) {
+			this.current_track = new Track (
+				sanitize_metadata_value (metadata.lookup_value ("xesam:artist", null)),
+				sanitize_metadata_value (metadata.lookup_value ("xesam:title", null)),
+				sanitize_metadata_value (metadata.lookup_value ("xesam:album", null)),
+				sanitize_metadata_value (metadata.lookup_value ("mpris:artUrl", null))
+			);
+		}
+		else {
+			this.current_track = null;
 		}
 	}
 }
