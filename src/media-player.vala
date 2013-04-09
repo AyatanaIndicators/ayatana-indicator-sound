@@ -114,6 +114,7 @@ public class MediaPlayer: Object {
 		this.proxy = null;
 		this._dbus_name = null;
 		this.notify_property ("is-running");
+		this.current_track = null;
 	}
 
 	/**
