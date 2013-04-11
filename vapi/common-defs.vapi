@@ -34,6 +34,7 @@ namespace DbusmenuMetadata{
 namespace DbusmenuTransport{
         public const string MENUITEM_TYPE;
         public const string MENUITEM_PLAY_STATE;
+        public const string MENUITEM_STATE_CHANGE;
 }
 
 [CCode (cheader_filename = "common-defs.h")]

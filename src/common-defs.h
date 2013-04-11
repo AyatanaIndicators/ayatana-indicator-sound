@@ -64,8 +64,9 @@ typedef enum {
 #define DBUSMENU_MUTE_MENUITEM_TYPE             "x-canonical-sound-menu-mute-type"
 #define DBUSMENU_MUTE_MENUITEM_VALUE            "x-canonical-sound-menu-mute-value"
 
-#define DBUSMENU_TRANSPORT_MENUITEM_TYPE        "x-canonical-sound-menu-player-transport-type"
-#define DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE  "x-canonical-sound-menu-player-transport-state"
+#define DBUSMENU_TRANSPORT_MENUITEM_TYPE         "x-canonical-sound-menu-player-transport-type"
+#define DBUSMENU_TRANSPORT_MENUITEM_PLAY_STATE   "x-canonical-sound-menu-player-transport-state"
+#define DBUSMENU_TRANSPORT_MENUITEM_STATE_CHANGE "Transport state change"
 
 #define DBUSMENU_TRACK_SPECIFIC_MENUITEM_TYPE   "x-canonical-sound-menu-player-track-specific-type"
 
