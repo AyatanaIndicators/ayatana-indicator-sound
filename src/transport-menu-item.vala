@@ -70,7 +70,7 @@ public class TransportMenuitem : PlayerItem
                                     Variant input_value,
                                     uint timestamp)
   {
-    if (name != Dbusmenu.MENUITEM_EVENT_ACTIVATED)
+    if (name != DbusmenuTransport.MENUITEM_STATE_CHANGE)
       return;
 
     Variant v = input_value;

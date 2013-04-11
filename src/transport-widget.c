@@ -450,7 +450,7 @@ transport_widget_seek (gpointer userdata)
     new_transport_state = g_variant_new_int32 ((int)TRANSPORT_ACTION_FORWIND);
 
     dbusmenu_menuitem_handle_event ( priv->twin_item,
-                                     "Transport state change",
+                                     DBUSMENU_TRANSPORT_MENUITEM_STATE_CHANGE,
                                      new_transport_state,
                                      0 );
 
@@ -460,7 +460,7 @@ transport_widget_seek (gpointer userdata)
     new_transport_state = g_variant_new_int32 ((int)TRANSPORT_ACTION_REWIND);
 
     dbusmenu_menuitem_handle_event ( priv->twin_item,
-                                     "Transport state change",
+                                     DBUSMENU_TRANSPORT_MENUITEM_STATE_CHANGE,
                                      new_transport_state,
                                      0 );
   }
@@ -482,7 +482,7 @@ transport_widget_button_release_event (GtkWidget *menuitem,
       priv->skip_frequency == 0){
     GVariant* new_transport_state = g_variant_new_int32 ((int)result);
     dbusmenu_menuitem_handle_event ( priv->twin_item,
-                                     "Transport state change",
+                                     DBUSMENU_TRANSPORT_MENUITEM_STATE_CHANGE,
                                      new_transport_state,
                                      0 );
   }
@@ -533,7 +533,7 @@ transport_widget_react_to_key_release_event ( TransportWidget* transport,
     GVariant* new_transport_event = g_variant_new_int32((int)transport_event);
     if (priv->skip_frequency == 0){
       dbusmenu_menuitem_handle_event ( priv->twin_item,
-                                       "Transport state change",
+                                       DBUSMENU_TRANSPORT_MENUITEM_STATE_CHANGE,
                                        new_transport_event,
                                        0 );
     }
