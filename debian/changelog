@@ -1,3 +1,37 @@
+indicator-sound (12.10.2daily13.04.12-0ubuntu1) raring; urgency=low
+
+  [ Marco Trevisan (Treviño) ]
+  * Indicator-sound should send the event timestamp when launching a
+    player (LP: #1163434)
+  * Player controls are non-functional in all mpris2 supported players
+    (LP: #1167908)
+  * Window management - Apps raised from indicators sometimes dont have
+    the focus (LP: #627195)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 348
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 12 Apr 2013 02:03:33 +0000
+
+indicator-sound (12.10.2daily13.04.09-0ubuntu1) raring; urgency=low
+
+  * Automatic snapshot from revision 348
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 09 Apr 2013 02:02:50 +0000
+
+indicator-sound (12.10.2daily13.04.08-0ubuntu1) raring; urgency=low
+
+  [ Marco Trevisan (Treviño) ]
+  * Indicator-sound should send the event timestamp when launching a
+    player (LP: #1163434)
+  * Window management - Apps raised from indicators sometimes dont have
+    the focus (LP: #627195)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 347
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 08 Apr 2013 02:03:24 +0000
+
 indicator-sound (12.10.2daily13.03.07-0ubuntu1) raring; urgency=low
 
   * Automatic snapshot from revision 343
