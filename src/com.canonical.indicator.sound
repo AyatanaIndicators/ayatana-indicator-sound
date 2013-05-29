@@ -1,4 +1,6 @@
 [Indicator Service]
 Name=indicator-sound
-BusName=com.canonical.indicator.sound
 ObjectPath=/com/canonical/indicator/sound
+
+[desktop]
+ObjectPath=/com/canonical/indicator/sound/desktop
