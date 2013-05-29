@@ -57,7 +57,7 @@ public class IndicatorSound.Service {
 	}
 
 	const ActionEntry[] action_entries = {
-		{ "root", null, null, "('', 'audio-volume-high-panel', '', true)", null },
+		{ "root", null, null, "{ 'icon': <'audio-volume-high-panel'> }", null },
 		{ "settings", activate_settings, null, null, null }
 	};
 
