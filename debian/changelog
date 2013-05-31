@@ -1,3 +1,10 @@
+indicator-sound (12.10.2daily13.05.02-0ubuntu2) UNRELEASED; urgency=low
+
+  * debian/control:
+    - Build with valac (>= 0.18) instead of vala-0.18 for easier transitions
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Thu, 30 May 2013 22:10:44 -0400
+
 indicator-sound (12.10.2daily13.05.02-0ubuntu1) saucy; urgency=low
 
   * Automatic snapshot from revision 349
