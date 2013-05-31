@@ -17,6 +17,9 @@
  *      Lars Uebernickel <lars.uebernickel@canonical.com>
  */
 
+/* Icon.serialize() is not yet in gio-2.0.vapi; remove this when it is */
+extern Variant? g_icon_serialize (Icon icon);
+
 public class IndicatorSound.Service {
 	public Service () {
 		this.settings = new Settings ("com.canonical.indicator.sound");
@@ -90,11 +93,17 @@ public class IndicatorSound.Service {
 	}
 
 	static Menu create_menu () {
+
 		var menu = new Menu ();
 		menu.append ("Mute", "indicator.mute");
 
 		var slider = new MenuItem (null, "indicator.volume");
 		slider.set_attribute ("x-canonical-type", "s", "com.canonical.unity.slider");
+		slider.set_attribute_value ("primary-icon", g_icon_serialize (new ThemedIcon ("audio-volume-low-zero-panel")));
+		slider.set_attribute_value ("secondary-icon", g_icon_serialize (new ThemedIcon ("audio-volume-high-panel")));
+		slider.set_attribute ("min-value", "d", 0.0);
+		slider.set_attribute ("max-value", "d", 1.0);
+		slider.set_attribute ("step", "d", 0.01);
 		menu.append_item (slider);
 
 		menu.append ("Sound Settings…", "indicator.settings");
