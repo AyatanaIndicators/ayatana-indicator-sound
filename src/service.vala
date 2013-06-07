@@ -99,8 +99,8 @@ public class IndicatorSound.Service {
 
 		var slider = new MenuItem (null, "indicator.volume");
 		slider.set_attribute ("x-canonical-type", "s", "com.canonical.unity.slider");
-		slider.set_attribute_value ("primary-icon", g_icon_serialize (new ThemedIcon ("audio-volume-low-zero-panel")));
-		slider.set_attribute_value ("secondary-icon", g_icon_serialize (new ThemedIcon ("audio-volume-high-panel")));
+		slider.set_attribute_value ("min-icon", g_icon_serialize (new ThemedIcon ("audio-volume-low-zero-panel")));
+		slider.set_attribute_value ("max-icon", g_icon_serialize (new ThemedIcon ("audio-volume-high-panel")));
 		slider.set_attribute ("min-value", "d", 0.0);
 		slider.set_attribute ("max-value", "d", 1.0);
 		slider.set_attribute ("step", "d", 0.01);
