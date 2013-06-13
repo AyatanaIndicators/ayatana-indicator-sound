@@ -195,10 +195,14 @@ public class IndicatorSound.Service {
 	}
 
 	void player_added (MediaPlayer player) {
-		var item = new MenuItem (player.name, "indicator." + player.id);
-		item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
-		item.set_attribute_value ("icon", g_icon_serialize (player.icon));
-		this.menu.insert_item (this.menu.get_n_items () -1, item);
+		var player_item = new MenuItem (player.name, "indicator." + player.id);
+		player_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
+		player_item.set_attribute_value ("icon", g_icon_serialize (player.icon));
+
+		var section = new Menu ();
+		section.append_item (player_item);
+
+		this.menu.insert_section (this.menu.get_n_items () -1, null, section);
 
 		SimpleAction action = new SimpleAction.stateful (player.id, null, this.action_state_for_player (player));
 		action.activate.connect ( () => { player.launch (); });
@@ -214,8 +218,9 @@ public class IndicatorSound.Service {
 
 		int n = this.menu.get_n_items ();
 		for (int i = 0; i < n; i++) {
+			var section = this.menu.get_item_link (i, Menu.LINK_SECTION);
 			string action;
-			this.menu.get_item_attribute (i, "action", "s", out action);
+			section.get_item_attribute (0, "action", "s", out action);
 			if (action == player.id) {
 				this.menu.remove (i);
 				break;
