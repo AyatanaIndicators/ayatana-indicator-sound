@@ -197,6 +197,7 @@ public class IndicatorSound.Service {
 	void player_added (MediaPlayer player) {
 		var item = new MenuItem (player.name, "indicator." + player.id);
 		item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
+		item.set_attribute_value ("icon", g_icon_serialize (player.icon));
 		this.menu.insert_item (this.menu.get_n_items () -1, item);
 
 		SimpleAction action = new SimpleAction.stateful (player.id, null, this.action_state_for_player (player));
