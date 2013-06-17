@@ -66,18 +66,7 @@ public class MediaPlayer: Object {
 	}
 
 	public string state {
-		get {
-			if (this.proxy != null && this.proxy.PlaybackStatus == "Playing")
-				return "Playing";
-			else
-				return "Paused";
-		}
-	}
-
-	public bool is_playing {
-		get {
-			return this.proxy != null && this.proxy.PlaybackStatus == "Playing";
-		}
+		get; private set; default = "Paused";
 	}
 
 	public class Track : Object {
@@ -120,6 +109,7 @@ public class MediaPlayer: Object {
 		this.proxy = null;
 		this._dbus_name = null;
 		this.notify_property ("is-running");
+		this.state = "Paused";
 		this.current_track = null;
 	}
 
@@ -136,6 +126,7 @@ public class MediaPlayer: Object {
 		catch (Error e) {
 			warning ("unable to launch %s: %s", appinfo.get_name (), e.message);
 		}
+		this.state = "Launching";
 	}
 
 	/**
@@ -176,7 +167,7 @@ public class MediaPlayer: Object {
 			gproxy.g_properties_changed.connect (this.proxy_properties_changed);
 
 			this.notify_property ("is-running");
-			this.notify_property ("state");
+			this.state = this.proxy.PlaybackStatus;
 			this.update_current_track (gproxy.get_cached_property ("Metadata"));
 		}
 		catch (Error e) {
@@ -201,8 +192,7 @@ public class MediaPlayer: Object {
 
 	void proxy_properties_changed (DBusProxy proxy, Variant changed_properties, string[] invalidated_properties) {
 		if (changed_properties.lookup ("PlaybackStatus", "s", null)) {
-			this.notify_property ("state");
-			this.notify_property ("is-running");
+			this.state = this.proxy.PlaybackStatus;
 		}
 
 		var metadata = changed_properties.lookup_value ("Metadata", new VariantType ("a{sv}"));
