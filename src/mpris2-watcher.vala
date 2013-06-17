@@ -21,8 +21,8 @@ using Xml;
 
 public class Mpris2Watcher : GLib.Object
 {
-  FreeDesktopObject fdesktop_obj;
-  
+  DBusConnection session_bus;
+
   public signal void client_appeared ( string desktop_file_name,
                                        string dbus_name,
                                        bool use_playlists );
@@ -33,18 +33,37 @@ public class Mpris2Watcher : GLib.Object
   }
 
   construct
-  {  
+  {
+    const string match_rule = "type='signal'," +
+                              "sender='org.freedesktop.DBus'," +
+                              "interface='org.freedesktop.DBus'," +
+                              "member='NameOwnerChanged'," +
+                              "path='/org/freedesktop/DBus'," +
+                              "arg0namespace='org.mpris.MediaPlayer2'";
     try {
-      this.fdesktop_obj = Bus.get_proxy_sync ( BusType.SESSION,
-                                               FREEDESKTOP_SERVICE,
-                                               FREEDESKTOP_OBJECT,
-                                               DBusProxyFlags.DO_NOT_LOAD_PROPERTIES );
-      this.fdesktop_obj.name_owner_changed.connect (this.name_changes_detected);      
+      this.session_bus = Bus.get_sync (BusType.SESSION);
+
+      this.session_bus.call_sync ("org.freedesktop.DBus",
+                                  "/",
+                                  "org.freedesktop.DBus",
+                                  "AddMatch",
+                                  new Variant ("(s)", match_rule),
+                                  VariantType.TUPLE,
+                                  DBusCallFlags.NONE,
+                                  -1);
+
+      this.session_bus.signal_subscribe ("org.freedesktop.DBus",
+                                         "org.freedesktop.DBus",
+                                         "NameOwnerChanged",
+                                         "/org/freedesktop/DBus",
+                                         null,
+                                         DBusSignalFlags.NO_MATCH_RULE,
+                                         this.name_owner_changed);
+
       this.check_for_active_clients.begin();
     }
-    catch ( IOError e ){
-      warning( "Mpris2watcher could not set up a watch for mpris clients appearing on the bus: %s",
-                e.message );
+    catch (GLib.Error e) {
+      warning ("unable to set up name watch for mrpis clients: %s", e.message);
     }
   }
 
@@ -52,16 +71,25 @@ public class Mpris2Watcher : GLib.Object
   // More relevant for development and daemon's like mpd. 
   public async void check_for_active_clients()
   {
-    string[] interfaces;
-    try{
-      interfaces = yield this.fdesktop_obj.list_names();
+    Variant interfaces;
+
+    try {
+      interfaces = yield this.session_bus.call ("org.freedesktop.DBus",
+                                                "/",
+                                                "org.freedesktop.DBus",
+                                                "ListNames",
+                                                null,
+                                                new VariantType ("(as)"),
+                                                DBusCallFlags.NONE,
+                                                -1);
     }
-    catch ( IOError e) {
-      warning( "Mpris2watcher could fetch active interfaces at startup: %s",
-                e.message );
+    catch (GLib.Error e) {
+      warning ("unable to search for existing mpris clients: %s ", e.message);
       return;
     }
-    foreach (var address in interfaces) {
+
+    foreach (var val in interfaces.get_child_value (0)) {
+      var address = (string) val;
       if (address.has_prefix (MPRIS_PREFIX)){
         MprisRoot? mpris2_root = this.create_mpris_root(address);
         if (mpris2_root == null) return;
@@ -71,13 +99,16 @@ public class Mpris2Watcher : GLib.Object
     }
   }
 
-  private void name_changes_detected ( FreeDesktopObject dbus_obj,
-                                       string     name,
-                                       string     previous_owner,
-                                       string     current_owner ) 
+  public void name_owner_changed (DBusConnection con, string sender, string object_path,
+                                  string interface_name, string signal_name, Variant parameters)
   {
-    MprisRoot? mpris2_root = this.create_mpris_root(name);                                         
+    string name, previous_owner, current_owner;
 
+	message ("xyxp");
+
+    parameters.get ("(sss)", out name, out previous_owner, out current_owner);
+
+    MprisRoot? mpris2_root = this.create_mpris_root (name);
     if (mpris2_root == null) return;
 
     if (previous_owner != "" && current_owner == "") {
