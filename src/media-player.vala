@@ -74,6 +74,12 @@ public class MediaPlayer: Object {
 		}
 	}
 
+	public bool is_playing {
+		get {
+			return this.proxy != null && this.proxy.PlaybackStatus == "Playing";
+		}
+	}
+
 	public class Track : Object {
 		public string artist { get; construct; }
 		public string title { get; construct; }
@@ -132,6 +138,30 @@ public class MediaPlayer: Object {
 		}
 	}
 
+	/**
+	 * Toggles playing status.
+	 */
+	public void play_pause () {
+		if (this.proxy != null)
+			this.proxy.PlayPause.begin ();
+	}
+
+	/**
+	 * Skips to the next track.
+	 */
+	public void next () {
+		if (this.proxy != null)
+			this.proxy.Next.begin ();
+	}
+
+	/**
+	 * Skips to the previous track.
+	 */
+	public void previous () {
+		if (this.proxy != null)
+			this.proxy.Previous.begin ();
+	}
+
 	DesktopAppInfo appinfo;
 	MprisPlayer? proxy;
 	string _dbus_name;
@@ -170,8 +200,10 @@ public class MediaPlayer: Object {
 	}
 
 	void proxy_properties_changed (DBusProxy proxy, Variant changed_properties, string[] invalidated_properties) {
-		if (changed_properties.lookup ("PlaybackStatus", "s", null))
+		if (changed_properties.lookup ("PlaybackStatus", "s", null)) {
 			this.notify_property ("state");
+			this.notify_property ("is-running");
+		}
 
 		var metadata = changed_properties.lookup_value ("Metadata", new VariantType ("a{sv}"));
 		if (metadata != null)

@@ -61,7 +61,7 @@ public class IndicatorSound.Service {
 
 	const ActionEntry[] action_entries = {
 		{ "root", null, null, "{ 'icon': <'audio-volume-high-panel'> }", null },
-		{ "settings", activate_settings, null, null, null }
+		{ "settings", activate_settings, null, null, null },
 	};
 
 	MainLoop loop;
@@ -200,14 +200,33 @@ public class IndicatorSound.Service {
 		player_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
 		player_item.set_attribute_value ("icon", g_icon_serialize (player.icon));
 
+		var playback_item = new MenuItem (null, null);
+		playback_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.playback-item");
+		playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id);
+		playback_item.set_attribute ("x-canonical-next-action", "s", "indicator.next." + player.id);
+		playback_item.set_attribute ("x-canonical-previous-action", "s", "indicator.previous." + player.id);
+
 		var section = new Menu ();
 		section.append_item (player_item);
+		section.append_item (playback_item);
 
 		this.menu.insert_section (this.menu.get_n_items () -1, null, section);
 
 		SimpleAction action = new SimpleAction.stateful (player.id, null, this.action_state_for_player (player));
 		action.activate.connect ( () => { player.launch (); });
 		this.actions.insert (action);
+
+		var play_action = new SimpleAction.stateful ("play." + player.id, null, player.is_playing);
+		play_action.activate.connect ( () => player.play_pause () );
+		this.actions.insert (play_action);
+
+		var next_action = new SimpleAction ("next." + player.id, null);
+		next_action.activate.connect ( () => player.next () );
+		this.actions.insert (next_action);
+
+		var prev_action = new SimpleAction ("previous." + player.id, null);
+		prev_action.activate.connect ( () => player.previous () );
+		this.actions.insert (prev_action);
 
 		player.notify.connect (this.eventually_update_player_actions);
 
@@ -216,6 +235,9 @@ public class IndicatorSound.Service {
 
 	void player_removed (MediaPlayer player) {
 		this.actions.remove (player.id);
+		this.actions.remove ("play." + player.id);
+		this.actions.remove ("next." + player.id);
+		this.actions.remove ("previous." + player.id);
 
 		int n = this.menu.get_n_items ();
 		for (int i = 0; i < n; i++) {
