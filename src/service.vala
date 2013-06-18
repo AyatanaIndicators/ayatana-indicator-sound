@@ -134,6 +134,24 @@ public class IndicatorSound.Service {
 		}
 	}
 
+	void update_root_icon () {
+		double volume = this.volume_control.get_volume ();
+		string icon;
+		if (this.volume_control.mute)
+			icon = "audio-volume-muted-panel";
+		else if (volume <= 0.0)
+			icon = "audio-volume-low-zero-panel";
+		else if (volume <= 0.3)
+			icon = "audio-volume-low-panel";
+		else if (volume <= 0.7)
+			icon = "audio-volume-medium-panel";
+		else
+			icon  = "audio-volume-high-panel";
+
+		var root_action = this.actions.lookup ("root") as SimpleAction;
+		root_action.set_state (new Variant.parsed ("{ 'icon': <%s> }", icon));
+	}
+
 	Action create_mute_action () {
 		var mute_action = new SimpleAction.stateful ("mute", null, this.volume_control.mute);
 
@@ -147,9 +165,17 @@ public class IndicatorSound.Service {
 
 		this.volume_control.notify["mute"].connect ( () => {
 			mute_action.set_state (this.volume_control.mute);
+			this.update_root_icon ();
 		});
 
 		return mute_action;
+	}
+
+	void volume_changed (double volume) {
+		var volume_action = this.actions.lookup ("volume") as SimpleAction;
+		volume_action.set_state (volume);
+
+		this.update_root_icon ();
 	}
 
 	Action create_volume_action () {
@@ -159,9 +185,7 @@ public class IndicatorSound.Service {
 			volume_control.set_volume (val.get_double ());
 		});
 
-		this.volume_control.volume_changed.connect ( (volume) => {
-			volume_action.set_state (volume);
-		});
+		this.volume_control.volume_changed.connect (volume_changed);
 
 		this.volume_control.bind_property ("ready", volume_action, "enabled", BindingFlags.SYNC_CREATE);
 
