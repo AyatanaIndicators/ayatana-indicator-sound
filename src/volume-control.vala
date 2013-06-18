@@ -30,11 +30,16 @@ public class VolumeControl : Object
 	private PulseAudio.Context context;
 	private bool   _mute = true;
 	private double _volume = 0.0;
+	private double _mic_volume = 0.0;
 
 	public signal void volume_changed (double v);
+	public signal void mic_volume_changed (double v);
 
 	/** true when connected to the pulse server */
 	public bool ready { get; set; }
+
+	/** true when a microphone is active **/
+	public bool active_mic { get; private set; default = false; }
 
 	public VolumeControl ()
 	{
@@ -61,9 +66,28 @@ public class VolumeControl : Object
 	/* PulseAudio logic*/
 	private void context_events_cb (Context c, Context.SubscriptionEventType t, uint32 index)
 	{
-		if ((t & Context.SubscriptionEventType.FACILITY_MASK) == Context.SubscriptionEventType.SINK)
+		switch (t & Context.SubscriptionEventType.FACILITY_MASK)
 		{
-			get_properties ();
+			case Context.SubscriptionEventType.SINK:
+				update_sink ();
+				break;
+
+			case Context.SubscriptionEventType.SOURCE:
+				update_source ();
+				break;
+
+			case Context.SubscriptionEventType.SOURCE_OUTPUT:
+				switch (t & Context.SubscriptionEventType.TYPE_MASK)
+				{
+					case Context.SubscriptionEventType.NEW:
+						c.get_source_output_info (index, source_output_info_cb);
+						break;
+
+					case Context.SubscriptionEventType.REMOVE:
+						this.active_mic = false;
+						break;
+				}
+				break;
 		}
 	}
 
@@ -85,6 +109,18 @@ public class VolumeControl : Object
 		}
 	}
 
+	private void source_info_cb (Context c, SourceInfo? i, int eol)
+	{
+		if (i == null)
+			return;
+
+		if (_mic_volume != volume_to_double (i.volume.values[0]))
+		{
+			_mic_volume = volume_to_double (i.volume.values[0]);
+			mic_volume_changed (_mic_volume);
+		}
+	}
+
 	private void server_info_cb_for_props (Context c, ServerInfo? i)
 	{
 		if (i == null)
@@ -92,18 +128,39 @@ public class VolumeControl : Object
 		context.get_sink_info_by_name (i.default_sink_name, sink_info_cb_for_props);
 	}
 
-	private void get_properties ()
+	private void update_sink ()
 	{
 		context.get_server_info (server_info_cb_for_props);
+	}
+
+	private void update_source ()
+	{
+		context.get_server_info ( (c, i) => {
+			if (i != null)
+				context.get_source_info_by_name (i.default_source_name, source_info_cb);
+		});
+	}
+
+	private void source_output_info_cb (Context c, SourceOutputInfo? i, int eol)
+	{
+		if (i == null)
+			return;
+
+		var role = i.proplist.gets (PulseAudio.Proplist.PROP_MEDIA_ROLE);
+		if (role == "phone" || role == "production")
+			this.active_mic = true;
 	}
 
 	private void context_state_callback (Context c)
 	{
 		if (c.get_state () == Context.State.READY)
 		{
-			c.subscribe (PulseAudio.Context.SubscriptionMask.SINK);
+			c.subscribe (PulseAudio.Context.SubscriptionMask.SINK |
+						 PulseAudio.Context.SubscriptionMask.SOURCE |
+						 PulseAudio.Context.SubscriptionMask.SOURCE_OUTPUT);
 			c.set_subscribe_callback (context_events_cb);
-			get_properties ();
+			update_sink ();
+			update_source ();
 			this.ready = true;
 		}
 		else
@@ -182,8 +239,34 @@ public class VolumeControl : Object
 		context.get_server_info (server_info_cb_for_set_volume);
 	}
 
+	void set_mic_volume_success_cb (Context c, int success)
+	{
+		if ((bool)success)
+			mic_volume_changed (_mic_volume);
+	}
+
+	public void set_mic_volume (double volume)
+	{
+		return_if_fail (context.get_state () == Context.State.READY);
+
+		_mic_volume = volume;
+
+		context.get_server_info ( (c, i) => {
+			if (i != null) {
+				unowned CVolume cvol = CVolume ();
+				cvol = vol_set (cvol, 1, double_to_volume (_mic_volume));
+				c.set_source_volume_by_name (i.default_source_name, cvol, set_mic_volume_success_cb);
+			}
+		});
+	}
+
 	public double get_volume ()
 	{
 		return _volume;
+	}
+
+	public double get_mic_volume ()
+	{
+		return _mic_volume;
 	}
 }

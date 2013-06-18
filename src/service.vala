@@ -25,6 +25,7 @@ public class IndicatorSound.Service {
 		this.settings = new Settings ("com.canonical.indicator.sound");
 
 		this.volume_control = new VolumeControl ();
+		this.volume_control.notify["active-mic"].connect (active_mic_changed);
 
 		this.players = new MediaPlayerList ();
 		this.players.player_added.connect (this.player_added);
@@ -34,6 +35,7 @@ public class IndicatorSound.Service {
 		this.actions.add_entries (action_entries, this);
 		this.actions.add_action (this.create_mute_action ());
 		this.actions.add_action (this.create_volume_action ());
+		this.actions.add_action (this.create_mic_volume_action ());
 
 		this.menu = create_menu ();
 		this.root_menu = create_root_menu (this.menu);
@@ -112,6 +114,26 @@ public class IndicatorSound.Service {
 		return menu;
 	}
 
+	void active_mic_changed () {
+		var volume_section = this.menu.get_item_link (0, "section") as Menu;
+		if (this.volume_control.active_mic) {
+			if (volume_section.get_n_items () < 3) {
+				var slider = new MenuItem (null, "indicator.mic-volume");
+				slider.set_attribute ("x-canonical-type", "s", "com.canonical.unity.slider");
+				slider.set_attribute_value ("min-icon", g_icon_serialize (new ThemedIcon ("audio-input-microphone-low-zero-panel")));
+				slider.set_attribute_value ("max-icon", g_icon_serialize (new ThemedIcon ("audio-input-microphone-high-panel")));
+				slider.set_attribute ("min-value", "d", 0.0);
+				slider.set_attribute ("max-value", "d", 1.0);
+				slider.set_attribute ("step", "d", 0.01);
+				volume_section.append_item (slider);
+			}
+		}
+		else {
+			if (volume_section.get_n_items () > 2)
+				volume_section.remove (2);
+		}
+	}
+
 	Action create_mute_action () {
 		var mute_action = new SimpleAction.stateful ("mute", null, this.volume_control.mute);
 
@@ -138,6 +160,22 @@ public class IndicatorSound.Service {
 		});
 
 		this.volume_control.volume_changed.connect ( (volume) => {
+			volume_action.set_state (volume);
+		});
+
+		this.volume_control.bind_property ("ready", volume_action, "enabled", BindingFlags.SYNC_CREATE);
+
+		return volume_action;
+	}
+
+	Action create_mic_volume_action () {
+		var volume_action = new SimpleAction.stateful ("mic-volume", null, this.volume_control.get_mic_volume ());
+
+		volume_action.change_state.connect ( (action, val) => {
+			volume_control.set_mic_volume (val.get_double ());
+		});
+
+		this.volume_control.mic_volume_changed.connect ( (volume) => {
 			volume_action.set_state (volume);
 		});
 
