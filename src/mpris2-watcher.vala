@@ -104,8 +104,6 @@ public class Mpris2Watcher : GLib.Object
   {
     string name, previous_owner, current_owner;
 
-	message ("xyxp");
-
     parameters.get ("(sss)", out name, out previous_owner, out current_owner);
 
     MprisRoot? mpris2_root = this.create_mpris_root (name);
