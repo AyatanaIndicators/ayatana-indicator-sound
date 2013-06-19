@@ -1,3 +1,60 @@
+indicator-sound (12.10.2daily13.06.07-0ubuntu1) saucy; urgency=low
+
+  [ Jeremy Bicha ]
+  * debian/control:
+    - Build with valac (>= 0.18) instead of vala-0.18 for easier transitions
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 351
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 07 Jun 2013 02:02:47 +0000
+
+indicator-sound (12.10.2daily13.05.02-0ubuntu1) saucy; urgency=low
+
+  * Automatic snapshot from revision 349
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 02 May 2013 22:59:34 +0000
+
+indicator-sound (12.10.2daily13.04.12-0ubuntu1) raring; urgency=low
+
+  [ Marco Trevisan (Treviño) ]
+  * Indicator-sound should send the event timestamp when launching a
+    player (LP: #1163434)
+  * Player controls are non-functional in all mpris2 supported players
+    (LP: #1167908)
+  * Window management - Apps raised from indicators sometimes dont have
+    the focus (LP: #627195)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 348
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 12 Apr 2013 02:03:33 +0000
+
+indicator-sound (12.10.2daily13.04.09-0ubuntu1) raring; urgency=low
+
+  * Automatic snapshot from revision 348
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 09 Apr 2013 02:02:50 +0000
+
+indicator-sound (12.10.2daily13.04.08-0ubuntu1) raring; urgency=low
+
+  [ Marco Trevisan (Treviño) ]
+  * Indicator-sound should send the event timestamp when launching a
+    player (LP: #1163434)
+  * Window management - Apps raised from indicators sometimes dont have
+    the focus (LP: #627195)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 347
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 08 Apr 2013 02:03:24 +0000
+
+indicator-sound (12.10.2daily13.03.07-0ubuntu1) raring; urgency=low
+
+  * Automatic snapshot from revision 343
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Thu, 07 Mar 2013 02:01:27 +0000
+
 indicator-sound (12.10.2daily13.02.25-0ubuntu1) raring; urgency=low
 
   [ Lars Uebernickel ]
