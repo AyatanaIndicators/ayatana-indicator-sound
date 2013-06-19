@@ -23,11 +23,13 @@ indicator_sound_service_VALAFLAGS = \
   --pkg libpulse-mainloop-glib \
   --target-glib=2.36
 
+# -w to disable warnings for vala-generated code
 indicator_sound_service_CFLAGS = $(PULSEAUDIO_CFLAGS) \
 	$(SOUNDSERVICE_CFLAGS) \
 	$(GCONF_CFLAGS) \
 	$(COVERAGE_CFLAGS) \
-	-DLIBEXECDIR=\"$(libexecdir)\" -Wall \
+	-DLIBEXECDIR=\"$(libexecdir)\" \
+	-w \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\"
 
 indicator_sound_service_LDADD = $(PULSEAUDIO_LIBS) $(SOUNDSERVICE_LIBS) $(GCONF_LIBS)
