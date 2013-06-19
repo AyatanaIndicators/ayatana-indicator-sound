@@ -27,6 +27,8 @@ indicator_sound_service_CFLAGS = $(PULSEAUDIO_CFLAGS) \
 	$(SOUNDSERVICE_CFLAGS) \
 	$(GCONF_CFLAGS) \
 	$(COVERAGE_CFLAGS) \
-	-DLIBEXECDIR=\"$(libexecdir)\" -Wall
+	-DLIBEXECDIR=\"$(libexecdir)\" -Wall \
+	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\"
+
 indicator_sound_service_LDADD = $(PULSEAUDIO_LIBS) $(SOUNDSERVICE_LIBS) $(GCONF_LIBS)
 indicator_sound_service_LDFLAGS = $(COVERAGE_LDFLAGS)

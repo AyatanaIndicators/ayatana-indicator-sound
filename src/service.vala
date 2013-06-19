@@ -96,7 +96,7 @@ public class IndicatorSound.Service {
 
 	static Menu create_menu () {
 		var volume_section = new Menu ();
-		volume_section.append ("Mute", "indicator.mute");
+		volume_section.append (_("Mute"), "indicator.mute");
 
 		var slider = new MenuItem (null, "indicator.volume");
 		slider.set_attribute ("x-canonical-type", "s", "com.canonical.unity.slider");
@@ -109,7 +109,7 @@ public class IndicatorSound.Service {
 
 		var menu = new Menu ();
 		menu.append_section (null, volume_section);
-		menu.append ("Sound Settings…", "indicator.settings");
+		menu.append (_("Sound Settings…"), "indicator.settings");
 
 		return menu;
 	}
