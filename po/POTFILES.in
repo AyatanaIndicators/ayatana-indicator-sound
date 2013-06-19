@@ -1,5 +1,2 @@
 [encoding: UTF-8]
 src/service.vala
-src/mute-menu-item.c
-src/playlists-menu-item.c
-src/sound-service-dbus.c
