@@ -71,6 +71,12 @@ else
 fi
 AC_SUBST(DBUSSERVICEDIR)
 
+AC_ARG_WITH([indicator-dir],
+	    [AS_HELP_STRING([--with-indicator-dir=DIR], [Indicator directory [default=$datadir/unity/indicators]])],
+	    [],
+	    [with_indicator_dir=$datadir/unity/indicators])
+AC_SUBST([INDICATOR_DIR], [$with_indicator_dir])
+
 ##############################
 # Custom Junk
 ##############################
