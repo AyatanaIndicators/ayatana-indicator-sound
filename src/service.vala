@@ -76,8 +76,17 @@ public class IndicatorSound.Service {
 	uint player_action_update_id;
 
 	void activate_settings (SimpleAction action, Variant? param) {
+		var env = Environment.get_variable ("DESKTOP_SESSION");
+		string cmd;
+		if (env == "unity")
+			cmd = "gnome-control-center sound-nua";
+		else if (env == "xubuntu" || env == "ubuntustudio")
+			cmd = "pavucontrol";
+		else
+			cmd = "gnome-control-center sound";
+
 		try {
-			Process.spawn_command_line_async ("gnome-control-center sound");
+			Process.spawn_command_line_async (cmd);
 		} catch (Error e) {
 			warning ("unable to launch sound settings: %s", e.message);
 		}
