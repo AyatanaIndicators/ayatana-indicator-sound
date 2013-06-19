@@ -1,5 +1,5 @@
 
-iconsdir = $(INDICATORICONSDIR)/hicolor/scalable/status
+iconsdir = $(datadir)/hicolor/scalable/status
 
 icons_DATA =  \
 	sound-icon.svg
