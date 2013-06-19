@@ -1,5 +1,3 @@
-SUBDIRS = icons
-
 gsettings_SCHEMAS = \
   com.canonical.indicator.sound.gschema.xml
 @GSETTINGS_RULES@

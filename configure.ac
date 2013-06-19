@@ -112,11 +112,6 @@ AC_OUTPUT([
 Makefile
 src/Makefile
 data/Makefile
-data/icons/Makefile
-data/icons/16x16/Makefile
-data/icons/16x16/status/Makefile
-data/icons/scalable/Makefile
-data/icons/scalable/status/Makefile
 po/Makefile.in
 tests/Makefile
 ])
