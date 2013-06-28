@@ -308,22 +308,29 @@ public class IndicatorSound.Service {
 		this.update_preferred_players ();
 	}
 
+	/* returns the position in this.menu of the section that's associated with @player */
+	int find_player_section (MediaPlayer player) {
+		int n = this.menu.get_n_items ();
+		for (int i = 0; i < n; i++) {
+			var section = this.menu.get_item_link (i, Menu.LINK_SECTION);
+			string action;
+			section.get_item_attribute (0, "action", "s", out action);
+			if (action == player.id)
+				return i;
+		}
+
+		return -1;
+	}
+
 	void player_removed (MediaPlayer player) {
 		this.actions.remove (player.id);
 		this.actions.remove ("play." + player.id);
 		this.actions.remove ("next." + player.id);
 		this.actions.remove ("previous." + player.id);
 
-		int n = this.menu.get_n_items ();
-		for (int i = 0; i < n; i++) {
-			var section = this.menu.get_item_link (i, Menu.LINK_SECTION);
-			string action;
-			section.get_item_attribute (0, "action", "s", out action);
-			if (action == player.id) {
-				this.menu.remove (i);
-				break;
-			}
-		}
+		int index = this.find_player_section (player);
+		if (index >= 0)
+			this.menu.remove (index);
 
 		this.update_preferred_players ();
 	}
