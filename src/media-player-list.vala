@@ -56,7 +56,7 @@ public class MediaPlayerList {
 	/**
 	 * Adds the player associated with @desktop_id.  Does nothing if such a player already exists.
 	 */
-	public MediaPlayer? insert (string desktop_id) {
+	MediaPlayer? insert (string desktop_id) {
 		var id = desktop_id.has_suffix (".desktop") ? desktop_id : desktop_id + ".desktop";
 		MediaPlayer? player = this._players.lookup (id);
 
@@ -78,7 +78,7 @@ public class MediaPlayerList {
 	/**
 	 * Removes the player associated with @desktop_id, unless it is currently running.
 	 */
-	public void remove (string desktop_id) {
+	void remove (string desktop_id) {
 		MediaPlayer? player = this._players.lookup (desktop_id);
 
 		if (player != null && !player.is_running) {

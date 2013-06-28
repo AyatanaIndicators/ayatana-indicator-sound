@@ -69,7 +69,7 @@ public class Mpris2Watcher : GLib.Object
 
   // At startup check to see if there are clients up that we are interested in
   // More relevant for development and daemon's like mpd. 
-  public async void check_for_active_clients()
+  async void check_for_active_clients()
   {
     Variant interfaces;
 
@@ -99,7 +99,7 @@ public class Mpris2Watcher : GLib.Object
     }
   }
 
-  public void name_owner_changed (DBusConnection con, string sender, string object_path,
+  void name_owner_changed (DBusConnection con, string sender, string object_path,
                                   string interface_name, string signal_name, Variant parameters)
   {
     string name, previous_owner, current_owner;
