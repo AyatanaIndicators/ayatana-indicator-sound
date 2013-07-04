@@ -48,13 +48,6 @@ AC_SUBST(COVERAGE_CXXFLAGS)
 AC_SUBST(COVERAGE_LDFLAGS)
 
 ###########################
-# Check to see if we're local
-###########################
-
-with_localinstall="no"
-AC_ARG_ENABLE(localinstall, AS_HELP_STRING([--enable-localinstall], [install all of the files localy instead of system directories (for distcheck)]), with_localinstall=$enableval, with_localinstall=no)
-
-###########################
 # Grab the GSettings Macros
 ###########################
 
@@ -63,13 +56,6 @@ GLIB_GSETTINGS
 ###########################
 # DBus Service Info
 ###########################
-
-if test "x$with_localinstall" = "xyes"; then
-	DBUSSERVICEDIR="${datadir}/dbus-1/services/"
-else
-	DBUSSERVICEDIR=`$PKG_CONFIG --variable=session_bus_services_dir dbus-1`
-fi
-AC_SUBST(DBUSSERVICEDIR)
 
 AC_ARG_WITH([indicator-dir],
 	    [AS_HELP_STRING([--with-indicator-dir=DIR], [Indicator directory [default=$datadir/unity/indicators]])],

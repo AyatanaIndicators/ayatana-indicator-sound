@@ -2,7 +2,7 @@ gsettings_SCHEMAS = \
   com.canonical.indicator.sound.gschema.xml
 @GSETTINGS_RULES@
 
-dbus_servicesdir = $(DBUSSERVICEDIR)
+dbus_servicesdir = $(datadir)/dbus-1/services
 dbus_services_DATA = indicator-sound.service
 
 %.service: %.service.in
