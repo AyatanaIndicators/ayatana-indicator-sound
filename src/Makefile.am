@@ -1,4 +1,4 @@
-libexec_PROGRAMS = indicator-sound-service
+pkglibexec_PROGRAMS = indicator-sound-service
 
 indicator_sound_service_SOURCES = \
 	service.vala \
