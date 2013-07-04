@@ -1,6 +1,7 @@
 [Indicator Service]
 Name=indicator-sound
 ObjectPath=/com/canonical/indicator/sound
+Position=30
 
 [desktop]
 ObjectPath=/com/canonical/indicator/sound/desktop
