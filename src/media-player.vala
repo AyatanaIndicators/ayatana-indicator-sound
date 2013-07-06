@@ -133,8 +133,13 @@ public class MediaPlayer: Object {
 	 * Toggles playing status.
 	 */
 	public void play_pause () {
-		if (this.proxy != null)
+		if (this.proxy != null) {
 			this.proxy.PlayPause.begin ();
+		}
+		else if (this.state != "Launching") {
+			this.play_when_attached = true;
+			this.launch ();
+		}
 	}
 
 	/**
@@ -156,6 +161,7 @@ public class MediaPlayer: Object {
 	DesktopAppInfo appinfo;
 	MprisPlayer? proxy;
 	string _dbus_name;
+	bool play_when_attached = false;
 
 	void got_proxy (Object? obj, AsyncResult res) {
 		try {
@@ -169,6 +175,13 @@ public class MediaPlayer: Object {
 			this.notify_property ("is-running");
 			this.state = this.proxy.PlaybackStatus;
 			this.update_current_track (gproxy.get_cached_property ("Metadata"));
+
+			if (this.play_when_attached) {
+				/* wait a little before calling PlayPause, some players need some time to
+				   set themselves up */
+				Timeout.add (1000, () => { proxy.PlayPause.begin (); return false; } );
+				this.play_when_attached = false;
+			}
 		}
 		catch (Error e) {
 			this._dbus_name = null;
