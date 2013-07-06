@@ -126,7 +126,9 @@ public class MediaPlayer: Object {
 		catch (Error e) {
 			warning ("unable to launch %s: %s", appinfo.get_name (), e.message);
 		}
-		this.state = "Launching";
+
+		if (this.proxy == null)
+			this.state = "Launching";
 	}
 
 	/**
