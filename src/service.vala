@@ -266,6 +266,37 @@ public class IndicatorSound.Service {
 		this.settings.set_value ("preferred-media-players", builder.end ());
 	}
 
+	void update_playlists (MediaPlayer player) {
+		int index = find_player_section (player);
+		if (index < 0)
+			return;
+
+		var section = this.menu.get_item_link (index, Menu.LINK_SECTION) as Menu;
+
+		/* if a section has three items, the playlists menu is in it */
+		if (section.get_n_items () == 3)
+			section.remove (2);
+
+		if (!player.is_running)
+			return;
+
+		var count = player.get_n_playlists ();
+		if (count == 0)
+			return;
+
+		var playlists_section = new Menu ();
+		for (int i = 0; i < count; i++) {
+			var playlist_id = player.get_playlist_id (i);
+			playlists_section.append (player.get_playlist_name (i),
+									  @"indicator.play-playlist.$(player.id)::$playlist_id");
+								   
+		}
+
+		var submenu = new Menu ();
+		submenu.append_section (null, playlists_section);
+		section.append_submenu ("Choose Playlist", submenu);
+	}
+
 	void player_added (MediaPlayer player) {
 		var player_item = new MenuItem (player.name, "indicator." + player.id);
 		player_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
@@ -303,19 +334,28 @@ public class IndicatorSound.Service {
 		prev_action.activate.connect ( () => player.previous () );
 		this.actions.insert (prev_action);
 
+		var playlist_action = new SimpleAction ("play-playlist." + player.id, VariantType.STRING);
+		playlist_action.activate.connect ( (parameter) => player.activate_playlist_by_name (parameter.get_string ()) );
+		this.actions.insert (playlist_action);
+
 		player.notify.connect (this.eventually_update_player_actions);
+
+		player.playlists_changed.connect (this.update_playlists);
+		player.notify["is-running"].connect ( () => this.update_playlists (player) );
+		update_playlists (player);
 
 		this.update_preferred_players ();
 	}
 
 	/* returns the position in this.menu of the section that's associated with @player */
 	int find_player_section (MediaPlayer player) {
-		int n = this.menu.get_n_items ();
-		for (int i = 0; i < n; i++) {
+		string action_name = @"indicator.$(player.id)";
+		int n = this.menu.get_n_items () -1;
+		for (int i = 1; i < n; i++) {
 			var section = this.menu.get_item_link (i, Menu.LINK_SECTION);
 			string action;
 			section.get_item_attribute (0, "action", "s", out action);
-			if (action == player.id)
+			if (action == action_name)
 				return i;
 		}
 
@@ -327,6 +367,7 @@ public class IndicatorSound.Service {
 		this.actions.remove ("play." + player.id);
 		this.actions.remove ("next." + player.id);
 		this.actions.remove ("previous." + player.id);
+		this.actions.remove ("play-playlist." + player.id);
 
 		int index = this.find_player_section (player);
 		if (index >= 0)

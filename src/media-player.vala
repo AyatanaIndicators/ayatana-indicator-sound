@@ -84,6 +84,8 @@ public class MediaPlayer: Object {
 		get; set;
 	}
 
+	public signal void playlists_changed ();
+
 	/**
 	 * Attach this object to a process of the associated media player.  The player must own @dbus_name and
 	 * implement the org.mpris.MediaPlayer2.Player interface.
@@ -98,6 +100,8 @@ public class MediaPlayer: Object {
 		this._dbus_name = dbus_name;
 		Bus.get_proxy.begin<MprisPlayer> (BusType.SESSION, dbus_name, "/org/mpris/MediaPlayer2",
 										  DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, got_proxy);
+		Bus.get_proxy.begin<MprisPlaylists> (BusType.SESSION, dbus_name, "/org/mpris/MediaPlayer2",
+											 DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, got_playlists_proxy);
 	}
 
 	/**
@@ -160,10 +164,31 @@ public class MediaPlayer: Object {
 			this.proxy.Previous.begin ();
 	}
 
+	public uint get_n_playlists () {
+		return this.playlists != null ? this.playlists.length : 0;
+	}
+
+	public string get_playlist_id (int index) {
+		return_val_if_fail (index < this.playlists.length, "");
+		return this.playlists[index].path;
+	}
+
+	public string get_playlist_name (int index) {
+		return_val_if_fail (index < this.playlists.length, "");
+		return this.playlists[index].name;
+	}
+
+	public void activate_playlist_by_name (string name) {
+		if (this.playlists_proxy != null)
+			this.playlists_proxy.ActivatePlaylist.begin (new ObjectPath (name));
+	}
+
 	DesktopAppInfo appinfo;
 	MprisPlayer? proxy;
+	MprisPlaylists ?playlists_proxy;
 	string _dbus_name;
 	bool play_when_attached = false;
+	PlaylistDetails[] playlists = null;
 
 	void got_proxy (Object? obj, AsyncResult res) {
 		try {
@@ -191,6 +216,42 @@ public class MediaPlayer: Object {
 		}
 	}
 
+	void fetch_playlists () {
+		/* The proxy is created even when the interface is not supported. GDBusProxy will
+		   return 0 for the PlaylistCount property in that case. */
+		if (this.playlists_proxy != null && this.playlists_proxy.PlaylistCount > 0) {
+			this.playlists_proxy.GetPlaylists.begin (0, 100, "Alphabetical", false, (obj, res) => {
+				try {
+					this.playlists = playlists_proxy.GetPlaylists.end (res);
+					this.playlists_changed ();
+				}
+				catch (Error e) {
+					warning ("could not fetch playlists: %s", e.message);
+					this.playlists = null;
+				}
+			});
+		}
+		else {
+			this.playlists = null;
+			this.playlists_changed ();
+		}
+	}
+
+	void got_playlists_proxy (Object? obj, AsyncResult res) {
+		try {
+			this.playlists_proxy = Bus.get_proxy.end (res);
+
+			var gproxy = this.proxy as DBusProxy;
+			gproxy.g_properties_changed.connect (this.playlists_proxy_properties_changed);
+		}
+		catch (Error e) {
+			warning ("unable to create mpris plalists proxy: %s", e.message);
+			return;
+		}
+
+		Timeout.add (500, () => { this.fetch_playlists (); return false; } );
+	}
+
 	/* some players (e.g. Spotify) don't follow the spec closely and pass single strings in metadata fields
 	 * where an array of string is expected */
 	static string sanitize_metadata_value (Variant? v) {
@@ -213,6 +274,11 @@ public class MediaPlayer: Object {
 		var metadata = changed_properties.lookup_value ("Metadata", new VariantType ("a{sv}"));
 		if (metadata != null)
 			this.update_current_track (metadata);
+	}
+
+	void playlists_proxy_properties_changed (DBusProxy proxy, Variant changed_properties, string[] invalidated_properties) {
+		if (changed_properties.lookup ("PlaylistCount", "u", null))
+			this.fetch_playlists ();
 	}
 
 	void update_current_track (Variant metadata) {
