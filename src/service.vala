@@ -40,9 +40,9 @@ public class IndicatorSound.Service {
 		this.menu = create_menu ();
 		this.root_menu = create_root_menu (this.menu);
 
-		this.players.sync (settings.get_strv ("preferred-media-players"));
-		this.settings.changed["preferred-media-players"].connect ( () => {
-			this.players.sync (settings.get_strv ("preferred-media-players"));
+		this.players.sync (settings.get_strv ("interested-media-players"));
+		this.settings.changed["interested-media-players"].connect ( () => {
+			this.players.sync (settings.get_strv ("interested-media-players"));
 		});
 	}
 
@@ -263,7 +263,7 @@ public class IndicatorSound.Service {
 		var builder = new VariantBuilder (VariantType.STRING_ARRAY);
 		foreach (var player in this.players)
 			builder.add ("s", player.id);
-		this.settings.set_value ("preferred-media-players", builder.end ());
+		this.settings.set_value ("interested-media-players", builder.end ());
 	}
 
 	void update_playlists (MediaPlayer player) {
