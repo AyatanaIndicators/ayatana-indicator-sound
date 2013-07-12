@@ -1,5 +1,4 @@
 AC_INIT([indicator-sound],[12.10.1],[conor.curran@canonical.com])
-AC_CONFIG_SRCDIR([src/sound-service.c])
 AM_INIT_AUTOMAKE([check-news])
 AC_CONFIG_HEADERS([config.h])
 
@@ -8,8 +7,7 @@ AC_PREREQ(2.53)
 AM_MAINTAINER_MODE
 
 IT_PROG_INTLTOOL([0.35.0])
-AM_PROG_VALAC([0.11.2])
-AS_IF([test -z "$VALAC"], [AC_MSG_ERROR(["No valac compiler found."])])
+AM_PROG_VALAC([0.18])
 
 AC_ISC_POSIX
 AC_PROG_CC
@@ -22,46 +20,19 @@ AC_CONFIG_MACRO_DIR([m4])
 
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
-AC_PATH_PROG([GLIB_GENMARSHAL], [glib-genmarshal])
-
 ###########################
 # Dependencies 
 ###########################  
 
-GTK_REQUIRED_VERSION=3.0
-INDICATOR_REQUIRED_VERSION=0.3.19
-DBUSMENUGTK_REQUIRED_VERSION=0.5.90
-POLKIT_REQUIRED_VERSION=0.92
 PULSE_AUDIO_REQUIRED_VERSION=0.9.19
-INDICATOR_DISPLAY_OBJECTS=0.1.11
-DBUSMENUGLIB_REQUIRED_VERSION=0.3.101
 GIO_2_0_REQUIRED_VERSION=2.25.13
-LIBNOTIFY_REQUIRED_VERSION=0.7.0
 
 PKG_CHECK_MODULES(PULSEAUDIO, libpulse-mainloop-glib >= $PULSE_AUDIO_REQUIRED_VERSION
                               gio-unix-2.0)
-AC_SUBST(PULSEAUDIO_CFLAGS)
-AC_SUBST(PULSEAUDIO_LIBS)
 
-PKG_CHECK_MODULES(APPLET, gtk+-3.0 >= $GTK_REQUIRED_VERSION
-                          indicator3-0.4 >= $INDICATOR_REQUIRED_VERSION
-                          dbusmenu-gtk3-0.4 >= $DBUSMENUGTK_REQUIRED_VERSION
-                          libido3-0.1 >= $INDICATOR_DISPLAY_OBJECTS
-                          libnotify >= $LIBNOTIFY_REQUIRED_VERSION)
-
-PKG_CHECK_MODULES(SOUNDSERVICE, dbusmenu-glib-0.4 >= $DBUSMENUGLIB_REQUIRED_VERSION
-                                indicator3-0.4
-                                gee-1.0
-                                gdk-x11-3.0
+PKG_CHECK_MODULES(SOUNDSERVICE, gee-1.0
                                 gio-unix-2.0
-                                libbamf3
                                 libxml-2.0)
-
-AC_SUBST(APPLET_CFLAGS)
-AC_SUBST(APPLET_LIBS)
-
-AC_SUBST(SOUNDSERVICE_CFLAGS)
-AC_SUBST(SOUNDSERVICE_LIBS)
 
 ###########################
 # gcov coverage reporting
@@ -77,45 +48,20 @@ AC_SUBST(COVERAGE_CXXFLAGS)
 AC_SUBST(COVERAGE_LDFLAGS)
 
 ###########################
-# Check to see if we're local
-###########################
-
-with_localinstall="no"
-AC_ARG_ENABLE(localinstall, AS_HELP_STRING([--enable-localinstall], [install all of the files localy instead of system directories (for distcheck)]), with_localinstall=$enableval, with_localinstall=no)
-
-###########################
-# Indicator Info
-###########################
-
-AS_IF([test "x$with_localinstall" = "xyes"],
-	[
-	INDICATORDIR="${libdir}/indicators/2/"
-	INDICATORICONSDIR="${datadir}/indicator-sound/icons/"
-	],
-	[
-	INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator3-0.4`
-	INDICATORICONSDIR=`$PKG_CONFIG --variable=iconsdir indicator3-0.4`
-	])
-AC_SUBST(INDICATORDIR)
-AC_SUBST(INDICATORICONSDIR)
-
-###########################
 # Grab the GSettings Macros
 ###########################
 
 GLIB_GSETTINGS
-GLIB_GENMARSHAL
 
 ###########################
 # DBus Service Info
 ###########################
 
-if test "x$with_localinstall" = "xyes"; then
-	DBUSSERVICEDIR="${datadir}/dbus-1/services/"
-else
-	DBUSSERVICEDIR=`$PKG_CONFIG --variable=session_bus_services_dir dbus-1`
-fi
-AC_SUBST(DBUSSERVICEDIR)
+AC_ARG_WITH([indicator-dir],
+	    [AS_HELP_STRING([--with-indicator-dir=DIR], [Indicator directory [default=$datadir/unity/indicators]])],
+	    [],
+	    [with_indicator_dir=$datadir/unity/indicators])
+AC_SUBST([INDICATOR_DIR], [$with_indicator_dir])
 
 ##############################
 # Custom Junk
@@ -152,12 +98,8 @@ AC_OUTPUT([
 Makefile
 src/Makefile
 data/Makefile
-data/icons/Makefile
-data/icons/16x16/Makefile
-data/icons/16x16/status/Makefile
-data/icons/scalable/Makefile
-data/icons/scalable/status/Makefile
 po/Makefile.in
+tests/Makefile
 ])
 
 ###########################

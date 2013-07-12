@@ -69,7 +69,7 @@ public class Mpris2Watcher : GLib.Object
 
   // At startup check to see if there are clients up that we are interested in
   // More relevant for development and daemon's like mpd. 
-  public async void check_for_active_clients()
+  async void check_for_active_clients()
   {
     Variant interfaces;
 
@@ -94,12 +94,12 @@ public class Mpris2Watcher : GLib.Object
         MprisRoot? mpris2_root = this.create_mpris_root(address);
         if (mpris2_root == null) return;
         bool use_playlists = this.supports_playlists ( address );
-        client_appeared (mpris2_root.DesktopEntry, address, use_playlists);
+        client_appeared (mpris2_root.DesktopEntry + ".desktop", address, use_playlists);
       }
     }
   }
 
-  public void name_owner_changed (DBusConnection con, string sender, string object_path,
+  void name_owner_changed (DBusConnection con, string sender, string object_path,
                                   string interface_name, string signal_name, Variant parameters)
   {
     string name, previous_owner, current_owner;
@@ -116,7 +116,7 @@ public class Mpris2Watcher : GLib.Object
     else if (previous_owner == "" && current_owner != "") {
       debug ("Client '%s' has appeared", name);
       bool use_playlists = this.supports_playlists ( name );
-      client_appeared (mpris2_root.DesktopEntry, name, use_playlists);
+      client_appeared (mpris2_root.DesktopEntry + ".desktop", name, use_playlists);
     }
   }
 
