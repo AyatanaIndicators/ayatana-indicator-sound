@@ -2,7 +2,7 @@ gsettings_SCHEMAS = \
   com.canonical.indicator.sound.gschema.xml
 @GSETTINGS_RULES@
 
-upstart_jobsdir = $(datadir)/upstart/services
+upstart_jobsdir = $(datadir)/upstart/sessions
 upstart_jobs_DATA = indicator-sound.conf
 
 %.conf: %.conf.in
