@@ -1,3 +1,17 @@
+indicator-sound (12.10.2+13.10.20130716-0ubuntu1) saucy; urgency=low
+
+  [ Ted Gould ]
+  * Add phone profile to indicator config.
+
+  [ Lars Uebernickel ]
+  * Remove gtk and dbusmenu. Sorry for the big changeset. I'd appreciate
+    a good deal of testing before merging this into the wild ;).
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 354
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 16 Jul 2013 02:02:55 +0000
+
 indicator-sound (12.10.2daily13.06.07-0ubuntu1) saucy; urgency=low
 
   [ Jeremy Bicha ]
