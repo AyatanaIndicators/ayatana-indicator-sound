@@ -62,7 +62,7 @@ public class IndicatorSound.Service {
 	}
 
 	const ActionEntry[] action_entries = {
-		{ "root", null, null, "{ 'icon': <'audio-volume-high-panel'> }", null },
+		{ "root", null, null, "@a{sv} {}", null },
 		{ "settings", activate_settings, null, null, null },
 	};
 
@@ -92,6 +92,13 @@ public class IndicatorSound.Service {
 		}
 	}
 
+	/* Returns a serialized version of @icon_name suited for the panel */
+	static Variant serialize_themed_icon (string icon_name)
+	{
+		var icon = new ThemedIcon.with_default_fallbacks (icon_name);
+		return g_icon_serialize (icon);
+	}
+
 	static Menu create_root_menu (Menu submenu) {
 		var root = new MenuItem (null, "indicator.root");
 		root.set_attribute ("x-canonical-type", "s", "com.canonical.indicator.root");
@@ -109,8 +116,8 @@ public class IndicatorSound.Service {
 
 		var slider = new MenuItem (null, "indicator.volume");
 		slider.set_attribute ("x-canonical-type", "s", "com.canonical.unity.slider");
-		slider.set_attribute_value ("min-icon", g_icon_serialize (new ThemedIcon ("audio-volume-low-zero-panel")));
-		slider.set_attribute_value ("max-icon", g_icon_serialize (new ThemedIcon ("audio-volume-high-panel")));
+		slider.set_attribute_value ("min-icon", serialize_themed_icon ("audio-volume-low-zero-panel"));
+		slider.set_attribute_value ("max-icon", serialize_themed_icon ("audio-volume-high-panel"));
 		slider.set_attribute ("min-value", "d", 0.0);
 		slider.set_attribute ("max-value", "d", 1.0);
 		slider.set_attribute ("step", "d", 0.01);
@@ -129,8 +136,8 @@ public class IndicatorSound.Service {
 			if (volume_section.get_n_items () < 3) {
 				var slider = new MenuItem (null, "indicator.mic-volume");
 				slider.set_attribute ("x-canonical-type", "s", "com.canonical.unity.slider");
-				slider.set_attribute_value ("min-icon", g_icon_serialize (new ThemedIcon ("audio-input-microphone-low-zero-panel")));
-				slider.set_attribute_value ("max-icon", g_icon_serialize (new ThemedIcon ("audio-input-microphone-high-panel")));
+				slider.set_attribute_value ("min-icon", serialize_themed_icon ("audio-input-microphone-low-zero-panel"));
+				slider.set_attribute_value ("max-icon", serialize_themed_icon ("audio-input-microphone-high-panel"));
 				slider.set_attribute ("min-value", "d", 0.0);
 				slider.set_attribute ("max-value", "d", 1.0);
 				slider.set_attribute ("step", "d", 0.01);
@@ -158,7 +165,7 @@ public class IndicatorSound.Service {
 			icon  = "audio-volume-high-panel";
 
 		var root_action = this.actions.lookup ("root") as SimpleAction;
-		root_action.set_state (new Variant.parsed ("{ 'icon': <%s> }", icon));
+		root_action.set_state (new Variant.parsed ("{ 'icon': %v }", serialize_themed_icon (icon)));
 	}
 
 	Action create_mute_action () {
