@@ -1,3 +1,15 @@
+indicator-sound (12.10.2+13.10.20130722-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Remove Rhythmbox from the default of the 'interested-media-players'
+    setting The sound menu should only contain players that have been
+    started before. (LP: #1202933)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 356
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 22 Jul 2013 02:03:34 +0000
+
 indicator-sound (12.10.2+13.10.20130716-0ubuntu1) saucy; urgency=low
 
   [ Ted Gould ]
