@@ -36,8 +36,9 @@ public class IndicatorSound.Service {
 		this.actions.add_action (this.create_volume_action ());
 		this.actions.add_action (this.create_mic_volume_action ());
 
-		this.menu = new SoundMenu ();
-		this.volume_control.bind_property ("active-mic", this.menu, "show-mic-volume", BindingFlags.SYNC_CREATE);
+		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
+		this.menus.insert ("desktop", new SoundMenu ());
+		this.volume_control.bind_property ("active-mic", this.menus.get("desktop"), "show-mic-volume", BindingFlags.SYNC_CREATE);
 
 		this.players.sync (settings.get_strv ("interested-media-players"));
 		this.settings.changed["interested-media-players"].connect ( () => {
@@ -67,7 +68,7 @@ public class IndicatorSound.Service {
 
 	MainLoop loop;
 	SimpleActionGroup actions;
-	SoundMenu menu;
+	HashTable<string, SoundMenu> menus;
 	Settings settings;
 	VolumeControl volume_control;
 	MediaPlayerList players;
@@ -174,10 +175,11 @@ public class IndicatorSound.Service {
 	void bus_acquired (DBusConnection connection, string name) {
 		try {
 			connection.export_action_group ("/com/canonical/indicator/sound", this.actions);
-			this.menu.export (connection, "/com/canonical/indicator/sound/desktop");
 		} catch (Error e) {
 			critical ("%s", e.message);
 		}
+
+		this.menus.@foreach ( (profile, menu) => menu.export (connection, @"/com/canonical/indicator/sound/$profile"));
 	}
 
 	void name_lost (DBusConnection connection, string name) {
@@ -221,7 +223,7 @@ public class IndicatorSound.Service {
 	}
 
 	void player_added (MediaPlayer player) {
-		this.menu.add_player (player);
+		this.menus.@foreach ( (profile, menu) => menu.add_player (player));
 
 		SimpleAction action = new SimpleAction.stateful (player.id, null, this.action_state_for_player (player));
 		action.activate.connect ( () => { player.launch (); });
@@ -259,7 +261,7 @@ public class IndicatorSound.Service {
 		this.actions.remove ("previous." + player.id);
 		this.actions.remove ("play-playlist." + player.id);
 
-		this.menu.remove_player (player);
+		this.menus.@foreach ( (profile, menu) => menu.remove_player (player));
 
 		this.update_preferred_players ();
 	}

@@ -43,8 +43,12 @@ class SoundMenu: Object
 		root.append_item (root_item);
 	}
 
-	public void export (DBusConnection connection, string object_path) throws Error {
-		connection.export_menu_model (object_path, this.root);
+	public void export (DBusConnection connection, string object_path) {
+		try {
+			connection.export_menu_model (object_path, this.root);
+		} catch (Error e) {
+			critical ("%s", e.message);
+		}
 	}
 
 	public bool show_mic_volume {
