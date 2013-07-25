@@ -1,3 +1,14 @@
+indicator-sound (12.10.2+13.10.20130725-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Specify fallback icons The *-panel suffix is only used by the
+    ubuntu-mono icon themes. . (LP: #1202932)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 358
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 25 Jul 2013 02:03:43 +0000
+
 indicator-sound (12.10.2+13.10.20130722-0ubuntu1) saucy; urgency=low
 
   [ Lars Uebernickel ]
