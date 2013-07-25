@@ -25,7 +25,6 @@ public class IndicatorSound.Service {
 		this.settings = new Settings ("com.canonical.indicator.sound");
 
 		this.volume_control = new VolumeControl ();
-		this.volume_control.notify["active-mic"].connect (active_mic_changed);
 
 		this.players = new MediaPlayerList ();
 		this.players.player_added.connect (this.player_added);
@@ -37,8 +36,13 @@ public class IndicatorSound.Service {
 		this.actions.add_action (this.create_volume_action ());
 		this.actions.add_action (this.create_mic_volume_action ());
 
-		this.menu = create_menu ();
-		this.root_menu = create_root_menu (this.menu);
+		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
+		this.menus.insert ("desktop", new SoundMenu ("indicator.desktop-settings"));
+		this.menus.insert ("phone", new SoundMenu ("indicator.phone-settings"));
+
+		this.menus.@foreach ( (profile, menu) => {
+			this.volume_control.bind_property ("active-mic", menu, "show-mic-volume", BindingFlags.SYNC_CREATE);
+		});
 
 		this.players.sync (settings.get_strv ("interested-media-players"));
 		this.settings.changed["interested-media-players"].connect ( () => {
@@ -63,19 +67,19 @@ public class IndicatorSound.Service {
 
 	const ActionEntry[] action_entries = {
 		{ "root", null, null, "@a{sv} {}", null },
-		{ "settings", activate_settings, null, null, null },
+		{ "desktop-settings", activate_desktop_settings, null, null, null },
+		{ "phone-settings", activate_phone_settings, null, null, null },
 	};
 
 	MainLoop loop;
 	SimpleActionGroup actions;
-	Menu root_menu;
-	Menu menu;
+	HashTable<string, SoundMenu> menus;
 	Settings settings;
 	VolumeControl volume_control;
 	MediaPlayerList players;
 	uint player_action_update_id;
 
-	void activate_settings (SimpleAction action, Variant? param) {
+	void activate_desktop_settings (SimpleAction action, Variant? param) {
 		var env = Environment.get_variable ("DESKTOP_SESSION");
 		string cmd;
 		if (env == "unity")
@@ -92,62 +96,19 @@ public class IndicatorSound.Service {
 		}
 	}
 
+	void activate_phone_settings (SimpleAction action, Variant? param) {
+		try {
+			Process.spawn_command_line_async ("system-settings sound");
+		} catch (Error e) {
+			warning ("unable to launch sound settings: %s", e.message);
+		}
+	}
+
 	/* Returns a serialized version of @icon_name suited for the panel */
 	static Variant serialize_themed_icon (string icon_name)
 	{
 		var icon = new ThemedIcon.with_default_fallbacks (icon_name);
 		return g_icon_serialize (icon);
-	}
-
-	static Menu create_root_menu (Menu submenu) {
-		var root = new MenuItem (null, "indicator.root");
-		root.set_attribute ("x-canonical-type", "s", "com.canonical.indicator.root");
-		root.set_submenu (submenu);
-
-		var menu = new Menu ();
-		menu.append_item (root);
-
-		return menu;
-	}
-
-	static Menu create_menu () {
-		var volume_section = new Menu ();
-		volume_section.append (_("Mute"), "indicator.mute");
-
-		var slider = new MenuItem (null, "indicator.volume");
-		slider.set_attribute ("x-canonical-type", "s", "com.canonical.unity.slider");
-		slider.set_attribute_value ("min-icon", serialize_themed_icon ("audio-volume-low-zero-panel"));
-		slider.set_attribute_value ("max-icon", serialize_themed_icon ("audio-volume-high-panel"));
-		slider.set_attribute ("min-value", "d", 0.0);
-		slider.set_attribute ("max-value", "d", 1.0);
-		slider.set_attribute ("step", "d", 0.01);
-		volume_section.append_item (slider);
-
-		var menu = new Menu ();
-		menu.append_section (null, volume_section);
-		menu.append (_("Sound Settings…"), "indicator.settings");
-
-		return menu;
-	}
-
-	void active_mic_changed () {
-		var volume_section = this.menu.get_item_link (0, "section") as Menu;
-		if (this.volume_control.active_mic) {
-			if (volume_section.get_n_items () < 3) {
-				var slider = new MenuItem (null, "indicator.mic-volume");
-				slider.set_attribute ("x-canonical-type", "s", "com.canonical.unity.slider");
-				slider.set_attribute_value ("min-icon", serialize_themed_icon ("audio-input-microphone-low-zero-panel"));
-				slider.set_attribute_value ("max-icon", serialize_themed_icon ("audio-input-microphone-high-panel"));
-				slider.set_attribute ("min-value", "d", 0.0);
-				slider.set_attribute ("max-value", "d", 1.0);
-				slider.set_attribute ("step", "d", 0.01);
-				volume_section.append_item (slider);
-			}
-		}
-		else {
-			if (volume_section.get_n_items () > 2)
-				volume_section.remove (2);
-		}
 	}
 
 	void update_root_icon () {
@@ -227,10 +188,11 @@ public class IndicatorSound.Service {
 	void bus_acquired (DBusConnection connection, string name) {
 		try {
 			connection.export_action_group ("/com/canonical/indicator/sound", this.actions);
-			connection.export_menu_model ("/com/canonical/indicator/sound/desktop", this.root_menu);
 		} catch (Error e) {
 			critical ("%s", e.message);
 		}
+
+		this.menus.@foreach ( (profile, menu) => menu.export (connection, @"/com/canonical/indicator/sound/$profile"));
 	}
 
 	void name_lost (DBusConnection connection, string name) {
@@ -273,53 +235,8 @@ public class IndicatorSound.Service {
 		this.settings.set_value ("interested-media-players", builder.end ());
 	}
 
-	void update_playlists (MediaPlayer player) {
-		int index = find_player_section (player);
-		if (index < 0)
-			return;
-
-		var section = this.menu.get_item_link (index, Menu.LINK_SECTION) as Menu;
-
-		/* if a section has three items, the playlists menu is in it */
-		if (section.get_n_items () == 3)
-			section.remove (2);
-
-		if (!player.is_running)
-			return;
-
-		var count = player.get_n_playlists ();
-		if (count == 0)
-			return;
-
-		var playlists_section = new Menu ();
-		for (int i = 0; i < count; i++) {
-			var playlist_id = player.get_playlist_id (i);
-			playlists_section.append (player.get_playlist_name (i),
-									  @"indicator.play-playlist.$(player.id)::$playlist_id");
-								   
-		}
-
-		var submenu = new Menu ();
-		submenu.append_section (null, playlists_section);
-		section.append_submenu ("Choose Playlist", submenu);
-	}
-
 	void player_added (MediaPlayer player) {
-		var player_item = new MenuItem (player.name, "indicator." + player.id);
-		player_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
-		player_item.set_attribute_value ("icon", g_icon_serialize (player.icon));
-
-		var playback_item = new MenuItem (null, null);
-		playback_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.playback-item");
-		playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id);
-		playback_item.set_attribute ("x-canonical-next-action", "s", "indicator.next." + player.id);
-		playback_item.set_attribute ("x-canonical-previous-action", "s", "indicator.previous." + player.id);
-
-		var section = new Menu ();
-		section.append_item (player_item);
-		section.append_item (playback_item);
-
-		this.menu.insert_section (this.menu.get_n_items () -1, null, section);
+		this.menus.@foreach ( (profile, menu) => menu.add_player (player));
 
 		SimpleAction action = new SimpleAction.stateful (player.id, null, this.action_state_for_player (player));
 		action.activate.connect ( () => { player.launch (); });
@@ -347,26 +264,7 @@ public class IndicatorSound.Service {
 
 		player.notify.connect (this.eventually_update_player_actions);
 
-		player.playlists_changed.connect (this.update_playlists);
-		player.notify["is-running"].connect ( () => this.update_playlists (player) );
-		update_playlists (player);
-
 		this.update_preferred_players ();
-	}
-
-	/* returns the position in this.menu of the section that's associated with @player */
-	int find_player_section (MediaPlayer player) {
-		string action_name = @"indicator.$(player.id)";
-		int n = this.menu.get_n_items () -1;
-		for (int i = 1; i < n; i++) {
-			var section = this.menu.get_item_link (i, Menu.LINK_SECTION);
-			string action;
-			section.get_item_attribute (0, "action", "s", out action);
-			if (action == action_name)
-				return i;
-		}
-
-		return -1;
 	}
 
 	void player_removed (MediaPlayer player) {
@@ -376,9 +274,7 @@ public class IndicatorSound.Service {
 		this.actions.remove ("previous." + player.id);
 		this.actions.remove ("play-playlist." + player.id);
 
-		int index = this.find_player_section (player);
-		if (index >= 0)
-			this.menu.remove (index);
+		this.menus.@foreach ( (profile, menu) => menu.remove_player (player));
 
 		this.update_preferred_players ();
 	}

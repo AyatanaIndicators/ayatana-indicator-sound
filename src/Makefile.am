@@ -8,7 +8,8 @@ indicator_sound_service_SOURCES = \
 	media-player-list.vala \
 	mpris2-interfaces.vala \
 	mpris2-watcher.vala \
-	freedesktop-interfaces.vala
+	freedesktop-interfaces.vala \
+	sound-menu.vala
 
 indicator_sound_service_VALAFLAGS = \
   --ccode \
