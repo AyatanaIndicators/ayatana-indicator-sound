@@ -37,8 +37,12 @@ public class IndicatorSound.Service {
 		this.actions.add_action (this.create_mic_volume_action ());
 
 		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
-		this.menus.insert ("desktop", new SoundMenu ());
-		this.volume_control.bind_property ("active-mic", this.menus.get("desktop"), "show-mic-volume", BindingFlags.SYNC_CREATE);
+		this.menus.insert ("desktop", new SoundMenu ("indicator.desktop-settings"));
+		this.menus.insert ("phone", new SoundMenu ("indicator.phone-settings"));
+
+		this.menus.@foreach ( (profile, menu) => {
+			this.volume_control.bind_property ("active-mic", menu, "show-mic-volume", BindingFlags.SYNC_CREATE);
+		});
 
 		this.players.sync (settings.get_strv ("interested-media-players"));
 		this.settings.changed["interested-media-players"].connect ( () => {
@@ -63,7 +67,8 @@ public class IndicatorSound.Service {
 
 	const ActionEntry[] action_entries = {
 		{ "root", null, null, "@a{sv} {}", null },
-		{ "settings", activate_settings, null, null, null },
+		{ "desktop-settings", activate_desktop_settings, null, null, null },
+		{ "phone-settings", activate_phone_settings, null, null, null },
 	};
 
 	MainLoop loop;
@@ -74,7 +79,7 @@ public class IndicatorSound.Service {
 	MediaPlayerList players;
 	uint player_action_update_id;
 
-	void activate_settings (SimpleAction action, Variant? param) {
+	void activate_desktop_settings (SimpleAction action, Variant? param) {
 		var env = Environment.get_variable ("DESKTOP_SESSION");
 		string cmd;
 		if (env == "unity")
@@ -86,6 +91,14 @@ public class IndicatorSound.Service {
 
 		try {
 			Process.spawn_command_line_async (cmd);
+		} catch (Error e) {
+			warning ("unable to launch sound settings: %s", e.message);
+		}
+	}
+
+	void activate_phone_settings (SimpleAction action, Variant? param) {
+		try {
+			Process.spawn_command_line_async ("system-settings sound");
 		} catch (Error e) {
 			warning ("unable to launch sound settings: %s", e.message);
 		}

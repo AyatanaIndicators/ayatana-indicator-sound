@@ -19,7 +19,7 @@
 
 class SoundMenu: Object
 {
-	public SoundMenu () {
+	public SoundMenu (string settings_action) {
 		/* A sound menu always has at least two sections: the volume section (this.volume_section)
 		 * at the start of the menu, and the settings section at the end. Between those two,
 		 * it has a dynamic amount of player sections, one for each registered player.
@@ -33,7 +33,7 @@ class SoundMenu: Object
 
 		this.menu = new Menu ();
 		this.menu.append_section (null, volume_section);
-		this.menu.append (_("Sound Settings…"), "indicator.settings");
+		this.menu.append (_("Sound Settings…"), settings_action);
 
 		var root_item = new MenuItem (null, "indicator.root");
 		root_item.set_attribute ("x-canonical-type", "s", "com.canonical.indicator.root");
