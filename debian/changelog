@@ -1,3 +1,13 @@
+indicator-sound (12.10.2+13.10.20130726-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Actually export a phone menu.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 360
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 26 Jul 2013 02:03:50 +0000
+
 indicator-sound (12.10.2+13.10.20130725-0ubuntu1) saucy; urgency=low
 
   [ Lars Uebernickel ]
