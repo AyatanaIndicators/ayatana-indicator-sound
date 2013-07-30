@@ -27,6 +27,7 @@ Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          pulseaudio,
+Recommends: ubuntu-system-settings | gnome-control-center,
 Description: System sound indicator.
  System sound indicator which provides easy control of the PulseAudio sound 
  daemon.
