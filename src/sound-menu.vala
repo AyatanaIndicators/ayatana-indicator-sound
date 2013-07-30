@@ -29,7 +29,7 @@ class SoundMenu: Object
 		volume_section.append (_("Mute"), "indicator.mute");
 		volume_section.append_item (this.create_slider_menu_item ("indicator.volume", 0.0, 1.0, 0.01,
 																  "audio-volume-low-zero-panel",
-																  "audio-volume-low-high-panel"));
+																  "audio-volume-high-panel"));
 
 		this.menu = new Menu ();
 		this.menu.append_section (null, volume_section);
@@ -139,7 +139,7 @@ class SoundMenu: Object
 			var playlist_id = player.get_playlist_id (i);
 			playlists_section.append (player.get_playlist_name (i),
 									  @"indicator.play-playlist.$(player.id)::$playlist_id");
-								   
+
 		}
 
 		var submenu = new Menu ();
