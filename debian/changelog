@@ -1,3 +1,16 @@
+indicator-sound (12.10.2+13.10.20130731-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * add Recommends: u-s-s | g-c-c to debian/control.
+
+  [ Nick Dedekind ]
+  * Fixed max-icon on volume control slider. (LP: #1206534)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 363
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 31 Jul 2013 02:02:57 +0000
+
 indicator-sound (12.10.2+13.10.20130726-0ubuntu1) saucy; urgency=low
 
   [ Lars Uebernickel ]
