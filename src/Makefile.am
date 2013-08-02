@@ -7,9 +7,10 @@ indicator_sound_service_SOURCES = \
 	media-player.vala \
 	media-player-list.vala \
 	mpris2-interfaces.vala \
-	mpris2-watcher.vala \
 	freedesktop-interfaces.vala \
-	sound-menu.vala
+	sound-menu.vala \
+	bus-watch-namespace.c \
+	bus-watch-namespace.h
 
 indicator_sound_service_VALAFLAGS = \
   --ccode \
@@ -22,6 +23,7 @@ indicator_sound_service_VALAFLAGS = \
   --pkg libxml-2.0 \
   --pkg libpulse \
   --pkg libpulse-mainloop-glib \
+  --pkg bus-watcher \
   --target-glib=2.36
 
 # -w to disable warnings for vala-generated code

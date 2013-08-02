@@ -26,9 +26,7 @@ public class MediaPlayerList {
 	public MediaPlayerList () {
 		this._players = new HashTable<string, MediaPlayer> (str_hash, str_equal);
 
-		this.mpris_watcher = new Mpris2Watcher ();
-		this.mpris_watcher.client_appeared.connect (this.player_appeared);
-		this.mpris_watcher.client_disappeared.connect (this.player_disappeared);
+		BusWatcher.watch_namespace (BusType.SESSION, "org.mpris.MediaPlayer2", this.player_appeared, this.player_disappeared);
 	}
 
 	/* only valid while the list is not changed */
@@ -113,15 +111,21 @@ public class MediaPlayerList {
 	public signal void player_removed (MediaPlayer player);
 
 	HashTable<string, MediaPlayer> _players;
-	Mpris2Watcher mpris_watcher;
 
-	void player_appeared (string desktop_id, string dbus_name, bool use_playlists) {
-		var player = this.insert (desktop_id);
-		if (player != null)
-			player.attach (dbus_name);
+	void player_appeared (DBusConnection connection, string name, string owner) {
+		try {
+			MprisRoot mpris2_root = Bus.get_proxy_sync (BusType.SESSION, name, MPRIS_MEDIA_PLAYER_PATH);
+
+			var player = this.insert (mpris2_root.DesktopEntry);
+			if (player != null)
+				player.attach (name);
+		}
+		catch (Error e) {
+			warning ("unable to create mpris proxy for '%s': %s", name, e.message);
+		}
 	}
 
-	void player_disappeared (string dbus_name) {
+	void player_disappeared (DBusConnection connection, string dbus_name) {
 		MediaPlayer? player = this._players.find ( (name, player) => {
 			return player.dbus_name == dbus_name;
 		});
