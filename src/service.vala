@@ -125,8 +125,20 @@ public class IndicatorSound.Service {
 		else
 			icon  = "audio-volume-high-panel";
 
-		var root_action = this.actions.lookup ("root") as SimpleAction;
-		root_action.set_state (new Variant.parsed ("{ 'icon': %v }", serialize_themed_icon (icon)));
+		string accessible_name;
+		if (this.volume_control.mute) {
+			accessible_name = "Volume (muted)";
+		} else {
+			int volume_int = (int)(volume * 100);
+			accessible_name = @"Volume ($volume_int%)";
+		}
+
+		var root_action = actions.lookup ("root") as SimpleAction;
+		var builder = new VariantBuilder (new VariantType ("a{sv}"));
+		builder.add ("{sv}", "accessible-desc", new Variant.string (accessible_name));
+		builder.add ("{sv}", "icon", serialize_themed_icon (icon));
+		builder.add ("{sv}", "visible", new Variant.boolean (true));
+		root_action.set_state (builder.end());
 	}
 
 	Action create_mute_action () {
