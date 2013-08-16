@@ -123,6 +123,6 @@ target_link_libraries(
 
 install(
   TARGETS indicator-sound-service-bin
-  RUNTIME DESTINATION ${CMAKE_INSTALL_LIBEXECDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_LIBEXECDIR}/indicator-sound/
 )
 
