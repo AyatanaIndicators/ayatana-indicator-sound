@@ -39,7 +39,6 @@ pkg_check_modules(
   gio-2.0>=${GIO_2_0_REQUIRED_VERSION}
   gio-unix-2.0
   libxml-2.0
-  gthread-2.0
 )
 include_directories(${SOUNDSERVICE_INCLUDE_DIRS})
 
@@ -52,6 +51,10 @@ include_directories(${SOURCE_BINARY_DIR})
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+add_definitions(
+  -Wall
+)
 
 configure_file(
   "config.h.in"
