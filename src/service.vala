@@ -17,9 +17,6 @@
  *      Lars Uebernickel <lars.uebernickel@canonical.com>
  */
 
-/* Icon.serialize() is not yet in gio-2.0.vapi; remove this when it is */
-extern Variant? g_icon_serialize (Icon icon);
-
 public class IndicatorSound.Service {
 	public Service () {
 		this.settings = new Settings ("com.canonical.indicator.sound");
