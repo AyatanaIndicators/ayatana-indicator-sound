@@ -1,3 +1,13 @@
+indicator-sound (12.10.2+13.10.20130820-0ubuntu1) saucy; urgency=low
+
+  [ Pete Woods ]
+  * Re-write build scripts using cmake.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 367
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 20 Aug 2013 10:08:24 +0000
+
 indicator-sound (12.10.2+13.10.20130812.1-0ubuntu1) saucy; urgency=low
 
   [ Charles Kerr ]
