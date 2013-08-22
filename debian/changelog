@@ -1,3 +1,13 @@
+indicator-sound (12.10.2+13.10.20130822-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * Don't use deprecated GSimpleActionGroup APIs.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 369
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 22 Aug 2013 20:29:51 +0000
+
 indicator-sound (12.10.2+13.10.20130820-0ubuntu1) saucy; urgency=low
 
   [ Pete Woods ]
