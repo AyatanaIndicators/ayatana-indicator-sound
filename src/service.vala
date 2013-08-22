@@ -28,7 +28,7 @@ public class IndicatorSound.Service {
 		this.players.player_removed.connect (this.player_removed);
 
 		this.actions = new SimpleActionGroup ();
-		this.actions.add_entries (action_entries, this);
+		this.actions.add_action_entries (action_entries, this);
 		this.actions.add_action (this.create_mute_action ());
 		this.actions.add_action (this.create_volume_action ());
 		this.actions.add_action (this.create_mic_volume_action ());
@@ -130,7 +130,7 @@ public class IndicatorSound.Service {
 			accessible_name = @"Volume ($volume_int%)";
 		}
 
-		var root_action = actions.lookup ("root") as SimpleAction;
+		var root_action = actions.lookup_action ("root") as SimpleAction;
 		var builder = new VariantBuilder (new VariantType ("a{sv}"));
 		builder.add ("{sv}", "accessible-desc", new Variant.string (accessible_name));
 		builder.add ("{sv}", "icon", serialize_themed_icon (icon));
@@ -158,7 +158,7 @@ public class IndicatorSound.Service {
 	}
 
 	void volume_changed (double volume) {
-		var volume_action = this.actions.lookup ("volume") as SimpleAction;
+		var volume_action = this.actions.lookup_action ("volume") as SimpleAction;
 		volume_action.set_state (volume);
 
 		this.update_root_icon ();
@@ -223,7 +223,7 @@ public class IndicatorSound.Service {
 
 	bool update_player_actions () {
 		foreach (var player in this.players) {
-			SimpleAction? action = this.actions.lookup (player.id) as SimpleAction;
+			SimpleAction? action = this.actions.lookup_action (player.id) as SimpleAction;
 			if (action != null)
 				action.set_state (this.action_state_for_player (player));
 		}
@@ -249,11 +249,11 @@ public class IndicatorSound.Service {
 
 		SimpleAction action = new SimpleAction.stateful (player.id, null, this.action_state_for_player (player));
 		action.activate.connect ( () => { player.launch (); });
-		this.actions.insert (action);
+		this.actions.add_action (action);
 
 		var play_action = new SimpleAction.stateful ("play." + player.id, null, player.state);
 		play_action.activate.connect ( () => player.play_pause () );
-		this.actions.insert (play_action);
+		this.actions.add_action (play_action);
 		player.notify.connect ( (object, pspec) => {
 			if (pspec.name == "state")
 				play_action.set_state (player.state);
@@ -261,15 +261,15 @@ public class IndicatorSound.Service {
 
 		var next_action = new SimpleAction ("next." + player.id, null);
 		next_action.activate.connect ( () => player.next () );
-		this.actions.insert (next_action);
+		this.actions.add_action (next_action);
 
 		var prev_action = new SimpleAction ("previous." + player.id, null);
 		prev_action.activate.connect ( () => player.previous () );
-		this.actions.insert (prev_action);
+		this.actions.add_action (prev_action);
 
 		var playlist_action = new SimpleAction ("play-playlist." + player.id, VariantType.STRING);
 		playlist_action.activate.connect ( (parameter) => player.activate_playlist_by_name (parameter.get_string ()) );
-		this.actions.insert (playlist_action);
+		this.actions.add_action (playlist_action);
 
 		player.notify.connect (this.eventually_update_player_actions);
 
@@ -277,11 +277,11 @@ public class IndicatorSound.Service {
 	}
 
 	void player_removed (MediaPlayer player) {
-		this.actions.remove (player.id);
-		this.actions.remove ("play." + player.id);
-		this.actions.remove ("next." + player.id);
-		this.actions.remove ("previous." + player.id);
-		this.actions.remove ("play-playlist." + player.id);
+		this.actions.remove_action (player.id);
+		this.actions.remove_action ("play." + player.id);
+		this.actions.remove_action ("next." + player.id);
+		this.actions.remove_action ("previous." + player.id);
+		this.actions.remove_action ("play-playlist." + player.id);
 
 		this.menus.@foreach ( (profile, menu) => menu.remove_player (player));
 
