@@ -17,6 +17,9 @@
  *      Lars Uebernickel <lars.uebernickel@canonical.com>
  */
 
+/* Icon.serialize() is not yet in gio-2.0.vapi; remove this when it is */
+extern Variant? g_icon_serialize (Icon icon);
+
 class SoundMenu: Object
 {
 	public SoundMenu (string settings_action) {
