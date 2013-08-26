@@ -313,7 +313,7 @@ bus_watch_namespace (GBusType                  bus_type,
   watcher->vanished_handler = vanished_handler;
   watcher->user_data = user_data;
   watcher->user_data_destroy = user_data_destroy;
-  watcher->cancellable = g_cancellable_new ();;
+  watcher->cancellable = g_cancellable_new ();
   watcher->names = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
   if (namespace_watcher_watchers == NULL)
