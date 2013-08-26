@@ -81,6 +81,8 @@ namespace_watcher_stop (gpointer data)
   if (g_hash_table_size (namespace_watcher_watchers) == 0)
     g_clear_pointer (&namespace_watcher_watchers, g_hash_table_destroy);
 
+  g_free (watcher->name_space);
+
   g_free (watcher);
 }
 
