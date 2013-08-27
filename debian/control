@@ -4,7 +4,7 @@ Priority: extra
 Maintainer: Ubuntu Desktop Team <ubuntu-desktop@lists.ubuntu.com>
 XSBC-Original-Maintainer: Conor Curran <conor.curran@canonical.com>
 Build-Depends: debhelper (>= 9.0),
-               dh-autoreconf,
+               cmake,
                dh-translations,
                gnome-common,
                autotools-dev,
@@ -27,6 +27,7 @@ Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          pulseaudio,
+Recommends: ubuntu-system-settings | gnome-control-center,
 Description: System sound indicator.
  System sound indicator which provides easy control of the PulseAudio sound 
  daemon.

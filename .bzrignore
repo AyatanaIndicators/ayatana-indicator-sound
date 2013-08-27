@@ -1,33 +1,7 @@
-Makefile
-Makefile.in
-Makefile.in.in
-.deps
-.libs
-*.gschema.valid
-
-/INSTALL
-/aclocal.m4
-/autom4te.cache
-/compile
-/config.guess
-/config.h
-/config.h.in
-/config.log
-/config.status
-/config.sub
-/configure
-/depcomp
-/install-sh
-/libtool
-/ltmain.sh
-/missing
-/stamp-h1
-/m4/*
-
 /po/POTFILES
 /po/stamp-it
 
-/data/indicator-sound.service
+/data/indicator-sound.conf
 
 /src/indicator-sound-service
 /src/indicator_sound_service_vala.stamp

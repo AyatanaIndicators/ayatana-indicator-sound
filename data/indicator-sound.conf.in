@@ -11,4 +11,4 @@ export G_MESSAGES_DEBUG
 
 respawn
 
-exec @pkglibexecdir@/indicator-sound-service
+exec @CMAKE_INSTALL_FULL_LIBEXECDIR@/indicator-sound/indicator-sound-service
