@@ -20,6 +20,7 @@ vala_init(indicator-sound-service
     --vapidir=${CMAKE_SOURCE_DIR}/vapi/
     --vapidir=.
     --target-glib=2.36
+    --pkg=bus-watcher
 )
 
 vala_add(indicator-sound-service
@@ -47,17 +48,10 @@ vala_add(indicator-sound-service
   media-player-list.vala
   DEPENDS
     media-player
-    mpris2-watcher
+    mpris2-interfaces
 )
 vala_add(indicator-sound-service
   mpris2-interfaces.vala
-)
-vala_add(indicator-sound-service
-  mpris2-watcher.vala
-  DEPENDS
-    media-player
-    mpris2-interfaces
-    freedesktop-interfaces
 )
 vala_add(indicator-sound-service
   freedesktop-interfaces.vala
@@ -89,6 +83,7 @@ set(
   INDICATOR_SOUND_SOURCES
   ${project_VALA_SOURCES}
   ${project_VALA_C}
+  bus-watch-namespace.c
   ${SYMBOLS_PATH}
 )
 
