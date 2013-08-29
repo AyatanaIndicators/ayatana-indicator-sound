@@ -1,3 +1,14 @@
+indicator-sound (12.10.2+13.10.20130829-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Use bus_watch_namespace() for more robust monitoring of mpris
+    players appearing or disappearing on the bus.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 371
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 29 Aug 2013 02:08:13 +0000
+
 indicator-sound (12.10.2+13.10.20130822-0ubuntu1) saucy; urgency=low
 
   [ Charles Kerr ]
