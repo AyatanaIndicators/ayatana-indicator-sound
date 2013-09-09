@@ -64,6 +64,7 @@ public class IndicatorSound.Service {
 
 	const ActionEntry[] action_entries = {
 		{ "root", null, null, "@a{sv} {}", null },
+		{ "scroll", activate_scroll_action, "i", null, null },
 		{ "desktop-settings", activate_desktop_settings, null, null, null },
 		{ "phone-settings", activate_phone_settings, null, null, null },
 	};
@@ -75,6 +76,19 @@ public class IndicatorSound.Service {
 	VolumeControl volume_control;
 	MediaPlayerList players;
 	uint player_action_update_id;
+
+	void activate_scroll_action (SimpleAction action, Variant? param) {
+		const double volume_step_percentage = 0.06;
+		int delta = param.get_int32(); /* positive for up, negative for down */
+
+		double v = this.volume_control.get_volume () + volume_step_percentage * delta;
+		if (v > 1.0)
+			v = 1.0;
+		else if (v < 0.0)
+			v = 0.0;
+
+		this.volume_control.set_volume (v);
+	}
 
 	void activate_desktop_settings (SimpleAction action, Variant? param) {
 		var env = Environment.get_variable ("DESKTOP_SESSION");
