@@ -41,6 +41,7 @@ class SoundMenu: Object
 		var root_item = new MenuItem (null, "indicator.root");
 		root_item.set_attribute ("x-canonical-type", "s", "com.canonical.indicator.root");
 		root_item.set_attribute ("x-canonical-scroll-action", "s", "indicator.scroll");
+		root_item.set_attribute ("x-canonical-secondary-action", "s", "indicator.mute");
 		root_item.set_submenu (this.menu);
 
 		this.root = new Menu ();
