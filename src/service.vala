@@ -138,10 +138,10 @@ public class IndicatorSound.Service {
 
 		string accessible_name;
 		if (this.volume_control.mute) {
-			accessible_name = "Volume (muted)";
+			accessible_name = _("Volume (muted)");
 		} else {
 			int volume_int = (int)(volume * 100);
-			accessible_name = @"Volume ($volume_int%)";
+			accessible_name = _("Volume (%d%%)").printf (volume_int);
 		}
 
 		var root_action = actions.lookup_action ("root") as SimpleAction;

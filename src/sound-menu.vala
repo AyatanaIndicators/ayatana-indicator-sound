@@ -149,7 +149,7 @@ class SoundMenu: Object
 
 		var submenu = new Menu ();
 		submenu.append_section (null, playlists_section);
-		player_section.append_submenu ("Choose Playlist", submenu);
+		player_section.append_submenu (_("Choose Playlist"), submenu);
 	}
 
 	MenuItem create_slider_menu_item (string action, double min, double max, double step, string min_icon_name, string max_icon_name) {
