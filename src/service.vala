@@ -141,7 +141,7 @@ public class IndicatorSound.Service {
 			accessible_name = _("Volume (muted)");
 		} else {
 			int volume_int = (int)(volume * 100);
-			accessible_name = _("Volume (%d%%)").printf (volume_int);
+			accessible_name = "%s (%d%%)".printf (_("Volume"), volume_int);
 		}
 
 		var root_action = actions.lookup_action ("root") as SimpleAction;
