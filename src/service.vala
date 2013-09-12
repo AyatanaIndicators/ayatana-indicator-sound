@@ -146,6 +146,7 @@ public class IndicatorSound.Service {
 
 		var root_action = actions.lookup_action ("root") as SimpleAction;
 		var builder = new VariantBuilder (new VariantType ("a{sv}"));
+		builder.add ("{sv}", "title", new Variant.string (_("Sound")));
 		builder.add ("{sv}", "accessible-desc", new Variant.string (accessible_name));
 		builder.add ("{sv}", "icon", serialize_themed_icon (icon));
 		builder.add ("{sv}", "visible", new Variant.boolean (true));
