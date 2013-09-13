@@ -1,3 +1,22 @@
+indicator-sound (12.10.2+13.10.20130913-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Fixes bug #1221242 and #1204036 (make scrolling and middle clicking
+    work on the sound indicator) It soft-depends on
+    lp:~larsu/libindicator/ng-add-scrolling. That means, this branch can
+    be merged without problems, as it only adds an action and a few
+    attributes on the root item. The bugs won't be fixed until both
+    branches land, though. Please the other merge request for a
+    description of the new attributes. (LP: #1221242, #1204036)
+  * Update POTFILES.in and mark remaining strings as translatable. (LP:
+    #1223500)
+  * Add "title" to the root action state dictionary . (LP: #1223635)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 375
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 13 Sep 2013 15:16:35 +0000
+
 indicator-sound (12.10.2+13.10.20130829-0ubuntu1) saucy; urgency=low
 
   [ Lars Uebernickel ]
