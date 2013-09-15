@@ -59,17 +59,19 @@ class SoundMenu: Object
 
 	public bool show_mic_volume {
 		get {
-			return this.volume_section.get_n_items () == 3;
+			return this.mic_volume_shown;
 		}
 		set {
-			if (value && this.volume_section.get_n_items () < 3) {
+			if (value && !this.mic_volume_shown) {
 				var slider = this.create_slider_menu_item ("indicator.mic-volume", 0.0, 1.0, 0.01,
 														   "audio-input-microphone-low-zero-panel",
 														   "audio-input-microphone-high-panel");
 				volume_section.append_item (slider);
+				this.mic_volume_shown = true;
 			}
-			else if (!value && this.volume_section.get_n_items () > 2) {
-				this.volume_section.remove (2);
+			else if (!value && this.mic_volume_shown) {
+				this.volume_section.remove (this.volume_section.get_n_items () -1);
+				this.mic_volume_shown = false;
 			}
 		}
 	}
@@ -106,6 +108,7 @@ class SoundMenu: Object
 	Menu root;
 	Menu menu;
 	Menu volume_section;
+	bool mic_volume_shown;
 
 	/* returns the position in this.menu of the section that's associated with @player */
 	int find_player_section (MediaPlayer player) {
