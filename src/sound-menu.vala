@@ -22,14 +22,15 @@ extern Variant? g_icon_serialize (Icon icon);
 
 class SoundMenu: Object
 {
-	public SoundMenu (string settings_action) {
+	public SoundMenu (bool show_mute, string settings_action) {
 		/* A sound menu always has at least two sections: the volume section (this.volume_section)
 		 * at the start of the menu, and the settings section at the end. Between those two,
 		 * it has a dynamic amount of player sections, one for each registered player.
 		 */
 
 		this.volume_section = new Menu ();
-		volume_section.append (_("Mute"), "indicator.mute");
+		if (show_mute)
+			volume_section.append (_("Mute"), "indicator.mute");
 		volume_section.append_item (this.create_slider_menu_item ("indicator.volume", 0.0, 1.0, 0.01,
 																  "audio-volume-low-zero-panel",
 																  "audio-volume-high-panel"));

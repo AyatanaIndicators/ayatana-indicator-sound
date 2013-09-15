@@ -34,8 +34,8 @@ public class IndicatorSound.Service {
 		this.actions.add_action (this.create_mic_volume_action ());
 
 		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
-		this.menus.insert ("desktop", new SoundMenu ("indicator.desktop-settings"));
-		this.menus.insert ("phone", new SoundMenu ("indicator.phone-settings"));
+		this.menus.insert ("desktop", new SoundMenu (true, "indicator.desktop-settings"));
+		this.menus.insert ("phone", new SoundMenu (false, "indicator.phone-settings"));
 
 		this.menus.@foreach ( (profile, menu) => {
 			this.volume_control.bind_property ("active-mic", menu, "show-mic-volume", BindingFlags.SYNC_CREATE);
