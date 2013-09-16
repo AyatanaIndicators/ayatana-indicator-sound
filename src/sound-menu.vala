@@ -22,14 +22,15 @@ extern Variant? g_icon_serialize (Icon icon);
 
 class SoundMenu: Object
 {
-	public SoundMenu (string settings_action) {
+	public SoundMenu (bool show_mute, string settings_action) {
 		/* A sound menu always has at least two sections: the volume section (this.volume_section)
 		 * at the start of the menu, and the settings section at the end. Between those two,
 		 * it has a dynamic amount of player sections, one for each registered player.
 		 */
 
 		this.volume_section = new Menu ();
-		volume_section.append (_("Mute"), "indicator.mute");
+		if (show_mute)
+			volume_section.append (_("Mute"), "indicator.mute");
 		volume_section.append_item (this.create_slider_menu_item ("indicator.volume", 0.0, 1.0, 0.01,
 																  "audio-volume-low-zero-panel",
 																  "audio-volume-high-panel"));
@@ -58,17 +59,19 @@ class SoundMenu: Object
 
 	public bool show_mic_volume {
 		get {
-			return this.volume_section.get_n_items () == 3;
+			return this.mic_volume_shown;
 		}
 		set {
-			if (value && this.volume_section.get_n_items () < 3) {
+			if (value && !this.mic_volume_shown) {
 				var slider = this.create_slider_menu_item ("indicator.mic-volume", 0.0, 1.0, 0.01,
 														   "audio-input-microphone-low-zero-panel",
 														   "audio-input-microphone-high-panel");
 				volume_section.append_item (slider);
+				this.mic_volume_shown = true;
 			}
-			else if (!value && this.volume_section.get_n_items () > 2) {
-				this.volume_section.remove (2);
+			else if (!value && this.mic_volume_shown) {
+				this.volume_section.remove (this.volume_section.get_n_items () -1);
+				this.mic_volume_shown = false;
 			}
 		}
 	}
@@ -105,6 +108,7 @@ class SoundMenu: Object
 	Menu root;
 	Menu menu;
 	Menu volume_section;
+	bool mic_volume_shown;
 
 	/* returns the position in this.menu of the section that's associated with @player */
 	int find_player_section (MediaPlayer player) {
