@@ -1,3 +1,13 @@
+indicator-sound (12.10.2+13.10.20130918-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Don't show the "Mute" menu item in the phone profile. (LP: #1220215)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 377
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 18 Sep 2013 06:24:34 +0000
+
 indicator-sound (12.10.2+13.10.20130913-0ubuntu1) saucy; urgency=low
 
   [ Lars Uebernickel ]
