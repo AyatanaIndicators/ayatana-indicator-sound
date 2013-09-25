@@ -20,6 +20,7 @@ vala_init(indicator-sound-service
     --vapidir=${CMAKE_SOURCE_DIR}/vapi/
     --vapidir=.
     --target-glib=2.36
+    --pkg=url-dispatcher
     --pkg=bus-watcher
 )
 
