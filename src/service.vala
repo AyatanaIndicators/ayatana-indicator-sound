@@ -108,7 +108,7 @@ public class IndicatorSound.Service {
 	}
 
 	void activate_phone_settings (SimpleAction action, Variant? param) {
-		UrlDispatch.send ("settings://system/sound");
+		UrlDispatch.send ("settings:///system/sound");
 	}
 
 	/* Returns a serialized version of @icon_name suited for the panel */
