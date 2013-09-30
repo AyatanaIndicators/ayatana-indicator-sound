@@ -1,3 +1,17 @@
+indicator-sound (12.10.2+13.10.20130930-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * Use url-dispatcher instead of invoking system-settings directly.
+    (LP: #1230819)
+
+  [ Ted Gould ]
+  * Update settings URL to settings:///system. (LP: #1231444)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 382
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 30 Sep 2013 06:33:10 +0000
+
 indicator-sound (12.10.2+13.10.20130924-0ubuntu1) saucy; urgency=low
 
   [ Ted Gould ]
