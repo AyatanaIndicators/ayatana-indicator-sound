@@ -46,21 +46,7 @@ public class VolumeControl : Object
 		if (loop == null)
 			loop = new PulseAudio.GLibMainLoop ();
 
-		var props = new Proplist ();
-		props.sets (Proplist.PROP_APPLICATION_NAME, "Ubuntu Audio Settings");
-		props.sets (Proplist.PROP_APPLICATION_ID, "com.canonical.settings.sound");
-		props.sets (Proplist.PROP_APPLICATION_ICON_NAME, "multimedia-volume-control");
-		props.sets (Proplist.PROP_APPLICATION_VERSION, "0.1");
-
-		context = new PulseAudio.Context (loop.get_api(), null, props);
-
-		context.set_state_callback (context_state_callback);
-
-		if (context.connect(null, Context.Flags.NOFAIL, null) < 0)
-		{
-			warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(context.errno()));
-			return;
-		}
+		this.reconnect_to_pulse ();
 	}
 
 	/* PulseAudio logic*/
@@ -153,18 +139,47 @@ public class VolumeControl : Object
 
 	private void context_state_callback (Context c)
 	{
-		if (c.get_state () == Context.State.READY)
-		{
-			c.subscribe (PulseAudio.Context.SubscriptionMask.SINK |
-						 PulseAudio.Context.SubscriptionMask.SOURCE |
-						 PulseAudio.Context.SubscriptionMask.SOURCE_OUTPUT);
-			c.set_subscribe_callback (context_events_cb);
-			update_sink ();
-			update_source ();
-			this.ready = true;
+		switch (c.get_state ()) {
+			case Context.State.READY:
+				c.subscribe (PulseAudio.Context.SubscriptionMask.SINK |
+							 PulseAudio.Context.SubscriptionMask.SOURCE |
+							 PulseAudio.Context.SubscriptionMask.SOURCE_OUTPUT);
+				c.set_subscribe_callback (context_events_cb);
+				update_sink ();
+				update_source ();
+				this.ready = true;
+				break;
+
+			case Context.State.FAILED:
+			case Context.State.TERMINATED:
+				this.reconnect_to_pulse ();
+				break;
+
+			default: 
+				this.ready = false;
+				break;
 		}
-		else
+	}
+
+	void reconnect_to_pulse ()
+	{
+		if (this.ready) {
+			this.context.disconnect ();
+			this.context = null;
 			this.ready = false;
+		}
+
+		var props = new Proplist ();
+		props.sets (Proplist.PROP_APPLICATION_NAME, "Ubuntu Audio Settings");
+		props.sets (Proplist.PROP_APPLICATION_ID, "com.canonical.settings.sound");
+		props.sets (Proplist.PROP_APPLICATION_ICON_NAME, "multimedia-volume-control");
+		props.sets (Proplist.PROP_APPLICATION_VERSION, "0.1");
+
+		this.context = new PulseAudio.Context (loop.get_api(), null, props);
+		this.context.set_state_callback (context_state_callback);
+
+		if (context.connect(null, Context.Flags.NOFAIL, null) < 0)
+			warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(context.errno()));
 	}
 
 	/* Mute operations */
