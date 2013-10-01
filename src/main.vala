@@ -7,6 +7,8 @@ static int main (string[] args) {
 	Intl.setlocale (LocaleCategory.ALL, "");
 	Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.GNOMELOCALEDIR);
 
+	Notify.init ("indicator-sound");
+
 	var service = new IndicatorSound.Service ();
 	return service.run ();
 }

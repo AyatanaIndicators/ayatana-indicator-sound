@@ -14,6 +14,7 @@ vala_init(indicator-sound-service
     libxml-2.0
     libpulse
     libpulse-mainloop-glib
+    libnotify
   OPTIONS
     --ccode
     --thread

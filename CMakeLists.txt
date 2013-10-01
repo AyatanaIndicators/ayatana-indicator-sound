@@ -41,6 +41,7 @@ pkg_check_modules(
   gio-2.0>=${GIO_2_0_REQUIRED_VERSION}
   gio-unix-2.0
   libxml-2.0
+  libnotify
 )
 include_directories(${SOUNDSERVICE_INCLUDE_DIRS})
 
