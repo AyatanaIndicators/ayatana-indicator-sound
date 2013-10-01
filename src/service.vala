@@ -45,6 +45,14 @@ public class IndicatorSound.Service {
 		this.settings.changed["interested-media-players"].connect ( () => {
 			this.players.sync (settings.get_strv ("interested-media-players"));
 		});
+
+		if (settings.get_boolean ("show-notify-osd-on-scroll")) {
+			unowned List<string> caps = Notify.get_server_caps ();
+			if (caps.find_custom ("x-canonical-private-synchronous", strcmp) != null) {
+				this.notification = new Notify.Notification ("indicator-sound", "", "");
+				this.notification.set_hint_string ("x-canonical-private-synchronous", "indicator-sound");
+			}
+		}
 	}
 
 	public int run () {
@@ -76,6 +84,7 @@ public class IndicatorSound.Service {
 	VolumeControl volume_control;
 	MediaPlayerList players;
 	uint player_action_update_id;
+	Notify.Notification notification;
 
 	void activate_scroll_action (SimpleAction action, Variant? param) {
 		const double volume_step_percentage = 0.06;
@@ -83,6 +92,27 @@ public class IndicatorSound.Service {
 
 		double v = this.volume_control.get_volume () + volume_step_percentage * delta;
 		this.volume_control.set_volume (v.clamp (0.0, 1.0));
+
+		if (this.notification != null) {
+			string icon;
+			if (v <= 0.0)
+				icon = "notification-audio-volume-off";
+			else if (v <= 0.3)
+				icon = "notification-audio-volume-low";
+			else if (v <= 0.7)
+				icon = "notification-audio-volume-medium";
+			else
+				icon = "notification-audio-volume-high";
+
+			this.notification.update ("indicator-sound", "", icon);
+			this.notification.set_hint_int32 ("value", ((int32) (100 * v)).clamp (-1, 101));
+			try {
+				this.notification.show ();
+			}
+			catch (Error e) {
+				warning ("unable to show notification: %s", e.message);
+			}
+		}
 	}
 
 	void activate_desktop_settings (SimpleAction action, Variant? param) {
