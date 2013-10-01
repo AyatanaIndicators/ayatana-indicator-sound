@@ -82,12 +82,7 @@ public class IndicatorSound.Service {
 		int delta = param.get_int32(); /* positive for up, negative for down */
 
 		double v = this.volume_control.get_volume () + volume_step_percentage * delta;
-		if (v > 1.0)
-			v = 1.0;
-		else if (v < 0.0)
-			v = 0.0;
-
-		this.volume_control.set_volume (v);
+		this.volume_control.set_volume (v.clamp (0.0, 1.0));
 	}
 
 	void activate_desktop_settings (SimpleAction action, Variant? param) {
