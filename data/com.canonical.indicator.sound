@@ -10,4 +10,4 @@ ObjectPath=/com/canonical/indicator/sound/desktop
 ObjectPath=/com/canonical/indicator/sound/phone
 
 [desktop_greeter]
-ObjectPath=/com/canonical/indicator/sound/desktop
+ObjectPath=/com/canonical/indicator/sound/desktop_greeter

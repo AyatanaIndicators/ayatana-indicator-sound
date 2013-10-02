@@ -22,7 +22,7 @@ extern Variant? g_icon_serialize (Icon icon);
 
 class SoundMenu: Object
 {
-	public SoundMenu (bool show_mute, string settings_action) {
+	public SoundMenu (bool show_mute, string? settings_action) {
 		/* A sound menu always has at least two sections: the volume section (this.volume_section)
 		 * at the start of the menu, and the settings section at the end. Between those two,
 		 * it has a dynamic amount of player sections, one for each registered player.
@@ -37,7 +37,11 @@ class SoundMenu: Object
 
 		this.menu = new Menu ();
 		this.menu.append_section (null, volume_section);
-		this.menu.append (_("Sound Settings…"), settings_action);
+
+		if (settings_action != null) {
+			settings_shown = true;
+			this.menu.append (_("Sound Settings…"), settings_action);
+		}
 
 		var root_item = new MenuItem (null, "indicator.root");
 		root_item.set_attribute ("x-canonical-type", "s", "com.canonical.indicator.root");
@@ -96,7 +100,11 @@ class SoundMenu: Object
 		player.notify["is-running"].connect ( () => this.update_playlists (player) );
 		update_playlists (player);
 
-		this.menu.insert_section (this.menu.get_n_items () -1, null, section);
+		if (settings_shown) {
+			this.menu.insert_section (this.menu.get_n_items () -1, null, section);
+		} else {
+			this.menu.append_section (null, section);
+		}
 	}
 
 	public void remove_player (MediaPlayer player) {
@@ -109,6 +117,7 @@ class SoundMenu: Object
 	Menu menu;
 	Menu volume_section;
 	bool mic_volume_shown;
+	bool settings_shown = false;
 
 	/* returns the position in this.menu of the section that's associated with @player */
 	int find_player_section (MediaPlayer player) {
