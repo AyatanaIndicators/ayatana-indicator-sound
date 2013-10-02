@@ -117,7 +117,7 @@ class SoundMenu: Object
 	Menu menu;
 	Menu volume_section;
 	bool mic_volume_shown;
-	bool settings_shown;
+	bool settings_shown = false;
 
 	/* returns the position in this.menu of the section that's associated with @player */
 	int find_player_section (MediaPlayer player) {
