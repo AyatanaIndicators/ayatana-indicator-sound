@@ -34,6 +34,7 @@ public class IndicatorSound.Service {
 		this.actions.add_action (this.create_mic_volume_action ());
 
 		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
+		this.menus.insert ("desktop_greeter", new SoundMenu (true, null));
 		this.menus.insert ("desktop", new SoundMenu (true, "indicator.desktop-settings"));
 		this.menus.insert ("phone", new SoundMenu (false, "indicator.phone-settings"));
 
