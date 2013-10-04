@@ -1,3 +1,22 @@
+indicator-sound (12.10.2+13.10.20131004-0ubuntu1) saucy; urgency=low
+
+  [ Pete Woods ]
+  * Fix translation support dh_translations doesn't perform variable
+    substitution when parsing the CMakeLists.txt file. (LP: #1233679)
+
+  [ Ted Gould ]
+  * Add a desktop_greeter menu without settings.
+
+  [ Lars Uebernickel ]
+  * Reconnect when pulseaudio terminates (or crashes). (LP: #1231942)
+  * Show synchronous notification when changing the volume by scrolling
+    over the indicator. (LP: #1225335)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 387
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 04 Oct 2013 02:29:38 +0000
+
 indicator-sound (12.10.2+13.10.20130930-0ubuntu1) saucy; urgency=low
 
   [ Charles Kerr ]
