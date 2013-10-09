@@ -87,8 +87,9 @@ public class IndicatorSound.Service {
 	uint player_action_update_id;
 	Notify.Notification notification;
 
+	const double volume_step_percentage = 0.06;
+
 	void activate_scroll_action (SimpleAction action, Variant? param) {
-		const double volume_step_percentage = 0.06;
 		int delta = param.get_int32(); /* positive for up, negative for down */
 
 		double v = this.volume_control.get_volume () + volume_step_percentage * delta;
@@ -202,10 +203,16 @@ public class IndicatorSound.Service {
 	}
 
 	Action create_volume_action () {
-		var volume_action = new SimpleAction.stateful ("volume", null, this.volume_control.get_volume ());
+		var volume_action = new SimpleAction.stateful ("volume", VariantType.INT32, this.volume_control.get_volume ());
 
 		volume_action.change_state.connect ( (action, val) => {
 			volume_control.set_volume (val.get_double ());
+		});
+
+		/* activating this action changes the volume by the amount given in the parameter */
+		volume_action.activate.connect ( (action, param) => {
+			double v = volume_control.get_volume () + volume_step_percentage * param.get_int32 ();
+			volume_control.set_volume (v.clamp (0.0, 1.0));
 		});
 
 		this.volume_control.volume_changed.connect (volume_changed);
