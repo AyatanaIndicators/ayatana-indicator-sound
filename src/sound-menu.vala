@@ -24,7 +24,8 @@ class SoundMenu: Object
 {
 	public enum DisplayFlags {
 		NONE = 0,
-		SHOW_MUTE = 1
+		SHOW_MUTE = 1,
+		HIDE_INACTIVE_PLAYERS = 2
 	}
 
 	public SoundMenu (string? settings_action, DisplayFlags flags) {
@@ -56,6 +57,9 @@ class SoundMenu: Object
 
 		this.root = new Menu ();
 		root.append_item (root_item);
+
+		this.hide_inactive = (flags & DisplayFlags.HIDE_INACTIVE_PLAYERS) != 0;
+		this.notify_handlers = new HashTable<MediaPlayer, ulong> (direct_hash, direct_equal);
 	}
 
 	public void export (DBusConnection connection, string object_path) {
@@ -86,36 +90,30 @@ class SoundMenu: Object
 	}
 
 	public void add_player (MediaPlayer player) {
-		/* Add new players to the end of the player sections, just before the settings */
-		var player_item = new MenuItem (player.name, "indicator." + player.id);
-		player_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
-		player_item.set_attribute_value ("icon", g_icon_serialize (player.icon));
+		if (this.notify_handlers.contains (player))
+			return;
 
-		var playback_item = new MenuItem (null, null);
-		playback_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.playback-item");
-		playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id);
-		playback_item.set_attribute ("x-canonical-next-action", "s", "indicator.next." + player.id);
-		playback_item.set_attribute ("x-canonical-previous-action", "s", "indicator.previous." + player.id);
+		if (player.is_running || !this.hide_inactive)
+			this.insert_player_section (player);
+		this.update_playlists (player);
 
-		var section = new Menu ();
-		section.append_item (player_item);
-		section.append_item (playback_item);
+		var handler_id = player.notify["is-running"].connect ( () => {
+			if (this.hide_inactive) {
+				if (player.is_running)
+					this.insert_player_section (player);
+				else
+					this.remove_player_section (player);
+			}
+			this.update_playlists (player);
+		});
+		this.notify_handlers.insert (player, handler_id);
 
 		player.playlists_changed.connect (this.update_playlists);
-		player.notify["is-running"].connect ( () => this.update_playlists (player) );
-		update_playlists (player);
-
-		if (settings_shown) {
-			this.menu.insert_section (this.menu.get_n_items () -1, null, section);
-		} else {
-			this.menu.append_section (null, section);
-		}
 	}
 
 	public void remove_player (MediaPlayer player) {
-		int index = this.find_player_section (player);
-		if (index >= 0)
-			this.menu.remove (index);
+		this.remove_player_section (player);
+		this.notify_handlers.remove (player);
 	}
 
 	Menu root;
@@ -123,6 +121,8 @@ class SoundMenu: Object
 	Menu volume_section;
 	bool mic_volume_shown;
 	bool settings_shown = false;
+	bool hide_inactive;
+	HashTable<MediaPlayer, ulong> notify_handlers;
 
 	/* returns the position in this.menu of the section that's associated with @player */
 	int find_player_section (MediaPlayer player) {
@@ -137,6 +137,35 @@ class SoundMenu: Object
 		}
 
 		return -1;
+	}
+
+	void insert_player_section (MediaPlayer player) {
+		var section = new Menu ();
+
+		var player_item = new MenuItem (player.name, "indicator." + player.id);
+		player_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
+		player_item.set_attribute_value ("icon", g_icon_serialize (player.icon));
+		section.append_item (player_item);
+
+		var playback_item = new MenuItem (null, null);
+		playback_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.playback-item");
+		playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id);
+		playback_item.set_attribute ("x-canonical-next-action", "s", "indicator.next." + player.id);
+		playback_item.set_attribute ("x-canonical-previous-action", "s", "indicator.previous." + player.id);
+		section.append_item (playback_item);
+
+		/* Add new players to the end of the player sections, just before the settings */
+		if (settings_shown) {
+			this.menu.insert_section (this.menu.get_n_items () -1, null, section);
+		} else {
+			this.menu.append_section (null, section);
+		}
+	}
+
+	void remove_player_section (MediaPlayer player) {
+		int index = this.find_player_section (player);
+		if (index >= 0)
+			this.menu.remove (index);
 	}
 
 	void update_playlists (MediaPlayer player) {
