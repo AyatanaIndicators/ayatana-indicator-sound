@@ -31,7 +31,7 @@ class SoundMenu: Object
 		this.volume_section = new Menu ();
 		if (show_mute)
 			volume_section.append (_("Mute"), "indicator.mute");
-		volume_section.append_item (this.create_slider_menu_item ("indicator.volume", 0.0, 1.0, 0.01,
+		volume_section.append_item (this.create_slider_menu_item ("indicator.volume(0)", 0.0, 1.0, 0.01,
 																  "audio-volume-low-zero-panel",
 																  "audio-volume-high-panel"));
 
