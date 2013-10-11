@@ -1,3 +1,14 @@
+indicator-sound (12.10.2+13.10.20131011-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Allow activating the 'volume' action It does the same as the
+    'scroll' action except showing a notification. (LP: #1236292)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 389
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 11 Oct 2013 04:27:50 +0000
+
 indicator-sound (12.10.2+13.10.20131004-0ubuntu1) saucy; urgency=low
 
   [ Pete Woods ]
