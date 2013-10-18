@@ -1,3 +1,10 @@
+indicator-sound (12.10.2+13.10.20131011-0ubuntu2) UNRELEASED; urgency=low
+
+  * Define "ubiquity" indicator profile, reusing the greeter object. (LP:
+    #1241539)
+
+ -- Dmitrijs Ledkovs <xnox@ubuntu.com>  Fri, 18 Oct 2013 13:10:03 +0100
+
 indicator-sound (12.10.2+13.10.20131011-0ubuntu1) saucy; urgency=low
 
   [ Lars Uebernickel ]
