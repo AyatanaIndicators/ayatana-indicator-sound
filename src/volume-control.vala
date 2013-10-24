@@ -27,6 +27,8 @@ public class VolumeControl : Object
 	/* this is static to ensure it being freed after @context (loop does not have ref counting) */
 	private static PulseAudio.GLibMainLoop loop;
 
+	private uint _reconnect_timer = 0;
+
 	private PulseAudio.Context context;
 	private bool   _mute = true;
 	private double _volume = 0.0;
@@ -47,6 +49,13 @@ public class VolumeControl : Object
 			loop = new PulseAudio.GLibMainLoop ();
 
 		this.reconnect_to_pulse ();
+	}
+
+	~VolumeControl ()
+	{
+		if (_reconnect_timer != 0) {
+			Source.remove (_reconnect_timer);
+		}
 	}
 
 	/* PulseAudio logic*/
@@ -152,13 +161,21 @@ public class VolumeControl : Object
 
 			case Context.State.FAILED:
 			case Context.State.TERMINATED:
-				this.reconnect_to_pulse ();
+				if (_reconnect_timer == 0)
+					_reconnect_timer = Timeout.add_seconds (2, reconnect_timeout);
 				break;
 
 			default: 
 				this.ready = false;
 				break;
 		}
+	}
+
+	bool reconnect_timeout ()
+	{
+		_reconnect_timer = 0;
+		reconnect_to_pulse ();
+		return false; // G_SOURCE_REMOVE
 	}
 
 	void reconnect_to_pulse ()
