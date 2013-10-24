@@ -195,7 +195,7 @@ public class IndicatorSound.Service {
 
 	void volume_changed (double volume) {
 		var volume_action = this.actions.lookup_action ("volume") as SimpleAction;
-		volume_action.set_state (volume);
+		volume_action.set_state (new Variant.double (volume));
 
 		this.update_root_icon ();
 	}
