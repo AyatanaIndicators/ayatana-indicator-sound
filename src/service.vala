@@ -175,10 +175,10 @@ public class IndicatorSound.Service {
 	}
 
 	Action create_mute_action () {
-		var mute_action = new SimpleAction.stateful ("mute", null, this.volume_control.mute);
+		var mute_action = new SimpleAction.stateful ("mute", null, new Variant.boolean (this.volume_control.mute));
 
 		mute_action.activate.connect ( (action, param) => {
-			action.change_state (!action.get_state ().get_boolean ());
+			action.change_state (new Variant.boolean (!action.get_state ().get_boolean ()));
 		});
 
 		mute_action.change_state.connect ( (action, val) => {
@@ -186,7 +186,7 @@ public class IndicatorSound.Service {
 		});
 
 		this.volume_control.notify["mute"].connect ( () => {
-			mute_action.set_state (this.volume_control.mute);
+			mute_action.set_state (new Variant.boolean (this.volume_control.mute));
 			this.update_root_icon ();
 		});
 
@@ -195,13 +195,13 @@ public class IndicatorSound.Service {
 
 	void volume_changed (double volume) {
 		var volume_action = this.actions.lookup_action ("volume") as SimpleAction;
-		volume_action.set_state (volume);
+		volume_action.set_state (new Variant.double (volume));
 
 		this.update_root_icon ();
 	}
 
 	Action create_volume_action () {
-		var volume_action = new SimpleAction.stateful ("volume", VariantType.INT32, this.volume_control.get_volume ());
+		var volume_action = new SimpleAction.stateful ("volume", VariantType.INT32, new Variant.double (this.volume_control.get_volume ()));
 
 		volume_action.change_state.connect ( (action, val) => {
 			volume_control.set_volume (val.get_double ());
@@ -221,14 +221,14 @@ public class IndicatorSound.Service {
 	}
 
 	Action create_mic_volume_action () {
-		var volume_action = new SimpleAction.stateful ("mic-volume", null, this.volume_control.get_mic_volume ());
+		var volume_action = new SimpleAction.stateful ("mic-volume", null, new Variant.double (this.volume_control.get_mic_volume ()));
 
 		volume_action.change_state.connect ( (action, val) => {
 			volume_control.set_mic_volume (val.get_double ());
 		});
 
 		this.volume_control.mic_volume_changed.connect ( (volume) => {
-			volume_action.set_state (volume);
+			volume_action.set_state (new Variant.double (volume));
 		});
 
 		this.volume_control.bind_property ("ready", volume_action, "enabled", BindingFlags.SYNC_CREATE);
