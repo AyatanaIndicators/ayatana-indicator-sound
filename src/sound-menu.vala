@@ -141,11 +141,15 @@ class SoundMenu: Object
 
 	void insert_player_section (MediaPlayer player) {
 		var section = new Menu ();
+		Icon icon;
+
+		icon = player.icon;
+		if (icon == null)
+			icon = new ThemedIcon.with_default_fallbacks ("application-default-icon");
 
 		var player_item = new MenuItem (player.name, "indicator." + player.id);
 		player_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
-		if (player.icon != null)
-			player_item.set_attribute_value ("icon", g_icon_serialize (player.icon));
+		player_item.set_attribute_value ("icon", g_icon_serialize (player.icon));
 		section.append_item (player_item);
 
 		var playback_item = new MenuItem (null, null);
