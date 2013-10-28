@@ -14,3 +14,7 @@ ObjectPath=/com/canonical/indicator/sound/desktop_greeter
 
 [ubiquity]
 ObjectPath=/com/canonical/indicator/sound/desktop_greeter
+
+[phone_greeter]
+ObjectPath=/com/canonical/indicator/sound/desktop_greeter
+
