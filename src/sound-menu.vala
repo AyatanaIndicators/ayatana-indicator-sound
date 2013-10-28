@@ -149,7 +149,8 @@ class SoundMenu: Object
 
 		var player_item = new MenuItem (player.name, "indicator." + player.id);
 		player_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
-		player_item.set_attribute_value ("icon", g_icon_serialize (player.icon));
+		if (icon != null)
+			player_item.set_attribute_value ("icon", g_icon_serialize (icon));
 		section.append_item (player_item);
 
 		var playback_item = new MenuItem (null, null);
