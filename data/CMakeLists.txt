@@ -17,7 +17,7 @@ install(
 )
 
 ###########################
-# Dbus Service
+# Upstart Job
 ###########################
 
 set(
@@ -34,6 +34,26 @@ configure_file(
 install(
   FILES "${INDICATOR_SOUND_CONF}"
   DESTINATION "${CMAKE_INSTALL_DATADIR}/upstart/sessions/"
+)
+
+###########################
+# XDG Autostart
+###########################
+
+set(
+  INDICATOR_SOUND_XDG_AUTOSTART
+  "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound.desktop"
+)
+
+configure_file(
+  "indicator-sound.desktop.in"
+  ${INDICATOR_SOUND_CONF}
+  @ONLY
+)
+
+install(
+  FILES "${INDICATOR_SOUND_XDG_AUTOSTART}"
+  DESTINATION "/etc/xdg/autostart"
 )
 
 ###########################
