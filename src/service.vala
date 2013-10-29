@@ -140,7 +140,7 @@ public class IndicatorSound.Service {
 	static Variant serialize_themed_icon (string icon_name)
 	{
 		var icon = new ThemedIcon.with_default_fallbacks (icon_name);
-		return g_icon_serialize (icon);
+		return icon.serialize ();
 	}
 
 	void update_root_icon () {

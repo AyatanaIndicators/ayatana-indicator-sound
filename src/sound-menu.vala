@@ -17,9 +17,6 @@
  *      Lars Uebernickel <lars.uebernickel@canonical.com>
  */
 
-/* Icon.serialize() is not yet in gio-2.0.vapi; remove this when it is */
-extern Variant? g_icon_serialize (Icon icon);
-
 class SoundMenu: Object
 {
 	public enum DisplayFlags {
@@ -150,7 +147,7 @@ class SoundMenu: Object
 		var player_item = new MenuItem (player.name, "indicator." + player.id);
 		player_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
 		if (icon != null)
-			player_item.set_attribute_value ("icon", g_icon_serialize (icon));
+			player_item.set_attribute_value ("icon", icon.serialize ());
 		section.append_item (player_item);
 
 		var playback_item = new MenuItem (null, null);
@@ -211,8 +208,8 @@ class SoundMenu: Object
 
 		var slider = new MenuItem (null, action);
 		slider.set_attribute ("x-canonical-type", "s", "com.canonical.unity.slider");
-		slider.set_attribute_value ("min-icon", g_icon_serialize (min_icon));
-		slider.set_attribute_value ("max-icon", g_icon_serialize (max_icon));
+		slider.set_attribute_value ("min-icon", min_icon.serialize ());
+		slider.set_attribute_value ("max-icon", max_icon.serialize ());
 		slider.set_attribute ("min-value", "d", min);
 		slider.set_attribute ("max-value", "d", max);
 		slider.set_attribute ("step", "d", step);
