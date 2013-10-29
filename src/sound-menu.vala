@@ -22,28 +22,44 @@ extern Variant? g_icon_serialize (Icon icon);
 
 class SoundMenu: Object
 {
-	public SoundMenu (string settings_action) {
+	public enum DisplayFlags {
+		NONE = 0,
+		SHOW_MUTE = 1,
+		HIDE_INACTIVE_PLAYERS = 2
+	}
+
+	public SoundMenu (string? settings_action, DisplayFlags flags) {
 		/* A sound menu always has at least two sections: the volume section (this.volume_section)
 		 * at the start of the menu, and the settings section at the end. Between those two,
 		 * it has a dynamic amount of player sections, one for each registered player.
 		 */
 
 		this.volume_section = new Menu ();
-		volume_section.append (_("Mute"), "indicator.mute");
-		volume_section.append_item (this.create_slider_menu_item ("indicator.volume", 0.0, 1.0, 0.01,
+		if ((flags & DisplayFlags.SHOW_MUTE) != 0)
+			volume_section.append (_("Mute"), "indicator.mute");
+		volume_section.append_item (this.create_slider_menu_item ("indicator.volume(0)", 0.0, 1.0, 0.01,
 																  "audio-volume-low-zero-panel",
 																  "audio-volume-high-panel"));
 
 		this.menu = new Menu ();
 		this.menu.append_section (null, volume_section);
-		this.menu.append (_("Sound Settings…"), settings_action);
+
+		if (settings_action != null) {
+			settings_shown = true;
+			this.menu.append (_("Sound Settings…"), settings_action);
+		}
 
 		var root_item = new MenuItem (null, "indicator.root");
 		root_item.set_attribute ("x-canonical-type", "s", "com.canonical.indicator.root");
+		root_item.set_attribute ("x-canonical-scroll-action", "s", "indicator.scroll");
+		root_item.set_attribute ("x-canonical-secondary-action", "s", "indicator.mute");
 		root_item.set_submenu (this.menu);
 
 		this.root = new Menu ();
 		root.append_item (root_item);
+
+		this.hide_inactive = (flags & DisplayFlags.HIDE_INACTIVE_PLAYERS) != 0;
+		this.notify_handlers = new HashTable<MediaPlayer, ulong> (direct_hash, direct_equal);
 	}
 
 	public void export (DBusConnection connection, string object_path) {
@@ -56,53 +72,57 @@ class SoundMenu: Object
 
 	public bool show_mic_volume {
 		get {
-			return this.volume_section.get_n_items () == 3;
+			return this.mic_volume_shown;
 		}
 		set {
-			if (value && this.volume_section.get_n_items () < 3) {
+			if (value && !this.mic_volume_shown) {
 				var slider = this.create_slider_menu_item ("indicator.mic-volume", 0.0, 1.0, 0.01,
 														   "audio-input-microphone-low-zero-panel",
 														   "audio-input-microphone-high-panel");
 				volume_section.append_item (slider);
+				this.mic_volume_shown = true;
 			}
-			else if (!value && this.volume_section.get_n_items () > 2) {
-				this.volume_section.remove (2);
+			else if (!value && this.mic_volume_shown) {
+				this.volume_section.remove (this.volume_section.get_n_items () -1);
+				this.mic_volume_shown = false;
 			}
 		}
 	}
 
 	public void add_player (MediaPlayer player) {
-		/* Add new players to the end of the player sections, just before the settings */
-		var player_item = new MenuItem (player.name, "indicator." + player.id);
-		player_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
-		player_item.set_attribute_value ("icon", g_icon_serialize (player.icon));
+		if (this.notify_handlers.contains (player))
+			return;
 
-		var playback_item = new MenuItem (null, null);
-		playback_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.playback-item");
-		playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id);
-		playback_item.set_attribute ("x-canonical-next-action", "s", "indicator.next." + player.id);
-		playback_item.set_attribute ("x-canonical-previous-action", "s", "indicator.previous." + player.id);
+		if (player.is_running || !this.hide_inactive)
+			this.insert_player_section (player);
+		this.update_playlists (player);
 
-		var section = new Menu ();
-		section.append_item (player_item);
-		section.append_item (playback_item);
+		var handler_id = player.notify["is-running"].connect ( () => {
+			if (this.hide_inactive) {
+				if (player.is_running)
+					this.insert_player_section (player);
+				else
+					this.remove_player_section (player);
+			}
+			this.update_playlists (player);
+		});
+		this.notify_handlers.insert (player, handler_id);
 
 		player.playlists_changed.connect (this.update_playlists);
-		player.notify["is-running"].connect ( () => this.update_playlists (player) );
-		update_playlists (player);
-
-		this.menu.insert_section (this.menu.get_n_items () -1, null, section);
 	}
 
 	public void remove_player (MediaPlayer player) {
-		int index = this.find_player_section (player);
-		if (index >= 0)
-			this.menu.remove (index);
+		this.remove_player_section (player);
+		this.notify_handlers.remove (player);
 	}
 
 	Menu root;
 	Menu menu;
 	Menu volume_section;
+	bool mic_volume_shown;
+	bool settings_shown = false;
+	bool hide_inactive;
+	HashTable<MediaPlayer, ulong> notify_handlers;
 
 	/* returns the position in this.menu of the section that's associated with @player */
 	int find_player_section (MediaPlayer player) {
@@ -117,6 +137,41 @@ class SoundMenu: Object
 		}
 
 		return -1;
+	}
+
+	void insert_player_section (MediaPlayer player) {
+		var section = new Menu ();
+		Icon icon;
+
+		icon = player.icon;
+		if (icon == null)
+			icon = new ThemedIcon.with_default_fallbacks ("application-default-icon");
+
+		var player_item = new MenuItem (player.name, "indicator." + player.id);
+		player_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
+		if (icon != null)
+			player_item.set_attribute_value ("icon", g_icon_serialize (icon));
+		section.append_item (player_item);
+
+		var playback_item = new MenuItem (null, null);
+		playback_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.playback-item");
+		playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id);
+		playback_item.set_attribute ("x-canonical-next-action", "s", "indicator.next." + player.id);
+		playback_item.set_attribute ("x-canonical-previous-action", "s", "indicator.previous." + player.id);
+		section.append_item (playback_item);
+
+		/* Add new players to the end of the player sections, just before the settings */
+		if (settings_shown) {
+			this.menu.insert_section (this.menu.get_n_items () -1, null, section);
+		} else {
+			this.menu.append_section (null, section);
+		}
+	}
+
+	void remove_player_section (MediaPlayer player) {
+		int index = this.find_player_section (player);
+		if (index >= 0)
+			this.menu.remove (index);
 	}
 
 	void update_playlists (MediaPlayer player) {
@@ -147,7 +202,7 @@ class SoundMenu: Object
 
 		var submenu = new Menu ();
 		submenu.append_section (null, playlists_section);
-		player_section.append_submenu ("Choose Playlist", submenu);
+		player_section.append_submenu (_("Choose Playlist"), submenu);
 	}
 
 	MenuItem create_slider_menu_item (string action, double min, double max, double step, string min_icon_name, string max_icon_name) {

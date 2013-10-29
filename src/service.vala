@@ -34,8 +34,9 @@ public class IndicatorSound.Service {
 		this.actions.add_action (this.create_mic_volume_action ());
 
 		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
-		this.menus.insert ("desktop", new SoundMenu ("indicator.desktop-settings"));
-		this.menus.insert ("phone", new SoundMenu ("indicator.phone-settings"));
+		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE));
+		this.menus.insert ("desktop", new SoundMenu ("indicator.desktop-settings", SoundMenu.DisplayFlags.SHOW_MUTE));
+		this.menus.insert ("phone", new SoundMenu ("indicator.phone-settings", SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS));
 
 		this.menus.@foreach ( (profile, menu) => {
 			this.volume_control.bind_property ("active-mic", menu, "show-mic-volume", BindingFlags.SYNC_CREATE);
@@ -45,6 +46,14 @@ public class IndicatorSound.Service {
 		this.settings.changed["interested-media-players"].connect ( () => {
 			this.players.sync (settings.get_strv ("interested-media-players"));
 		});
+
+		if (settings.get_boolean ("show-notify-osd-on-scroll")) {
+			unowned List<string> caps = Notify.get_server_caps ();
+			if (caps.find_custom ("x-canonical-private-synchronous", strcmp) != null) {
+				this.notification = new Notify.Notification ("indicator-sound", "", "");
+				this.notification.set_hint_string ("x-canonical-private-synchronous", "indicator-sound");
+			}
+		}
 	}
 
 	public int run () {
@@ -64,6 +73,7 @@ public class IndicatorSound.Service {
 
 	const ActionEntry[] action_entries = {
 		{ "root", null, null, "@a{sv} {}", null },
+		{ "scroll", activate_scroll_action, "i", null, null },
 		{ "desktop-settings", activate_desktop_settings, null, null, null },
 		{ "phone-settings", activate_phone_settings, null, null, null },
 	};
@@ -75,13 +85,42 @@ public class IndicatorSound.Service {
 	VolumeControl volume_control;
 	MediaPlayerList players;
 	uint player_action_update_id;
+	Notify.Notification notification;
+
+	const double volume_step_percentage = 0.06;
+
+	void activate_scroll_action (SimpleAction action, Variant? param) {
+		int delta = param.get_int32(); /* positive for up, negative for down */
+
+		double v = this.volume_control.get_volume () + volume_step_percentage * delta;
+		this.volume_control.set_volume (v.clamp (0.0, 1.0));
+
+		if (this.notification != null) {
+			string icon;
+			if (v <= 0.0)
+				icon = "notification-audio-volume-off";
+			else if (v <= 0.3)
+				icon = "notification-audio-volume-low";
+			else if (v <= 0.7)
+				icon = "notification-audio-volume-medium";
+			else
+				icon = "notification-audio-volume-high";
+
+			this.notification.update ("indicator-sound", "", icon);
+			this.notification.set_hint_int32 ("value", ((int32) (100 * v)).clamp (-1, 101));
+			try {
+				this.notification.show ();
+			}
+			catch (Error e) {
+				warning ("unable to show notification: %s", e.message);
+			}
+		}
+	}
 
 	void activate_desktop_settings (SimpleAction action, Variant? param) {
 		var env = Environment.get_variable ("DESKTOP_SESSION");
 		string cmd;
-		if (env == "unity")
-			cmd = "gnome-control-center sound-nua";
-		else if (env == "xubuntu" || env == "ubuntustudio")
+		if (env == "xubuntu" || env == "ubuntustudio")
 			cmd = "pavucontrol";
 		else
 			cmd = "gnome-control-center sound";
@@ -94,11 +133,7 @@ public class IndicatorSound.Service {
 	}
 
 	void activate_phone_settings (SimpleAction action, Variant? param) {
-		try {
-			Process.spawn_command_line_async ("system-settings sound");
-		} catch (Error e) {
-			warning ("unable to launch sound settings: %s", e.message);
-		}
+		UrlDispatch.send ("settings:///system/sound");
 	}
 
 	/* Returns a serialized version of @icon_name suited for the panel */
@@ -124,14 +159,15 @@ public class IndicatorSound.Service {
 
 		string accessible_name;
 		if (this.volume_control.mute) {
-			accessible_name = "Volume (muted)";
+			accessible_name = _("Volume (muted)");
 		} else {
 			int volume_int = (int)(volume * 100);
-			accessible_name = @"Volume ($volume_int%)";
+			accessible_name = "%s (%d%%)".printf (_("Volume"), volume_int);
 		}
 
 		var root_action = actions.lookup_action ("root") as SimpleAction;
 		var builder = new VariantBuilder (new VariantType ("a{sv}"));
+		builder.add ("{sv}", "title", new Variant.string (_("Sound")));
 		builder.add ("{sv}", "accessible-desc", new Variant.string (accessible_name));
 		builder.add ("{sv}", "icon", serialize_themed_icon (icon));
 		builder.add ("{sv}", "visible", new Variant.boolean (true));
@@ -139,10 +175,10 @@ public class IndicatorSound.Service {
 	}
 
 	Action create_mute_action () {
-		var mute_action = new SimpleAction.stateful ("mute", null, this.volume_control.mute);
+		var mute_action = new SimpleAction.stateful ("mute", null, new Variant.boolean (this.volume_control.mute));
 
 		mute_action.activate.connect ( (action, param) => {
-			action.change_state (!action.get_state ().get_boolean ());
+			action.change_state (new Variant.boolean (!action.get_state ().get_boolean ()));
 		});
 
 		mute_action.change_state.connect ( (action, val) => {
@@ -150,7 +186,7 @@ public class IndicatorSound.Service {
 		});
 
 		this.volume_control.notify["mute"].connect ( () => {
-			mute_action.set_state (this.volume_control.mute);
+			mute_action.set_state (new Variant.boolean (this.volume_control.mute));
 			this.update_root_icon ();
 		});
 
@@ -159,16 +195,22 @@ public class IndicatorSound.Service {
 
 	void volume_changed (double volume) {
 		var volume_action = this.actions.lookup_action ("volume") as SimpleAction;
-		volume_action.set_state (volume);
+		volume_action.set_state (new Variant.double (volume));
 
 		this.update_root_icon ();
 	}
 
 	Action create_volume_action () {
-		var volume_action = new SimpleAction.stateful ("volume", null, this.volume_control.get_volume ());
+		var volume_action = new SimpleAction.stateful ("volume", VariantType.INT32, new Variant.double (this.volume_control.get_volume ()));
 
 		volume_action.change_state.connect ( (action, val) => {
 			volume_control.set_volume (val.get_double ());
+		});
+
+		/* activating this action changes the volume by the amount given in the parameter */
+		volume_action.activate.connect ( (action, param) => {
+			double v = volume_control.get_volume () + volume_step_percentage * param.get_int32 ();
+			volume_control.set_volume (v.clamp (0.0, 1.0));
 		});
 
 		this.volume_control.volume_changed.connect (volume_changed);
@@ -179,14 +221,14 @@ public class IndicatorSound.Service {
 	}
 
 	Action create_mic_volume_action () {
-		var volume_action = new SimpleAction.stateful ("mic-volume", null, this.volume_control.get_mic_volume ());
+		var volume_action = new SimpleAction.stateful ("mic-volume", null, new Variant.double (this.volume_control.get_mic_volume ()));
 
 		volume_action.change_state.connect ( (action, val) => {
 			volume_control.set_mic_volume (val.get_double ());
 		});
 
 		this.volume_control.mic_volume_changed.connect ( (volume) => {
-			volume_action.set_state (volume);
+			volume_action.set_state (new Variant.double (volume));
 		});
 
 		this.volume_control.bind_property ("ready", volume_action, "enabled", BindingFlags.SYNC_CREATE);

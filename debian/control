@@ -10,8 +10,10 @@ Build-Depends: debhelper (>= 9.0),
                autotools-dev,
                valac (>= 0.18),
                libglib2.0-dev (>= 2.22.3),
+               liburl-dispatcher1-dev,
                libpulse-dev (>= 0.9.18),
                libpulse-mainloop-glib0 (>= 0.9.18),
+               libnotify-dev,
                libgee-dev,
                libxml2-dev,
 Standards-Version: 3.9.4
@@ -27,7 +29,7 @@ Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          pulseaudio,
-Recommends: ubuntu-system-settings | gnome-control-center,
+Recommends: gnome-control-center | ubuntu-system-settings,
 Description: System sound indicator.
  System sound indicator which provides easy control of the PulseAudio sound 
  daemon.

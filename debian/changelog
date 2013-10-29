@@ -1,3 +1,104 @@
+indicator-sound (12.10.2+13.10.20131011-0ubuntu2) UNRELEASED; urgency=low
+
+  * Define "ubiquity" indicator profile, reusing the greeter object. (LP:
+    #1241539)
+
+ -- Dmitrijs Ledkovs <xnox@ubuntu.com>  Fri, 18 Oct 2013 13:10:03 +0100
+
+indicator-sound (12.10.2+13.10.20131011-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Allow activating the 'volume' action It does the same as the
+    'scroll' action except showing a notification. (LP: #1236292)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 389
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 11 Oct 2013 04:27:50 +0000
+
+indicator-sound (12.10.2+13.10.20131004-0ubuntu1) saucy; urgency=low
+
+  [ Pete Woods ]
+  * Fix translation support dh_translations doesn't perform variable
+    substitution when parsing the CMakeLists.txt file. (LP: #1233679)
+
+  [ Ted Gould ]
+  * Add a desktop_greeter menu without settings.
+
+  [ Lars Uebernickel ]
+  * Reconnect when pulseaudio terminates (or crashes). (LP: #1231942)
+  * Show synchronous notification when changing the volume by scrolling
+    over the indicator. (LP: #1225335)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 387
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 04 Oct 2013 02:29:38 +0000
+
+indicator-sound (12.10.2+13.10.20130930-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * Use url-dispatcher instead of invoking system-settings directly.
+    (LP: #1230819)
+
+  [ Ted Gould ]
+  * Update settings URL to settings:///system. (LP: #1231444)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 382
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 30 Sep 2013 06:33:10 +0000
+
+indicator-sound (12.10.2+13.10.20130924-0ubuntu1) saucy; urgency=low
+
+  [ Ted Gould ]
+  * Recommending gnome-control-center first.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 379
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 24 Sep 2013 22:45:08 +0000
+
+indicator-sound (12.10.2+13.10.20130918-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Don't show the "Mute" menu item in the phone profile. (LP: #1220215)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 377
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 18 Sep 2013 06:24:34 +0000
+
+indicator-sound (12.10.2+13.10.20130913-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Fixes bug #1221242 and #1204036 (make scrolling and middle clicking
+    work on the sound indicator) It soft-depends on
+    lp:~larsu/libindicator/ng-add-scrolling. That means, this branch can
+    be merged without problems, as it only adds an action and a few
+    attributes on the root item. The bugs won't be fixed until both
+    branches land, though. Please the other merge request for a
+    description of the new attributes. (LP: #1221242, #1204036)
+  * Update POTFILES.in and mark remaining strings as translatable. (LP:
+    #1223500)
+  * Add "title" to the root action state dictionary . (LP: #1223635)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 375
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 13 Sep 2013 15:16:35 +0000
+
+indicator-sound (12.10.2+13.10.20130829-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Use bus_watch_namespace() for more robust monitoring of mpris
+    players appearing or disappearing on the bus.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 371
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 29 Aug 2013 02:08:13 +0000
+
 indicator-sound (12.10.2+13.10.20130822-0ubuntu1) saucy; urgency=low
 
   [ Charles Kerr ]

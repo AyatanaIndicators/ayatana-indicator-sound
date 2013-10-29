@@ -1,4 +1,3 @@
 [encoding: UTF-8]
 src/service.vala
-src/service.c
-src/sound-menu.c
+src/sound-menu.vala

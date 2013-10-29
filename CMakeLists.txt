@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8.9)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" "${CMAKE_MODULE_PATH}")
 
 set(PACKAGE ${CMAKE_PROJECT_NAME})
-set(GETTEXT_PACKAGE ${CMAKE_PROJECT_NAME})
+set(GETTEXT_PACKAGE indicator-sound)
 set(GNOMELOCALEDIR "${CMAKE_INSTALL_FULL_DATADIR}/locale")
 
 add_definitions( -DGETTEXT_PACKAGE="${GETTEXT_PACKAGE}" )
@@ -25,11 +25,13 @@ set(SOURCE_BINARY_DIR "${CMAKE_BINARY_DIR}/src")
 
 set(PULSE_AUDIO_REQUIRED_VERSION 0.9.19)
 set(GIO_2_0_REQUIRED_VERSION 2.25.13)
+set(URL_DISPATCHER_1_REQUIRED_VERSION 1)
 
 pkg_check_modules(
   PULSEAUDIO REQUIRED
   libpulse-mainloop-glib>=${PULSE_AUDIO_REQUIRED_VERSION}
-  gio-unix-2.0
+  gio-unix-2.0>=${GIO_2_0_REQUIRED_VERSION}
+  url-dispatcher-1>=${URL_DISPATCHER_1_REQUIRED_VERSION}
 )
 include_directories(${PULSEAUDIO_INCLUDE_DIRS})
 
@@ -39,6 +41,7 @@ pkg_check_modules(
   gio-2.0>=${GIO_2_0_REQUIRED_VERSION}
   gio-unix-2.0
   libxml-2.0
+  libnotify
 )
 include_directories(${SOUNDSERVICE_INCLUDE_DIRS})
 

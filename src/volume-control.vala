@@ -27,6 +27,8 @@ public class VolumeControl : Object
 	/* this is static to ensure it being freed after @context (loop does not have ref counting) */
 	private static PulseAudio.GLibMainLoop loop;
 
+	private uint _reconnect_timer = 0;
+
 	private PulseAudio.Context context;
 	private bool   _mute = true;
 	private double _volume = 0.0;
@@ -46,20 +48,13 @@ public class VolumeControl : Object
 		if (loop == null)
 			loop = new PulseAudio.GLibMainLoop ();
 
-		var props = new Proplist ();
-		props.sets (Proplist.PROP_APPLICATION_NAME, "Ubuntu Audio Settings");
-		props.sets (Proplist.PROP_APPLICATION_ID, "com.canonical.settings.sound");
-		props.sets (Proplist.PROP_APPLICATION_ICON_NAME, "multimedia-volume-control");
-		props.sets (Proplist.PROP_APPLICATION_VERSION, "0.1");
+		this.reconnect_to_pulse ();
+	}
 
-		context = new PulseAudio.Context (loop.get_api(), null, props);
-
-		context.set_state_callback (context_state_callback);
-
-		if (context.connect(null, Context.Flags.NOFAIL, null) < 0)
-		{
-			warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(context.errno()));
-			return;
+	~VolumeControl ()
+	{
+		if (_reconnect_timer != 0) {
+			Source.remove (_reconnect_timer);
 		}
 	}
 
@@ -133,12 +128,14 @@ public class VolumeControl : Object
 		context.get_server_info (server_info_cb_for_props);
 	}
 
+	private void update_source_get_server_info_cb (PulseAudio.Context c, PulseAudio.ServerInfo? i) {
+		if (i != null)
+			context.get_source_info_by_name (i.default_source_name, source_info_cb);
+	}
+
 	private void update_source ()
 	{
-		context.get_server_info ( (c, i) => {
-			if (i != null)
-				context.get_source_info_by_name (i.default_source_name, source_info_cb);
-		});
+		context.get_server_info (update_source_get_server_info_cb);
 	}
 
 	private void source_output_info_cb (Context c, SourceOutputInfo? i, int eol)
@@ -153,18 +150,65 @@ public class VolumeControl : Object
 
 	private void context_state_callback (Context c)
 	{
-		if (c.get_state () == Context.State.READY)
-		{
-			c.subscribe (PulseAudio.Context.SubscriptionMask.SINK |
-						 PulseAudio.Context.SubscriptionMask.SOURCE |
-						 PulseAudio.Context.SubscriptionMask.SOURCE_OUTPUT);
-			c.set_subscribe_callback (context_events_cb);
-			update_sink ();
-			update_source ();
-			this.ready = true;
+		switch (c.get_state ()) {
+			case Context.State.READY:
+				c.subscribe (PulseAudio.Context.SubscriptionMask.SINK |
+							 PulseAudio.Context.SubscriptionMask.SOURCE |
+							 PulseAudio.Context.SubscriptionMask.SOURCE_OUTPUT);
+				c.set_subscribe_callback (context_events_cb);
+				update_sink ();
+				update_source ();
+				this.ready = true;
+				break;
+
+			case Context.State.FAILED:
+			case Context.State.TERMINATED:
+				if (_reconnect_timer == 0)
+					_reconnect_timer = Timeout.add_seconds (2, reconnect_timeout);
+				break;
+
+			default: 
+				this.ready = false;
+				break;
 		}
-		else
+	}
+
+	bool reconnect_timeout ()
+	{
+		_reconnect_timer = 0;
+		reconnect_to_pulse ();
+		return false; // G_SOURCE_REMOVE
+	}
+
+	void reconnect_to_pulse ()
+	{
+		if (this.ready) {
+			this.context.disconnect ();
+			this.context = null;
 			this.ready = false;
+		}
+
+		var props = new Proplist ();
+		props.sets (Proplist.PROP_APPLICATION_NAME, "Ubuntu Audio Settings");
+		props.sets (Proplist.PROP_APPLICATION_ID, "com.canonical.settings.sound");
+		props.sets (Proplist.PROP_APPLICATION_ICON_NAME, "multimedia-volume-control");
+		props.sets (Proplist.PROP_APPLICATION_VERSION, "0.1");
+
+		this.context = new PulseAudio.Context (loop.get_api(), null, props);
+		this.context.set_state_callback (context_state_callback);
+
+		if (context.connect(null, Context.Flags.NOFAIL, null) < 0)
+			warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(context.errno()));
+	}
+
+	void sink_info_list_callback_set_mute (PulseAudio.Context context, PulseAudio.SinkInfo? sink, int eol) {
+		if (sink != null)
+			context.set_sink_mute_by_index (sink.index, true, null);
+	}
+
+	void sink_info_list_callback_unset_mute (PulseAudio.Context context, PulseAudio.SinkInfo? sink, int eol) {
+		if (sink != null)
+			context.set_sink_mute_by_index (sink.index, false, null);
 	}
 
 	/* Mute operations */
@@ -172,10 +216,10 @@ public class VolumeControl : Object
 	{
 		return_if_fail (context.get_state () == Context.State.READY);
 
-		context.get_sink_info_list ((context, sink, eol) => {
-			if (sink != null)
-				context.set_sink_mute_by_index (sink.index, mute, null);
-		});
+		if (mute)
+			context.get_sink_info_list (sink_info_list_callback_set_mute);
+		else
+			context.get_sink_info_list (sink_info_list_callback_unset_mute);
 	}
 
 	public void toggle_mute ()
@@ -245,19 +289,21 @@ public class VolumeControl : Object
 			mic_volume_changed (_mic_volume);
 	}
 
+	void set_mic_volume_get_server_info_cb (PulseAudio.Context c, PulseAudio.ServerInfo? i) {
+		if (i != null) {
+			unowned CVolume cvol = CVolume ();
+			cvol = vol_set (cvol, 1, double_to_volume (_mic_volume));
+			c.set_source_volume_by_name (i.default_source_name, cvol, set_mic_volume_success_cb);
+		}
+	}
+
 	public void set_mic_volume (double volume)
 	{
 		return_if_fail (context.get_state () == Context.State.READY);
 
 		_mic_volume = volume;
 
-		context.get_server_info ( (c, i) => {
-			if (i != null) {
-				unowned CVolume cvol = CVolume ();
-				cvol = vol_set (cvol, 1, double_to_volume (_mic_volume));
-				c.set_source_volume_by_name (i.default_source_name, cvol, set_mic_volume_success_cb);
-			}
-		});
+		context.get_server_info (set_mic_volume_get_server_info_cb);
 	}
 
 	public double get_volume ()
