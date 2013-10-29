@@ -53,7 +53,7 @@
 # OF SUCH DAMAGE.
 #=============================================================================
 
-find_package (Vala 0.18 REQUIRED)
+find_package (Vala 0.20 REQUIRED)
 include (CMakeParseArguments)
 
 function (vala_init id)

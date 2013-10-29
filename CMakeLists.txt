@@ -45,7 +45,7 @@ pkg_check_modules(
 )
 include_directories(${SOUNDSERVICE_INCLUDE_DIRS})
 
-find_package(Vala 0.18)
+find_package(Vala 0.20)
 
 find_package(GObjectIntrospection 0.9.12)
 
