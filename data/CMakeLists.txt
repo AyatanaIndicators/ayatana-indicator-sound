@@ -47,7 +47,7 @@ set(
 
 configure_file(
   "indicator-sound.desktop.in"
-  ${INDICATOR_SOUND_CONF}
+  ${INDICATOR_SOUND_XDG_AUTOSTART}
   @ONLY
 )
 
