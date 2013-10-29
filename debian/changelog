@@ -1,9 +1,45 @@
-indicator-sound (12.10.2+13.10.20131011-0ubuntu2) UNRELEASED; urgency=low
+indicator-sound (12.10.2+14.04.20131029.1-0ubuntu1) trusty; urgency=low
 
+  [ Dmitrijs Ledkovs ]
   * Define "ubiquity" indicator profile, reusing the greeter object. (LP:
     #1241539)
 
- -- Dmitrijs Ledkovs <xnox@ubuntu.com>  Fri, 18 Oct 2013 13:10:03 +0100
+  [ Charles Kerr ]
+  * When we can't connect to pulse, wait a moment before retrying. (LP:
+    #1244010)
+  * In Service's volume_changed() function, explicitly instantiate the
+    GVariant to avoid leaking it. See the description in bug #1244468
+    for before & after C code and more information. (LP: #1244468)
+  * Test that MediaPlayer's icon property isn't NULL before we serialize
+    it. (LP: #1229612)
+
+  [ Sebastien Bacher ]
+  * Don't special case Unity sessions, that's not needed since gnome-
+    control-center is doing the right thing, the session name used was
+    also wrong and couldn't work (lp: #1239545). (LP: #1239545)
+
+  [ Lars Uebernickel ]
+  * Only display running players in the phone's sound menu The design
+    says to only display the _one_ running player. This will have that
+    effect, as there's only one player allowed to run at a time on the
+    phone.
+  * VolumeControl: don't pass vala closures into libpulse Libpulse's
+    vala bindings don't specify that callbacks passed into some of its
+    functions (e.g., get_server_info) can be called after the function
+    returns. Vala thus frees closure data after these functions return.
+    This can't easily be fixed in the bindings, because libpulse doesn't
+    provide variants of these functions with destroy_notifies. This
+    patch works around this problem by only passing non-closure
+    functions into libpulse. (LP: #1244386)
+  * Depend on vala 0.20 and use its GIcon.serialize().
+
+  [ Ted Gould ]
+  * Adding a phone_greeter profile.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 399
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 29 Oct 2013 10:32:48 +0000
 
 indicator-sound (12.10.2+13.10.20131011-0ubuntu1) saucy; urgency=low
 
