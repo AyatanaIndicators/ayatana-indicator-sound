@@ -118,17 +118,17 @@ public class MediaPlayer: Object {
 	}
 
 	/**
-	 * Launch the associated media player.
+	 * Activate the associated media player.
 	 *
 	 * Note: this will _not_ call attach(), because it doesn't know on which dbus-name the player will appear.
 	 * Use attach() to attach this object to a running instance of the player.
 	 */
-	public void launch () {
+	public void activate () {
 		try {
 			this.appinfo.launch (null, null);
 		}
 		catch (Error e) {
-			warning ("unable to launch %s: %s", appinfo.get_name (), e.message);
+			warning ("unable to activate %s: %s", appinfo.get_name (), e.message);
 		}
 
 		if (this.proxy == null)
@@ -144,7 +144,7 @@ public class MediaPlayer: Object {
 		}
 		else if (this.state != "Launching") {
 			this.play_when_attached = true;
-			this.launch ();
+			this.activate ();
 		}
 	}
 

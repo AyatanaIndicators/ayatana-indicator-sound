@@ -290,7 +290,7 @@ public class IndicatorSound.Service {
 		this.menus.@foreach ( (profile, menu) => menu.add_player (player));
 
 		SimpleAction action = new SimpleAction.stateful (player.id, null, this.action_state_for_player (player));
-		action.activate.connect ( () => { player.launch (); });
+		action.activate.connect ( () => { player.activate (); });
 		this.actions.add_action (action);
 
 		var play_action = new SimpleAction.stateful ("play." + player.id, null, player.state);
