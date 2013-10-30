@@ -118,7 +118,7 @@ public class MediaPlayerList {
 
 			var player = this.insert (mpris2_root.DesktopEntry);
 			if (player != null)
-				player.attach (name);
+				player.attach (mpris2_root, name);
 		}
 		catch (Error e) {
 			warning ("unable to create mpris proxy for '%s': %s", name, e.message);

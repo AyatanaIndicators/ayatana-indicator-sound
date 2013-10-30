@@ -94,9 +94,10 @@ public class MediaPlayer: Object {
 	 *
 	 * This method does not block.  If it is successful, "is-running" will be set to %TRUE.
 	 */
-	public void attach (string dbus_name) {
+	public void attach (MprisRoot root, string dbus_name) {
 		return_if_fail (this._dbus_name == null && this.proxy == null);
 
+		this.root = root;
 		this._dbus_name = dbus_name;
 		Bus.get_proxy.begin<MprisPlayer> (BusType.SESSION, dbus_name, "/org/mpris/MediaPlayer2",
 										  DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, got_proxy);
@@ -125,14 +126,17 @@ public class MediaPlayer: Object {
 	 */
 	public void activate () {
 		try {
-			this.appinfo.launch (null, null);
+			if (this.proxy == null) {
+				this.appinfo.launch (null, null);
+				this.state = "Launching";
+			}
+			else if (this.root != null && this.root.CanRaise) {
+				this.root.Raise ();
+			}
 		}
 		catch (Error e) {
 			warning ("unable to activate %s: %s", appinfo.get_name (), e.message);
 		}
-
-		if (this.proxy == null)
-			this.state = "Launching";
 	}
 
 	/**
@@ -188,6 +192,7 @@ public class MediaPlayer: Object {
 	MprisPlaylists ?playlists_proxy;
 	string _dbus_name;
 	bool play_when_attached = false;
+	MprisRoot root;
 	PlaylistDetails[] playlists = null;
 
 	void got_proxy (Object? obj, AsyncResult res) {
