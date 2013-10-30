@@ -84,6 +84,12 @@ public class MediaPlayer: Object {
 		get; set;
 	}
 
+	public bool can_raise {
+		get {
+			return this.root != null ? this.root.CanRaise : true;
+		}
+	}
+
 	public signal void playlists_changed ();
 
 	/**
@@ -94,8 +100,11 @@ public class MediaPlayer: Object {
 	 *
 	 * This method does not block.  If it is successful, "is-running" will be set to %TRUE.
 	 */
-	public void attach (string dbus_name) {
+	public void attach (MprisRoot root, string dbus_name) {
 		return_if_fail (this._dbus_name == null && this.proxy == null);
+
+		this.root = root;
+		this.notify_property ("can-raise");
 
 		this._dbus_name = dbus_name;
 		Bus.get_proxy.begin<MprisPlayer> (BusType.SESSION, dbus_name, "/org/mpris/MediaPlayer2",
@@ -110,29 +119,34 @@ public class MediaPlayer: Object {
 	 * See also: attach()
 	 */
 	public void detach () {
+		this.root = null;
 		this.proxy = null;
 		this._dbus_name = null;
 		this.notify_property ("is-running");
+		this.notify_property ("can-raise");
 		this.state = "Paused";
 		this.current_track = null;
 	}
 
 	/**
-	 * Launch the associated media player.
+	 * Activate the associated media player.
 	 *
 	 * Note: this will _not_ call attach(), because it doesn't know on which dbus-name the player will appear.
 	 * Use attach() to attach this object to a running instance of the player.
 	 */
-	public void launch () {
+	public void activate () {
 		try {
-			this.appinfo.launch (null, null);
+			if (this.proxy == null) {
+				this.appinfo.launch (null, null);
+				this.state = "Launching";
+			}
+			else if (this.root != null && this.root.CanRaise) {
+				this.root.Raise ();
+			}
 		}
 		catch (Error e) {
-			warning ("unable to launch %s: %s", appinfo.get_name (), e.message);
+			warning ("unable to activate %s: %s", appinfo.get_name (), e.message);
 		}
-
-		if (this.proxy == null)
-			this.state = "Launching";
 	}
 
 	/**
@@ -144,7 +158,7 @@ public class MediaPlayer: Object {
 		}
 		else if (this.state != "Launching") {
 			this.play_when_attached = true;
-			this.launch ();
+			this.activate ();
 		}
 	}
 
@@ -188,6 +202,7 @@ public class MediaPlayer: Object {
 	MprisPlaylists ?playlists_proxy;
 	string _dbus_name;
 	bool play_when_attached = false;
+	MprisRoot root;
 	PlaylistDetails[] playlists = null;
 
 	void got_proxy (Object? obj, AsyncResult res) {
