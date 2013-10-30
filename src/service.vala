@@ -266,8 +266,10 @@ public class IndicatorSound.Service {
 	bool update_player_actions () {
 		foreach (var player in this.players) {
 			SimpleAction? action = this.actions.lookup_action (player.id) as SimpleAction;
-			if (action != null)
+			if (action != null) {
 				action.set_state (this.action_state_for_player (player));
+				action.set_enabled (player.can_raise);
+			}
 		}
 
 		this.player_action_update_id = 0;

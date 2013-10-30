@@ -84,6 +84,12 @@ public class MediaPlayer: Object {
 		get; set;
 	}
 
+	public bool can_raise {
+		get {
+			return this.root != null ? this.root.CanRaise : true;
+		}
+	}
+
 	public signal void playlists_changed ();
 
 	/**
@@ -98,6 +104,8 @@ public class MediaPlayer: Object {
 		return_if_fail (this._dbus_name == null && this.proxy == null);
 
 		this.root = root;
+		this.notify_property ("can-raise");
+
 		this._dbus_name = dbus_name;
 		Bus.get_proxy.begin<MprisPlayer> (BusType.SESSION, dbus_name, "/org/mpris/MediaPlayer2",
 										  DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, got_proxy);
@@ -111,9 +119,11 @@ public class MediaPlayer: Object {
 	 * See also: attach()
 	 */
 	public void detach () {
+		this.root = null;
 		this.proxy = null;
 		this._dbus_name = null;
 		this.notify_property ("is-running");
+		this.notify_property ("can-raise");
 		this.state = "Paused";
 		this.current_track = null;
 	}
