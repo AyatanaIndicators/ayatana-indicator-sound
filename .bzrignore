@@ -1,7 +1,7 @@
 /po/POTFILES
 /po/stamp-it
 
-/data/indicator-sound.service
+/data/indicator-sound.conf
 
 /src/indicator-sound-service
 /src/indicator_sound_service_vala.stamp
