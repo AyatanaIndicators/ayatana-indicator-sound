@@ -21,6 +21,19 @@ class NameWatchTest : public ::testing::Test
 			g_test_dbus_down(testbus);
 			g_clear_object(&testbus);
 		}
+
+		static gboolean timeout_cb (gpointer user_data) {
+			GMainLoop * loop = static_cast<GMainLoop *>(user_data);
+			g_main_loop_quit(loop);
+			return G_SOURCE_REMOVE;
+		}
+
+		void loop (unsigned int ms) {
+			GMainLoop * loop = g_main_loop_new(NULL, FALSE);
+			g_timeout_add(ms, timeout_cb, loop);
+			g_main_loop_run(loop);
+			g_main_loop_unref(loop);
+		}
 };
 
 typedef struct {
@@ -63,22 +76,14 @@ TEST_F(NameWatchTest, BaseWatch)
 	                             G_BUS_NAME_OWNER_FLAGS_NONE,
 	                             NULL, NULL, NULL, NULL, NULL);
 
-	g_usleep(100000);
-	while (g_main_pending())
-		g_main_iteration(TRUE);
-	g_usleep(100000);
-	while (g_main_pending())
-		g_main_iteration(TRUE);
-
+	loop(100);
 
 	ASSERT_EQ(callback_count.appeared, 2);
 
 	g_bus_unown_name(name1);
 	g_bus_unown_name(name2);
 
-	g_usleep(100000);
-	while (g_main_pending())
-		g_main_iteration(TRUE);
+	loop(100);
 
 	ASSERT_EQ(callback_count.vanished, 2);
 
@@ -105,22 +110,14 @@ TEST_F(NameWatchTest, NonMatches)
 	                             G_BUS_NAME_OWNER_FLAGS_NONE,
 	                             NULL, NULL, NULL, NULL, NULL);
 
-	g_usleep(100000);
-	while (g_main_pending())
-		g_main_iteration(TRUE);
-	g_usleep(100000);
-	while (g_main_pending())
-		g_main_iteration(TRUE);
-
+	loop(100);
 
 	ASSERT_EQ(callback_count.appeared, 0);
 
 	g_bus_unown_name(name1);
 	g_bus_unown_name(name2);
 
-	g_usleep(100000);
-	while (g_main_pending())
-		g_main_iteration(TRUE);
+	loop(100);
 
 	ASSERT_EQ(callback_count.vanished, 0);
 
@@ -134,9 +131,7 @@ TEST_F(NameWatchTest, StartupNames)
 	                             G_BUS_NAME_OWNER_FLAGS_NONE,
 	                             NULL, NULL, NULL, NULL, NULL);
 
-	g_usleep(100000);
-	while (g_main_pending())
-		g_main_iteration(TRUE);
+	loop(100);
 
 	callback_count_t callback_count = {0};
 
@@ -147,23 +142,13 @@ TEST_F(NameWatchTest, StartupNames)
 	                                     &callback_count,
 	                                     NULL);
 
-	g_usleep(100000);
-	while (g_main_pending())
-		g_main_iteration(TRUE);
-	g_usleep(100000);
-	while (g_main_pending())
-		g_main_iteration(TRUE);
-	g_usleep(100000);
-	while (g_main_pending())
-		g_main_iteration(TRUE);
+	loop(100);
 
 	ASSERT_EQ(callback_count.appeared, 1);
 
 	g_bus_unown_name(name1);
 
-	g_usleep(100000);
-	while (g_main_pending())
-		g_main_iteration(TRUE);
+	loop(100);
 
 	ASSERT_EQ(callback_count.vanished, 1);
 
