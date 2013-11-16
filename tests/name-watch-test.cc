@@ -54,6 +54,33 @@ TEST_F(NameWatchTest, BaseWatch)
 	                                     &callback_count,
 	                                     NULL);
 
+	guint name1 = g_bus_own_name(G_BUS_TYPE_SESSION,
+	                             "com.foo.bar",
+	                             G_BUS_NAME_OWNER_FLAGS_NONE,
+	                             NULL, NULL, NULL, NULL, NULL);
+	guint name2 = g_bus_own_name(G_BUS_TYPE_SESSION,
+	                             "com.foo.bar_too",
+	                             G_BUS_NAME_OWNER_FLAGS_NONE,
+	                             NULL, NULL, NULL, NULL, NULL);
+
+	g_usleep(100000);
+	while (g_main_pending())
+		g_main_iteration(TRUE);
+	g_usleep(100000);
+	while (g_main_pending())
+		g_main_iteration(TRUE);
+
+
+	ASSERT_EQ(callback_count.appeared, 2);
+
+	g_bus_unown_name(name1);
+	g_bus_unown_name(name2);
+
+	g_usleep(100000);
+	while (g_main_pending())
+		g_main_iteration(TRUE);
+
+	ASSERT_EQ(callback_count.vanished, 2);
 
 	bus_unwatch_namespace(ns_watch);
 }
