@@ -5,11 +5,13 @@ Maintainer: Ubuntu Desktop Team <ubuntu-desktop@lists.ubuntu.com>
 XSBC-Original-Maintainer: Conor Curran <conor.curran@canonical.com>
 Build-Depends: debhelper (>= 9.0),
                cmake,
+               dbus,
                dh-translations,
                gnome-common,
                autotools-dev,
                valac (>= 0.20),
                libglib2.0-dev (>= 2.22.3),
+               libgtest-dev,
                liburl-dispatcher1-dev,
                libpulse-dev (>= 0.9.18),
                libpulse-mainloop-glib0 (>= 0.9.18),
