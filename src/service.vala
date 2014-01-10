@@ -123,7 +123,12 @@ public class IndicatorSound.Service {
 		if (env == "xubuntu" || env == "ubuntustudio")
 			cmd = "pavucontrol";
 		else
-			cmd = "gnome-control-center sound";
+		{
+			if (Environment.find_program_in_path ("unity-control-center") != null)
+				cmd = "unity-control-center sound";
+			else
+				cmd = "gnome-control-center sound";
+		}
 
 		try {
 			Process.spawn_command_line_async (cmd);
