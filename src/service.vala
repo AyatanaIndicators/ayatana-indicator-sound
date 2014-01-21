@@ -42,9 +42,9 @@ public class IndicatorSound.Service {
 			this.volume_control.bind_property ("active-mic", menu, "show-mic-volume", BindingFlags.SYNC_CREATE);
 		});
 
-		this.players.sync (settings.get_strv ("interested-media-players"));
+		this.sync_preferred_players ();
 		this.settings.changed["interested-media-players"].connect ( () => {
-			this.players.sync (settings.get_strv ("interested-media-players"));
+			this.sync_preferred_players ();
 		});
 
 		if (settings.get_boolean ("show-notify-osd-on-scroll")) {
@@ -86,6 +86,7 @@ public class IndicatorSound.Service {
 	MediaPlayerList players;
 	uint player_action_update_id;
 	Notify.Notification notification;
+	bool syncing_preferred_players = false;
 
 	const double volume_step_percentage = 0.06;
 
@@ -281,11 +282,21 @@ public class IndicatorSound.Service {
 			this.player_action_update_id = Idle.add (this.update_player_actions);
 	}
 
+
+	void sync_preferred_players () {
+		this.syncing_preferred_players = true;
+		this.players.sync (settings.get_strv ("interested-media-players"));
+		this.syncing_preferred_players = false;
+	}
+
 	void update_preferred_players () {
-		var builder = new VariantBuilder (VariantType.STRING_ARRAY);
-		foreach (var player in this.players)
-			builder.add ("s", player.id);
-		this.settings.set_value ("interested-media-players", builder.end ());
+		/* only write the key if we're not getting this call because we're syncing from the key right now */
+		if (!this.syncing_preferred_players) {
+			var builder = new VariantBuilder (VariantType.STRING_ARRAY);
+			foreach (var player in this.players)
+				builder.add ("s", player.id);
+			this.settings.set_value ("interested-media-players", builder.end ());
+		}
 	}
 
 	void player_added (MediaPlayer player) {
