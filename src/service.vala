@@ -124,7 +124,7 @@ public class IndicatorSound.Service {
 			cmd = "pavucontrol";
 		else
 		{
-			if (Environment.find_program_in_path ("unity-control-center") != null)
+			if (Environment.get_variable ("XDG_CURRENT_DESKTOP") == "Unity" && Environment.find_program_in_path ("unity-control-center") != null)
 				cmd = "unity-control-center sound";
 			else
 				cmd = "gnome-control-center sound";
