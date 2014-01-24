@@ -1,3 +1,24 @@
+indicator-sound (12.10.2+14.04.20140124-0ubuntu1) trusty; urgency=low
+
+  [ Robert Ancell ]
+  * Use unity-control-center if it is available. (LP: #1257505)
+
+  [ Ted Gould ]
+  * Own the server capabilities so we clean it up.
+
+  [ Lars Uebernickel ]
+  * Don't write 'interested-media-players' on startup
+    IndicatorSound.Service read that gsettings key and inserted the
+    players desktop ids into a MediaPlayerList, which emits "player-
+    added" every time a player is added. This patch makes the service
+    keep track of whether players are added because it is syncing the
+    key or when a player appeared on the bus. .
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 408
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 24 Jan 2014 11:00:18 +0000
+
 indicator-sound (12.10.2+14.04.20131125-0ubuntu1) trusty; urgency=low
 
   [ Ted Gould ]
