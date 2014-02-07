@@ -1,3 +1,18 @@
+indicator-sound (12.10.2+14.04.20140207-0ubuntu1) trusty; urgency=low
+
+  [ Unit193 ]
+  * Drop the recommends to suggests for the control centers and system
+    settings so that flavors that don't seed those packages aren't stuck
+    with them.
+
+  [ Ted Gould ]
+  * Adding acceptance tests and merge review policies.
+
+  [ CI bot ]
+  * Adding acceptance tests and merge review policies
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 07 Feb 2014 16:26:07 +0000
+
 indicator-sound (12.10.2+14.04.20140124-0ubuntu1) trusty; urgency=low
 
   [ Robert Ancell ]
