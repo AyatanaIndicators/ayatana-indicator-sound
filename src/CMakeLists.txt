@@ -16,6 +16,8 @@ vapi_gen(accounts-service
 )
 
 vala_init(indicator-sound-service
+  DEPENDS
+    accounts-service
   PACKAGES
     config
     gio-2.0
@@ -24,6 +26,7 @@ vala_init(indicator-sound-service
     libpulse
     libpulse-mainloop-glib
     libnotify
+    accounts-service
   OPTIONS
     --ccode
     --thread
@@ -31,7 +34,6 @@ vala_init(indicator-sound-service
     --vapidir=.
     --pkg=url-dispatcher
     --pkg=bus-watcher
-    --pkg=accounts-service
 )
 
 vala_add(indicator-sound-service
