@@ -87,6 +87,7 @@ public class IndicatorSound.Service {
 	uint player_action_update_id;
 	Notify.Notification notification;
 	bool syncing_preferred_players = false;
+	Act.UserManager account_manager = Act.UserManager.get_default();
 
 	const double volume_step_percentage = 0.06;
 

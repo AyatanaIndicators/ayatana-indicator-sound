@@ -6,6 +6,15 @@
 set(HEADER_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.h")
 set(SYMBOLS_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.def")
 
+vapi_gen(accounts-service
+	LIBRARY
+		accounts-service
+	PACKAGES
+		gio-2.0
+	INPUT
+		/usr/share/gir-1.0/AccountsService-1.0.gir
+)
+
 vala_init(indicator-sound-service
   PACKAGES
     config
@@ -20,9 +29,9 @@ vala_init(indicator-sound-service
     --thread
     --vapidir=${CMAKE_SOURCE_DIR}/vapi/
     --vapidir=.
-    --target-glib=2.36
     --pkg=url-dispatcher
     --pkg=bus-watcher
+    --pkg=accounts-service
 )
 
 vala_add(indicator-sound-service
