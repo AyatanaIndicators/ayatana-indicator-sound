@@ -275,12 +275,24 @@ public class IndicatorSound.Service {
 	}
 
 	bool update_player_actions () {
+		bool clear_accounts_player = true;
+
 		foreach (var player in this.players) {
 			SimpleAction? action = this.actions.lookup_action (player.id) as SimpleAction;
 			if (action != null) {
 				action.set_state (this.action_state_for_player (player));
 				action.set_enabled (player.can_raise);
 			}
+			
+			/* If we're playing then put that data in accounts service */
+			if (player.is_running && accounts_service != null) {
+				accounts_service.player = player;
+				clear_accounts_player = false;
+			}
+		}
+
+		if (clear_accounts_player && accounts_service != null) {
+			accounts_service.player = null;
 		}
 
 		this.player_action_update_id = 0;
