@@ -42,6 +42,10 @@ public class IndicatorSound.Service {
 			this.volume_control.bind_property ("active-mic", menu, "show-mic-volume", BindingFlags.SYNC_CREATE);
 		});
 
+		if (GLib.Environment.get_user_name() != "lightdm") {
+			accounts_service = new AccountsServiceUser();
+		}
+
 		this.sync_preferred_players ();
 		this.settings.changed["interested-media-players"].connect ( () => {
 			this.sync_preferred_players ();
@@ -87,7 +91,7 @@ public class IndicatorSound.Service {
 	uint player_action_update_id;
 	Notify.Notification notification;
 	bool syncing_preferred_players = false;
-	Act.UserManager account_manager = Act.UserManager.get_default();
+	AccountsServiceUser? accounts_service = null;
 
 	const double volume_step_percentage = 0.06;
 

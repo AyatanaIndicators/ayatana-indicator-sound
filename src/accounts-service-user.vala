@@ -18,7 +18,14 @@
  */
 
 
-public class AccountServiceUser : Object {
+public class AccountsServiceUser : Object {
+	Act.UserManager accounts_manager = Act.UserManager.get_default();
+	Act.User? user = null;
+
+	public AccountsServiceUser () {
+		user = accounts_manager.get_user(GLib.Environment.get_user_name());
+
+	}
 
 
 
