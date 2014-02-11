@@ -86,7 +86,7 @@ public class AccountsServiceUser : Object {
 
 			Bus.get_proxy.begin<AccountsServiceSoundSettings> (
 				BusType.SYSTEM,
-				"org.freedesktop.AccountsService",
+				"org.freedesktop.Accounts",
 				user.get_object_path(),
 				DBusProxyFlags.GET_INVALIDATED_PROPERTIES,
 				null,
