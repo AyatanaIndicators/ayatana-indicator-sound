@@ -20,7 +20,14 @@
 [DBus (name = "com.canonical.indicator.sound.AccountsService")]
 public interface AccountsServiceSoundSettings : Object {
 	// properties
-	public abstract bool playing{owned get; set;}
+	public abstract string player_name {owned get; set;}
+	public abstract Variant player_icon {owned get; set;}
+	public abstract bool running {owned get; set;}
+	public abstract string state {owned get; set;}
+	public abstract string title {owned get; set;}
+	public abstract string artist {owned get; set;}
+	public abstract string album {owned get; set;}
+	public abstract string art_url {owned get; set;}
 }
 
 public class AccountsServiceUser : Object {
@@ -32,6 +39,38 @@ public class AccountsServiceUser : Object {
 	public MediaPlayer? player {
 		set {
 			this._player = value;
+
+			/* No proxy, no settings to set */
+			if (this.proxy == null)
+				return;
+
+			if (this._player == null) {
+				/* Clear it */
+				this.proxy.player_name = "";
+			} else {
+				this.proxy.player_name = this._player.name;
+				if (this._player.icon == null) {
+					var icon = new ThemedIcon.with_default_fallbacks ("application-default-icon");
+					this.proxy.player_icon = icon.serialize();
+				} else {
+					this.proxy.player_icon = this._player.icon.serialize();
+				}
+
+				this.proxy.running = this._player.is_running;
+				this.proxy.state = this._player.state;
+
+				if (this._player.current_track != null) {
+					this.proxy.title = this._player.current_track.title;
+					this.proxy.artist = this._player.current_track.artist;
+					this.proxy.album = this._player.current_track.album;
+					this.proxy.art_url = this._player.current_track.art_url;
+				} else {
+					this.proxy.title = "";
+					this.proxy.artist = "";
+					this.proxy.album = "";
+					this.proxy.art_url = "";
+				}
+			}
 		}
 		get {
 			return this._player;
@@ -53,7 +92,10 @@ public class AccountsServiceUser : Object {
 				null,
 				new_proxy);
 		});
+	}
 
+	~AccountsServiceUser () {
+		this.player = null;
 	}
 
 	void new_proxy (GLib.Object? obj, AsyncResult res) {
@@ -65,13 +107,4 @@ public class AccountsServiceUser : Object {
 			warning("Unable to get proxy to user sound settings: %s", e.message);
 		}
 	}
-
-
-
-
-
-
-
-
-
 }
