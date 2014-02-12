@@ -47,11 +47,6 @@ vala_add(indicator-sound-service
     accounts-service-user
 )
 vala_add(indicator-sound-service
-  main.vala
-  DEPENDS
-    service
-)
-vala_add(indicator-sound-service
   volume-control.vala
 )
 vala_add(indicator-sound-service
@@ -110,16 +105,33 @@ set(
 )
 
 ###########################
-# Executable
+# Lib
 ###########################
 
 add_definitions(
   -w
 )
 
+add_library(
+	indicator-sound-service-lib STATIC
+	${INDICATOR_SOUND_SOURCES}
+)
+
+target_link_libraries(
+  indicator-sound-service-lib
+  ${PULSEAUDIO_LIBRARIES}
+  ${SOUNDSERVICE_LIBRARIES}
+)
+
+###########################
+# Executable
+###########################
+
+include_directories(${CMAKE_BINARY_DIR})
+
 add_executable(
   indicator-sound-service-bin
-  ${INDICATOR_SOUND_SOURCES}
+  main.c
 )
 
 set_target_properties(
@@ -130,8 +142,7 @@ set_target_properties(
 
 target_link_libraries(
   indicator-sound-service-bin
-  ${PULSEAUDIO_LIBRARIES}
-  ${SOUNDSERVICE_LIBRARIES}
+  indicator-sound-service-lib
 )
 
 ###########################
