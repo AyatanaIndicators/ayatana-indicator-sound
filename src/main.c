@@ -21,9 +21,12 @@ main (int argc, char ** argv) {
 	/* Initialize libnotify */
 	notify_init ("indicator-sound");
 
+	MediaPlayerList * playerlist = MEDIA_PLAYER_LIST(media_player_list_mpris_new());
 
-	service = indicator_sound_service_new ();
+	service = indicator_sound_service_new (playerlist);
 	result = indicator_sound_service_run (service);
+
+	g_object_unref(playerlist);
 	g_object_unref(service);
 
 	return result;

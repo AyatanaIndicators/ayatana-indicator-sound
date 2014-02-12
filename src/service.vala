@@ -18,12 +18,12 @@
  */
 
 public class IndicatorSound.Service {
-	public Service () {
+	public Service (MediaPlayerList playerlist) {
 		this.settings = new Settings ("com.canonical.indicator.sound");
 
 		this.volume_control = new VolumeControl ();
 
-		this.players = new MediaPlayerList ();
+		this.players = playerlist;
 		this.players.player_added.connect (this.player_added);
 		this.players.player_removed.connect (this.player_removed);
 
