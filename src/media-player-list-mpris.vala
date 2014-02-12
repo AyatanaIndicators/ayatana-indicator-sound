@@ -21,23 +21,23 @@
  * MediaPlayerList is a list of media players that should appear in the sound menu.  Its main responsibility is
  * to listen for MPRIS players on the bus and attach them to the corresponding %Player objects.
  */
-public class MediaPlayerList {
+public class MediaPlayerListMpris : MediaPlayerList {
 
-	public MediaPlayerList () {
+	public MediaPlayerListMpris () {
 		this._players = new HashTable<string, MediaPlayerMpris> (str_hash, str_equal);
 
 		BusWatcher.watch_namespace (BusType.SESSION, "org.mpris.MediaPlayer2", this.player_appeared, this.player_disappeared);
 	}
 
 	/* only valid while the list is not changed */
-	public class Iterator {
+	public class Iterator : MediaPlayerList.Iterator {
 		HashTableIter<string, MediaPlayerMpris> iter;
 
-		public Iterator (MediaPlayerList list) {
+		public Iterator (MediaPlayerListMpris list) {
 			this.iter = HashTableIter<string, MediaPlayerMpris> (list._players);
 		}
 
-		public MediaPlayer? next_value () {
+		public override MediaPlayer? next_value () {
 			MediaPlayerMpris? player;
 
 			if (this.iter.next (null, out player))
@@ -47,8 +47,8 @@ public class MediaPlayerList {
 		}
 	}
 
-	public Iterator iterator () {
-		return new Iterator (this);
+	public override MediaPlayerList.Iterator iterator () {
+		return new Iterator (this) as MediaPlayerList.Iterator;
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class MediaPlayerList {
 	 * Synchronizes the player list with @desktop_ids.  After this call, this list will only contain the players
 	 * in @desktop_ids.  Players that were running but are not in @desktop_ids will remain in the list.
 	 */
-	public void sync (string[] desktop_ids) {
+	public override void sync (string[] desktop_ids) {
 
 		/* hash desktop_ids for faster lookup */
 		var hash = new HashTable<string, unowned string> (str_hash, str_equal);
@@ -106,9 +106,6 @@ public class MediaPlayerList {
 		foreach (var id in desktop_ids)
 			this.insert (id);
 	}
-
-	public signal void player_added (MediaPlayer player);
-	public signal void player_removed (MediaPlayer player);
 
 	HashTable<string, MediaPlayerMpris> _players;
 
