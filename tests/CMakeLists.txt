@@ -104,5 +104,12 @@ target_link_libraries (
 	${SOUNDSERVICE_LIBRARIES}
 	${TEST_LIBRARIES}
 )
-add_test(accounts-service-user-test accounts-service-user-test)
 
+# Split tests to work around libaccountservice sucking
+add_test(accounts-service-user-test-basic
+	accounts-service-user-test  --gtest_filter=AccountsServiceUserTest.BasicObject
+)
+
+add_test(accounts-service-user-test-player
+	accounts-service-user-test  --gtest_filter=AccountsServiceUserTest.SetMediaPlayer
+)
