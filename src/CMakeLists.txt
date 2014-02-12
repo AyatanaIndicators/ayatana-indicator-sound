@@ -51,13 +51,18 @@ vala_add(indicator-sound-service
 )
 vala_add(indicator-sound-service
   media-player.vala
+)
+vala_add(indicator-sound-service
+  media-player-mpris.vala
   DEPENDS
+    media-player
     mpris2-interfaces
 )
 vala_add(indicator-sound-service
   media-player-list.vala
   DEPENDS
     media-player
+    media-player-mpris
     mpris2-interfaces
 )
 vala_add(indicator-sound-service
