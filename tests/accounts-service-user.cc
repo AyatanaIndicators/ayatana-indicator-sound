@@ -24,6 +24,7 @@
 
 extern "C" {
 #include "indicator-sound-service.h"
+#include "vala-mocks.h"
 }
 
 class AccountsServiceUserTest : public ::testing::Test
@@ -107,7 +108,7 @@ class AccountsServiceUserTest : public ::testing::Test
 		virtual void TearDown() {
 			/* These are the things that libaccountservice0 doesn't clean up :-( */
 			g_object_unref(act_user_manager_get_default());
-			for (int i = 0; i < 11; i++) {
+			for (int i = 0; i < 11 && system != NULL; i++) {
 				g_object_unref(system);
 			}
 			/* End shitty untested library cleanup */
@@ -116,7 +117,8 @@ class AccountsServiceUserTest : public ::testing::Test
 			g_clear_object(&service);
 
 			g_object_unref(session);
-			g_object_unref(system);
+			if (system != NULL)
+				g_object_unref(system);
 
 			unsigned int cleartry = 0;
 			while ((session != NULL || system != NULL) && cleartry < 100) {
@@ -145,5 +147,17 @@ class AccountsServiceUserTest : public ::testing::Test
 TEST_F(AccountsServiceUserTest, BasicObject) {
 	AccountsServiceUser * srv = accounts_service_user_new();
 	loop(50);
+	g_object_unref(srv);
+}
+
+TEST_F(AccountsServiceUserTest, SetMediaPlayer) {
+	AccountsServiceUser * srv = accounts_service_user_new();
+	MediaPlayerMock * media = media_player_mock_new();
+
+	accounts_service_user_set_player(srv, MEDIA_PLAYER(media));
+
+	loop(50);
+
+	g_object_unref(media);
 	g_object_unref(srv);
 }
