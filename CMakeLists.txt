@@ -47,6 +47,12 @@ pkg_check_modules(
 )
 include_directories(${SOUNDSERVICE_INCLUDE_DIRS})
 
+pkg_check_modules(
+  TEST REQUIRED
+  dbustest-1
+)
+include_directories(${TEST_INCLUDE_DIRS})
+
 find_package(Vala 0.20)
 
 find_package(GObjectIntrospection 0.9.12)
