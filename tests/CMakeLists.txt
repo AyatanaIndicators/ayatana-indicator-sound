@@ -10,6 +10,76 @@ add_library (gtest STATIC
              ${GTEST_SOURCE_DIR}/gtest_main.cc)
 target_link_libraries(gtest ${GTEST_LIBS})
 
+###########################
+# Vala Mocks
+###########################
+
+set(VALA_MOCKS_HEADER_PATH "${CMAKE_CURRENT_BINARY_DIR}/vala-mocks.h")
+set(VALA_MOCKS_SYMBOLS_PATH "${CMAKE_CURRENT_BINARY_DIR}/vala-mocks.def")
+
+vala_init(vala-mocks
+	DEPENDS
+		indicator-sound-service-lib
+	PACKAGES
+		config
+		gio-2.0
+		gio-unix-2.0
+		libxml-2.0
+		libpulse
+		libpulse-mainloop-glib
+		libnotify
+		accounts-service
+		indicator-sound-service
+	OPTIONS
+		--ccode
+		--thread
+		--vapidir=${CMAKE_BINARY_DIR}/src/
+		--vapidir=${CMAKE_SOURCE_DIR}/vapi/
+		--vapidir=.
+)
+
+vala_add(vala-mocks
+	media-player-mock.vala
+)
+
+vala_finish(vala-mocks
+	SOURCES
+		vala_mocks_VALA_SOURCES
+	OUTPUTS
+		vala_mocks_VALA_C
+	GENERATE_HEADER
+		${VALA_MOCKS_HEADER_PATH}
+	GENERATE_SYMBOLS
+		${VALA_MOCKS_SYMBOLS_PATH}
+)
+
+set_source_files_properties(
+	${vala_mocks_VALA_SOURCES}
+	PROPERTIES
+	HEADER_FILE_ONLY TRUE
+)
+
+set(
+	VALA_MOCKS_SOURCES
+	${vala_mocks_VALA_SOURCES}
+	${vala_mocks_VALA_C}
+	${VALA_MOCKS_SYMBOLS_PATH}
+)
+
+add_definitions(
+	-Wno-unused-but-set-variable
+)
+
+add_library(
+	vala-mocks-lib STATIC
+	${VALA_MOCKS_SOURCES}
+)
+
+target_link_libraries(
+	vala-mocks-lib
+	indicator-sound-service-lib
+)
+
 
 ###########################
 # Name Watch Test
@@ -29,6 +99,7 @@ add_executable (accounts-service-user-test accounts-service-user.cc)
 target_link_libraries (
 	accounts-service-user-test
 	indicator-sound-service-lib
+	vala-mocks-lib
 	gtest
 	${SOUNDSERVICE_LIBRARIES}
 	${TEST_LIBRARIES}

@@ -5,6 +5,7 @@
 
 set(HEADER_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.h")
 set(SYMBOLS_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.def")
+set(VAPI_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.vapi")
 
 vapi_gen(accounts-service
 	LIBRARY
@@ -93,6 +94,8 @@ vala_finish(indicator-sound-service
     ${HEADER_PATH}
   GENERATE_SYMBOLS
     ${SYMBOLS_PATH}
+  GENERATE_VAPI
+    ${VAPI_PATH}
 )
 
 set_source_files_properties(
