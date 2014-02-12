@@ -21,7 +21,13 @@ main (int argc, char ** argv) {
 	/* Initialize libnotify */
 	notify_init ("indicator-sound");
 
-	MediaPlayerList * playerlist = MEDIA_PLAYER_LIST(media_player_list_mpris_new());
+	MediaPlayerList * playerlist = NULL;
+
+	if (g_strcmp0("lightdm", g_get_user_name())) {
+		playerlist = MEDIA_PLAYER_LIST(media_player_list_greeter_new());
+	} else {
+		playerlist = MEDIA_PLAYER_LIST(media_player_list_mpris_new());
+	}
 
 	service = indicator_sound_service_new (playerlist);
 	result = indicator_sound_service_run (service);
