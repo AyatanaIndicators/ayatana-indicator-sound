@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 #include <gio/gio.h>
 #include <libdbustest/dbus-test.h>
+#include <act/act.h>
 
 extern "C" {
 #include "indicator-sound-service.h"
@@ -50,13 +51,20 @@ class AccountsServiceUserTest : public ::testing::Test
 		}
 
 		virtual void TearDown() {
+			/* These are the things that libaccountservice0 doesn't clean up :-( */
+			g_object_unref(act_user_manager_get_default());
+			g_object_unref(system);
+			g_object_unref(system);
+			g_object_unref(system);
+			/* End shitty untested library cleanup */
+
 			g_clear_object(&service);
 
 			g_object_unref(session);
 			g_object_unref(system);
 
 			unsigned int cleartry = 0;
-			while (session != NULL && system != NULL && cleartry < 100) {
+			while ((session != NULL || system != NULL) && cleartry < 100) {
 				loop(100);
 				cleartry++;
 			}
@@ -80,6 +88,7 @@ class AccountsServiceUserTest : public ::testing::Test
 };
 
 TEST_F(AccountsServiceUserTest, BasicObject) {
-
-
+	AccountsServiceUser * srv = accounts_service_user_new();
+	loop(50);
+	g_object_unref(srv);
 }

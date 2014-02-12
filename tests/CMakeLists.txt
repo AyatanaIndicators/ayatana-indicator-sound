@@ -26,6 +26,12 @@ add_test(name-watch-test name-watch-test)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 add_executable (accounts-service-user-test accounts-service-user.cc)
-target_link_libraries (accounts-service-user-test gtest ${SOUNDSERVICE_LIBRARIES} ${TEST_LIBRARIES})
+target_link_libraries (
+	accounts-service-user-test
+	indicator-sound-service-lib
+	gtest
+	${SOUNDSERVICE_LIBRARIES}
+	${TEST_LIBRARIES}
+)
 add_test(accounts-service-user-test accounts-service-user-test)
 
