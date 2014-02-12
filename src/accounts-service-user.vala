@@ -101,7 +101,7 @@ public class AccountsServiceUser : Object {
 	void new_proxy (GLib.Object? obj, AsyncResult res) {
 		try {
 			this.proxy = Bus.get_proxy.end (res);
-			//this.player = _player;
+			this.player = _player;
 		} catch (Error e) {
 			this.proxy = null;
 			warning("Unable to get proxy to user sound settings: %s", e.message);
