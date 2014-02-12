@@ -80,6 +80,7 @@ target_link_libraries(
 	indicator-sound-service-lib
 )
 
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 ###########################
 # Name Watch Test
