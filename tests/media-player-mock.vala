@@ -19,6 +19,31 @@
 
 public class MediaPlayerMock: MediaPlayer {
 
+	/* Superclass variables */
+	public override string id { get { return mock_id; } }
+	public override string name { get { return mock_name; } }
+	public override string state { get { return mock_state; } set { this.mock_state = value; }}
+	public override Icon? icon { get { return mock_icon; } }
+	public override string dbus_name { get { return mock_dbus_name; } }
+
+	public override bool is_running { get { return mock_is_running; } }
+	public override bool can_raise { get {  return mock_can_raise; } }
+
+	public override MediaPlayer.Track? current_track { get { return mock_current_track; } set { this.mock_current_track = value; } }
+
+	/* Mock values */
+	public string mock_id { get; set; }
+	public string mock_name { get; set; }
+	public string mock_state { get; set; }
+	public Icon? mock_icon { get; set; }
+	public string mock_dbus_name { get; set; }
+
+	public bool mock_is_running { get; set; }
+	public bool mock_can_raise { get; set; }
+
+	public MediaPlayer.Track? mock_current_track { get; set; } 
+
+	/* Virtual functions */
 	public override void activate () {
 		debug("Mock activate");
 	}
