@@ -240,7 +240,8 @@ public class IndicatorSound.Service: Object {
 		var volume_action = new SimpleAction.stateful ("volume", VariantType.INT32, new Variant.double (volume));
 
 		volume_action.change_state.connect ( (action, val) => {
-			volume_control.set_volume (val.get_double () * this.max_volume);
+			double v = val.get_double () * this.max_volume;
+			volume_control.set_volume (v.clamp (0.0, this.max_volume));
 		});
 
 		/* activating this action changes the volume by the amount given in the parameter */
