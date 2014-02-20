@@ -87,6 +87,7 @@ public class IndicatorSound.Service: Object {
 				this.max_volume = 1.0;
 			}
 
+			/* Normalize volume, because the volume action's state is [0.0, 1.0], see create_volume_action() */
 			this.actions.change_action_state ("volume", this.volume_control.get_volume () / this.max_volume);
 		}
 	}
@@ -107,6 +108,10 @@ public class IndicatorSound.Service: Object {
 	uint player_action_update_id;
 	Notify.Notification notification;
 	bool syncing_preferred_players = false;
+
+	/* Maximum volume as a scaling factor between the volume action's state and the value in
+	 * this.volume_control. See create_volume_action().
+	 */
 	double max_volume = 1.0;
 
 	const double volume_step_percentage = 0.06;
@@ -222,6 +227,8 @@ public class IndicatorSound.Service: Object {
 
 	void volume_changed (double volume) {
 		var volume_action = this.actions.lookup_action ("volume") as SimpleAction;
+
+		/* Normalize volume, because the volume action's state is [0.0, 1.0], see create_volume_action() */
 		volume_action.set_state (new Variant.double (volume / this.max_volume));
 
 		this.update_root_icon ();
