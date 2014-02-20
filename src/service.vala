@@ -17,7 +17,7 @@
  *      Lars Uebernickel <lars.uebernickel@canonical.com>
  */
 
-public class IndicatorSound.Service {
+public class IndicatorSound.Service: Object {
 	public Service () {
 		this.settings = new Settings ("com.canonical.indicator.sound");
 
@@ -54,6 +54,8 @@ public class IndicatorSound.Service {
 				this.notification.set_hint_string ("x-canonical-private-synchronous", "indicator-sound");
 			}
 		}
+
+		settings.bind ("allow-amplified-volume", this, "allow-amplified-volume", SettingsBindFlags.GET);
 	}
 
 	public int run () {
@@ -69,6 +71,24 @@ public class IndicatorSound.Service {
 		this.loop.run ();
 
 		return 0;
+	}
+
+	public bool allow_amplified_volume {
+		get {
+			return this.max_volume > 1.0;
+		}
+
+		set {
+			if (value) {
+				/* from pulse/volume.h: #define PA_VOLUME_UI_MAX (pa_sw_volume_from_dB(+11.0)) */
+				this.max_volume = (double)PulseAudio.Volume.sw_from_dB(11.0) / PulseAudio.Volume.NORM;
+			}
+			else {
+				this.max_volume = 1.0;
+			}
+
+			this.actions.change_action_state ("volume", this.volume_control.get_volume () / this.max_volume);
+		}
 	}
 
 	const ActionEntry[] action_entries = {
@@ -87,6 +107,7 @@ public class IndicatorSound.Service {
 	uint player_action_update_id;
 	Notify.Notification notification;
 	bool syncing_preferred_players = false;
+	double max_volume = 1.0;
 
 	const double volume_step_percentage = 0.06;
 
@@ -94,7 +115,7 @@ public class IndicatorSound.Service {
 		int delta = param.get_int32(); /* positive for up, negative for down */
 
 		double v = this.volume_control.get_volume () + volume_step_percentage * delta;
-		this.volume_control.set_volume (v.clamp (0.0, 1.0));
+		this.volume_control.set_volume (v.clamp (0.0, this.max_volume));
 
 		if (this.notification != null) {
 			string icon;
@@ -201,22 +222,32 @@ public class IndicatorSound.Service {
 
 	void volume_changed (double volume) {
 		var volume_action = this.actions.lookup_action ("volume") as SimpleAction;
-		volume_action.set_state (new Variant.double (volume));
+		volume_action.set_state (new Variant.double (volume / this.max_volume));
 
 		this.update_root_icon ();
 	}
 
 	Action create_volume_action () {
-		var volume_action = new SimpleAction.stateful ("volume", VariantType.INT32, new Variant.double (this.volume_control.get_volume ()));
+		/* The action's state is between be in [0.0, 1.0] instead of [0.0,
+		 * max_volume], so that we don't need to update the slider menu item
+		 * every time allow-amplified-volume is changed.  Convert between the
+		 * two here, so that we always pass the full range into
+		 * volume_control.set_volume().
+		 */
+
+		double volume = this.volume_control.get_volume () / this.max_volume;
+
+		var volume_action = new SimpleAction.stateful ("volume", VariantType.INT32, new Variant.double (volume));
 
 		volume_action.change_state.connect ( (action, val) => {
-			volume_control.set_volume (val.get_double ());
+			volume_control.set_volume (val.get_double () * this.max_volume);
 		});
 
 		/* activating this action changes the volume by the amount given in the parameter */
 		volume_action.activate.connect ( (action, param) => {
-			double v = volume_control.get_volume () + volume_step_percentage * param.get_int32 ();
-			volume_control.set_volume (v.clamp (0.0, 1.0));
+			int delta = param.get_int32 ();
+			double v = volume_control.get_volume () + volume_step_percentage * delta;
+			volume_control.set_volume (v.clamp (0.0, this.max_volume));
 		});
 
 		this.volume_control.volume_changed.connect (volume_changed);
