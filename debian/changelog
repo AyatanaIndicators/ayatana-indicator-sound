@@ -1,3 +1,13 @@
+indicator-sound (12.10.2+14.04.20140220-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * Add support for amplified volumes Add a settings key "allow-
+    amplified-volume" which controls whether the volume slider stops at
+    100% or PA_VOLUME_UI_MAX. unity-control-center will provide a ui for
+    this key.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 20 Feb 2014 18:13:42 +0000
+
 indicator-sound (12.10.2+14.04.20140207-0ubuntu1) trusty; urgency=low
 
   [ Unit193 ]
