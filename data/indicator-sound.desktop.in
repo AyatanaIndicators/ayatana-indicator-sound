@@ -2,7 +2,7 @@
 Type=Application
 Name=Indicator Sound
 Exec=@CMAKE_INSTALL_FULL_LIBEXECDIR@/indicator-sound/indicator-sound-service
-NotShowIn=Unity;
+OnlyShowIn=Unity;
 NoDisplay=true
 StartupNotify=false
 Terminal=false
