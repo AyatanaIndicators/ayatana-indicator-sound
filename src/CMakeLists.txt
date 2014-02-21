@@ -63,6 +63,7 @@ vala_add(indicator-sound-service
   media-player-user.vala
   DEPENDS
     media-player
+	accounts-service-sound-settings
 )
 vala_add(indicator-sound-service
   media-player-list.vala
