@@ -46,6 +46,7 @@ public abstract class MediaPlayerUser : MediaPlayer {
 		try {
 			this.proxy = Bus.get_proxy.end (res);
 			/* TODO: Update settings */
+			/* TODO: Setup setting notification */
 		} catch (Error e) {
 			this.proxy = null;
 			warning("Unable to get proxy to user '%s' sound settings: %s", username, e.message);
@@ -105,7 +106,7 @@ public abstract class MediaPlayerUser : MediaPlayer {
 	}
 	public override string dbus_name { get { return ""; } }
 
-	public override bool is_running { get { return true; } }
+	public override bool is_running { get { return proxy_is_valid(); } }
 	public override bool can_raise { get { return false; } }
 
 	MediaPlayer.Track track_cache;
