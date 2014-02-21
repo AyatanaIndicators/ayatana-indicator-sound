@@ -35,6 +35,7 @@ public class AccountsServiceUser : Object {
 	Act.UserManager accounts_manager = Act.UserManager.get_default();
 	Act.User? user = null;
 	AccountsServiceSoundSettings? proxy = null;
+	uint timer = 0;
 	MediaPlayer? _player = null;
 
 	public MediaPlayer? player {
@@ -44,6 +45,12 @@ public class AccountsServiceUser : Object {
 			/* No proxy, no settings to set */
 			if (this.proxy == null)
 				return;
+
+			/* Always reset the timer */
+			if (this.timer != 0) {
+				GLib.Source.remove(this.timer);
+				this.timer = 0;
+			}
 
 			if (this._player == null) {
 				/* Clear it */
@@ -73,6 +80,11 @@ public class AccountsServiceUser : Object {
 					this.proxy.album = "";
 					this.proxy.art_url = "";
 				}
+
+				this.timer = GLib.Timeout.add_seconds(5 * 60, () => {
+					this.proxy.timestamp = GLib.get_monotonic_time();
+					return true;
+				});
 			}
 		}
 		get {
