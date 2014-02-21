@@ -17,20 +17,6 @@
  *      Ted Gould <ted@canonical.com>
  */
 
-[DBus (name = "com.canonical.indicator.sound.AccountsService")]
-public interface AccountsServiceSoundSettings : Object {
-	// properties
-	public abstract uint64 timestamp {owned get; set;}
-	public abstract string player_name {owned get; set;}
-	public abstract Variant player_icon {owned get; set;}
-	public abstract bool running {owned get; set;}
-	public abstract string state {owned get; set;}
-	public abstract string title {owned get; set;}
-	public abstract string artist {owned get; set;}
-	public abstract string album {owned get; set;}
-	public abstract string art_url {owned get; set;}
-}
-
 public class AccountsServiceUser : Object {
 	Act.UserManager accounts_manager = Act.UserManager.get_default();
 	Act.User? user = null;
