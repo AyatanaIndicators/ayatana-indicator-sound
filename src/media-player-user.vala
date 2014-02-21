@@ -52,6 +52,19 @@ public abstract class MediaPlayerUser : MediaPlayer {
 		}
 	}
 
+	bool proxy_is_valid () {
+		if (this.proxy == null) {
+			return false;
+		}
+
+		/* More than 10 minutes old */
+		if (this.proxy.timestamp < GLib.get_monotonic_time() - 10 * 60 * 1000 * 1000) {
+			return false;
+		}
+
+		return true;
+	}
+
 	public override string id {
 		get { return username; }
 	}
@@ -59,7 +72,7 @@ public abstract class MediaPlayerUser : MediaPlayer {
 	string name_cache;
 	public override string name { 
 		get {
-			if (this.proxy != null) {
+			if (proxy_is_valid()) {
 				name_cache = this.proxy.player_name;
 				return name_cache;
 			} else {
@@ -70,7 +83,7 @@ public abstract class MediaPlayerUser : MediaPlayer {
 	string state_cache;
 	public override string state {
 		get {
-			if (this.proxy != null) {
+			if (proxy_is_valid()) {
 				state_cache = this.proxy.state;
 				return state_cache;
 			} else {
@@ -82,7 +95,7 @@ public abstract class MediaPlayerUser : MediaPlayer {
 	Icon icon_cache;
 	public override Icon? icon { 
 		get { 
-			if (this.proxy != null) {
+			if (proxy_is_valid()) {
 				icon_cache = Icon.deserialize(this.proxy.player_icon);
 				return icon_cache;
 			} else {
@@ -98,7 +111,7 @@ public abstract class MediaPlayerUser : MediaPlayer {
 	MediaPlayer.Track track_cache;
 	public override MediaPlayer.Track? current_track {
 		get { 
-			if (this.proxy != null) {
+			if (proxy_is_valid()) {
 				track_cache = new MediaPlayer.Track(
 					this.proxy.artist,
 					this.proxy.title,
