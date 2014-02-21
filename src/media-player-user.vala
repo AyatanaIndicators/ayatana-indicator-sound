@@ -56,23 +56,38 @@ public abstract class MediaPlayerUser : MediaPlayer {
 		get { return username; }
 	}
 
+	string name_cache;
 	public override string name { 
 		get {
-			/* TODO */
-			return "";
+			if (this.proxy != null) {
+				name_cache = this.proxy.player_name;
+				return name_cache;
+			} else {
+				return "";
+			}
 		}
 	}
+	string state_cache;
 	public override string state {
 		get {
-			/* TODO */
-			return "";
+			if (this.proxy != null) {
+				state_cache = this.proxy.state;
+				return state_cache;
+			} else {
+				return "";
+			}
 		}
 		set { }
 	}
+	Icon icon_cache;
 	public override Icon? icon { 
 		get { 
-			/* TODO */
-			return null;
+			if (this.proxy != null) {
+				icon_cache = Icon.deserialize(this.proxy.player_icon);
+				return icon_cache;
+			} else {
+				return null;
+			}
 		}
 	}
 	public override string dbus_name { get { return ""; } }
@@ -80,10 +95,20 @@ public abstract class MediaPlayerUser : MediaPlayer {
 	public override bool is_running { get { return true; } }
 	public override bool can_raise { get { return false; } }
 
+	MediaPlayer.Track track_cache;
 	public override MediaPlayer.Track? current_track {
 		get { 
-			/* TODO: */
-			return null;
+			if (this.proxy != null) {
+				track_cache = new MediaPlayer.Track(
+					this.proxy.artist,
+					this.proxy.title,
+					this.proxy.album,
+					this.proxy.art_url
+				);
+				return track_cache;
+			} else {
+				return null;
+			}
 		}
 		set { }
 	}
