@@ -20,6 +20,7 @@
 [DBus (name = "com.canonical.indicator.sound.AccountsService")]
 public interface AccountsServiceSoundSettings : Object {
 	// properties
+	public abstract uint64 timestamp {owned get; set;}
 	public abstract string player_name {owned get; set;}
 	public abstract Variant player_icon {owned get; set;}
 	public abstract bool running {owned get; set;}
@@ -34,6 +35,7 @@ public class AccountsServiceUser : Object {
 	Act.UserManager accounts_manager = Act.UserManager.get_default();
 	Act.User? user = null;
 	AccountsServiceSoundSettings? proxy = null;
+	uint timer = 0;
 	MediaPlayer? _player = null;
 
 	public MediaPlayer? player {
@@ -44,10 +46,18 @@ public class AccountsServiceUser : Object {
 			if (this.proxy == null)
 				return;
 
+			/* Always reset the timer */
+			if (this.timer != 0) {
+				GLib.Source.remove(this.timer);
+				this.timer = 0;
+			}
+
 			if (this._player == null) {
 				/* Clear it */
 				this.proxy.player_name = "";
+				this.proxy.timestamp = 0;
 			} else {
+				this.proxy.timestamp = GLib.get_monotonic_time();
 				this.proxy.player_name = this._player.name;
 				if (this._player.icon == null) {
 					var icon = new ThemedIcon.with_default_fallbacks ("application-default-icon");
@@ -70,6 +80,11 @@ public class AccountsServiceUser : Object {
 					this.proxy.album = "";
 					this.proxy.art_url = "";
 				}
+
+				this.timer = GLib.Timeout.add_seconds(5 * 60, () => {
+					this.proxy.timestamp = GLib.get_monotonic_time();
+					return true;
+				});
 			}
 		}
 		get {

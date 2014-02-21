@@ -12,6 +12,9 @@
     <annotation name="org.freedesktop.Accounts.Authentication.ChangeAny"
                 value="com.canonical.indicator.sound.AccountsService.ModifyAnyUser"/>
 
+    <property name="Timestamp" type="t" access="readwrite">
+      <annotation name="org.freedesktop.Accounts.DefaultValue" value="0"/>
+    </property>
     <property name="PlayerName" type="s" access="readwrite">
       <annotation name="org.freedesktop.Accounts.DefaultValue" value=""/>
     </property>
