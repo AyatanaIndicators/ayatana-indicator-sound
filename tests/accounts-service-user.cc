@@ -68,6 +68,9 @@ class AccountsServiceUserTest : public ::testing::Test
 
 			DbusTestDbusMockObject * soundobj = dbus_test_dbus_mock_get_object(mock, "/user", "com.canonical.indicator.sound.AccountsService", NULL);
 			dbus_test_dbus_mock_object_add_property(mock, soundobj,
+				"Timeout", G_VARIANT_TYPE_UINT64,
+				g_variant_new_uint64(0), NULL);
+			dbus_test_dbus_mock_object_add_property(mock, soundobj,
 				"PlayerName", G_VARIANT_TYPE_STRING,
 				g_variant_new_string(""), NULL);
 			dbus_test_dbus_mock_object_add_property(mock, soundobj,
