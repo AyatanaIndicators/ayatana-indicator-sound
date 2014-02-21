@@ -20,6 +20,7 @@
 [DBus (name = "com.canonical.indicator.sound.AccountsService")]
 public interface AccountsServiceSoundSettings : Object {
 	// properties
+	public abstract uint64 timestamp {owned get; set;}
 	public abstract string player_name {owned get; set;}
 	public abstract Variant player_icon {owned get; set;}
 	public abstract bool running {owned get; set;}
@@ -47,7 +48,9 @@ public class AccountsServiceUser : Object {
 			if (this._player == null) {
 				/* Clear it */
 				this.proxy.player_name = "";
+				this.proxy.timestamp = 0;
 			} else {
+				this.proxy.timestamp = GLib.get_monotonic_time();
 				this.proxy.player_name = this._player.name;
 				if (this._player.icon == null) {
 					var icon = new ThemedIcon.with_default_fallbacks ("application-default-icon");
