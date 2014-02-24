@@ -48,9 +48,5 @@
         Whether or not to show the sound indicator in the menu bar.
       </description>
     </key>
-    <key name="allow-amplified-volume" type="b">
-      <default>false</default>
-      <summary>Whether the volume slider allows setting the volume above 100%</summary>
-    </key>
   </schema>
 </schemalist>
