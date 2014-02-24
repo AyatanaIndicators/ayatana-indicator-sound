@@ -23,6 +23,9 @@ public class MediaPlayerUser : MediaPlayer {
 	Act.User? actuser = null;
 	AccountsServiceSoundSettings? proxy = null;
 
+	HashTable<string, bool> properties_queued = new HashTable<string, bool>(str_hash, str_equal);
+	uint properties_timeout = 0;
+
 	/* Grab the user from the Accounts service and, when it is loaded then
 	   set up a proxy to its sound settings */
 	public MediaPlayerUser(string user) {
@@ -44,23 +47,53 @@ public class MediaPlayerUser : MediaPlayer {
 		});
 	}
 
+	~MediaPlayerUser () {
+		if (properties_timeout != 0) {
+			Source.remove(properties_timeout);
+			properties_timeout = 0;
+		}
+	}
+
+	/* Ensure that we've collected all the changes so that we only signal
+	   once for variables like 'track' */
+	bool properties_idle () {
+		properties_timeout = 0;
+
+		properties_queued.@foreach((key, value) => {
+			this.notify_property(key);
+		});
+
+		/* Remove source */
+		return false;
+	}
+
+	/* Turns the DBus names into the object properties */
 	void queue_property_notification (string dbus_property_name) {
+		if (properties_timeout == 0) {
+			properties_timeout = Idle.add(properties_idle);
+		}
+
 		switch (dbus_property_name) {
 		case "Timestamp":
+			properties_queued.insert("name", true);
+			properties_queued.insert("icon", true);
+			properties_queued.insert("state", true);
+			properties_queued.insert("current-track", true);
 			break;
 		case "PlayerName":
+			properties_queued.insert("name", true);
 			break;
 		case "PlayerIcon":
+			properties_queued.insert("icon", true);
 			break;
 		case "State":
+			properties_queued.insert("state", true);
 			break;
 		case "Title":
-			break;
 		case "Artist":
-			break;
 		case "Album":
-			break;
 		case "ArtUrl":
+			properties_queued.insert("current-track", true);
 			break;
 		}
 	}
@@ -84,7 +117,8 @@ public class MediaPlayerUser : MediaPlayer {
 				}
 			});
 
-			/* TODO: Update settings */
+			/* Update all of them -- we've got a proxy! */
+			queue_property_notification("Timestamp");
 		} catch (Error e) {
 			this.proxy = null;
 			warning("Unable to get proxy to user '%s' sound settings: %s", username, e.message);
