@@ -81,5 +81,29 @@ public class MediaPlayerListGreeter : MediaPlayerList {
 		}
 	}
 
+	/* We need to have an iterator for the interface, but eh, we can
+	   only ever have one player for the current user */
+	public class Iterator : MediaPlayerList.Iterator {
+		int i = 0;
+		MediaPlayerListGreeter list;
 
+		public Iterator (MediaPlayerListGreeter in_list) {
+			list = in_list;
+		}
+
+		public override MediaPlayer? next_value () {
+			MediaPlayer? retval = null;
+
+			if (i == 0) {
+				retval = list.players.lookup(list.selected_user);
+			}
+			i++;
+
+			return retval;
+		}
+	}
+
+	public override MediaPlayerList.Iterator iterator() {
+		return new Iterator(this) as MediaPlayerList.Iterator;
+	}
 }
