@@ -20,6 +20,7 @@
 public class IndicatorSound.Service: Object {
 	public Service () {
 		this.settings = new Settings ("com.canonical.indicator.sound");
+		this.sharedsettings = new Settings ("com.ubuntu.sound");
 
 		this.volume_control = new VolumeControl ();
 
@@ -55,7 +56,7 @@ public class IndicatorSound.Service: Object {
 			}
 		}
 
-		settings.bind ("allow-amplified-volume", this, "allow-amplified-volume", SettingsBindFlags.GET);
+		sharedsettings.bind ("allow-amplified-volume", this, "allow-amplified-volume", SettingsBindFlags.GET);
 	}
 
 	public int run () {
@@ -103,6 +104,7 @@ public class IndicatorSound.Service: Object {
 	SimpleActionGroup actions;
 	HashTable<string, SoundMenu> menus;
 	Settings settings;
+	Settings sharedsettings;
 	VolumeControl volume_control;
 	MediaPlayerList players;
 	uint player_action_update_id;
