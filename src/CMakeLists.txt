@@ -82,6 +82,7 @@ vala_add(indicator-sound-service
   media-player-list-greeter.vala
   DEPENDS
     media-player-list
+    media-player-user
     media-player
 )
 vala_add(indicator-sound-service

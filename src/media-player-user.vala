@@ -17,13 +17,13 @@
  *      Ted Gould <ted@canonical.com>
  */
 
-public abstract class MediaPlayerUser : MediaPlayer {
+public class MediaPlayerUser : MediaPlayer {
 	Act.UserManager accounts_manager = Act.UserManager.get_default();
 	string username;
 	Act.User? actuser = null;
 	AccountsServiceSoundSettings? proxy = null;
 
-	MediaPlayerUser(string user) {
+	public MediaPlayerUser(string user) {
 		username = user;
 
 		actuser = accounts_manager.get_user(user);
