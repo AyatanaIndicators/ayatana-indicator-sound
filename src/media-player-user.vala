@@ -23,6 +23,8 @@ public class MediaPlayerUser : MediaPlayer {
 	Act.User? actuser = null;
 	AccountsServiceSoundSettings? proxy = null;
 
+	/* Grab the user from the Accounts service and, when it is loaded then
+	   set up a proxy to its sound settings */
 	public MediaPlayerUser(string user) {
 		username = user;
 
@@ -42,11 +44,47 @@ public class MediaPlayerUser : MediaPlayer {
 		});
 	}
 
+	void queue_property_notification (string dbus_property_name) {
+		switch (dbus_property_name) {
+		case "Timestamp":
+			break;
+		case "PlayerName":
+			break;
+		case "PlayerIcon":
+			break;
+		case "State":
+			break;
+		case "Title":
+			break;
+		case "Artist":
+			break;
+		case "Album":
+			break;
+		case "ArtUrl":
+			break;
+		}
+	}
+
 	void new_proxy (GLib.Object? obj, AsyncResult res) {
 		try {
 			this.proxy = Bus.get_proxy.end (res);
+
+			var gproxy = this.proxy as DBusProxy;
+			gproxy.g_properties_changed.connect ((proxy, changed, invalidated) => {
+				string key = "";
+				Variant value;
+				VariantIter iter = new VariantIter(changed);
+
+				while (iter.next("{sv}", &key, &value)) {
+					queue_property_notification(key);
+				}
+
+				foreach (var invalid in invalidated) {
+					queue_property_notification(invalid);
+				}
+			});
+
 			/* TODO: Update settings */
-			/* TODO: Setup setting notification */
 		} catch (Error e) {
 			this.proxy = null;
 			warning("Unable to get proxy to user '%s' sound settings: %s", username, e.message);
@@ -70,6 +108,7 @@ public class MediaPlayerUser : MediaPlayer {
 		get { return username; }
 	}
 
+	/* These values come from the proxy */
 	string name_cache;
 	public override string name { 
 		get {
@@ -104,11 +143,16 @@ public class MediaPlayerUser : MediaPlayer {
 			}
 		}
 	}
+
+	/* Placeholder */
 	public override string dbus_name { get { return ""; } }
 
+	/* If it's shown externally it's running */
 	public override bool is_running { get { return proxy_is_valid(); } }
+	/* A bit weird.  Not sure how we should handle this. */
 	public override bool can_raise { get { return false; } }
 
+	/* Fill out the track based on the values in the proxy */
 	MediaPlayer.Track track_cache;
 	public override MediaPlayer.Track? current_track {
 		get { 
