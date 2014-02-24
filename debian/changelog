@@ -1,3 +1,12 @@
+indicator-sound (12.10.2+14.04.20140224-0ubuntu1) trusty; urgency=low
+
+  [ Sebastien Bacher ]
+  * Remove the new added allow-applified key, it's moved to shared
+    schemas, that way the other desktop components don't need to depends
+    on indicator-sound only to read that settings
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 24 Feb 2014 14:33:07 +0000
+
 indicator-sound (12.10.2+14.04.20140220-0ubuntu1) trusty; urgency=low
 
   [ Lars Uebernickel ]
