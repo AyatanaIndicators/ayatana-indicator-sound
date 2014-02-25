@@ -27,10 +27,13 @@ public class AccountsServiceUser : Object {
 	public MediaPlayer? player {
 		set {
 			this._player = value;
+			debug("New player: %s", this._player != null ? this._player.name : "Cleared");
 
 			/* No proxy, no settings to set */
-			if (this.proxy == null)
+			if (this.proxy == null) {
+				debug("Nothing written to Accounts Service, waiting on proxy");
 				return;
+			}
 
 			/* Always reset the timer */
 			if (this.timer != 0) {
@@ -68,6 +71,7 @@ public class AccountsServiceUser : Object {
 				}
 
 				this.timer = GLib.Timeout.add_seconds(5 * 60, () => {
+					debug("Writing timestamp");
 					this.proxy.timestamp = GLib.get_monotonic_time();
 					return true;
 				});
