@@ -34,6 +34,10 @@ public class VolumeControl : Object
 	private double _volume = 0.0;
 	private double _mic_volume = 0.0;
 
+	private DBusProxy _user_proxy;
+	private DBusProxy _greeter_proxy;
+	private bool _greeter_mode = false;
+
 	public signal void volume_changed (double v);
 	public signal void mic_volume_changed (double v);
 
@@ -47,6 +51,10 @@ public class VolumeControl : Object
 	{
 		if (loop == null)
 			loop = new PulseAudio.GLibMainLoop ();
+
+		_greeter_mode = Environment.get_variable ("XDG_SESSION_CLASS") == "greeter";
+		if (_greeter_mode)
+			watch_greeter_user.begin ();
 
 		this.reconnect_to_pulse ();
 	}
@@ -101,6 +109,7 @@ public class VolumeControl : Object
 		{
 			_volume = volume_to_double (i.volume.values[0]);
 			volume_changed (_volume);
+			sync_volume_to_accountsservice.begin ();
 		}
 	}
 
@@ -250,8 +259,10 @@ public class VolumeControl : Object
 
 	private void set_volume_success_cb (Context c, int success)
 	{
-		if ((bool)success)
+		if ((bool)success) {
 			volume_changed (_volume);
+			sync_volume_to_accountsservice.begin ();
+		}
 	}
 
 	private void sink_info_set_volume_cb (Context c, SinkInfo? i, int eol)
@@ -314,5 +325,98 @@ public class VolumeControl : Object
 	public double get_mic_volume ()
 	{
 		return _mic_volume;
+	}
+
+	private async DBusProxy? get_user_proxy (string? username = null)
+	{
+		if (username == null)
+			username = Environment.get_variable ("USER");
+		if (username == "" || username == null)
+			return null;
+
+		DBusProxy accounts_proxy;
+		try {
+			accounts_proxy = yield DBusProxy.create_for_bus (BusType.SYSTEM, DBusProxyFlags.DO_NOT_LOAD_PROPERTIES | DBusProxyFlags.DO_NOT_CONNECT_SIGNALS, null, "org.freedesktop.Accounts", "/org/freedesktop/Accounts", "org.freedesktop.Accounts");
+		} catch (GLib.Error e) {
+			warning ("unable to get greeter proxy: %s", e.message);
+			return null;
+		}
+
+		try {
+			var user_path_variant = yield accounts_proxy.call ("FindUserByName", new Variant ("(s)", username), DBusCallFlags.NONE, -1);
+			string user_path;
+			user_path_variant.get ("(&s)", out user_path);
+			return yield DBusProxy.create_for_bus (BusType.SYSTEM, DBusProxyFlags.NONE, null, "org.freedesktop.Accounts", user_path, "org.freedesktop.DBus.Properties");
+		} catch (GLib.Error e) {
+			warning ("unable to find Accounts path for user %s: %s", username, e.message);
+			return null;
+		}
+	}
+
+	private async void sync_volume_from_accountsservice (string? username = null)
+	{
+		if (!_greeter_mode)
+			return; // skip sync if we are not in greeter
+
+		if (username == null) {
+			try {
+				var username_variant = yield _greeter_proxy.call ("GetActiveEntry", null, DBusCallFlags.NONE, -1);
+				username = username_variant.get_string ();
+				if (username == "" || username == null)
+					return;
+			} catch (GLib.Error e) {
+				warning ("unable to find Accounts path for user %s: %s", username, e.message);
+				return;
+			}
+		}
+
+		var user_proxy = yield get_user_proxy (username);
+		if (user_proxy == null)
+			return;
+
+		try {
+			var volume_outer_variant = yield user_proxy.call ("Get", new Variant ("(ss)", "com.ubuntu.touch.AccountsService.Sound", "Volume"), DBusCallFlags.NONE, -1);
+			Variant volume_variant;
+			volume_outer_variant.get ("(v)", out volume_variant);
+			set_volume (volume_variant.get_double ());
+		} catch (GLib.Error e) {
+			warning ("unable to sync volume from AccountsService: %s", e.message);
+		}
+	}
+
+	private void greeter_user_changed (string username)
+	{
+		sync_volume_from_accountsservice.begin (username);
+	}
+
+	private async void watch_greeter_user ()
+	{
+		try {
+			_greeter_proxy = yield DBusProxy.create_for_bus (BusType.SESSION, DBusProxyFlags.NONE, null, "com.canonical.UnityGreeter", "/list", "com.canonical.UnityGreeter.List");
+		} catch (GLib.Error e) {
+			warning ("unable to get greeter proxy: %s", e.message);
+			return;
+		}
+
+		_greeter_proxy.connect ("EntrySelected", greeter_user_changed);
+		yield sync_volume_from_accountsservice ();
+	}
+
+	private async void sync_volume_to_accountsservice ()
+	{
+		if (_greeter_mode)
+			return; // skip sync if we are in greeter
+
+		if (_user_proxy == null) {
+			_user_proxy = yield get_user_proxy ();
+			if (_user_proxy == null)
+				return;
+		}
+
+		try {
+			yield _user_proxy.call ("Set", new Variant ("(ssv)", "com.ubuntu.touch.AccountsService.Sound", "Volume", new Variant ("d", _volume)), DBusCallFlags.NONE, -1);
+		} catch (GLib.Error e) {
+			warning ("unable to sync volume to AccountsService: %s", e.message);
+		}
 	}
 }
