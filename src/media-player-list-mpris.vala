@@ -55,6 +55,8 @@ public class MediaPlayerListMpris : MediaPlayerList {
 	 * Adds the player associated with @desktop_id.  Does nothing if such a player already exists.
 	 */
 	MediaPlayerMpris? insert (string desktop_id) {
+		debug("Inserting player: %s", desktop_id);
+
 		var id = desktop_id.has_suffix (".desktop") ? desktop_id : desktop_id + ".desktop";
 		MediaPlayerMpris? player = this._players.lookup (id);
 

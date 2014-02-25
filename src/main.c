@@ -23,7 +23,7 @@ main (int argc, char ** argv) {
 
 	MediaPlayerList * playerlist = NULL;
 
-	if (g_strcmp0("lightdm", g_get_user_name())) {
+	if (g_strcmp0("lightdm", g_get_user_name()) == 0) {
 		playerlist = MEDIA_PLAYER_LIST(media_player_list_greeter_new());
 	} else {
 		playerlist = MEDIA_PLAYER_LIST(media_player_list_mpris_new());
