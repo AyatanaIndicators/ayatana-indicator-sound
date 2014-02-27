@@ -64,6 +64,7 @@ vala_add(indicator-sound-service
   DEPENDS
     media-player
 	accounts-service-sound-settings
+    greeter-broadcast
 )
 vala_add(indicator-sound-service
   media-player-list.vala

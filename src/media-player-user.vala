@@ -22,6 +22,7 @@ public class MediaPlayerUser : MediaPlayer {
 	string username;
 	Act.User? actuser = null;
 	AccountsServiceSoundSettings? proxy = null;
+	GreeterBroadcast? greeter = null;
 
 	HashTable<string, bool> properties_queued = new HashTable<string, bool>(str_hash, str_equal);
 	uint properties_timeout = 0;
@@ -45,6 +46,14 @@ public class MediaPlayerUser : MediaPlayer {
 				null,
 				new_proxy);
 		});
+
+		Bus.get_proxy.begin<GreeterBroadcast> (
+			BusType.SYSTEM,
+			"com.canonical.Unity.Greeter.Broadcast",
+			"/com/canonical/Unity/Greeter/Broadcast",
+			DBusProxyFlags.NONE,
+			null,
+			greeter_proxy_new);
 	}
 
 	~MediaPlayerUser () {
@@ -205,18 +214,33 @@ public class MediaPlayerUser : MediaPlayer {
 		set { }
 	}
 
+	void greeter_proxy_new (GLib.Object? obj, AsyncResult res) {
+		try {
+			this.greeter = Bus.get_proxy.end (res);
+		} catch (Error e) {
+			this.greeter = null;
+			warning("Unable to get greeter proxy: %s", e.message);
+		}
+	}
+
 	/* Control functions through unity-greeter-session-broadcast */
 	public override void activate () {
 		/* TODO: */
 	}
 	public override void play_pause () {
-		/* TODO: */
+		if (this.greeter != null) {
+			this.greeter.SoundPlayPause(this.username);
+		}
 	}
 	public override void next () {
-		/* TODO: */
+		if (this.greeter != null) {
+			this.greeter.SoundNext(this.username);
+		}
 	}
 	public override void previous () {
-		/* TODO: */
+		if (this.greeter != null) {
+			this.greeter.SoundPrev(this.username);
+		}
 	}
 
 	/* Play list functions are all null as we don't support the
