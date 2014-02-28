@@ -123,22 +123,28 @@ class SoundMenu: Object
 
 	/* returns the position in this.menu of the section that's associated with @player */
 	int find_player_section (MediaPlayer player) {
+		debug("Looking for player: %s", player.id);
 		string action_name = @"indicator.$(player.id)";
 		int n = this.menu.get_n_items () -1;
 		for (int i = 1; i < n; i++) {
 			var section = this.menu.get_item_link (i, Menu.LINK_SECTION);
+			if (section == null) continue;
+
 			string action;
 			section.get_item_attribute (0, "action", "s", out action);
 			if (action == action_name)
 				return i;
 		}
 
+		debug("Unable to find section for player: %s", player.id);
 		return -1;
 	}
 
 	void insert_player_section (MediaPlayer player) {
 		var section = new Menu ();
 		Icon icon;
+
+		debug("Adding section for player: %s", player.id);
 
 		icon = player.icon;
 		if (icon == null)
