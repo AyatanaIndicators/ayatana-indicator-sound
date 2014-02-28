@@ -157,6 +157,7 @@ public class MediaPlayerUser : MediaPlayer {
 		get {
 			if (proxy_is_valid()) {
 				name_cache = this.proxy.player_name;
+				debug("Player Name: %s", name_cache);
 				return name_cache;
 			} else {
 				return "";
@@ -168,6 +169,7 @@ public class MediaPlayerUser : MediaPlayer {
 		get {
 			if (proxy_is_valid()) {
 				state_cache = this.proxy.state;
+				debug("State: %s", state_cache);
 				return state_cache;
 			} else {
 				return "";
@@ -228,18 +230,30 @@ public class MediaPlayerUser : MediaPlayer {
 		/* TODO: */
 	}
 	public override void play_pause () {
+		debug("Play Pause for user: %s", this.username);
+
 		if (this.greeter != null) {
 			this.greeter.SoundPlayPause(this.username);
+		} else {
+			warning("No unity-greeter-session-broadcast to send play-pause");
 		}
 	}
 	public override void next () {
+		debug("Next for user: %s", this.username);
+
 		if (this.greeter != null) {
 			this.greeter.SoundNext(this.username);
+		} else {
+			warning("No unity-greeter-session-broadcast to send next");
 		}
 	}
 	public override void previous () {
+		debug("Previous for user: %s", this.username);
+
 		if (this.greeter != null) {
 			this.greeter.SoundPrev(this.username);
+		} else {
+			warning("No unity-greeter-session-broadcast to send previous");
 		}
 	}
 
