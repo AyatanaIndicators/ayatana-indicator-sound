@@ -233,7 +233,13 @@ public class MediaPlayerUser : MediaPlayer {
 		debug("Play Pause for user: %s", this.username);
 
 		if (this.greeter != null) {
-			this.greeter.SoundPlayPause(this.username);
+			this.greeter.RequestSoundPlayPause.begin(this.username, (obj, res) => {
+				try {
+					(obj as GreeterBroadcast).RequestSoundPlayPause.end(res);
+				} catch (Error e) {
+					warning("Unable to send play pause: %s", e.message);
+				}
+			});
 		} else {
 			warning("No unity-greeter-session-broadcast to send play-pause");
 		}
@@ -242,7 +248,13 @@ public class MediaPlayerUser : MediaPlayer {
 		debug("Next for user: %s", this.username);
 
 		if (this.greeter != null) {
-			this.greeter.SoundNext(this.username);
+			this.greeter.RequestSoundNext.begin(this.username, (obj, res) => {
+				try {
+					(obj as GreeterBroadcast).RequestSoundNext.end(res);
+				} catch (Error e) {
+					warning("Unable to send next: %s", e.message);
+				}
+			});
 		} else {
 			warning("No unity-greeter-session-broadcast to send next");
 		}
@@ -251,7 +263,13 @@ public class MediaPlayerUser : MediaPlayer {
 		debug("Previous for user: %s", this.username);
 
 		if (this.greeter != null) {
-			this.greeter.SoundPrev(this.username);
+			this.greeter.RequestSoundPrev.begin(this.username, (obj, res) => {
+				try {
+					(obj as GreeterBroadcast).RequestSoundPrev.end(res);
+				} catch (Error e) {
+					warning("Unable to send previous: %s", e.message);
+				}
+			});
 		} else {
 			warning("No unity-greeter-session-broadcast to send previous");
 		}
