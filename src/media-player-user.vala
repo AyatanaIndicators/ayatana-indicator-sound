@@ -120,8 +120,8 @@ public class MediaPlayerUser : MediaPlayer {
 				}
 			});
 
-			/* Update all of them -- we've got a proxy! */
-			queue_property_notification("Timestamp");
+			debug("Notifying player is ready for user: %s", this.username);
+			this.notify_property("is-running");
 		} catch (Error e) {
 			this.proxy = null;
 			warning("Unable to get proxy to user '%s' sound settings: %s", username, e.message);

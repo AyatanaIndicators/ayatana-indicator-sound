@@ -73,7 +73,15 @@ public class MediaPlayerListGreeter : MediaPlayerList {
 		}
 
 		if (selected_user != null && !players.contains(selected_user)) {
-			players.insert(selected_user, new MediaPlayerUser(selected_user));
+			var newplayer = new MediaPlayerUser(selected_user);
+			newplayer.notify["is-running"].connect((obj, prop) => {
+				MediaPlayerUser? player = obj as MediaPlayerUser;
+				if (player == null) return;
+				if (player.is_running && player.id == this.selected_user)
+					this.player_added(player);
+			});
+
+			players.insert(selected_user, newplayer);
 		}
 
 		if (old_user != null) {
@@ -83,7 +91,9 @@ public class MediaPlayerListGreeter : MediaPlayerList {
 
 		if (selected_user != null) {
 			var new_player = players.lookup(selected_user);
-			player_added(new_player);
+
+			if (new_player.is_running)
+				player_added(new_player);
 		}
 	}
 
