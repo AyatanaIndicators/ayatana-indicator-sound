@@ -63,6 +63,8 @@ public class MediaPlayerUser : MediaPlayer {
 			this.notify_property(key);
 		});
 
+		properties_queued.remove_all();
+
 		/* Remove source */
 		return false;
 	}
