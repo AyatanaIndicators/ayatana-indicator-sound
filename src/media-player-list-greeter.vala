@@ -64,7 +64,13 @@ public class MediaPlayerListGreeter : MediaPlayerList {
 		}
 
 		var old_user = selected_user;
-		selected_user = active_user;
+
+		/* Protect against a null user */
+		if (active_user != "") {
+			selected_user = active_user;
+		} else {
+			selected_user = null;
+		}
 
 		if (selected_user != null && !players.contains(selected_user)) {
 			players.insert(selected_user, new MediaPlayerUser(selected_user));
