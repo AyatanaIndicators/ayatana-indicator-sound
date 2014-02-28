@@ -60,6 +60,7 @@ public class MediaPlayerUser : MediaPlayer {
 		properties_timeout = 0;
 
 		properties_queued.@foreach((key, value) => {
+			debug("Notifying '%s' changed", key);
 			this.notify_property(key);
 		});
 
