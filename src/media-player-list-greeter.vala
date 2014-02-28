@@ -78,14 +78,17 @@ public class MediaPlayerListGreeter : MediaPlayerList {
 
 		if (old_user != null) {
 			var old_player = players.lookup(old_user);
+			debug("Removing player for user: %s", old_user);
 			player_removed(old_player);
 		}
 
 		if (selected_user != null) {
 			var new_player = players.lookup(selected_user);
 
-			if (new_player != null)
+			if (new_player != null) {
+				debug("Adding player for user: %s", selected_user);
 				player_added(new_player);
+			}
 		}
 	}
 
