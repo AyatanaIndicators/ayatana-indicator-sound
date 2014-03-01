@@ -111,7 +111,12 @@ class SoundMenu: Object
 
 	public void remove_player (MediaPlayer player) {
 		this.remove_player_section (player);
-		this.notify_handlers.remove (player);
+
+		var id = this.notify_handlers.lookup(player);
+		if (id != 0) {
+			player.disconnect(id);
+			this.notify_handlers.remove (player);
+		}
 	}
 
 	Menu root;
