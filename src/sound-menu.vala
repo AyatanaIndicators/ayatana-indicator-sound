@@ -115,8 +115,12 @@ class SoundMenu: Object
 		var id = this.notify_handlers.lookup(player);
 		if (id != 0) {
 			player.disconnect(id);
-			this.notify_handlers.remove (player);
 		}
+
+		player.playlists_changed.disconnect (this.update_playlists);
+
+		/* this'll drop our ref to it */
+		this.notify_handlers.remove (player);
 	}
 
 	Menu root;
