@@ -95,12 +95,11 @@ class SoundMenu: Object
 		this.update_playlists (player);
 
 		var handler_id = player.notify["is-running"].connect ( () => {
-			if (this.hide_inactive) {
-				if (player.is_running)
+			if (player.is_running || !this.hide_inactive)
+				if (this.find_player_section(player) == -1)
 					this.insert_player_section (player);
-				else
-					this.remove_player_section (player);
-			}
+			else
+				this.remove_player_section (player);
 			this.update_playlists (player);
 		});
 		this.notify_handlers.insert (player, handler_id);
