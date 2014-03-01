@@ -82,6 +82,7 @@ public class MediaPlayerUser : MediaPlayer {
 			properties_queued.insert("icon", true);
 			properties_queued.insert("state", true);
 			properties_queued.insert("current-track", true);
+			properties_queued.insert("is-running", true);
 			break;
 		case "PlayerName":
 			properties_queued.insert("name", true);
