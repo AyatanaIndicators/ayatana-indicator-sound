@@ -135,8 +135,8 @@ public class SoundMenu: Object
 	int find_player_section (MediaPlayer player) {
 		debug("Looking for player: %s", player.id);
 		string action_name = @"indicator.$(player.id)";
-		int n = this.menu.get_n_items () -1;
-		for (int i = 1; i < n; i++) {
+		int n = this.menu.get_n_items ();
+		for (int i = 0; i < n; i++) {
 			var section = this.menu.get_item_link (i, Menu.LINK_SECTION);
 			if (section == null) continue;
 
