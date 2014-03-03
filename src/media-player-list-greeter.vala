@@ -71,6 +71,7 @@ public class MediaPlayerListGreeter : MediaPlayerList {
 		if (active_user != "" && active_user[0] != '*') {
 			selected_user = active_user;
 		} else {
+			debug(@"Blocking active user change for '$active_user'");
 			selected_user = null;
 		}
 
