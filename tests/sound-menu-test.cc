@@ -39,6 +39,21 @@ class SoundMenuTest : public ::testing::Test
 			g_test_dbus_down(bus);
 			g_clear_object(&bus);
 		}
+
+		void verify_item_attribute (GMenuModel * mm, guint index, const gchar * name, GVariant * value) {
+			g_variant_ref_sink(value);
+
+			gchar * variantstr = g_variant_print(value, TRUE);
+			g_debug("Expecting item %d to have a '%s' attribute: %s", index, name, variantstr);
+
+			const GVariantType * type = g_variant_get_type(value);
+			GVariant * itemval = g_menu_model_get_item_attribute_value(mm, index, name, type);
+
+			ASSERT_NE(nullptr, itemval);
+			EXPECT_TRUE(g_variant_equal(itemval, value));
+
+			g_variant_unref(value);
+		}
 };
 
 TEST_F(SoundMenuTest, BasicObject) {
@@ -71,6 +86,22 @@ TEST_F(SoundMenuTest, AddRemovePlayer) {
 
 	ASSERT_NE(nullptr, menu->menu);
 	EXPECT_EQ(2, g_menu_model_get_n_items(G_MENU_MODEL(menu->menu)));
+
+	GMenuModel * section = g_menu_model_get_item_link(G_MENU_MODEL(menu->menu), 1, G_MENU_LINK_SECTION);
+	ASSERT_NE(nullptr, section);
+	EXPECT_EQ(2, g_menu_model_get_n_items(section)); /* No playlists, so two items */
+
+	/* Player display */
+	verify_item_attribute(section, 0, "action", g_variant_new_string("indicator.player-id"));
+	verify_item_attribute(section, 0, "x-canonical-type", g_variant_new_string("com.canonical.unity.media-player"));
+
+	/* Player control */
+	verify_item_attribute(section, 1, "x-canonical-type", g_variant_new_string("com.canonical.unity.playback-item"));
+	verify_item_attribute(section, 1, "x-canonical-play-action", g_variant_new_string("indicator.play.player-id"));
+	verify_item_attribute(section, 1, "x-canonical-next-action", g_variant_new_string("indicator.next.player-id"));
+	verify_item_attribute(section, 1, "x-canonical-previous-action", g_variant_new_string("indicator.previous.player-id"));
+
+	g_clear_object(&section);
 
 	sound_menu_remove_player(menu, MEDIA_PLAYER(media));
 
