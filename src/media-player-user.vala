@@ -188,7 +188,7 @@ public class MediaPlayerUser : MediaPlayer {
 	/* If it's shown externally it's running */
 	public override bool is_running { get { return proxy_is_valid(); } }
 	/* A bit weird.  Not sure how we should handle this. */
-	public override bool can_raise { get { return false; } }
+	public override bool can_raise { get { return true; } }
 
 	/* Fill out the track based on the values in the proxy */
 	MediaPlayer.Track track_cache;
