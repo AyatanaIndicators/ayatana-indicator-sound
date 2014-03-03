@@ -226,12 +226,15 @@ public class VolumeControl : Object
 	{
 		return_val_if_fail (context.get_state () == Context.State.READY, false);
 
-		if (mute)
-			context.get_sink_info_list (sink_info_list_callback_set_mute);
-		else
-			context.get_sink_info_list (sink_info_list_callback_unset_mute);
-
-		return true;
+		if (_mute != mute) {
+			if (mute)
+				context.get_sink_info_list (sink_info_list_callback_set_mute);
+			else
+				context.get_sink_info_list (sink_info_list_callback_unset_mute);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public void set_mute (bool mute)
@@ -296,11 +299,13 @@ public class VolumeControl : Object
 	{
 		return_val_if_fail (context.get_state () == Context.State.READY, false);
 
-		_volume = volume;
-
-		context.get_server_info (server_info_cb_for_set_volume);
-
-		return true;
+		if (_volume == volume) {
+			_volume = volume;
+			context.get_server_info (server_info_cb_for_set_volume);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public void set_volume (double volume)
@@ -352,9 +357,11 @@ public class VolumeControl : Object
 				set_volume_internal (volume);
 		}
 
-		Variant mute_variant = changed_properties.lookup_value ("Mute", new VariantType ("b"));
-		if (mute_variant != null)
-			set_mute_internal (mute_variant.get_boolean ());
+		Variant mute_variant = changed_properties.lookup_value ("Muted", new VariantType ("b"));
+		if (mute_variant != null) {
+			var mute = mute_variant.get_boolean ();
+			set_mute_internal (mute);
+		}
 	}
 
 	private async void setup_user_proxy (string? username = null)
@@ -433,7 +440,7 @@ public class VolumeControl : Object
 		_mute_cancellable.reset ();
 
 		try {
-			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Mute", new Variant ("b", _mute)), null, DBusCallFlags.NONE, -1, _mute_cancellable);
+			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Muted", new Variant ("b", _mute)), null, DBusCallFlags.NONE, -1, _mute_cancellable);
 		} catch (GLib.Error e) {
 			warning ("unable to sync mute to AccountsService: %s", e.message);
 		}
