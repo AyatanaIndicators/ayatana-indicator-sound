@@ -36,6 +36,7 @@ class MediaPlayerUserTest : public ::testing::Test
 
 		GDBusConnection * session = NULL;
 		GDBusConnection * system = NULL;
+		GDBusProxy * proxy = NULL;
 
 		virtual void SetUp() {
 			service = dbus_test_service_new(NULL);
@@ -56,9 +57,19 @@ class MediaPlayerUserTest : public ::testing::Test
 			ASSERT_NE(nullptr, system);
 			g_dbus_connection_set_exit_on_close(system, FALSE);
 			g_object_add_weak_pointer(G_OBJECT(system), (gpointer *)&system);
+
+			proxy = g_dbus_proxy_new_sync(session,
+				G_DBUS_PROXY_FLAGS_NONE,
+				NULL,
+				"org.freedesktop.Accounts",
+				"/user",
+				"org.freedesktop.DBus.Properties",
+				NULL, NULL);
+			ASSERT_NE(nullptr, proxy);
 		}
 
 		virtual void TearDown() {
+			g_clear_object(&proxy);
 			g_clear_object(&service);
 
 			g_object_unref(session);
@@ -90,6 +101,15 @@ class MediaPlayerUserTest : public ::testing::Test
 			g_main_loop_run(loop);
 			g_main_loop_unref(loop);
 		}
+
+		void set_property (const gchar * name, GVariant * value) {
+			g_dbus_proxy_call_sync(proxy,
+				"Set",
+				g_variant_new("(ssv)", "com.canonical.indicator.sound.AccountsService", name, value),
+				G_DBUS_CALL_FLAGS_NONE,
+				-1, NULL, NULL
+				);
+		}
 };
 
 TEST_F(MediaPlayerUserTest, BasicObject) {
@@ -117,5 +137,48 @@ TEST_F(MediaPlayerUserTest, BasicObject) {
 	EXPECT_EQ(nullptr, media_player_get_icon(MEDIA_PLAYER(player)));
 	EXPECT_EQ(nullptr, media_player_get_current_track(MEDIA_PLAYER(player)));
 
+	g_clear_object(&player);
+}
+
+TEST_F(MediaPlayerUserTest, DataSet) {
+	/* Put data into Acts */
+	set_property("Timestamp", g_variant_new_uint64(g_get_monotonic_time()));
+	set_property("PlayerName", g_variant_new_string("The Player Formerly Known as Prince"));
+	GIcon * in_icon = g_themed_icon_new_with_default_fallbacks("foo-bar-fallback");
+	set_property("PlayerIcon", g_variant_new_variant(g_icon_serialize(in_icon)));
+	set_property("State", g_variant_new_string("Chillin'"));
+	set_property("Title", g_variant_new_string("Dictator"));
+	set_property("Artist", g_variant_new_string("Bansky"));
+	set_property("Album", g_variant_new_string("Vinyl is dead"));
+	set_property("ArtUrl", g_variant_new_string("http://art.url"));
+
+	/* Build our media player */
+	MediaPlayerUser * player = media_player_user_new("user");
+	ASSERT_NE(nullptr, player);
+
+	/* Get the proxy -- and it's precious precious data -- oh, my, precious! */
+	loop(100);
+
+	/* Ensure even with the proxy we don't have anything */
+	EXPECT_TRUE(media_player_get_is_running(MEDIA_PLAYER(player)));
+	EXPECT_TRUE(media_player_get_can_raise(MEDIA_PLAYER(player)));
+	EXPECT_STREQ("user", media_player_get_id(MEDIA_PLAYER(player)));
+	EXPECT_STREQ("The Player Formerly Known as Prince", media_player_get_name(MEDIA_PLAYER(player)));
+	EXPECT_STREQ("Chillin'", media_player_get_state(MEDIA_PLAYER(player)));
+
+	GIcon * out_icon = media_player_get_icon(MEDIA_PLAYER(player));
+	EXPECT_NE(nullptr, out_icon);
+	EXPECT_TRUE(g_icon_equal(in_icon, out_icon));
+	g_clear_object(&out_icon);
+
+	MediaPlayerTrack * track = media_player_get_current_track(MEDIA_PLAYER(player));
+	EXPECT_NE(nullptr, track);
+	EXPECT_STREQ("Dictator", media_player_track_get_title(track));
+	EXPECT_STREQ("Bansky", media_player_track_get_artist(track));
+	EXPECT_STREQ("Vinyl is dead", media_player_track_get_album(track));
+	EXPECT_STREQ("http://art.url", media_player_track_get_art_url(track));
+	g_clear_object(&track);
+
+	g_clear_object(&in_icon);
 	g_clear_object(&player);
 }
