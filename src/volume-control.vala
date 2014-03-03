@@ -1,4 +1,5 @@
 /*
+ * -*- Mode:Vala; indent-tabs-mode:t; tab-width:4; encoding:utf8 -*-
  * Copyright 2013 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -36,7 +37,6 @@ public class VolumeControl : Object
 
 	private DBusProxy _user_proxy;
 	private DBusProxy _greeter_proxy;
-	private bool _greeter_mode = false;
 
 	public signal void volume_changed (double v);
 	public signal void mic_volume_changed (double v);
@@ -52,9 +52,7 @@ public class VolumeControl : Object
 		if (loop == null)
 			loop = new PulseAudio.GLibMainLoop ();
 
-		_greeter_mode = Environment.get_variable ("XDG_SESSION_CLASS") == "greeter";
-		if (_greeter_mode)
-			watch_greeter_user.begin ();
+		watch_greeter_user.begin ();
 
 		this.reconnect_to_pulse ();
 	}
@@ -355,9 +353,6 @@ public class VolumeControl : Object
 
 	private async void sync_volume_from_accountsservice (string? username = null)
 	{
-		if (!_greeter_mode)
-			return; // skip sync if we are not in greeter
-
 		if (username == null) {
 			try {
 				var username_variant = yield _greeter_proxy.call ("GetActiveEntry", null, DBusCallFlags.NONE, -1);
@@ -378,7 +373,9 @@ public class VolumeControl : Object
 			var volume_outer_variant = yield user_proxy.call ("Get", new Variant ("(ss)", "com.ubuntu.touch.AccountsService.Sound", "Volume"), DBusCallFlags.NONE, -1);
 			Variant volume_variant;
 			volume_outer_variant.get ("(v)", out volume_variant);
-			set_volume (volume_variant.get_double ());
+			var volume = volume_variant.get_double ();
+			if (volume >= 0)
+				set_volume (volume);
 		} catch (GLib.Error e) {
 			warning ("unable to sync volume from AccountsService: %s", e.message);
 		}
@@ -398,15 +395,14 @@ public class VolumeControl : Object
 			return;
 		}
 
-		_greeter_proxy.connect ("EntrySelected", greeter_user_changed);
-		yield sync_volume_from_accountsservice ();
+		if (_greeter_proxy.get_name_owner () != null) {
+			_greeter_proxy.connect ("EntrySelected", greeter_user_changed);
+			yield sync_volume_from_accountsservice ();
+		}
 	}
 
 	private async void sync_volume_to_accountsservice ()
 	{
-		if (_greeter_mode)
-			return; // skip sync if we are in greeter
-
 		if (_user_proxy == null) {
 			_user_proxy = yield get_user_proxy ();
 			if (_user_proxy == null)
