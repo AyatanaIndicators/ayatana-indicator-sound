@@ -17,7 +17,7 @@
  *      Lars Uebernickel <lars.uebernickel@canonical.com>
  */
 
-class SoundMenu: Object
+public class SoundMenu: Object
 {
 	public enum DisplayFlags {
 		NONE = 0,

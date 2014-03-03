@@ -114,3 +114,20 @@ add_test(accounts-service-user-test-basic
 add_test(accounts-service-user-test-player
 	accounts-service-user-test  --gtest_filter=AccountsServiceUserTest.SetMediaPlayer
 )
+
+###########################
+# Accounts Service User
+###########################
+
+include_directories(${CMAKE_SOURCE_DIR}/src)
+add_executable (sound-menu-test sound-menu-test.cc)
+target_link_libraries (
+	sound-menu-test
+	indicator-sound-service-lib
+	vala-mocks-lib
+	gtest
+	${SOUNDSERVICE_LIBRARIES}
+	${TEST_LIBRARIES}
+)
+
+add_test(sound-menu-test sound-menu-test)
