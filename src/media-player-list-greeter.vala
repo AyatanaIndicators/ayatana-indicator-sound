@@ -66,7 +66,7 @@ public class MediaPlayerListGreeter : MediaPlayerList {
 		var old_user = selected_user;
 
 		/* Protect against a null user */
-		if (active_user != "" && active_user != "*guest") {
+		if (active_user != "" && active_user[0] != '*') {
 			selected_user = active_user;
 		} else {
 			selected_user = null;
