@@ -373,9 +373,8 @@ public class IndicatorSound.Service: Object {
 		var play_action = new SimpleAction.stateful ("play." + player.id, null, player.state);
 		play_action.activate.connect ( () => player.play_pause () );
 		this.actions.add_action (play_action);
-		player.notify.connect ( (object, pspec) => {
-			if (pspec.name == "state")
-				play_action.set_state (player.state);
+		player.notify["state"].connect ( (object, pspec) => {
+			play_action.set_state (player.state);
 		});
 
 		var next_action = new SimpleAction ("next." + player.id, null);
