@@ -120,7 +120,7 @@ add_test(accounts-service-user-test-player
 ###########################
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
-add_executable (sound-menu-test sound-menu-test.cc)
+add_executable (sound-menu-test sound-menu.cc)
 target_link_libraries (
 	sound-menu-test
 	indicator-sound-service-lib
