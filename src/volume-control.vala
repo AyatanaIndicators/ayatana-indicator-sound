@@ -256,10 +256,8 @@ public class VolumeControl : Object
 
 	private void set_volume_success_cb (Context c, int success)
 	{
-		if ((bool)success) {
+		if ((bool)success)
 			volume_changed (_volume);
-			sync_volume_to_accountsservice.begin ();
-		}
 	}
 
 	private void sink_info_set_volume_cb (Context c, SinkInfo? i, int eol)
@@ -282,13 +280,21 @@ public class VolumeControl : Object
 		context.get_sink_info_by_name (i.default_sink_name, sink_info_set_volume_cb);
 	}
 
-	public void set_volume (double volume)
+	bool set_volume_internal (double volume)
 	{
-		return_if_fail (context.get_state () == Context.State.READY);
+		return_val_if_fail (context.get_state () == Context.State.READY, false);
 
 		_volume = volume;
 
 		context.get_server_info (server_info_cb_for_set_volume);
+
+		return true;
+	}
+
+	public void set_volume (double volume)
+	{
+		if (set_volume_internal (volume))
+			sync_volume_to_accountsservice.begin ();
 	}
 
 	void set_mic_volume_success_cb (Context c, int success)
@@ -324,13 +330,8 @@ public class VolumeControl : Object
 		return _mic_volume;
 	}
 
-	private async DBusProxy? get_user_proxy (string? username = null)
+	private async DBusProxy? get_user_proxy (string username)
 	{
-		if (username == null)
-			username = Environment.get_variable ("USER");
-		if (username == "" || username == null)
-			return null;
-
 		DBusProxy accounts_proxy;
 		try {
 			accounts_proxy = yield DBusProxy.create_for_bus (BusType.SYSTEM, DBusProxyFlags.DO_NOT_LOAD_PROPERTIES | DBusProxyFlags.DO_NOT_CONNECT_SIGNALS, null, "org.freedesktop.Accounts", "/org/freedesktop/Accounts", "org.freedesktop.Accounts");
@@ -343,10 +344,20 @@ public class VolumeControl : Object
 			var user_path_variant = yield accounts_proxy.call ("FindUserByName", new Variant ("(s)", username), DBusCallFlags.NONE, -1);
 			string user_path;
 			user_path_variant.get ("(o)", out user_path);
-			return yield DBusProxy.create_for_bus (BusType.SYSTEM, DBusProxyFlags.NONE, null, "org.freedesktop.Accounts", user_path, "org.freedesktop.DBus.Properties");
+			return yield DBusProxy.create_for_bus (BusType.SYSTEM, DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, "org.freedesktop.Accounts", user_path, "org.freedesktop.DBus.Properties");
 		} catch (GLib.Error e) {
 			warning ("unable to find Accounts path for user %s: %s", username, e.message);
 			return null;
+		}
+	}
+
+	private void accountsservice_props_changed_cb (DBusProxy proxy, Variant changed_properties, string[] invalidated_properties)
+	{
+		Variant volume_variant = changed_properties.lookup_value ("Volume", new VariantType ("d"));
+		if (volume_variant != null) {
+			var volume = volume_variant.get_double ();
+			if (volume >= 0)
+				set_volume_internal (volume);
 		}
 	}
 
@@ -355,7 +366,7 @@ public class VolumeControl : Object
 		if (username == null) {
 			try {
 				var username_variant = yield _greeter_proxy.call ("GetActiveEntry", null, DBusCallFlags.NONE, -1);
-				username = username_variant.get_string ();
+				username_variant.get ("(s)", out username);
 				if (username == "" || username == null)
 					return;
 			} catch (GLib.Error e) {
@@ -368,16 +379,20 @@ public class VolumeControl : Object
 		if (_user_proxy == null)
 			return;
 
+		// Get current volume
 		try {
 			var volume_outer_variant = yield _user_proxy.call ("Get", new Variant ("(ss)", "com.ubuntu.touch.AccountsService.Sound", "Volume"), DBusCallFlags.NONE, -1);
 			Variant volume_variant;
 			volume_outer_variant.get ("(v)", out volume_variant);
 			var volume = volume_variant.get_double ();
 			if (volume >= 0)
-				set_volume (volume);
+				set_volume_internal (volume);
 		} catch (GLib.Error e) {
 			warning ("unable to sync volume from AccountsService: %s", e.message);
 		}
+
+		// Listen for future changes
+		_user_proxy.g_properties_changed.connect (accountsservice_props_changed_cb);
 	}
 
 	private void greeter_user_changed (string username)
@@ -399,7 +414,9 @@ public class VolumeControl : Object
 			yield sync_volume_from_accountsservice ();
 		} else {
 			// We are in a user session.  We just need our own proxy
-			_user_proxy = yield get_user_proxy (Environment.get_variable ("USER"));
+			var username = Environment.get_variable ("USER");
+			if (username != "" && username != null)
+				yield sync_volume_from_accountsservice (username);
 		}
 	}
 
