@@ -96,5 +96,26 @@ TEST_F(MediaPlayerUserTest, BasicObject) {
 	MediaPlayerUser * player = media_player_user_new("user");
 	ASSERT_NE(nullptr, player);
 
+	/* Protected, but no useful data */
+	EXPECT_FALSE(media_player_get_is_running(MEDIA_PLAYER(player)));
+	EXPECT_TRUE(media_player_get_can_raise(MEDIA_PLAYER(player)));
+	EXPECT_STREQ("user", media_player_get_id(MEDIA_PLAYER(player)));
+	EXPECT_STREQ("", media_player_get_name(MEDIA_PLAYER(player)));
+	EXPECT_STREQ("", media_player_get_state(MEDIA_PLAYER(player)));
+	EXPECT_EQ(nullptr, media_player_get_icon(MEDIA_PLAYER(player)));
+	EXPECT_EQ(nullptr, media_player_get_current_track(MEDIA_PLAYER(player)));
+
+	/* Get the proxy -- but no good data */
+	loop(100);
+
+	/* Ensure even with the proxy we don't have anything */
+	EXPECT_FALSE(media_player_get_is_running(MEDIA_PLAYER(player)));
+	EXPECT_TRUE(media_player_get_can_raise(MEDIA_PLAYER(player)));
+	EXPECT_STREQ("user", media_player_get_id(MEDIA_PLAYER(player)));
+	EXPECT_STREQ("", media_player_get_name(MEDIA_PLAYER(player)));
+	EXPECT_STREQ("", media_player_get_state(MEDIA_PLAYER(player)));
+	EXPECT_EQ(nullptr, media_player_get_icon(MEDIA_PLAYER(player)));
+	EXPECT_EQ(nullptr, media_player_get_current_track(MEDIA_PLAYER(player)));
+
 	g_clear_object(&player);
 }
