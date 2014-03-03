@@ -44,6 +44,8 @@ class SoundMenuTest : public ::testing::Test
 TEST_F(SoundMenuTest, BasicObject) {
 	SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE);
 
+	ASSERT_NE(nullptr, menu);
+
 	g_clear_object(&menu);
 	return;
 }
@@ -67,11 +69,12 @@ TEST_F(SoundMenuTest, AddRemovePlayer) {
 
 	sound_menu_add_player(menu, MEDIA_PLAYER(media));
 
-	/* TODO: Verify */
+	ASSERT_NE(nullptr, menu->menu);
+	EXPECT_EQ(2, g_menu_model_get_n_items(G_MENU_MODEL(menu->menu)));
 
 	sound_menu_remove_player(menu, MEDIA_PLAYER(media));
 
-	/* TODO: Verify */
+	EXPECT_EQ(1, g_menu_model_get_n_items(G_MENU_MODEL(menu->menu)));
 
 	g_clear_object(&media);
 	g_clear_object(&menu);

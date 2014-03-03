@@ -123,8 +123,8 @@ public class SoundMenu: Object
 		this.notify_handlers.remove (player);
 	}
 
-	Menu root;
-	Menu menu;
+	public Menu root;
+	public Menu menu;
 	Menu volume_section;
 	bool mic_volume_shown;
 	bool settings_shown = false;
