@@ -154,7 +154,7 @@ class SoundMenu: Object
 		var section = new Menu ();
 		Icon icon;
 
-		debug("Adding section for player: %s", player.id);
+		debug("Adding section for player: %s (%s)", player.id, player.is_running ? "running" : "not running");
 
 		icon = player.icon;
 		if (icon == null)
