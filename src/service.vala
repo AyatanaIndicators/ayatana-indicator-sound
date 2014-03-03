@@ -401,6 +401,8 @@ public class IndicatorSound.Service: Object {
 		this.actions.remove_action ("previous." + player.id);
 		this.actions.remove_action ("play-playlist." + player.id);
 
+		player.notify.disconnect (this.eventually_update_player_actions);
+
 		this.menus.@foreach ( (profile, menu) => menu.remove_player (player));
 
 		this.update_preferred_players ();
