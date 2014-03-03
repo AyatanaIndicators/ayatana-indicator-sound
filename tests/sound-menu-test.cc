@@ -47,3 +47,33 @@ TEST_F(SoundMenuTest, BasicObject) {
 	g_clear_object(&menu);
 	return;
 }
+
+TEST_F(SoundMenuTest, AddRemovePlayer) {
+	SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE);
+
+	MediaPlayerTrack * track = media_player_track_new("Artist", "Title", "Album", "http://art.url");
+
+	MediaPlayerMock * media = MEDIA_PLAYER_MOCK(
+		g_object_new(TYPE_MEDIA_PLAYER_MOCK,
+			"mock-id", "player-id",
+			"mock-name", "Test Player",
+			"mock-state", "Playing",
+			"mock-is-running", TRUE,
+			"mock-can-raise", FALSE,
+			"mock-current-track", track,
+			NULL)
+	);
+	g_clear_object(&track);
+
+	sound_menu_add_player(menu, MEDIA_PLAYER(media));
+
+	/* TODO: Verify */
+
+	sound_menu_remove_player(menu, MEDIA_PLAYER(media));
+
+	/* TODO: Verify */
+
+	g_clear_object(&media);
+	g_clear_object(&menu);
+	return;
+}
