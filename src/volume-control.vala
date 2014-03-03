@@ -299,7 +299,7 @@ public class VolumeControl : Object
 	{
 		return_val_if_fail (context.get_state () == Context.State.READY, false);
 
-		if (_volume == volume) {
+		if (_volume != volume) {
 			_volume = volume;
 			context.get_server_info (server_info_cb_for_set_volume);
 			return true;
@@ -347,7 +347,7 @@ public class VolumeControl : Object
 		return _mic_volume;
 	}
 
-	/* accountsservice operations */
+	/* AccountsService operations */
 	private void accountsservice_props_changed_cb (DBusProxy proxy, Variant changed_properties, string[] invalidated_properties)
 	{
 		Variant volume_variant = changed_properties.lookup_value ("Volume", new VariantType ("d"));
