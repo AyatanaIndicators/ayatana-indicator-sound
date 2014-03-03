@@ -107,7 +107,6 @@ public class VolumeControl : Object
 		{
 			_volume = volume_to_double (i.volume.values[0]);
 			volume_changed (_volume);
-			sync_volume_to_accountsservice.begin ();
 		}
 	}
 
@@ -365,12 +364,12 @@ public class VolumeControl : Object
 			}
 		}
 
-		var user_proxy = yield get_user_proxy (username);
-		if (user_proxy == null)
+		_user_proxy = yield get_user_proxy (username);
+		if (_user_proxy == null)
 			return;
 
 		try {
-			var volume_outer_variant = yield user_proxy.call ("Get", new Variant ("(ss)", "com.ubuntu.touch.AccountsService.Sound", "Volume"), DBusCallFlags.NONE, -1);
+			var volume_outer_variant = yield _user_proxy.call ("Get", new Variant ("(ss)", "com.ubuntu.touch.AccountsService.Sound", "Volume"), DBusCallFlags.NONE, -1);
 			Variant volume_variant;
 			volume_outer_variant.get ("(v)", out volume_variant);
 			var volume = volume_variant.get_double ();
@@ -398,16 +397,16 @@ public class VolumeControl : Object
 		if (_greeter_proxy.get_name_owner () != null) {
 			_greeter_proxy.connect ("EntrySelected", greeter_user_changed);
 			yield sync_volume_from_accountsservice ();
+		} else {
+			// We are in a user session.  We just need our own proxy
+			_user_proxy = yield get_user_proxy (Environment.get_variable ("USER"));
 		}
 	}
 
 	private async void sync_volume_to_accountsservice ()
 	{
-		if (_user_proxy == null) {
-			_user_proxy = yield get_user_proxy ();
-			if (_user_proxy == null)
-				return;
-		}
+		if (_user_proxy == null)
+			return;
 
 		try {
 			yield _user_proxy.call ("Set", new Variant ("(ssv)", "com.ubuntu.touch.AccountsService.Sound", "Volume", new Variant ("d", _volume)), DBusCallFlags.NONE, -1);
