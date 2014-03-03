@@ -345,7 +345,7 @@ public class VolumeControl : Object
 		try {
 			var user_path_variant = yield accounts_proxy.call ("FindUserByName", new Variant ("(s)", username), DBusCallFlags.NONE, -1);
 			string user_path;
-			user_path_variant.get ("(&s)", out user_path);
+			user_path_variant.get ("(o)", out user_path);
 			return yield DBusProxy.create_for_bus (BusType.SYSTEM, DBusProxyFlags.NONE, null, "org.freedesktop.Accounts", user_path, "org.freedesktop.DBus.Properties");
 		} catch (GLib.Error e) {
 			warning ("unable to find Accounts path for user %s: %s", username, e.message);
