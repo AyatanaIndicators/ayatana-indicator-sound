@@ -63,6 +63,8 @@ public class MediaPlayerListGreeter : MediaPlayerList {
 			return;
 		}
 
+		debug(@"Active user changed to: $active_user");
+
 		var old_user = selected_user;
 
 		/* Protect against a null user */
