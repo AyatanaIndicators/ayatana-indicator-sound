@@ -35,7 +35,7 @@ public class IndicatorSound.Service: Object {
 		this.actions.add_action (this.create_mic_volume_action ());
 
 		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
-		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS));
+		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.DONT_SHOW_PLAYERS));
 		this.menus.insert ("desktop", new SoundMenu ("indicator.desktop-settings", SoundMenu.DisplayFlags.SHOW_MUTE));
 		this.menus.insert ("phone", new SoundMenu ("indicator.phone-settings", SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS));
 
