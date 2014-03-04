@@ -32,7 +32,7 @@ class MediaPlayerUserTest : public ::testing::Test
 
 	protected:
 		DbusTestService * service = NULL;
-		DbusTestDbusMock * mock = NULL;
+		AccountsServiceMock service_mock;
 
 		GDBusConnection * session = NULL;
 		GDBusConnection * system = NULL;
@@ -41,7 +41,6 @@ class MediaPlayerUserTest : public ::testing::Test
 		virtual void SetUp() {
 			service = dbus_test_service_new(NULL);
 
-			AccountsServiceMock service_mock;
 
 			dbus_test_service_add_task(service, (DbusTestTask*)service_mock);
 			dbus_test_service_start_tasks(service);
@@ -103,12 +102,7 @@ class MediaPlayerUserTest : public ::testing::Test
 		}
 
 		void set_property (const gchar * name, GVariant * value) {
-			g_dbus_proxy_call_sync(proxy,
-				"Set",
-				g_variant_new("(ssv)", "com.canonical.indicator.sound.AccountsService", name, value),
-				G_DBUS_CALL_FLAGS_NONE,
-				-1, NULL, NULL
-				);
+			dbus_test_dbus_mock_object_update_property((DbusTestDbusMock *)service_mock, service_mock.get_sound(), name, value, NULL);
 		}
 };
 
@@ -178,6 +172,38 @@ TEST_F(MediaPlayerUserTest, DataSet) {
 	EXPECT_STREQ("Vinyl is dead", media_player_track_get_album(track));
 	EXPECT_STREQ("http://art.url", media_player_track_get_art_url(track));
 	g_clear_object(&track);
+
+	g_clear_object(&in_icon);
+	g_clear_object(&player);
+}
+
+TEST_F(MediaPlayerUserTest, TimeoutTest) {
+	/* Put data into Acts -- but 15 minutes ago */
+	set_property("Timestamp", g_variant_new_uint64(g_get_monotonic_time() - 15 * 60 * 1000 * 1000));
+	set_property("PlayerName", g_variant_new_string("The Player Formerly Known as Prince"));
+	GIcon * in_icon = g_themed_icon_new_with_default_fallbacks("foo-bar-fallback");
+	set_property("PlayerIcon", g_variant_new_variant(g_icon_serialize(in_icon)));
+	set_property("State", g_variant_new_string("Chillin'"));
+	set_property("Title", g_variant_new_string("Dictator"));
+	set_property("Artist", g_variant_new_string("Bansky"));
+	set_property("Album", g_variant_new_string("Vinyl is dead"));
+	set_property("ArtUrl", g_variant_new_string("http://art.url"));
+
+	/* Build our media player */
+	MediaPlayerUser * player = media_player_user_new("user");
+	ASSERT_NE(nullptr, player);
+
+	/* Get the proxy -- and the old data, so old, like forever */
+	loop(100);
+
+	/* Ensure that we show up as not running */
+	EXPECT_FALSE(media_player_get_is_running(MEDIA_PLAYER(player)));
+
+	/* Update to make running */
+	set_property("Timestamp", g_variant_new_uint64(g_get_monotonic_time()));
+	loop(100);
+
+	EXPECT_TRUE(media_player_get_is_running(MEDIA_PLAYER(player)));
 
 	g_clear_object(&in_icon);
 	g_clear_object(&player);

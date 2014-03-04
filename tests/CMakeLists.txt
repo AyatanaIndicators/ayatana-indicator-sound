@@ -151,4 +151,10 @@ target_link_libraries (
 add_test(media-player-user-test-basic
 	media-player-user-test  --gtest_filter=MediaPlayerUserTest.BasicObject
 )
+add_test(media-player-user-test-dataset
+	media-player-user-test  --gtest_filter=MediaPlayerUserTest.DataSet
+)
+add_test(media-player-user-test-timeout
+	media-player-user-test  --gtest_filter=MediaPlayerUserTest.TimeoutTest
+)
 
