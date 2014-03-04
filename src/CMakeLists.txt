@@ -96,7 +96,6 @@ vala_add(indicator-sound-service
   sound-menu.vala
   DEPENDS
     media-player
-    mpris2-interfaces
 )
 vala_add(indicator-sound-service
   accounts-service-user.vala

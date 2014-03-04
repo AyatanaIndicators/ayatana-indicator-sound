@@ -69,8 +69,11 @@ public class MediaPlayerUser : MediaPlayer {
 		properties_timeout = 0;
 
 		properties_queued.@foreach((key, value) => {
+			debug("Notifying '%s' changed", key);
 			this.notify_property(key);
 		});
+
+		properties_queued.remove_all();
 
 		/* Remove source */
 		return false;
@@ -88,6 +91,7 @@ public class MediaPlayerUser : MediaPlayer {
 			properties_queued.insert("icon", true);
 			properties_queued.insert("state", true);
 			properties_queued.insert("current-track", true);
+			properties_queued.insert("is-running", true);
 			break;
 		case "PlayerName":
 			properties_queued.insert("name", true);
@@ -126,8 +130,8 @@ public class MediaPlayerUser : MediaPlayer {
 				}
 			});
 
-			/* Update all of them -- we've got a proxy! */
-			queue_property_notification("Timestamp");
+			debug("Notifying player is ready for user: %s", this.username);
+			this.notify_property("is-running");
 		} catch (Error e) {
 			this.proxy = null;
 			warning("Unable to get proxy to user '%s' sound settings: %s", username, e.message);
@@ -195,7 +199,7 @@ public class MediaPlayerUser : MediaPlayer {
 	/* If it's shown externally it's running */
 	public override bool is_running { get { return proxy_is_valid(); } }
 	/* A bit weird.  Not sure how we should handle this. */
-	public override bool can_raise { get { return false; } }
+	public override bool can_raise { get { return true; } }
 
 	/* Fill out the track based on the values in the proxy */
 	MediaPlayer.Track track_cache;

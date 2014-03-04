@@ -63,12 +63,15 @@ public class MediaPlayerListGreeter : MediaPlayerList {
 			return;
 		}
 
+		debug(@"Active user changed to: $active_user");
+
 		var old_user = selected_user;
 
 		/* Protect against a null user */
-		if (active_user != "") {
+		if (active_user != "" && active_user[0] != '*') {
 			selected_user = active_user;
 		} else {
+			debug(@"Blocking active user change for '$active_user'");
 			selected_user = null;
 		}
 
@@ -78,12 +81,17 @@ public class MediaPlayerListGreeter : MediaPlayerList {
 
 		if (old_user != null) {
 			var old_player = players.lookup(old_user);
+			debug("Removing player for user: %s", old_user);
 			player_removed(old_player);
 		}
 
 		if (selected_user != null) {
 			var new_player = players.lookup(selected_user);
-			player_added(new_player);
+
+			if (new_player != null) {
+				debug("Adding player for user: %s", selected_user);
+				player_added(new_player);
+			}
 		}
 	}
 

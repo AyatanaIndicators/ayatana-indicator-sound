@@ -114,3 +114,47 @@ add_test(accounts-service-user-test-basic
 add_test(accounts-service-user-test-player
 	accounts-service-user-test  --gtest_filter=AccountsServiceUserTest.SetMediaPlayer
 )
+
+###########################
+# Sound Menu
+###########################
+
+include_directories(${CMAKE_SOURCE_DIR}/src)
+add_executable (sound-menu-test sound-menu.cc)
+target_link_libraries (
+	sound-menu-test
+	indicator-sound-service-lib
+	vala-mocks-lib
+	gtest
+	${SOUNDSERVICE_LIBRARIES}
+	${TEST_LIBRARIES}
+)
+
+add_test(sound-menu-test sound-menu-test)
+
+###########################
+# Accounts Service User
+###########################
+
+include_directories(${CMAKE_SOURCE_DIR}/src)
+add_executable (media-player-user-test media-player-user.cc)
+target_link_libraries (
+	media-player-user-test
+	indicator-sound-service-lib
+	vala-mocks-lib
+	gtest
+	${SOUNDSERVICE_LIBRARIES}
+	${TEST_LIBRARIES}
+)
+
+# Split tests to work around libaccountservice sucking
+add_test(media-player-user-test-basic
+	media-player-user-test  --gtest_filter=MediaPlayerUserTest.BasicObject
+)
+add_test(media-player-user-test-dataset
+	media-player-user-test  --gtest_filter=MediaPlayerUserTest.DataSet
+)
+add_test(media-player-user-test-timeout
+	media-player-user-test  --gtest_filter=MediaPlayerUserTest.TimeoutTest
+)
+

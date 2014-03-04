@@ -35,7 +35,8 @@ public class IndicatorSound.Service: Object {
 		this.actions.add_action (this.create_mic_volume_action ());
 
 		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
-		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE));
+		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.DONT_SHOW_PLAYERS));
+		this.menus.insert ("phone_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS));
 		this.menus.insert ("desktop", new SoundMenu ("indicator.desktop-settings", SoundMenu.DisplayFlags.SHOW_MUTE));
 		this.menus.insert ("phone", new SoundMenu ("indicator.phone-settings", SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS));
 
@@ -366,15 +367,15 @@ public class IndicatorSound.Service: Object {
 		this.menus.@foreach ( (profile, menu) => menu.add_player (player));
 
 		SimpleAction action = new SimpleAction.stateful (player.id, null, this.action_state_for_player (player));
+		action.set_enabled (player.can_raise);
 		action.activate.connect ( () => { player.activate (); });
 		this.actions.add_action (action);
 
 		var play_action = new SimpleAction.stateful ("play." + player.id, null, player.state);
 		play_action.activate.connect ( () => player.play_pause () );
 		this.actions.add_action (play_action);
-		player.notify.connect ( (object, pspec) => {
-			if (pspec.name == "state")
-				play_action.set_state (player.state);
+		player.notify["state"].connect ( (object, pspec) => {
+			play_action.set_state (player.state);
 		});
 
 		var next_action = new SimpleAction ("next." + player.id, null);
@@ -400,6 +401,8 @@ public class IndicatorSound.Service: Object {
 		this.actions.remove_action ("next." + player.id);
 		this.actions.remove_action ("previous." + player.id);
 		this.actions.remove_action ("play-playlist." + player.id);
+
+		player.notify.disconnect (this.eventually_update_player_actions);
 
 		this.menus.@foreach ( (profile, menu) => menu.remove_player (player));
 
