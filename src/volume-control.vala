@@ -240,7 +240,7 @@ public class VolumeControl : Object
 	public void set_mute (bool mute)
 	{
 		if (set_mute_internal (mute))
-			sync_mute_to_accountsservice.begin ();
+			sync_mute_to_accountsservice.begin (mute);
 	}
 
 	public void toggle_mute ()
@@ -311,7 +311,7 @@ public class VolumeControl : Object
 	public void set_volume (double volume)
 	{
 		if (set_volume_internal (volume))
-			sync_volume_to_accountsservice.begin ();
+			sync_volume_to_accountsservice.begin (volume);
 	}
 
 	void set_mic_volume_success_cb (Context c, int success)
@@ -431,7 +431,7 @@ public class VolumeControl : Object
 		}
 	}
 
-	private async void sync_mute_to_accountsservice ()
+	private async void sync_mute_to_accountsservice (bool mute)
 	{
 		if (_user_proxy == null)
 			return;
@@ -440,13 +440,13 @@ public class VolumeControl : Object
 		_mute_cancellable.reset ();
 
 		try {
-			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Muted", new Variant ("b", _mute)), null, DBusCallFlags.NONE, -1, _mute_cancellable);
+			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Muted", new Variant ("b", mute)), null, DBusCallFlags.NONE, -1, _mute_cancellable);
 		} catch (GLib.Error e) {
 			warning ("unable to sync mute to AccountsService: %s", e.message);
 		}
 	}
 
-	private async void sync_volume_to_accountsservice ()
+	private async void sync_volume_to_accountsservice (double volume)
 	{
 		if (_user_proxy == null)
 			return;
@@ -455,7 +455,7 @@ public class VolumeControl : Object
 		_volume_cancellable.reset ();
 
 		try {
-			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Volume", new Variant ("d", _volume)), null, DBusCallFlags.NONE, -1, _volume_cancellable);
+			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Volume", new Variant ("d", volume)), null, DBusCallFlags.NONE, -1, _volume_cancellable);
 		} catch (GLib.Error e) {
 			warning ("unable to sync volume to AccountsService: %s", e.message);
 		}
