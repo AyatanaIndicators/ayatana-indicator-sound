@@ -22,6 +22,9 @@ public class IndicatorSound.Service: Object {
 		this.settings = new Settings ("com.canonical.indicator.sound");
 		this.sharedsettings = new Settings ("com.ubuntu.sound");
 
+		this.settings.bind ("visible", this, "visible", SettingsBindFlags.GET);
+		this.notify["visible"].connect ( () => this.update_root_icon () );
+
 		this.volume_control = new VolumeControl ();
 
 		this.players = new MediaPlayerList ();
@@ -73,6 +76,8 @@ public class IndicatorSound.Service: Object {
 
 		return 0;
 	}
+
+	public bool visible { get; set; }
 
 	public bool allow_amplified_volume {
 		get {
@@ -204,7 +209,7 @@ public class IndicatorSound.Service: Object {
 		builder.add ("{sv}", "title", new Variant.string (_("Sound")));
 		builder.add ("{sv}", "accessible-desc", new Variant.string (accessible_name));
 		builder.add ("{sv}", "icon", serialize_themed_icon (icon));
-		builder.add ("{sv}", "visible", new Variant.boolean (true));
+		builder.add ("{sv}", "visible", new Variant.boolean (this.visible));
 		root_action.set_state (builder.end());
 	}
 
