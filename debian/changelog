@@ -1,3 +1,17 @@
+indicator-sound (12.10.2+14.04.20140311.1-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * Add desktop_lockscreen profile
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 11 Mar 2014 18:26:29 +0000
+
+indicator-sound (12.10.2+14.04.20140305-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * Honor com.canonical.indicator.sound visible (LP: #829648)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 05 Mar 2014 08:44:14 +0000
+
 indicator-sound (12.10.2+14.04.20140224-0ubuntu1) trusty; urgency=low
 
   [ Sebastien Bacher ]
