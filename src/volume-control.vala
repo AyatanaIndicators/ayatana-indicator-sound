@@ -23,6 +23,13 @@ using PulseAudio;
 [CCode(cname="pa_cvolume_set", cheader_filename = "pulse/volume.h")]
 extern unowned PulseAudio.CVolume? vol_set (PulseAudio.CVolume? cv, uint channels, PulseAudio.Volume v);
 
+[DBus (name="com.canonical.UnityGreeter.List")]
+interface GreeterListInterface : Object
+{
+    public abstract async string get_active_entry () throws IOError;
+    public signal void entry_selected (string entry_name);
+}
+
 public class VolumeControl : Object
 {
 	/* this is static to ensure it being freed after @context (loop does not have ref counting) */
@@ -36,7 +43,7 @@ public class VolumeControl : Object
 	private double _mic_volume = 0.0;
 
 	private DBusProxy _user_proxy;
-	private DBusProxy _greeter_proxy;
+	private GreeterListInterface _greeter_proxy;
 	private Cancellable _mute_cancellable;
 	private Cancellable _volume_cancellable;
 
@@ -364,15 +371,15 @@ public class VolumeControl : Object
 		}
 	}
 
-	private async void setup_user_proxy (string? username = null)
+	private async void setup_user_proxy (string? username_in = null)
 	{
+		var username = username_in;
 		_user_proxy = null;
 
 		// Look up currently selected greeter user, if asked
 		if (username == null) {
 			try {
-				var username_variant = yield _greeter_proxy.call ("GetActiveEntry", null, DBusCallFlags.NONE, -1);
-				username_variant.get ("(s)", out username);
+				username = yield _greeter_proxy.get_active_entry ();
 				if (username == "" || username == null)
 					return;
 			} catch (GLib.Error e) {
@@ -412,15 +419,14 @@ public class VolumeControl : Object
 
 	private async void setup_accountsservice ()
 	{
-		try {
-			_greeter_proxy = yield DBusProxy.create_for_bus (BusType.SESSION, DBusProxyFlags.NONE, null, "com.canonical.UnityGreeter", "/list", "com.canonical.UnityGreeter.List");
-		} catch (GLib.Error e) {
-			warning ("unable to get greeter proxy: %s", e.message);
-			return;
-		}
-
-		if (_greeter_proxy.get_name_owner () != null) {
-			_greeter_proxy.connect ("EntrySelected", greeter_user_changed);
+		if (Environment.get_variable ("XDG_SESSION_CLASS") == "greeter") {
+			try {
+				_greeter_proxy = yield Bus.get_proxy (BusType.SESSION, "com.canonical.UnityGreeter", "/list");
+			} catch (GLib.Error e) {
+				warning ("unable to get greeter proxy: %s", e.message);
+				return;
+			}
+			_greeter_proxy.entry_selected.connect (greeter_user_changed);
 			yield setup_user_proxy ();
 		} else {
 			// We are in a user session.  We just need our own proxy
