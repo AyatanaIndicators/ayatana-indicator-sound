@@ -22,6 +22,9 @@ public class IndicatorSound.Service: Object {
 		this.settings = new Settings ("com.canonical.indicator.sound");
 		this.sharedsettings = new Settings ("com.ubuntu.sound");
 
+		this.settings.bind ("visible", this, "visible", SettingsBindFlags.GET);
+		this.notify["visible"].connect ( () => this.update_root_icon () );
+
 		this.volume_control = new VolumeControl ();
 
 		this.players = playerlist;
@@ -35,7 +38,7 @@ public class IndicatorSound.Service: Object {
 		this.actions.add_action (this.create_mic_volume_action ());
 
 		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
-		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.DONT_SHOW_PLAYERS));
+		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.HIDE_PLAYERS));
 		this.menus.insert ("phone_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS));
 		this.menus.insert ("desktop", new SoundMenu ("indicator.desktop-settings", SoundMenu.DisplayFlags.SHOW_MUTE));
 		this.menus.insert ("phone", new SoundMenu ("indicator.phone-settings", SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS));
@@ -78,6 +81,8 @@ public class IndicatorSound.Service: Object {
 
 		return 0;
 	}
+
+	public bool visible { get; set; }
 
 	public bool allow_amplified_volume {
 		get {
@@ -210,7 +215,7 @@ public class IndicatorSound.Service: Object {
 		builder.add ("{sv}", "title", new Variant.string (_("Sound")));
 		builder.add ("{sv}", "accessible-desc", new Variant.string (accessible_name));
 		builder.add ("{sv}", "icon", serialize_themed_icon (icon));
-		builder.add ("{sv}", "visible", new Variant.boolean (true));
+		builder.add ("{sv}", "visible", new Variant.boolean (this.visible));
 		root_action.set_state (builder.end());
 	}
 

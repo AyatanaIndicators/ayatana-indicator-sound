@@ -23,7 +23,7 @@ public class SoundMenu: Object
 		NONE = 0,
 		SHOW_MUTE = 1,
 		HIDE_INACTIVE_PLAYERS = 2,
-		DONT_SHOW_PLAYERS = 4
+		HIDE_PLAYERS = 4
 	}
 
 	public SoundMenu (string? settings_action, DisplayFlags flags) {
@@ -31,8 +31,6 @@ public class SoundMenu: Object
 		 * at the start of the menu, and the settings section at the end. Between those two,
 		 * it has a dynamic amount of player sections, one for each registered player.
 		 */
-
-		this.no_players = ((flags & DisplayFlags.DONT_SHOW_PLAYERS) != 0);
 
 		this.volume_section = new Menu ();
 		if ((flags & DisplayFlags.SHOW_MUTE) != 0)
@@ -58,6 +56,7 @@ public class SoundMenu: Object
 		this.root = new Menu ();
 		root.append_item (root_item);
 
+		this.hide_players = (flags & DisplayFlags.HIDE_PLAYERS) != 0;
 		this.hide_inactive = (flags & DisplayFlags.HIDE_INACTIVE_PLAYERS) != 0;
 		this.notify_handlers = new HashTable<MediaPlayer, ulong> (direct_hash, direct_equal);
 	}
@@ -90,8 +89,6 @@ public class SoundMenu: Object
 	}
 
 	public void add_player (MediaPlayer player) {
-		if (this.no_players)
-			return;
 		if (this.notify_handlers.contains (player))
 			return;
 
@@ -134,7 +131,7 @@ public class SoundMenu: Object
 	bool mic_volume_shown;
 	bool settings_shown = false;
 	bool hide_inactive;
-	bool no_players;
+	bool hide_players = false;
 	HashTable<MediaPlayer, ulong> notify_handlers;
 
 	/* returns the position in this.menu of the section that's associated with @player */
@@ -157,6 +154,9 @@ public class SoundMenu: Object
 	}
 
 	void insert_player_section (MediaPlayer player) {
+		if (this.hide_players)
+			return;
+
 		var section = new Menu ();
 		Icon icon;
 
@@ -188,6 +188,9 @@ public class SoundMenu: Object
 	}
 
 	void remove_player_section (MediaPlayer player) {
+		if (this.hide_players)
+			return;
+
 		int index = this.find_player_section (player);
 		if (index >= 0)
 			this.menu.remove (index);
