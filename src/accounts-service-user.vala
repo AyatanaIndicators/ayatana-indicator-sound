@@ -101,6 +101,11 @@ public class AccountsServiceUser : Object {
 
 	~AccountsServiceUser () {
 		this.player = null;
+
+		if (this.timer != 0) {
+			GLib.Source.remove(this.timer);
+			this.timer = 0;
+		}
 	}
 
 	void new_proxy (GLib.Object? obj, AsyncResult res) {
