@@ -22,7 +22,8 @@ class SoundMenu: Object
 	public enum DisplayFlags {
 		NONE = 0,
 		SHOW_MUTE = 1,
-		HIDE_INACTIVE_PLAYERS = 2
+		HIDE_INACTIVE_PLAYERS = 2,
+		HIDE_PLAYERS = 4
 	}
 
 	public SoundMenu (string? settings_action, DisplayFlags flags) {
@@ -55,6 +56,7 @@ class SoundMenu: Object
 		this.root = new Menu ();
 		root.append_item (root_item);
 
+		this.hide_players = (flags & DisplayFlags.HIDE_PLAYERS) != 0;
 		this.hide_inactive = (flags & DisplayFlags.HIDE_INACTIVE_PLAYERS) != 0;
 		this.notify_handlers = new HashTable<MediaPlayer, ulong> (direct_hash, direct_equal);
 	}
@@ -119,6 +121,7 @@ class SoundMenu: Object
 	bool mic_volume_shown;
 	bool settings_shown = false;
 	bool hide_inactive;
+	bool hide_players = false;
 	HashTable<MediaPlayer, ulong> notify_handlers;
 
 	/* returns the position in this.menu of the section that's associated with @player */
@@ -137,6 +140,9 @@ class SoundMenu: Object
 	}
 
 	void insert_player_section (MediaPlayer player) {
+		if (this.hide_players)
+			return;
+
 		var section = new Menu ();
 		Icon icon;
 
@@ -166,6 +172,9 @@ class SoundMenu: Object
 	}
 
 	void remove_player_section (MediaPlayer player) {
+		if (this.hide_players)
+			return;
+
 		int index = this.find_player_section (player);
 		if (index >= 0)
 			this.menu.remove (index);
