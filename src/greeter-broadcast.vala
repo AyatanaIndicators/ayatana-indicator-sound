@@ -20,14 +20,14 @@
 [DBus (name = "com.canonical.Unity.Greeter.Broadcast")]
 public interface GreeterBroadcast : Object {
   // methods
-  public abstract async void RequestApplicationStart(string name, string appid) throws IOError;
-  public abstract async void RequestHomeShown(string name) throws IOError;
+  // unused public abstract async void RequestApplicationStart(string name, string appid) throws IOError;
+  // unused public abstract async void RequestHomeShown(string name) throws IOError;
   public abstract async void RequestSoundPlayPause(string name) throws IOError;
   public abstract async void RequestSoundNext(string name) throws IOError;
   public abstract async void RequestSoundPrev(string name) throws IOError;
   // signals
-  public signal void StartApplication(string username, string appid);
-  public signal void ShowHome(string username);
+  // unused public signal void StartApplication(string username, string appid);
+  // unused public signal void ShowHome(string username);
   public signal void SoundPlayPause(string username);
   public signal void SoundNext(string username);
   public signal void SoundPrev(string username);
