@@ -1,3 +1,11 @@
+indicator-sound (12.10.2+14.04.20140313-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * Don't show player sections on the greeter and lock screen (LP:
+    #1280378)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 13 Mar 2014 15:33:11 +0000
+
 indicator-sound (12.10.2+14.04.20140311.1-0ubuntu1) trusty; urgency=low
 
   [ Lars Uebernickel ]
