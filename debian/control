@@ -6,7 +6,7 @@ XSBC-Original-Maintainer: Conor Curran <conor.curran@canonical.com>
 Build-Depends: debhelper (>= 9.0),
                cmake,
                dbus,
-               dbus-test-runner,
+               dbus-test-runner (>= 14.04.0+14.04.20140226),
                dh-translations,
                gir1.2-accountsservice-1.0,
                gnome-common,
