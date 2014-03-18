@@ -141,7 +141,7 @@ public class IndicatorSound.Service: Object {
 				icon = "notification-audio-volume-high";
 
 			this.notification.update ("indicator-sound", "", icon);
-			this.notification.set_hint_int32 ("value", ((int32) (100 * v)).clamp (-1, 101));
+			this.notification.set_hint_int32 ("value", ((int32) (100 * v / this.max_volume)).clamp (-1, 101));
 			try {
 				this.notification.show ();
 			}
