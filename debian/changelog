@@ -1,3 +1,11 @@
+indicator-sound (12.10.2+14.04.20140318-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * Show a red icon in the panel when a sound is playing while mute is
+    on (LP: #1291530)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 18 Mar 2014 10:01:01 +0000
+
 indicator-sound (12.10.2+14.04.20140313-0ubuntu1) trusty; urgency=low
 
   [ Lars Uebernickel ]
