@@ -48,5 +48,14 @@
         Whether or not to show the sound indicator in the menu bar.
       </description>
     </key>
+    <key name="greeter-export" type="b">
+      <default>true</default>
+      <summary>Whether or not to export the currently playing song to the greeter.</summary>
+      <description>
+        If enabled the sound indicator will export the current player and
+        song to the greeter so that it can be shown if the user is selected
+        and the sound menu is shown.
+      </description>
+    </key>
   </schema>
 </schemalist>
