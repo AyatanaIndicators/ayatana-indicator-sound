@@ -188,7 +188,7 @@ public class IndicatorSound.Service: Object {
 		double volume = this.volume_control.get_volume ();
 		string icon;
 		if (this.volume_control.mute)
-			icon = this.mute_blocks_sound ? "audio-volume-muted-blocked-panel" : "audio-volume-muted-panel";
+			icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
 		else if (volume <= 0.0)
 			icon = "audio-volume-low-zero-panel";
 		else if (volume <= 0.3)
