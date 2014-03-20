@@ -46,9 +46,9 @@ public class IndicatorSound.Service: Object {
 			this.volume_control.bind_property ("active-mic", menu, "show-mic-volume", BindingFlags.SYNC_CREATE);
 		});
 
-		if (GLib.Environment.get_user_name() != "lightdm") {
-			accounts_service = new AccountsServiceUser();
-		}
+		/* Setup handling for the greeter-export setting */
+		this.settings.changed["greeter-export"].connect( () => this.build_accountsservice() );
+		build_accountsservice();
 
 		this.sync_preferred_players ();
 		this.settings.changed["interested-media-players"].connect ( () => {
@@ -64,6 +64,22 @@ public class IndicatorSound.Service: Object {
 		}
 
 		sharedsettings.bind ("allow-amplified-volume", this, "allow-amplified-volume", SettingsBindFlags.GET);
+	}
+
+	void build_accountsservice () {
+		this.accounts_service = null;
+
+		/* If we're not exporting, don't build anything */
+		if (!this.settings.get_boolean("greeter-export")) {
+			return;
+		}
+
+		/* If we're on the greeter, don't export */
+		if (GLib.Environment.get_user_name() == "lightdm") {
+			return;
+		}
+
+		this.accounts_service = new AccountsServiceUser();
 	}
 
 	public int run () {
