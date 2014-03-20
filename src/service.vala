@@ -101,6 +101,13 @@ public class IndicatorSound.Service: Object {
 			this.bus_acquired, null, this.name_lost);
 
 		this.loop = new MainLoop (null, false);
+
+		GLib.Unix.signal_add(GLib.ProcessSignal.TERM, () => {
+			debug("SIGTERM recieved, stopping our mainloop");
+			this.loop.quit();
+			return false;
+		});
+
 		this.loop.run ();
 
 		return 0;
