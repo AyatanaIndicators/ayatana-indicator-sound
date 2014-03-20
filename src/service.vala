@@ -67,6 +67,11 @@ public class IndicatorSound.Service: Object {
 	}
 
 	void build_accountsservice () {
+		/* NOTE: This is a bit of a hack to ensure that accounts service doesn't
+		   continue to export the player by keeping a ref in the timer */
+		if (this.accounts_service != null)
+			this.accounts_service.player = null;
+
 		this.accounts_service = null;
 
 		/* If we're not exporting, don't build anything */
