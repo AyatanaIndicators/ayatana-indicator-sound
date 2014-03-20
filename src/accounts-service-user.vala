@@ -45,6 +45,13 @@ public class AccountsServiceUser : Object {
 				/* Clear it */
 				this.proxy.player_name = "";
 				this.proxy.timestamp = 0;
+				this.proxy.title = "";
+				this.proxy.artist = "";
+				this.proxy.album = "";
+				this.proxy.art_url = "";
+
+				var icon = new ThemedIcon.with_default_fallbacks ("application-default-icon");
+				this.proxy.player_icon = icon.serialize();
 			} else {
 				this.proxy.timestamp = GLib.get_monotonic_time();
 				this.proxy.player_name = this._player.name;
