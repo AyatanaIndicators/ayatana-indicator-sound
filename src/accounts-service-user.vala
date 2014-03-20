@@ -114,6 +114,7 @@ public class AccountsServiceUser : Object {
 	}
 
 	~AccountsServiceUser () {
+		debug("Account Service Object Finalizing");
 		this.player = null;
 
 		if (this.timer != 0) {
