@@ -93,11 +93,16 @@ public class AccountsServiceUser : Object {
 
 	public AccountsServiceUser () {
 		user = accounts_manager.get_user(GLib.Environment.get_user_name());
-		user.notify["is-loaded"].connect(() => {
-			debug("User loaded");
+		user.notify["is-loaded"].connect(() => user_loaded_changed());
+		user_loaded_changed();
+	}
 
-			this.proxy = null;
+	void user_loaded_changed () {
+		debug("User loaded changed");
 
+		this.proxy = null;
+
+		if (this.user.is_loaded) {
 			Bus.get_proxy.begin<AccountsServiceSoundSettings> (
 				BusType.SYSTEM,
 				"org.freedesktop.Accounts",
@@ -105,7 +110,7 @@ public class AccountsServiceUser : Object {
 				DBusProxyFlags.GET_INVALIDATED_PROPERTIES,
 				null,
 				new_proxy);
-		});
+		}
 	}
 
 	~AccountsServiceUser () {
