@@ -71,11 +71,13 @@ public class IndicatorSound.Service: Object {
 
 		/* If we're not exporting, don't build anything */
 		if (!this.settings.get_boolean("greeter-export")) {
+			debug("Accounts service export disabled due to user setting");
 			return;
 		}
 
 		/* If we're on the greeter, don't export */
 		if (GLib.Environment.get_user_name() == "lightdm") {
+			debug("Accounts service export disabled due to being used on the greeter");
 			return;
 		}
 

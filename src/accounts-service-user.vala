@@ -42,6 +42,8 @@ public class AccountsServiceUser : Object {
 			}
 
 			if (this._player == null) {
+				debug("Clearing player data in accounts service");
+
 				/* Clear it */
 				this.proxy.player_name = "";
 				this.proxy.timestamp = 0;
