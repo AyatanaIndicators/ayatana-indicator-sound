@@ -1,3 +1,20 @@
+indicator-sound (12.10.2+14.04.20140320-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * Scale volume in notifications when allow-amplified-volume is set
+    (LP: #1293163)
+  * Use audio-volume-mute-blocking-panel instead of *-blocked-panel
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 20 Mar 2014 08:58:30 +0000
+
+indicator-sound (12.10.2+14.04.20140318-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * Show a red icon in the panel when a sound is playing while mute is
+    on (LP: #1291530)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 18 Mar 2014 10:01:01 +0000
+
 indicator-sound (12.10.2+14.04.20140313-0ubuntu1) trusty; urgency=low
 
   [ Lars Uebernickel ]

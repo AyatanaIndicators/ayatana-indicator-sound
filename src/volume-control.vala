@@ -31,6 +31,7 @@ public class VolumeControl : Object
 
 	private PulseAudio.Context context;
 	private bool   _mute = true;
+	private bool   _is_playing = false;
 	private double _volume = 0.0;
 	private double _mic_volume = 0.0;
 
@@ -95,6 +96,13 @@ public class VolumeControl : Object
 		{
 			_mute = (bool)i.mute;
 			this.notify_property ("mute");
+		}
+
+		var playing = (i.state == PulseAudio.SinkState.RUNNING);
+		if (_is_playing != playing)
+		{
+			_is_playing = playing;
+			this.notify_property ("is-playing");
 		}
 
 		if (_volume != volume_to_double (i.volume.values[0]))
@@ -232,6 +240,14 @@ public class VolumeControl : Object
 		get
 		{
 			return this._mute;
+		}
+	}
+
+	public bool is_playing
+	{
+		get
+		{
+			return this._is_playing;
 		}
 	}
 
