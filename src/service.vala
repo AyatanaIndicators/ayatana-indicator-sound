@@ -110,6 +110,10 @@ public class IndicatorSound.Service: Object {
 
 		this.loop.run ();
 
+		/* Ensure we clear the player right after the mainloop quits */
+		if (this.accounts_service != null)
+			this.accounts_service.player = null;
+
 		return 0;
 	}
 
