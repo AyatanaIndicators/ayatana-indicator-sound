@@ -133,6 +133,8 @@ public class IndicatorSound.Service: Object {
 	VolumeControl volume_control;
 	MediaPlayerList players;
 	uint player_action_update_id;
+	bool mute_blocks_sound;
+	uint sound_was_blocked_timeout_id;
 	Notify.Notification notification;
 	bool syncing_preferred_players = false;
 	AccountsServiceUser? accounts_service = null;
@@ -162,7 +164,7 @@ public class IndicatorSound.Service: Object {
 				icon = "notification-audio-volume-high";
 
 			this.notification.update ("indicator-sound", "", icon);
-			this.notification.set_hint_int32 ("value", ((int32) (100 * v)).clamp (-1, 101));
+			this.notification.set_hint_int32 ("value", ((int32) (100 * v / this.max_volume)).clamp (-1, 101));
 			try {
 				this.notification.show ();
 			}
@@ -207,7 +209,7 @@ public class IndicatorSound.Service: Object {
 		double volume = this.volume_control.get_volume ();
 		string icon;
 		if (this.volume_control.mute)
-			icon = "audio-volume-muted-panel";
+			icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
 		else if (volume <= 0.0)
 			icon = "audio-volume-low-zero-panel";
 		else if (volume <= 0.3)
@@ -247,6 +249,31 @@ public class IndicatorSound.Service: Object {
 
 		this.volume_control.notify["mute"].connect ( () => {
 			mute_action.set_state (new Variant.boolean (this.volume_control.mute));
+			this.update_root_icon ();
+		});
+
+		this.volume_control.notify["is-playing"].connect( () => {
+			if (!this.volume_control.mute) {
+				this.mute_blocks_sound = false;
+				return;
+			}
+
+			if (this.volume_control.is_playing) {
+				this.mute_blocks_sound = true;
+			}
+			else if (this.mute_blocks_sound) {
+				/* Continue to show the blocking icon five seconds after a player has tried to play something */
+				if (this.sound_was_blocked_timeout_id > 0)
+					Source.remove (this.sound_was_blocked_timeout_id);
+
+				this.sound_was_blocked_timeout_id = Timeout.add_seconds (5, () => {
+					this.mute_blocks_sound = false;
+					this.sound_was_blocked_timeout_id = 0;
+					this.update_root_icon ();
+					return false;
+				});
+			}
+
 			this.update_root_icon ();
 		});
 
