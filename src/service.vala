@@ -80,6 +80,8 @@ public class IndicatorSound.Service: Object {
 		}
 
 		this.accounts_service = new AccountsServiceUser();
+
+		this.eventually_update_player_actions();
 	}
 
 	public int run () {
