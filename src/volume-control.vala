@@ -56,6 +56,7 @@ public class VolumeControl : Object
 	{
 		if (_reconnect_timer != 0) {
 			Source.remove (_reconnect_timer);
+			_reconnect_timer = 0;
 		}
 	}
 
