@@ -67,8 +67,10 @@ public class IndicatorSound.Service: Object {
 	}
 
 	~Service() {
-		if (this.sound_was_blocked_timeout_id > 0)
+		if (this.sound_was_blocked_timeout_id > 0) {
 			Source.remove (this.sound_was_blocked_timeout_id);
+			this.sound_was_blocked_timeout_id = 0;
+		}
 	}
 
 	void build_accountsservice () {
