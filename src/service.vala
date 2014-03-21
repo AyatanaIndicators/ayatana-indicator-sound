@@ -67,11 +67,7 @@ public class IndicatorSound.Service: Object {
 	}
 
 	void build_accountsservice () {
-		/* NOTE: This is a bit of a hack to ensure that accounts service doesn't
-		   continue to export the player by keeping a ref in the timer */
-		if (this.accounts_service != null)
-			this.accounts_service.player = null;
-
+		clear_acts_player();
 		this.accounts_service = null;
 
 		/* If we're not exporting, don't build anything */
@@ -89,6 +85,13 @@ public class IndicatorSound.Service: Object {
 		this.accounts_service = new AccountsServiceUser();
 
 		this.eventually_update_player_actions();
+	}
+
+	void clear_acts_player () {
+		/* NOTE: This is a bit of a hack to ensure that accounts service doesn't
+		   continue to export the player by keeping a ref in the timer */
+		if (this.accounts_service != null)
+			this.accounts_service.player = null;
 	}
 
 	public int run () {
@@ -110,9 +113,7 @@ public class IndicatorSound.Service: Object {
 
 		this.loop.run ();
 
-		/* Ensure we clear the player right after the mainloop quits */
-		if (this.accounts_service != null)
-			this.accounts_service.player = null;
+		clear_acts_player();
 
 		return 0;
 	}
@@ -400,9 +401,8 @@ public class IndicatorSound.Service: Object {
 			}
 		}
 
-		if (clear_accounts_player && accounts_service != null) {
-			accounts_service.player = null;
-		}
+		if (clear_accounts_player)
+			clear_acts_player();
 
 		this.player_action_update_id = 0;
 		return false;
