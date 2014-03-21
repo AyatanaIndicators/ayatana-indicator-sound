@@ -66,6 +66,11 @@ public class IndicatorSound.Service: Object {
 		sharedsettings.bind ("allow-amplified-volume", this, "allow-amplified-volume", SettingsBindFlags.GET);
 	}
 
+	~Service() {
+		if (this.sound_was_blocked_timeout_id > 0)
+			Source.remove (this.sound_was_blocked_timeout_id);
+	}
+
 	void build_accountsservice () {
 		clear_acts_player();
 		this.accounts_service = null;
