@@ -42,9 +42,18 @@ public class AccountsServiceUser : Object {
 			}
 
 			if (this._player == null) {
+				debug("Clearing player data in accounts service");
+
 				/* Clear it */
 				this.proxy.player_name = "";
 				this.proxy.timestamp = 0;
+				this.proxy.title = "";
+				this.proxy.artist = "";
+				this.proxy.album = "";
+				this.proxy.art_url = "";
+
+				var icon = new ThemedIcon.with_default_fallbacks ("application-default-icon");
+				this.proxy.player_icon = icon.serialize();
 			} else {
 				this.proxy.timestamp = GLib.get_monotonic_time();
 				this.proxy.player_name = this._player.name;
@@ -84,11 +93,16 @@ public class AccountsServiceUser : Object {
 
 	public AccountsServiceUser () {
 		user = accounts_manager.get_user(GLib.Environment.get_user_name());
-		user.notify["is-loaded"].connect(() => {
-			debug("User loaded");
+		user.notify["is-loaded"].connect(() => user_loaded_changed());
+		user_loaded_changed();
+	}
 
-			this.proxy = null;
+	void user_loaded_changed () {
+		debug("User loaded changed");
 
+		this.proxy = null;
+
+		if (this.user.is_loaded) {
 			Bus.get_proxy.begin<AccountsServiceSoundSettings> (
 				BusType.SYSTEM,
 				"org.freedesktop.Accounts",
@@ -96,10 +110,11 @@ public class AccountsServiceUser : Object {
 				DBusProxyFlags.GET_INVALIDATED_PROPERTIES,
 				null,
 				new_proxy);
-		});
+		}
 	}
 
 	~AccountsServiceUser () {
+		debug("Account Service Object Finalizing");
 		this.player = null;
 
 		if (this.timer != 0) {

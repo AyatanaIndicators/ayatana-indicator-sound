@@ -67,20 +67,39 @@ public class IndicatorSound.Service: Object {
 		sharedsettings.bind ("allow-amplified-volume", this, "allow-amplified-volume", SettingsBindFlags.GET);
 	}
 
+	~Service() {
+		if (this.sound_was_blocked_timeout_id > 0) {
+			Source.remove (this.sound_was_blocked_timeout_id);
+			this.sound_was_blocked_timeout_id = 0;
+		}
+	}
+
 	void build_accountsservice () {
+		clear_acts_player();
 		this.accounts_service = null;
 
 		/* If we're not exporting, don't build anything */
 		if (!this.settings.get_boolean("greeter-export")) {
+			debug("Accounts service export disabled due to user setting");
 			return;
 		}
 
 		/* If we're on the greeter, don't export */
 		if (GLib.Environment.get_user_name() == "lightdm") {
+			debug("Accounts service export disabled due to being used on the greeter");
 			return;
 		}
 
 		this.accounts_service = new AccountsServiceUser();
+
+		this.eventually_update_player_actions();
+	}
+
+	void clear_acts_player () {
+		/* NOTE: This is a bit of a hack to ensure that accounts service doesn't
+		   continue to export the player by keeping a ref in the timer */
+		if (this.accounts_service != null)
+			this.accounts_service.player = null;
 	}
 
 	public int run () {
@@ -93,7 +112,16 @@ public class IndicatorSound.Service: Object {
 			this.bus_acquired, null, this.name_lost);
 
 		this.loop = new MainLoop (null, false);
+
+		GLib.Unix.signal_add(GLib.ProcessSignal.TERM, () => {
+			debug("SIGTERM recieved, stopping our mainloop");
+			this.loop.quit();
+			return false;
+		});
+
 		this.loop.run ();
+
+		clear_acts_player();
 
 		return 0;
 	}
@@ -381,9 +409,8 @@ public class IndicatorSound.Service: Object {
 			}
 		}
 
-		if (clear_accounts_player && accounts_service != null) {
-			accounts_service.player = null;
-		}
+		if (clear_accounts_player)
+			clear_acts_player();
 
 		this.player_action_update_id = 0;
 		return false;
