@@ -1,4 +1,5 @@
 /*
+ * -*- Mode:Vala; indent-tabs-mode:t; tab-width:4; encoding:utf8 -*-
  * Copyright 2013 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,6 +23,13 @@ using PulseAudio;
 [CCode(cname="pa_cvolume_set", cheader_filename = "pulse/volume.h")]
 extern unowned PulseAudio.CVolume? vol_set (PulseAudio.CVolume? cv, uint channels, PulseAudio.Volume v);
 
+[DBus (name="com.canonical.UnityGreeter.List")]
+interface GreeterListInterface : Object
+{
+    public abstract async string get_active_entry () throws IOError;
+    public signal void entry_selected (string entry_name);
+}
+
 public class VolumeControl : Object
 {
 	/* this is static to ensure it being freed after @context (loop does not have ref counting) */
@@ -34,6 +42,11 @@ public class VolumeControl : Object
 	private bool   _is_playing = false;
 	private double _volume = 0.0;
 	private double _mic_volume = 0.0;
+
+	private DBusProxy _user_proxy;
+	private GreeterListInterface _greeter_proxy;
+	private Cancellable _mute_cancellable;
+	private Cancellable _volume_cancellable;
 
 	public signal void volume_changed (double v);
 	public signal void mic_volume_changed (double v);
@@ -48,6 +61,10 @@ public class VolumeControl : Object
 	{
 		if (loop == null)
 			loop = new PulseAudio.GLibMainLoop ();
+
+		_mute_cancellable = new Cancellable ();
+		_volume_cancellable = new Cancellable ();
+		setup_accountsservice.begin ();
 
 		this.reconnect_to_pulse ();
 	}
@@ -220,14 +237,25 @@ public class VolumeControl : Object
 	}
 
 	/* Mute operations */
+	bool set_mute_internal (bool mute)
+	{
+		return_val_if_fail (context.get_state () == Context.State.READY, false);
+
+		if (_mute != mute) {
+			if (mute)
+				context.get_sink_info_list (sink_info_list_callback_set_mute);
+			else
+				context.get_sink_info_list (sink_info_list_callback_unset_mute);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	public void set_mute (bool mute)
 	{
-		return_if_fail (context.get_state () == Context.State.READY);
-
-		if (mute)
-			context.get_sink_info_list (sink_info_list_callback_set_mute);
-		else
-			context.get_sink_info_list (sink_info_list_callback_unset_mute);
+		if (set_mute_internal (mute))
+			sync_mute_to_accountsservice.begin (mute);
 	}
 
 	public void toggle_mute ()
@@ -290,13 +318,23 @@ public class VolumeControl : Object
 		context.get_sink_info_by_name (i.default_sink_name, sink_info_set_volume_cb);
 	}
 
+	bool set_volume_internal (double volume)
+	{
+		return_val_if_fail (context.get_state () == Context.State.READY, false);
+
+		if (_volume != volume) {
+			_volume = volume;
+			context.get_server_info (server_info_cb_for_set_volume);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	public void set_volume (double volume)
 	{
-		return_if_fail (context.get_state () == Context.State.READY);
-
-		_volume = volume;
-
-		context.get_server_info (server_info_cb_for_set_volume);
+		if (set_volume_internal (volume))
+			sync_volume_to_accountsservice.begin (volume);
 	}
 
 	void set_mic_volume_success_cb (Context c, int success)
@@ -330,5 +368,122 @@ public class VolumeControl : Object
 	public double get_mic_volume ()
 	{
 		return _mic_volume;
+	}
+
+	/* AccountsService operations */
+	private void accountsservice_props_changed_cb (DBusProxy proxy, Variant changed_properties, string[] invalidated_properties)
+	{
+		Variant volume_variant = changed_properties.lookup_value ("Volume", new VariantType ("d"));
+		if (volume_variant != null) {
+			var volume = volume_variant.get_double ();
+			if (volume >= 0)
+				set_volume_internal (volume);
+		}
+
+		Variant mute_variant = changed_properties.lookup_value ("Muted", new VariantType ("b"));
+		if (mute_variant != null) {
+			var mute = mute_variant.get_boolean ();
+			set_mute_internal (mute);
+		}
+	}
+
+	private async void setup_user_proxy (string? username_in = null)
+	{
+		var username = username_in;
+		_user_proxy = null;
+
+		// Look up currently selected greeter user, if asked
+		if (username == null) {
+			try {
+				username = yield _greeter_proxy.get_active_entry ();
+				if (username == "" || username == null)
+					return;
+			} catch (GLib.Error e) {
+				warning ("unable to find Accounts path for user %s: %s", username, e.message);
+				return;
+			}
+		}
+
+		// Get master AccountsService object
+		DBusProxy accounts_proxy;
+		try {
+			accounts_proxy = yield DBusProxy.create_for_bus (BusType.SYSTEM, DBusProxyFlags.DO_NOT_LOAD_PROPERTIES | DBusProxyFlags.DO_NOT_CONNECT_SIGNALS, null, "org.freedesktop.Accounts", "/org/freedesktop/Accounts", "org.freedesktop.Accounts");
+		} catch (GLib.Error e) {
+			warning ("unable to get greeter proxy: %s", e.message);
+			return;
+		}
+
+		// Find user's AccountsService object
+		try {
+			var user_path_variant = yield accounts_proxy.call ("FindUserByName", new Variant ("(s)", username), DBusCallFlags.NONE, -1);
+			string user_path;
+			user_path_variant.get ("(o)", out user_path);
+			_user_proxy = yield DBusProxy.create_for_bus (BusType.SYSTEM, DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, "org.freedesktop.Accounts", user_path, "com.ubuntu.AccountsService.Sound");
+		} catch (GLib.Error e) {
+			warning ("unable to find Accounts path for user %s: %s", username, e.message);
+			return;
+		}
+
+		// Get current values and listen for changes
+		_user_proxy.g_properties_changed.connect (accountsservice_props_changed_cb);
+		var props_variant = yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "GetAll", new Variant ("(s)", _user_proxy.get_interface_name ()), null, DBusCallFlags.NONE, -1);
+		Variant props;
+		props_variant.get ("(@a{sv})", out props);
+		accountsservice_props_changed_cb(_user_proxy, props, null);
+	}
+
+	private void greeter_user_changed (string username)
+	{
+		setup_user_proxy.begin (username);
+	}
+
+	private async void setup_accountsservice ()
+	{
+		if (Environment.get_variable ("XDG_SESSION_CLASS") == "greeter") {
+			try {
+				_greeter_proxy = yield Bus.get_proxy (BusType.SESSION, "com.canonical.UnityGreeter", "/list");
+			} catch (GLib.Error e) {
+				warning ("unable to get greeter proxy: %s", e.message);
+				return;
+			}
+			_greeter_proxy.entry_selected.connect (greeter_user_changed);
+			yield setup_user_proxy ();
+		} else {
+			// We are in a user session.  We just need our own proxy
+			var username = Environment.get_variable ("USER");
+			if (username != "" && username != null) {
+				yield setup_user_proxy (username);
+			}
+		}
+	}
+
+	private async void sync_mute_to_accountsservice (bool mute)
+	{
+		if (_user_proxy == null)
+			return;
+
+		_mute_cancellable.cancel ();
+		_mute_cancellable.reset ();
+
+		try {
+			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Muted", new Variant ("b", mute)), null, DBusCallFlags.NONE, -1, _mute_cancellable);
+		} catch (GLib.Error e) {
+			warning ("unable to sync mute to AccountsService: %s", e.message);
+		}
+	}
+
+	private async void sync_volume_to_accountsservice (double volume)
+	{
+		if (_user_proxy == null)
+			return;
+
+		_volume_cancellable.cancel ();
+		_volume_cancellable.reset ();
+
+		try {
+			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Volume", new Variant ("d", volume)), null, DBusCallFlags.NONE, -1, _volume_cancellable);
+		} catch (GLib.Error e) {
+			warning ("unable to sync volume to AccountsService: %s", e.message);
+		}
 	}
 }
