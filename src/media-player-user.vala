@@ -22,6 +22,7 @@ public class MediaPlayerUser : MediaPlayer {
 	string username;
 	Act.User? actuser = null;
 	AccountsServiceSoundSettings? proxy = null;
+	GreeterBroadcast? greeter = null;
 
 	HashTable<string, bool> properties_queued = new HashTable<string, bool>(str_hash, str_equal);
 	uint properties_timeout = 0;
@@ -45,6 +46,14 @@ public class MediaPlayerUser : MediaPlayer {
 				null,
 				new_proxy);
 		});
+
+		Bus.get_proxy.begin<GreeterBroadcast> (
+			BusType.SYSTEM,
+			"com.canonical.Unity.Greeter.Broadcast",
+			"/com/canonical/Unity/Greeter/Broadcast",
+			DBusProxyFlags.NONE,
+			null,
+			greeter_proxy_new);
 	}
 
 	~MediaPlayerUser () {
@@ -152,6 +161,7 @@ public class MediaPlayerUser : MediaPlayer {
 		get {
 			if (proxy_is_valid()) {
 				name_cache = this.proxy.player_name;
+				debug("Player Name: %s", name_cache);
 				return name_cache;
 			} else {
 				return "";
@@ -163,6 +173,7 @@ public class MediaPlayerUser : MediaPlayer {
 		get {
 			if (proxy_is_valid()) {
 				state_cache = this.proxy.state;
+				debug("State: %s", state_cache);
 				return state_cache;
 			} else {
 				return "";
@@ -209,18 +220,63 @@ public class MediaPlayerUser : MediaPlayer {
 		set { }
 	}
 
+	void greeter_proxy_new (GLib.Object? obj, AsyncResult res) {
+		try {
+			this.greeter = Bus.get_proxy.end (res);
+		} catch (Error e) {
+			this.greeter = null;
+			warning("Unable to get greeter proxy: %s", e.message);
+		}
+	}
+
 	/* Control functions through unity-greeter-session-broadcast */
 	public override void activate () {
 		/* TODO: */
 	}
 	public override void play_pause () {
-		/* TODO: */
+		debug("Play Pause for user: %s", this.username);
+
+		if (this.greeter != null) {
+			this.greeter.RequestSoundPlayPause.begin(this.username, (obj, res) => {
+				try {
+					(obj as GreeterBroadcast).RequestSoundPlayPause.end(res);
+				} catch (Error e) {
+					warning("Unable to send play pause: %s", e.message);
+				}
+			});
+		} else {
+			warning("No unity-greeter-session-broadcast to send play-pause");
+		}
 	}
 	public override void next () {
-		/* TODO: */
+		debug("Next for user: %s", this.username);
+
+		if (this.greeter != null) {
+			this.greeter.RequestSoundNext.begin(this.username, (obj, res) => {
+				try {
+					(obj as GreeterBroadcast).RequestSoundNext.end(res);
+				} catch (Error e) {
+					warning("Unable to send next: %s", e.message);
+				}
+			});
+		} else {
+			warning("No unity-greeter-session-broadcast to send next");
+		}
 	}
 	public override void previous () {
-		/* TODO: */
+		debug("Previous for user: %s", this.username);
+
+		if (this.greeter != null) {
+			this.greeter.RequestSoundPrev.begin(this.username, (obj, res) => {
+				try {
+					(obj as GreeterBroadcast).RequestSoundPrev.end(res);
+				} catch (Error e) {
+					warning("Unable to send previous: %s", e.message);
+				}
+			});
+		} else {
+			warning("No unity-greeter-session-broadcast to send previous");
+		}
 	}
 
 	/* Play list functions are all null as we don't support the

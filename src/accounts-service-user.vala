@@ -23,6 +23,7 @@ public class AccountsServiceUser : Object {
 	AccountsServiceSoundSettings? proxy = null;
 	uint timer = 0;
 	MediaPlayer? _player = null;
+	GreeterBroadcast? greeter = null;
 
 	public MediaPlayer? player {
 		set {
@@ -95,6 +96,14 @@ public class AccountsServiceUser : Object {
 		user = accounts_manager.get_user(GLib.Environment.get_user_name());
 		user.notify["is-loaded"].connect(() => user_loaded_changed());
 		user_loaded_changed();
+
+		Bus.get_proxy.begin<GreeterBroadcast> (
+			BusType.SYSTEM,
+			"com.canonical.Unity.Greeter.Broadcast",
+			"/com/canonical/Unity/Greeter/Broadcast",
+			DBusProxyFlags.NONE,
+			null,
+			greeter_proxy_new);
 	}
 
 	void user_loaded_changed () {
@@ -130,6 +139,39 @@ public class AccountsServiceUser : Object {
 		} catch (Error e) {
 			this.proxy = null;
 			warning("Unable to get proxy to user sound settings: %s", e.message);
+		}
+	}
+
+	void greeter_proxy_new (GLib.Object? obj, AsyncResult res) {
+		try {
+			this.greeter = Bus.get_proxy.end (res);
+
+			this.greeter.SoundPlayPause.connect((username) => {
+				if (username != GLib.Environment.get_user_name())
+					return;
+				if (this._player == null)
+					return;
+				this._player.play_pause();
+			});
+
+			this.greeter.SoundNext.connect((username) => {
+				if (username != GLib.Environment.get_user_name())
+					return;
+				if (this._player == null)
+					return;
+				this._player.next();
+			});
+
+			this.greeter.SoundPrev.connect((username) => {
+				if (username != GLib.Environment.get_user_name())
+					return;
+				if (this._player == null)
+					return;
+				this._player.previous();
+			});
+		} catch (Error e) {
+			this.greeter = null;
+			warning("Unable to get greeter proxy: %s", e.message);
 		}
 	}
 }
