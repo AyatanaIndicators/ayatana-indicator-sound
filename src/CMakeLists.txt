@@ -60,11 +60,30 @@ vala_add(indicator-sound-service
     mpris2-interfaces
 )
 vala_add(indicator-sound-service
+  media-player-user.vala
+  DEPENDS
+    media-player
+	accounts-service-sound-settings
+)
+vala_add(indicator-sound-service
   media-player-list.vala
   DEPENDS
     media-player
+)
+vala_add(indicator-sound-service
+  media-player-list-mpris.vala
+  DEPENDS
+    media-player-list
+    media-player
     media-player-mpris
     mpris2-interfaces
+)
+vala_add(indicator-sound-service
+  media-player-list-greeter.vala
+  DEPENDS
+    media-player-list
+    media-player-user
+    media-player
 )
 vala_add(indicator-sound-service
   mpris2-interfaces.vala
@@ -76,7 +95,6 @@ vala_add(indicator-sound-service
   sound-menu.vala
   DEPENDS
     media-player
-    mpris2-interfaces
 )
 vala_add(indicator-sound-service
   accounts-service-user.vala

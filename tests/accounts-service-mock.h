@@ -22,6 +22,8 @@
 class AccountsServiceMock
 {
 		DbusTestDbusMock * mock = nullptr;
+		DbusTestDbusMockObject * soundobj = nullptr;
+		DbusTestDbusMockObject * userobj = nullptr;
 
 	public:
 		AccountsServiceMock () {
@@ -45,12 +47,12 @@ class AccountsServiceMock
 				"UncacheUser", G_VARIANT_TYPE_STRING, NULL,
 				"", NULL);
 
-			DbusTestDbusMockObject * userobj = dbus_test_dbus_mock_get_object(mock, "/user", "org.freedesktop.Accounts.User", NULL);
+			userobj = dbus_test_dbus_mock_get_object(mock, "/user", "org.freedesktop.Accounts.User", NULL);
 			dbus_test_dbus_mock_object_add_property(mock, userobj,
 				"UserName", G_VARIANT_TYPE_STRING,
 				g_variant_new_string(g_get_user_name()), NULL);
 
-			DbusTestDbusMockObject * soundobj = dbus_test_dbus_mock_get_object(mock, "/user", "com.canonical.indicator.sound.AccountsService", NULL);
+			soundobj = dbus_test_dbus_mock_get_object(mock, "/user", "com.canonical.indicator.sound.AccountsService", NULL);
 			dbus_test_dbus_mock_object_add_property(mock, soundobj,
 				"Timestamp", G_VARIANT_TYPE_UINT64,
 				g_variant_new_uint64(0), NULL);
@@ -81,10 +83,19 @@ class AccountsServiceMock
 		}
 
 		~AccountsServiceMock () {
+			g_debug("Destroying the Accounts Service Mock");
 			g_clear_object(&mock);
 		}
 
 		operator DbusTestTask* () {
 			return DBUS_TEST_TASK(mock);
+		}
+
+		operator DbusTestDbusMock* () {
+			return mock;
+		}
+
+		DbusTestDbusMockObject * get_sound () {
+			return soundobj;
 		}
 };

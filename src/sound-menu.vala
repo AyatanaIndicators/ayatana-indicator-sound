@@ -17,7 +17,7 @@
  *      Lars Uebernickel <lars.uebernickel@canonical.com>
  */
 
-class SoundMenu: Object
+public class SoundMenu: Object
 {
 	public enum DisplayFlags {
 		NONE = 0,
@@ -97,12 +97,13 @@ class SoundMenu: Object
 		this.update_playlists (player);
 
 		var handler_id = player.notify["is-running"].connect ( () => {
-			if (this.hide_inactive) {
-				if (player.is_running)
+			if (player.is_running)
+				if (this.find_player_section(player) == -1)
 					this.insert_player_section (player);
-				else
+			else
+				if (this.hide_inactive)
 					this.remove_player_section (player);
-			}
+
 			this.update_playlists (player);
 		});
 		this.notify_handlers.insert (player, handler_id);
@@ -112,11 +113,20 @@ class SoundMenu: Object
 
 	public void remove_player (MediaPlayer player) {
 		this.remove_player_section (player);
+
+		var id = this.notify_handlers.lookup(player);
+		if (id != 0) {
+			player.disconnect(id);
+		}
+
+		player.playlists_changed.disconnect (this.update_playlists);
+
+		/* this'll drop our ref to it */
 		this.notify_handlers.remove (player);
 	}
 
-	Menu root;
-	Menu menu;
+	public Menu root;
+	public Menu menu;
 	Menu volume_section;
 	bool mic_volume_shown;
 	bool settings_shown = false;
@@ -126,16 +136,20 @@ class SoundMenu: Object
 
 	/* returns the position in this.menu of the section that's associated with @player */
 	int find_player_section (MediaPlayer player) {
+		debug("Looking for player: %s", player.id);
 		string action_name = @"indicator.$(player.id)";
-		int n = this.menu.get_n_items () -1;
-		for (int i = 1; i < n; i++) {
+		int n = this.menu.get_n_items ();
+		for (int i = 0; i < n; i++) {
 			var section = this.menu.get_item_link (i, Menu.LINK_SECTION);
+			if (section == null) continue;
+
 			string action;
 			section.get_item_attribute (0, "action", "s", out action);
 			if (action == action_name)
 				return i;
 		}
 
+		debug("Unable to find section for player: %s", player.id);
 		return -1;
 	}
 
@@ -145,6 +159,8 @@ class SoundMenu: Object
 
 		var section = new Menu ();
 		Icon icon;
+
+		debug("Adding section for player: %s (%s)", player.id, player.is_running ? "running" : "not running");
 
 		icon = player.icon;
 		if (icon == null)
