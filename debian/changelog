@@ -1,3 +1,19 @@
+indicator-sound (12.10.2+14.04.20140324-0ubuntu1) trusty; urgency=low
+
+  [ Michael Terry ]
+  * Sync volume and mute settings with AccountsService. (LP: #840777)
+
+  [ Ted Gould ]
+  * Add an apport hook for debugging
+  * Synchronize process management across indicators
+  * Export currently running player to Accounts Service
+  * Create players on the phone greeter based on the accounts service
+    data
+  * Allow the phone greeter player to control the running player in the
+    session.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 24 Mar 2014 15:03:16 +0000
+
 indicator-sound (12.10.2+14.04.20140320-0ubuntu1) trusty; urgency=low
 
   [ Lars Uebernickel ]
