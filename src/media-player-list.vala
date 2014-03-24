@@ -24,24 +24,24 @@
 public class MediaPlayerList {
 
 	public MediaPlayerList () {
-		this._players = new HashTable<string, MediaPlayer> (str_hash, str_equal);
+		this._players = new HashTable<string, MediaPlayerMpris> (str_hash, str_equal);
 
 		BusWatcher.watch_namespace (BusType.SESSION, "org.mpris.MediaPlayer2", this.player_appeared, this.player_disappeared);
 	}
 
 	/* only valid while the list is not changed */
 	public class Iterator {
-		HashTableIter<string, MediaPlayer> iter;
+		HashTableIter<string, MediaPlayerMpris> iter;
 
 		public Iterator (MediaPlayerList list) {
-			this.iter = HashTableIter<string, MediaPlayer> (list._players);
+			this.iter = HashTableIter<string, MediaPlayerMpris> (list._players);
 		}
 
 		public MediaPlayer? next_value () {
-			MediaPlayer? player;
+			MediaPlayerMpris? player;
 
 			if (this.iter.next (null, out player))
-				return player;
+				return player as MediaPlayer;
 			else
 				return null;
 		}
@@ -54,9 +54,9 @@ public class MediaPlayerList {
 	/**
 	 * Adds the player associated with @desktop_id.  Does nothing if such a player already exists.
 	 */
-	MediaPlayer? insert (string desktop_id) {
+	MediaPlayerMpris? insert (string desktop_id) {
 		var id = desktop_id.has_suffix (".desktop") ? desktop_id : desktop_id + ".desktop";
-		MediaPlayer? player = this._players.lookup (id);
+		MediaPlayerMpris? player = this._players.lookup (id);
 
 		if (player == null) {
 			var appinfo = new DesktopAppInfo (id);
@@ -65,7 +65,7 @@ public class MediaPlayerList {
 				return null;
 			}
 
-			player = new MediaPlayer (appinfo);
+			player = new MediaPlayerMpris (appinfo);
 			this._players.insert (player.id, player);
 			this.player_added (player);
 		}
@@ -110,7 +110,7 @@ public class MediaPlayerList {
 	public signal void player_added (MediaPlayer player);
 	public signal void player_removed (MediaPlayer player);
 
-	HashTable<string, MediaPlayer> _players;
+	HashTable<string, MediaPlayerMpris> _players;
 
 	void player_appeared (DBusConnection connection, string name, string owner) {
 		try {
@@ -126,7 +126,7 @@ public class MediaPlayerList {
 	}
 
 	void player_disappeared (DBusConnection connection, string dbus_name) {
-		MediaPlayer? player = this._players.find ( (name, player) => {
+		MediaPlayerMpris? player = this._players.find ( (name, player) => {
 			return player.dbus_name == dbus_name;
 		});
 

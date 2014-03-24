@@ -10,6 +10,77 @@ add_library (gtest STATIC
              ${GTEST_SOURCE_DIR}/gtest_main.cc)
 target_link_libraries(gtest ${GTEST_LIBS})
 
+###########################
+# Vala Mocks
+###########################
+
+set(VALA_MOCKS_HEADER_PATH "${CMAKE_CURRENT_BINARY_DIR}/vala-mocks.h")
+set(VALA_MOCKS_SYMBOLS_PATH "${CMAKE_CURRENT_BINARY_DIR}/vala-mocks.def")
+
+vala_init(vala-mocks
+	DEPENDS
+		indicator-sound-service-lib
+	PACKAGES
+		config
+		gio-2.0
+		gio-unix-2.0
+		libxml-2.0
+		libpulse
+		libpulse-mainloop-glib
+		libnotify
+		accounts-service
+		indicator-sound-service
+	OPTIONS
+		--ccode
+		--thread
+		--vapidir=${CMAKE_BINARY_DIR}/src/
+		--vapidir=${CMAKE_SOURCE_DIR}/vapi/
+		--vapidir=.
+)
+
+vala_add(vala-mocks
+	media-player-mock.vala
+)
+
+vala_finish(vala-mocks
+	SOURCES
+		vala_mocks_VALA_SOURCES
+	OUTPUTS
+		vala_mocks_VALA_C
+	GENERATE_HEADER
+		${VALA_MOCKS_HEADER_PATH}
+	GENERATE_SYMBOLS
+		${VALA_MOCKS_SYMBOLS_PATH}
+)
+
+set_source_files_properties(
+	${vala_mocks_VALA_SOURCES}
+	PROPERTIES
+	HEADER_FILE_ONLY TRUE
+)
+
+set(
+	VALA_MOCKS_SOURCES
+	${vala_mocks_VALA_SOURCES}
+	${vala_mocks_VALA_C}
+	${VALA_MOCKS_SYMBOLS_PATH}
+)
+
+add_definitions(
+	-Wno-unused-but-set-variable
+)
+
+add_library(
+	vala-mocks-lib STATIC
+	${VALA_MOCKS_SOURCES}
+)
+
+target_link_libraries(
+	vala-mocks-lib
+	indicator-sound-service-lib
+)
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 ###########################
 # Name Watch Test
@@ -20,3 +91,26 @@ add_executable (name-watch-test name-watch-test.cc ${CMAKE_SOURCE_DIR}/src/bus-w
 target_link_libraries (name-watch-test gtest ${SOUNDSERVICE_LIBRARIES})
 add_test(name-watch-test name-watch-test)
 
+###########################
+# Accounts Service User
+###########################
+
+include_directories(${CMAKE_SOURCE_DIR}/src)
+add_executable (accounts-service-user-test accounts-service-user.cc)
+target_link_libraries (
+	accounts-service-user-test
+	indicator-sound-service-lib
+	vala-mocks-lib
+	gtest
+	${SOUNDSERVICE_LIBRARIES}
+	${TEST_LIBRARIES}
+)
+
+# Split tests to work around libaccountservice sucking
+add_test(accounts-service-user-test-basic
+	accounts-service-user-test  --gtest_filter=AccountsServiceUserTest.BasicObject
+)
+
+add_test(accounts-service-user-test-player
+	accounts-service-user-test  --gtest_filter=AccountsServiceUserTest.SetMediaPlayer
+)

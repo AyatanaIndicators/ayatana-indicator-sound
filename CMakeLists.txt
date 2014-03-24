@@ -40,10 +40,18 @@ pkg_check_modules(
   gee-1.0
   gio-2.0>=${GIO_2_0_REQUIRED_VERSION}
   gio-unix-2.0
+  gthread-2.0
   libxml-2.0
   libnotify
+  accountsservice
 )
 include_directories(${SOUNDSERVICE_INCLUDE_DIRS})
+
+pkg_check_modules(
+  TEST REQUIRED
+  dbustest-1
+)
+include_directories(${TEST_INCLUDE_DIRS})
 
 find_package(Vala 0.20)
 

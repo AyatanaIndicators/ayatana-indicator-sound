@@ -46,6 +46,10 @@ public class IndicatorSound.Service: Object {
 			this.volume_control.bind_property ("active-mic", menu, "show-mic-volume", BindingFlags.SYNC_CREATE);
 		});
 
+		/* Setup handling for the greeter-export setting */
+		this.settings.changed["greeter-export"].connect( () => this.build_accountsservice() );
+		build_accountsservice();
+
 		this.sync_preferred_players ();
 		this.settings.changed["interested-media-players"].connect ( () => {
 			this.sync_preferred_players ();
@@ -62,6 +66,41 @@ public class IndicatorSound.Service: Object {
 		sharedsettings.bind ("allow-amplified-volume", this, "allow-amplified-volume", SettingsBindFlags.GET);
 	}
 
+	~Service() {
+		if (this.sound_was_blocked_timeout_id > 0) {
+			Source.remove (this.sound_was_blocked_timeout_id);
+			this.sound_was_blocked_timeout_id = 0;
+		}
+	}
+
+	void build_accountsservice () {
+		clear_acts_player();
+		this.accounts_service = null;
+
+		/* If we're not exporting, don't build anything */
+		if (!this.settings.get_boolean("greeter-export")) {
+			debug("Accounts service export disabled due to user setting");
+			return;
+		}
+
+		/* If we're on the greeter, don't export */
+		if (GLib.Environment.get_user_name() == "lightdm") {
+			debug("Accounts service export disabled due to being used on the greeter");
+			return;
+		}
+
+		this.accounts_service = new AccountsServiceUser();
+
+		this.eventually_update_player_actions();
+	}
+
+	void clear_acts_player () {
+		/* NOTE: This is a bit of a hack to ensure that accounts service doesn't
+		   continue to export the player by keeping a ref in the timer */
+		if (this.accounts_service != null)
+			this.accounts_service.player = null;
+	}
+
 	public int run () {
 		if (this.loop != null) {
 			warning ("service is already running");
@@ -72,7 +111,16 @@ public class IndicatorSound.Service: Object {
 			this.bus_acquired, null, this.name_lost);
 
 		this.loop = new MainLoop (null, false);
+
+		GLib.Unix.signal_add(GLib.ProcessSignal.TERM, () => {
+			debug("SIGTERM recieved, stopping our mainloop");
+			this.loop.quit();
+			return false;
+		});
+
 		this.loop.run ();
+
+		clear_acts_player();
 
 		return 0;
 	}
@@ -117,6 +165,7 @@ public class IndicatorSound.Service: Object {
 	uint sound_was_blocked_timeout_id;
 	Notify.Notification notification;
 	bool syncing_preferred_players = false;
+	AccountsServiceUser? accounts_service = null;
 
 	/* Maximum volume as a scaling factor between the volume action's state and the value in
 	 * this.volume_control. See create_volume_action().
@@ -343,13 +392,24 @@ public class IndicatorSound.Service: Object {
 	}
 
 	bool update_player_actions () {
+		bool clear_accounts_player = true;
+
 		foreach (var player in this.players) {
 			SimpleAction? action = this.actions.lookup_action (player.id) as SimpleAction;
 			if (action != null) {
 				action.set_state (this.action_state_for_player (player));
 				action.set_enabled (player.can_raise);
 			}
+			
+			/* If we're playing then put that data in accounts service */
+			if (player.is_running && accounts_service != null) {
+				accounts_service.player = player;
+				clear_accounts_player = false;
+			}
 		}
+
+		if (clear_accounts_player)
+			clear_acts_player();
 
 		this.player_action_update_id = 0;
 		return false;
