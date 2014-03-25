@@ -177,4 +177,7 @@ target_link_libraries (
 add_test(greeter-list-test-basic
 	greeter-list-test  --gtest_filter=GreeterListTest.BasicObject
 )
+add_test(greeter-list-test-iterator
+	greeter-list-test  --gtest_filter=GreeterListTest.BasicIterator
+)
 

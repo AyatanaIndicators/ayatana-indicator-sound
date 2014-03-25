@@ -51,3 +51,18 @@ TEST_F(GreeterListTest, BasicObject) {
 	return;
 }
 
+TEST_F(GreeterListTest, BasicIterator) {
+	MediaPlayerListGreeter * list = media_player_list_greeter_new();
+	ASSERT_NE(nullptr, list);
+
+	MediaPlayerListGreeterIterator * iter = media_player_list_greeter_iterator_new(list);
+	ASSERT_NE(nullptr, iter);
+
+	MediaPlayer * player = media_player_list_iterator_next_value (MEDIA_PLAYER_LIST_ITERATOR(iter));
+	ASSERT_EQ(nullptr, player);
+
+	g_clear_object(&iter);
+	g_clear_object(&list);
+	return;
+}
+
