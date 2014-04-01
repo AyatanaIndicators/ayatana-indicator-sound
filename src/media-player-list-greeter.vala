@@ -31,7 +31,7 @@ public class MediaPlayerListGreeter : MediaPlayerList {
 	public MediaPlayerListGreeter () {
 		Bus.get_proxy.begin<UnityGreeterList> (
 			BusType.SESSION,
-			"com.canonical.Unity",
+			"com.canonical.UnityGreeter",
 			"/list",
 			DBusProxyFlags.NONE,
 			null,
