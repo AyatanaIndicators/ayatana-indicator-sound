@@ -158,3 +158,26 @@ add_test(media-player-user-test-timeout
 	media-player-user-test  --gtest_filter=MediaPlayerUserTest.TimeoutTest
 )
 
+###########################
+# Greeter List
+###########################
+
+include_directories(${CMAKE_SOURCE_DIR}/src)
+add_executable (greeter-list-test greeter-list.cc)
+target_link_libraries (
+	greeter-list-test
+	indicator-sound-service-lib
+	vala-mocks-lib
+	gtest
+	${SOUNDSERVICE_LIBRARIES}
+	${TEST_LIBRARIES}
+)
+
+# Split tests to work around libaccountservice sucking
+add_test(greeter-list-test-basic
+	greeter-list-test  --gtest_filter=GreeterListTest.BasicObject
+)
+add_test(greeter-list-test-iterator
+	greeter-list-test  --gtest_filter=GreeterListTest.BasicIterator
+)
+

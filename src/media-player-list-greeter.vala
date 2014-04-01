@@ -108,7 +108,7 @@ public class MediaPlayerListGreeter : MediaPlayerList {
 		public override MediaPlayer? next_value () {
 			MediaPlayer? retval = null;
 
-			if (i == 0) {
+			if (i == 0 && list.selected_user != null) {
 				retval = list.players.lookup(list.selected_user);
 			}
 			i++;
