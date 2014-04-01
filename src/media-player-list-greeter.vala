@@ -29,12 +29,9 @@ public class MediaPlayerListGreeter : MediaPlayerList {
 	HashTable<string, MediaPlayerUser> players = new HashTable<string, MediaPlayerUser>(str_hash, str_equal);
 
 	public MediaPlayerListGreeter () {
-		var bus_name = Environment.get_variable ("UNITY_GREETER_DBUS_NAME");
-		if (bus_name == null)
-			bus_name = "com.canonical.UnityGreeter";
 		Bus.get_proxy.begin<UnityGreeterList> (
 			BusType.SESSION,
-			bus_name,
+			"com.canonical.UnityGreeter",
 			"/list",
 			DBusProxyFlags.NONE,
 			null,

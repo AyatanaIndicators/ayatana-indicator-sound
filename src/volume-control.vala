@@ -441,11 +441,8 @@ public class VolumeControl : Object
 	private async void setup_accountsservice ()
 	{
 		if (Environment.get_variable ("XDG_SESSION_CLASS") == "greeter") {
-			var bus_name = Environment.get_variable ("UNITY_GREETER_DBUS_NAME");
-			if (bus_name == null)
-				bus_name = "com.canonical.UnityGreeter";
 			try {
-				_greeter_proxy = yield Bus.get_proxy (BusType.SESSION, bus_name, "/list");
+				_greeter_proxy = yield Bus.get_proxy (BusType.SESSION, "com.canonical.UnityGreeter", "/list");
 			} catch (GLib.Error e) {
 				warning ("unable to get greeter proxy: %s", e.message);
 				return;
