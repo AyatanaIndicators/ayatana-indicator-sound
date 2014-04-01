@@ -163,7 +163,7 @@ TEST_F(MediaPlayerUserTest, DataSet) {
 	GIcon * out_icon = media_player_get_icon(MEDIA_PLAYER(player));
 	EXPECT_NE(nullptr, out_icon);
 	EXPECT_TRUE(g_icon_equal(in_icon, out_icon));
-	g_clear_object(&out_icon);
+	// NOTE: No reference in 'out_icon' returned
 
 	MediaPlayerTrack * track = media_player_get_current_track(MEDIA_PLAYER(player));
 	EXPECT_NE(nullptr, track);
@@ -171,7 +171,7 @@ TEST_F(MediaPlayerUserTest, DataSet) {
 	EXPECT_STREQ("Bansky", media_player_track_get_artist(track));
 	EXPECT_STREQ("Vinyl is dead", media_player_track_get_album(track));
 	EXPECT_STREQ("http://art.url", media_player_track_get_art_url(track));
-	g_clear_object(&track);
+	// NOTE: No reference in 'track' returned
 
 	g_clear_object(&in_icon);
 	g_clear_object(&player);
