@@ -372,7 +372,7 @@ public class VolumeControl : Object
 	}
 
 	/* AccountsService operations */
-	private void accountsservice_props_changed_cb (DBusProxy proxy, Variant changed_properties, string[]? invalidated_properties)
+	private void accountsservice_props_changed_cb (DBusProxy proxy, Variant changed_properties, string[] invalidated_properties)
 	{
 		Variant volume_variant = changed_properties.lookup_value ("Volume", new VariantType ("d"));
 		if (volume_variant != null) {
