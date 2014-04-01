@@ -1,3 +1,20 @@
+indicator-sound (12.10.2+14.04.20140401-0ubuntu1) trusty; urgency=low
+
+  [ Michael Terry ]
+  * Use correct dbus name for Unity Greeter.
+
+  [ Ted Gould ]
+  * Don't unref the objects in the test
+  * Check the username has been gotten before using it. (LP: #1297078)
+  * Make unity-greeter-session-broadcast a suggests to avoid pulling it
+    into seeds
+  * Remove mute from the phone greeter
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 01 Apr 2014 23:21:06 +0000
+
 indicator-sound (12.10.2+14.04.20140324-0ubuntu1) trusty; urgency=low
 
   [ Michael Terry ]
