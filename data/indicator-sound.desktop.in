@@ -2,7 +2,7 @@
 Type=Application
 Name=Indicator Sound
 Exec=@CMAKE_INSTALL_FULL_LIBEXECDIR@/indicator-sound/indicator-sound-service
-OnlyShowIn=Unity;XFCE;GNOME;
+OnlyShowIn=Unity;XFCE;GNOME;Pantheon;
 NoDisplay=true
 StartupNotify=false
 Terminal=false
