@@ -62,7 +62,14 @@ public class AccountsServiceUser : Object {
 					var icon = new ThemedIcon.with_default_fallbacks ("application-default-icon");
 					this.proxy.player_icon = icon.serialize();
 				} else {
-					this.proxy.player_icon = this._player.icon.serialize();
+					var serialization = this._player.icon.serialize();
+
+					if (serialization == null) {
+						var icon = new ThemedIcon.with_default_fallbacks ("application-default-icon");
+						serialization = icon.serialize();
+					}
+
+					this.proxy.player_icon = serialization;
 				}
 
 				this.proxy.running = this._player.is_running;
