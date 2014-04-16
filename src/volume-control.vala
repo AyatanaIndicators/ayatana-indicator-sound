@@ -523,6 +523,7 @@ public class VolumeControl : Object
 			_send_next_local_volume = false;
 
 			sync_volume_to_accountsservice.begin (_volume);
+			return true; // G_SOURCE_CONTINUE
 		}
 		_local_volume_timer = 0;
 		return false; // G_SOURCE_REMOVE
