@@ -501,6 +501,9 @@ public class VolumeControl : Object
 	{
 		// perform a slow sync with the accounts service. max at 1 per second.
 
+		// stop the AS update timer, as since we're going to be setting the volume.
+		stop_account_service_volume_timer();
+
 		if (_local_volume_timer == 0) {
 			sync_volume_to_accountsservice.begin (_volume);
 			_local_volume_timer = Timeout.add_seconds (1, local_volume_changed_timeout);
@@ -532,7 +535,7 @@ public class VolumeControl : Object
 	private void start_account_service_volume_timer()
 	{
 		stop_account_service_volume_timer();
-		_accountservice_volume_timer = Timeout.add_seconds (2, accountservice_volume_changed_timeout);
+		_accountservice_volume_timer = Timeout.add_seconds (1, accountservice_volume_changed_timeout);
 	}
 
 	private void stop_account_service_volume_timer()
@@ -545,12 +548,8 @@ public class VolumeControl : Object
 
 	bool accountservice_volume_changed_timeout ()
 	{
-		// if the local value hasn't changed.
-		if (_local_volume_timer == 0) {
-			_accountservice_volume_timer = 0;
-			set_volume_internal (_account_service_volume);
-			return false; // G_SOURCE_REMOVE
-		}
-		return true; // G_SOURCE_CONTINUE
+		_accountservice_volume_timer = 0;
+		set_volume_internal (_account_service_volume);
+		return false; // G_SOURCE_REMOVE
 	}
 }
