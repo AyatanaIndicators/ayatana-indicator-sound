@@ -532,8 +532,15 @@ public class VolumeControl : Object
 
 	private void start_account_service_volume_timer()
 	{
-		stop_account_service_volume_timer();
-		_accountservice_volume_timer = Timeout.add_seconds (1, accountservice_volume_changed_timeout);
+		if (_accountservice_volume_timer == 0) {
+			// If we haven't been messing with local volume recently, apply immediately.
+			if (_local_volume_timer == 0 && !set_volume_internal (_account_service_volume)) {
+				return;
+			}
+			// Else check again in another second if needed.
+			// (if AS is throwing us lots of notifications, we update at most once a second)
+			_accountservice_volume_timer = Timeout.add_seconds (1, accountservice_volume_changed_timeout);
+		}
 	}
 
 	private void stop_account_service_volume_timer()
@@ -547,7 +554,7 @@ public class VolumeControl : Object
 	bool accountservice_volume_changed_timeout ()
 	{
 		_accountservice_volume_timer = 0;
-		set_volume_internal (_account_service_volume);
+		start_account_service_volume_timer ();
 		return false; // G_SOURCE_REMOVE
 	}
 }
