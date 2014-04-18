@@ -522,13 +522,11 @@ public class VolumeControl : Object
 
 	bool local_volume_changed_timeout()
 	{
-		if (_send_next_local_volume == true) {
-			_send_next_local_volume = false;
-
-			sync_volume_to_accountsservice.begin (_volume);
-			return true; // G_SOURCE_CONTINUE
-		}
 		_local_volume_timer = 0;
+		if (_send_next_local_volume) {
+			_send_next_local_volume = false;
+			start_local_volume_timer();
+		}
 		return false; // G_SOURCE_REMOVE
 	}
 
