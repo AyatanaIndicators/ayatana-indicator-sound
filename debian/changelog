@@ -1,3 +1,15 @@
+indicator-sound (12.10.2+14.10.20140509-0ubuntu1) utopic; urgency=low
+
+  [ Michael Terry ]
+  * Added timers to volume changes to settle frequent updates from
+    account services. (LP: #1306499)
+
+  [ Nick Dedekind ]
+  * Added timers to volume changes to settle frequent updates from
+    account services. (LP: #1306499)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 09 May 2014 14:43:21 +0000
+
 indicator-sound (12.10.2+14.04.20140401-0ubuntu1) trusty; urgency=low
 
   [ Michael Terry ]
