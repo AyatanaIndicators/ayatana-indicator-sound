@@ -47,6 +47,10 @@ public class VolumeControl : Object
 	private GreeterListInterface _greeter_proxy;
 	private Cancellable _mute_cancellable;
 	private Cancellable _volume_cancellable;
+	private uint _local_volume_timer = 0;
+	private uint _accountservice_volume_timer = 0;
+	private bool _send_next_local_volume = false;
+	private double _account_service_volume = 0.0;
 
 	public signal void volume_changed (double v);
 	public signal void mic_volume_changed (double v);
@@ -75,6 +79,8 @@ public class VolumeControl : Object
 			Source.remove (_reconnect_timer);
 			_reconnect_timer = 0;
 		}
+		stop_local_volume_timer();
+		stop_account_service_volume_timer();
 	}
 
 	/* PulseAudio logic*/
@@ -193,7 +199,7 @@ public class VolumeControl : Object
 					_reconnect_timer = Timeout.add_seconds (2, reconnect_timeout);
 				break;
 
-			default: 
+			default:
 				this.ready = false;
 				break;
 		}
@@ -335,7 +341,7 @@ public class VolumeControl : Object
 	public void set_volume (double volume)
 	{
 		if (set_volume_internal (volume))
-			sync_volume_to_accountsservice.begin (volume);
+			start_local_volume_timer();
 	}
 
 	void set_mic_volume_success_cb (Context c, int success)
@@ -377,8 +383,11 @@ public class VolumeControl : Object
 		Variant volume_variant = changed_properties.lookup_value ("Volume", new VariantType ("d"));
 		if (volume_variant != null) {
 			var volume = volume_variant.get_double ();
-			if (volume >= 0)
-				set_volume_internal (volume);
+			if (volume >= 0) {
+				_account_service_volume = volume;
+				// we need to wait for this to settle.
+				start_account_service_volume_timer();
+			}
 		}
 
 		Variant mute_variant = changed_properties.lookup_value ("Muted", new VariantType ("b"));
@@ -486,5 +495,66 @@ public class VolumeControl : Object
 		} catch (GLib.Error e) {
 			warning ("unable to sync volume to AccountsService: %s", e.message);
 		}
+	}
+
+	private void start_local_volume_timer()
+	{
+		// perform a slow sync with the accounts service. max at 1 per second.
+
+		// stop the AS update timer, as since we're going to be setting the volume.
+		stop_account_service_volume_timer();
+
+		if (_local_volume_timer == 0) {
+			sync_volume_to_accountsservice.begin (_volume);
+			_local_volume_timer = Timeout.add_seconds (1, local_volume_changed_timeout);
+		} else {
+			_send_next_local_volume = true;
+		}
+	}
+
+	private void stop_local_volume_timer()
+	{
+		if (_local_volume_timer != 0) {
+			Source.remove (_local_volume_timer);
+			_local_volume_timer = 0;
+		}
+	}
+
+	bool local_volume_changed_timeout()
+	{
+		_local_volume_timer = 0;
+		if (_send_next_local_volume) {
+			_send_next_local_volume = false;
+			start_local_volume_timer ();
+		}
+		return false; // G_SOURCE_REMOVE
+	}
+
+	private void start_account_service_volume_timer()
+	{
+		if (_accountservice_volume_timer == 0) {
+			// If we haven't been messing with local volume recently, apply immediately.
+			if (_local_volume_timer == 0 && !set_volume_internal (_account_service_volume)) {
+				return;
+			}
+			// Else check again in another second if needed.
+			// (if AS is throwing us lots of notifications, we update at most once a second)
+			_accountservice_volume_timer = Timeout.add_seconds (1, accountservice_volume_changed_timeout);
+		}
+	}
+
+	private void stop_account_service_volume_timer()
+	{
+		if (_accountservice_volume_timer != 0) {
+			Source.remove (_accountservice_volume_timer);
+			_accountservice_volume_timer = 0;
+		}
+	}
+
+	bool accountservice_volume_changed_timeout ()
+	{
+		_accountservice_volume_timer = 0;
+		start_account_service_volume_timer ();
+		return false; // G_SOURCE_REMOVE
 	}
 }
