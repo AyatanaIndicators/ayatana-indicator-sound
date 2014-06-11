@@ -1,3 +1,14 @@
+indicator-sound (12.10.2+14.10.20140611-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * Protect against icon serialization errors (LP: #1305902)
+
+  [ Sergey "Shnatsel" Davidoff ]
+  * Add Pantheon, the desktop environment of elementary Project, to
+    OnlyShowIn lists in .desktop files. (LP: #1301699)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 11 Jun 2014 17:25:52 +0000
+
 indicator-sound (12.10.2+14.10.20140509-0ubuntu1) utopic; urgency=low
 
   [ Michael Terry ]
