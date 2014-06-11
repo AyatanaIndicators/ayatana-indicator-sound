@@ -58,13 +58,19 @@ public class AccountsServiceUser : Object {
 			} else {
 				this.proxy.timestamp = GLib.get_monotonic_time();
 				this.proxy.player_name = this._player.name;
-				if (this._player.icon == null) {
-					var icon = new ThemedIcon.with_default_fallbacks ("application-default-icon");
-					this.proxy.player_icon = icon.serialize();
-				} else {
-					this.proxy.player_icon = this._player.icon.serialize();
-				}
 
+				/* Serialize the icon if it exits, if it doesn't or errors then
+				   we need to use the application default icon */
+				GLib.Variant? icon_serialization = null;
+				if (this._player.icon != null)
+					icon_serialization = this._player.icon.serialize();
+				if (icon_serialization == null) {
+					var icon = new ThemedIcon.with_default_fallbacks ("application-default-icon");
+					icon_serialization = icon.serialize();
+				}
+				this.proxy.player_icon = icon_serialization;
+
+				/* Set state of the player */
 				this.proxy.running = this._player.is_running;
 				this.proxy.state = this._player.state;
 
