@@ -35,7 +35,7 @@ public class SoundMenu: Object
 		this.volume_section = new Menu ();
 		if ((flags & DisplayFlags.SHOW_MUTE) != 0)
 			volume_section.append (_("Mute"), "indicator.mute");
-		volume_section.append_item (this.create_slider_menu_item ("indicator.volume(0)", 0.0, 1.0, 0.01,
+		volume_section.append_item (this.create_slider_menu_item ("Volume", "indicator.volume(0)", 0.0, 1.0, 0.01,
 																  "audio-volume-low-zero-panel",
 																  "audio-volume-high-panel"));
 
@@ -75,7 +75,7 @@ public class SoundMenu: Object
 		}
 		set {
 			if (value && !this.mic_volume_shown) {
-				var slider = this.create_slider_menu_item ("indicator.mic-volume", 0.0, 1.0, 0.01,
+				var slider = this.create_slider_menu_item ("Microphone Volume", "indicator.mic-volume", 0.0, 1.0, 0.01,
 														   "audio-input-microphone-low-zero-panel",
 														   "audio-input-microphone-high-panel");
 				volume_section.append_item (slider);
@@ -227,11 +227,11 @@ public class SoundMenu: Object
 		player_section.append_submenu (_("Choose Playlist"), submenu);
 	}
 
-	MenuItem create_slider_menu_item (string action, double min, double max, double step, string min_icon_name, string max_icon_name) {
+	MenuItem create_slider_menu_item (string label, string action, double min, double max, double step, string min_icon_name, string max_icon_name) {
 		var min_icon = new ThemedIcon.with_default_fallbacks (min_icon_name);
 		var max_icon = new ThemedIcon.with_default_fallbacks (max_icon_name);
 
-		var slider = new MenuItem (null, action);
+		var slider = new MenuItem (label, action);
 		slider.set_attribute ("x-canonical-type", "s", "com.canonical.unity.slider");
 		slider.set_attribute_value ("min-icon", min_icon.serialize ());
 		slider.set_attribute_value ("max-icon", max_icon.serialize ());
