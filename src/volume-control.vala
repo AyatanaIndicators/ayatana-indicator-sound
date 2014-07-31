@@ -19,6 +19,7 @@
  */
 
 using PulseAudio;
+using Notify;
 
 [CCode(cname="pa_cvolume_set", cheader_filename = "pulse/volume.h")]
 extern unowned PulseAudio.CVolume? vol_set (PulseAudio.CVolume? cv, uint channels, PulseAudio.Volume v);
@@ -51,6 +52,7 @@ public class VolumeControl : Object
 	private uint _accountservice_volume_timer = 0;
 	private bool _send_next_local_volume = false;
 	private double _account_service_volume = 0.0;
+	private Notify.Notification _notification;
 
 	public signal void volume_changed (double v);
 	public signal void mic_volume_changed (double v);
@@ -68,6 +70,13 @@ public class VolumeControl : Object
 
 		_mute_cancellable = new Cancellable ();
 		_volume_cancellable = new Cancellable ();
+
+		Notify.init ("Volume");
+		_notification = new Notify.Notification("Volume", "", "audio-volume-muted");
+		_notification.set_hint ("value", 0);
+		_notification.set_hint ("x-canonical-private-synchronous", "true");
+		_notification.set_hint ("x-canonical-non-shaped-icon", "true");
+
 		setup_accountsservice.begin ();
 
 		this.reconnect_to_pulse ();
@@ -301,8 +310,12 @@ public class VolumeControl : Object
 
 	private void set_volume_success_cb (Context c, int success)
 	{
-		if ((bool)success)
+		if ((bool)success) {
 			volume_changed (_volume);
+			_notification.update ("Volume", "", "audio-volume-medium");
+			_notification.set_hint ("value", _volume);
+			_notification.show ();			
+		}
 	}
 
 	private void sink_info_set_volume_cb (Context c, SinkInfo? i, int eol)
