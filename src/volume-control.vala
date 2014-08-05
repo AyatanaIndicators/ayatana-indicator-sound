@@ -310,12 +310,8 @@ public class VolumeControl : Object
 
 	private void set_volume_success_cb (Context c, int success)
 	{
-		if ((bool)success) {
+		if ((bool)success)
 			volume_changed (_volume);
-			_notification.update ("Volume", "", "audio-volume-medium");
-			_notification.set_hint ("value", _volume);
-			_notification.show ();			
-		}
 	}
 
 	private void sink_info_set_volume_cb (Context c, SinkInfo? i, int eol)
@@ -353,8 +349,20 @@ public class VolumeControl : Object
 
 	public void set_volume (double volume)
 	{
-		if (set_volume_internal (volume))
+		if (set_volume_internal (volume)) {
+			if (_volume == 0.0)
+				_notification.update ("Volume", "", "audio-volume-muted");
+			if (_volume > 0.0 && _volume <= 0.33)
+				_notification.update ("Volume", "", "audio-volume-low");
+			if (_volume > 0.33 && _volume <= 0.66)
+				_notification.update ("Volume", "", "audio-volume-medium");
+			if (_volume > 0.66 && _volume <= 1.0)
+				_notification.update ("Volume", "", "audio-volume-high");
+			_notification.set_hint ("value", _volume * 100.0);
+			_notification.show ();			
+
 			start_local_volume_timer();
+		}
 	}
 
 	void set_mic_volume_success_cb (Context c, int success)
