@@ -76,6 +76,7 @@ public class VolumeControl : Object
 		_notification.set_hint ("value", 0);
 		_notification.set_hint ("x-canonical-private-synchronous", "true");
 		_notification.set_hint ("x-canonical-non-shaped-icon", "true");
+		_notification.set_hint ("sound-file", "/usr/share/sounds/ubuntu/stereo/message.ogg");
 
 		setup_accountsservice.begin ();
 
