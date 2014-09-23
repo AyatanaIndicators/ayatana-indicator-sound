@@ -74,6 +74,10 @@ public class IndicatorSound.Service: Object {
 		}
 	}
 
+	bool greeter_show_track () {
+		return false;
+	}
+
 	void build_accountsservice () {
 		clear_acts_player();
 		this.accounts_service = null;
@@ -402,6 +406,12 @@ public class IndicatorSound.Service: Object {
 				action.set_enabled (player.can_raise);
 			}
 			
+			SimpleAction? greeter_action = this.actions.lookup_action (player.id + ".greeter") as SimpleAction;
+			if (greeter_action != null) {
+				greeter_action.set_state (this.action_state_for_player (player, greeter_show_track()));
+				greeter_action.set_enabled (player.can_raise);
+			}
+			
 			/* If we're playing then put that data in accounts service */
 			if (player.is_running && accounts_service != null) {
 				accounts_service.player = player;
@@ -445,6 +455,11 @@ public class IndicatorSound.Service: Object {
 		action.set_enabled (player.can_raise);
 		action.activate.connect ( () => { player.activate (); });
 		this.actions.add_action (action);
+
+		SimpleAction greeter_action = new SimpleAction.stateful (player.id + ".greeter", null, this.action_state_for_player (player, greeter_show_track()));
+		greeter_action.set_enabled (player.can_raise);
+		greeter_action.activate.connect ( () => { player.activate (); });
+		this.actions.add_action (greeter_action);
 
 		var play_action = new SimpleAction.stateful ("play." + player.id, null, player.state);
 		play_action.activate.connect ( () => player.play_pause () );
