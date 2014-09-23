@@ -206,7 +206,7 @@ public class VolumeControl : Object
 
 	private void update_active_sink_input (uint32 index)
 	{
-		if (index != _active_sink_input && (index == -1 || index in _sink_input_list)) {
+		if ((index == -1) || (index != _active_sink_input && index in _sink_input_list)) {
 			string sink_input_objp = _objp_role_alert;
 			if (index != -1)
 				sink_input_objp = _sink_input_hash.get (index);
@@ -256,7 +256,9 @@ public class VolumeControl : Object
 						_sink_input_hash.set (i.index, _objp_role_phone);
 						break;
 				}
-				if (_sink_input_hash.get (_active_sink_input) != _objp_role_phone)
+				/* Only switch the active sink input in case a phone one is not active */
+				if (_active_sink_input == -1 ||
+						_sink_input_hash.get (_active_sink_input) != _objp_role_phone)
 					update_active_sink_input (i.index);
 			}
 		}
@@ -290,11 +292,12 @@ public class VolumeControl : Object
 			return;
 
 		if (i.index in _sink_input_list) {
-			if (i.corked == 1)
-				remove_sink_input_from_list(i.index);
+			/* Phone stream is always corked, so handle it differently */
+			if (i.corked == 1 && _sink_input_hash.get (i.index) != _objp_role_phone)
+				remove_sink_input_from_list (i.index);
 		} else {
 			if (i.corked == 0)
-				add_sink_input_into_list(i);
+				add_sink_input_into_list (i);
 		}
 	}
 
@@ -368,7 +371,6 @@ public class VolumeControl : Object
 
 		if (context.connect(null, Context.Flags.NOFAIL, null) < 0)
 			warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(context.errno()));
-
 	}
 
 	void sink_info_list_callback_set_mute (PulseAudio.Context context, PulseAudio.SinkInfo? sink, int eol) {
@@ -592,8 +594,12 @@ public class VolumeControl : Object
 		_objp_role_phone = stream_restore_get_object_path ("sink-input-by-media-role:phone");
 
 		/* Only use stream restore if every used role is available */
-		if (_objp_role_multimedia != null && _objp_role_alert != null && _objp_role_alarm != null && _objp_role_phone != null)
+		if (_objp_role_multimedia != null && _objp_role_alert != null && _objp_role_alarm != null && _objp_role_phone != null) {
+			stdout.printf ("Using PulseAudio DBUS Stream Restore module\n");
+			/* Restore volume and update default entry */
+			update_active_sink_input (-1);
 			_pulse_use_stream_restore = true;
+		}
 	}
 
 	private string? stream_restore_get_object_path (string name) {
