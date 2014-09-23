@@ -103,10 +103,14 @@ vala_add(indicator-sound-service
     media-player
     mpris2-interfaces
     accounts-service-sound-settings
+    accounts-service-privacy-settings
     greeter-broadcast
 )
 vala_add(indicator-sound-service
   accounts-service-sound-settings.vala
+)
+vala_add(indicator-sound-service
+  accounts-service-privacy-settings.vala
 )
 vala_add(indicator-sound-service
   greeter-broadcast.vala
