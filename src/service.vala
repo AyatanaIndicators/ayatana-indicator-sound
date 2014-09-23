@@ -47,9 +47,11 @@ public class IndicatorSound.Service: Object {
 			this.volume_control.bind_property ("active-mic", menu, "show-mic-volume", BindingFlags.SYNC_CREATE);
 		});
 
-		/* Setup handling for the greeter-export setting */
-		this.settings.changed["greeter-export"].connect( () => this.build_accountsservice() );
-		build_accountsservice();
+		/* If we're on the greeter, don't export */
+		if (GLib.Environment.get_user_name() != "lightdm") {
+			this.accounts_service = new AccountsServiceUser();
+			/* TODO: Watch for setting */
+		}
 
 		this.sync_preferred_players ();
 		this.settings.changed["interested-media-players"].connect ( () => {
@@ -75,28 +77,7 @@ public class IndicatorSound.Service: Object {
 	}
 
 	bool greeter_show_track () {
-		return false;
-	}
-
-	void build_accountsservice () {
-		clear_acts_player();
-		this.accounts_service = null;
-
-		/* If we're not exporting, don't build anything */
-		if (!this.settings.get_boolean("greeter-export")) {
-			debug("Accounts service export disabled due to user setting");
-			return;
-		}
-
-		/* If we're on the greeter, don't export */
-		if (GLib.Environment.get_user_name() == "lightdm") {
-			debug("Accounts service export disabled due to being used on the greeter");
-			return;
-		}
-
-		this.accounts_service = new AccountsServiceUser();
-
-		this.eventually_update_player_actions();
+		return export_to_accounts_service;
 	}
 
 	void clear_acts_player () {
@@ -171,6 +152,7 @@ public class IndicatorSound.Service: Object {
 	Notify.Notification notification;
 	bool syncing_preferred_players = false;
 	AccountsServiceUser? accounts_service = null;
+	bool export_to_accounts_service = false;
 
 	/* Maximum volume as a scaling factor between the volume action's state and the value in
 	 * this.volume_control. See create_volume_action().
@@ -413,7 +395,7 @@ public class IndicatorSound.Service: Object {
 			}
 			
 			/* If we're playing then put that data in accounts service */
-			if (player.is_running && accounts_service != null) {
+			if (player.is_running && export_to_accounts_service && accounts_service != null) {
 				accounts_service.player = player;
 				clear_accounts_player = false;
 			}
