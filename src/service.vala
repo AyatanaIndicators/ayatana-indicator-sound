@@ -379,11 +379,11 @@ public class IndicatorSound.Service: Object {
 		this.loop.quit ();
 	}
 
-	Variant action_state_for_player (MediaPlayer player) {
+	Variant action_state_for_player (MediaPlayer player, bool show_track = true) {
 		var builder = new VariantBuilder (new VariantType ("a{sv}"));
 		builder.add ("{sv}", "running", new Variant ("b", player.is_running));
 		builder.add ("{sv}", "state", new Variant ("s", player.state));
-		if (player.current_track != null) {
+		if (player.current_track != null && show_track) {
 			builder.add ("{sv}", "title", new Variant ("s", player.current_track.title));
 			builder.add ("{sv}", "artist", new Variant ("s", player.current_track.artist));
 			builder.add ("{sv}", "album", new Variant ("s", player.current_track.album));
