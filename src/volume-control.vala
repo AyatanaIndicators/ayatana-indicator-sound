@@ -204,6 +204,33 @@ public class VolumeControl : Object
 		context.get_server_info (update_source_get_server_info_cb);
 	}
 
+    private DBusMessage pulse_dbus_filter (DBusConnection connection, owned DBusMessage message, bool incoming)
+    {
+		if (message.get_message_type () == DBusMessageType.SIGNAL) {
+			string active_role_objp = _objp_role_alert;
+			if (_active_sink_input != -1)
+				active_role_objp = _sink_input_hash.get (_active_sink_input);
+
+			if (message.get_path () == active_role_objp && message.get_member () == "VolumeUpdated") {
+				/* Extract volume and make sure it's not a side effect of us setting it */
+				Variant body = message.get_body ();
+				Variant varray = body.get_child_value (0);
+
+				uint32 type = 0, volume = 0;
+				VariantIter iter = varray.iterator ();
+				iter.next ("(uu)", &type, &volume);
+				PulseAudio.Volume cvolume = double_to_volume (_volume);
+				if (volume != cvolume) {
+					/* Someone else changed the volume for this role, reflect on the indicator */
+					_volume = volume_to_double (volume);
+					volume_changed (_volume);
+				}
+			}
+		}
+
+		return message;
+    }
+
 	private void update_active_sink_input (uint32 index)
 	{
 		if ((index == -1) || (index != _active_sink_input && index in _sink_input_list)) {
@@ -212,16 +239,14 @@ public class VolumeControl : Object
 				sink_input_objp = _sink_input_hash.get (index);
 			_active_sink_input = index;
 
-			uint32 type = 0;
-			uint32 volume = 0;
-
 			try {
 				var props_variant = _pconn.call_sync ("org.PulseAudio.Ext.StreamRestore1.RestoreEntry",
 						sink_input_objp, "org.freedesktop.DBus.Properties", "Get",
 						new Variant ("(ss)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume"),
 						null, DBusCallFlags.NONE, -1);
-				Variant? tmp = null;
+				Variant tmp;
 				props_variant.get ("(v)", out tmp);
+				uint32 type = 0, volume = 0;
 				VariantIter iter = tmp.iterator ();
 				iter.next ("(uu)", &type, &volume);
 
@@ -229,6 +254,19 @@ public class VolumeControl : Object
 				volume_changed (_volume);
 			} catch (GLib.Error e) {
 				warning ("unable to get volume for active role %s (%s)", sink_input_objp, e.message);
+			}
+
+			/* Listen for role volume changes from pulse itself (external clients) */
+			try {
+				var builder = new VariantBuilder (new VariantType ("ao"));
+				builder.add ("o", sink_input_objp);
+
+				_pconn.call_sync ("org.PulseAudio.Core1", "/org/pulseaudio/core1",
+						"org.PulseAudio.Core1", "ListenForSignal",
+						new Variant ("(sao)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry.VolumeUpdated", builder),
+						null, DBusCallFlags.NONE, -1);
+			} catch (GLib.Error e) {
+				warning ("unable to listen for pulseaudio dbus signals (%s)", e.message);
 			}
 		}
 	}
@@ -364,7 +402,7 @@ public class VolumeControl : Object
 		props.sets (Proplist.PROP_APPLICATION_ICON_NAME, "multimedia-volume-control");
 		props.sets (Proplist.PROP_APPLICATION_VERSION, "0.1");
 
-		reconnect_pulse_stream_restore ();
+		reconnect_pulse_dbus ();
 
 		this.context = new PulseAudio.Context (loop.get_api(), null, props);
 		this.context.set_state_callback (context_state_callback);
@@ -543,8 +581,8 @@ public class VolumeControl : Object
 		return _mic_volume;
 	}
 
-	/* PulseAudio Stream Restore logic */
-	private void reconnect_pulse_stream_restore ()
+	/* PulseAudio Dbus (Stream Restore) logic */
+	private void reconnect_pulse_dbus ()
 	{
 		unowned string pulse_dbus_server_env = Environment.get_variable ("PULSE_DBUS_SERVER");
 		string address;
@@ -585,6 +623,9 @@ public class VolumeControl : Object
 			/* If it fails, it means the dbus pulse extension is not available */
 			return;
 		}
+
+		/* For pulse dbus related events */
+		_pconn.add_filter (pulse_dbus_filter);
 
 		/* Check if the 4 currently supported media roles are already available in StreamRestore
 		 * Roles: multimedia, alert, alarm and phone */
