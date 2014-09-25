@@ -629,7 +629,6 @@ public class VolumeControl : Object
 
 		/* Check if the 4 currently supported media roles are already available in StreamRestore
 		 * Roles: multimedia, alert, alarm and phone */
-		/* TODO: Watch for change events in case someone else change the volume for a specific role */
 		_objp_role_multimedia = stream_restore_get_object_path ("sink-input-by-media-role:multimedia");
 		_objp_role_alert = stream_restore_get_object_path ("sink-input-by-media-role:alert");
 		_objp_role_alarm = stream_restore_get_object_path ("sink-input-by-media-role:alarm");
