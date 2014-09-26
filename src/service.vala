@@ -50,7 +50,13 @@ public class IndicatorSound.Service: Object {
 		/* If we're on the greeter, don't export */
 		if (GLib.Environment.get_user_name() != "lightdm") {
 			this.accounts_service = new AccountsServiceUser();
-			/* TODO: Watch for setting */
+
+			this.accounts_service.notify["showDataOnGreeter"].connect(() => {
+				this.export_to_accounts_service = this.accounts_service.showDataOnGreeter;
+				eventually_update_player_actions();
+			});
+
+			this.export_to_accounts_service = this.accounts_service.showDataOnGreeter;
 		}
 
 		this.sync_preferred_players ();
