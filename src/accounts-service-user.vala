@@ -21,9 +21,12 @@ public class AccountsServiceUser : Object {
 	Act.UserManager accounts_manager = Act.UserManager.get_default();
 	Act.User? user = null;
 	AccountsServiceSoundSettings? proxy = null;
+	AccountsServicePrivacySettings? privacyproxy = null;
 	uint timer = 0;
 	MediaPlayer? _player = null;
 	GreeterBroadcast? greeter = null;
+
+	public bool showDataOnGreeter = false;
 
 	public MediaPlayer? player {
 		set {
@@ -124,7 +127,15 @@ public class AccountsServiceUser : Object {
 				user.get_object_path(),
 				DBusProxyFlags.GET_INVALIDATED_PROPERTIES,
 				null,
-				new_proxy);
+				new_sound_proxy);
+
+			Bus.get_proxy.begin<AccountsServicePrivacySettings> (
+				BusType.SYSTEM,
+				"org.freedesktop.Accounts",
+				user.get_object_path(),
+				DBusProxyFlags.GET_INVALIDATED_PROPERTIES,
+				null,
+				new_privacy_proxy);
 		}
 	}
 
@@ -138,13 +149,31 @@ public class AccountsServiceUser : Object {
 		}
 	}
 
-	void new_proxy (GLib.Object? obj, AsyncResult res) {
+	void new_sound_proxy (GLib.Object? obj, AsyncResult res) {
 		try {
 			this.proxy = Bus.get_proxy.end (res);
 			this.player = _player;
 		} catch (Error e) {
 			this.proxy = null;
 			warning("Unable to get proxy to user sound settings: %s", e.message);
+		}
+	}
+
+	void new_privacy_proxy (GLib.Object? obj, AsyncResult res) {
+		try {
+			this.privacyproxy = Bus.get_proxy.end (res);
+
+			(this.privacyproxy as DBusProxy).g_properties_changed.connect((proxy, changed, invalid) => {
+				var welcomeval = changed.lookup("MessagesWelcomeScreen", "b", null);
+				if (welcomeval) {
+					this.showDataOnGreeter = welcomeval;
+				}
+			});
+
+			this.showDataOnGreeter = this.privacyproxy.messages_welcome_screen;
+		} catch (Error e) {
+			this.privacyproxy = null;
+			warning("Unable to get proxy to user privacy settings: %s", e.message);
 		}
 	}
 
