@@ -35,7 +35,7 @@ public class SoundMenu: Object
 		this.volume_section = new Menu ();
 		if ((flags & DisplayFlags.SHOW_MUTE) != 0)
 			volume_section.append (_("Mute"), "indicator.mute");
-		volume_section.append_item (this.create_slider_menu_item ("Volume", "indicator.volume(0)", 0.0, 1.0, 0.01,
+		volume_section.append_item (this.create_slider_menu_item (_("Volume"), "indicator.volume(0)", 0.0, 1.0, 0.01,
 																  "audio-volume-low-zero-panel",
 																  "audio-volume-high-panel"));
 
@@ -75,7 +75,7 @@ public class SoundMenu: Object
 		}
 		set {
 			if (value && !this.mic_volume_shown) {
-				var slider = this.create_slider_menu_item ("Microphone Volume", "indicator.mic-volume", 0.0, 1.0, 0.01,
+				var slider = this.create_slider_menu_item (_("Microphone Volume"), "indicator.mic-volume", 0.0, 1.0, 0.01,
 														   "audio-input-microphone-low-zero-panel",
 														   "audio-input-microphone-high-panel");
 				volume_section.append_item (slider);
