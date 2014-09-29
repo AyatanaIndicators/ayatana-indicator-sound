@@ -46,6 +46,8 @@ public class VolumeControl : Object
 
 	/* Used by the pulseaudio stream restore extension */
 	private DBusConnection _pconn;
+	/* Need both the list and hash so we can retrieve the last known sink-input after
+	 * releasing the current active one (restoring back to the previous known role) */
 	private Gee.ArrayList<uint32> _sink_input_list = new Gee.ArrayList<uint32> ();
 	private HashMap<uint32, string> _sink_input_hash = new HashMap<uint32, string> ();
 	private bool _pulse_use_stream_restore = false;
@@ -120,7 +122,7 @@ public class VolumeControl : Object
 						remove_sink_input_from_list (index);
 						break;
 					default:
-						stdout.printf ("Sink input event not known\n");
+						debug ("Sink input event not known.");
 						break;
 				}
 				break;
@@ -204,8 +206,8 @@ public class VolumeControl : Object
 		context.get_server_info (update_source_get_server_info_cb);
 	}
 
-    private DBusMessage pulse_dbus_filter (DBusConnection connection, owned DBusMessage message, bool incoming)
-    {
+	private DBusMessage pulse_dbus_filter (DBusConnection connection, owned DBusMessage message, bool incoming)
+	{
 		if (message.get_message_type () == DBusMessageType.SIGNAL) {
 			string active_role_objp = _objp_role_alert;
 			if (_active_sink_input != -1)
@@ -219,6 +221,8 @@ public class VolumeControl : Object
 				uint32 type = 0, volume = 0;
 				VariantIter iter = varray.iterator ();
 				iter.next ("(uu)", &type, &volume);
+				/* Here we need to compare integer values to avoid rounding issues, so just
+				 * using the volume values used by pulseaudio */
 				PulseAudio.Volume cvolume = double_to_volume (_volume);
 				if (volume != cvolume) {
 					/* Someone else changed the volume for this role, reflect on the indicator */
@@ -229,9 +233,9 @@ public class VolumeControl : Object
 		}
 
 		return message;
-    }
+	}
 
-	private void update_active_sink_input (uint32 index)
+	private async void update_active_sink_input (uint32 index)
 	{
 		if ((index == -1) || (index != _active_sink_input && index in _sink_input_list)) {
 			string sink_input_objp = _objp_role_alert;
@@ -239,8 +243,21 @@ public class VolumeControl : Object
 				sink_input_objp = _sink_input_hash.get (index);
 			_active_sink_input = index;
 
+			/* Listen for role volume changes from pulse itself (external clients) */
 			try {
-				var props_variant = _pconn.call_sync ("org.PulseAudio.Ext.StreamRestore1.RestoreEntry",
+				var builder = new VariantBuilder (new VariantType ("ao"));
+				builder.add ("o", sink_input_objp);
+
+				yield _pconn.call ("org.PulseAudio.Core1", "/org/pulseaudio/core1",
+						"org.PulseAudio.Core1", "ListenForSignal",
+						new Variant ("(sao)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry.VolumeUpdated", builder),
+						null, DBusCallFlags.NONE, -1);
+			} catch (GLib.Error e) {
+				warning ("unable to listen for pulseaudio dbus signals (%s)", e.message);
+			}
+
+			try {
+				var props_variant = yield _pconn.call ("org.PulseAudio.Ext.StreamRestore1.RestoreEntry",
 						sink_input_objp, "org.freedesktop.DBus.Properties", "Get",
 						new Variant ("(ss)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume"),
 						null, DBusCallFlags.NONE, -1);
@@ -255,49 +272,36 @@ public class VolumeControl : Object
 			} catch (GLib.Error e) {
 				warning ("unable to get volume for active role %s (%s)", sink_input_objp, e.message);
 			}
-
-			/* Listen for role volume changes from pulse itself (external clients) */
-			try {
-				var builder = new VariantBuilder (new VariantType ("ao"));
-				builder.add ("o", sink_input_objp);
-
-				_pconn.call_sync ("org.PulseAudio.Core1", "/org/pulseaudio/core1",
-						"org.PulseAudio.Core1", "ListenForSignal",
-						new Variant ("(sao)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry.VolumeUpdated", builder),
-						null, DBusCallFlags.NONE, -1);
-			} catch (GLib.Error e) {
-				warning ("unable to listen for pulseaudio dbus signals (%s)", e.message);
-			}
 		}
 	}
 
-	private void add_sink_input_into_list (SinkInputInfo i)
+	private void add_sink_input_into_list (SinkInputInfo sink_input)
 	{
 		/* We're only adding ones that are not corked and with a valid role */
-		var role = i.proplist.gets (PulseAudio.Proplist.PROP_MEDIA_ROLE);
+		var role = sink_input.proplist.gets (PulseAudio.Proplist.PROP_MEDIA_ROLE);
 
 		if (role != null && role in _valid_roles) {
-			if (i.corked == 0 || role == "phone") {
-				_sink_input_list.insert (0, i.index);
+			if (sink_input.corked == 0 || role == "phone") {
+				_sink_input_list.insert (0, sink_input.index);
 				switch (role)
 				{
 					case "multimedia":
-						_sink_input_hash.set (i.index, _objp_role_multimedia);
+						_sink_input_hash.set (sink_input.index, _objp_role_multimedia);
 						break;
 					case "alert":
-						_sink_input_hash.set (i.index, _objp_role_alert);
+						_sink_input_hash.set (sink_input.index, _objp_role_alert);
 						break;
 					case "alarm":
-						_sink_input_hash.set (i.index, _objp_role_alarm);
+						_sink_input_hash.set (sink_input.index, _objp_role_alarm);
 						break;
 					case "phone":
-						_sink_input_hash.set (i.index, _objp_role_phone);
+						_sink_input_hash.set (sink_input.index, _objp_role_phone);
 						break;
 				}
 				/* Only switch the active sink input in case a phone one is not active */
 				if (_active_sink_input == -1 ||
 						_sink_input_hash.get (_active_sink_input) != _objp_role_phone)
-					update_active_sink_input (i.index);
+					update_active_sink_input.begin (sink_input.index);
 			}
 		}
 	}
@@ -309,9 +313,9 @@ public class VolumeControl : Object
 			_sink_input_hash.unset (index);
 			if (index == _active_sink_input) {
 				if (_sink_input_list.size != 0)
-					update_active_sink_input (_sink_input_list.get (0));
+					update_active_sink_input.begin (_sink_input_list.get (0));
 				else
-					update_active_sink_input (-1);
+					update_active_sink_input.begin (-1);
 			}
 		}
 	}
@@ -503,11 +507,16 @@ public class VolumeControl : Object
 		context.get_sink_info_by_name (i.default_sink_name, sink_info_set_volume_cb);
 	}
 
+	/* This call can be async once we are sure we are not allowing multiple set volume calls
+	 * in sequence (with a minimal volume delta, not with steps), as this can cause issues
+	 * when handling the volume updated signal from PulseAudio (_volume can get set before
+	 * the signal from a previous set gets handled at pulse_dbus_filter, generating an extra
+	 * volume_updated signal) */
 	private void set_volume_active_role ()
 	{
 		string active_role_objp = _objp_role_alert;
 
-		if (_active_sink_input != -1)
+		if (_active_sink_input != -1 && _active_sink_input in _sink_input_list)
 			active_role_objp = _sink_input_hash.get (_active_sink_input);
 
 		try {
@@ -519,7 +528,6 @@ public class VolumeControl : Object
 					active_role_objp, "org.freedesktop.DBus.Properties", "Set",
 					new Variant ("(ssv)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume", volume),
 					null, DBusCallFlags.NONE, -1);
-
 			volume_changed (_volume);
 		} catch (GLib.Error e) {
 			warning ("unable to set volume for stream obj path %s (%s)", active_role_objp, e.message);
@@ -638,7 +646,7 @@ public class VolumeControl : Object
 		if (_objp_role_multimedia != null && _objp_role_alert != null && _objp_role_alarm != null && _objp_role_phone != null) {
 			stdout.printf ("Using PulseAudio DBUS Stream Restore module\n");
 			/* Restore volume and update default entry */
-			update_active_sink_input (-1);
+			update_active_sink_input.begin (-1);
 			_pulse_use_stream_restore = true;
 		}
 	}
