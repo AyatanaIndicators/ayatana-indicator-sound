@@ -274,8 +274,7 @@ public class MediaPlayerMpris: MediaPlayer {
 		}
 
 		var metadata = changed_properties.lookup_value ("Metadata", new VariantType ("a{sv}"));
-		if (metadata != null)
-			this.update_current_track (metadata);
+		this.update_current_track (metadata);
 	}
 
 	void playlists_proxy_properties_changed (DBusProxy proxy, Variant changed_properties, string[] invalidated_properties) {
@@ -283,7 +282,7 @@ public class MediaPlayerMpris: MediaPlayer {
 			this.fetch_playlists ();
 	}
 
-	void update_current_track (Variant metadata) {
+	void update_current_track (Variant? metadata) {
 		if (metadata != null) {
 			this.current_track = new Track (
 				sanitize_metadata_value (metadata.lookup_value ("xesam:artist", null)),
