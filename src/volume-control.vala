@@ -129,9 +129,9 @@ public class VolumeControl : Object
 			this.notify_property ("is-playing");
 		}
 
-		if (_volume != volume_to_double (i.volume.values[0]))
+		if (_volume != volume_to_double (i.volume.max ()))
 		{
-			_volume = volume_to_double (i.volume.values[0]);
+			_volume = volume_to_double (i.volume.max ());
 			volume_changed (_volume);
 		}
 	}
@@ -310,7 +310,8 @@ public class VolumeControl : Object
 		if (i == null)
 			return;
 
-		unowned CVolume cvol = vol_set (i.volume, 1, double_to_volume (_volume));
+		unowned CVolume cvol = i.volume;
+		cvol.scale (double_to_volume (_volume));
 		c.set_sink_volume_by_index (i.index, cvol, set_volume_success_cb);
 	}
 
