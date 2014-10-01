@@ -57,6 +57,7 @@ public class VolumeControl : Object
 	private string? _objp_role_alert = null;
 	private string? _objp_role_alarm = null;
 	private string? _objp_role_phone = null;
+	private uint _pa_volume_sig_count = 0;
 
 	private DBusProxy _user_proxy;
 	private GreeterListInterface _greeter_proxy;
@@ -214,20 +215,30 @@ public class VolumeControl : Object
 				active_role_objp = _sink_input_hash.get (_active_sink_input);
 
 			if (message.get_path () == active_role_objp && message.get_member () == "VolumeUpdated") {
-				/* Extract volume and make sure it's not a side effect of us setting it */
-				Variant body = message.get_body ();
-				Variant varray = body.get_child_value (0);
+				uint sig_count = 0;
+				lock (_pa_volume_sig_count) {
+					sig_count = _pa_volume_sig_count;
+					if (_pa_volume_sig_count > 0)
+						_pa_volume_sig_count--;
+				}
 
-				uint32 type = 0, volume = 0;
-				VariantIter iter = varray.iterator ();
-				iter.next ("(uu)", &type, &volume);
-				/* Here we need to compare integer values to avoid rounding issues, so just
-				 * using the volume values used by pulseaudio */
-				PulseAudio.Volume cvolume = double_to_volume (_volume);
-				if (volume != cvolume) {
-					/* Someone else changed the volume for this role, reflect on the indicator */
-					_volume = volume_to_double (volume);
-					volume_changed (_volume);
+				/* We only care about signals if our internal count is zero */
+				if (sig_count == 0) {
+					/* Extract volume and make sure it's not a side effect of us setting it */
+					Variant body = message.get_body ();
+					Variant varray = body.get_child_value (0);
+
+					uint32 type = 0, volume = 0;
+					VariantIter iter = varray.iterator ();
+					iter.next ("(uu)", &type, &volume);
+					/* Here we need to compare integer values to avoid rounding issues, so just
+					 * using the volume values used by pulseaudio */
+					PulseAudio.Volume cvolume = double_to_volume (_volume);
+					if (volume != cvolume) {
+						/* Someone else changed the volume for this role, reflect on the indicator */
+						_volume = volume_to_double (volume);
+						volume_changed (_volume);
+					}
 				}
 			}
 		}
@@ -507,12 +518,7 @@ public class VolumeControl : Object
 		context.get_sink_info_by_name (i.default_sink_name, sink_info_set_volume_cb);
 	}
 
-	/* This call can be async once we are sure we are not allowing multiple set volume calls
-	 * in sequence (with a minimal volume delta, not with steps), as this can cause issues
-	 * when handling the volume updated signal from PulseAudio (_volume can get set before
-	 * the signal from a previous set gets handled at pulse_dbus_filter, generating an extra
-	 * volume_updated signal) */
-	private void set_volume_active_role ()
+	private async void set_volume_active_role ()
 	{
 		string active_role_objp = _objp_role_alert;
 
@@ -524,12 +530,21 @@ public class VolumeControl : Object
 			builder.add ("(uu)", 0, double_to_volume (_volume));
 			Variant volume = builder.end ();
 
-			_pconn.call_sync ("org.PulseAudio.Ext.StreamRestore1.RestoreEntry",
+			/* Increase the signal counter so we can handle the callback */
+			lock (_pa_volume_sig_count) {
+				_pa_volume_sig_count++;
+			}
+
+			yield _pconn.call ("org.PulseAudio.Ext.StreamRestore1.RestoreEntry",
 					active_role_objp, "org.freedesktop.DBus.Properties", "Set",
 					new Variant ("(ssv)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume", volume),
 					null, DBusCallFlags.NONE, -1);
+
 			volume_changed (_volume);
 		} catch (GLib.Error e) {
+			lock (_pa_volume_sig_count) {
+				_pa_volume_sig_count--;
+			}
 			warning ("unable to set volume for stream obj path %s (%s)", active_role_objp, e.message);
 		}
 	}
@@ -541,7 +556,7 @@ public class VolumeControl : Object
 		if (_volume != volume) {
 			_volume = volume;
 			if (_pulse_use_stream_restore)
-				set_volume_active_role ();
+				set_volume_active_role.begin ();
 			else
 				context.get_server_info (server_info_cb_for_set_volume);
 			return true;
@@ -597,6 +612,7 @@ public class VolumeControl : Object
 
 		/* In case of a reconnect */
 		_pulse_use_stream_restore = false;
+		_pa_volume_sig_count = 0;
 
 		if (pulse_dbus_server_env != null) {
 			address = pulse_dbus_server_env;
