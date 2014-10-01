@@ -164,10 +164,10 @@ public class AccountsServiceUser : Object {
 			this.privacyproxy = Bus.get_proxy.end (res);
 
 			(this.privacyproxy as DBusProxy).g_properties_changed.connect((proxy, changed, invalid) => {
-				var welcomeval = changed.lookup("MessagesWelcomeScreen", "b", null);
-				if (welcomeval) {
+				var welcomeval = changed.lookup_value("MessagesWelcomeScreen", new VariantType("b"));
+				if (welcomeval != null) {
 					debug("Messages on welcome screen changed");
-					this.showDataOnGreeter = welcomeval;
+					this.showDataOnGreeter = welcomeval.get_boolean();
 				}
 			});
 
