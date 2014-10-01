@@ -26,7 +26,7 @@ public class AccountsServiceUser : Object {
 	MediaPlayer? _player = null;
 	GreeterBroadcast? greeter = null;
 
-	public bool showDataOnGreeter = false;
+	public bool showDataOnGreeter { get; set; }
 
 	public MediaPlayer? player {
 		set {
@@ -166,6 +166,7 @@ public class AccountsServiceUser : Object {
 			(this.privacyproxy as DBusProxy).g_properties_changed.connect((proxy, changed, invalid) => {
 				var welcomeval = changed.lookup("MessagesWelcomeScreen", "b", null);
 				if (welcomeval) {
+					debug("Messages on welcome screen changed");
 					this.showDataOnGreeter = welcomeval;
 				}
 			});
