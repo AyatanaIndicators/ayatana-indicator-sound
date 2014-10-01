@@ -274,7 +274,8 @@ public class MediaPlayerMpris: MediaPlayer {
 		}
 
 		var metadata = changed_properties.lookup_value ("Metadata", new VariantType ("a{sv}"));
-		this.update_current_track (metadata);
+		if (metadata != null)
+			this.update_current_track (metadata);
 	}
 
 	void playlists_proxy_properties_changed (DBusProxy proxy, Variant changed_properties, string[] invalidated_properties) {
