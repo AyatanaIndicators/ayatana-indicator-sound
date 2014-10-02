@@ -24,7 +24,8 @@ public class SoundMenu: Object
 		SHOW_MUTE = 1,
 		HIDE_INACTIVE_PLAYERS = 2,
 		HIDE_PLAYERS = 4,
-		GREETER_PLAYERS = 8
+		GREETER_PLAYERS = 8,
+		SHOW_SILENT_MODE = 16
 	}
 
 	public SoundMenu (string? settings_action, DisplayFlags flags) {
@@ -34,8 +35,12 @@ public class SoundMenu: Object
 		 */
 
 		this.volume_section = new Menu ();
+
 		if ((flags & DisplayFlags.SHOW_MUTE) != 0)
 			volume_section.append (_("Mute"), "indicator.mute");
+		if ((flags & DisplayFlags.SHOW_SILENT_MODE) != 0)
+			volume_section.append (_("Silent Mode"), "indicator.silent-mode");
+
 		volume_section.append_item (this.create_slider_menu_item ("indicator.volume(0)", 0.0, 1.0, 0.01,
 																  "audio-volume-low-zero-panel",
 																  "audio-volume-high-panel"));
