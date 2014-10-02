@@ -229,7 +229,7 @@ public class IndicatorSound.Service: Object {
 	void update_root_icon () {
 		double volume = this.volume_control.get_volume ();
 		string icon;
-		if (this.volume_control.mute)
+		if (this.volume_control.mute || (this.accounts_service != null && this.accounts_service.silentMode))
 			icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
 		else if (volume <= 0.0)
 			icon = "audio-volume-low-zero-panel";
