@@ -25,6 +25,8 @@ public class IndicatorSound.Service: Object {
 		this.settings.bind ("visible", this, "visible", SettingsBindFlags.GET);
 		this.notify["visible"].connect ( () => this.update_root_icon () );
 
+		this.volume_control = new VolumeControl ();
+
 		/* If we're on the greeter, don't export */
 		if (GLib.Environment.get_user_name() != "lightdm") {
 			this.accounts_service = new AccountsServiceUser();
@@ -36,8 +38,6 @@ public class IndicatorSound.Service: Object {
 
 			this.export_to_accounts_service = this.accounts_service.showDataOnGreeter;
 		}
-
-		this.volume_control = new VolumeControl ();
 
 		this.players = playerlist;
 		this.players.player_added.connect (this.player_added);
