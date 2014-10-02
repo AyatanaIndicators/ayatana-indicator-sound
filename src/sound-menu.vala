@@ -38,8 +38,11 @@ public class SoundMenu: Object
 
 		if ((flags & DisplayFlags.SHOW_MUTE) != 0)
 			volume_section.append (_("Mute"), "indicator.mute");
-		if ((flags & DisplayFlags.SHOW_SILENT_MODE) != 0)
-			volume_section.append (_("Silent Mode"), "indicator.silent-mode");
+		if ((flags & DisplayFlags.SHOW_SILENT_MODE) != 0) {
+			var item = new MenuItem(_("Silent Mode"), "indicator.silent-mode");
+			item.set_attribute("x-canonical-type", "s", "com.canonical.indicator.switch");
+			volume_section.append_item(item);
+		}
 
 		volume_section.append_item (this.create_slider_menu_item ("indicator.volume(0)", 0.0, 1.0, 0.01,
 																  "audio-volume-low-zero-panel",
