@@ -28,7 +28,17 @@ public class AccountsServiceUser : Object {
 	GreeterBroadcast? greeter = null;
 
 	public bool showDataOnGreeter { get; set; }
-	public bool silentMode { get; set; }
+
+	bool _silentMode = false;
+	public bool silentMode {
+		get {
+			return _silentMode;
+		}
+		set {
+			if (syssoundproxy != null)
+				syssoundproxy.silent_mode = value;
+		}
+	}
 
 	public MediaPlayer? player {
 		set {
@@ -196,7 +206,8 @@ public class AccountsServiceUser : Object {
 				var silentvar = changed.lookup_value("SilentMode", new VariantType("b"));
 				if (silentvar != null) {
 					debug("Silent Mode changed");
-					this.silentMode = silentvar.get_boolean();
+					this._silentMode = silentvar.get_boolean();
+					this.notify_property("silentMode");
 				}
 			});
 
