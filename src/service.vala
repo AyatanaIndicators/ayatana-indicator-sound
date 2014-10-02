@@ -227,10 +227,26 @@ public class IndicatorSound.Service: Object {
 		return icon.serialize ();
 	}
 
+	/* This kinda got complex with both mute and silent mode. So we're
+	   gonna put it into a function */
+	bool user_sound_output () {
+		if (this.volume_control.mute) {
+			return false;
+		}
+
+		if (this.accounts_service != null) {
+			if (this.accounts_service.silentMode) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	void update_root_icon () {
 		double volume = this.volume_control.get_volume ();
 		string icon;
-		if (this.volume_control.mute || (this.accounts_service != null && this.accounts_service.silentMode))
+		if (!user_sound_output())
 			icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
 		else if (volume <= 0.0)
 			icon = "audio-volume-low-zero-panel";
@@ -242,7 +258,7 @@ public class IndicatorSound.Service: Object {
 			icon  = "audio-volume-high-panel";
 
 		string accessible_name;
-		if (this.volume_control.mute) {
+		if (!user_sound_output()) {
 			accessible_name = _("Volume (muted)");
 		} else {
 			int volume_int = (int)(volume * 100);
@@ -274,6 +290,7 @@ public class IndicatorSound.Service: Object {
 
 		this.accounts_service.notify["silentMode"].connect(() => {
 			silent_action.set_state(new Variant.boolean(this.accounts_service.silentMode));
+			this.update_root_icon ();
 		});
 
 		silent_action.activate.connect ((action, param) => {
