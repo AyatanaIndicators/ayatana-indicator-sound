@@ -104,6 +104,7 @@ vala_add(indicator-sound-service
     mpris2-interfaces
     accounts-service-sound-settings
     accounts-service-privacy-settings
+    accounts-service-system-sound-settings
     greeter-broadcast
 )
 vala_add(indicator-sound-service
@@ -111,6 +112,9 @@ vala_add(indicator-sound-service
 )
 vala_add(indicator-sound-service
   accounts-service-privacy-settings.vala
+)
+vala_add(indicator-sound-service
+  accounts-service-system-sound-settings.vala
 )
 vala_add(indicator-sound-service
   greeter-broadcast.vala
