@@ -25,6 +25,18 @@ public class IndicatorSound.Service: Object {
 		this.settings.bind ("visible", this, "visible", SettingsBindFlags.GET);
 		this.notify["visible"].connect ( () => this.update_root_icon () );
 
+		/* If we're on the greeter, don't export */
+		if (GLib.Environment.get_user_name() != "lightdm") {
+			this.accounts_service = new AccountsServiceUser();
+
+			this.accounts_service.notify["showDataOnGreeter"].connect(() => {
+				this.export_to_accounts_service = this.accounts_service.showDataOnGreeter;
+				eventually_update_player_actions();
+			});
+
+			this.export_to_accounts_service = this.accounts_service.showDataOnGreeter;
+		}
+
 		this.volume_control = new VolumeControl ();
 
 		this.players = playerlist;
@@ -33,6 +45,7 @@ public class IndicatorSound.Service: Object {
 
 		this.actions = new SimpleActionGroup ();
 		this.actions.add_action_entries (action_entries, this);
+		this.actions.add_action (this.create_silent_mode_action ());
 		this.actions.add_action (this.create_mute_action ());
 		this.actions.add_action (this.create_volume_action ());
 		this.actions.add_action (this.create_mic_volume_action ());
@@ -46,18 +59,6 @@ public class IndicatorSound.Service: Object {
 		this.menus.@foreach ( (profile, menu) => {
 			this.volume_control.bind_property ("active-mic", menu, "show-mic-volume", BindingFlags.SYNC_CREATE);
 		});
-
-		/* If we're on the greeter, don't export */
-		if (GLib.Environment.get_user_name() != "lightdm") {
-			this.accounts_service = new AccountsServiceUser();
-
-			this.accounts_service.notify["showDataOnGreeter"].connect(() => {
-				this.export_to_accounts_service = this.accounts_service.showDataOnGreeter;
-				eventually_update_player_actions();
-			});
-
-			this.export_to_accounts_service = this.accounts_service.showDataOnGreeter;
-		}
 
 		this.sync_preferred_players ();
 		this.settings.changed["interested-media-players"].connect ( () => {
@@ -255,6 +256,35 @@ public class IndicatorSound.Service: Object {
 		builder.add ("{sv}", "icon", serialize_themed_icon (icon));
 		builder.add ("{sv}", "visible", new Variant.boolean (this.visible));
 		root_action.set_state (builder.end());
+	}
+
+	Action create_silent_mode_action () {
+		bool silentNow = false;
+		if (this.accounts_service != null) {
+			silentNow = this.accounts_service.silentMode;
+		}
+
+		var silent_action = new SimpleAction.stateful ("silent-mode", null, new Variant.boolean (silentNow));
+
+		/* If we're not dealing with accounts service, we'll just always be out
+		   of silent mode and that's cool. */
+		if (this.accounts_service == null) {
+			return silent_action;
+		}
+
+		this.accounts_service.notify["silentMode"].connect(() => {
+			silent_action.set_state(new Variant.boolean(this.accounts_service.silentMode));
+		});
+
+		silent_action.activate.connect ((action, param) => {
+			action.change_state (new Variant.boolean (!action.get_state().get_boolean()));
+		});
+
+		silent_action.change_state.connect ((action, val) => {
+			this.accounts_service.silentMode = val.get_boolean();
+		});
+
+		return silent_action;
 	}
 
 	Action create_mute_action () {
