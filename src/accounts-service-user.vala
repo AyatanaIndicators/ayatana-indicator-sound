@@ -22,11 +22,13 @@ public class AccountsServiceUser : Object {
 	Act.User? user = null;
 	AccountsServiceSoundSettings? proxy = null;
 	AccountsServicePrivacySettings? privacyproxy = null;
+	AccountsServiceSystemSoundSettings? syssoundproxy = null;
 	uint timer = 0;
 	MediaPlayer? _player = null;
 	GreeterBroadcast? greeter = null;
 
 	public bool showDataOnGreeter { get; set; }
+	public bool silentMode { get; set; }
 
 	public MediaPlayer? player {
 		set {
@@ -136,6 +138,14 @@ public class AccountsServiceUser : Object {
 				DBusProxyFlags.GET_INVALIDATED_PROPERTIES,
 				null,
 				new_privacy_proxy);
+
+			Bus.get_proxy.begin<AccountsServiceSystemSoundSettings> (
+				BusType.SYSTEM,
+				"org.freedesktop.Accounts",
+				user.get_object_path(),
+				DBusProxyFlags.GET_INVALIDATED_PROPERTIES,
+				null,
+				new_system_sound_proxy);
 		}
 	}
 
@@ -175,6 +185,25 @@ public class AccountsServiceUser : Object {
 		} catch (Error e) {
 			this.privacyproxy = null;
 			warning("Unable to get proxy to user privacy settings: %s", e.message);
+		}
+	}
+
+	void new_system_sound_proxy (GLib.Object? obj, AsyncResult res) {
+		try {
+			this.syssoundproxy = Bus.get_proxy.end (res);
+
+			(this.syssoundproxy as DBusProxy).g_properties_changed.connect((proxy, changed, invalid) => {
+				var silentvar = changed.lookup_value("SilentMode", new VariantType("b"));
+				if (silentvar != null) {
+					debug("Silent Mode changed");
+					this.silentMode = silentvar.get_boolean();
+				}
+			});
+
+			this.silentMode = this.syssoundproxy.silent_mode;
+		} catch (Error e) {
+			this.syssoundproxy = null;
+			warning("Unable to get proxy to system sound settings: %s", e.message);
 		}
 	}
 
