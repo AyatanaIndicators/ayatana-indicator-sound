@@ -1,3 +1,10 @@
+indicator-sound (12.10.2+14.10.20141001-0ubuntu1) utopic; urgency=low
+
+  [ Ricardo Salveti de Araujo ]
+  * Adding support to change volumes per active audio role.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 01 Oct 2014 03:53:54 +0000
+
 indicator-sound (12.10.2+14.10.20140611-0ubuntu1) utopic; urgency=low
 
   [ Ted Gould ]
