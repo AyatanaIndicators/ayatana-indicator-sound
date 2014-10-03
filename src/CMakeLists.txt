@@ -21,6 +21,7 @@ vala_init(indicator-sound-service
     accounts-service
   PACKAGES
     config
+    gee-1.0
     gio-2.0
     gio-unix-2.0
     libxml-2.0
