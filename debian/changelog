@@ -1,3 +1,17 @@
+indicator-sound (12.10.2+14.10.20141001-0ubuntu2) utopic; urgency=medium
+
+  * debian/control: adjusting libpulse-dev version deps
+  * Support for volumes per role covered by FFe LP: #1368827
+
+ -- Ricardo Salveti de Araujo <ricardo.salveti@canonical.com>  Wed, 01 Oct 2014 23:57:15 -0300
+
+indicator-sound (12.10.2+14.10.20141001-0ubuntu1) utopic; urgency=low
+
+  [ Ricardo Salveti de Araujo ]
+  * Adding support to change volumes per active audio role.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 01 Oct 2014 03:53:54 +0000
+
 indicator-sound (12.10.2+14.10.20140611-0ubuntu1) utopic; urgency=low
 
   [ Ted Gould ]
