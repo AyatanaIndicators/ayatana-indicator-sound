@@ -19,6 +19,7 @@
  */
 
 using PulseAudio;
+using Notify;
 using Gee;
 
 [CCode(cname="pa_cvolume_set", cheader_filename = "pulse/volume.h")]
@@ -67,6 +68,7 @@ public class VolumeControl : Object
 	private uint _accountservice_volume_timer = 0;
 	private bool _send_next_local_volume = false;
 	private double _account_service_volume = 0.0;
+	private Notify.Notification _notification;
 
 	public signal void volume_changed (double v);
 	public signal void mic_volume_changed (double v);
@@ -84,6 +86,13 @@ public class VolumeControl : Object
 
 		_mute_cancellable = new Cancellable ();
 		_volume_cancellable = new Cancellable ();
+
+		Notify.init ("Volume");
+		_notification = new Notify.Notification("Volume", "", "audio-volume-muted");
+		_notification.set_hint ("value", 0);
+		_notification.set_hint ("x-canonical-private-synchronous", "true");
+		_notification.set_hint ("x-canonical-non-shaped-icon", "true");
+
 		setup_accountsservice.begin ();
 
 		this.reconnect_to_pulse ();
@@ -166,9 +175,9 @@ public class VolumeControl : Object
 		}
 
 		if (_pulse_use_stream_restore == false &&
-				_volume != volume_to_double (i.volume.values[0]))
+				_volume != volume_to_double (i.volume.max ()))
 		{
-			_volume = volume_to_double (i.volume.values[0]);
+			_volume = volume_to_double (i.volume.max ());
 			volume_changed (_volume);
 		}
 	}
@@ -503,7 +512,8 @@ public class VolumeControl : Object
 		if (i == null)
 			return;
 
-		unowned CVolume cvol = vol_set (i.volume, 1, double_to_volume (_volume));
+		unowned CVolume cvol = i.volume;
+		cvol.scale (double_to_volume (_volume));
 		c.set_sink_volume_by_index (i.index, cvol, set_volume_success_cb);
 	}
 
@@ -567,8 +577,21 @@ public class VolumeControl : Object
 
 	public void set_volume (double volume)
 	{
-		if (set_volume_internal (volume))
+		if (_volume == 0.0)
+			_notification.update ("Volume", "", "audio-volume-muted");
+		if (_volume > 0.0 && _volume <= 0.33)
+			_notification.update ("Volume", "", "audio-volume-low");
+		if (_volume > 0.33 && _volume <= 0.66)
+			_notification.update ("Volume", "", "audio-volume-medium");
+		if (_volume > 0.66 && _volume <= 1.0)
+			_notification.update ("Volume", "", "audio-volume-high");
+		_notification.set_hint ("value", _volume * 100.0);
+		_notification.set_hint ("sound-file", "/usr/share/sounds/ubuntu/stereo/message.ogg");
+		_notification.show ();			
+
+		if (set_volume_internal (volume)) {
 			start_local_volume_timer();
+		}
 	}
 
 	void set_mic_volume_success_cb (Context c, int success)
