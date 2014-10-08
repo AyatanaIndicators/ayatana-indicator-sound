@@ -1,3 +1,10 @@
+indicator-sound (12.10.2+14.10.20141008-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * Revert notifications on volume change.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 08 Oct 2014 18:55:06 +0000
+
 indicator-sound (12.10.2+14.10.20141007-0ubuntu1) utopic; urgency=low
 
   [ Ted Gould ]
