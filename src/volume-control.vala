@@ -578,13 +578,13 @@ public class VolumeControl : Object
 	public void set_volume (double volume)
 	{
 		if (_volume == 0.0)
-			_notification.update ("Volume", "", "audio-volume-muted");
+			_notification.update (_("Volume"), "", "audio-volume-muted");
 		if (_volume > 0.0 && _volume <= 0.33)
-			_notification.update ("Volume", "", "audio-volume-low");
+			_notification.update (_("Volume"), "", "audio-volume-low");
 		if (_volume > 0.33 && _volume <= 0.66)
-			_notification.update ("Volume", "", "audio-volume-medium");
+			_notification.update (_("Volume"), "", "audio-volume-medium");
 		if (_volume > 0.66 && _volume <= 1.0)
-			_notification.update ("Volume", "", "audio-volume-high");
+			_notification.update (_("Volume"), "", "audio-volume-high");
 		_notification.set_hint ("value", _volume * 100.0);
 		_notification.set_hint ("sound-file", "/usr/share/sounds/ubuntu/stereo/message.ogg");
 		_notification.show ();			
