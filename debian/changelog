@@ -1,3 +1,10 @@
+indicator-sound (12.10.2+14.10.20141009-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * Show a silent mode checkbox (LP: #1342151)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 09 Oct 2014 13:32:54 +0000
+
 indicator-sound (12.10.2+14.10.20141008-0ubuntu1) utopic; urgency=low
 
   [ Ted Gould ]
