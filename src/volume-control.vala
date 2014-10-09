@@ -577,17 +577,22 @@ public class VolumeControl : Object
 
 	public void set_volume (double volume)
 	{
-		if (_volume == 0.0)
-			_notification.update (_("Volume"), "", "audio-volume-muted");
-		if (_volume > 0.0 && _volume <= 0.33)
-			_notification.update (_("Volume"), "", "audio-volume-low");
-		if (_volume > 0.33 && _volume <= 0.66)
-			_notification.update (_("Volume"), "", "audio-volume-medium");
-		if (_volume > 0.66 && _volume <= 1.0)
-			_notification.update (_("Volume"), "", "audio-volume-high");
-		_notification.set_hint ("value", _volume * 100.0);
-		_notification.set_hint ("sound-file", "/usr/share/sounds/ubuntu/stereo/message.ogg");
-		_notification.show ();			
+		/* Using this to detect whether we're on the phone or not */
+		if (_pulse_use_stream_restore) {
+			if (_volume == 0.0)
+				_notification.update (_("Volume"), "", "audio-volume-muted");
+			if (_volume > 0.0 && _volume <= 0.33)
+				_notification.update (_("Volume"), "", "audio-volume-low");
+			if (_volume > 0.33 && _volume <= 0.66)
+				_notification.update (_("Volume"), "", "audio-volume-medium");
+			if (_volume > 0.66 && _volume <= 1.0)
+				_notification.update (_("Volume"), "", "audio-volume-high");
+			_notification.set_hint ("value", _volume * 100.0);
+			if (_active_sink_input == -1 || _valid_roles[_active_sink_input] != "multimedia")
+				/* No audio ping if we're playing multimedia */
+				_notification.set_hint ("sound-file", "/usr/share/sounds/ubuntu/stereo/message.ogg");
+			_notification.show ();			
+		}
 
 		if (set_volume_internal (volume)) {
 			start_local_volume_timer();
