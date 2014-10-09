@@ -23,7 +23,9 @@ public class SoundMenu: Object
 		NONE = 0,
 		SHOW_MUTE = 1,
 		HIDE_INACTIVE_PLAYERS = 2,
-		HIDE_PLAYERS = 4
+		HIDE_PLAYERS = 4,
+		GREETER_PLAYERS = 8,
+		SHOW_SILENT_MODE = 16
 	}
 
 	public SoundMenu (string? settings_action, DisplayFlags flags) {
@@ -33,8 +35,15 @@ public class SoundMenu: Object
 		 */
 
 		this.volume_section = new Menu ();
+
 		if ((flags & DisplayFlags.SHOW_MUTE) != 0)
 			volume_section.append (_("Mute"), "indicator.mute");
+		if ((flags & DisplayFlags.SHOW_SILENT_MODE) != 0) {
+			var item = new MenuItem(_("Silent Mode"), "indicator.silent-mode");
+			item.set_attribute("x-canonical-type", "s", "com.canonical.indicator.switch");
+			volume_section.append_item(item);
+		}
+
 		volume_section.append_item (this.create_slider_menu_item (_("Volume"), "indicator.volume(0)", 0.0, 1.0, 0.01,
 																  "audio-volume-low-zero-panel",
 																  "audio-volume-high-panel"));
@@ -59,6 +68,8 @@ public class SoundMenu: Object
 		this.hide_players = (flags & DisplayFlags.HIDE_PLAYERS) != 0;
 		this.hide_inactive = (flags & DisplayFlags.HIDE_INACTIVE_PLAYERS) != 0;
 		this.notify_handlers = new HashTable<MediaPlayer, ulong> (direct_hash, direct_equal);
+
+		this.greeter_players = (flags & DisplayFlags.GREETER_PLAYERS) != 0;
 	}
 
 	public void export (DBusConnection connection, string object_path) {
@@ -133,6 +144,7 @@ public class SoundMenu: Object
 	bool hide_inactive;
 	bool hide_players = false;
 	HashTable<MediaPlayer, ulong> notify_handlers;
+	bool greeter_players = false;
 
 	/* returns the position in this.menu of the section that's associated with @player */
 	int find_player_section (MediaPlayer player) {
@@ -166,7 +178,11 @@ public class SoundMenu: Object
 		if (icon == null)
 			icon = new ThemedIcon.with_default_fallbacks ("application-default-icon");
 
-		var player_item = new MenuItem (player.name, "indicator." + player.id);
+		var base_action = "indicator." + player.id;
+		if (this.greeter_players)
+			base_action += ".greeter";
+
+		var player_item = new MenuItem (player.name, base_action);
 		player_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
 		if (icon != null)
 			player_item.set_attribute_value ("icon", icon.serialize ());
