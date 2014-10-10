@@ -580,22 +580,42 @@ public class VolumeControl : Object
 	{
 		/* Using this to detect whether we're on the phone or not */
 		if (_pulse_use_stream_restore) {
-			if (volume == 0.0)
-				_notification.update (_("Volume"), "", "audio-volume-muted");
-			if (volume > 0.0 && volume <= 0.33)
-				_notification.update (_("Volume"), "", "audio-volume-low");
-			if (volume > 0.33 && volume <= 0.66)
-				_notification.update (_("Volume"), "", "audio-volume-medium");
-			if (volume > 0.66 && volume <= 1.0)
-				_notification.update (_("Volume"), "", "audio-volume-high");
-			_notification.set_hint ("value", (int32)(volume * 100.0));
-			if (_active_sink_input == -1 || _valid_roles[_active_sink_input] != "multimedia") {
-				/* No audio ping if we're playing multimedia */
-				_notification.set_hint ("sound-file", "/usr/share/sounds/ubuntu/stereo/message.ogg");
-			} else {
-				_notification.set_hint ("sound-file", null);
-			}
+			/* Watch for extreme */
+			bool extreme_volume = false;
+			if (volume > 0.75) /* TODO: Also if headphones */
+				extreme_volume = true;
 
+			/* Determine Label */
+			string volume_label = _("Volume");
+			if (extreme_volume)
+				volume_label = _("High volume");
+
+			/* Choose an icon */
+			string icon = "audio-volume-muted";
+			if (volume > 0.0 && volume <= 0.33)
+				icon = "audio-volume-low";
+			if (volume > 0.33 && volume <= 0.66)
+				icon = "audio-volume-medium";
+			if (volume > 0.66 && volume <= 1.0)
+				icon = "audio-volume-high";
+
+			/* Choose a sound */
+			string? sound = null;
+			if (_active_sink_input == -1 || _valid_roles[_active_sink_input] != "multimedia")
+				sound = "/usr/share/sounds/ubuntu/stereo/message.ogg";
+
+			/* Check tint */
+			string tint = "false";
+			if (extreme_volume)
+				tint = "true";
+
+			/* Put it all into the notification */
+			_notification.update (volume_label, "", icon);
+			_notification.set_hint ("value", (int32)(volume * 100.0));
+			_notification.set_hint ("sound-file", sound);
+			_notification.set_hint ("x-canonical-value-bar-tint", tint);
+
+			/* Show it */
 			try {
 				_notification.show ();			
 			} catch (GLib.Error e) {
