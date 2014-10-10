@@ -22,3 +22,20 @@ Test-case indicator-sound/unity8-items-check
 		<dd>The menu is populated with items</dd>
 </dl>
 
+Test-case indicator-sound/unity8-sound-notifications
+<dl>
+	<dt>Adjust volume using HW keys if available</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>An audibule sound should play at the level of the audio</dd>
+	<dt>Adjust volume with slider in sound indicator</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>An audibule sound should play at the level of the audio</dd>
+	<dt>Open a video with sound and play in media player</dt>
+		<dd>The video should play and the sound should be audible</dd>
+	<dt>Adjust volume using HW keys if available</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>No notification sound should be heard</dd>
+	<dt>Adjust volume with slider in sound indicator</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>No notification sound should be heard</dd>
+</dl>
