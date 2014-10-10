@@ -588,9 +588,12 @@ public class VolumeControl : Object
 			if (_volume > 0.66 && _volume <= 1.0)
 				_notification.update (_("Volume"), "", "audio-volume-high");
 			_notification.set_hint ("value", _volume * 100.0);
-			if (_active_sink_input == -1 || _valid_roles[_active_sink_input] != "multimedia")
+			if (_active_sink_input == -1 || _valid_roles[_active_sink_input] != "multimedia") {
 				/* No audio ping if we're playing multimedia */
 				_notification.set_hint ("sound-file", "/usr/share/sounds/ubuntu/stereo/message.ogg");
+			} else {
+				_notification.set_hint ("sound-file", null);
+			}
 			_notification.show ();			
 		}
 
