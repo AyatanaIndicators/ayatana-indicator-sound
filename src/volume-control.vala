@@ -88,7 +88,7 @@ public class VolumeControl : Object
 		_volume_cancellable = new Cancellable ();
 
 		Notify.init ("Volume");
-		_notification = new Notify.Notification("Volume", "", "audio-volume-muted");
+		_notification = new Notify.Notification(_("Volume"), "", "audio-volume-muted");
 		_notification.set_hint ("value", 0);
 		_notification.set_hint ("x-canonical-private-synchronous", "true");
 		_notification.set_hint ("x-canonical-non-shaped-icon", "true");
