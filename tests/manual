@@ -22,3 +22,22 @@ Test-case indicator-sound/unity8-items-check
 		<dd>The menu is populated with items</dd>
 </dl>
 
+Test-case indicator-sound/unity8-audio-roles
+<dl>
+	<dt>Without playing anything (no active audio stream), change the volume on the indicator or with the volume buttons and then try playing one of the following audio streams: camera shutter, ringtone, message notification, dtmf</dt>
+		<dd>The audio stream should reflect the volume set on the indicator</dd>
+	<dt>Without playing anything (no active audio stream), change the volume on the indicator or with volume buttons and then try playing one of the following audio streams: music-app, webrowser (youtube)</dt>
+		<dd>The audio stream should not be affected by the volume set on the indicator when there was no other active stream</dt>
+	<dt>Play a multimedia stream (music-app, webrowser) and change the volume on the indicator when the stream is active</dt>
+		<dd>The multimedia audio stream should reflect the volume set on the indicator</dd>
+		<dd>When stopping/closing the multimedia stream, it should automatically show up the volume for the alert role (ringtone, notification, etc)</dd>
+		<dd>No other role should be affected by the volume level used by the multimedia role</dd>
+	<dt>Play a alarm stream (clock-app) and change the volume on the indicator when the stream is active</dt>
+		<dd>The alarm audio stream should reflect the volume set on the indicator</dd>
+		<dd>When stopping/closing the alarm stream, it should automatically show up the volume for the alert role (ringtone, notification, etc)</dd>
+		<dd>No other role should be affected by the volume level used by the alarm role</dd>
+	<dt>Start a voice call using the dialer-app and change the volume on the indicator when the call is active</dt>
+		<dd>The phone audio stream should reflect the volume set on the indicator</dd>
+		<dd>When hanging up the voice call it should automatically show up the volume for the alert role (ringtone, notification, etc)</dd>
+		<dd>No other role should be affected by the volume level used by the phone role</dd>
+</dl>
