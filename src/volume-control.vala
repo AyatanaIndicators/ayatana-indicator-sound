@@ -79,6 +79,9 @@ public class VolumeControl : Object
 	/** true when a microphone is active **/
 	public bool active_mic { get; private set; default = false; }
 
+	/** true when high volume warnings should be shown */
+	public bool high_volume { get; set; }
+
 	public VolumeControl ()
 	{
 		if (loop == null)
@@ -581,13 +584,14 @@ public class VolumeControl : Object
 		/* Using this to detect whether we're on the phone or not */
 		if (_pulse_use_stream_restore) {
 			/* Watch for extreme */
-			bool extreme_volume = false;
 			if (volume > 0.75) /* TODO: Also if headphones */
-				extreme_volume = true;
+				high_volume = true;
+			else
+				high_volume = false;
 
 			/* Determine Label */
 			string volume_label = _("Volume");
-			if (extreme_volume)
+			if (high_volume)
 				volume_label = _("High volume");
 
 			/* Choose an icon */
@@ -606,7 +610,7 @@ public class VolumeControl : Object
 
 			/* Check tint */
 			string tint = "false";
-			if (extreme_volume)
+			if (high_volume)
 				tint = "true";
 
 			/* Put it all into the notification */
