@@ -594,7 +594,12 @@ public class VolumeControl : Object
 			} else {
 				_notification.set_hint ("sound-file", null);
 			}
-			_notification.show ();			
+
+			try {
+				_notification.show ();			
+			} catch (GLib.Error e) {
+				warning("Unable to send volume change notification: %s", e.message);
+			}
 		}
 
 		if (set_volume_internal (volume)) {
