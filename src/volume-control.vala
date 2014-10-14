@@ -633,7 +633,7 @@ public class VolumeControl : Object
 				tint = "true";
 
 			/* Put it all into the notification */
-			_notification.update (volume_label, "", icon);
+			_notification.update (_("Volume"), volume_label, icon);
 			_notification.set_hint ("value", (int32)(volume * 100.0));
 			_notification.set_hint ("sound-file", sound);
 			_notification.set_hint ("x-canonical-value-bar-tint", tint);
