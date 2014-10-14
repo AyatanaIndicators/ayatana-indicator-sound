@@ -25,7 +25,9 @@ public class SoundMenu: Object
 		HIDE_INACTIVE_PLAYERS = 2,
 		HIDE_PLAYERS = 4,
 		GREETER_PLAYERS = 8,
-		SHOW_SILENT_MODE = 16
+		SHOW_SILENT_MODE = 16,
+		HIGH_VOLUME_WARNING = 32 /* Everyone should get this eventually, but we don't
+		                            want it in the desktop initially because of freezes */
 	}
 
 	public SoundMenu (string? settings_action, DisplayFlags flags) {
@@ -47,6 +49,9 @@ public class SoundMenu: Object
 		volume_section.append_item (this.create_slider_menu_item (_("Volume"), "indicator.volume(0)", 0.0, 1.0, 0.01,
 																  "audio-volume-low-zero-panel",
 																  "audio-volume-high-panel"));
+
+		if ((flags & DisplayFlags.HIGH_VOLUME_WARNING) != 0)
+			volume_section.append (_("High volume can damage your hearing."), "indicator.high-volume-menu");
 
 		this.menu = new Menu ();
 		this.menu.append_section (null, volume_section);
