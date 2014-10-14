@@ -599,7 +599,7 @@ public class VolumeControl : Object
 		/* Using this to detect whether we're on the phone or not */
 		if (_pulse_use_stream_restore) {
 			/* Watch for extreme */
-			if (volume > 0.75) /* TODO: Also if headphones */
+			if (volume > 0.75 && _active_port_headphone)
 				high_volume = true;
 			else
 				high_volume = false;
