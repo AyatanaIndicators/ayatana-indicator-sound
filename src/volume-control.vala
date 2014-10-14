@@ -163,6 +163,8 @@ public class VolumeControl : Object
 
 	private void sink_info_cb_for_props (Context c, SinkInfo? i, int eol)
 	{
+		bool old_active_port_headphone = this._active_port_headphone;
+
 		if (i == null)
 			return;
 
@@ -196,6 +198,8 @@ public class VolumeControl : Object
 				_volume != volume_to_double (i.volume.max ()))
 		{
 			_volume = volume_to_double (i.volume.max ());
+			volume_changed (_volume);
+		} else if (this._active_port_headphone != old_active_port_headphone) {
 			volume_changed (_volume);
 		}
 	}
