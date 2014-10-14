@@ -395,28 +395,7 @@ public class IndicatorSound.Service: Object {
 		this.volume_control.notify["high_volume"].connect( () =>
 			high_volume_action.set_state(new Variant.boolean (this.volume_control.high_volume)));
 
-		/* So this is a bit confusing, putting it here because everywhere else
-		   sucks too. It might create an action and put it into the action group.
-		   Which is sneaky. Better to have the code not duplicated, but no good
-		   place to put code like that. */
-		setup_high_volume_menu_action();
-
 		return high_volume_action;
-	}
-
-	void setup_high_volume_menu_action () {
-		this.volume_control.notify["high_volume"].connect(update_high_volume_menu_action);
-		update_high_volume_menu_action();
-	}
-
-	void update_high_volume_menu_action () {
-		if (this.volume_control.high_volume) {
-			var menu_action = new SimpleAction("high-volume-menu", null);
-			menu_action.set_enabled(false);
-			this.actions.add_action(menu_action);
-		} else {
-			this.actions.remove_action("high-volume-menu");
-		}
 	}
 
 	void bus_acquired (DBusConnection connection, string name) {
