@@ -199,6 +199,7 @@ public class VolumeControl : Object
 		{
 			_volume = volume_to_double (i.volume.max ());
 			volume_changed (_volume);
+			start_local_volume_timer();
 		} else if (this._active_port_headphone != old_active_port_headphone) {
 			volume_changed (_volume);
 		}
@@ -269,6 +270,7 @@ public class VolumeControl : Object
 						/* Someone else changed the volume for this role, reflect on the indicator */
 						_volume = volume_to_double (volume);
 						volume_changed (_volume);
+						start_local_volume_timer();
 					}
 				}
 			}
@@ -311,6 +313,7 @@ public class VolumeControl : Object
 
 				_volume = volume_to_double (volume);
 				volume_changed (_volume);
+				start_local_volume_timer();
 			} catch (GLib.Error e) {
 				warning ("unable to get volume for active role %s (%s)", sink_input_objp, e.message);
 			}

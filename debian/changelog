@@ -1,3 +1,11 @@
+indicator-sound (12.10.2+14.10.20141010-0ubuntu1) utopic; urgency=low
+
+  [ Ricardo Salveti de Araujo ]
+  * volume-control: making sure we're always in sync with accountservice
+    (LP: #1379618)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 10 Oct 2014 15:40:30 +0000
+
 indicator-sound (12.10.2+14.10.20141009-0ubuntu1) utopic; urgency=low
 
   [ Ted Gould ]
