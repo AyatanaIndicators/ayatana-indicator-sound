@@ -22,3 +22,38 @@ Test-case indicator-sound/unity8-items-check
 		<dd>The menu is populated with items</dd>
 </dl>
 
+Test-case indicator-sound/unity8-sound-notifications
+<dl>
+	<dt>Adjust volume using HW keys if available</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>An audibule sound should play at the level of the audio</dd>
+	<dt>Adjust volume with slider in sound indicator</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>An audibule sound should play at the level of the audio</dd>
+	<dt>Open a video with sound and play in media player</dt>
+		<dd>The video should play and the sound should be audible</dd>
+	<dt>Adjust volume using HW keys if available</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>No notification sound should be heard</dd>
+	<dt>Adjust volume with slider in sound indicator</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>No notification sound should be heard</dd>
+</dl>
+
+Test-case indicator-sound/unity8-high-volume
+<dl>
+	<dt>Plug headphones into the headphone jack</dt>
+	<dt>Adjust volume so that it is at the midpoint of volume range</dt>
+		<dd>The slider should be in the middle of the scale</dd>
+	<dt>Increase the volume once using HW keys if available</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>The text on the notification should read "Volume"</dd>
+	<dt>Increase the volume using HW keys until it is roughly 90% of the range</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>The text on the notification should read "High volume"</dd>
+		<dd>The range on the notification bubble should have a different color signifying the higher volume</dd>
+	<dt>Decrease the volume using HW keys until it is roughly 50% of the range</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>The text on the notification should read "Volume"</dd>
+		<dd>The range on the notification bubble should have a standard color</dd>
+</dl>

@@ -82,8 +82,27 @@ public class SoundMenu: Object
 				this.mic_volume_shown = true;
 			}
 			else if (!value && this.mic_volume_shown) {
+				/* TODO: Make smarter */
 				this.volume_section.remove (this.volume_section.get_n_items () -1);
 				this.mic_volume_shown = false;
+			}
+		}
+	}
+
+	public bool show_high_volume_warning {
+		get {
+			return this.high_volume_warning_shown;
+		}
+		set {
+			if (value && !this.high_volume_warning_shown) {
+				var item = new MenuItem(_("High volume can damage your hearing."), null);
+				volume_section.append_item (item);
+				this.high_volume_warning_shown = true;
+			}
+			else if (!value && this.high_volume_warning_shown) {
+				/* TODO: Make smarter */
+				this.volume_section.remove (this.volume_section.get_n_items () -1);
+				this.high_volume_warning_shown = false;
 			}
 		}
 	}
@@ -130,6 +149,7 @@ public class SoundMenu: Object
 	Menu volume_section;
 	bool mic_volume_shown;
 	bool settings_shown = false;
+	bool high_volume_warning_shown = false;
 	bool hide_inactive;
 	bool hide_players = false;
 	HashTable<MediaPlayer, ulong> notify_handlers;
