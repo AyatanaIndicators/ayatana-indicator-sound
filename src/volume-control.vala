@@ -70,6 +70,8 @@ public class VolumeControl : Object
 	private double _account_service_volume = 0.0;
 	private Notify.Notification _notification;
 
+	private bool _active_port_headphone = false;
+
 	public signal void volume_changed (double v);
 	public signal void mic_volume_changed (double v);
 
@@ -175,6 +177,19 @@ public class VolumeControl : Object
 		{
 			_is_playing = playing;
 			this.notify_property ("is-playing");
+		}
+
+		/* Check if the current active port is headset/headphone */
+		/* There is not easy way to check if the port is a headset/headphone besides
+		 * checking for the port name. On touch (with the pulseaudio droid element)
+		 * the headset/headphone port is called 'output-headset' and 'output-headphone'.
+		 * On the desktop this is usually called 'analog-output-headphones' */
+		if (i.active_port.name == "output-wired_headset" ||
+			i.active_port.name == "output-wired_headphone" ||
+			i.active_port.name == "analog-output-headphones") {
+			_active_port_headphone = true;
+		} else {
+			_active_port_headphone = false;
 		}
 
 		if (_pulse_use_stream_restore == false &&
