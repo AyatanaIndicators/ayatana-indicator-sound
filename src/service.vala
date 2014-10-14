@@ -61,6 +61,10 @@ public class IndicatorSound.Service: Object {
 			this.volume_control.bind_property ("active-mic", menu, "show-mic-volume", BindingFlags.SYNC_CREATE);
 		});
 
+		this.menus.@foreach ( (profile, menu) => {
+			this.volume_control.bind_property ("high-volume", menu, "show-high-volume-warning", BindingFlags.SYNC_CREATE);
+		});
+
 		this.sync_preferred_players ();
 		this.settings.changed["interested-media-players"].connect ( () => {
 			this.sync_preferred_players ();
