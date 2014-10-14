@@ -624,7 +624,7 @@ public class VolumeControl : Object
 
 			/* Choose a sound */
 			string? sound = null;
-			if (_active_sink_input == -1 || _valid_roles[_active_sink_input] != "multimedia")
+			if (!((_active_sink_input in _sink_input_list) && (_valid_roles[_active_sink_input] == "multimedia")))
 				sound = "/usr/share/sounds/ubuntu/stereo/message.ogg";
 
 			/* Check tint */
