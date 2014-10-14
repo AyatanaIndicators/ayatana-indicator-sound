@@ -25,9 +25,7 @@ public class SoundMenu: Object
 		HIDE_INACTIVE_PLAYERS = 2,
 		HIDE_PLAYERS = 4,
 		GREETER_PLAYERS = 8,
-		SHOW_SILENT_MODE = 16,
-		HIGH_VOLUME_WARNING = 32 /* Everyone should get this eventually, but we don't
-		                            want it in the desktop initially because of freezes */
+		SHOW_SILENT_MODE = 16
 	}
 
 	public SoundMenu (string? settings_action, DisplayFlags flags) {
@@ -49,9 +47,6 @@ public class SoundMenu: Object
 		volume_section.append_item (this.create_slider_menu_item (_("Volume"), "indicator.volume(0)", 0.0, 1.0, 0.01,
 																  "audio-volume-low-zero-panel",
 																  "audio-volume-high-panel"));
-
-		if ((flags & DisplayFlags.HIGH_VOLUME_WARNING) != 0)
-			volume_section.append (_("High volume can damage your hearing."), "indicator.high-volume-menu");
 
 		this.menu = new Menu ();
 		this.menu.append_section (null, volume_section);
@@ -98,8 +93,27 @@ public class SoundMenu: Object
 				this.mic_volume_shown = true;
 			}
 			else if (!value && this.mic_volume_shown) {
+				/* TODO: Make smarter */
 				this.volume_section.remove (this.volume_section.get_n_items () -1);
 				this.mic_volume_shown = false;
+			}
+		}
+	}
+
+	public bool show_high_volume_warning {
+		get {
+			return this.high_volume_warning_shown;
+		}
+		set {
+			if (value && !this.high_volume_warning_shown) {
+				var item = new MenuItem(_("High volume can damage your hearing."), null);
+				volume_section.append_item (item);
+				this.high_volume_warning_shown = true;
+			}
+			else if (!value && this.high_volume_warning_shown) {
+				/* TODO: Make smarter */
+				this.volume_section.remove (this.volume_section.get_n_items () -1);
+				this.high_volume_warning_shown = false;
 			}
 		}
 	}
@@ -146,6 +160,7 @@ public class SoundMenu: Object
 	Menu volume_section;
 	bool mic_volume_shown;
 	bool settings_shown = false;
+	bool high_volume_warning_shown = false;
 	bool hide_inactive;
 	bool hide_players = false;
 	HashTable<MediaPlayer, ulong> notify_handlers;
