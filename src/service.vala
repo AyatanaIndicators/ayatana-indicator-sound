@@ -49,6 +49,7 @@ public class IndicatorSound.Service: Object {
 		this.actions.add_action (this.create_mute_action ());
 		this.actions.add_action (this.create_volume_action ());
 		this.actions.add_action (this.create_mic_volume_action ());
+		this.actions.add_action (this.create_high_volume_actions ());
 
 		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
 		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.HIDE_PLAYERS | SoundMenu.DisplayFlags.GREETER_PLAYERS));
@@ -386,6 +387,36 @@ public class IndicatorSound.Service: Object {
 		this.volume_control.bind_property ("ready", volume_action, "enabled", BindingFlags.SYNC_CREATE);
 
 		return volume_action;
+	}
+
+	Action create_high_volume_actions () {
+		var high_volume_action = new SimpleAction.stateful("high-volume", null, new Variant.boolean (this.volume_control.high_volume));
+
+		this.volume_control.notify["high_volume"].connect( () =>
+			high_volume_action.set_state(new Variant.boolean (this.volume_control.high_volume)));
+
+		/* So this is a bit confusing, putting it here because everywhere else
+		   sucks too. It might create an action and put it into the action group.
+		   Which is sneaky. Better to have the code not duplicated, but no good
+		   place to put code like that. */
+		setup_high_volume_menu_action();
+
+		return high_volume_action;
+	}
+
+	void setup_high_volume_menu_action () {
+		this.volume_control.notify["high_volume"].connect(update_high_volume_menu_action);
+		update_high_volume_menu_action();
+	}
+
+	void update_high_volume_menu_action () {
+		if (this.volume_control.high_volume) {
+			var menu_action = new SimpleAction("high-volume-menu", null);
+			menu_action.set_enabled(false);
+			this.actions.add_action(menu_action);
+		} else {
+			this.actions.remove_action("high-volume-menu");
+		}
 	}
 
 	void bus_acquired (DBusConnection connection, string name) {
