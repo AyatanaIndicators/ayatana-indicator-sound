@@ -127,7 +127,7 @@ public class SoundMenu: Object
 		int n = menu.get_n_items ();
 		for (int i = 0; i < n; i++) {
 			string action;
-			menu.get_item_attribute (0, "action", "s", out action);
+			menu.get_item_attribute (i, "action", "s", out action);
 			if (in_action == action)
 				return i;
 		}
