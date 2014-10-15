@@ -373,7 +373,7 @@ public class IndicatorSound.Service: Object {
 	Action create_high_volume_actions () {
 		var high_volume_action = new SimpleAction.stateful("high-volume", null, new Variant.boolean (this.volume_control.high_volume));
 
-		this.volume_control.notify["high_volume"].connect( () =>
+		this.volume_control.notify["high-volume"].connect( () =>
 			high_volume_action.set_state(new Variant.boolean (this.volume_control.high_volume)));
 
 		return high_volume_action;
