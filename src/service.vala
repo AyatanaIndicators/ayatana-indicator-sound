@@ -36,6 +36,7 @@ public class IndicatorSound.Service: Object {
 		this.actions.add_action (this.create_mute_action ());
 		this.actions.add_action (this.create_volume_action ());
 		this.actions.add_action (this.create_mic_volume_action ());
+		this.actions.add_action (this.create_high_volume_actions ());
 
 		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
 		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.HIDE_PLAYERS));
@@ -45,6 +46,10 @@ public class IndicatorSound.Service: Object {
 
 		this.menus.@foreach ( (profile, menu) => {
 			this.volume_control.bind_property ("active-mic", menu, "show-mic-volume", BindingFlags.SYNC_CREATE);
+		});
+
+		this.menus.@foreach ( (profile, menu) => {
+			this.volume_control.bind_property ("high-volume", menu, "show-high-volume-warning", BindingFlags.SYNC_CREATE);
 		});
 
 		/* Setup handling for the greeter-export setting */
@@ -181,6 +186,8 @@ public class IndicatorSound.Service: Object {
 		double v = this.volume_control.get_volume () + volume_step_percentage * delta;
 		this.volume_control.set_volume (v.clamp (0.0, this.max_volume));
 
+		/* TODO: Don't want to mess up the desktop today, but we should remove this
+		   scrolling change and merge that into volume control's notification */
 		if (this.notification != null) {
 			string icon;
 			if (v <= 0.0)
@@ -363,6 +370,15 @@ public class IndicatorSound.Service: Object {
 		this.volume_control.bind_property ("ready", volume_action, "enabled", BindingFlags.SYNC_CREATE);
 
 		return volume_action;
+	}
+
+	Action create_high_volume_actions () {
+		var high_volume_action = new SimpleAction.stateful("high-volume", null, new Variant.boolean (this.volume_control.high_volume));
+
+		this.volume_control.notify["high-volume"].connect( () =>
+			high_volume_action.set_state(new Variant.boolean (this.volume_control.high_volume)));
+
+		return high_volume_action;
 	}
 
 	void bus_acquired (DBusConnection connection, string name) {

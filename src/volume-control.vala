@@ -70,6 +70,8 @@ public class VolumeControl : Object
 	private double _account_service_volume = 0.0;
 	private Notify.Notification _notification;
 
+	private bool _active_port_headphone = false;
+
 	public signal void volume_changed (double v);
 	public signal void mic_volume_changed (double v);
 
@@ -78,6 +80,9 @@ public class VolumeControl : Object
 
 	/** true when a microphone is active **/
 	public bool active_mic { get; private set; default = false; }
+
+	/** true when high volume warnings should be shown */
+	public bool high_volume { get; set; }
 
 	public VolumeControl ()
 	{
@@ -158,6 +163,8 @@ public class VolumeControl : Object
 
 	private void sink_info_cb_for_props (Context c, SinkInfo? i, int eol)
 	{
+		bool old_active_port_headphone = this._active_port_headphone;
+
 		if (i == null)
 			return;
 
@@ -174,10 +181,26 @@ public class VolumeControl : Object
 			this.notify_property ("is-playing");
 		}
 
+		/* Check if the current active port is headset/headphone */
+		/* There is not easy way to check if the port is a headset/headphone besides
+		 * checking for the port name. On touch (with the pulseaudio droid element)
+		 * the headset/headphone port is called 'output-headset' and 'output-headphone'.
+		 * On the desktop this is usually called 'analog-output-headphones' */
+		if (i.active_port.name == "output-wired_headset" ||
+			i.active_port.name == "output-wired_headphone" ||
+			i.active_port.name == "analog-output-headphones") {
+			_active_port_headphone = true;
+		} else {
+			_active_port_headphone = false;
+		}
+
 		if (_pulse_use_stream_restore == false &&
 				_volume != volume_to_double (i.volume.max ()))
 		{
 			_volume = volume_to_double (i.volume.max ());
+			volume_changed (_volume);
+			start_local_volume_timer();
+		} else if (this._active_port_headphone != old_active_port_headphone) {
 			volume_changed (_volume);
 		}
 	}
@@ -247,6 +270,7 @@ public class VolumeControl : Object
 						/* Someone else changed the volume for this role, reflect on the indicator */
 						_volume = volume_to_double (volume);
 						volume_changed (_volume);
+						start_local_volume_timer();
 					}
 				}
 			}
@@ -289,6 +313,7 @@ public class VolumeControl : Object
 
 				_volume = volume_to_double (volume);
 				volume_changed (_volume);
+				start_local_volume_timer();
 			} catch (GLib.Error e) {
 				warning ("unable to get volume for active role %s (%s)", sink_input_objp, e.message);
 			}
@@ -579,22 +604,52 @@ public class VolumeControl : Object
 	{
 		/* Using this to detect whether we're on the phone or not */
 		if (_pulse_use_stream_restore) {
-			if (volume == 0.0)
-				_notification.update (_("Volume"), "", "audio-volume-muted");
-			if (volume > 0.0 && volume <= 0.33)
-				_notification.update (_("Volume"), "", "audio-volume-low");
-			if (volume > 0.33 && volume <= 0.66)
-				_notification.update (_("Volume"), "", "audio-volume-medium");
-			if (volume > 0.66 && volume <= 1.0)
-				_notification.update (_("Volume"), "", "audio-volume-high");
-			_notification.set_hint ("value", (int32)(volume * 100.0));
-			if (_active_sink_input == -1 || _valid_roles[_active_sink_input] != "multimedia") {
-				/* No audio ping if we're playing multimedia */
-				_notification.set_hint ("sound-file", "/usr/share/sounds/ubuntu/stereo/message.ogg");
-			} else {
-				_notification.set_hint ("sound-file", null);
-			}
+			/* Watch for extreme */
+			if (volume > 0.75 && _active_port_headphone)
+				high_volume = true;
+			else
+				high_volume = false;
 
+			/* Determine Label */
+			string volume_label = "";
+			if (high_volume)
+				volume_label = _("High volume");
+
+			/* Choose an icon */
+			string icon = "audio-volume-muted";
+			if (volume <= 0.0)
+				icon = "audio-volume-muted";
+			else if (volume <= 0.3)
+				icon = "audio-volume-low";
+			else if (volume <= 0.7)
+				icon = "audio-volume-medium";
+			else
+				icon = "audio-volume-high";
+
+			/* Choose a sound */
+			string? sound = null;
+			if (!((_active_sink_input >= 0) && (_active_sink_input < _valid_roles.length)
+					&& (_valid_roles[_active_sink_input] == "multimedia")))
+				sound = "/usr/share/sounds/ubuntu/stereo/message.ogg";
+
+			/* Check tint */
+			string tint = "false";
+			if (high_volume)
+				tint = "true";
+
+			/* Put it all into the notification */
+			_notification.clear_hints ();
+			_notification.update (_("Volume"), volume_label, icon);
+			_notification.set_hint ("value", (int32)(volume * 100.0));
+			/* TODO: Removing sound until we can get all the roles cleaned up for
+			   when to play it. We expect this to come back, but in another landing.
+			_notification.set_hint ("sound-file", sound);
+			 */
+			_notification.set_hint ("x-canonical-value-bar-tint", tint);
+			_notification.set_hint ("x-canonical-private-synchronous", "true");
+			_notification.set_hint ("x-canonical-non-shaped-icon", "true");
+
+			/* Show it */
 			try {
 				_notification.show ();			
 			} catch (GLib.Error e) {
