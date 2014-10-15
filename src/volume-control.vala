@@ -618,11 +618,13 @@ public class VolumeControl : Object
 
 			/* Choose an icon */
 			string icon = "audio-volume-muted";
-			if (volume > 0.0 && volume <= 0.33)
+			if (volume <= 0.0)
+				icon = "audio-volume-muted";
+			else if (volume <= 0.3)
 				icon = "audio-volume-low";
-			if (volume > 0.33 && volume <= 0.66)
+			else if (volume <= 0.7)
 				icon = "audio-volume-medium";
-			if (volume > 0.66 && volume <= 1.0)
+			else
 				icon = "audio-volume-high";
 
 			/* Choose a sound */
