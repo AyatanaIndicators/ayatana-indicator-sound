@@ -186,6 +186,8 @@ public class IndicatorSound.Service: Object {
 		double v = this.volume_control.get_volume () + volume_step_percentage * delta;
 		this.volume_control.set_volume (v.clamp (0.0, this.max_volume));
 
+		/* TODO: Don't want to mess up the desktop today, but we should remove this
+		   scrolling change and merge that into volume control's notification */
 		if (this.notification != null) {
 			string icon;
 			if (v <= 0.0)
