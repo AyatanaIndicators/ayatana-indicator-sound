@@ -118,7 +118,6 @@ public class SoundMenu: Object
 				while ((location = find_action(this.volume_section, "indicator.high-volume-warning-item")) != -1) {
 					this.volume_section.remove (location);
 				}
-				this.volume_section.remove (this.volume_section.get_n_items () -1);
 				this.high_volume_warning_shown = false;
 			}
 		}
