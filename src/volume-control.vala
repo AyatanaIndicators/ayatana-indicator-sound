@@ -19,6 +19,7 @@
  */
 
 using PulseAudio;
+using Notify;
 using Gee;
 
 [CCode(cname="pa_cvolume_set", cheader_filename = "pulse/volume.h")]
@@ -67,6 +68,7 @@ public class VolumeControl : Object
 	private uint _accountservice_volume_timer = 0;
 	private bool _send_next_local_volume = false;
 	private double _account_service_volume = 0.0;
+	private Notify.Notification _notification;
 
 	public signal void volume_changed (double v);
 	public signal void mic_volume_changed (double v);
@@ -84,6 +86,13 @@ public class VolumeControl : Object
 
 		_mute_cancellable = new Cancellable ();
 		_volume_cancellable = new Cancellable ();
+
+		Notify.init ("Volume");
+		_notification = new Notify.Notification(_("Volume"), "", "audio-volume-muted");
+		_notification.set_hint ("value", 0);
+		_notification.set_hint ("x-canonical-private-synchronous", "true");
+		_notification.set_hint ("x-canonical-non-shaped-icon", "true");
+
 		setup_accountsservice.begin ();
 
 		this.reconnect_to_pulse ();
@@ -568,8 +577,34 @@ public class VolumeControl : Object
 
 	public void set_volume (double volume)
 	{
-		if (set_volume_internal (volume))
+		/* Using this to detect whether we're on the phone or not */
+		if (_pulse_use_stream_restore) {
+			if (volume == 0.0)
+				_notification.update (_("Volume"), "", "audio-volume-muted");
+			if (volume > 0.0 && volume <= 0.33)
+				_notification.update (_("Volume"), "", "audio-volume-low");
+			if (volume > 0.33 && volume <= 0.66)
+				_notification.update (_("Volume"), "", "audio-volume-medium");
+			if (volume > 0.66 && volume <= 1.0)
+				_notification.update (_("Volume"), "", "audio-volume-high");
+			_notification.set_hint ("value", (int32)(volume * 100.0));
+			if (_active_sink_input == -1 || _valid_roles[_active_sink_input] != "multimedia") {
+				/* No audio ping if we're playing multimedia */
+				_notification.set_hint ("sound-file", "/usr/share/sounds/ubuntu/stereo/message.ogg");
+			} else {
+				_notification.set_hint ("sound-file", null);
+			}
+
+			try {
+				_notification.show ();			
+			} catch (GLib.Error e) {
+				warning("Unable to send volume change notification: %s", e.message);
+			}
+		}
+
+		if (set_volume_internal (volume)) {
 			start_local_volume_timer();
+		}
 	}
 
 	void set_mic_volume_success_cb (Context c, int success)
