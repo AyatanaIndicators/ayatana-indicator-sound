@@ -642,7 +642,10 @@ public class VolumeControl : Object
 			_notification.clear_hints ();
 			_notification.update (_("Volume"), volume_label, icon);
 			_notification.set_hint ("value", (int32)(volume * 100.0));
+			/* TODO: Removing sound until we can get all the roles cleaned up for
+			   when to play it. We expect this to come back, but in another landing.
 			_notification.set_hint ("sound-file", sound);
+			 */
 			_notification.set_hint ("x-canonical-value-bar-tint", tint);
 			_notification.set_hint ("x-canonical-private-synchronous", "true");
 			_notification.set_hint ("x-canonical-non-shaped-icon", "true");
