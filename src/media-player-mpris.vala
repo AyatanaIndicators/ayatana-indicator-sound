@@ -283,7 +283,7 @@ public class MediaPlayerMpris: MediaPlayer {
 			this.fetch_playlists ();
 	}
 
-	void update_current_track (Variant metadata) {
+	void update_current_track (Variant? metadata) {
 		if (metadata != null) {
 			this.current_track = new Track (
 				sanitize_metadata_value (metadata.lookup_value ("xesam:artist", null)),

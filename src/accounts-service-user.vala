@@ -21,9 +21,24 @@ public class AccountsServiceUser : Object {
 	Act.UserManager accounts_manager = Act.UserManager.get_default();
 	Act.User? user = null;
 	AccountsServiceSoundSettings? proxy = null;
+	AccountsServicePrivacySettings? privacyproxy = null;
+	AccountsServiceSystemSoundSettings? syssoundproxy = null;
 	uint timer = 0;
 	MediaPlayer? _player = null;
 	GreeterBroadcast? greeter = null;
+
+	public bool showDataOnGreeter { get; set; }
+
+	bool _silentMode = false;
+	public bool silentMode {
+		get {
+			return _silentMode;
+		}
+		set {
+			if (syssoundproxy != null)
+				syssoundproxy.silent_mode = value;
+		}
+	}
 
 	public MediaPlayer? player {
 		set {
@@ -124,7 +139,23 @@ public class AccountsServiceUser : Object {
 				user.get_object_path(),
 				DBusProxyFlags.GET_INVALIDATED_PROPERTIES,
 				null,
-				new_proxy);
+				new_sound_proxy);
+
+			Bus.get_proxy.begin<AccountsServicePrivacySettings> (
+				BusType.SYSTEM,
+				"org.freedesktop.Accounts",
+				user.get_object_path(),
+				DBusProxyFlags.GET_INVALIDATED_PROPERTIES,
+				null,
+				new_privacy_proxy);
+
+			Bus.get_proxy.begin<AccountsServiceSystemSoundSettings> (
+				BusType.SYSTEM,
+				"org.freedesktop.Accounts",
+				user.get_object_path(),
+				DBusProxyFlags.GET_INVALIDATED_PROPERTIES,
+				null,
+				new_system_sound_proxy);
 		}
 	}
 
@@ -138,13 +169,52 @@ public class AccountsServiceUser : Object {
 		}
 	}
 
-	void new_proxy (GLib.Object? obj, AsyncResult res) {
+	void new_sound_proxy (GLib.Object? obj, AsyncResult res) {
 		try {
 			this.proxy = Bus.get_proxy.end (res);
 			this.player = _player;
 		} catch (Error e) {
 			this.proxy = null;
 			warning("Unable to get proxy to user sound settings: %s", e.message);
+		}
+	}
+
+	void new_privacy_proxy (GLib.Object? obj, AsyncResult res) {
+		try {
+			this.privacyproxy = Bus.get_proxy.end (res);
+
+			(this.privacyproxy as DBusProxy).g_properties_changed.connect((proxy, changed, invalid) => {
+				var welcomeval = changed.lookup_value("MessagesWelcomeScreen", new VariantType("b"));
+				if (welcomeval != null) {
+					debug("Messages on welcome screen changed");
+					this.showDataOnGreeter = welcomeval.get_boolean();
+				}
+			});
+
+			this.showDataOnGreeter = this.privacyproxy.messages_welcome_screen;
+		} catch (Error e) {
+			this.privacyproxy = null;
+			warning("Unable to get proxy to user privacy settings: %s", e.message);
+		}
+	}
+
+	void new_system_sound_proxy (GLib.Object? obj, AsyncResult res) {
+		try {
+			this.syssoundproxy = Bus.get_proxy.end (res);
+
+			(this.syssoundproxy as DBusProxy).g_properties_changed.connect((proxy, changed, invalid) => {
+				var silentvar = changed.lookup_value("SilentMode", new VariantType("b"));
+				if (silentvar != null) {
+					debug("Silent Mode changed");
+					this._silentMode = silentvar.get_boolean();
+					this.notify_property("silentMode");
+				}
+			});
+
+			this.silentMode = this.syssoundproxy.silent_mode;
+		} catch (Error e) {
+			this.syssoundproxy = null;
+			warning("Unable to get proxy to system sound settings: %s", e.message);
 		}
 	}
 

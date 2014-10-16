@@ -27,22 +27,35 @@ public class IndicatorSound.Service: Object {
 
 		this.volume_control = new VolumeControl ();
 
+		/* If we're on the greeter, don't export */
+		if (GLib.Environment.get_user_name() != "lightdm") {
+			this.accounts_service = new AccountsServiceUser();
+
+			this.accounts_service.notify["showDataOnGreeter"].connect(() => {
+				this.export_to_accounts_service = this.accounts_service.showDataOnGreeter;
+				eventually_update_player_actions();
+			});
+
+			this.export_to_accounts_service = this.accounts_service.showDataOnGreeter;
+		}
+
 		this.players = playerlist;
 		this.players.player_added.connect (this.player_added);
 		this.players.player_removed.connect (this.player_removed);
 
 		this.actions = new SimpleActionGroup ();
 		this.actions.add_action_entries (action_entries, this);
+		this.actions.add_action (this.create_silent_mode_action ());
 		this.actions.add_action (this.create_mute_action ());
 		this.actions.add_action (this.create_volume_action ());
 		this.actions.add_action (this.create_mic_volume_action ());
 		this.actions.add_action (this.create_high_volume_actions ());
 
 		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
-		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.HIDE_PLAYERS));
-		this.menus.insert ("phone_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS));
+		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.HIDE_PLAYERS | SoundMenu.DisplayFlags.GREETER_PLAYERS));
+		this.menus.insert ("phone_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_SILENT_MODE | SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS | SoundMenu.DisplayFlags.GREETER_PLAYERS));
 		this.menus.insert ("desktop", new SoundMenu ("indicator.desktop-settings", SoundMenu.DisplayFlags.SHOW_MUTE));
-		this.menus.insert ("phone", new SoundMenu ("indicator.phone-settings", SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS));
+		this.menus.insert ("phone", new SoundMenu ("indicator.phone-settings", SoundMenu.DisplayFlags.SHOW_SILENT_MODE | SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS));
 
 		this.menus.@foreach ( (profile, menu) => {
 			this.volume_control.bind_property ("active-mic", menu, "show-mic-volume", BindingFlags.SYNC_CREATE);
@@ -51,10 +64,6 @@ public class IndicatorSound.Service: Object {
 		this.menus.@foreach ( (profile, menu) => {
 			this.volume_control.bind_property ("high-volume", menu, "show-high-volume-warning", BindingFlags.SYNC_CREATE);
 		});
-
-		/* Setup handling for the greeter-export setting */
-		this.settings.changed["greeter-export"].connect( () => this.build_accountsservice() );
-		build_accountsservice();
 
 		this.sync_preferred_players ();
 		this.settings.changed["interested-media-players"].connect ( () => {
@@ -79,25 +88,8 @@ public class IndicatorSound.Service: Object {
 		}
 	}
 
-	void build_accountsservice () {
-		clear_acts_player();
-		this.accounts_service = null;
-
-		/* If we're not exporting, don't build anything */
-		if (!this.settings.get_boolean("greeter-export")) {
-			debug("Accounts service export disabled due to user setting");
-			return;
-		}
-
-		/* If we're on the greeter, don't export */
-		if (GLib.Environment.get_user_name() == "lightdm") {
-			debug("Accounts service export disabled due to being used on the greeter");
-			return;
-		}
-
-		this.accounts_service = new AccountsServiceUser();
-
-		this.eventually_update_player_actions();
+	bool greeter_show_track () {
+		return export_to_accounts_service;
 	}
 
 	void clear_acts_player () {
@@ -175,6 +167,7 @@ public class IndicatorSound.Service: Object {
 	Notify.Notification notification;
 	bool syncing_preferred_players = false;
 	AccountsServiceUser? accounts_service = null;
+	bool export_to_accounts_service = false;
 
 	/* Maximum volume as a scaling factor between the volume action's state and the value in
 	 * this.volume_control. See create_volume_action().
@@ -273,6 +266,36 @@ public class IndicatorSound.Service: Object {
 		builder.add ("{sv}", "icon", serialize_themed_icon (icon));
 		builder.add ("{sv}", "visible", new Variant.boolean (this.visible));
 		root_action.set_state (builder.end());
+	}
+
+	Action create_silent_mode_action () {
+		bool silentNow = false;
+		if (this.accounts_service != null) {
+			silentNow = this.accounts_service.silentMode;
+		}
+
+		var silent_action = new SimpleAction.stateful ("silent-mode", null, new Variant.boolean (silentNow));
+
+		/* If we're not dealing with accounts service, we'll just always be out
+		   of silent mode and that's cool. */
+		if (this.accounts_service == null) {
+			return silent_action;
+		}
+
+		this.accounts_service.notify["silentMode"].connect(() => {
+			silent_action.set_state(new Variant.boolean(this.accounts_service.silentMode));
+			this.update_root_icon ();
+		});
+
+		silent_action.activate.connect ((action, param) => {
+			action.change_state (new Variant.boolean (!action.get_state().get_boolean()));
+		});
+
+		silent_action.change_state.connect ((action, val) => {
+			this.accounts_service.silentMode = val.get_boolean();
+		});
+
+		return silent_action;
 	}
 
 	Action create_mute_action () {
@@ -398,11 +421,11 @@ public class IndicatorSound.Service: Object {
 		this.loop.quit ();
 	}
 
-	Variant action_state_for_player (MediaPlayer player) {
+	Variant action_state_for_player (MediaPlayer player, bool show_track = true) {
 		var builder = new VariantBuilder (new VariantType ("a{sv}"));
 		builder.add ("{sv}", "running", new Variant ("b", player.is_running));
 		builder.add ("{sv}", "state", new Variant ("s", player.state));
-		if (player.current_track != null) {
+		if (player.current_track != null && show_track) {
 			builder.add ("{sv}", "title", new Variant ("s", player.current_track.title));
 			builder.add ("{sv}", "artist", new Variant ("s", player.current_track.artist));
 			builder.add ("{sv}", "album", new Variant ("s", player.current_track.album));
@@ -421,8 +444,14 @@ public class IndicatorSound.Service: Object {
 				action.set_enabled (player.can_raise);
 			}
 			
+			SimpleAction? greeter_action = this.actions.lookup_action (player.id + ".greeter") as SimpleAction;
+			if (greeter_action != null) {
+				greeter_action.set_state (this.action_state_for_player (player, greeter_show_track()));
+				greeter_action.set_enabled (player.can_raise);
+			}
+			
 			/* If we're playing then put that data in accounts service */
-			if (player.is_running && accounts_service != null) {
+			if (player.is_running && export_to_accounts_service && accounts_service != null) {
 				accounts_service.player = player;
 				clear_accounts_player = false;
 			}
@@ -464,6 +493,11 @@ public class IndicatorSound.Service: Object {
 		action.set_enabled (player.can_raise);
 		action.activate.connect ( () => { player.activate (); });
 		this.actions.add_action (action);
+
+		SimpleAction greeter_action = new SimpleAction.stateful (player.id + ".greeter", null, this.action_state_for_player (player, greeter_show_track()));
+		greeter_action.set_enabled (player.can_raise);
+		greeter_action.activate.connect ( () => { player.activate (); });
+		this.actions.add_action (greeter_action);
 
 		var play_action = new SimpleAction.stateful ("play." + player.id, null, player.state);
 		play_action.activate.connect ( () => player.play_pause () );
