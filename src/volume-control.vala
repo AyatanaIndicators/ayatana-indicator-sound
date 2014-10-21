@@ -586,7 +586,8 @@ public class VolumeControl : Object
 
 	bool set_volume_internal (double volume)
 	{
-		return_val_if_fail (context.get_state () == Context.State.READY, false);
+		if (context.get_state () != Context.State.READY)
+			return false;
 
 		if (_volume != volume) {
 			_volume = volume;

@@ -1,3 +1,9 @@
+indicator-sound (12.10.2+14.10.20141016-0ubuntu2) UNRELEASED; urgency=medium
+
+  * Silent Mode checkbox in indicator (LP: #1342151)
+
+ -- Ted Gould <ted@ubuntu.com>  Tue, 21 Oct 2014 16:02:49 -0400
+
 indicator-sound (12.10.2+14.10.20141016-0ubuntu1) 14.09; urgency=low
 
   [ Lars Uebernickel ]
@@ -19,6 +25,13 @@ indicator-sound (12.10.2+14.10.20141010-0ubuntu1) utopic; urgency=low
     (LP: #1379618)
 
  -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 10 Oct 2014 15:40:30 +0000
+
+indicator-sound (12.10.2+14.10.20141009-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * Show a silent mode checkbox (LP: #1342151)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 09 Oct 2014 13:32:54 +0000
 
 indicator-sound (12.10.2+14.10.20141008-0ubuntu1) utopic; urgency=low
 
