@@ -24,7 +24,7 @@ Test-case indicator-sound/unity8-items-check
 
 Test-case indicator-sound/unity8-silent-mode
 <dl>
-	<dt>NOTE: This test currently doesn't work because of a bug: </dt>
+	<dt>NOTE: This test currently doesn't work because of a bug: http://pad.lv/1336715</dt>
 	<dt>Open the Sound menu</dt>
 		<dd>The sound menu includes an item "Silent Mode" which is a check box</dd>
 		<dd>The checkbox is not checked</dd>
