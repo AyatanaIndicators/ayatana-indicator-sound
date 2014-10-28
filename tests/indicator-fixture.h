@@ -27,10 +27,11 @@ class IndicatorFixture : public ::testing::Test
 	private:
 		std::string _indicatorPath;
 		std::string _indicatorAddress;
-		GMenu * _menu;
+		GMenuModel * _menu;
 		DbusTestService * _test_service;
 		DbusTestTask * _test_indicator;
 		DbusTestTask * _test_dummy;
+		GDBusConnection * _session;
 
 	public:
 		virtual ~IndicatorFixture() = default;
@@ -40,6 +41,7 @@ class IndicatorFixture : public ::testing::Test
 			: _indicatorPath(path)
 			, _indicatorAddress(addr)
 			, _menu(nullptr)
+			, _session(nullptr)
 		{
 		};
 
@@ -57,17 +59,53 @@ class IndicatorFixture : public ::testing::Test
 			dbus_test_service_add_task(_test_service, _test_dummy);
 
 			dbus_test_service_start_tasks(_test_service);
+
+			_session = g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr, nullptr);
 		}
 
 		virtual void TearDown() override
 		{
+			/* Menu structures that could be allocated */
+			g_clear_object(&_menu);
+
+			/* D-Bus Test Stuff */
 			g_clear_object(&_test_dummy);
 			g_clear_object(&_test_indicator);
 			g_clear_object(&_test_service);
+
+			/* Wait for D-Bus session bus to go */
+			if (!g_dbus_connection_is_closed(_session)) {
+				g_dbus_connection_close_sync(_session, nullptr, nullptr);
+			}
+			g_clear_object(&_session);
+		}
+
+		static void _changed_quit (GMenuModel * model, gint position, gint removed, gint added, GMainLoop * loop) {
+			g_main_loop_quit(loop);
+		}
+
+		static gboolean _loop_quit (gpointer user_data) {
+			g_main_loop_quit((GMainLoop *)user_data);
+			return G_SOURCE_CONTINUE;
 		}
 
 		void setMenu (const std::string& path) {
+			g_clear_object(&_menu);
+			_menu = G_MENU_MODEL(g_dbus_menu_model_get(_session, _indicatorAddress.c_str(), path.c_str()));
 
+			GMainLoop * temploop = g_main_loop_new(nullptr, FALSE);
+
+			/* Our two exit criteria */
+			gulong signal = g_signal_connect(G_OBJECT(_menu), "items-changed", G_CALLBACK(_changed_quit), temploop);
+			guint timer = g_timeout_add_seconds(1, _loop_quit, temploop);
+
+			/* Wait for sync */
+			g_main_loop_run(temploop);
+
+			/* Clean up */
+			g_source_remove(timer);
+			g_signal_handler_disconnect(G_OBJECT(_menu), signal);
+			g_main_loop_unref(temploop);
 		}
 
 		void expectActionExists (const std::string& name) {
@@ -93,7 +131,7 @@ class IndicatorFixture : public ::testing::Test
 		}
 
 		void expectMenuAttributeRecurse (const std::vector<int> menuLocation, const std::string& attribute, GVariant * value, unsigned int index, GMenuModel * menu) {
-			ASSERT_LT(menuLocation.size(), index);
+			ASSERT_LT(index, menuLocation.size());
 
 			if (menuLocation.size() - 1 == index)
 				return expectMenuAttributeVerify(menuLocation[index], menu, attribute, value);
@@ -109,7 +147,7 @@ class IndicatorFixture : public ::testing::Test
 
 		void expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, GVariant * value) {
 			g_variant_ref_sink(value);
-			expectMenuAttributeRecurse(menuLocation, attribute, value, 0, G_MENU_MODEL(_menu));
+			expectMenuAttributeRecurse(menuLocation, attribute, value, 0, _menu);
 			g_variant_unref(value);
 		}
 
@@ -123,6 +161,7 @@ class IndicatorFixture : public ::testing::Test
 			expectMenuAttribute(menuLocation, attribute, var);
 		}
 
-
 };
+
+#define EXPECT_MENU_ATTRIB(menu, attrib, value) expectMenuAttribute(menu, attrib, value)
 
