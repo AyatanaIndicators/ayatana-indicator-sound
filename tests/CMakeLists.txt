@@ -185,6 +185,9 @@ add_test(greeter-list-test-iterator
 # Indicator Test
 ###########################
 
+add_definitions(
+	-DINDICATOR_SOUND_SERVICE_BINARY="${CMAKE_BINARY_DIR}/src/indicator-sound-service"
+)
 add_executable (indicator-test indicator-test.cc)
 target_link_libraries (
 	indicator-test

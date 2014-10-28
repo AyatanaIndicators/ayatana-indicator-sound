@@ -26,7 +26,7 @@ class IndicatorTest : public IndicatorFixture
 {
 protected:
 	IndicatorTest (void) :
-		IndicatorFixture("/test", "com.test")
+		IndicatorFixture(INDICATOR_SOUND_SERVICE_BINARY, "com.canonical.indicator.sound")
 	{
 	}
 
