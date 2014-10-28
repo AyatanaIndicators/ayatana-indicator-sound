@@ -20,6 +20,7 @@
 
 #include <gtest/gtest.h>
 #include <gio/gio.h>
+#include <libdbustest/dbus-test.h>
 
 class IndicatorFixture : public ::testing::Test
 {
@@ -27,6 +28,9 @@ class IndicatorFixture : public ::testing::Test
 		std::string _indicatorPath;
 		std::string _indicatorAddress;
 		GMenu * _menu;
+		DbusTestService * _test_service;
+		DbusTestTask * _test_indicator;
+		DbusTestTask * _test_dummy;
 
 	public:
 		virtual ~IndicatorFixture() = default;
@@ -43,14 +47,23 @@ class IndicatorFixture : public ::testing::Test
 	protected:
 		virtual void SetUp() override
 		{
+			_test_service = dbus_test_service_new(nullptr);
 
+			_test_indicator = DBUS_TEST_TASK(dbus_test_process_new(_indicatorPath.c_str()));
+			dbus_test_service_add_task(_test_service, _test_indicator);
 
+			_test_dummy = dbus_test_task_new();
+			dbus_test_task_set_wait_for(_test_dummy, _indicatorAddress.c_str());
+			dbus_test_service_add_task(_test_service, _test_dummy);
+
+			dbus_test_service_start_tasks(_test_service);
 		}
 
 		virtual void TearDown() override
 		{
-
-
+			g_clear_object(&_test_dummy);
+			g_clear_object(&_test_indicator);
+			g_clear_object(&_test_service);
 		}
 
 		void setMenu (const std::string& path) {
