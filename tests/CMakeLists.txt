@@ -181,3 +181,18 @@ add_test(greeter-list-test-iterator
 	greeter-list-test  --gtest_filter=GreeterListTest.BasicIterator
 )
 
+###########################
+# Indicator Test
+###########################
+
+add_executable (indicator-test indicator-test.cc)
+target_link_libraries (
+	indicator-test
+	gtest
+	${SOUNDSERVICE_LIBRARIES}
+	${TEST_LIBRARIES}
+)
+
+# Split tests to work around libaccountservice sucking
+add_test(indicator-test indicator-test)
+
