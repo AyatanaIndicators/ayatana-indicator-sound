@@ -17,6 +17,7 @@
  *      Ted Gould <ted@canonical.com>
  */
 
+#include <memory>
 
 #include <gtest/gtest.h>
 #include <gio/gio.h>
@@ -138,11 +139,14 @@ class IndicatorFixture : public ::testing::Test
 			if (location >= g_menu_model_get_n_items(menu))
 				return;
 
-			auto menuval = g_menu_model_get_item_attribute_value(menu, location, attribute.c_str(), g_variant_get_type(value));
+			auto menuval = std::shared_ptr<GVariant>(g_menu_model_get_item_attribute_value(menu, location, attribute.c_str(), g_variant_get_type(value)), [](GVariant * varptr) {
+				if (varptr != nullptr)
+					g_variant_unref(varptr);
+			});
+
 			EXPECT_NE(nullptr, menuval);
 			if (menuval != nullptr) {
-				EXPECT_TRUE(g_variant_equal(value, menuval));
-				g_variant_unref(menuval);
+				EXPECT_TRUE(g_variant_equal(value, menuval.get()));
 			}
 		}
 
@@ -152,19 +156,24 @@ class IndicatorFixture : public ::testing::Test
 			if (menuLocation.size() - 1 == index)
 				return expectMenuAttributeVerify(menuLocation[index], menu, attribute, value);
 
-			auto submenu = g_menu_model_get_item_link(menu, menuLocation[index], G_MENU_LINK_SUBMENU);
+			auto submenu = std::shared_ptr<GMenuModel>(g_menu_model_get_item_link(menu, menuLocation[index], G_MENU_LINK_SUBMENU), [](GMenuModel * modelptr) {
+				g_clear_object(&modelptr);
+			});
+
 			EXPECT_NE(nullptr, submenu);
 			if (submenu == nullptr)
 				return;
 
-			expectMenuAttributeRecurse(menuLocation, attribute, value, index++, submenu);
-			g_object_unref(submenu);
+			expectMenuAttributeRecurse(menuLocation, attribute, value, index++, submenu.get());
 		}
 
 		void expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, GVariant * value) {
-			g_variant_ref_sink(value);
+			auto varref = std::shared_ptr<GVariant>(g_variant_ref_sink(value), [](GVariant * varptr) {
+				if (varptr != nullptr)
+					g_variant_unref(varptr);
+			});
+
 			expectMenuAttributeRecurse(menuLocation, attribute, value, 0, _menu);
-			g_variant_unref(value);
 		}
 
 		void expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, bool value) {
