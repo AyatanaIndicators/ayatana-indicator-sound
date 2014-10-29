@@ -27,6 +27,7 @@ class IndicatorFixture : public ::testing::Test
 	private:
 		std::string _indicatorPath;
 		std::string _indicatorAddress;
+		GMainLoop * _loop;
 		GMenuModel * _menu;
 		DbusTestService * _test_service;
 		DbusTestTask * _test_indicator;
@@ -40,6 +41,7 @@ class IndicatorFixture : public ::testing::Test
 				const std::string& addr)
 			: _indicatorPath(path)
 			, _indicatorAddress(addr)
+			, _loop(nullptr)
 			, _menu(nullptr)
 			, _session(nullptr)
 		{
@@ -49,6 +51,8 @@ class IndicatorFixture : public ::testing::Test
 	protected:
 		virtual void SetUp() override
 		{
+			_loop = g_main_loop_new(nullptr, FALSE);
+
 			_test_service = dbus_test_service_new(nullptr);
 
 			_test_indicator = DBUS_TEST_TASK(dbus_test_process_new(_indicatorPath.c_str()));
@@ -57,6 +61,10 @@ class IndicatorFixture : public ::testing::Test
 			_test_dummy = dbus_test_task_new();
 			dbus_test_task_set_wait_for(_test_dummy, _indicatorAddress.c_str());
 			dbus_test_service_add_task(_test_service, _test_dummy);
+
+			DbusTestBustle * bustle = dbus_test_bustle_new("indicator-test.bustle");
+			dbus_test_service_add_task(_test_service, DBUS_TEST_TASK(bustle));
+			g_object_unref(bustle);
 
 			dbus_test_service_start_tasks(_test_service);
 
@@ -78,34 +86,39 @@ class IndicatorFixture : public ::testing::Test
 				g_dbus_connection_close_sync(_session, nullptr, nullptr);
 			}
 			g_clear_object(&_session);
+
+			/* Dropping temp loop */
+			g_main_loop_unref(_loop);
 		}
 
 		static void _changed_quit (GMenuModel * model, gint position, gint removed, gint added, GMainLoop * loop) {
+			g_debug("Got Menus");
 			g_main_loop_quit(loop);
 		}
 
 		static gboolean _loop_quit (gpointer user_data) {
+			g_warning("Menu Timeout");
 			g_main_loop_quit((GMainLoop *)user_data);
 			return G_SOURCE_CONTINUE;
 		}
 
 		void setMenu (const std::string& path) {
 			g_clear_object(&_menu);
+			g_debug("Getting Menu: %s:%s", _indicatorAddress.c_str(), path.c_str());
 			_menu = G_MENU_MODEL(g_dbus_menu_model_get(_session, _indicatorAddress.c_str(), path.c_str()));
 
-			GMainLoop * temploop = g_main_loop_new(nullptr, FALSE);
-
 			/* Our two exit criteria */
-			gulong signal = g_signal_connect(G_OBJECT(_menu), "items-changed", G_CALLBACK(_changed_quit), temploop);
-			guint timer = g_timeout_add_seconds(1, _loop_quit, temploop);
+			gulong signal = g_signal_connect(G_OBJECT(_menu), "items-changed", G_CALLBACK(_changed_quit), _loop);
+			guint timer = g_timeout_add_seconds(5, _loop_quit, _loop);
+
+			g_menu_model_get_n_items(_menu);
 
 			/* Wait for sync */
-			g_main_loop_run(temploop);
+			g_main_loop_run(_loop);
 
 			/* Clean up */
 			g_source_remove(timer);
 			g_signal_handler_disconnect(G_OBJECT(_menu), signal);
-			g_main_loop_unref(temploop);
 		}
 
 		void expectActionExists (const std::string& name) {

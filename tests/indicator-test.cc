@@ -37,4 +37,10 @@ TEST_F(IndicatorTest, StartStop) {
 	setMenu("/com/canonical/indicator/sound/phone");
 
 	EXPECT_MENU_ATTRIB({0}, "action", "indicator.root");
+	EXPECT_MENU_ATTRIB({0}, "x-canonical-type", "com.canonical.indicator.root");
+
+	// EXPECT_MENU_ATTRIB({0, 0, 0}, "action", "indicator.silent-mode");
+
+	setMenu("/com/canonical/indicator/sound/desktop");
+	EXPECT_MENU_ATTRIB({0}, "action", "indicator.root");
 }
