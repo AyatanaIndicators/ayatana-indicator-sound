@@ -138,9 +138,12 @@ class IndicatorFixture : public ::testing::Test
 			if (location >= g_menu_model_get_n_items(menu))
 				return;
 
-			auto menuval = g_menu_model_get_item_attribute_value(menu, location, attribute.c_str(), NULL);
-			EXPECT_TRUE(g_variant_equal(value, menuval));
-			g_variant_unref(menuval);
+			auto menuval = g_menu_model_get_item_attribute_value(menu, location, attribute.c_str(), g_variant_get_type(value));
+			EXPECT_NE(nullptr, menuval);
+			if (menuval != nullptr) {
+				EXPECT_TRUE(g_variant_equal(value, menuval));
+				g_variant_unref(menuval);
+			}
 		}
 
 		void expectMenuAttributeRecurse (const std::vector<int> menuLocation, const std::string& attribute, GVariant * value, unsigned int index, GMenuModel * menu) {
@@ -171,6 +174,11 @@ class IndicatorFixture : public ::testing::Test
 
 		void expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, std::string value) {
 			GVariant * var = g_variant_new_string(value.c_str());
+			expectMenuAttribute(menuLocation, attribute, var);
+		}
+
+		void expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, const char * value) {
+			GVariant * var = g_variant_new_string(value);
 			expectMenuAttribute(menuLocation, attribute, var);
 		}
 
