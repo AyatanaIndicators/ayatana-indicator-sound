@@ -59,15 +59,20 @@ class IndicatorFixture : public ::testing::Test
 			_test_service = dbus_test_service_new(nullptr);
 
 			_test_indicator = DBUS_TEST_TASK(dbus_test_process_new(_indicatorPath.c_str()));
+			dbus_test_task_set_name(_test_indicator, "Indicator");
 			dbus_test_service_add_task(_test_service, _test_indicator);
 
 			_test_dummy = dbus_test_task_new();
 			dbus_test_task_set_wait_for(_test_dummy, _indicatorAddress.c_str());
+			dbus_test_task_set_name(_test_dummy, "Dummy");
 			dbus_test_service_add_task(_test_service, _test_dummy);
 
-			DbusTestBustle * bustle = dbus_test_bustle_new("indicator-test.bustle");
-			dbus_test_service_add_task(_test_service, DBUS_TEST_TASK(bustle));
-			g_object_unref(bustle);
+			if (true) {
+				DbusTestBustle * bustle = dbus_test_bustle_new("indicator-test.bustle");
+				dbus_test_task_set_name(DBUS_TEST_TASK(bustle), "Bustle");
+				dbus_test_service_add_task(_test_service, DBUS_TEST_TASK(bustle));
+				g_object_unref(bustle);
+			}
 
 			dbus_test_service_start_tasks(_test_service);
 
