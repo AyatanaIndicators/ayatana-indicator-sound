@@ -154,21 +154,21 @@ class IndicatorFixture : public ::testing::Test
 			return menuval;
 		}
 
-		std::shared_ptr<GVariant> getMenuAttributeRecurse (const std::vector<int> menuLocation, const std::string& attribute, std::shared_ptr<GVariant>& value, unsigned int index, std::shared_ptr<GMenuModel>& menu) {
-			if (index >= menuLocation.size())
+		std::shared_ptr<GVariant> getMenuAttributeRecurse (std::vector<int>::const_iterator menuLocation, std::vector<int>::const_iterator menuEnd, const std::string& attribute, std::shared_ptr<GVariant>& value, std::shared_ptr<GMenuModel>& menu) {
+			if (menuLocation == menuEnd)
 				return nullptr;
 
-			if (menuLocation.size() - 1 == index)
-				return getMenuAttributeVal(menuLocation[index], menu, attribute, value);
+			if (menuLocation + 1 == menuEnd)
+				return getMenuAttributeVal(*menuLocation, menu, attribute, value);
 
-			auto submenu = std::shared_ptr<GMenuModel>(g_menu_model_get_item_link(menu.get(), menuLocation[index], G_MENU_LINK_SUBMENU), [](GMenuModel * modelptr) {
+			auto submenu = std::shared_ptr<GMenuModel>(g_menu_model_get_item_link(menu.get(), *menuLocation, G_MENU_LINK_SUBMENU), [](GMenuModel * modelptr) {
 				g_clear_object(&modelptr);
 			});
 
 			if (submenu == nullptr)
 				return nullptr;
 
-			return getMenuAttributeRecurse(menuLocation, attribute, value, index++, submenu);
+			return getMenuAttributeRecurse(menuLocation + 1, menuEnd, attribute, value, submenu);
 		}
 
 		bool expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, GVariant * value) {
@@ -177,7 +177,7 @@ class IndicatorFixture : public ::testing::Test
 					g_variant_unref(varptr);
 			});
 
-			auto attrib = getMenuAttributeRecurse(menuLocation, attribute, varref, 0, _menu);
+			auto attrib = getMenuAttributeRecurse(menuLocation.cbegin(), menuLocation.cend(), attribute, varref, _menu);
 			bool same = false;
 
 			if (attrib != nullptr && varref != nullptr) {
