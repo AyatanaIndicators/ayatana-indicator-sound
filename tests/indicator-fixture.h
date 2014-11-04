@@ -18,6 +18,8 @@
  */
 
 #include <memory>
+#include <algorithm>
+#include <string>
 
 #include <gtest/gtest.h>
 #include <gio/gio.h>
@@ -29,7 +31,7 @@ class IndicatorFixture : public ::testing::Test
 		std::string _indicatorPath;
 		std::string _indicatorAddress;
 		GMainLoop * _loop;
-		GMenuModel * _menu;
+		std::shared_ptr<GMenuModel>  _menu;
 		DbusTestService * _test_service;
 		DbusTestTask * _test_indicator;
 		DbusTestTask * _test_dummy;
@@ -74,8 +76,7 @@ class IndicatorFixture : public ::testing::Test
 
 		virtual void TearDown() override
 		{
-			/* Menu structures that could be allocated */
-			g_clear_object(&_menu);
+			_menu.reset();
 
 			/* D-Bus Test Stuff */
 			g_clear_object(&_test_dummy);
@@ -104,22 +105,25 @@ class IndicatorFixture : public ::testing::Test
 		}
 
 		void setMenu (const std::string& path) {
-			g_clear_object(&_menu);
+			_menu.reset();
+
 			g_debug("Getting Menu: %s:%s", _indicatorAddress.c_str(), path.c_str());
-			_menu = G_MENU_MODEL(g_dbus_menu_model_get(_session, _indicatorAddress.c_str(), path.c_str()));
+			_menu = std::shared_ptr<GMenuModel>(G_MENU_MODEL(g_dbus_menu_model_get(_session, _indicatorAddress.c_str(), path.c_str())), [](GMenuModel * modelptr) {
+				g_clear_object(&modelptr);
+			});
 
 			/* Our two exit criteria */
-			gulong signal = g_signal_connect(G_OBJECT(_menu), "items-changed", G_CALLBACK(_changed_quit), _loop);
+			gulong signal = g_signal_connect(G_OBJECT(_menu.get()), "items-changed", G_CALLBACK(_changed_quit), _loop);
 			guint timer = g_timeout_add_seconds(5, _loop_quit, _loop);
 
-			g_menu_model_get_n_items(_menu);
+			g_menu_model_get_n_items(_menu.get());
 
 			/* Wait for sync */
 			g_main_loop_run(_loop);
 
 			/* Clean up */
 			g_source_remove(timer);
-			g_signal_handler_disconnect(G_OBJECT(_menu), signal);
+			g_signal_handler_disconnect(G_OBJECT(_menu.get()), signal);
 		}
 
 		void expectActionExists (const std::string& name) {
@@ -134,64 +138,107 @@ class IndicatorFixture : public ::testing::Test
 
 		}
 
-		void expectMenuAttributeVerify (int location, GMenuModel * menu, const std::string& attribute, GVariant * value) {
-			EXPECT_LT(location, g_menu_model_get_n_items(menu));
-			if (location >= g_menu_model_get_n_items(menu))
-				return;
+		std::shared_ptr<GVariant> getMenuAttributeVal (int location, std::shared_ptr<GMenuModel>& menu, const std::string& attribute, std::shared_ptr<GVariant>& value) {
+			if (!(location < g_menu_model_get_n_items(menu.get()))) {
+				return nullptr;
+			}
 
-			auto menuval = std::shared_ptr<GVariant>(g_menu_model_get_item_attribute_value(menu, location, attribute.c_str(), g_variant_get_type(value)), [](GVariant * varptr) {
+			if (location >= g_menu_model_get_n_items(menu.get()))
+				return nullptr;
+
+			auto menuval = std::shared_ptr<GVariant>(g_menu_model_get_item_attribute_value(menu.get(), location, attribute.c_str(), g_variant_get_type(value.get())), [](GVariant * varptr) {
 				if (varptr != nullptr)
 					g_variant_unref(varptr);
 			});
 
-			EXPECT_NE(nullptr, menuval);
-			if (menuval != nullptr) {
-				EXPECT_TRUE(g_variant_equal(value, menuval.get()));
-			}
+			return menuval;
 		}
 
-		void expectMenuAttributeRecurse (const std::vector<int> menuLocation, const std::string& attribute, GVariant * value, unsigned int index, GMenuModel * menu) {
-			ASSERT_LT(index, menuLocation.size());
+		std::shared_ptr<GVariant> getMenuAttributeRecurse (const std::vector<int> menuLocation, const std::string& attribute, std::shared_ptr<GVariant>& value, unsigned int index, std::shared_ptr<GMenuModel>& menu) {
+			if (index >= menuLocation.size())
+				return nullptr;
 
 			if (menuLocation.size() - 1 == index)
-				return expectMenuAttributeVerify(menuLocation[index], menu, attribute, value);
+				return getMenuAttributeVal(menuLocation[index], menu, attribute, value);
 
-			auto submenu = std::shared_ptr<GMenuModel>(g_menu_model_get_item_link(menu, menuLocation[index], G_MENU_LINK_SUBMENU), [](GMenuModel * modelptr) {
+			auto submenu = std::shared_ptr<GMenuModel>(g_menu_model_get_item_link(menu.get(), menuLocation[index], G_MENU_LINK_SUBMENU), [](GMenuModel * modelptr) {
 				g_clear_object(&modelptr);
 			});
 
-			EXPECT_NE(nullptr, submenu);
 			if (submenu == nullptr)
-				return;
+				return nullptr;
 
-			expectMenuAttributeRecurse(menuLocation, attribute, value, index++, submenu.get());
+			return getMenuAttributeRecurse(menuLocation, attribute, value, index++, submenu);
 		}
 
-		void expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, GVariant * value) {
+		bool expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, GVariant * value) {
 			auto varref = std::shared_ptr<GVariant>(g_variant_ref_sink(value), [](GVariant * varptr) {
 				if (varptr != nullptr)
 					g_variant_unref(varptr);
 			});
 
-			expectMenuAttributeRecurse(menuLocation, attribute, value, 0, _menu);
+			auto attrib = getMenuAttributeRecurse(menuLocation, attribute, varref, 0, _menu);
+			bool same = false;
+
+			if (attrib != nullptr && varref != nullptr) {
+				same = g_variant_equal(attrib.get(), varref.get());
+			}
+
+			if (!same) {
+				gchar * valstr = nullptr;
+				gchar * attstr = nullptr;
+
+				if (attrib != nullptr) {
+					attstr = g_variant_print(attrib.get(), TRUE);
+				} else {
+					attstr = g_strdup("nullptr");
+				}
+
+				if (varref != nullptr) {
+					valstr = g_variant_print(varref.get(), TRUE);
+				} else {
+					valstr = g_strdup("nullptr");
+				}
+
+				std::string menuprint("{ ");
+				std::for_each(menuLocation.begin(), menuLocation.end(), [&menuprint](int i) {
+					menuprint.append(std::to_string(i));
+					menuprint.append(", ");
+				});
+				menuprint += "}";
+
+				std::cout <<
+					"      Menu: " << menuprint << std::endl <<
+					" Attribute: " << attribute << std::endl <<
+					"  Expected: " << valstr << std::endl <<
+					"    Actual: " << attstr << std::endl;
+
+				g_free(valstr);
+				g_free(attstr);
+			}
+
+			return same;
 		}
 
-		void expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, bool value) {
+		bool expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, bool value) {
 			GVariant * var = g_variant_new_boolean(value);
-			expectMenuAttribute(menuLocation, attribute, var);
+			return expectMenuAttribute(menuLocation, attribute, var);
 		}
 
-		void expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, std::string value) {
+		bool expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, std::string value) {
 			GVariant * var = g_variant_new_string(value.c_str());
-			expectMenuAttribute(menuLocation, attribute, var);
+			return expectMenuAttribute(menuLocation, attribute, var);
 		}
 
-		void expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, const char * value) {
+		bool expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, const char * value) {
 			GVariant * var = g_variant_new_string(value);
-			expectMenuAttribute(menuLocation, attribute, var);
+			return expectMenuAttribute(menuLocation, attribute, var);
 		}
 
 };
 
 #define EXPECT_MENU_ATTRIB(menu, attrib, value) expectMenuAttribute(menu, attrib, value)
+#define ASSERT_MENU_ATTRIB(menu, attrib, value) \
+	if (!expectMenuAttribute(menu, attrib, value)) \
+		return;
 
