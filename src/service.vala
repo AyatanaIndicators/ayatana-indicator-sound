@@ -131,6 +131,9 @@ public class IndicatorSound.Service: Object {
 		}
 
 		set {
+			if (this.allow_amplified_volume == value)
+				return;
+
 			if (value) {
 				/* from pulse/volume.h: #define PA_VOLUME_UI_MAX (pa_sw_volume_from_dB(+11.0)) */
 				this.max_volume = (double)PulseAudio.Volume.sw_from_dB(11.0) / PulseAudio.Volume.NORM;
