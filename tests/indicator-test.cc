@@ -47,3 +47,9 @@ TEST_F(IndicatorTest, DesktopMenu) {
 
 	EXPECT_MENU_ATTRIB({0}, "action", "indicator.root");
 }
+
+TEST_F(IndicatorTest, SilentActions) {
+	setActions("/com/canonical/indicator/sound");
+
+	expectActionExists("indicator.root");
+}

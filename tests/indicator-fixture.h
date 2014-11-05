@@ -25,12 +25,23 @@
 #include <gio/gio.h>
 #include <libdbustest/dbus-test.h>
 
+extern "C" {
+
+/* Super useful function that GLib has hidden from us :-( */
+gboolean
+g_dbus_action_group_sync (GDBusActionGroup  *group,
+                          GCancellable      *cancellable,
+                          GError           **error);
+
+}
+
 class IndicatorFixture : public ::testing::Test
 {
 	private:
 		std::string _indicatorPath;
 		std::string _indicatorAddress;
 		std::shared_ptr<GMenuModel>  _menu;
+		std::shared_ptr<GActionGroup> _actions;
 		DbusTestService * _test_service;
 		DbusTestTask * _test_indicator;
 		DbusTestTask * _test_dummy;
@@ -79,6 +90,7 @@ class IndicatorFixture : public ::testing::Test
 		virtual void TearDown() override
 		{
 			_menu.reset();
+			_actions.reset();
 
 			/* D-Bus Test Stuff */
 			g_clear_object(&_test_dummy);
@@ -93,15 +105,27 @@ class IndicatorFixture : public ::testing::Test
 		}
 
 	private:
-		static void _changed_quit (GMenuModel * model, gint position, gint removed, gint added, GMainLoop * loop) {
-			g_debug("Got Menus");
-			g_main_loop_quit(loop);
-		}
-
 		static gboolean _loop_quit (gpointer user_data) {
 			g_warning("Menu Timeout");
 			g_main_loop_quit((GMainLoop *)user_data);
 			return G_SOURCE_CONTINUE;
+		}
+
+		void waitForCore (GObject * obj, const gchar * signalname) {
+			auto loop = g_main_loop_new(nullptr, FALSE);
+
+			/* Our two exit criteria */
+			gulong signal = g_signal_connect_swapped(obj, signalname, G_CALLBACK(g_main_loop_quit), loop);
+			guint timer = g_timeout_add_seconds(5, _loop_quit, loop);
+
+			/* Wait for sync */
+			g_main_loop_run(loop);
+
+			/* Clean up */
+			g_source_remove(timer);
+			g_signal_handler_disconnect(obj, signal);
+
+			g_main_loop_unref(loop);
 		}
 
 		void menuWaitForItems (const std::shared_ptr<GMenuModel>& menu) {
@@ -110,22 +134,18 @@ class IndicatorFixture : public ::testing::Test
 			if (count != 0)
 				return;
 
-			auto loop = g_main_loop_new(nullptr, FALSE);
+			waitForCore(G_OBJECT(menu.get()), "items-changed");
+		}
 
-			/* Our two exit criteria */
-			gulong signal = g_signal_connect(G_OBJECT(menu.get()), "items-changed", G_CALLBACK(_changed_quit), loop);
-			guint timer = g_timeout_add_seconds(5, _loop_quit, loop);
+		void agWaitForActions (const std::shared_ptr<GActionGroup>& group) {
+			auto list = g_action_group_list_actions(group.get());
 
-			g_menu_model_get_n_items(menu.get());
+			if (list != nullptr) {
+				g_strfreev(list);
+				return;
+			}
 
-			/* Wait for sync */
-			g_main_loop_run(loop);
-
-			/* Clean up */
-			g_source_remove(timer);
-			g_signal_handler_disconnect(G_OBJECT(menu.get()), signal);
-
-			g_main_loop_unref(loop);
+			waitForCore(G_OBJECT(group.get()), "action-added");
 		}
 
 	protected:
@@ -138,6 +158,16 @@ class IndicatorFixture : public ::testing::Test
 			});
 
 			menuWaitForItems(_menu);
+		}
+
+		void setActions (const std::string& path) {
+			_actions.reset();
+
+			_actions = std::shared_ptr<GActionGroup>(G_ACTION_GROUP(g_dbus_action_group_get(_session, _indicatorAddress.c_str(), path.c_str())), [](GActionGroup * groupptr) {
+				g_clear_object(&groupptr);
+			});
+
+			agWaitForActions(_actions);
 		}
 
 		void expectActionExists (const std::string& name) {
