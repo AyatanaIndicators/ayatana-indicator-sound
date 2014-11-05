@@ -1,11 +1,12 @@
-indicator-sound (12.10.2+14.10.20141010-0ubuntu5) UNRELEASED; urgency=medium
+indicator-sound (12.10.2+14.10.20141010-0ubuntu6) UNRELEASED; urgency=medium
 
   * Remove various Vala warnings
   * Show notifications on volume change (LP: #1378564, #1378961)
   * Warn on high audio levels when using headphones (LP: #123633, #1373404)
   * service.vala: don't call set_volume unnecessarily (LP: #1381871)
+  * Integration test for audio roles
 
- -- Ted Gould <ted@ubuntu.com>  Wed, 05 Nov 2014 10:37:17 -0600
+ -- Ted Gould <ted@ubuntu.com>  Wed, 05 Nov 2014 10:39:03 -0600
 
 indicator-sound (12.10.2+14.10.20141010-0ubuntu1) utopic; urgency=low
 
