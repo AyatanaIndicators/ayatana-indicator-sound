@@ -69,7 +69,7 @@ public class IndicatorSound.Service: Object {
 			List<string> caps = Notify.get_server_caps ();
 			if (caps.find_custom ("x-canonical-private-synchronous", strcmp) != null) {
 				this.notification = new Notify.Notification ("indicator-sound", "", "");
-				this.notification.set_hint_string ("x-canonical-private-synchronous", "indicator-sound");
+				this.notification.set_hint ("x-canonical-private-synchronous", "indicator-sound");
 			}
 		}
 
@@ -186,7 +186,7 @@ public class IndicatorSound.Service: Object {
 				icon = "notification-audio-volume-high";
 
 			this.notification.update ("indicator-sound", "", icon);
-			this.notification.set_hint_int32 ("value", ((int32) (100 * v / this.max_volume)).clamp (-1, 101));
+			this.notification.set_hint ("value", ((int32) (100 * v / this.max_volume)).clamp (-1, 101));
 			try {
 				this.notification.show ();
 			}
