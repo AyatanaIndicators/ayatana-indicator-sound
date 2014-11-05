@@ -260,6 +260,16 @@ class IndicatorFixture : public ::testing::Test
 			return expectActionStateIs(name, var);
 		}
 
+		bool expectActionStateIs (const std::string& name, double value) {
+			GVariant * var = g_variant_new_double(value);
+			return expectActionStateIs(name, var);
+		}
+
+		bool expectActionStateIs (const std::string& name, float value) {
+			GVariant * var = g_variant_new_double(value);
+			return expectActionStateIs(name, var);
+		}
+
 
 	private:
 		std::shared_ptr<GVariant> getMenuAttributeVal (int location, std::shared_ptr<GMenuModel>& menu, const std::string& attribute, std::shared_ptr<GVariant>& value) {
