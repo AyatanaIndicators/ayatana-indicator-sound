@@ -33,14 +33,17 @@ protected:
 };
 
 
-TEST_F(IndicatorTest, StartStop) {
+TEST_F(IndicatorTest, PhoneMenu) {
 	setMenu("/com/canonical/indicator/sound/phone");
 
 	EXPECT_MENU_ATTRIB({0}, "action", "indicator.root");
 	EXPECT_MENU_ATTRIB({0}, "x-canonical-type", "com.canonical.indicator.root");
 
 	expectMenuAttribute({0, 0, 0}, "action", "indicator.silent-mode");
+}
 
+TEST_F(IndicatorTest, DesktopMenu) {
 	setMenu("/com/canonical/indicator/sound/desktop");
+
 	EXPECT_MENU_ATTRIB({0}, "action", "indicator.root");
 }
