@@ -98,6 +98,7 @@ class IndicatorFixture : public ::testing::Test
 			g_main_loop_unref(_loop);
 		}
 
+	private:
 		static void _changed_quit (GMenuModel * model, gint position, gint removed, gint added, GMainLoop * loop) {
 			g_debug("Got Menus");
 			g_main_loop_quit(loop);
@@ -109,6 +110,7 @@ class IndicatorFixture : public ::testing::Test
 			return G_SOURCE_CONTINUE;
 		}
 
+	protected:
 		void setMenu (const std::string& path) {
 			_menu.reset();
 
@@ -143,6 +145,7 @@ class IndicatorFixture : public ::testing::Test
 
 		}
 
+	private:
 		std::shared_ptr<GVariant> getMenuAttributeVal (int location, std::shared_ptr<GMenuModel>& menu, const std::string& attribute, std::shared_ptr<GVariant>& value) {
 			if (!(location < g_menu_model_get_n_items(menu.get()))) {
 				return nullptr;
@@ -173,9 +176,12 @@ class IndicatorFixture : public ::testing::Test
 			if (submenu == nullptr)
 				return nullptr;
 
+			g_menu_model_get_n_items(submenu.get());
+
 			return getMenuAttributeRecurse(menuLocation + 1, menuEnd, attribute, value, submenu);
 		}
 
+	protected:
 		bool expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, GVariant * value) {
 			auto varref = std::shared_ptr<GVariant>(g_variant_ref_sink(value), [](GVariant * varptr) {
 				if (varptr != nullptr)
