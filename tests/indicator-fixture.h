@@ -176,9 +176,14 @@ class IndicatorFixture : public ::testing::Test
 			if (menuLocation + 1 == menuEnd)
 				return getMenuAttributeVal(*menuLocation, menu, attribute, value);
 
-			auto submenu = std::shared_ptr<GMenuModel>(g_menu_model_get_item_link(menu.get(), *menuLocation, G_MENU_LINK_SUBMENU), [](GMenuModel * modelptr) {
+			auto clearfunc = [](GMenuModel * modelptr) {
 				g_clear_object(&modelptr);
-			});
+			};
+
+			auto submenu = std::shared_ptr<GMenuModel>(g_menu_model_get_item_link(menu.get(), *menuLocation, G_MENU_LINK_SUBMENU), clearfunc);
+
+			if (submenu == nullptr)
+				submenu = std::shared_ptr<GMenuModel>(g_menu_model_get_item_link(menu.get(), *menuLocation, G_MENU_LINK_SECTION), clearfunc);
 
 			if (submenu == nullptr)
 				return nullptr;
