@@ -95,3 +95,29 @@ Test-case indicator-sound/unity8-audio-roles
 		<dd>When hanging up the voice call it should automatically show up the volume for the alert role (ringtone, notification, etc)</dd>
 		<dd>No other role should be affected by the volume level used by the phone role</dd>
 </dl>
+
+Test-case indicator-sound/unity8-embedded-greeter
+<dl>
+	<dt>NOTE: Only works with embedded greeter, split greeter will require modifications to this test</dt>
+	<dt>Ensure System Settings is set to "Show Messages on Greeter"</dt>
+	<dt>Play a song in the media player</dt>
+		<dd>The song should be heard</dd>
+		<dd>There should be an entry in the sound menu with the meta data for the song being played</dd>
+	<dt>Go to the greeter. This can be done by hitting the lock button twice.</dt>
+	<dt>Ensure the sound menu has song meta data</dt>
+		<dd>There should be an entry in the sound menu with the meta data for the song being played</dd>
+	<dt>Pause the song in the greeter</dt>
+		<dd>The song should stop playing</dd>
+	<dt>Resume the song in the greeter</dt>
+		<dd>The song should continue to play</dd>
+	<dt>Disable System Settings value "Show Messages on Greeter"</dt>
+	<dt>Ensure the sound menu has song meta data</dt>
+		<dd>There should be an entry in the sound menu with the meta data for the song being played</dd>
+	<dt>Go to the greeter. This can be done by hitting the lock button twice.</dt>
+	<dt>Ensure the sound menu does not have song meta data</dt>
+		<dd>There should be an entry for the player but it should have no information on the song being played</dd>
+	<dt>Pause the song in the greeter</dt>
+		<dd>The song should stop playing</dd>
+	<dt>Resume the song in the greeter</dt>
+		<dd>The song should continue to play</dd>
+</dl>

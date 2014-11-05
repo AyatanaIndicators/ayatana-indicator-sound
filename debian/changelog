@@ -1,4 +1,4 @@
-indicator-sound (12.10.2+14.10.20141010-0ubuntu7) UNRELEASED; urgency=medium
+indicator-sound (12.10.2+14.10.20141010-0ubuntu8) UNRELEASED; urgency=medium
 
   * Remove various Vala warnings
   * Show notifications on volume change (LP: #1378564, #1378961)
@@ -6,8 +6,10 @@ indicator-sound (12.10.2+14.10.20141010-0ubuntu7) UNRELEASED; urgency=medium
   * service.vala: don't call set_volume unnecessarily (LP: #1381871)
   * Integration test for audio roles
   * Integration test for silent mode
+  * Ensure the greeter menu matches whether song metadata should be shown,
+    and update the metadata based on the new setting. (LP: #1358340)
 
- -- Ted Gould <ted@ubuntu.com>  Wed, 05 Nov 2014 10:40:44 -0600
+ -- Ted Gould <ted@ubuntu.com>  Wed, 05 Nov 2014 10:42:12 -0600
 
 indicator-sound (12.10.2+14.10.20141010-0ubuntu1) utopic; urgency=low
 
