@@ -51,5 +51,5 @@ TEST_F(IndicatorTest, DesktopMenu) {
 TEST_F(IndicatorTest, SilentActions) {
 	setActions("/com/canonical/indicator/sound");
 
-	expectActionExists("indicator.root");
+	expectActionExists("root");
 }

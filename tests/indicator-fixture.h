@@ -136,10 +136,13 @@ class IndicatorFixture : public ::testing::Test
 		}
 
 		void agWaitForActions (const std::shared_ptr<GActionGroup>& group) {
-			auto list = g_action_group_list_actions(group.get());
+			auto list = std::shared_ptr<gchar *>(
+				g_action_group_list_actions(group.get()),
+				[](gchar ** list) {
+					g_strfreev(list);
+				});
 
-			if (list != nullptr) {
-				g_strfreev(list);
+			if (g_strv_length(list.get()) != 0) {
 				return;
 			}
 
