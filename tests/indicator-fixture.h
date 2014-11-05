@@ -105,18 +105,16 @@ class IndicatorFixture : public ::testing::Test
 		}
 
 	private:
-		static gboolean _loop_quit (gpointer user_data) {
-			g_warning("Menu Timeout");
-			g_main_loop_quit((GMainLoop *)user_data);
-			return G_SOURCE_CONTINUE;
-		}
-
 		void waitForCore (GObject * obj, const gchar * signalname) {
 			auto loop = g_main_loop_new(nullptr, FALSE);
 
 			/* Our two exit criteria */
 			gulong signal = g_signal_connect_swapped(obj, signalname, G_CALLBACK(g_main_loop_quit), loop);
-			guint timer = g_timeout_add_seconds(5, _loop_quit, loop);
+			guint timer = g_timeout_add_seconds(5, [](gpointer user_data) -> gboolean {
+					g_warning("Menu Timeout");
+					g_main_loop_quit((GMainLoop *)user_data);
+					return G_SOURCE_CONTINUE;
+				}, loop);
 
 			/* Wait for sync */
 			g_main_loop_run(loop);
