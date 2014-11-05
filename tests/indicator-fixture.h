@@ -168,17 +168,95 @@ class IndicatorFixture : public ::testing::Test
 			agWaitForActions(_actions);
 		}
 
-		void expectActionExists (const std::string& name) {
+		bool expectActionExists (const std::string& name) {
+			bool hasit = g_action_group_has_action(_actions.get(), name.c_str());
 
+			if (!hasit) {
+				std::cout <<
+					"    Action: " << name << std::endl <<
+					"  Expected: " << "Exists" << std::endl <<
+					"    Actual: " << "No action found" << std::endl;
+			}
+
+			return hasit;
 		}
 
-		void expectActionStateType (const std::string& name, const GVariantType * type) {
+		bool expectActionStateType (const std::string& name, const GVariantType * type) {
+			auto atype = g_action_group_get_action_state_type(_actions.get(), name.c_str());
+			bool same = false;
 
+			if (atype != nullptr) {
+				same = g_variant_type_equal(atype, type);
+			}
+
+			if (!same) {
+				std::cout <<
+					"    Action: " << name << std::endl <<
+					"  Expected: " << g_variant_type_peek_string(type) << std::endl <<
+					"    Actual: " << g_variant_type_peek_string(atype) << std::endl;
+			}
+
+			return same;
 		}
 
-		void expectActionStateIs (const std::string& name, const GVariant * value) {
+		bool expectActionStateIs (const std::string& name, GVariant * value) {
+			auto varref = std::shared_ptr<GVariant>(g_variant_ref_sink(value), [](GVariant * varptr) {
+				if (varptr != nullptr)
+					g_variant_unref(varptr);
+			});
+			auto aval = std::shared_ptr<GVariant>(g_action_group_get_action_state(_actions.get(), name.c_str()), [] (GVariant * varptr) {
+				if (varptr != nullptr)
+					g_variant_unref(varptr);
+			});
+			bool match = false;
 
+			if (aval != nullptr) {
+				match = g_variant_equal(aval.get(), varref.get());
+			}
+
+			if (!match) {
+				gchar * valstr = nullptr;
+				gchar * attstr = nullptr;
+
+				if (aval != nullptr) {
+					attstr = g_variant_print(aval.get(), TRUE);
+				} else {
+					attstr = g_strdup("nullptr");
+				}
+
+				if (varref != nullptr) {
+					valstr = g_variant_print(varref.get(), TRUE);
+				} else {
+					valstr = g_strdup("nullptr");
+				}
+
+				std::cout <<
+					"    Action: " << name << std::endl <<
+					"  Expected: " << valstr << std::endl <<
+					"    Actual: " << attstr << std::endl;
+
+				g_free(valstr);
+				g_free(attstr);
+			}
+
+			return match;
 		}
+
+		bool expectActionStateIs (const std::string& name, bool value) {
+			GVariant * var = g_variant_new_boolean(value);
+			return expectActionStateIs(name, var);
+		}
+
+		bool expectActionStateIs (const std::string& name, std::string value) {
+			GVariant * var = g_variant_new_string(value.c_str());
+			return expectActionStateIs(name, var);
+		}
+
+		bool expectActionStateIs (const std::string& name, const char * value) {
+			GVariant * var = g_variant_new_string(value);
+			return expectActionStateIs(name, var);
+		}
+
 
 	private:
 		std::shared_ptr<GVariant> getMenuAttributeVal (int location, std::shared_ptr<GMenuModel>& menu, const std::string& attribute, std::shared_ptr<GVariant>& value) {
