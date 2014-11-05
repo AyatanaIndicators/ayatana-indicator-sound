@@ -604,16 +604,6 @@ public class VolumeControl : Object
 	{
 		/* Using this to detect whether we're on the phone or not */
 		if (_pulse_use_stream_restore) {
-<<<<<<< TREE
-			if (volume == 0.0)
-				_notification.update (_("Volume"), "", "audio-volume-muted");
-			if (volume > 0.0 && volume <= 0.33)
-				_notification.update (_("Volume"), "", "audio-volume-low");
-			if (volume > 0.33 && volume <= 0.66)
-				_notification.update (_("Volume"), "", "audio-volume-medium");
-			if (volume > 0.66 && volume <= 1.0)
-				_notification.update (_("Volume"), "", "audio-volume-high");
-=======
 			/* Watch for extreme */
 			if (volume > 0.75 && _active_port_headphone)
 				high_volume = true;
