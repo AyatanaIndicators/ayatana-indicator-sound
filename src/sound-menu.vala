@@ -93,11 +93,48 @@ public class SoundMenu: Object
 				this.mic_volume_shown = true;
 			}
 			else if (!value && this.mic_volume_shown) {
-				this.volume_section.remove (this.volume_section.get_n_items () -1);
+				int location = -1;
+				while ((location = find_action(this.volume_section, "indicator.mic-volume")) != -1) {
+					this.volume_section.remove (location);
+				}
 				this.mic_volume_shown = false;
 			}
 		}
 	}
+
+	public bool show_high_volume_warning {
+		get {
+			return this.high_volume_warning_shown;
+		}
+		set {
+			if (value && !this.high_volume_warning_shown) {
+				/* NOTE: Action doesn't really exist, just used to find below when removing */
+				var item = new MenuItem(_("High volume can damage your hearing."), "indicator.high-volume-warning-item");
+				volume_section.append_item (item);
+				this.high_volume_warning_shown = true;
+			}
+			else if (!value && this.high_volume_warning_shown) {
+				int location = -1;
+				while ((location = find_action(this.volume_section, "indicator.high-volume-warning-item")) != -1) {
+					this.volume_section.remove (location);
+				}
+				this.high_volume_warning_shown = false;
+			}
+		}
+	}
+
+	int find_action (Menu menu, string in_action) {
+		int n = menu.get_n_items ();
+		for (int i = 0; i < n; i++) {
+			string action;
+			menu.get_item_attribute (i, "action", "s", out action);
+			if (in_action == action)
+				return i;
+		}
+
+		return -1;
+	}
+
 
 	public void add_player (MediaPlayer player) {
 		if (this.notify_handlers.contains (player))
@@ -141,6 +178,7 @@ public class SoundMenu: Object
 	Menu volume_section;
 	bool mic_volume_shown;
 	bool settings_shown = false;
+	bool high_volume_warning_shown = false;
 	bool hide_inactive;
 	bool hide_players = false;
 	HashTable<MediaPlayer, ulong> notify_handlers;

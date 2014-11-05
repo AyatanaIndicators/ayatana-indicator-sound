@@ -22,3 +22,102 @@ Test-case indicator-sound/unity8-items-check
 		<dd>The menu is populated with items</dd>
 </dl>
 
+Test-case indicator-sound/unity8-sound-notifications
+<dl>
+	<dt>Adjust volume using HW keys if available</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>An audibule sound should play at the level of the audio</dd>
+	<dt>Adjust volume with slider in sound indicator</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>An audibule sound should play at the level of the audio</dd>
+	<dt>Open a video with sound and play in media player</dt>
+		<dd>The video should play and the sound should be audible</dd>
+	<dt>Adjust volume using HW keys if available</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>No notification sound should be heard</dd>
+	<dt>Adjust volume with slider in sound indicator</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>No notification sound should be heard</dd>
+</dl>
+
+Test-case indicator-sound/unity8-high-volume
+<dl>
+	<dt>Plug headphones into the headphone jack</dt>
+	<dt>Adjust volume so that it is at the midpoint of volume range</dt>
+		<dd>The slider should be in the middle of the scale</dd>
+	<dt>Increase the volume once using HW keys if available</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>There should be no text on the notification</dd>
+	<dt>Increase the volume using HW keys until it is roughly 90% of the range</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>The text on the notification should read "High volume"</dd>
+		<dd>The range on the notification bubble should have a different color signifying the higher volume</dd>
+	<dt>Decrease the volume using HW keys until it is roughly 50% of the range</dt>
+		<dd>A notification bubble should appear with the sound volume</dd>
+		<dd>There should be no text on the notification</dd>
+		<dd>The range on the notification bubble should have a standard color</dd>
+</dl>
+
+Test-case indicator-sound/unity8-silent-mode
+<dl>
+	<dt>NOTE: This test currently doesn't work because of a bug: http://pad.lv/1336715</dt>
+	<dt>Open the Sound menu</dt>
+		<dd>The sound menu includes an item "Silent Mode" which is a check box</dd>
+		<dd>The checkbox is not checked</dd>
+	<dt>Enable silent mode</dt>
+		<dd>Selecting the "Silent Mode" item should cause the box to be checked</dd>
+	<dt>Open the sound panel in system settings</dt>
+		<dd>The sound panel includes an item "Silent Mode" which is a check box</dd>
+		<dd>The checkbox is checked</dd>
+	<dt>Disable silent mode in system settings</dt>
+		<dd>The checkbox is not checked</dd>
+	<dt>Open the Sound menu</dt>
+		<dd>The sound menu includes an item "Silent Mode" which is a check box</dd>
+		<dd>The checkbox is not checked</dd>
+</dl>
+
+Test-case indicator-sound/unity8-audio-roles
+<dl>
+	<dt>Without playing anything (no active audio stream), change the volume on the indicator or with the volume buttons and then try playing one of the following audio streams: camera shutter, ringtone, message notification, dtmf</dt>
+		<dd>The audio stream should reflect the volume set on the indicator</dd>
+	<dt>Without playing anything (no active audio stream), change the volume on the indicator or with volume buttons and then try playing one of the following audio streams: music-app, webrowser (youtube)</dt>
+		<dd>The audio stream should not be affected by the volume set on the indicator when there was no other active stream</dt>
+	<dt>Play a multimedia stream (music-app, webrowser) and change the volume on the indicator when the stream is active</dt>
+		<dd>The multimedia audio stream should reflect the volume set on the indicator</dd>
+		<dd>When stopping/closing the multimedia stream, it should automatically show up the volume for the alert role (ringtone, notification, etc)</dd>
+		<dd>No other role should be affected by the volume level used by the multimedia role</dd>
+	<dt>Play a alarm stream (clock-app) and change the volume on the indicator when the stream is active</dt>
+		<dd>The alarm audio stream should reflect the volume set on the indicator</dd>
+		<dd>When stopping/closing the alarm stream, it should automatically show up the volume for the alert role (ringtone, notification, etc)</dd>
+		<dd>No other role should be affected by the volume level used by the alarm role</dd>
+	<dt>Start a voice call using the dialer-app and change the volume on the indicator when the call is active</dt>
+		<dd>The phone audio stream should reflect the volume set on the indicator</dd>
+		<dd>When hanging up the voice call it should automatically show up the volume for the alert role (ringtone, notification, etc)</dd>
+		<dd>No other role should be affected by the volume level used by the phone role</dd>
+</dl>
+
+Test-case indicator-sound/unity8-embedded-greeter
+<dl>
+	<dt>NOTE: Only works with embedded greeter, split greeter will require modifications to this test</dt>
+	<dt>Ensure System Settings is set to "Show Messages on Greeter"</dt>
+	<dt>Play a song in the media player</dt>
+		<dd>The song should be heard</dd>
+		<dd>There should be an entry in the sound menu with the meta data for the song being played</dd>
+	<dt>Go to the greeter. This can be done by hitting the lock button twice.</dt>
+	<dt>Ensure the sound menu has song meta data</dt>
+		<dd>There should be an entry in the sound menu with the meta data for the song being played</dd>
+	<dt>Pause the song in the greeter</dt>
+		<dd>The song should stop playing</dd>
+	<dt>Resume the song in the greeter</dt>
+		<dd>The song should continue to play</dd>
+	<dt>Disable System Settings value "Show Messages on Greeter"</dt>
+	<dt>Ensure the sound menu has song meta data</dt>
+		<dd>There should be an entry in the sound menu with the meta data for the song being played</dd>
+	<dt>Go to the greeter. This can be done by hitting the lock button twice.</dt>
+	<dt>Ensure the sound menu does not have song meta data</dt>
+		<dd>There should be an entry for the player but it should have no information on the song being played</dd>
+	<dt>Pause the song in the greeter</dt>
+		<dd>The song should stop playing</dd>
+	<dt>Resume the song in the greeter</dt>
+		<dd>The song should continue to play</dd>
+</dl>
