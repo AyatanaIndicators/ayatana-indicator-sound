@@ -30,7 +30,6 @@ class IndicatorFixture : public ::testing::Test
 	private:
 		std::string _indicatorPath;
 		std::string _indicatorAddress;
-		GMainLoop * _loop;
 		std::shared_ptr<GMenuModel>  _menu;
 		DbusTestService * _test_service;
 		DbusTestTask * _test_indicator;
@@ -44,7 +43,6 @@ class IndicatorFixture : public ::testing::Test
 				const std::string& addr)
 			: _indicatorPath(path)
 			, _indicatorAddress(addr)
-			, _loop(nullptr)
 			, _menu(nullptr)
 			, _session(nullptr)
 		{
@@ -54,7 +52,6 @@ class IndicatorFixture : public ::testing::Test
 	protected:
 		virtual void SetUp() override
 		{
-			_loop = g_main_loop_new(nullptr, FALSE);
 
 			_test_service = dbus_test_service_new(nullptr);
 
@@ -93,9 +90,6 @@ class IndicatorFixture : public ::testing::Test
 				g_dbus_connection_close_sync(_session, nullptr, nullptr);
 			}
 			g_clear_object(&_session);
-
-			/* Dropping temp loop */
-			g_main_loop_unref(_loop);
 		}
 
 	private:
@@ -110,6 +104,30 @@ class IndicatorFixture : public ::testing::Test
 			return G_SOURCE_CONTINUE;
 		}
 
+		void menuWaitForItems (const std::shared_ptr<GMenuModel>& menu) {
+			auto count = g_menu_model_get_n_items(menu.get());
+			
+			if (count != 0)
+				return;
+
+			auto loop = g_main_loop_new(nullptr, FALSE);
+
+			/* Our two exit criteria */
+			gulong signal = g_signal_connect(G_OBJECT(menu.get()), "items-changed", G_CALLBACK(_changed_quit), loop);
+			guint timer = g_timeout_add_seconds(5, _loop_quit, loop);
+
+			g_menu_model_get_n_items(menu.get());
+
+			/* Wait for sync */
+			g_main_loop_run(loop);
+
+			/* Clean up */
+			g_source_remove(timer);
+			g_signal_handler_disconnect(G_OBJECT(menu.get()), signal);
+
+			g_main_loop_unref(loop);
+		}
+
 	protected:
 		void setMenu (const std::string& path) {
 			_menu.reset();
@@ -119,18 +137,7 @@ class IndicatorFixture : public ::testing::Test
 				g_clear_object(&modelptr);
 			});
 
-			/* Our two exit criteria */
-			gulong signal = g_signal_connect(G_OBJECT(_menu.get()), "items-changed", G_CALLBACK(_changed_quit), _loop);
-			guint timer = g_timeout_add_seconds(5, _loop_quit, _loop);
-
-			g_menu_model_get_n_items(_menu.get());
-
-			/* Wait for sync */
-			g_main_loop_run(_loop);
-
-			/* Clean up */
-			g_source_remove(timer);
-			g_signal_handler_disconnect(G_OBJECT(_menu.get()), signal);
+			menuWaitForItems(_menu);
 		}
 
 		void expectActionExists (const std::string& name) {
@@ -176,7 +183,7 @@ class IndicatorFixture : public ::testing::Test
 			if (submenu == nullptr)
 				return nullptr;
 
-			g_menu_model_get_n_items(submenu.get());
+			menuWaitForItems(submenu);
 
 			return getMenuAttributeRecurse(menuLocation + 1, menuEnd, attribute, value, submenu);
 		}
