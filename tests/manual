@@ -58,6 +58,24 @@ Test-case indicator-sound/unity8-high-volume
 		<dd>The range on the notification bubble should have a standard color</dd>
 </dl>
 
+Test-case indicator-sound/unity8-silent-mode
+<dl>
+	<dt>NOTE: This test currently doesn't work because of a bug: http://pad.lv/1336715</dt>
+	<dt>Open the Sound menu</dt>
+		<dd>The sound menu includes an item "Silent Mode" which is a check box</dd>
+		<dd>The checkbox is not checked</dd>
+	<dt>Enable silent mode</dt>
+		<dd>Selecting the "Silent Mode" item should cause the box to be checked</dd>
+	<dt>Open the sound panel in system settings</dt>
+		<dd>The sound panel includes an item "Silent Mode" which is a check box</dd>
+		<dd>The checkbox is checked</dd>
+	<dt>Disable silent mode in system settings</dt>
+		<dd>The checkbox is not checked</dd>
+	<dt>Open the Sound menu</dt>
+		<dd>The sound menu includes an item "Silent Mode" which is a check box</dd>
+		<dd>The checkbox is not checked</dd>
+</dl>
+
 Test-case indicator-sound/unity8-audio-roles
 <dl>
 	<dt>Without playing anything (no active audio stream), change the volume on the indicator or with the volume buttons and then try playing one of the following audio streams: camera shutter, ringtone, message notification, dtmf</dt>
