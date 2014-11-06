@@ -30,9 +30,13 @@ class IndicatorFixture : public ::testing::Test
 	private:
 		std::string _indicatorPath;
 		std::string _indicatorAddress;
+		std::vector<std::shared_ptr<DbusTestTask>> _mocks;
 
 		class PerRunData {
-		public: /* We're private in the fixture but other than that we don't care, we don't leak out */
+		public:
+			/* We're private in the fixture but other than that we don't care,
+			   we don't leak out. This object's purpose isn't to hide data it is
+			   to make the lifecycle of the items more clear. */
 			std::shared_ptr<GMenuModel>  _menu;
 			std::shared_ptr<GActionGroup> _actions;
 			DbusTestService * _test_service;
@@ -40,7 +44,7 @@ class IndicatorFixture : public ::testing::Test
 			DbusTestTask * _test_dummy;
 			GDBusConnection * _session;
 
-			PerRunData (const std::string& indicatorPath, const std::string& indicatorAddress)
+			PerRunData (const std::string& indicatorPath, const std::string& indicatorAddress, std::vector<std::shared_ptr<DbusTestTask>>& mocks)
 				: _menu(nullptr)
 				, _session(nullptr)
 			{
@@ -55,12 +59,9 @@ class IndicatorFixture : public ::testing::Test
 				dbus_test_task_set_name(_test_dummy, "Dummy");
 				dbus_test_service_add_task(_test_service, _test_dummy);
 
-				if (true) {
-					DbusTestBustle * bustle = dbus_test_bustle_new("indicator-test.bustle");
-					dbus_test_task_set_name(DBUS_TEST_TASK(bustle), "Bustle");
-					dbus_test_service_add_task(_test_service, DBUS_TEST_TASK(bustle));
-					g_object_unref(bustle);
-				}
+				std::for_each(mocks.begin(), mocks.end(), [this](std::shared_ptr<DbusTestTask> task) {
+					dbus_test_service_add_task(_test_service, task.get());
+				});
 
 				dbus_test_service_start_tasks(_test_service);
 
@@ -100,12 +101,30 @@ class IndicatorFixture : public ::testing::Test
 	protected:
 		virtual void SetUp() override
 		{
-			run = std::make_shared<PerRunData>(_indicatorPath, _indicatorAddress);
+			run = std::make_shared<PerRunData>(_indicatorPath, _indicatorAddress, _mocks);
+
+			_mocks.clear();
 		}
 
 		virtual void TearDown() override
 		{
 			run.reset();
+		}
+
+		void addMock (std::shared_ptr<DbusTestTask>& mock)
+		{
+			_mocks.push_back(mock);
+		}
+
+		std::shared_ptr<DbusTestTask> buildBustleMock (const std::string& filename)
+		{
+			return std::shared_ptr<DbusTestTask>([filename]() {
+				DbusTestTask * bustle = DBUS_TEST_TASK(dbus_test_bustle_new(filename.c_str()));
+				dbus_test_task_set_name(bustle, "Bustle");
+				return bustle;
+			}(), [](DbusTestTask * bustle) {
+				g_clear_object(&bustle);
+			});
 		}
 
 	private:

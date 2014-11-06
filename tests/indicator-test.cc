@@ -30,6 +30,14 @@ protected:
 	{
 	}
 
+	virtual void SetUp() override
+	{
+		auto bustle = buildBustleMock("indicator-test.bustle");
+		addMock(bustle);
+
+		IndicatorFixture::SetUp();
+	}
+
 };
 
 
