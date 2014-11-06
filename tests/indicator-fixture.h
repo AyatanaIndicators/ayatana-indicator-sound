@@ -25,27 +25,66 @@
 #include <gio/gio.h>
 #include <libdbustest/dbus-test.h>
 
-extern "C" {
-
-/* Super useful function that GLib has hidden from us :-( */
-gboolean
-g_dbus_action_group_sync (GDBusActionGroup  *group,
-                          GCancellable      *cancellable,
-                          GError           **error);
-
-}
-
 class IndicatorFixture : public ::testing::Test
 {
 	private:
 		std::string _indicatorPath;
 		std::string _indicatorAddress;
-		std::shared_ptr<GMenuModel>  _menu;
-		std::shared_ptr<GActionGroup> _actions;
-		DbusTestService * _test_service;
-		DbusTestTask * _test_indicator;
-		DbusTestTask * _test_dummy;
-		GDBusConnection * _session;
+
+		class PerRunData {
+		public: /* We're private in the fixture but other than that we don't care, we don't leak out */
+			std::shared_ptr<GMenuModel>  _menu;
+			std::shared_ptr<GActionGroup> _actions;
+			DbusTestService * _test_service;
+			DbusTestTask * _test_indicator;
+			DbusTestTask * _test_dummy;
+			GDBusConnection * _session;
+
+			PerRunData (const std::string& indicatorPath, const std::string& indicatorAddress)
+				: _menu(nullptr)
+				, _session(nullptr)
+			{
+				_test_service = dbus_test_service_new(nullptr);
+
+				_test_indicator = DBUS_TEST_TASK(dbus_test_process_new(indicatorPath.c_str()));
+				dbus_test_task_set_name(_test_indicator, "Indicator");
+				dbus_test_service_add_task(_test_service, _test_indicator);
+
+				_test_dummy = dbus_test_task_new();
+				dbus_test_task_set_wait_for(_test_dummy, indicatorAddress.c_str());
+				dbus_test_task_set_name(_test_dummy, "Dummy");
+				dbus_test_service_add_task(_test_service, _test_dummy);
+
+				if (true) {
+					DbusTestBustle * bustle = dbus_test_bustle_new("indicator-test.bustle");
+					dbus_test_task_set_name(DBUS_TEST_TASK(bustle), "Bustle");
+					dbus_test_service_add_task(_test_service, DBUS_TEST_TASK(bustle));
+					g_object_unref(bustle);
+				}
+
+				dbus_test_service_start_tasks(_test_service);
+
+				_session = g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr, nullptr);
+			}
+
+			virtual ~PerRunData (void) {
+				_menu.reset();
+				_actions.reset();
+
+				/* D-Bus Test Stuff */
+				g_clear_object(&_test_dummy);
+				g_clear_object(&_test_indicator);
+				g_clear_object(&_test_service);
+
+				/* Wait for D-Bus session bus to go */
+				if (!g_dbus_connection_is_closed(_session)) {
+					g_dbus_connection_close_sync(_session, nullptr, nullptr);
+				}
+				g_clear_object(&_session);
+			}
+		};
+
+		std::shared_ptr<PerRunData> run;
 
 	public:
 		virtual ~IndicatorFixture() = default;
@@ -54,8 +93,6 @@ class IndicatorFixture : public ::testing::Test
 				const std::string& addr)
 			: _indicatorPath(path)
 			, _indicatorAddress(addr)
-			, _menu(nullptr)
-			, _session(nullptr)
 		{
 		};
 
@@ -63,45 +100,12 @@ class IndicatorFixture : public ::testing::Test
 	protected:
 		virtual void SetUp() override
 		{
-
-			_test_service = dbus_test_service_new(nullptr);
-
-			_test_indicator = DBUS_TEST_TASK(dbus_test_process_new(_indicatorPath.c_str()));
-			dbus_test_task_set_name(_test_indicator, "Indicator");
-			dbus_test_service_add_task(_test_service, _test_indicator);
-
-			_test_dummy = dbus_test_task_new();
-			dbus_test_task_set_wait_for(_test_dummy, _indicatorAddress.c_str());
-			dbus_test_task_set_name(_test_dummy, "Dummy");
-			dbus_test_service_add_task(_test_service, _test_dummy);
-
-			if (true) {
-				DbusTestBustle * bustle = dbus_test_bustle_new("indicator-test.bustle");
-				dbus_test_task_set_name(DBUS_TEST_TASK(bustle), "Bustle");
-				dbus_test_service_add_task(_test_service, DBUS_TEST_TASK(bustle));
-				g_object_unref(bustle);
-			}
-
-			dbus_test_service_start_tasks(_test_service);
-
-			_session = g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr, nullptr);
+			run = std::make_shared<PerRunData>(_indicatorPath, _indicatorAddress);
 		}
 
 		virtual void TearDown() override
 		{
-			_menu.reset();
-			_actions.reset();
-
-			/* D-Bus Test Stuff */
-			g_clear_object(&_test_dummy);
-			g_clear_object(&_test_indicator);
-			g_clear_object(&_test_service);
-
-			/* Wait for D-Bus session bus to go */
-			if (!g_dbus_connection_is_closed(_session)) {
-				g_dbus_connection_close_sync(_session, nullptr, nullptr);
-			}
-			g_clear_object(&_session);
+			run.reset();
 		}
 
 	private:
@@ -151,28 +155,28 @@ class IndicatorFixture : public ::testing::Test
 
 	protected:
 		void setMenu (const std::string& path) {
-			_menu.reset();
+			run->_menu.reset();
 
 			g_debug("Getting Menu: %s:%s", _indicatorAddress.c_str(), path.c_str());
-			_menu = std::shared_ptr<GMenuModel>(G_MENU_MODEL(g_dbus_menu_model_get(_session, _indicatorAddress.c_str(), path.c_str())), [](GMenuModel * modelptr) {
+			run->_menu = std::shared_ptr<GMenuModel>(G_MENU_MODEL(g_dbus_menu_model_get(run->_session, _indicatorAddress.c_str(), path.c_str())), [](GMenuModel * modelptr) {
 				g_clear_object(&modelptr);
 			});
 
-			menuWaitForItems(_menu);
+			menuWaitForItems(run->_menu);
 		}
 
 		void setActions (const std::string& path) {
-			_actions.reset();
+			run->_actions.reset();
 
-			_actions = std::shared_ptr<GActionGroup>(G_ACTION_GROUP(g_dbus_action_group_get(_session, _indicatorAddress.c_str(), path.c_str())), [](GActionGroup * groupptr) {
+			run->_actions = std::shared_ptr<GActionGroup>(G_ACTION_GROUP(g_dbus_action_group_get(run->_session, _indicatorAddress.c_str(), path.c_str())), [](GActionGroup * groupptr) {
 				g_clear_object(&groupptr);
 			});
 
-			agWaitForActions(_actions);
+			agWaitForActions(run->_actions);
 		}
 
 		bool expectActionExists (const std::string& name) {
-			bool hasit = g_action_group_has_action(_actions.get(), name.c_str());
+			bool hasit = g_action_group_has_action(run->_actions.get(), name.c_str());
 
 			if (!hasit) {
 				std::cout <<
@@ -185,7 +189,7 @@ class IndicatorFixture : public ::testing::Test
 		}
 
 		bool expectActionStateType (const std::string& name, const GVariantType * type) {
-			auto atype = g_action_group_get_action_state_type(_actions.get(), name.c_str());
+			auto atype = g_action_group_get_action_state_type(run->_actions.get(), name.c_str());
 			bool same = false;
 
 			if (atype != nullptr) {
@@ -207,7 +211,7 @@ class IndicatorFixture : public ::testing::Test
 				if (varptr != nullptr)
 					g_variant_unref(varptr);
 			});
-			auto aval = std::shared_ptr<GVariant>(g_action_group_get_action_state(_actions.get(), name.c_str()), [] (GVariant * varptr) {
+			auto aval = std::shared_ptr<GVariant>(g_action_group_get_action_state(run->_actions.get(), name.c_str()), [] (GVariant * varptr) {
 				if (varptr != nullptr)
 					g_variant_unref(varptr);
 			});
@@ -319,7 +323,7 @@ class IndicatorFixture : public ::testing::Test
 					g_variant_unref(varptr);
 			});
 
-			auto attrib = getMenuAttributeRecurse(menuLocation.cbegin(), menuLocation.cend(), attribute, varref, _menu);
+			auto attrib = getMenuAttributeRecurse(menuLocation.cbegin(), menuLocation.cend(), attribute, varref, run->_menu);
 			bool same = false;
 
 			if (attrib != nullptr && varref != nullptr) {
