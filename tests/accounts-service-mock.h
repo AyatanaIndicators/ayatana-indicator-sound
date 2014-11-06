@@ -17,6 +17,7 @@
  *      Ted Gould <ted@canonical.com>
  */
 
+#include <memory>
 #include <libdbustest/dbus-test.h>
 
 class AccountsServiceMock
@@ -85,6 +86,12 @@ class AccountsServiceMock
 		~AccountsServiceMock () {
 			g_debug("Destroying the Accounts Service Mock");
 			g_clear_object(&mock);
+		}
+
+		operator std::shared_ptr<DbusTestTask> () {
+			return std::shared_ptr<DbusTestTask>(
+				DBUS_TEST_TASK(g_object_ref(mock)),
+				[](DbusTestTask * task) { g_clear_object(&task); });
 		}
 
 		operator DbusTestTask* () {

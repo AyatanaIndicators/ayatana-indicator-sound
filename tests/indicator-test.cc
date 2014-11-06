@@ -21,6 +21,7 @@
 #include <gio/gio.h>
 
 #include "indicator-fixture.h"
+#include "accounts-service-mock.h"
 
 class IndicatorTest : public IndicatorFixture
 {
@@ -34,6 +35,9 @@ protected:
 	{
 		auto bustle = buildBustleMock("indicator-test.bustle");
 		addMock(bustle);
+
+		AccountsServiceMock as;
+		addMock(as);
 
 		IndicatorFixture::SetUp();
 	}

@@ -111,7 +111,7 @@ class IndicatorFixture : public ::testing::Test
 			run.reset();
 		}
 
-		void addMock (std::shared_ptr<DbusTestTask>& mock)
+		void addMock (std::shared_ptr<DbusTestTask> mock)
 		{
 			_mocks.push_back(mock);
 		}
