@@ -12,27 +12,6 @@ indicator-sound (12.10.2+15.04.20141105-0ubuntu1) vivid; urgency=medium
 
  -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 05 Nov 2014 17:56:29 +0000
 
-indicator-sound (12.10.2+14.10.20141021~rtm-0ubuntu1) 14.09; urgency=medium
-
-  [ Ted Gould ]
-  * Silent Mode checkbox in indicator (LP: #1342151)
-
- -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 21 Oct 2014 20:06:43 +0000
-
-indicator-sound (12.10.2+14.10.20141016-0ubuntu1) 14.09; urgency=low
-
-  [ Lars Uebernickel ]
-  * service.vala: don't call set_volume unnecessarily
-
- -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 16 Oct 2014 13:31:43 +0000
-
-indicator-sound (12.10.2+14.10.20141015.5~rtm-0ubuntu1) 14.09; urgency=low
-
-  [ Ted Gould ]
-  * Show notifications on volume change (LP: #1378564)
-
- -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 15 Oct 2014 16:19:12 +0000
-
 indicator-sound (12.10.2+14.10.20141010-0ubuntu1) utopic; urgency=low
 
   [ Ricardo Salveti de Araujo ]
