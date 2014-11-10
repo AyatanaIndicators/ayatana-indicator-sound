@@ -69,7 +69,6 @@ public class VolumeControl : Object
 	private bool _send_next_local_volume = false;
 	private double _account_service_volume = 0.0;
 	private Notify.Notification _notification;
-
 	private bool _active_port_headphone = false;
 
 	public signal void volume_changed (double v);
@@ -776,7 +775,7 @@ public class VolumeControl : Object
 	}
 
 	/* AccountsService operations */
-	private void accountsservice_props_changed_cb (DBusProxy proxy, Variant changed_properties, string[] invalidated_properties)
+	private void accountsservice_props_changed_cb (DBusProxy proxy, Variant changed_properties, string[]? invalidated_properties)
 	{
 		Variant volume_variant = changed_properties.lookup_value ("Volume", new VariantType ("d"));
 		if (volume_variant != null) {
@@ -834,10 +833,14 @@ public class VolumeControl : Object
 
 		// Get current values and listen for changes
 		_user_proxy.g_properties_changed.connect (accountsservice_props_changed_cb);
-		var props_variant = yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "GetAll", new Variant ("(s)", _user_proxy.get_interface_name ()), null, DBusCallFlags.NONE, -1);
-		Variant props;
-		props_variant.get ("(@a{sv})", out props);
-		accountsservice_props_changed_cb(_user_proxy, props, null);
+		try {
+			var props_variant = yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "GetAll", new Variant ("(s)", _user_proxy.get_interface_name ()), null, DBusCallFlags.NONE, -1);
+			Variant props;
+			props_variant.get ("(@a{sv})", out props);
+			accountsservice_props_changed_cb(_user_proxy, props, null);
+		} catch (GLib.Error e) {
+			debug("Unable to get properties for user %s at first try: %s", username, e.message);
+		}
 	}
 
 	private void greeter_user_changed (string username)

@@ -1,3 +1,17 @@
+indicator-sound (12.10.2+15.04.20141105-0ubuntu1) vivid; urgency=medium
+
+  [ Ted Gould ]
+  * Remove various Vala warnings
+  * Show notifications on volume change (LP: #1378564, #1378961)
+  * Warn on high audio levels when using headphones (LP: #1232633, #1373404)
+  * service.vala: don't call set_volume unnecessarily (LP: #1381871)
+  * Integration test for audio roles
+  * Integration test for silent mode
+  * Ensure the greeter menu matches whether song metadata should be shown,
+    and update the metadata based on the new setting. (LP: #1358340)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 05 Nov 2014 17:56:29 +0000
+
 indicator-sound (12.10.2+14.10.20141021~rtm-0ubuntu1) 14.09; urgency=medium
 
   [ Ted Gould ]
