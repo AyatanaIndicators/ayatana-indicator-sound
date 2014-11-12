@@ -40,12 +40,10 @@ class MediaPlayerUserTest : public ::testing::Test
 
 		virtual void SetUp() {
 			service = dbus_test_service_new(NULL);
-
+			dbus_test_service_set_bus(service, DBUS_TEST_SERVICE_BUS_BOTH);
 
 			dbus_test_service_add_task(service, (DbusTestTask*)service_mock);
 			dbus_test_service_start_tasks(service);
-
-			g_setenv("DBUS_SYSTEM_BUS_ADDRESS", g_getenv("DBUS_SESSION_BUS_ADDRESS"), TRUE);
 
 			session = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
 			ASSERT_NE(nullptr, session);

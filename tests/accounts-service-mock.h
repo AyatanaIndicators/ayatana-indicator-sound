@@ -30,6 +30,8 @@ class AccountsServiceMock
 		AccountsServiceMock () {
 			mock = dbus_test_dbus_mock_new("org.freedesktop.Accounts");
 
+			dbus_test_task_set_bus(DBUS_TEST_TASK(mock), DBUS_TEST_SERVICE_BUS_SYSTEM);
+
 			DbusTestDbusMockObject * baseobj = dbus_test_dbus_mock_get_object(mock, "/org/freedesktop/Accounts", "org.freedesktop.Accounts", NULL);
 
 			dbus_test_dbus_mock_object_add_method(mock, baseobj,
