@@ -197,5 +197,12 @@ target_link_libraries (
 )
 
 # Split tests to work around libaccountservice sucking
-add_test(indicator-test indicator-test)
-
+add_test(indcator-test-phone-menu
+	indicator-test  --gtest_filter=IndicatorTest.PhoneMenu
+)
+add_test(indcator-test-desktop-menu
+	indicator-test  --gtest_filter=IndicatorTest.DesktopMenu
+)
+add_test(indcator-test-silent-actions
+	indicator-test  --gtest_filter=IndicatorTest.SilentActions
+)
