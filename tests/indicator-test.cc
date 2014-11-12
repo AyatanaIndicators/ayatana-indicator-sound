@@ -33,8 +33,8 @@ protected:
 
 	virtual void SetUp() override
 	{
-		auto bustle = buildBustleMock("indicator-test.bustle");
-		addMock(bustle);
+		addMock(buildBustleMock("indicator-test-session.bustle", DBUS_TEST_SERVICE_BUS_SESSION));
+		addMock(buildBustleMock("indicator-test-system.bustle", DBUS_TEST_SERVICE_BUS_SYSTEM));
 
 		AccountsServiceMock as;
 		addMock(as);

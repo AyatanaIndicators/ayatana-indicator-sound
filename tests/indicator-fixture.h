@@ -39,33 +39,47 @@ class IndicatorFixture : public ::testing::Test
 			   to make the lifecycle of the items more clear. */
 			std::shared_ptr<GMenuModel>  _menu;
 			std::shared_ptr<GActionGroup> _actions;
-			DbusTestService * _test_service;
+			DbusTestService * _session_service;
+			DbusTestService * _system_service;
 			DbusTestTask * _test_indicator;
 			DbusTestTask * _test_dummy;
 			GDBusConnection * _session;
+			GDBusConnection * _system;
 
 			PerRunData (const std::string& indicatorPath, const std::string& indicatorAddress, std::vector<std::shared_ptr<DbusTestTask>>& mocks)
 				: _menu(nullptr)
 				, _session(nullptr)
 			{
-				_test_service = dbus_test_service_new(nullptr);
+				_session_service = dbus_test_service_new(nullptr);
+				dbus_test_service_set_bus(_session_service, DBUS_TEST_SERVICE_BUS_SESSION);
+
+				_system_service = dbus_test_service_new(nullptr);
+				dbus_test_service_set_bus(_system_service, DBUS_TEST_SERVICE_BUS_SYSTEM);
 
 				_test_indicator = DBUS_TEST_TASK(dbus_test_process_new(indicatorPath.c_str()));
 				dbus_test_task_set_name(_test_indicator, "Indicator");
-				dbus_test_service_add_task(_test_service, _test_indicator);
+				dbus_test_service_add_task(_session_service, _test_indicator);
 
 				_test_dummy = dbus_test_task_new();
 				dbus_test_task_set_wait_for(_test_dummy, indicatorAddress.c_str());
 				dbus_test_task_set_name(_test_dummy, "Dummy");
-				dbus_test_service_add_task(_test_service, _test_dummy);
+				dbus_test_service_add_task(_session_service, _test_dummy);
 
 				std::for_each(mocks.begin(), mocks.end(), [this](std::shared_ptr<DbusTestTask> task) {
-					dbus_test_service_add_task(_test_service, task.get());
+					if (dbus_test_task_get_bus(task.get()) == DBUS_TEST_SERVICE_BUS_SYSTEM) {
+						dbus_test_service_add_task(_system_service, task.get());
+					} else {
+						dbus_test_service_add_task(_session_service, task.get());
+					}
 				});
 
-				dbus_test_service_start_tasks(_test_service);
+				dbus_test_service_start_tasks(_system_service);
+				_system = g_bus_get_sync(G_BUS_TYPE_SYSTEM, nullptr, nullptr);
+				g_dbus_connection_set_exit_on_close(_system, FALSE);
 
+				dbus_test_service_start_tasks(_session_service);
 				_session = g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr, nullptr);
+				g_dbus_connection_set_exit_on_close(_session, FALSE);
 			}
 
 			virtual ~PerRunData (void) {
@@ -75,13 +89,19 @@ class IndicatorFixture : public ::testing::Test
 				/* D-Bus Test Stuff */
 				g_clear_object(&_test_dummy);
 				g_clear_object(&_test_indicator);
-				g_clear_object(&_test_service);
+				g_clear_object(&_session_service);
+				g_clear_object(&_system_service);
 
 				/* Wait for D-Bus session bus to go */
 				if (!g_dbus_connection_is_closed(_session)) {
 					g_dbus_connection_close_sync(_session, nullptr, nullptr);
 				}
 				g_clear_object(&_session);
+
+				if (!g_dbus_connection_is_closed(_system)) {
+					g_dbus_connection_close_sync(_system, nullptr, nullptr);
+				}
+				g_clear_object(&_system);
 			}
 		};
 
@@ -116,11 +136,12 @@ class IndicatorFixture : public ::testing::Test
 			_mocks.push_back(mock);
 		}
 
-		std::shared_ptr<DbusTestTask> buildBustleMock (const std::string& filename)
+		std::shared_ptr<DbusTestTask> buildBustleMock (const std::string& filename, DbusTestServiceBus bus = DBUS_TEST_SERVICE_BUS_BOTH)
 		{
-			return std::shared_ptr<DbusTestTask>([filename]() {
+			return std::shared_ptr<DbusTestTask>([filename, bus]() {
 				DbusTestTask * bustle = DBUS_TEST_TASK(dbus_test_bustle_new(filename.c_str()));
 				dbus_test_task_set_name(bustle, "Bustle");
+				dbus_test_task_set_bus(bustle, bus);
 				return bustle;
 			}(), [](DbusTestTask * bustle) {
 				g_clear_object(&bustle);
