@@ -49,7 +49,7 @@ include_directories(${SOUNDSERVICE_INCLUDE_DIRS})
 
 pkg_check_modules(
   TEST REQUIRED
-  dbustest-1
+  dbustest-1>=15.04.0
 )
 include_directories(${TEST_INCLUDE_DIRS})
 
