@@ -185,9 +185,10 @@ public class VolumeControl : Object
 		 * checking for the port name. On touch (with the pulseaudio droid element)
 		 * the headset/headphone port is called 'output-headset' and 'output-headphone'.
 		 * On the desktop this is usually called 'analog-output-headphones' */
-		if (i.active_port.name == "output-wired_headset" ||
+		if (i.active_port != null && (
+			i.active_port.name == "output-wired_headset" ||
 			i.active_port.name == "output-wired_headphone" ||
-			i.active_port.name == "analog-output-headphones") {
+			i.active_port.name == "analog-output-headphones")) {
 			_active_port_headphone = true;
 		} else {
 			_active_port_headphone = false;
