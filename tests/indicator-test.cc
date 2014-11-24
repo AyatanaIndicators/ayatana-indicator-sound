@@ -63,11 +63,11 @@ TEST_F(IndicatorTest, DesktopMenu) {
 TEST_F(IndicatorTest, SilentActions) {
 	setActions("/com/canonical/indicator/sound");
 
-	expectActionExists("scroll");
+	EXPECT_ACTION_EXISTS("scroll");
 
-	expectActionExists("silent-mode");
-	expectActionStateIs("silent-mode", false);
+	EXPECT_ACTION_EXISTS("silent-mode");
+	EXPECT_ACTION_STATE("silent-mode", false);
 
-	expectActionExists("mute");
-	expectActionStateIs("mute", false);
+	EXPECT_ACTION_EXISTS("mute");
+	EXPECT_ACTION_STATE("mute", false);
 }

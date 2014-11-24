@@ -215,20 +215,24 @@ class IndicatorFixture : public ::testing::Test
 			agWaitForActions(run->_actions);
 		}
 
-		bool expectActionExists (const std::string& name) {
+		testing::AssertionResult expectActionExists (const gchar * nameStr, const std::string& name) {
 			bool hasit = g_action_group_has_action(run->_actions.get(), name.c_str());
 
 			if (!hasit) {
-				std::cout <<
-					"    Action: " << name << std::endl <<
+				auto result = testing::AssertionFailure();
+				result <<
+					"    Action: " << nameStr << std::endl <<
 					"  Expected: " << "Exists" << std::endl <<
 					"    Actual: " << "No action found" << std::endl;
+
+				return result;
 			}
 
-			return hasit;
+			auto result = testing::AssertionSuccess();
+			return result;
 		}
 
-		bool expectActionStateType (const std::string& name, const GVariantType * type) {
+		testing::AssertionResult expectActionStateType (const char * nameStr, const char * typeStr, const std::string& name, const GVariantType * type) {
 			auto atype = g_action_group_get_action_state_type(run->_actions.get(), name.c_str());
 			bool same = false;
 
@@ -237,16 +241,20 @@ class IndicatorFixture : public ::testing::Test
 			}
 
 			if (!same) {
-				std::cout <<
-					"    Action: " << name << std::endl <<
-					"  Expected: " << g_variant_type_peek_string(type) << std::endl <<
+				auto result = testing::AssertionFailure();
+				result <<
+					"    Action: " << nameStr << std::endl <<
+					"  Expected: " << typeStr << std::endl <<
 					"    Actual: " << g_variant_type_peek_string(atype) << std::endl;
+
+				return result;
 			}
 
-			return same;
+			auto result = testing::AssertionSuccess();
+			return result;
 		}
 
-		bool expectActionStateIs (const std::string& name, GVariant * value) {
+		testing::AssertionResult expectActionStateIs (const char * nameStr, const char * valueStr, const std::string& name, GVariant * value) {
 			auto varref = std::shared_ptr<GVariant>(g_variant_ref_sink(value), [](GVariant * varptr) {
 				if (varptr != nullptr)
 					g_variant_unref(varptr);
@@ -262,7 +270,6 @@ class IndicatorFixture : public ::testing::Test
 			}
 
 			if (!match) {
-				gchar * valstr = nullptr;
 				gchar * attstr = nullptr;
 
 				if (aval != nullptr) {
@@ -271,47 +278,44 @@ class IndicatorFixture : public ::testing::Test
 					attstr = g_strdup("nullptr");
 				}
 
-				if (varref != nullptr) {
-					valstr = g_variant_print(varref.get(), TRUE);
-				} else {
-					valstr = g_strdup("nullptr");
-				}
-
-				std::cout <<
-					"    Action: " << name << std::endl <<
-					"  Expected: " << valstr << std::endl <<
+				auto result = testing::AssertionFailure();
+				result <<
+					"    Action: " << nameStr << std::endl <<
+					"  Expected: " << valueStr << std::endl <<
 					"    Actual: " << attstr << std::endl;
 
-				g_free(valstr);
 				g_free(attstr);
+
+				return result;
+			} else {
+				auto result = testing::AssertionSuccess();
+				return result;
 			}
-
-			return match;
 		}
 
-		bool expectActionStateIs (const std::string& name, bool value) {
+		testing::AssertionResult expectActionStateIs (const char * nameStr, const char * valueStr, const std::string& name, bool value) {
 			GVariant * var = g_variant_new_boolean(value);
-			return expectActionStateIs(name, var);
+			return expectActionStateIs(nameStr, valueStr, name, var);
 		}
 
-		bool expectActionStateIs (const std::string& name, std::string value) {
+		testing::AssertionResult expectActionStateIs (const char * nameStr, const char * valueStr, const std::string& name, std::string value) {
 			GVariant * var = g_variant_new_string(value.c_str());
-			return expectActionStateIs(name, var);
+			return expectActionStateIs(nameStr, valueStr, name, var);
 		}
 
-		bool expectActionStateIs (const std::string& name, const char * value) {
+		testing::AssertionResult expectActionStateIs (const char * nameStr, const char * valueStr, const std::string& name, const char * value) {
 			GVariant * var = g_variant_new_string(value);
-			return expectActionStateIs(name, var);
+			return expectActionStateIs(nameStr, valueStr, name, var);
 		}
 
-		bool expectActionStateIs (const std::string& name, double value) {
+		testing::AssertionResult expectActionStateIs (const char * nameStr, const char * valueStr, const std::string& name, double value) {
 			GVariant * var = g_variant_new_double(value);
-			return expectActionStateIs(name, var);
+			return expectActionStateIs(nameStr, valueStr, name, var);
 		}
 
-		bool expectActionStateIs (const std::string& name, float value) {
+		testing::AssertionResult expectActionStateIs (const char * nameStr, const char * valueStr, const std::string& name, float value) {
 			GVariant * var = g_variant_new_double(value);
-			return expectActionStateIs(name, var);
+			return expectActionStateIs(nameStr, valueStr, name, var);
 		}
 
 
@@ -416,6 +420,23 @@ class IndicatorFixture : public ::testing::Test
 	EXPECT_PRED_FORMAT3(IndicatorFixture::expectMenuAttribute, menu, attrib, value)
 
 #define ASSERT_MENU_ATTRIB(menu, attrib, value) \
-	if (!expectMenuAttribute(menu, attrib, value)) \
-		return;
+	ASSERT_PRED_FORMAT3(IndicatorFixture::expectMenuAttribute, menu, attrib, value)
+
+#define ASSERT_ACTION_EXISTS(action) \
+	ASSERT_PRED_FORMAT1(IndicatorFixture::expectActionExists, action)
+
+#define EXPECT_ACTION_EXISTS(action) \
+	EXPECT_PRED_FORMAT1(IndicatorFixture::expectActionExists, action)
+
+#define EXPECT_ACTION_STATE(action, value) \
+	EXPECT_PRED_FORMAT2(IndicatorFixture::expectActionStateIs, action, value)
+
+#define ASSERT_ACTION_STATE(action, value) \
+	ASSERT_PRED_FORMAT2(IndicatorFixture::expectActionStateIs, action, value)
+
+#define EXPECT_ACTION_STATE_TYPE(action, type) \
+	EXPECT_PRED_FORMAT2(IndicatorFixture::expectActionStateType, action, type)
+
+#define ASSERT_ACTION_STATE_TYPE(action, type) \
+	ASSERT_PRED_FORMAT2(IndicatorFixture::expectActionStateType, action, type)
 
