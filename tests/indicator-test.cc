@@ -62,8 +62,11 @@ TEST_F(IndicatorTest, DesktopMenu) {
 	EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "action", "indicator.mute");
 }
 
-TEST_F(IndicatorTest, SilentActions) {
+TEST_F(IndicatorTest, BaseActions) {
 	setActions("/com/canonical/indicator/sound");
+
+	ASSERT_ACTION_EXISTS("root");
+	ASSERT_ACTION_STATE_TYPE("root", G_VARIANT_TYPE("a{sv}"));
 
 	ASSERT_ACTION_EXISTS("scroll");
 
@@ -74,4 +77,10 @@ TEST_F(IndicatorTest, SilentActions) {
 	ASSERT_ACTION_EXISTS("mute");
 	ASSERT_ACTION_STATE_TYPE("mute", G_VARIANT_TYPE_BOOLEAN);
 	EXPECT_ACTION_STATE("mute", false);
+
+	ASSERT_ACTION_EXISTS("mic-volume");
+	ASSERT_ACTION_STATE_TYPE("mic-volume", G_VARIANT_TYPE_DOUBLE);
+
+	ASSERT_ACTION_EXISTS("volume");
+	ASSERT_ACTION_STATE_TYPE("volume", G_VARIANT_TYPE_DOUBLE);
 }
