@@ -357,7 +357,7 @@ class IndicatorFixture : public ::testing::Test
 		}
 
 	protected:
-		bool expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, GVariant * value) {
+		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const gchar * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, GVariant * value) {
 			auto varref = std::shared_ptr<GVariant>(g_variant_ref_sink(value), [](GVariant * varptr) {
 				if (varptr != nullptr)
 					g_variant_unref(varptr);
@@ -371,7 +371,6 @@ class IndicatorFixture : public ::testing::Test
 			}
 
 			if (!same) {
-				gchar * valstr = nullptr;
 				gchar * attstr = nullptr;
 
 				if (attrib != nullptr) {
@@ -380,50 +379,42 @@ class IndicatorFixture : public ::testing::Test
 					attstr = g_strdup("nullptr");
 				}
 
-				if (varref != nullptr) {
-					valstr = g_variant_print(varref.get(), TRUE);
-				} else {
-					valstr = g_strdup("nullptr");
-				}
-
-				std::string menuprint("{ ");
-				std::for_each(menuLocation.begin(), menuLocation.end(), [&menuprint](int i) {
-					menuprint.append(std::to_string(i));
-					menuprint.append(", ");
-				});
-				menuprint += "}";
-
-				std::cout <<
-					"      Menu: " << menuprint << std::endl <<
-					" Attribute: " << attribute << std::endl <<
-					"  Expected: " << valstr << std::endl <<
+				auto result = testing::AssertionFailure();
+				result <<
+					"      Menu: " << menuLocationStr << std::endl <<
+					" Attribute: " << attributeStr << std::endl <<
+					"  Expected: " << valueStr << std::endl <<
 					"    Actual: " << attstr << std::endl;
 
-				g_free(valstr);
 				g_free(attstr);
+
+				return result;
+			} else {
+				auto result = testing::AssertionSuccess();
+				return result;
 			}
-
-			return same;
 		}
 
-		bool expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, bool value) {
+		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const gchar * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, bool value) {
 			GVariant * var = g_variant_new_boolean(value);
-			return expectMenuAttribute(menuLocation, attribute, var);
+			return expectMenuAttribute(menuLocationStr, attributeStr, valueStr, menuLocation, attribute, var);
 		}
 
-		bool expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, std::string value) {
+		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const gchar * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, std::string value) {
 			GVariant * var = g_variant_new_string(value.c_str());
-			return expectMenuAttribute(menuLocation, attribute, var);
+			return expectMenuAttribute(menuLocationStr, attributeStr, valueStr, menuLocation, attribute, var);
 		}
 
-		bool expectMenuAttribute (const std::vector<int> menuLocation, const std::string& attribute, const char * value) {
+		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const gchar * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, const char * value) {
 			GVariant * var = g_variant_new_string(value);
-			return expectMenuAttribute(menuLocation, attribute, var);
+			return expectMenuAttribute(menuLocationStr, attributeStr, valueStr, menuLocation, attribute, var);
 		}
 
 };
 
-#define EXPECT_MENU_ATTRIB(menu, attrib, value) expectMenuAttribute(menu, attrib, value)
+#define EXPECT_MENU_ATTRIB(menu, attrib, value) \
+	EXPECT_PRED_FORMAT3(IndicatorFixture::expectMenuAttribute, menu, attrib, value)
+
 #define ASSERT_MENU_ATTRIB(menu, attrib, value) \
 	if (!expectMenuAttribute(menu, attrib, value)) \
 		return;
