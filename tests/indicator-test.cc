@@ -51,7 +51,7 @@ TEST_F(IndicatorTest, PhoneMenu) {
 	EXPECT_MENU_ATTRIB({0}, "action", "indicator.root");
 	EXPECT_MENU_ATTRIB({0}, "x-canonical-type", "com.canonical.indicator.root");
 
-	//expectMenuAttribute({0, 0, 0}, "action", "indicator.silent-mode");
+	EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "action", "indicator.silent-mode");
 }
 
 TEST_F(IndicatorTest, DesktopMenu) {
