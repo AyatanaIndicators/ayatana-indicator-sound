@@ -50,16 +50,29 @@ TEST_F(IndicatorTest, PhoneMenu) {
 
 	EXPECT_MENU_ATTRIB({0}, "action", "indicator.root");
 	EXPECT_MENU_ATTRIB({0}, "x-canonical-type", "com.canonical.indicator.root");
+	EXPECT_MENU_ATTRIB({0}, "x-canonical-scroll-action", "indicator.scroll");
+	EXPECT_MENU_ATTRIB({0}, "x-canonical-secondary-action", "indicator.mute");
 
 	EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "action", "indicator.silent-mode");
+	EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "label", "Silent Mode");
+
+	EXPECT_MENU_ATTRIB(std::vector<int>({0, 2}), "action", "indicator.phone-settings");
+	EXPECT_MENU_ATTRIB(std::vector<int>({0, 2}), "label", "Sound Settings…");
 }
 
 TEST_F(IndicatorTest, DesktopMenu) {
 	setMenu("/com/canonical/indicator/sound/desktop");
 
 	EXPECT_MENU_ATTRIB({0}, "action", "indicator.root");
+	EXPECT_MENU_ATTRIB({0}, "x-canonical-type", "com.canonical.indicator.root");
+	EXPECT_MENU_ATTRIB({0}, "x-canonical-scroll-action", "indicator.scroll");
+	EXPECT_MENU_ATTRIB({0}, "x-canonical-secondary-action", "indicator.mute");
 
 	EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "action", "indicator.mute");
+	EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "label", "Mute");
+
+	EXPECT_MENU_ATTRIB(std::vector<int>({0, 2}), "action", "indicator.desktop-settings");
+	EXPECT_MENU_ATTRIB(std::vector<int>({0, 2}), "label", "Sound Settings…");
 }
 
 TEST_F(IndicatorTest, BaseActions) {
