@@ -31,15 +31,24 @@ protected:
 	{
 	}
 
+	std::shared_ptr<AccountsServiceMock> as;
+
 	virtual void SetUp() override
 	{
 		//addMock(buildBustleMock("indicator-test-session.bustle", DBUS_TEST_SERVICE_BUS_SESSION));
 		//addMock(buildBustleMock("indicator-test-system.bustle", DBUS_TEST_SERVICE_BUS_SYSTEM));
 
-		AccountsServiceMock as;
-		addMock(as);
+		as = std::make_shared<AccountsServiceMock>();
+		addMock(*as);
 
 		IndicatorFixture::SetUp();
+	}
+
+	virtual void TearDown() override
+	{
+		as.reset();
+
+		IndicatorFixture::TearDown();
 	}
 
 };
@@ -97,3 +106,4 @@ TEST_F(IndicatorTest, BaseActions) {
 	ASSERT_ACTION_EXISTS("volume");
 	ASSERT_ACTION_STATE_TYPE("volume", G_VARIANT_TYPE_DOUBLE);
 }
+
