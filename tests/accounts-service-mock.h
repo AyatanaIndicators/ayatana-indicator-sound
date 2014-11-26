@@ -25,6 +25,7 @@ class AccountsServiceMock
 		DbusTestDbusMock * mock = nullptr;
 		DbusTestDbusMockObject * soundobj = nullptr;
 		DbusTestDbusMockObject * userobj = nullptr;
+		DbusTestDbusMockObject * syssoundobj = nullptr;
 
 	public:
 		AccountsServiceMock () {
@@ -83,11 +84,22 @@ class AccountsServiceMock
 			dbus_test_dbus_mock_object_add_property(mock, soundobj,
 				"ArtUrl", G_VARIANT_TYPE_STRING,
 				g_variant_new_string(""), NULL);
+
+			syssoundobj = dbus_test_dbus_mock_get_object(mock, "/user", "com.ubuntu.touch.AccountsService.Sound", NULL);
+			dbus_test_dbus_mock_object_add_property(mock, syssoundobj,
+				"SilentMode", G_VARIANT_TYPE_BOOLEAN,
+				g_variant_new_boolean(FALSE), NULL);
 		}
 
 		~AccountsServiceMock () {
 			g_debug("Destroying the Accounts Service Mock");
 			g_clear_object(&mock);
+		}
+
+		void setSilentMode (bool modeValue) {
+			dbus_test_dbus_mock_object_update_property(mock, syssoundobj,
+				"SilentMode", g_variant_new_boolean(modeValue ? TRUE : FALSE),
+				NULL);
 		}
 
 		operator std::shared_ptr<DbusTestTask> () {
