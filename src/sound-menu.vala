@@ -60,6 +60,7 @@ public class SoundMenu: Object
 		root_item.set_attribute ("x-canonical-type", "s", "com.canonical.indicator.root");
 		root_item.set_attribute ("x-canonical-scroll-action", "s", "indicator.scroll");
 		root_item.set_attribute ("x-canonical-secondary-action", "s", "indicator.mute");
+		root_item.set_attribute ("submenu-action", "s", "indicator.indicator-shown");
 		root_item.set_submenu (this.menu);
 
 		this.root = new Menu ();

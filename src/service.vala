@@ -146,6 +146,7 @@ public class IndicatorSound.Service: Object {
 		{ "scroll", activate_scroll_action, "i", null, null },
 		{ "desktop-settings", activate_desktop_settings, null, null, null },
 		{ "phone-settings", activate_phone_settings, null, null, null },
+		{ "indicator-shown", null, null, "@b false", null },
 	};
 
 	MainLoop loop;
@@ -253,6 +254,10 @@ public class IndicatorSound.Service: Object {
 		}
 
 		if (!support_sync_notification)
+			return;
+
+		var shown_action = actions.lookup_action ("indicator-shown") as SimpleAction;
+		if (shown_action != null && shown_action.get_state().get_boolean())
 			return;
 
 		/* Determine Label */
