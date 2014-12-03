@@ -383,16 +383,6 @@ public class IndicatorSound.Service: Object {
 		return mute_action;
 	}
 
-	void volume_changed (double volume) {
-		var volume_action = this.actions.lookup_action ("volume") as SimpleAction;
-
-		/* Normalize volume, because the volume action's state is [0.0, 1.0], see create_volume_action() */
-		volume_action.set_state (new Variant.double (volume / this.max_volume));
-
-		this.update_root_icon ();
-		this.update_sync_notification ();
-	}
-
 	Action create_volume_action () {
 		/* The action's state is between be in [0.0, 1.0] instead of [0.0,
 		 * max_volume], so that we don't need to update the slider menu item
@@ -417,7 +407,15 @@ public class IndicatorSound.Service: Object {
 			volume_control.volume = v.clamp (0.0, this.max_volume);
 		});
 
-		this.volume_control.volume_changed.connect (volume_changed);
+		this.volume_control.notify["volume"].connect (() => {
+			var vol_action = this.actions.lookup_action ("volume") as SimpleAction;
+
+			/* Normalize volume, because the volume action's state is [0.0, 1.0], see create_volume_action() */
+			vol_action.set_state (new Variant.double (this.volume_control.volume / this.max_volume));
+
+			this.update_root_icon ();
+			this.update_sync_notification ();
+		});
 
 		this.volume_control.bind_property ("ready", volume_action, "enabled", BindingFlags.SYNC_CREATE);
 
@@ -431,8 +429,8 @@ public class IndicatorSound.Service: Object {
 			volume_control.mic_volume = val.get_double ();
 		});
 
-		this.volume_control.mic_volume_changed.connect ( (volume) => {
-			volume_action.set_state (new Variant.double (volume));
+		this.volume_control.notify["mic-volume"].connect ( () => {
+			volume_action.set_state (new Variant.double (this.volume_control.mic_volume));
 		});
 
 		this.volume_control.bind_property ("ready", volume_action, "enabled", BindingFlags.SYNC_CREATE);

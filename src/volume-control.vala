@@ -70,9 +70,6 @@ public class VolumeControl : Object
 	private double _account_service_volume = 0.0;
 	private bool _active_port_headphone = false;
 
-	public signal void volume_changed (double v);
-	public signal void mic_volume_changed (double v);
-
 	/** true when connected to the pulse server */
 	public bool ready { get; set; }
 
@@ -190,10 +187,10 @@ public class VolumeControl : Object
 				_volume != volume_to_double (i.volume.max ()))
 		{
 			_volume = volume_to_double (i.volume.max ());
-			volume_changed (_volume);
+			this.notify_property("volume");
 			start_local_volume_timer();
 		} else if (this._active_port_headphone != old_active_port_headphone) {
-			volume_changed (_volume);
+			this.notify_property("volume");
 		}
 	}
 
@@ -205,7 +202,7 @@ public class VolumeControl : Object
 		if (_mic_volume != volume_to_double (i.volume.values[0]))
 		{
 			_mic_volume = volume_to_double (i.volume.values[0]);
-			mic_volume_changed (_mic_volume);
+			this.notify_property ("mic-volume");
 		}
 	}
 
@@ -261,7 +258,7 @@ public class VolumeControl : Object
 					if (volume != cvolume) {
 						/* Someone else changed the volume for this role, reflect on the indicator */
 						_volume = volume_to_double (volume);
-						volume_changed (_volume);
+						this.notify_property("volume");
 						start_local_volume_timer();
 					}
 				}
@@ -304,7 +301,7 @@ public class VolumeControl : Object
 				iter.next ("(uu)", &type, &volume);
 
 				_volume = volume_to_double (volume);
-				volume_changed (_volume);
+				this.notify_property("volume");
 				start_local_volume_timer();
 			} catch (GLib.Error e) {
 				warning ("unable to get volume for active role %s (%s)", sink_input_objp, e.message);
@@ -521,7 +518,7 @@ public class VolumeControl : Object
 	private void set_volume_success_cb (Context c, int success)
 	{
 		if ((bool)success)
-			volume_changed (_volume);
+			this.notify_property("volume");
 	}
 
 	private void sink_info_set_volume_cb (Context c, SinkInfo? i, int eol)
@@ -567,7 +564,7 @@ public class VolumeControl : Object
 					new Variant ("(ssv)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume", volume),
 					null, DBusCallFlags.NONE, -1);
 
-			volume_changed (_volume);
+			this.notify_property("volume");
 		} catch (GLib.Error e) {
 			lock (_pa_volume_sig_count) {
 				_pa_volume_sig_count--;
@@ -599,7 +596,7 @@ public class VolumeControl : Object
 	void set_mic_volume_success_cb (Context c, int success)
 	{
 		if ((bool)success)
-			mic_volume_changed (_mic_volume);
+			this.notify_property ("mic-volume");
 	}
 
 	void set_mic_volume_get_server_info_cb (PulseAudio.Context c, PulseAudio.ServerInfo? i) {
