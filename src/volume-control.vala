@@ -68,7 +68,6 @@ public class VolumeControl : Object
 	private uint _accountservice_volume_timer = 0;
 	private bool _send_next_local_volume = false;
 	private double _account_service_volume = 0.0;
-	private Notify.Notification _notification;
 	private bool _active_port_headphone = false;
 
 	public signal void volume_changed (double v);
@@ -90,12 +89,6 @@ public class VolumeControl : Object
 
 		_mute_cancellable = new Cancellable ();
 		_volume_cancellable = new Cancellable ();
-
-		Notify.init ("Volume");
-		_notification = new Notify.Notification(_("Volume"), "", "audio-volume-muted");
-		_notification.set_hint ("value", 0);
-		_notification.set_hint ("x-canonical-private-synchronous", "true");
-		_notification.set_hint ("x-canonical-non-shaped-icon", "true");
 
 		setup_accountsservice.begin ();
 
@@ -594,71 +587,12 @@ public class VolumeControl : Object
 				set_volume_active_role.begin ();
 			else
 				context.get_server_info (server_info_cb_for_set_volume);
+
+			high_volume = volume > 0.75 && _active_port_headphone;
+
 			return true;
 		} else {
 			return false;
-		}
-	}
-
-	public void set_volume (double volume)
-	{
-		/* Using this to detect whether we're on the phone or not */
-		if (_pulse_use_stream_restore) {
-			/* Watch for extreme */
-			if (volume > 0.75 && _active_port_headphone)
-				high_volume = true;
-			else
-				high_volume = false;
-
-			/* Determine Label */
-			string volume_label = "";
-			if (high_volume)
-				volume_label = _("High volume");
-
-			/* Choose an icon */
-			string icon = "audio-volume-muted";
-			if (volume <= 0.0)
-				icon = "audio-volume-muted";
-			else if (volume <= 0.3)
-				icon = "audio-volume-low";
-			else if (volume <= 0.7)
-				icon = "audio-volume-medium";
-			else
-				icon = "audio-volume-high";
-
-			/* Choose a sound */
-			string? sound = null;
-			if (!((_active_sink_input >= 0) && (_active_sink_input < _valid_roles.length)
-					&& (_valid_roles[_active_sink_input] == "multimedia")))
-				sound = "/usr/share/sounds/ubuntu/stereo/message.ogg";
-
-			/* Check tint */
-			string tint = "false";
-			if (high_volume)
-				tint = "true";
-
-			/* Put it all into the notification */
-			_notification.clear_hints ();
-			_notification.update (_("Volume"), volume_label, icon);
-			_notification.set_hint ("value", (int32)(volume * 100.0));
-			/* TODO: Removing sound until we can get all the roles cleaned up for
-			   when to play it. We expect this to come back, but in another landing.
-			_notification.set_hint ("sound-file", sound);
-			 */
-			_notification.set_hint ("x-canonical-value-bar-tint", tint);
-			_notification.set_hint ("x-canonical-private-synchronous", "true");
-			_notification.set_hint ("x-canonical-non-shaped-icon", "true");
-
-			/* Show it */
-			try {
-				_notification.show ();			
-			} catch (GLib.Error e) {
-				warning("Unable to send volume change notification: %s", e.message);
-			}
-		}
-
-		if (set_volume_internal (volume)) {
-			start_local_volume_timer();
 		}
 	}
 
@@ -676,23 +610,28 @@ public class VolumeControl : Object
 		}
 	}
 
-	public void set_mic_volume (double volume)
-	{
-		return_if_fail (context.get_state () == Context.State.READY);
-
-		_mic_volume = volume;
-
-		context.get_server_info (set_mic_volume_get_server_info_cb);
+	public double volume {
+		get {
+			return _volume;
+		}
+		set {
+			if (set_volume_internal (value)) {
+				start_local_volume_timer();
+			}
+		}
 	}
 
-	public double get_volume ()
-	{
-		return _volume;
-	}
+	public double mic_volume {
+		get {
+			return _mic_volume;
+		}
+		set {
+			return_if_fail (context.get_state () == Context.State.READY);
 
-	public double get_mic_volume ()
-	{
-		return _mic_volume;
+			_mic_volume = value;
+
+			context.get_server_info (set_mic_volume_get_server_info_cb);
+		}
 	}
 
 	/* PulseAudio Dbus (Stream Restore) logic */
