@@ -73,6 +73,18 @@ public class IndicatorSound.Service: Object {
 		});
 
 		sharedsettings.bind ("allow-amplified-volume", this, "allow-amplified-volume", SettingsBindFlags.GET);
+
+		/* Hide the notification when the menu is shown */
+		var shown_action = actions.lookup_action ("indicator-shown") as SimpleAction;
+		shown_action.change_state.connect ((state) => {
+			if (state.get_boolean()) {
+				try {
+					sync_notification.close();
+				} catch (Error e) {
+					warning("Unable to close synchronous volume notification: %s", e.message);
+				}
+			}
+		});
 	}
 
 	~Service() {
