@@ -32,15 +32,6 @@
         On start up volume should not be muted.
       </description>
     </key>
-    <key name="show-notify-osd-on-scroll" type="b">
-      <default>true</default>
-      <summary>Initial setting for showing notify-osd notification on scroll volume-change</summary>
-      <description>
-        When using the mouse scroll-wheel over the indicator-sound icon, the volume changes.
-        Enabling this setting, every scroll volume-change a notify-osd bubble with the
-        updated volume value will be shown (if supported by your notification daemon).
-      </description>
-    </key>
     <key name="visible" type="b">
       <default>true</default>
       <summary>Whether or not to show the sound indicator in the menu bar.</summary>

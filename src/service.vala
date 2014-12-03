@@ -72,14 +72,6 @@ public class IndicatorSound.Service: Object {
 			this.sync_preferred_players ();
 		});
 
-		if (settings.get_boolean ("show-notify-osd-on-scroll")) {
-			List<string> caps = Notify.get_server_caps ();
-			if (caps.find_custom ("x-canonical-private-synchronous", strcmp) != null) {
-				this.notification = new Notify.Notification ("indicator-sound", "", "");
-				this.notification.set_hint ("x-canonical-private-synchronous", "indicator-sound");
-			}
-		}
-
 		sharedsettings.bind ("allow-amplified-volume", this, "allow-amplified-volume", SettingsBindFlags.GET);
 	}
 
@@ -166,7 +158,6 @@ public class IndicatorSound.Service: Object {
 	uint player_action_update_id;
 	bool mute_blocks_sound;
 	uint sound_was_blocked_timeout_id;
-	Notify.Notification notification;
 	bool syncing_preferred_players = false;
 	AccountsServiceUser? accounts_service = null;
 	bool export_to_accounts_service = false;
@@ -184,29 +175,6 @@ public class IndicatorSound.Service: Object {
 
 		double v = this.volume_control.volume + volume_step_percentage * delta;
 		this.volume_control.volume = v.clamp (0.0, this.max_volume);
-
-		/* TODO: Don't want to mess up the desktop today, but we should remove this
-		   scrolling change and merge that into volume control's notification */
-		if (this.notification != null) {
-			string icon;
-			if (v <= 0.0)
-				icon = "notification-audio-volume-off";
-			else if (v <= 0.3)
-				icon = "notification-audio-volume-low";
-			else if (v <= 0.7)
-				icon = "notification-audio-volume-medium";
-			else
-				icon = "notification-audio-volume-high";
-
-			this.notification.update ("indicator-sound", "", icon);
-			this.notification.set_hint ("value", ((int32) (100 * v / this.max_volume)).clamp (-1, 101));
-			try {
-				this.notification.show ();
-			}
-			catch (Error e) {
-				warning ("unable to show notification: %s", e.message);
-			}
-		}
 	}
 
 	void activate_desktop_settings (SimpleAction action, Variant? param) {
@@ -271,7 +239,22 @@ public class IndicatorSound.Service: Object {
 		root_action.set_state (builder.end());
 	}
 
+	/* TODO: Update these if the notification server leaves the bus and restarts */
+	private bool check_sync_notification = false;
+	private bool support_sync_notification = false;
+
 	void update_sync_notification () {
+		if (!check_sync_notification) {
+			List<string> caps = Notify.get_server_caps ();
+			if (caps.find_custom ("x-canonical-private-synchronous", strcmp) != null) {
+				support_sync_notification = true;
+			}
+			check_sync_notification = true;
+		}
+
+		if (!support_sync_notification)
+			return;
+
 		/* Determine Label */
 		string volume_label = "";
 		if (volume_control.high_volume)
