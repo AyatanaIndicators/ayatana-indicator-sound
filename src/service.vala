@@ -51,7 +51,7 @@ public class IndicatorSound.Service: Object {
 		this.actions.add_action (this.create_mute_action ());
 		this.actions.add_action (this.create_volume_action ());
 		this.actions.add_action (this.create_mic_volume_action ());
-		this.actions.add_action (this.create_high_volume_actions ());
+		this.actions.add_action (this.create_high_volume_action ());
 
 		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
 		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.HIDE_PLAYERS | SoundMenu.DisplayFlags.GREETER_PLAYERS));
@@ -440,11 +440,13 @@ public class IndicatorSound.Service: Object {
 		return volume_action;
 	}
 
-	Action create_high_volume_actions () {
+	Action create_high_volume_action () {
 		var high_volume_action = new SimpleAction.stateful("high-volume", null, new Variant.boolean (this.volume_control.high_volume));
 
-		this.volume_control.notify["high-volume"].connect( () =>
-			high_volume_action.set_state(new Variant.boolean (this.volume_control.high_volume)));
+		this.volume_control.notify["high-volume"].connect( () => {
+			high_volume_action.set_state(new Variant.boolean (this.volume_control.high_volume));
+			update_sync_notification();
+		});
 
 		return high_volume_action;
 	}
