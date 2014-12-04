@@ -77,7 +77,11 @@ public class VolumeControl : Object
 	public bool active_mic { get; private set; default = false; }
 
 	/** true when high volume warnings should be shown */
-	public bool high_volume { get; set; }
+	public bool high_volume {
+		get {
+			return this._volume > 0.75 && _active_port_headphone;	
+		}
+	}
 
 	public VolumeControl ()
 	{
@@ -152,7 +156,7 @@ public class VolumeControl : Object
 
 	private void sink_info_cb_for_props (Context c, SinkInfo? i, int eol)
 	{
-		bool old_active_port_headphone = this._active_port_headphone;
+		bool old_high_volume = this.high_volume;
 
 		if (i == null)
 			return;
@@ -189,8 +193,10 @@ public class VolumeControl : Object
 			_volume = volume_to_double (i.volume.max ());
 			this.notify_property("volume");
 			start_local_volume_timer();
-		} else if (this._active_port_headphone != old_active_port_headphone) {
-			this.notify_property("volume");
+		} 
+		
+		if (this.high_volume != old_high_volume) {
+			this.notify_property("high-volume");
 		}
 	}
 
@@ -579,13 +585,18 @@ public class VolumeControl : Object
 			return false;
 
 		if (_volume != volume) {
+			var old_high_volume = this.high_volume;
+
 			_volume = volume;
 			if (_pulse_use_stream_restore)
 				set_volume_active_role.begin ();
 			else
 				context.get_server_info (server_info_cb_for_set_volume);
 
-			high_volume = volume > 0.75 && _active_port_headphone;
+			this.notify_property("volume");
+
+			if (this.high_volume != old_high_volume)
+				this.notify_property("high-volume");
 
 			return true;
 		} else {
