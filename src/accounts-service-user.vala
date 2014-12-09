@@ -35,6 +35,7 @@ public class AccountsServiceUser : Object {
 			return _silentMode;
 		}
 		set {
+			_silentMode = value;
 			if (syssoundproxy != null)
 				syssoundproxy.silent_mode = value;
 		}
