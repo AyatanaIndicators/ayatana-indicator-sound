@@ -1,3 +1,24 @@
+indicator-sound (12.10.2+15.04.20150120-0ubuntu1) vivid; urgency=low
+
+  [ Ted Gould ]
+  * Set internal silent mode variable at startup (LP: #1391164)
+
+  [ CI bot ]
+  * Set internal silent mode variable at startup (LP: #1391164)
+
+  [ Nick Dedekind ]
+  * Update the panel icon when entering/exiting silent mode. (LP:
+    #1390067)
+
+  [ Dmitry Shachnev ]
+  * Fix indicator-sound-service crash when active_port is null. (LP:
+    #1395455)
+
+  [ Lars Uebernickel ]
+  * Set internal silent mode variable at startup (LP: #1391164)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 20 Jan 2015 22:03:19 +0000
+
 indicator-sound (12.10.2+15.04.20141105-0ubuntu1) vivid; urgency=medium
 
   [ Ted Gould ]
