@@ -35,6 +35,7 @@ public class AccountsServiceUser : Object {
 			return _silentMode;
 		}
 		set {
+			_silentMode = value;
 			if (syssoundproxy != null)
 				syssoundproxy.silent_mode = value;
 		}
@@ -211,7 +212,8 @@ public class AccountsServiceUser : Object {
 				}
 			});
 
-			this.silentMode = this.syssoundproxy.silent_mode;
+			this._silentMode = this.syssoundproxy.silent_mode;
+			this.notify_property("silentMode");
 		} catch (Error e) {
 			this.syssoundproxy = null;
 			warning("Unable to get proxy to system sound settings: %s", e.message);
