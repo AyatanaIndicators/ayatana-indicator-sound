@@ -242,6 +242,8 @@ public class IndicatorSound.Service: Object {
 		string icon;
 		if (this.volume_control.mute)
 			icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
+		else if (this.accounts_service != null && this.accounts_service.silentMode)
+		  icon = "audio-volume-muted-panel";
 		else if (volume <= 0.0)
 			icon = "audio-volume-low-zero-panel";
 		else if (volume <= 0.3)
@@ -254,6 +256,9 @@ public class IndicatorSound.Service: Object {
 		string accessible_name;
 		if (this.volume_control.mute) {
 			accessible_name = _("Volume (muted)");
+		} else if (this.accounts_service != null && this.accounts_service.silentMode) {
+			int volume_int = (int)(volume * 100);
+			accessible_name = "%s (%s %d%%)".printf (_("Volume"), _("silent"), volume_int);
 		} else {
 			int volume_int = (int)(volume * 100);
 			accessible_name = "%s (%d%%)".printf (_("Volume"), volume_int);
@@ -443,13 +448,13 @@ public class IndicatorSound.Service: Object {
 				action.set_state (this.action_state_for_player (player));
 				action.set_enabled (player.can_raise);
 			}
-			
+
 			SimpleAction? greeter_action = this.actions.lookup_action (player.id + ".greeter") as SimpleAction;
 			if (greeter_action != null) {
 				greeter_action.set_state (this.action_state_for_player (player, greeter_show_track()));
 				greeter_action.set_enabled (player.can_raise);
 			}
-			
+
 			/* If we're playing then put that data in accounts service */
 			if (player.is_running && export_to_accounts_service && accounts_service != null) {
 				accounts_service.player = player;
