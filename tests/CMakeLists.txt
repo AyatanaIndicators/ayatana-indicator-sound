@@ -83,6 +83,21 @@ target_link_libraries(
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 ###########################
+# Pulse Mock
+###########################
+
+add_library(
+	pulse-mock
+	SHARED
+	pa-mock.c
+)
+
+target_link_libraries(
+	pulse-mock
+	${SOUNDSERVICE_LIBRARIES}
+)
+
+###########################
 # Name Watch Test
 ###########################
 

@@ -1,5 +1,8 @@
 
-#include <pulseaudio.h>
+#include <pulse/pulseaudio.h>
+#include <pulse/glib-mainloop.h>
+#include <gio/gio.h>
+#include <math.h>
 
 #ifdef G_LOG_DOMAIN
 #undef G_LOG_DOMAIN
@@ -16,7 +19,7 @@ G_DEFINE_QUARK("pa-mock-subscribe-mask", subscribe_mask);
 
 typedef struct {
 	pa_context_notify_cb_t cb;
-	gpointer user_data;
+	gpointer userdata;
 } state_cb_t;
 
 static void
@@ -28,7 +31,7 @@ context_weak_cb (gpointer user_data, GObject * oldobj)
 pa_context *
 pa_context_new_with_proplist (pa_mainloop_api *mainloop, const char *name, pa_proplist *proplist)
 {
-	GObject * gctx = g_object_new(G_TYPE_OBJECT);
+	GObject * gctx = g_object_new(G_TYPE_OBJECT, NULL);
 	pa_context * ctx = (pa_context *)gctx;
 
 	g_debug("Creating new context: %p", ctx);
@@ -43,10 +46,11 @@ pa_context_unref (pa_context *c) {
 	g_object_unref(G_OBJECT(c));
 }
 
-void
+pa_context *
 pa_context_ref (pa_context *c) {
 	g_return_if_fail(G_IS_OBJECT(c));
 	g_object_ref(G_OBJECT(c));
+	return c;
 }
 
 int
@@ -89,9 +93,9 @@ pa_context_set_state_callback (pa_context *c, pa_context_notify_cb_t cb, void *u
 	state_cb->cb = cb;
 	state_cb->userdata = userdata;
 
-	GList * statelist = g_object_get_qdata(G_OBJECT(c), state_cb_quark);
+	GList * statelist = g_object_get_qdata(G_OBJECT(c), state_cb_quark());
 	statelist = g_list_append(statelist, state_cb);
-	g_object_set_qdata_full(G_OBJECT(c), state_cb_quark, state_cb, state_cb_list_destroy);
+	g_object_set_qdata_full(G_OBJECT(c), state_cb_quark(), state_cb, state_cb_list_destroy);
 }
 
 pa_context_state_t
@@ -128,7 +132,6 @@ get_server_info_cb (gpointer data)
 		.host_name = "host",
 		.server_version = "1.2.3",
 		.server_name = "server",
-		.sample_spec = ,
 		.default_sink_name = "default-sink",
 		.default_source_name = "default-source",
 		.cookie = 1234,
@@ -152,14 +155,14 @@ pa_context_get_server_info (pa_context *c, pa_server_info_cb_t cb, void *userdat
 	get_server_info_t * info = g_new(get_server_info_t, 1);
 	info->cb = cb;
 	info->userdata = userdata;
-	info->context = g_objet_ref(c);
+	info->context = g_object_ref(c);
 
 	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE,
 		get_server_info_cb,
 		info,
 		get_server_info_free);
 
-	GObject * goper = g_object_new(G_TYPE_OBJECT);
+	GObject * goper = g_object_new(G_TYPE_OBJECT, NULL);
 	pa_operation * oper = (pa_operation *)goper;
 	return oper;
 }
@@ -180,7 +183,7 @@ get_sink_info_free (gpointer data)
 }
 
 static gboolean
-get_info_info_cb (gpointer data)
+get_sink_info_cb (gpointer data)
 {
 	pa_sink_info sink = {
 		.name = "default-sink",
@@ -207,14 +210,14 @@ pa_context_get_sink_info_by_name (pa_context *c, const gchar * name, pa_sink_inf
 	get_sink_info_t * info = g_new(get_sink_info_t, 1);
 	info->cb = cb;
 	info->userdata = userdata;
-	info->context = g_objet_ref(c);
+	info->context = g_object_ref(c);
 
 	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE,
 		get_sink_info_cb,
 		info,
 		get_sink_info_free);
 
-	GObject * goper = g_object_new(G_TYPE_OBJECT);
+	GObject * goper = g_object_new(G_TYPE_OBJECT, NULL);
 	pa_operation * oper = (pa_operation *)goper;
 	return oper;
 }
@@ -227,34 +230,34 @@ pa_context_get_sink_info_list (pa_context *c, pa_sink_info_cb_t cb, void *userda
 }
 
 typedef struct {
-	pa_sink_info_cb_t cb;
+	pa_sink_input_info_cb_t cb;
 	gpointer userdata;
 	pa_context * context;
 } get_sink_input_info_t;
 
 static void
-get_sink_info_free (gpointer data)
+get_sink_input_info_free (gpointer data)
 {
-	get_sink_input_info_t * info = (get_sink_info_t *)data;
+	get_sink_input_info_t * info = (get_sink_input_info_t *)data;
 	pa_context_unref(info->context);
 	g_free(info);
 }
 
 static gboolean
-get_sink_info_cb (gpointer data)
+get_sink_input_info_cb (gpointer data)
 {
 	pa_sink_input_info sink = {
 		.name = "default-sink"
 	};
 	get_sink_input_info_t * info = (get_sink_input_info_t *)data;
 
-	info->cb(info->context, &sink, info->userdata);
+	info->cb(info->context, &sink, 0, info->userdata);
 
 	return G_SOURCE_REMOVE;
 }
 
 pa_operation *
-pa_context_get_sink_input_info (pa_context *c, pa_sink_input_info_cb_t cb, void * userdata)
+pa_context_get_sink_input_info (pa_context *c, uint32_t idx, pa_sink_input_info_cb_t cb, void * userdata)
 {
 	g_return_val_if_fail(G_IS_OBJECT(c), NULL);
 	g_return_val_if_fail(cb != NULL, NULL);
@@ -262,14 +265,14 @@ pa_context_get_sink_input_info (pa_context *c, pa_sink_input_info_cb_t cb, void 
 	get_sink_input_info_t * info = g_new(get_sink_input_info_t, 1);
 	info->cb = cb;
 	info->userdata = userdata;
-	info->context = g_objet_ref(c);
+	info->context = g_object_ref(c);
 
 	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE,
 		get_sink_input_info_cb,
 		info,
 		get_sink_input_info_free);
 
-	GObject * goper = g_object_new(G_TYPE_OBJECT);
+	GObject * goper = g_object_new(G_TYPE_OBJECT, NULL);
 	pa_operation * oper = (pa_operation *)goper;
 	return oper;
 }
@@ -296,7 +299,7 @@ get_source_info_cb (gpointer data)
 	};
 	get_source_info_t * info = (get_source_info_t *)data;
 
-	info->cb(info->context, &source, info->userdata);
+	info->cb(info->context, &source, 0, info->userdata);
 
 	return G_SOURCE_REMOVE;
 }
@@ -310,14 +313,14 @@ pa_context_get_source_info_by_name (pa_context *c, const char * name, pa_source_
 	get_source_info_t * info = g_new(get_source_info_t, 1);
 	info->cb = cb;
 	info->userdata = userdata;
-	info->context = g_objet_ref(c);
+	info->context = g_object_ref(c);
 
 	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE,
 		get_source_info_cb,
 		info,
 		get_source_info_free);
 
-	GObject * goper = g_object_new(G_TYPE_OBJECT);
+	GObject * goper = g_object_new(G_TYPE_OBJECT, NULL);
 	pa_operation * oper = (pa_operation *)goper;
 	return oper;
 }
@@ -344,7 +347,7 @@ get_source_output_cb (gpointer data)
 	};
 	get_source_output_t * info = (get_source_output_t *)data;
 
-	info->cb(info->context, &source, info->userdata);
+	info->cb(info->context, &source, 0, info->userdata);
 
 	return G_SOURCE_REMOVE;
 }
@@ -358,14 +361,14 @@ pa_context_get_source_output_info (pa_context *c, uint32_t idx, pa_source_output
 	get_source_output_t * info = g_new(get_source_output_t, 1);
 	info->cb = cb;
 	info->userdata = userdata;
-	info->context = g_objet_ref(c);
+	info->context = g_object_ref(c);
 
 	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE,
 		get_source_output_cb,
 		info,
 		get_source_output_free);
 
-	GObject * goper = g_object_new(G_TYPE_OBJECT);
+	GObject * goper = g_object_new(G_TYPE_OBJECT, NULL);
 	pa_operation * oper = (pa_operation *)goper;
 	return oper;
 }
@@ -373,6 +376,7 @@ pa_context_get_source_output_info (pa_context *c, uint32_t idx, pa_source_output
 typedef struct {
 	pa_context_success_cb_t cb;
 	gpointer userdata;
+	pa_context * context;
 	int mute;
 } set_sink_mute_t;
 
@@ -403,7 +407,7 @@ pa_context_set_sink_mute_by_index (pa_context *c, uint32_t idx, int mute, pa_con
 	set_sink_mute_t * data = g_new(set_sink_mute_t, 1);
 	data->cb = cb;
 	data->userdata = userdata;
-	data->context = g_objet_ref(c);
+	data->context = g_object_ref(c);
 	data->mute = mute;
 
 	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE,
@@ -411,7 +415,7 @@ pa_context_set_sink_mute_by_index (pa_context *c, uint32_t idx, int mute, pa_con
 		data,
 		set_sink_mute_free);
 
-	GObject * goper = g_object_new(G_TYPE_OBJECT);
+	GObject * goper = g_object_new(G_TYPE_OBJECT, NULL);
 	pa_operation * oper = (pa_operation *)goper;
 	return oper;
 }
@@ -419,6 +423,7 @@ pa_context_set_sink_mute_by_index (pa_context *c, uint32_t idx, int mute, pa_con
 typedef struct {
 	pa_context_success_cb_t cb;
 	gpointer userdata;
+	pa_context * context;
 	pa_cvolume cvol;
 } set_sink_volume_t;
 
@@ -449,7 +454,7 @@ pa_context_set_sink_volume_by_index (pa_context *c, uint32_t idx, const pa_cvolu
 	set_sink_volume_t * data = g_new(set_sink_volume_t, 1);
 	data->cb = cb;
 	data->userdata = userdata;
-	data->context = g_objet_ref(c);
+	data->context = g_object_ref(c);
 	data->cvol.channels = cvol->channels;
 
 	int i;
@@ -461,7 +466,7 @@ pa_context_set_sink_volume_by_index (pa_context *c, uint32_t idx, const pa_cvolu
 		data,
 		set_sink_volume_free);
 
-	GObject * goper = g_object_new(G_TYPE_OBJECT);
+	GObject * goper = g_object_new(G_TYPE_OBJECT, NULL);
 	pa_operation * oper = (pa_operation *)goper;
 	return oper;
 }
@@ -469,6 +474,7 @@ pa_context_set_sink_volume_by_index (pa_context *c, uint32_t idx, const pa_cvolu
 typedef struct {
 	pa_context_success_cb_t cb;
 	gpointer userdata;
+	pa_context * context;
 	pa_cvolume cvol;
 } set_source_volume_t;
 
@@ -499,7 +505,7 @@ pa_context_set_source_volume_by_name (pa_context *c, const char * name, const pa
 	set_source_volume_t * data = g_new(set_source_volume_t, 1);
 	data->cb = cb;
 	data->userdata = userdata;
-	data->context = g_objet_ref(c);
+	data->context = g_object_ref(c);
 	data->cvol.channels = cvol->channels;
 
 	int i;
@@ -511,7 +517,7 @@ pa_context_set_source_volume_by_name (pa_context *c, const char * name, const pa
 		data,
 		set_source_volume_free);
 
-	GObject * goper = g_object_new(G_TYPE_OBJECT);
+	GObject * goper = g_object_new(G_TYPE_OBJECT, NULL);
 	pa_operation * oper = (pa_operation *)goper;
 	return oper;
 }
@@ -521,9 +527,9 @@ pa_context_set_source_volume_by_name (pa_context *c, const char * name, const pa
  * *******************************/
 
 typedef struct {
-	pa_context_subscribe_cb_t cb;
-	gointer userdata;
-	GObject * context;
+	pa_context_success_cb_t cb;
+	gpointer userdata;
+	pa_context * context;
 	pa_subscription_mask_t mask;
 } subscribe_mask_t;
 
@@ -539,7 +545,7 @@ static gboolean
 subscribe_mask_cb (gpointer data)
 {
 	subscribe_mask_t * mask_data = (subscribe_mask_t *)data;
-	g_object_set_qdata(mask_data->context, subscribe_mask_quark, GINT_TO_POINTER(mask_data->mask));
+	g_object_set_qdata(G_OBJECT(mask_data->context), subscribe_mask_quark(), GINT_TO_POINTER(mask_data->mask));
 	mask_data->cb(mask_data->context, 1, mask_data->userdata);
 	return G_SOURCE_REMOVE;
 }
@@ -560,14 +566,14 @@ pa_context_subscribe (pa_context * c, pa_subscription_mask_t mask, pa_context_su
 		data,
 		subscribe_mask_free);
 
-	GObject * goper = g_object_new(G_TYPE_OBJECT);
+	GObject * goper = g_object_new(G_TYPE_OBJECT, NULL);
 	pa_operation * oper = (pa_operation *)goper;
 	return oper;
 }
 
 typedef struct {
 	pa_context_subscribe_cb_t cb;
-	gointer userdata;
+	gpointer userdata;
 } subscribe_cb_t;
 
 void
@@ -579,7 +585,7 @@ pa_context_set_subscribe_callback (pa_context * c, pa_context_subscribe_cb_t cal
 	sub->cb = callback;
 	sub->userdata = userdata;
 
-	g_object_set_qdata_full(c, subscribe_cb_quark, sub, g_free);
+	g_object_set_qdata_full(G_OBJECT(c), subscribe_cb_quark(), sub, g_free);
 }
 
 /* *******************************
@@ -684,7 +690,16 @@ pa_volume_t
 pa_sw_volume_from_dB (double f)
 {
 	double linear = pow(10.0, f / 20.0);
-	return (pa_volume_t) PA_CLAMP_VOLUME((uint64_t) lround(cbrt(linear) * PA_VOLUME_NORM));
+
+	pa_volume_t calculated = lround(cbrt(linear) * PA_VOLUME_NORM);
+
+	if (G_UNLIKELY(calculated > PA_VOLUME_MAX)) {
+		return PA_VOLUME_MAX;
+	} else if (G_UNLIKELY(calculated < PA_VOLUME_MUTED)) {
+		return PA_VOLUME_MUTED;
+	} else {
+		return calculated;
+	}
 }
 
 pa_cvolume *
@@ -711,8 +726,15 @@ pa_cvolume_set (pa_cvolume * cvol, unsigned channels, pa_volume_t volume)
 	cvol->channels = channels;
 
 	unsigned int i;
-	for (i = 0; i < channels; i++)
-		cvol->values[i] = PA_CLAMP_VOLUME(volume);
+	for (i = 0; i < channels; i++) {
+		if (G_UNLIKELY(volume > PA_VOLUME_MAX)) {
+			cvol->values[i] = PA_VOLUME_MAX;
+		} else if (G_UNLIKELY(volume < PA_VOLUME_MUTED)) {
+			cvol->values[i] = PA_VOLUME_MUTED;
+		} else {
+			cvol->values[i] = volume;
+		}
+	}
 
 	return cvol;
 }
@@ -741,8 +763,17 @@ pa_cvolume_scale (pa_cvolume * cvol, pa_volume_t max)
 		return pa_cvolume_set(cvol, cvol->channels, max);
 
 	unsigned int i;
-	for (i = 0; i < channels; i++)
-		cvol->values[i] = PA_CLAMP_VOLUME( (cvol->values[i] * max) / originalmax );
+	for (i = 0; i < cvol->channels; i++) {
+		pa_volume_t calculated = (cvol->values[i] * max) / originalmax;
+
+		if (G_UNLIKELY(calculated > PA_VOLUME_MAX)) {
+			cvol->values[i] = PA_VOLUME_MAX;
+		} else if (G_UNLIKELY(calculated < PA_VOLUME_MUTED)) {
+			cvol->values[i] = PA_VOLUME_MUTED;
+		} else {
+			cvol->values[i] = calculated;
+		}
+	}
 
 	return cvol;
 }
