@@ -12,6 +12,15 @@
 G_DEFINE_QUARK("pa-mock-state-cb-list", state_cb);
 G_DEFINE_QUARK("pa-mock-subscribe-callback", subscribe_cb);
 G_DEFINE_QUARK("pa-mock-subscribe-mask", subscribe_mask);
+G_DEFINE_QUARK("pa-mock-current-state", state);
+G_DEFINE_QUARK("pa-mock-future-state", state_future);
+
+/* *******************************
+ * Prototypes
+ * *******************************/
+
+static void set_state (pa_context * c, pa_context_state_t state);
+static void queue_state (pa_context * context, pa_context_state_t state);
 
 /* *******************************
  * context.h
@@ -37,6 +46,8 @@ pa_context_new_with_proplist (pa_mainloop_api *mainloop, const char *name, pa_pr
 	g_debug("Creating new context: %p", ctx);
 	g_object_weak_ref(gctx, context_weak_cb, NULL);
 
+	set_state(ctx, PA_CONTEXT_UNCONNECTED);
+
 	return ctx;
 }
 
@@ -58,6 +69,7 @@ pa_context_connect (pa_context *c, const char *server, pa_context_flags_t flags,
 {
 	g_return_if_fail(G_IS_OBJECT(c));
 	g_debug("Context Connect");
+	queue_state(c, PA_CONTEXT_READY);
 	return 0;
 }
 
@@ -66,6 +78,7 @@ pa_context_disconnect (pa_context *c)
 {
 	g_return_if_fail(G_IS_OBJECT(c));
 	g_debug("Context Disconnect");
+	queue_state(c, PA_CONTEXT_UNCONNECTED);
 }
 
 int
@@ -74,6 +87,49 @@ pa_context_errno (pa_context *c)
 	g_return_val_if_fail(G_IS_OBJECT(c), -1);
 
 	return 0;
+}
+
+static void
+set_state_cb (gpointer pcbdata, gpointer pcontext)
+{
+	pa_context * context = (pa_context *)pcontext;
+	state_cb_t * cbdata = (state_cb_t *)pcbdata;
+
+	cbdata->cb(context, cbdata->userdata);
+}
+
+static void
+set_state (pa_context * c, pa_context_state_t state)
+{
+	pa_context_state_t oldstate = pa_context_get_state(c);
+	if (oldstate == state)
+		return;
+
+	g_object_set_qdata(G_OBJECT(c), state_quark(), GINT_TO_POINTER(state));
+	GList * statelist = g_object_get_qdata(G_OBJECT(c), state_cb_quark());
+	g_list_foreach(statelist, set_state_cb, c);
+}
+
+static gboolean
+queue_state_cb (gpointer pcontext)
+{
+	pa_context * context = (pa_context *)pcontext;
+	pa_context_state_t state = GPOINTER_TO_INT(g_object_get_qdata(G_OBJECT(context), state_future_quark()));
+
+	set_state(context, state);
+
+	return G_SOURCE_REMOVE;
+}
+
+static void
+queue_state (pa_context * context, pa_context_state_t state)
+{
+	g_object_set_qdata(G_OBJECT(context), state_future_quark(), GINT_TO_POINTER(state));
+
+	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE,
+		queue_state_cb,
+		g_object_ref(context),
+		g_object_unref);
 }
 
 static void
@@ -95,7 +151,7 @@ pa_context_set_state_callback (pa_context *c, pa_context_notify_cb_t cb, void *u
 
 	GList * statelist = g_object_get_qdata(G_OBJECT(c), state_cb_quark());
 	statelist = g_list_append(statelist, state_cb);
-	g_object_set_qdata_full(G_OBJECT(c), state_cb_quark(), state_cb, state_cb_list_destroy);
+	g_object_set_qdata_full(G_OBJECT(c), state_cb_quark(), statelist, state_cb_list_destroy);
 }
 
 pa_context_state_t
@@ -103,7 +159,7 @@ pa_context_get_state (pa_context *c)
 {
 	g_return_if_fail(G_IS_OBJECT(c));
 
-	return PA_CONTEXT_READY;
+	return GPOINTER_TO_INT(g_object_get_qdata(G_OBJECT(c), state_quark()));
 }
 
 /* *******************************
@@ -185,13 +241,17 @@ get_sink_info_free (gpointer data)
 static gboolean
 get_sink_info_cb (gpointer data)
 {
+	pa_sink_port_info active_port = {
+		.name = "speaker"
+	};
 	pa_sink_info sink = {
 		.name = "default-sink",
 		.index = 0,
 		.description = "Default Sink",
 		.channel_map = {
 			.channels = 0
-		}
+		},
+		.active_port = &active_port
 	};
 	get_sink_info_t * info = (get_sink_info_t *)data;
 
@@ -393,7 +453,8 @@ set_sink_mute_cb (gpointer data)
 {
 	set_sink_mute_t * mute = (set_sink_mute_t *)data;
 
-	mute->cb(mute->context, 1, mute->userdata);
+	if (mute->cb != NULL)
+		mute->cb(mute->context, 1, mute->userdata);
 
 	return G_SOURCE_REMOVE;
 }
@@ -402,7 +463,6 @@ pa_operation*
 pa_context_set_sink_mute_by_index (pa_context *c, uint32_t idx, int mute, pa_context_success_cb_t cb, void *userdata)
 {
 	g_return_val_if_fail(G_IS_OBJECT(c), NULL);
-	g_return_val_if_fail(cb != NULL, NULL);
 
 	set_sink_mute_t * data = g_new(set_sink_mute_t, 1);
 	data->cb = cb;
@@ -546,7 +606,8 @@ subscribe_mask_cb (gpointer data)
 {
 	subscribe_mask_t * mask_data = (subscribe_mask_t *)data;
 	g_object_set_qdata(G_OBJECT(mask_data->context), subscribe_mask_quark(), GINT_TO_POINTER(mask_data->mask));
-	mask_data->cb(mask_data->context, 1, mask_data->userdata);
+	if (mask_data->cb != NULL)
+		mask_data->cb(mask_data->context, 1, mask_data->userdata);
 	return G_SOURCE_REMOVE;
 }
 
@@ -720,7 +781,7 @@ pa_cvolume *
 pa_cvolume_set (pa_cvolume * cvol, unsigned channels, pa_volume_t volume)
 {
 	g_return_val_if_fail(cvol != NULL, NULL);
-	g_return_val_if_fail(channels > 0, NULL);
+	g_warn_if_fail(channels > 0);
 	g_return_val_if_fail(channels <= PA_CHANNELS_MAX, NULL);
 
 	cvol->channels = channels;
