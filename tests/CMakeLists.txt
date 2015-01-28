@@ -89,7 +89,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_library(
 	pulse-mock
 	SHARED
-	pa-mock.c
+	pa-mock.cpp
 )
 
 ###########################
