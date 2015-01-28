@@ -13,12 +13,6 @@
 #endif
 #define G_LOG_DOMAIN "PA-Mock"
 
-G_DEFINE_QUARK("pa-mock-state-cb-list", state_cb);
-G_DEFINE_QUARK("pa-mock-subscribe-callback", subscribe_cb);
-G_DEFINE_QUARK("pa-mock-subscribe-mask", subscribe_mask);
-G_DEFINE_QUARK("pa-mock-current-state", state);
-G_DEFINE_QUARK("pa-mock-future-state", state_future);
-
 /* Core class of the PA Mock state */
 class PAMockContext {
 public:
@@ -32,13 +26,13 @@ public:
 
 	/* Event stuff */
 	std::vector<std::function<void(pa_subscription_event_type_t, uint32_t)>> eventCallbacks;
-	pa_subscription_mask_t mask;
+	pa_subscription_mask_t eventMask;
 
 	PAMockContext ()
 		: refcnt(1)
 		, currentState(PA_CONTEXT_UNCONNECTED)
 		, futureState(PA_CONTEXT_UNCONNECTED)
-		, mask(PA_SUBSCRIPTION_MASK_NULL)
+		, eventMask(PA_SUBSCRIPTION_MASK_NULL)
 	{
 		g_debug("Creating Context: %p", this);
 	}
@@ -107,11 +101,16 @@ public:
 	{
 		stateCallbacks.push_back(callback);
 	}
-};
 
-struct pa_context {
-	operator PAMockContext * () {
-		return reinterpret_cast<PAMockContext *>(this);
+	/* Event Stuff */
+	void setMask (pa_subscription_mask_t mask)
+	{
+		eventMask = mask;
+	}
+
+	void addEventCallback (std::function<void(pa_subscription_event_type_t, uint32_t)> &callback)
+	{
+		eventCallbacks.push_back(callback);
 	}
 };
 
@@ -174,129 +173,68 @@ pa_context_get_state (pa_context *c)
  * introspect.h
  * *******************************/
 
-typedef struct {
-	pa_server_info_cb_t cb;
-	gpointer userdata;
-	pa_context * context;
-} get_server_info_t;
-
-static void
-get_server_info_free (gpointer data)
+static pa_operation *
+dummy_operation (void)
 {
-	get_server_info_t * info = (get_server_info_t *)data;
-	g_object_unref(info->context);
-	g_free(info);
-}
-
-static gboolean
-get_server_info_cb (gpointer data)
-{
-	pa_server_info server{
-		.user_name = "user",
-		.host_name = "host",
-		.server_version = "1.2.3",
-		.server_name = "server",
-		.sample_spec = {
-			.format = PA_SAMPLE_U8,
-			.rate = 44100,
-			.channels = 1
-		},
-		.default_sink_name = "default-sink",
-		.default_source_name = "default-source",
-		.cookie = 1234,
-		.channel_map = {
-			.channels = 0
-		}
-	};
-	get_server_info_t * info = (get_server_info_t *)data;
-
-	info->cb(info->context, &server, info->userdata);
-
-	return G_SOURCE_REMOVE;
+	GObject * goper = (GObject *)g_object_new(G_TYPE_OBJECT, nullptr);
+	pa_operation * oper = (pa_operation *)goper;
+	return oper;
 }
 
 pa_operation*
 pa_context_get_server_info (pa_context *c, pa_server_info_cb_t cb, void *userdata)
 {
-	g_return_val_if_fail(G_IS_OBJECT(c), nullptr);
-	g_return_val_if_fail(cb != nullptr, nullptr);
+	reinterpret_cast<PAMockContext*>(c)->idleOnce(
+	[c, cb, userdata]() {
+		if (cb == nullptr)
+			return;
 
-	get_server_info_t * info = g_new(get_server_info_t, 1);
-	info->cb = cb;
-	info->userdata = userdata;
-	info->context = (pa_context *)g_object_ref(c);
+		pa_server_info server{
+			.user_name = "user",
+			.host_name = "host",
+			.server_version = "1.2.3",
+			.server_name = "server",
+			.sample_spec = {
+				.format = PA_SAMPLE_U8,
+				.rate = 44100,
+				.channels = 1
+			},
+			.default_sink_name = "default-sink",
+			.default_source_name = "default-source",
+			.cookie = 1234,
+			.channel_map = {
+				.channels = 0
+			}
+		};
 
-	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE,
-		get_server_info_cb,
-		info,
-		get_server_info_free);
+		cb(c, &server, userdata);
+	});
 
-	GObject * goper = (GObject *)g_object_new(G_TYPE_OBJECT, nullptr);
-	pa_operation * oper = (pa_operation *)goper;
-	return oper;
-}
-
-typedef struct {
-	pa_sink_info_cb_t cb;
-	gpointer userdata;
-	pa_context * context;
-	uint32_t index;
-} get_sink_info_t;
-
-static void
-get_sink_info_free (gpointer data)
-{
-	get_sink_info_t * info = (get_sink_info_t *)data;
-	g_object_unref(info->context);
-	g_free(info);
-}
-
-static gboolean
-get_sink_info_cb (gpointer data)
-{
-	#if 0
-	pa_sink_port_info active_port = {
-		.name = "speaker"
-	};
-	#endif
-	pa_sink_info sink = {0};
-	#if 0
-		.name = "default-sink",
-		.index = 0,
-		.description = "Default Sink",
-		.channel_map = {
-			.channels = 0
-		},
-		.active_port = &active_port
-	};
-	#endif
-	get_sink_info_t * info = (get_sink_info_t *)data;
-
-	info->cb(info->context, &sink, 1, info->userdata);
-
-	return G_SOURCE_REMOVE;
+	return dummy_operation();
 }
 
 pa_operation*
 pa_context_get_sink_info_by_name (pa_context *c, const gchar * name, pa_sink_info_cb_t cb, void *userdata)
 {
-	g_return_val_if_fail(G_IS_OBJECT(c), nullptr);
-	g_return_val_if_fail(g_strcmp0(name, "default-sink") == 0, nullptr);
-	g_return_val_if_fail(cb != nullptr, nullptr);
+	reinterpret_cast<PAMockContext*>(c)->idleOnce(
+	[c, name, cb, userdata]() {
+		if (cb == nullptr)
+			return;
 
-	get_sink_info_t * info = g_new(get_sink_info_t, 1);
-	info->cb = cb;
-	info->userdata = userdata;
-	info->context = (pa_context *)g_object_ref(c);
+		pa_sink_port_info active_port = {0};
+		active_port.name = "speaker";
 
-	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE,
-		get_sink_info_cb,
-		info,
-		get_sink_info_free);
+		pa_sink_info sink = {0};
+		sink.name = "default-sink";
+		sink.index = 0;
+		sink.description = "Default Sink";
+		sink.channel_map.channels = 0;
+		sink.active_port = &active_port;
 
-	GObject * goper = (GObject *)g_object_new(G_TYPE_OBJECT, nullptr);
-	pa_operation * oper = (pa_operation *)goper;
-	return oper;
+		cb(c, &sink, 1, userdata);
+	});
+
+	return dummy_operation();
 }
 
 pa_operation*
@@ -306,363 +244,119 @@ pa_context_get_sink_info_list (pa_context *c, pa_sink_info_cb_t cb, void *userda
 	return pa_context_get_sink_info_by_name(c, "default-sink", cb, userdata);
 }
 
-typedef struct {
-	pa_sink_input_info_cb_t cb;
-	gpointer userdata;
-	pa_context * context;
-} get_sink_input_info_t;
-
-static void
-get_sink_input_info_free (gpointer data)
-{
-	get_sink_input_info_t * info = (get_sink_input_info_t *)data;
-	pa_context_unref(info->context);
-	g_free(info);
-}
-
-static gboolean
-get_sink_input_info_cb (gpointer data)
-{
-	pa_sink_input_info sink = { 0 };
-
-	get_sink_input_info_t * info = (get_sink_input_info_t *)data;
-
-	info->cb(info->context, &sink, 0, info->userdata);
-
-	return G_SOURCE_REMOVE;
-}
-
 pa_operation *
 pa_context_get_sink_input_info (pa_context *c, uint32_t idx, pa_sink_input_info_cb_t cb, void * userdata)
 {
-	g_return_val_if_fail(G_IS_OBJECT(c), nullptr);
-	g_return_val_if_fail(cb != nullptr, nullptr);
+	reinterpret_cast<PAMockContext*>(c)->idleOnce(
+	[c, idx, cb, userdata]() {
+		if (cb == nullptr)
+			return;
 
-	get_sink_input_info_t * info = g_new(get_sink_input_info_t, 1);
-	info->cb = cb;
-	info->userdata = userdata;
-	info->context = (pa_context *)g_object_ref(c);
+		pa_sink_input_info sink = { 0 };
 
-	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE,
-		get_sink_input_info_cb,
-		info,
-		get_sink_input_info_free);
+		cb(c, &sink, 1, userdata);
+	});
 
-	GObject * goper = (GObject *)g_object_new(G_TYPE_OBJECT, nullptr);
-	pa_operation * oper = (pa_operation *)goper;
-	return oper;
-}
-
-typedef struct {
-	pa_source_info_cb_t cb;
-	gpointer userdata;
-	pa_context * context;
-} get_source_info_t;
-
-static void
-get_source_info_free (gpointer data)
-{
-	get_source_info_t * info = (get_source_info_t *)data;
-	g_object_unref(info->context);
-	g_free(info);
-}
-
-static gboolean
-get_source_info_cb (gpointer data)
-{
-	pa_source_info source = {
-		.name = "default-source"
-	};
-	get_source_info_t * info = (get_source_info_t *)data;
-
-	info->cb(info->context, &source, 0, info->userdata);
-
-	return G_SOURCE_REMOVE;
+	return dummy_operation();
 }
 
 pa_operation*
 pa_context_get_source_info_by_name (pa_context *c, const char * name, pa_source_info_cb_t cb, void *userdata)
 {
-	g_return_val_if_fail(G_IS_OBJECT(c), nullptr);
-	g_return_val_if_fail(cb != nullptr, nullptr);
+	reinterpret_cast<PAMockContext*>(c)->idleOnce(
+	[c, name, cb, userdata]() {
+		if (cb == nullptr)
+			return;
 
-	get_source_info_t * info = g_new(get_source_info_t, 1);
-	info->cb = cb;
-	info->userdata = userdata;
-	info->context = (pa_context *)g_object_ref(c);
+		pa_source_info source = {
+			.name = "default-source"
+		};
 
-	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE,
-		get_source_info_cb,
-		info,
-		get_source_info_free);
+		cb(c, &source, 1, userdata);
+	});
 
-	GObject * goper = (GObject *)g_object_new(G_TYPE_OBJECT, nullptr);
-	pa_operation * oper = (pa_operation *)goper;
-	return oper;
-}
-
-typedef struct {
-	pa_source_output_info_cb_t cb;
-	gpointer userdata;
-	pa_context * context;
-} get_source_output_t;
-
-static void
-get_source_output_free (gpointer data)
-{
-	get_source_output_t * info = (get_source_output_t *)data;
-	g_object_unref(info->context);
-	g_free(info);
-}
-
-static gboolean
-get_source_output_cb (gpointer data)
-{
-	pa_source_output_info source = {0};
-	source.name = "default source";
-
-	get_source_output_t * info = (get_source_output_t *)data;
-
-	info->cb(info->context, &source, 0, info->userdata);
-
-	return G_SOURCE_REMOVE;
+	return dummy_operation();
 }
 
 pa_operation*
 pa_context_get_source_output_info (pa_context *c, uint32_t idx, pa_source_output_info_cb_t cb, void *userdata)
 {
-	g_return_val_if_fail(G_IS_OBJECT(c), nullptr);
-	g_return_val_if_fail(cb != nullptr, nullptr);
+	reinterpret_cast<PAMockContext*>(c)->idleOnce(
+	[c, idx, cb, userdata]() {
+		if (cb == nullptr)
+			return;
 
-	get_source_output_t * info = g_new(get_source_output_t, 1);
-	info->cb = cb;
-	info->userdata = userdata;
-	info->context = (pa_context *)g_object_ref(c);
+		pa_source_output_info source = {0};
+		source.name = "default source";
 
-	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE,
-		get_source_output_cb,
-		info,
-		get_source_output_free);
+		cb(c, &source, 1, userdata);
+	});
 
-	GObject * goper = (GObject *)g_object_new(G_TYPE_OBJECT, nullptr);
-	pa_operation * oper = (pa_operation *)goper;
-	return oper;
-}
-
-typedef struct {
-	pa_context_success_cb_t cb;
-	gpointer userdata;
-	pa_context * context;
-	int mute;
-} set_sink_mute_t;
-
-static void
-set_sink_mute_free (gpointer data)
-{
-	set_sink_mute_t * mute = (set_sink_mute_t *)data;
-	g_object_unref(mute->context);
-	g_free(mute);
-}
-
-static gboolean
-set_sink_mute_cb (gpointer data)
-{
-	set_sink_mute_t * mute = (set_sink_mute_t *)data;
-
-	if (mute->cb != nullptr)
-		mute->cb(mute->context, 1, mute->userdata);
-
-	return G_SOURCE_REMOVE;
+	return dummy_operation();
 }
 
 pa_operation*
 pa_context_set_sink_mute_by_index (pa_context *c, uint32_t idx, int mute, pa_context_success_cb_t cb, void *userdata)
 {
-	g_return_val_if_fail(G_IS_OBJECT(c), nullptr);
+	reinterpret_cast<PAMockContext*>(c)->idleOnce(
+	[c, idx, mute, cb, userdata]() {
+		if (cb != nullptr)
+			cb(c, 1, userdata);
+	});
 
-	set_sink_mute_t * data = g_new(set_sink_mute_t, 1);
-	data->cb = cb;
-	data->userdata = userdata;
-	data->context = pa_context_ref(c);
-	data->mute = mute;
-
-	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE,
-		set_sink_mute_cb,
-		data,
-		set_sink_mute_free);
-
-	GObject * goper = (GObject *)g_object_new(G_TYPE_OBJECT, nullptr);
-	pa_operation * oper = (pa_operation *)goper;
-	return oper;
-}
-
-typedef struct {
-	pa_context_success_cb_t cb;
-	gpointer userdata;
-	pa_context * context;
-	pa_cvolume cvol;
-} set_sink_volume_t;
-
-static void
-set_sink_volume_free (gpointer data)
-{
-	set_sink_volume_t * vol = (set_sink_volume_t *)data;
-	g_object_unref(vol->context);
-	g_free(vol);
-}
-
-static gboolean
-set_sink_volume_cb (gpointer data)
-{
-	set_sink_volume_t * vol = (set_sink_volume_t *)data;
-
-	vol->cb(vol->context, 1, vol->userdata);
-
-	return G_SOURCE_REMOVE;
+	return dummy_operation();
 }
 
 pa_operation*
 pa_context_set_sink_volume_by_index (pa_context *c, uint32_t idx, const pa_cvolume * cvol, pa_context_success_cb_t cb, void *userdata)
 {
-	g_return_val_if_fail(G_IS_OBJECT(c), nullptr);
-	g_return_val_if_fail(cb != nullptr, nullptr);
+	reinterpret_cast<PAMockContext*>(c)->idleOnce(
+	[c, idx, cvol, cb, userdata]() {
+		if (cb != nullptr)
+			cb(c, 1, userdata);
+	});
 
-	set_sink_volume_t * data = g_new(set_sink_volume_t, 1);
-	data->cb = cb;
-	data->userdata = userdata;
-	data->context = pa_context_ref(c);
-	data->cvol.channels = cvol->channels;
-
-	int i;
-	for (i = 0; i < cvol->channels; i++)
-		data->cvol.values[i] = cvol->values[i];
-
-	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE,
-		set_sink_volume_cb,
-		data,
-		set_sink_volume_free);
-
-	GObject * goper = (GObject *)g_object_new(G_TYPE_OBJECT, nullptr);
-	pa_operation * oper = (pa_operation *)goper;
-	return oper;
-}
-
-typedef struct {
-	pa_context_success_cb_t cb;
-	gpointer userdata;
-	pa_context * context;
-	pa_cvolume cvol;
-} set_source_volume_t;
-
-static void
-set_source_volume_free (gpointer data)
-{
-	set_source_volume_t * vol = (set_source_volume_t *)data;
-	g_object_unref(vol->context);
-	g_free(vol);
-}
-
-static gboolean
-set_source_volume_cb (gpointer data)
-{
-	set_source_volume_t * vol = (set_source_volume_t *)data;
-
-	vol->cb(vol->context, 1, vol->userdata);
-
-	return G_SOURCE_REMOVE;
+	return dummy_operation();
 }
 
 pa_operation*
 pa_context_set_source_volume_by_name (pa_context *c, const char * name, const pa_cvolume * cvol, pa_context_success_cb_t cb, void *userdata)
 {
-	g_return_val_if_fail(G_IS_OBJECT(c), nullptr);
-	g_return_val_if_fail(cb != nullptr, nullptr);
+	reinterpret_cast<PAMockContext*>(c)->idleOnce(
+	[c, name, cvol, cb, userdata]() {
+		if (cb != nullptr)
+			cb(c, 1, userdata);
+	});
 
-	set_source_volume_t * data = g_new(set_source_volume_t, 1);
-	data->cb = cb;
-	data->userdata = userdata;
-	data->context = pa_context_ref(c);
-	data->cvol.channels = cvol->channels;
-
-	int i;
-	for (i = 0; i < cvol->channels; i++)
-		data->cvol.values[i] = cvol->values[i];
-
-	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE,
-		set_source_volume_cb,
-		data,
-		set_source_volume_free);
-
-	GObject * goper = (GObject *)g_object_new(G_TYPE_OBJECT, nullptr);
-	pa_operation * oper = (pa_operation *)goper;
-	return oper;
+	return dummy_operation();
 }
 
 /* *******************************
  * subscribe.h
  * *******************************/
 
-typedef struct {
-	pa_context_success_cb_t cb;
-	gpointer userdata;
-	pa_context * context;
-	pa_subscription_mask_t mask;
-} subscribe_mask_t;
-
-static void
-subscribe_mask_free (gpointer data)
-{
-	subscribe_mask_t * mask_data = (subscribe_mask_t *)data;
-	g_object_unref(mask_data->context);
-	g_free(mask_data);
-}
-
-static gboolean
-subscribe_mask_cb (gpointer data)
-{
-	subscribe_mask_t * mask_data = (subscribe_mask_t *)data;
-	g_object_set_qdata(G_OBJECT(mask_data->context), subscribe_mask_quark(), GINT_TO_POINTER(mask_data->mask));
-	if (mask_data->cb != nullptr)
-		mask_data->cb(mask_data->context, 1, mask_data->userdata);
-	return G_SOURCE_REMOVE;
-}
-
 pa_operation *
 pa_context_subscribe (pa_context * c, pa_subscription_mask_t mask, pa_context_success_cb_t callback, void * userdata)
 {
-	g_return_val_if_fail(G_IS_OBJECT(c), nullptr);
+	reinterpret_cast<PAMockContext*>(c)->idleOnce(
+	[c, mask, callback, userdata]() {
+		reinterpret_cast<PAMockContext*>(c)->setMask(mask);
+		if (callback != nullptr)
+			callback(c, 1, userdata);
+	});
 
-	subscribe_mask_t * data = g_new0(subscribe_mask_t, 1);
-	data->cb = callback;
-	data->userdata = userdata;
-	data->context = pa_context_ref(c);
-	data->mask = mask;
-
-	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE,
-		subscribe_mask_cb,
-		data,
-		subscribe_mask_free);
-
-	GObject * goper = (GObject *)g_object_new(G_TYPE_OBJECT, nullptr);
-	pa_operation * oper = (pa_operation *)goper;
-	return oper;
+	return dummy_operation();
 }
-
-typedef struct {
-	pa_context_subscribe_cb_t cb;
-	gpointer userdata;
-} subscribe_cb_t;
 
 void
 pa_context_set_subscribe_callback (pa_context * c, pa_context_subscribe_cb_t callback, void * userdata)
 {
-	g_return_if_fail(G_IS_OBJECT(c));
+	std::function<void(pa_subscription_event_type_t, uint32_t)> cppcb([c, callback, userdata](pa_subscription_event_type_t event, uint32_t index) {
+		if (callback != nullptr)
+			callback(c, event, index, userdata);
+	});
 
-	subscribe_cb_t * sub = g_new0(subscribe_cb_t, 1);
-	sub->cb = callback;
-	sub->userdata = userdata;
-
-	g_object_set_qdata_full(G_OBJECT(c), subscribe_cb_quark(), sub, g_free);
+	reinterpret_cast<PAMockContext*>(c)->addEventCallback(cppcb);
 }
 
 /* *******************************
