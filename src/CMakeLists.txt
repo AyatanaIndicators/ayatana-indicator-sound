@@ -163,7 +163,6 @@ add_library(
 
 target_link_libraries(
   indicator-sound-service-lib
-  ${PULSEAUDIO_LIBRARIES}
   ${SOUNDSERVICE_LIBRARIES}
 )
 
@@ -187,6 +186,7 @@ set_target_properties(
 target_link_libraries(
   indicator-sound-service-bin
   indicator-sound-service-lib
+  ${PULSEAUDIO_LIBRARIES}
 )
 
 ###########################

@@ -83,6 +83,16 @@ target_link_libraries(
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 ###########################
+# Pulse Mock
+###########################
+
+add_library(
+	pulse-mock
+	SHARED
+	pa-mock.cpp
+)
+
+###########################
 # Name Watch Test
 ###########################
 
@@ -114,6 +124,22 @@ add_test(accounts-service-user-test-basic
 add_test(accounts-service-user-test-player
 	accounts-service-user-test  --gtest_filter=AccountsServiceUserTest.SetMediaPlayer
 )
+
+###########################
+# Volume Control
+###########################
+
+include_directories(${CMAKE_SOURCE_DIR}/src)
+add_executable (volume-control-test volume-control-test.cc)
+target_link_libraries (
+	volume-control-test
+	indicator-sound-service-lib
+	pulse-mock
+	gtest
+	${TEST_LIBRARIES}
+)
+
+add_test(volume-control-test volume-control-test)
 
 ###########################
 # Sound Menu

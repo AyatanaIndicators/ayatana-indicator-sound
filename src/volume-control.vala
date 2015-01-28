@@ -19,6 +19,7 @@
  */
 
 using PulseAudio;
+using Notify;
 using Gee;
 
 [CCode(cname="pa_cvolume_set", cheader_filename = "pulse/volume.h")]
@@ -67,15 +68,20 @@ public class VolumeControl : Object
 	private uint _accountservice_volume_timer = 0;
 	private bool _send_next_local_volume = false;
 	private double _account_service_volume = 0.0;
-
-	public signal void volume_changed (double v);
-	public signal void mic_volume_changed (double v);
+	private bool _active_port_headphone = false;
 
 	/** true when connected to the pulse server */
 	public bool ready { get; set; }
 
 	/** true when a microphone is active **/
 	public bool active_mic { get; private set; default = false; }
+
+	/** true when high volume warnings should be shown */
+	public bool high_volume {
+		get {
+			return this._volume > 0.75 && _active_port_headphone;	
+		}
+	}
 
 	public VolumeControl ()
 	{
@@ -84,6 +90,7 @@ public class VolumeControl : Object
 
 		_mute_cancellable = new Cancellable ();
 		_volume_cancellable = new Cancellable ();
+
 		setup_accountsservice.begin ();
 
 		this.reconnect_to_pulse ();
@@ -149,6 +156,8 @@ public class VolumeControl : Object
 
 	private void sink_info_cb_for_props (Context c, SinkInfo? i, int eol)
 	{
+		bool old_high_volume = this.high_volume;
+
 		if (i == null)
 			return;
 
@@ -165,12 +174,29 @@ public class VolumeControl : Object
 			this.notify_property ("is-playing");
 		}
 
+		/* Check if the current active port is headset/headphone */
+		/* There is not easy way to check if the port is a headset/headphone besides
+		 * checking for the port name. On touch (with the pulseaudio droid element)
+		 * the headset/headphone port is called 'output-headset' and 'output-headphone'.
+		 * On the desktop this is usually called 'analog-output-headphones' */
+		if (i.active_port.name == "output-wired_headset" ||
+			i.active_port.name == "output-wired_headphone" ||
+			i.active_port.name == "analog-output-headphones") {
+			_active_port_headphone = true;
+		} else {
+			_active_port_headphone = false;
+		}
+
 		if (_pulse_use_stream_restore == false &&
 				_volume != volume_to_double (i.volume.max ()))
 		{
 			_volume = volume_to_double (i.volume.max ());
-			volume_changed (_volume);
+			this.notify_property("volume");
 			start_local_volume_timer();
+		} 
+		
+		if (this.high_volume != old_high_volume) {
+			this.notify_property("high-volume");
 		}
 	}
 
@@ -182,7 +208,7 @@ public class VolumeControl : Object
 		if (_mic_volume != volume_to_double (i.volume.values[0]))
 		{
 			_mic_volume = volume_to_double (i.volume.values[0]);
-			mic_volume_changed (_mic_volume);
+			this.notify_property ("mic-volume");
 		}
 	}
 
@@ -238,7 +264,7 @@ public class VolumeControl : Object
 					if (volume != cvolume) {
 						/* Someone else changed the volume for this role, reflect on the indicator */
 						_volume = volume_to_double (volume);
-						volume_changed (_volume);
+						this.notify_property("volume");
 						start_local_volume_timer();
 					}
 				}
@@ -281,7 +307,7 @@ public class VolumeControl : Object
 				iter.next ("(uu)", &type, &volume);
 
 				_volume = volume_to_double (volume);
-				volume_changed (_volume);
+				this.notify_property("volume");
 				start_local_volume_timer();
 			} catch (GLib.Error e) {
 				warning ("unable to get volume for active role %s (%s)", sink_input_objp, e.message);
@@ -498,7 +524,7 @@ public class VolumeControl : Object
 	private void set_volume_success_cb (Context c, int success)
 	{
 		if ((bool)success)
-			volume_changed (_volume);
+			this.notify_property("volume");
 	}
 
 	private void sink_info_set_volume_cb (Context c, SinkInfo? i, int eol)
@@ -544,7 +570,7 @@ public class VolumeControl : Object
 					new Variant ("(ssv)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume", volume),
 					null, DBusCallFlags.NONE, -1);
 
-			volume_changed (_volume);
+			this.notify_property("volume");
 		} catch (GLib.Error e) {
 			lock (_pa_volume_sig_count) {
 				_pa_volume_sig_count--;
@@ -559,27 +585,29 @@ public class VolumeControl : Object
 			return false;
 
 		if (_volume != volume) {
+			var old_high_volume = this.high_volume;
+
 			_volume = volume;
 			if (_pulse_use_stream_restore)
 				set_volume_active_role.begin ();
 			else
 				context.get_server_info (server_info_cb_for_set_volume);
+
+			this.notify_property("volume");
+
+			if (this.high_volume != old_high_volume)
+				this.notify_property("high-volume");
+
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public void set_volume (double volume)
-	{
-		if (set_volume_internal (volume))
-			start_local_volume_timer();
-	}
-
 	void set_mic_volume_success_cb (Context c, int success)
 	{
 		if ((bool)success)
-			mic_volume_changed (_mic_volume);
+			this.notify_property ("mic-volume");
 	}
 
 	void set_mic_volume_get_server_info_cb (PulseAudio.Context c, PulseAudio.ServerInfo? i) {
@@ -590,23 +618,28 @@ public class VolumeControl : Object
 		}
 	}
 
-	public void set_mic_volume (double volume)
-	{
-		return_if_fail (context.get_state () == Context.State.READY);
-
-		_mic_volume = volume;
-
-		context.get_server_info (set_mic_volume_get_server_info_cb);
+	public double volume {
+		get {
+			return _volume;
+		}
+		set {
+			if (set_volume_internal (value)) {
+				start_local_volume_timer();
+			}
+		}
 	}
 
-	public double get_volume ()
-	{
-		return _volume;
-	}
+	public double mic_volume {
+		get {
+			return _mic_volume;
+		}
+		set {
+			return_if_fail (context.get_state () == Context.State.READY);
 
-	public double get_mic_volume ()
-	{
-		return _mic_volume;
+			_mic_volume = value;
+
+			context.get_server_info (set_mic_volume_get_server_info_cb);
+		}
 	}
 
 	/* PulseAudio Dbus (Stream Restore) logic */
@@ -689,7 +722,7 @@ public class VolumeControl : Object
 	}
 
 	/* AccountsService operations */
-	private void accountsservice_props_changed_cb (DBusProxy proxy, Variant changed_properties, string[] invalidated_properties)
+	private void accountsservice_props_changed_cb (DBusProxy proxy, Variant changed_properties, string[]? invalidated_properties)
 	{
 		Variant volume_variant = changed_properties.lookup_value ("Volume", new VariantType ("d"));
 		if (volume_variant != null) {
@@ -747,10 +780,14 @@ public class VolumeControl : Object
 
 		// Get current values and listen for changes
 		_user_proxy.g_properties_changed.connect (accountsservice_props_changed_cb);
-		var props_variant = yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "GetAll", new Variant ("(s)", _user_proxy.get_interface_name ()), null, DBusCallFlags.NONE, -1);
-		Variant props;
-		props_variant.get ("(@a{sv})", out props);
-		accountsservice_props_changed_cb(_user_proxy, props, null);
+		try {
+			var props_variant = yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "GetAll", new Variant ("(s)", _user_proxy.get_interface_name ()), null, DBusCallFlags.NONE, -1);
+			Variant props;
+			props_variant.get ("(@a{sv})", out props);
+			accountsservice_props_changed_cb(_user_proxy, props, null);
+		} catch (GLib.Error e) {
+			debug("Unable to get properties for user %s at first try: %s", username, e.message);
+		}
 	}
 
 	private void greeter_user_changed (string username)
