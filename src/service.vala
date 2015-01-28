@@ -19,6 +19,8 @@
 
 public class IndicatorSound.Service: Object {
 	public Service (MediaPlayerList playerlist) {
+		sync_notification = new Notify.Notification(_("Volume"), "", "audio-volume-muted");
+
 		this.settings = new Settings ("com.canonical.indicator.sound");
 		this.sharedsettings = new Settings ("com.ubuntu.sound");
 
@@ -49,7 +51,7 @@ public class IndicatorSound.Service: Object {
 		this.actions.add_action (this.create_mute_action ());
 		this.actions.add_action (this.create_volume_action ());
 		this.actions.add_action (this.create_mic_volume_action ());
-		this.actions.add_action (this.create_high_volume_actions ());
+		this.actions.add_action (this.create_high_volume_action ());
 
 		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
 		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.HIDE_PLAYERS | SoundMenu.DisplayFlags.GREETER_PLAYERS));
@@ -70,15 +72,19 @@ public class IndicatorSound.Service: Object {
 			this.sync_preferred_players ();
 		});
 
-		if (settings.get_boolean ("show-notify-osd-on-scroll")) {
-			List<string> caps = Notify.get_server_caps ();
-			if (caps.find_custom ("x-canonical-private-synchronous", strcmp) != null) {
-				this.notification = new Notify.Notification ("indicator-sound", "", "");
-				this.notification.set_hint ("x-canonical-private-synchronous", "indicator-sound");
-			}
-		}
-
 		sharedsettings.bind ("allow-amplified-volume", this, "allow-amplified-volume", SettingsBindFlags.GET);
+
+		/* Hide the notification when the menu is shown */
+		var shown_action = actions.lookup_action ("indicator-shown") as SimpleAction;
+		shown_action.change_state.connect ((state) => {
+			if (state.get_boolean()) {
+				try {
+					sync_notification.close();
+				} catch (Error e) {
+					warning("Unable to close synchronous volume notification: %s", e.message);
+				}
+			}
+		});
 	}
 
 	~Service() {
@@ -143,7 +149,7 @@ public class IndicatorSound.Service: Object {
 			}
 
 			/* Normalize volume, because the volume action's state is [0.0, 1.0], see create_volume_action() */
-			this.actions.change_action_state ("volume", this.volume_control.get_volume () / this.max_volume);
+			this.actions.change_action_state ("volume", this.volume_control.volume / this.max_volume);
 		}
 	}
 
@@ -152,6 +158,7 @@ public class IndicatorSound.Service: Object {
 		{ "scroll", activate_scroll_action, "i", null, null },
 		{ "desktop-settings", activate_desktop_settings, null, null, null },
 		{ "phone-settings", activate_phone_settings, null, null, null },
+		{ "indicator-shown", null, null, "@b false", null },
 	};
 
 	MainLoop loop;
@@ -164,10 +171,10 @@ public class IndicatorSound.Service: Object {
 	uint player_action_update_id;
 	bool mute_blocks_sound;
 	uint sound_was_blocked_timeout_id;
-	Notify.Notification notification;
 	bool syncing_preferred_players = false;
 	AccountsServiceUser? accounts_service = null;
 	bool export_to_accounts_service = false;
+	private Notify.Notification sync_notification;
 
 	/* Maximum volume as a scaling factor between the volume action's state and the value in
 	 * this.volume_control. See create_volume_action().
@@ -179,31 +186,8 @@ public class IndicatorSound.Service: Object {
 	void activate_scroll_action (SimpleAction action, Variant? param) {
 		int delta = param.get_int32(); /* positive for up, negative for down */
 
-		double v = this.volume_control.get_volume () + volume_step_percentage * delta;
-		this.volume_control.set_volume (v.clamp (0.0, this.max_volume));
-
-		/* TODO: Don't want to mess up the desktop today, but we should remove this
-		   scrolling change and merge that into volume control's notification */
-		if (this.notification != null) {
-			string icon;
-			if (v <= 0.0)
-				icon = "notification-audio-volume-off";
-			else if (v <= 0.3)
-				icon = "notification-audio-volume-low";
-			else if (v <= 0.7)
-				icon = "notification-audio-volume-medium";
-			else
-				icon = "notification-audio-volume-high";
-
-			this.notification.update ("indicator-sound", "", icon);
-			this.notification.set_hint ("value", ((int32) (100 * v / this.max_volume)).clamp (-1, 101));
-			try {
-				this.notification.show ();
-			}
-			catch (Error e) {
-				warning ("unable to show notification: %s", e.message);
-			}
-		}
+		double v = this.volume_control.volume + volume_step_percentage * delta;
+		this.volume_control.volume = v.clamp (0.0, this.max_volume);
 	}
 
 	void activate_desktop_settings (SimpleAction action, Variant? param) {
@@ -238,7 +222,7 @@ public class IndicatorSound.Service: Object {
 	}
 
 	void update_root_icon () {
-		double volume = this.volume_control.get_volume ();
+		double volume = this.volume_control.volume;
 		string icon;
 		if (this.volume_control.mute)
 			icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
@@ -266,6 +250,63 @@ public class IndicatorSound.Service: Object {
 		builder.add ("{sv}", "icon", serialize_themed_icon (icon));
 		builder.add ("{sv}", "visible", new Variant.boolean (this.visible));
 		root_action.set_state (builder.end());
+	}
+
+	/* TODO: Update these if the notification server leaves the bus and restarts */
+	private bool check_sync_notification = false;
+	private bool support_sync_notification = false;
+
+	void update_sync_notification () {
+		if (!check_sync_notification) {
+			List<string> caps = Notify.get_server_caps ();
+			if (caps.find_custom ("x-canonical-private-synchronous", strcmp) != null) {
+				support_sync_notification = true;
+			}
+			check_sync_notification = true;
+		}
+
+		if (!support_sync_notification)
+			return;
+
+		var shown_action = actions.lookup_action ("indicator-shown") as SimpleAction;
+		if (shown_action != null && shown_action.get_state().get_boolean())
+			return;
+
+		/* Determine Label */
+		string volume_label = "";
+		if (volume_control.high_volume)
+			volume_label = _("High volume");
+
+		/* Choose an icon */
+		string icon = "audio-volume-muted";
+		if (volume_control.volume <= 0.0)
+			icon = "audio-volume-muted";
+		else if (volume_control.volume <= 0.3)
+			icon = "audio-volume-low";
+		else if (volume_control.volume <= 0.7)
+			icon = "audio-volume-medium";
+		else
+			icon = "audio-volume-high";
+
+		/* Check tint */
+		string tint = "false";
+		if (volume_control.high_volume)
+			tint = "true";
+
+		/* Put it all into the notification */
+		sync_notification.clear_hints ();
+		sync_notification.update (_("Volume"), volume_label, icon);
+		sync_notification.set_hint ("value", (int32)(volume_control.volume * 100.0));
+		sync_notification.set_hint ("x-canonical-value-bar-tint", tint);
+		sync_notification.set_hint ("x-canonical-private-synchronous", "true");
+		sync_notification.set_hint ("x-canonical-non-shaped-icon", "true");
+
+		/* Show it */
+		try {
+			sync_notification.show ();			
+		} catch (GLib.Error e) {
+			warning("Unable to send volume change notification: %s", e.message);
+		}
 	}
 
 	Action create_silent_mode_action () {
@@ -342,15 +383,6 @@ public class IndicatorSound.Service: Object {
 		return mute_action;
 	}
 
-	void volume_changed (double volume) {
-		var volume_action = this.actions.lookup_action ("volume") as SimpleAction;
-
-		/* Normalize volume, because the volume action's state is [0.0, 1.0], see create_volume_action() */
-		volume_action.set_state (new Variant.double (volume / this.max_volume));
-
-		this.update_root_icon ();
-	}
-
 	Action create_volume_action () {
 		/* The action's state is between be in [0.0, 1.0] instead of [0.0,
 		 * max_volume], so that we don't need to update the slider menu item
@@ -359,23 +391,31 @@ public class IndicatorSound.Service: Object {
 		 * volume_control.set_volume().
 		 */
 
-		double volume = this.volume_control.get_volume () / this.max_volume;
+		double volume = this.volume_control.volume / this.max_volume;
 
 		var volume_action = new SimpleAction.stateful ("volume", VariantType.INT32, new Variant.double (volume));
 
 		volume_action.change_state.connect ( (action, val) => {
 			double v = val.get_double () * this.max_volume;
-			volume_control.set_volume (v.clamp (0.0, this.max_volume));
+			volume_control.volume = v.clamp (0.0, this.max_volume);
 		});
 
 		/* activating this action changes the volume by the amount given in the parameter */
 		volume_action.activate.connect ( (action, param) => {
 			int delta = param.get_int32 ();
-			double v = volume_control.get_volume () + volume_step_percentage * delta;
-			volume_control.set_volume (v.clamp (0.0, this.max_volume));
+			double v = volume_control.volume + volume_step_percentage * delta;
+			volume_control.volume = v.clamp (0.0, this.max_volume);
 		});
 
-		this.volume_control.volume_changed.connect (volume_changed);
+		this.volume_control.notify["volume"].connect (() => {
+			var vol_action = this.actions.lookup_action ("volume") as SimpleAction;
+
+			/* Normalize volume, because the volume action's state is [0.0, 1.0], see create_volume_action() */
+			vol_action.set_state (new Variant.double (this.volume_control.volume / this.max_volume));
+
+			this.update_root_icon ();
+			this.update_sync_notification ();
+		});
 
 		this.volume_control.bind_property ("ready", volume_action, "enabled", BindingFlags.SYNC_CREATE);
 
@@ -383,14 +423,14 @@ public class IndicatorSound.Service: Object {
 	}
 
 	Action create_mic_volume_action () {
-		var volume_action = new SimpleAction.stateful ("mic-volume", null, new Variant.double (this.volume_control.get_mic_volume ()));
+		var volume_action = new SimpleAction.stateful ("mic-volume", null, new Variant.double (this.volume_control.mic_volume));
 
 		volume_action.change_state.connect ( (action, val) => {
-			volume_control.set_mic_volume (val.get_double ());
+			volume_control.mic_volume = val.get_double ();
 		});
 
-		this.volume_control.mic_volume_changed.connect ( (volume) => {
-			volume_action.set_state (new Variant.double (volume));
+		this.volume_control.notify["mic-volume"].connect ( () => {
+			volume_action.set_state (new Variant.double (this.volume_control.mic_volume));
 		});
 
 		this.volume_control.bind_property ("ready", volume_action, "enabled", BindingFlags.SYNC_CREATE);
@@ -398,11 +438,13 @@ public class IndicatorSound.Service: Object {
 		return volume_action;
 	}
 
-	Action create_high_volume_actions () {
+	Action create_high_volume_action () {
 		var high_volume_action = new SimpleAction.stateful("high-volume", null, new Variant.boolean (this.volume_control.high_volume));
 
-		this.volume_control.notify["high-volume"].connect( () =>
-			high_volume_action.set_state(new Variant.boolean (this.volume_control.high_volume)));
+		this.volume_control.notify["high-volume"].connect( () => {
+			high_volume_action.set_state(new Variant.boolean (this.volume_control.high_volume));
+			update_sync_notification();
+		});
 
 		return high_volume_action;
 	}

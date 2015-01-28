@@ -68,11 +68,7 @@ public class VolumeControl : Object
 	private uint _accountservice_volume_timer = 0;
 	private bool _send_next_local_volume = false;
 	private double _account_service_volume = 0.0;
-	private Notify.Notification _notification;
 	private bool _active_port_headphone = false;
-
-	public signal void volume_changed (double v);
-	public signal void mic_volume_changed (double v);
 
 	/** true when connected to the pulse server */
 	public bool ready { get; set; }
@@ -81,7 +77,11 @@ public class VolumeControl : Object
 	public bool active_mic { get; private set; default = false; }
 
 	/** true when high volume warnings should be shown */
-	public bool high_volume { get; set; }
+	public bool high_volume {
+		get {
+			return this._volume > 0.75 && _active_port_headphone;	
+		}
+	}
 
 	public VolumeControl ()
 	{
@@ -90,12 +90,6 @@ public class VolumeControl : Object
 
 		_mute_cancellable = new Cancellable ();
 		_volume_cancellable = new Cancellable ();
-
-		Notify.init ("Volume");
-		_notification = new Notify.Notification(_("Volume"), "", "audio-volume-muted");
-		_notification.set_hint ("value", 0);
-		_notification.set_hint ("x-canonical-private-synchronous", "true");
-		_notification.set_hint ("x-canonical-non-shaped-icon", "true");
 
 		setup_accountsservice.begin ();
 
@@ -162,7 +156,7 @@ public class VolumeControl : Object
 
 	private void sink_info_cb_for_props (Context c, SinkInfo? i, int eol)
 	{
-		bool old_active_port_headphone = this._active_port_headphone;
+		bool old_high_volume = this.high_volume;
 
 		if (i == null)
 			return;
@@ -197,10 +191,12 @@ public class VolumeControl : Object
 				_volume != volume_to_double (i.volume.max ()))
 		{
 			_volume = volume_to_double (i.volume.max ());
-			volume_changed (_volume);
+			this.notify_property("volume");
 			start_local_volume_timer();
-		} else if (this._active_port_headphone != old_active_port_headphone) {
-			volume_changed (_volume);
+		} 
+		
+		if (this.high_volume != old_high_volume) {
+			this.notify_property("high-volume");
 		}
 	}
 
@@ -212,7 +208,7 @@ public class VolumeControl : Object
 		if (_mic_volume != volume_to_double (i.volume.values[0]))
 		{
 			_mic_volume = volume_to_double (i.volume.values[0]);
-			mic_volume_changed (_mic_volume);
+			this.notify_property ("mic-volume");
 		}
 	}
 
@@ -268,7 +264,7 @@ public class VolumeControl : Object
 					if (volume != cvolume) {
 						/* Someone else changed the volume for this role, reflect on the indicator */
 						_volume = volume_to_double (volume);
-						volume_changed (_volume);
+						this.notify_property("volume");
 						start_local_volume_timer();
 					}
 				}
@@ -311,7 +307,7 @@ public class VolumeControl : Object
 				iter.next ("(uu)", &type, &volume);
 
 				_volume = volume_to_double (volume);
-				volume_changed (_volume);
+				this.notify_property("volume");
 				start_local_volume_timer();
 			} catch (GLib.Error e) {
 				warning ("unable to get volume for active role %s (%s)", sink_input_objp, e.message);
@@ -528,7 +524,7 @@ public class VolumeControl : Object
 	private void set_volume_success_cb (Context c, int success)
 	{
 		if ((bool)success)
-			volume_changed (_volume);
+			this.notify_property("volume");
 	}
 
 	private void sink_info_set_volume_cb (Context c, SinkInfo? i, int eol)
@@ -574,7 +570,7 @@ public class VolumeControl : Object
 					new Variant ("(ssv)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume", volume),
 					null, DBusCallFlags.NONE, -1);
 
-			volume_changed (_volume);
+			this.notify_property("volume");
 		} catch (GLib.Error e) {
 			lock (_pa_volume_sig_count) {
 				_pa_volume_sig_count--;
@@ -589,83 +585,29 @@ public class VolumeControl : Object
 			return false;
 
 		if (_volume != volume) {
+			var old_high_volume = this.high_volume;
+
 			_volume = volume;
 			if (_pulse_use_stream_restore)
 				set_volume_active_role.begin ();
 			else
 				context.get_server_info (server_info_cb_for_set_volume);
+
+			this.notify_property("volume");
+
+			if (this.high_volume != old_high_volume)
+				this.notify_property("high-volume");
+
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public void set_volume (double volume)
-	{
-		/* Using this to detect whether we're on the phone or not */
-		if (_pulse_use_stream_restore) {
-			/* Watch for extreme */
-			if (volume > 0.75 && _active_port_headphone)
-				high_volume = true;
-			else
-				high_volume = false;
-
-			/* Determine Label */
-			string volume_label = "";
-			if (high_volume)
-				volume_label = _("High volume");
-
-			/* Choose an icon */
-			string icon = "audio-volume-muted";
-			if (volume <= 0.0)
-				icon = "audio-volume-muted";
-			else if (volume <= 0.3)
-				icon = "audio-volume-low";
-			else if (volume <= 0.7)
-				icon = "audio-volume-medium";
-			else
-				icon = "audio-volume-high";
-
-			/* Choose a sound */
-			string? sound = null;
-			if (!((_active_sink_input >= 0) && (_active_sink_input < _valid_roles.length)
-					&& (_valid_roles[_active_sink_input] == "multimedia")))
-				sound = "/usr/share/sounds/ubuntu/stereo/message.ogg";
-
-			/* Check tint */
-			string tint = "false";
-			if (high_volume)
-				tint = "true";
-
-			/* Put it all into the notification */
-			_notification.clear_hints ();
-			_notification.update (_("Volume"), volume_label, icon);
-			_notification.set_hint ("value", (int32)(volume * 100.0));
-			/* TODO: Removing sound until we can get all the roles cleaned up for
-			   when to play it. We expect this to come back, but in another landing.
-			_notification.set_hint ("sound-file", sound);
-			 */
-			_notification.set_hint ("x-canonical-value-bar-tint", tint);
-			_notification.set_hint ("x-canonical-private-synchronous", "true");
-			_notification.set_hint ("x-canonical-non-shaped-icon", "true");
-
-			/* Show it */
-			try {
-				_notification.show ();			
-			} catch (GLib.Error e) {
-				warning("Unable to send volume change notification: %s", e.message);
-			}
-		}
-
-		if (set_volume_internal (volume)) {
-			start_local_volume_timer();
-		}
-	}
-
 	void set_mic_volume_success_cb (Context c, int success)
 	{
 		if ((bool)success)
-			mic_volume_changed (_mic_volume);
+			this.notify_property ("mic-volume");
 	}
 
 	void set_mic_volume_get_server_info_cb (PulseAudio.Context c, PulseAudio.ServerInfo? i) {
@@ -676,23 +618,28 @@ public class VolumeControl : Object
 		}
 	}
 
-	public void set_mic_volume (double volume)
-	{
-		return_if_fail (context.get_state () == Context.State.READY);
-
-		_mic_volume = volume;
-
-		context.get_server_info (set_mic_volume_get_server_info_cb);
+	public double volume {
+		get {
+			return _volume;
+		}
+		set {
+			if (set_volume_internal (value)) {
+				start_local_volume_timer();
+			}
+		}
 	}
 
-	public double get_volume ()
-	{
-		return _volume;
-	}
+	public double mic_volume {
+		get {
+			return _mic_volume;
+		}
+		set {
+			return_if_fail (context.get_state () == Context.State.READY);
 
-	public double get_mic_volume ()
-	{
-		return _mic_volume;
+			_mic_volume = value;
+
+			context.get_server_info (set_mic_volume_get_server_info_cb);
+		}
 	}
 
 	/* PulseAudio Dbus (Stream Restore) logic */
