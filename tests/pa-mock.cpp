@@ -55,10 +55,12 @@ public:
 		g_debug("Creating Context: %p", this);
 	}
 
+private: /* To ensure we're the only ones who can delete it */
 	~PAMockContext () {
 		g_debug("Destroying Context: %p", this);
 	}
 
+public:
 	/* Ref counting */
 	void ref () {
 		refcnt++;
