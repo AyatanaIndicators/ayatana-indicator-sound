@@ -1,3 +1,15 @@
+indicator-sound (12.10.2+15.04.20150129.1-0ubuntu1) vivid; urgency=low
+
+  [ Ted Gould ]
+  * Move notification code out of volume control object
+  * Build a rudimentary Pulse Audio mock for testing.
+  * Disconnect the right function from the 'closed' signal (LP:
+    #1307021)
+  * Ensure that the active port is not null before looking at its value
+    (LP: #1399862)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 29 Jan 2015 17:32:11 +0000
+
 indicator-sound (12.10.2+15.04.20150128-0ubuntu1) vivid; urgency=low
 
   [ Ted Gould ]
