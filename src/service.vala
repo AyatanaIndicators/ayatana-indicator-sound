@@ -20,6 +20,11 @@
 public class IndicatorSound.Service: Object {
 	public Service (MediaPlayerList playerlist) {
 		sync_notification = new Notify.Notification(_("Volume"), "", "audio-volume-muted");
+		this.notification_server_watch = GLib.Bus.watch_name(GLib.BusType.SESSION,
+			"org.freedesktop.Notifications",
+			GLib.BusNameWatcherFlags.NONE,
+			() => { check_sync_notification = false; },
+			() => { check_sync_notification = false; });
 
 		this.settings = new Settings ("com.canonical.indicator.sound");
 		this.sharedsettings = new Settings ("com.ubuntu.sound");
@@ -91,6 +96,11 @@ public class IndicatorSound.Service: Object {
 		if (this.sound_was_blocked_timeout_id > 0) {
 			Source.remove (this.sound_was_blocked_timeout_id);
 			this.sound_was_blocked_timeout_id = 0;
+		}
+
+		if (this.notification_server_watch != 0) {
+			GLib.Bus.unwatch_name(this.notification_server_watch);
+			this.notification_server_watch = 0;
 		}
 	}
 
@@ -175,6 +185,7 @@ public class IndicatorSound.Service: Object {
 	AccountsServiceUser? accounts_service = null;
 	bool export_to_accounts_service = false;
 	private Notify.Notification sync_notification;
+	private uint notification_server_watch;
 
 	/* Maximum volume as a scaling factor between the volume action's state and the value in
 	 * this.volume_control. See create_volume_action().
@@ -252,7 +263,6 @@ public class IndicatorSound.Service: Object {
 		root_action.set_state (builder.end());
 	}
 
-	/* TODO: Update these if the notification server leaves the bus and restarts */
 	private bool check_sync_notification = false;
 	private bool support_sync_notification = false;
 
