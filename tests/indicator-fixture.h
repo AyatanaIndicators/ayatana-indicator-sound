@@ -73,10 +73,12 @@ class IndicatorFixture : public ::testing::Test
 					}
 				});
 
+				g_debug("Starting System Bus");
 				dbus_test_service_start_tasks(_system_service);
 				_system = g_bus_get_sync(G_BUS_TYPE_SYSTEM, nullptr, nullptr);
 				g_dbus_connection_set_exit_on_close(_system, FALSE);
 
+				g_debug("Starting Session Bus");
 				dbus_test_service_start_tasks(_session_service);
 				_session = g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr, nullptr);
 				g_dbus_connection_set_exit_on_close(_session, FALSE);

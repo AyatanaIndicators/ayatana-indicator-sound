@@ -37,6 +37,7 @@ protected:
 	{
 		//addMock(buildBustleMock("indicator-test-session.bustle", DBUS_TEST_SERVICE_BUS_SESSION));
 		//addMock(buildBustleMock("indicator-test-system.bustle", DBUS_TEST_SERVICE_BUS_SYSTEM));
+		g_setenv("LD_PRELOAD", PA_MOCK_LIB, TRUE);
 
 		as = std::make_shared<AccountsServiceMock>();
 		addMock(*as);

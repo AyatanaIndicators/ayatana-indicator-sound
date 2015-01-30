@@ -92,6 +92,8 @@ add_library(
 	pa-mock.cpp
 )
 
+target_link_libraries (pulse-mock ${PULSEAUDIO_LIBRARIES})
+
 ###########################
 # Name Watch Test
 ###########################
@@ -213,6 +215,7 @@ add_test(greeter-list-test-iterator
 
 add_definitions(
 	-DINDICATOR_SOUND_SERVICE_BINARY="${CMAKE_BINARY_DIR}/src/indicator-sound-service"
+	-DPA_MOCK_LIB="${CMAKE_CURRENT_BINARY_DIR}/libpulse-mock.so"
 )
 add_executable (indicator-test indicator-test.cc)
 target_link_libraries (
