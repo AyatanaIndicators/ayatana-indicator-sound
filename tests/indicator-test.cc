@@ -66,8 +66,8 @@ TEST_F(IndicatorTest, PhoneMenu) {
 	EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "action", "indicator.silent-mode");
 	EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "label", "Silent Mode");
 
-	EXPECT_MENU_ATTRIB(std::vector<int>({0, 2}), "action", "indicator.phone-settings");
-	EXPECT_MENU_ATTRIB(std::vector<int>({0, 2}), "label", "Sound Settings…");
+	EXPECT_MENU_ATTRIB(std::vector<int>({0, 1}), "action", "indicator.phone-settings");
+	EXPECT_MENU_ATTRIB(std::vector<int>({0, 1}), "label", "Sound Settings…");
 }
 
 TEST_F(IndicatorTest, DesktopMenu) {
