@@ -20,6 +20,11 @@
 public class IndicatorSound.Service: Object {
 	public Service (MediaPlayerList playerlist) {
 		sync_notification = new Notify.Notification(_("Volume"), "", "audio-volume-muted");
+		this.notification_server_watch = GLib.Bus.watch_name(GLib.BusType.SESSION,
+			"org.freedesktop.Notifications",
+			GLib.BusNameWatcherFlags.NONE,
+			() => { check_sync_notification = false; },
+			() => { check_sync_notification = false; });
 
 		this.settings = new Settings ("com.canonical.indicator.sound");
 		this.sharedsettings = new Settings ("com.ubuntu.sound");
@@ -91,6 +96,11 @@ public class IndicatorSound.Service: Object {
 		if (this.sound_was_blocked_timeout_id > 0) {
 			Source.remove (this.sound_was_blocked_timeout_id);
 			this.sound_was_blocked_timeout_id = 0;
+		}
+
+		if (this.notification_server_watch != 0) {
+			GLib.Bus.unwatch_name(this.notification_server_watch);
+			this.notification_server_watch = 0;
 		}
 	}
 
@@ -175,6 +185,7 @@ public class IndicatorSound.Service: Object {
 	AccountsServiceUser? accounts_service = null;
 	bool export_to_accounts_service = false;
 	private Notify.Notification sync_notification;
+	private uint notification_server_watch;
 
 	/* Maximum volume as a scaling factor between the volume action's state and the value in
 	 * this.volume_control. See create_volume_action().
@@ -226,6 +237,8 @@ public class IndicatorSound.Service: Object {
 		string icon;
 		if (this.volume_control.mute)
 			icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
+		else if (this.accounts_service != null && this.accounts_service.silentMode)
+		  icon = "audio-volume-muted-panel";
 		else if (volume <= 0.0)
 			icon = "audio-volume-low-zero-panel";
 		else if (volume <= 0.3)
@@ -238,6 +251,9 @@ public class IndicatorSound.Service: Object {
 		string accessible_name;
 		if (this.volume_control.mute) {
 			accessible_name = _("Volume (muted)");
+		} else if (this.accounts_service != null && this.accounts_service.silentMode) {
+			int volume_int = (int)(volume * 100);
+			accessible_name = "%s (%s %d%%)".printf (_("Volume"), _("silent"), volume_int);
 		} else {
 			int volume_int = (int)(volume * 100);
 			accessible_name = "%s (%d%%)".printf (_("Volume"), volume_int);
@@ -252,7 +268,6 @@ public class IndicatorSound.Service: Object {
 		root_action.set_state (builder.end());
 	}
 
-	/* TODO: Update these if the notification server leaves the bus and restarts */
 	private bool check_sync_notification = false;
 	private bool support_sync_notification = false;
 
@@ -485,13 +500,13 @@ public class IndicatorSound.Service: Object {
 				action.set_state (this.action_state_for_player (player));
 				action.set_enabled (player.can_raise);
 			}
-			
+
 			SimpleAction? greeter_action = this.actions.lookup_action (player.id + ".greeter") as SimpleAction;
 			if (greeter_action != null) {
 				greeter_action.set_state (this.action_state_for_player (player, greeter_show_track()));
 				greeter_action.set_enabled (player.can_raise);
 			}
-			
+
 			/* If we're playing then put that data in accounts service */
 			if (player.is_running && export_to_accounts_service && accounts_service != null) {
 				accounts_service.player = player;

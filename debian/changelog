@@ -1,3 +1,43 @@
+indicator-sound (12.10.2+15.04.20150129.1-0ubuntu1) vivid; urgency=low
+
+  [ Ted Gould ]
+  * Move notification code out of volume control object
+  * Build a rudimentary Pulse Audio mock for testing.
+  * Disconnect the right function from the 'closed' signal (LP:
+    #1307021)
+  * Ensure that the active port is not null before looking at its value
+    (LP: #1399862)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 29 Jan 2015 17:32:11 +0000
+
+indicator-sound (12.10.2+15.04.20150128-0ubuntu1) vivid; urgency=low
+
+  [ Ted Gould ]
+  * Remove XFCE from the OnlyShowIn list (LP: #1411959)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 28 Jan 2015 21:16:55 +0000
+
+indicator-sound (12.10.2+15.04.20150120-0ubuntu1) vivid; urgency=low
+
+  [ Ted Gould ]
+  * Set internal silent mode variable at startup (LP: #1391164)
+
+  [ CI bot ]
+  * Set internal silent mode variable at startup (LP: #1391164)
+
+  [ Nick Dedekind ]
+  * Update the panel icon when entering/exiting silent mode. (LP:
+    #1390067)
+
+  [ Dmitry Shachnev ]
+  * Fix indicator-sound-service crash when active_port is null. (LP:
+    #1395455)
+
+  [ Lars Uebernickel ]
+  * Set internal silent mode variable at startup (LP: #1391164)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 20 Jan 2015 22:03:19 +0000
+
 indicator-sound (12.10.2+15.04.20141105-0ubuntu1) vivid; urgency=medium
 
   [ Ted Gould ]

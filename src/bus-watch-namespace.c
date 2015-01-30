@@ -41,8 +41,15 @@ typedef struct
   gchar            *name;
 } GetNameOwnerData;
 
+/* Global Variables */
 static guint namespace_watcher_next_id;
 static GHashTable *namespace_watcher_watchers;
+
+/* Prototypes */
+static void connection_closed (GDBusConnection *connection,
+                               gboolean         remote_peer_vanished,
+                               GError          *error,
+                               gpointer         user_data);
 
 static void
 namespace_watcher_stop (gpointer data)
@@ -70,7 +77,7 @@ namespace_watcher_stop (gpointer data)
 
   if (watcher->connection)
     {
-      g_signal_handlers_disconnect_by_func (watcher->connection, namespace_watcher_stop, watcher);
+      g_signal_handlers_disconnect_by_func (watcher->connection, connection_closed, watcher);
       g_object_unref (watcher->connection);
     }
 
