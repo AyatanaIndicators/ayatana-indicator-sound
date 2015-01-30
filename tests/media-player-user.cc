@@ -180,6 +180,9 @@ TEST_F(MediaPlayerUserTest, TimeoutTest) {
 	set_property("Album", g_variant_new_string("Vinyl is dead"));
 	set_property("ArtUrl", g_variant_new_string("http://art.url"));
 
+	/* Ensure the properties get set before we pull them */
+	loop(100);
+
 	/* Build our media player */
 	MediaPlayerUser * player = media_player_user_new("user");
 	ASSERT_NE(nullptr, player);
