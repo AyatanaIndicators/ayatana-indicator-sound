@@ -34,28 +34,22 @@ class MediaPlayerUserTest : public ::testing::Test
 		DbusTestService * service = NULL;
 		AccountsServiceMock service_mock;
 
-		GDBusConnection * session = NULL;
 		GDBusConnection * system = NULL;
 		GDBusProxy * proxy = NULL;
 
 		virtual void SetUp() {
 			service = dbus_test_service_new(NULL);
-			dbus_test_service_set_bus(service, DBUS_TEST_SERVICE_BUS_BOTH);
+			dbus_test_service_set_bus(service, DBUS_TEST_SERVICE_BUS_SYSTEM);
 
 			dbus_test_service_add_task(service, (DbusTestTask*)service_mock);
 			dbus_test_service_start_tasks(service);
-
-			session = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
-			ASSERT_NE(nullptr, session);
-			g_dbus_connection_set_exit_on_close(session, FALSE);
-			g_object_add_weak_pointer(G_OBJECT(session), (gpointer *)&session);
 
 			system = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, NULL);
 			ASSERT_NE(nullptr, system);
 			g_dbus_connection_set_exit_on_close(system, FALSE);
 			g_object_add_weak_pointer(G_OBJECT(system), (gpointer *)&system);
 
-			proxy = g_dbus_proxy_new_sync(session,
+			proxy = g_dbus_proxy_new_sync(system,
 				G_DBUS_PROXY_FLAGS_NONE,
 				NULL,
 				"org.freedesktop.Accounts",
@@ -69,7 +63,6 @@ class MediaPlayerUserTest : public ::testing::Test
 			g_clear_object(&proxy);
 			g_clear_object(&service);
 
-			g_object_unref(session);
 			g_object_unref(system);
 
 			#if 0
