@@ -271,7 +271,7 @@ public class IndicatorSound.Service: Object {
 	private bool check_sync_notification = false;
 	private bool support_sync_notification = false;
 	private string last_output_notification = "multimedia";
-	private string last_volume_notification = 0;
+	private double last_volume_notification = 0;
 
 	void update_sync_notification () {
 		if (!check_sync_notification) {
