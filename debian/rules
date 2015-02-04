@@ -17,3 +17,5 @@ override_dh_install:
 	install -m 644 debian/indicator-sound-crashdb.conf debian/indicator-sound/etc/apport/crashdb.conf.d/
 	dh_install --fail-missing
 
+override_dh_auto_test:
+	ARGS=-V dh_auto_test
