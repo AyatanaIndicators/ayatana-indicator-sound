@@ -11,6 +11,28 @@ add_library (gtest STATIC
 target_link_libraries(gtest ${GTEST_LIBS})
 
 ###########################
+# GSettings Schema
+###########################
+
+# build the necessary schemas
+set_directory_properties (PROPERTIES
+                          ADDITIONAL_MAKE_CLEAN_FILES gschemas.compiled)
+set_source_files_properties (gschemas.compiled GENERATED)
+
+# GSettings:
+# compile the indicator-sound schema into a gschemas.compiled file in this directory,
+# and help the tests to find that file by setting -DSCHEMA_DIR
+set (SCHEMA_DIR ${CMAKE_CURRENT_BINARY_DIR})
+add_definitions(-DSCHEMA_DIR="${SCHEMA_DIR}")
+execute_process (COMMAND ${PKG_CONFIG_EXECUTABLE} gio-2.0 --variable glib_compile_schemas
+                 OUTPUT_VARIABLE COMPILE_SCHEMA_EXECUTABLE
+                 OUTPUT_STRIP_TRAILING_WHITESPACE)
+add_custom_command (OUTPUT gschemas.compiled
+                    DEPENDS ${CMAKE_BINARY_DIR}/data/com.canonical.indicator.sound.gschema.xml
+                    COMMAND cp -f ${CMAKE_BINARY_DIR}/data/*gschema.xml ${SCHEMA_DIR}
+                    COMMAND ${COMPILE_SCHEMA_EXECUTABLE} ${SCHEMA_DIR})
+
+###########################
 # Vala Mocks
 ###########################
 
