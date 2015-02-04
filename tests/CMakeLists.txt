@@ -22,14 +22,15 @@ set_source_files_properties (gschemas.compiled GENERATED)
 # GSettings:
 # compile the indicator-sound schema into a gschemas.compiled file in this directory,
 # and help the tests to find that file by setting -DSCHEMA_DIR
-set (SCHEMA_DIR ${CMAKE_CURRENT_BINARY_DIR})
+set (SCHEMA_DIR "${CMAKE_CURRENT_BINARY_DIR}/gsettings-schemas")
 add_definitions(-DSCHEMA_DIR="${SCHEMA_DIR}")
 execute_process (COMMAND ${PKG_CONFIG_EXECUTABLE} gio-2.0 --variable glib_compile_schemas
                  OUTPUT_VARIABLE COMPILE_SCHEMA_EXECUTABLE
                  OUTPUT_STRIP_TRAILING_WHITESPACE)
 add_custom_command (OUTPUT gschemas.compiled
-                    DEPENDS ${CMAKE_BINARY_DIR}/data/com.canonical.indicator.sound.gschema.xml
-                    COMMAND cp -f ${CMAKE_BINARY_DIR}/data/*gschema.xml ${SCHEMA_DIR}
+                    DEPENDS ${CMAKE_SOURCE_DIR}/data/com.canonical.indicator.sound.gschema.xml
+                    COMMAND mkdir -p ${SCHEMA_DIR}
+                    COMMAND cp -f ${CMAKE_SOURCE_DIR}/data/*gschema.xml ${SCHEMA_DIR}
                     COMMAND ${COMPILE_SCHEMA_EXECUTABLE} ${SCHEMA_DIR})
 
 ###########################
@@ -239,7 +240,7 @@ add_definitions(
 	-DINDICATOR_SOUND_SERVICE_BINARY="${CMAKE_BINARY_DIR}/src/indicator-sound-service"
 	-DPA_MOCK_LIB="${CMAKE_CURRENT_BINARY_DIR}/libpulse-mock.so"
 )
-add_executable (indicator-test indicator-test.cc)
+add_executable (indicator-test indicator-test.cc gschemas.compiled)
 target_link_libraries (
 	indicator-test
 	gtest
