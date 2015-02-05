@@ -17,6 +17,7 @@
  *      Ted Gould <ted@canonical.com>
  */
 
+#include <memory>
 #include <libdbustest/dbus-test.h>
 
 class AccountsServiceMock
@@ -24,10 +25,13 @@ class AccountsServiceMock
 		DbusTestDbusMock * mock = nullptr;
 		DbusTestDbusMockObject * soundobj = nullptr;
 		DbusTestDbusMockObject * userobj = nullptr;
+		DbusTestDbusMockObject * syssoundobj = nullptr;
 
 	public:
 		AccountsServiceMock () {
 			mock = dbus_test_dbus_mock_new("org.freedesktop.Accounts");
+
+			dbus_test_task_set_bus(DBUS_TEST_TASK(mock), DBUS_TEST_SERVICE_BUS_SYSTEM);
 
 			DbusTestDbusMockObject * baseobj = dbus_test_dbus_mock_get_object(mock, "/org/freedesktop/Accounts", "org.freedesktop.Accounts", NULL);
 
@@ -80,11 +84,28 @@ class AccountsServiceMock
 			dbus_test_dbus_mock_object_add_property(mock, soundobj,
 				"ArtUrl", G_VARIANT_TYPE_STRING,
 				g_variant_new_string(""), NULL);
+
+			syssoundobj = dbus_test_dbus_mock_get_object(mock, "/user", "com.ubuntu.touch.AccountsService.Sound", NULL);
+			dbus_test_dbus_mock_object_add_property(mock, syssoundobj,
+				"SilentMode", G_VARIANT_TYPE_BOOLEAN,
+				g_variant_new_boolean(FALSE), NULL);
 		}
 
 		~AccountsServiceMock () {
 			g_debug("Destroying the Accounts Service Mock");
 			g_clear_object(&mock);
+		}
+
+		void setSilentMode (bool modeValue) {
+			dbus_test_dbus_mock_object_update_property(mock, syssoundobj,
+				"SilentMode", g_variant_new_boolean(modeValue ? TRUE : FALSE),
+				NULL);
+		}
+
+		operator std::shared_ptr<DbusTestTask> () {
+			return std::shared_ptr<DbusTestTask>(
+				DBUS_TEST_TASK(g_object_ref(mock)),
+				[](DbusTestTask * task) { g_clear_object(&task); });
 		}
 
 		operator DbusTestTask* () {
