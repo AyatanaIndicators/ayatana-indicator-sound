@@ -54,6 +54,14 @@ public class VolumeControl : Object
 	private bool _pulse_use_stream_restore = false;
 	private uint32 _active_sink_input = -1;
 	private string[] _valid_roles = {"multimedia", "alert", "alarm", "phone"};
+	public string stream {
+		get {
+			if (_active_sink_input < 0 || _active_sink_input >= _valid_roles.length)
+				return "multimedia";
+			else
+				return _valid_roles[_active_sink_input];
+		}
+	}
 	private string? _objp_role_multimedia = null;
 	private string? _objp_role_alert = null;
 	private string? _objp_role_alarm = null;

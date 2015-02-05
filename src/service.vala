@@ -270,6 +270,8 @@ public class IndicatorSound.Service: Object {
 
 	private bool check_sync_notification = false;
 	private bool support_sync_notification = false;
+	private string last_output_notification = "multimedia";
+	private double last_volume_notification = 0;
 
 	void update_sync_notification () {
 		if (!check_sync_notification) {
@@ -281,6 +283,21 @@ public class IndicatorSound.Service: Object {
 		}
 
 		if (!support_sync_notification)
+			return;
+
+		/* Update our volume and output */
+		var oldoutput = this.last_output_notification;
+		this.last_output_notification = this.volume_control.stream;
+
+		var oldvolume = this.last_volume_notification;
+		this.last_volume_notification = volume_control.volume;
+
+		/* Suppress notifications of volume changes if it is because the 
+		   output stream changed. */
+		if (oldoutput != this.last_output_notification)
+			return;
+		/* Supress updates that don't change the value */
+		if (GLib.Math.fabs(oldvolume - this.last_volume_notification) < 0.01)
 			return;
 
 		var shown_action = actions.lookup_action ("indicator-shown") as SimpleAction;
