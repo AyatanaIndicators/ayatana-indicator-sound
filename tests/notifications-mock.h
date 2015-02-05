@@ -24,18 +24,20 @@ class NotificationsMock
 		DbusTestDbusMock * mock = nullptr;
 
 	public:
-		AccountsServiceMock () {
+		NotificationsMock () {
 			mock = dbus_test_dbus_mock_new("org.freedesktop.Notifications");
 			dbus_test_task_set_bus(DBUS_TEST_TASK(mock), DBUS_TEST_SERVICE_BUS_SESSION);
+			dbus_test_task_set_name(DBUS_TEST_TASK(mock), "Notifications");
 		}
 
-		~AccountsServiceMock () {
+		~NotificationsMock () {
 			g_debug("Destroying the Accounts Service Mock");
 			g_clear_object(&mock);
 		}
 
 		operator std::shared_ptr<DbusTestTask> () {
-			return std::make_shared<DbusTestTask>(g_object_ref(mock), [](DbusTestTask * task) { g_clear_object(&task); });
+			std::shared_ptr<DbusTestTask> retval(DBUS_TEST_TASK(g_object_ref(mock)), [](DbusTestTask * task) { g_clear_object(&task); });
+			return retval;
 		}
 
 		operator DbusTestTask* () {
@@ -44,9 +46,5 @@ class NotificationsMock
 
 		operator DbusTestDbusMock* () {
 			return mock;
-		}
-
-		DbusTestDbusMockObject * get_sound () {
-			return soundobj;
 		}
 };
