@@ -34,30 +34,22 @@ class MediaPlayerUserTest : public ::testing::Test
 		DbusTestService * service = NULL;
 		AccountsServiceMock service_mock;
 
-		GDBusConnection * session = NULL;
 		GDBusConnection * system = NULL;
 		GDBusProxy * proxy = NULL;
 
 		virtual void SetUp() {
 			service = dbus_test_service_new(NULL);
-
+			dbus_test_service_set_bus(service, DBUS_TEST_SERVICE_BUS_SYSTEM);
 
 			dbus_test_service_add_task(service, (DbusTestTask*)service_mock);
 			dbus_test_service_start_tasks(service);
-
-			g_setenv("DBUS_SYSTEM_BUS_ADDRESS", g_getenv("DBUS_SESSION_BUS_ADDRESS"), TRUE);
-
-			session = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
-			ASSERT_NE(nullptr, session);
-			g_dbus_connection_set_exit_on_close(session, FALSE);
-			g_object_add_weak_pointer(G_OBJECT(session), (gpointer *)&session);
 
 			system = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, NULL);
 			ASSERT_NE(nullptr, system);
 			g_dbus_connection_set_exit_on_close(system, FALSE);
 			g_object_add_weak_pointer(G_OBJECT(system), (gpointer *)&system);
 
-			proxy = g_dbus_proxy_new_sync(session,
+			proxy = g_dbus_proxy_new_sync(system,
 				G_DBUS_PROXY_FLAGS_NONE,
 				NULL,
 				"org.freedesktop.Accounts",
@@ -71,7 +63,6 @@ class MediaPlayerUserTest : public ::testing::Test
 			g_clear_object(&proxy);
 			g_clear_object(&service);
 
-			g_object_unref(session);
 			g_object_unref(system);
 
 			#if 0
@@ -188,6 +179,9 @@ TEST_F(MediaPlayerUserTest, TimeoutTest) {
 	set_property("Artist", g_variant_new_string("Bansky"));
 	set_property("Album", g_variant_new_string("Vinyl is dead"));
 	set_property("ArtUrl", g_variant_new_string("http://art.url"));
+
+	/* Ensure the properties get set before we pull them */
+	loop(100);
 
 	/* Build our media player */
 	MediaPlayerUser * player = media_player_user_new("user");
