@@ -285,16 +285,18 @@ public class IndicatorSound.Service: Object {
 		if (!support_sync_notification)
 			return;
 
-		/* Suppress notifications of volume changes if it is because the 
-		   output stream changed. */
+		/* Update our volume and output */
 		var oldoutput = this.last_output_notification;
 		this.last_output_notification = this.volume_control.stream;
-		if (oldoutput != this.last_output_notification)
-			return;
 
-		/* Supress updates that don't change the value */
 		var oldvolume = this.last_volume_notification;
 		this.last_volume_notification = volume_control.volume;
+
+		/* Suppress notifications of volume changes if it is because the 
+		   output stream changed. */
+		if (oldoutput != this.last_output_notification)
+			return;
+		/* Supress updates that don't change the value */
 		if (oldvolume == this.last_volume_notification)
 			return;
 
