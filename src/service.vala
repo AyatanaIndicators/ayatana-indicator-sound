@@ -297,7 +297,7 @@ public class IndicatorSound.Service: Object {
 		if (oldoutput != this.last_output_notification)
 			return;
 		/* Supress updates that don't change the value */
-		if (oldvolume == this.last_volume_notification)
+		if (GLib.Math.fabs(oldvolume - this.last_volume_notification) < 0.01)
 			return;
 
 		var shown_action = actions.lookup_action ("indicator-shown") as SimpleAction;
