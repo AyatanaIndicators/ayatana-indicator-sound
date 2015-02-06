@@ -1,3 +1,12 @@
+indicator-sound (12.10.2+15.04.20150205-0ubuntu1) vivid; urgency=medium
+
+  [ Ted Gould ]
+  * Don't show notification when output mode changes (LP: #1416233)
+  * Initial support for indicator service testing from the GMenu/GAction
+    interfaces
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 05 Feb 2015 17:19:42 +0000
+
 indicator-sound (12.10.2+15.04.20150129.1-0ubuntu1) vivid; urgency=low
 
   [ Ted Gould ]
