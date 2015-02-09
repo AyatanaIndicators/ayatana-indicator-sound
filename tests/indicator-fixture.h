@@ -36,6 +36,7 @@ class IndicatorFixture : public ::testing::Test
 	protected:
 		std::chrono::milliseconds _eventuallyTime;
 
+	private:
 		class PerRunData {
 		public:
 			/* We're private in the fixture but other than that we don't care,
@@ -209,9 +210,8 @@ class IndicatorFixture : public ::testing::Test
 
 			/* The core of the idle function as an object so we can use the C++-isms
 			   of attaching the variables and make this code reasonably readable */
-			auto idlefunc = [&loop, &retpromise, &testfunc, &start, this]() -> void {
+			std::function<void(void)> idlefunc = [&loop, &retpromise, &testfunc, &start, this]() -> void {
 				auto result = testfunc();
-				g_debug("Idle Ran");
 
 				if (result == false && _eventuallyTime > (std::chrono::steady_clock::now() - start)) {
 					return;
@@ -220,12 +220,6 @@ class IndicatorFixture : public ::testing::Test
 				retpromise.set_value(result);
 				g_main_loop_quit(loop.get());
 			};
-
-			/* Run once to see if we can avoid waiting */
-			idlefunc();
-			if (retfuture.valid()) {
-				return retfuture.get();
-			}
 
 			auto idlesrc = g_idle_add([](gpointer data) -> gboolean {
 				auto func = reinterpret_cast<std::function<void(void)> *>(data);
