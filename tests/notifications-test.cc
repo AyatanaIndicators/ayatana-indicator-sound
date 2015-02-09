@@ -22,6 +22,7 @@
 #include <gtest/gtest.h>
 #include <gio/gio.h>
 #include <libdbustest/dbus-test.h>
+#include <libnotify/notify.h>
 
 #include "notifications-mock.h"
 
@@ -51,9 +52,15 @@ class NotificationsTest : public ::testing::Test
 			ASSERT_NE(nullptr, session);
 			g_dbus_connection_set_exit_on_close(session, FALSE);
 			g_object_add_weak_pointer(G_OBJECT(session), (gpointer *)&session);
+
+			/* This is done in main.c */
+			notify_init("indicator-sound");
 		}
 
 		virtual void TearDown() {
+			if (notify_is_initted())
+				notify_uninit();
+
 			notifications.reset();
 			g_clear_object(&service);
 
