@@ -16,12 +16,16 @@
  * Authors:
  *      Ted Gould <ted@canonical.com>
  */
+#include <map>
+#include <memory>
+#include <type_traits>
 
 #include <libdbustest/dbus-test.h>
 
 class NotificationsMock
 {
 		DbusTestDbusMock * mock = nullptr;
+		DbusTestDbusMockObject * baseobj = nullptr;
 
 	public:
 		NotificationsMock (std::vector<std::string> capabilities = {"body", "body-markup", "icon-static", "image/svg+xml", "x-canonical-private-synchronous", "x-canonical-append", "x-canonical-private-icon-only", "x-canonical-truncation", "private-synchronous", "append", "private-icon-only", "truncation"}) {
@@ -29,13 +33,17 @@ class NotificationsMock
 			dbus_test_task_set_bus(DBUS_TEST_TASK(mock), DBUS_TEST_SERVICE_BUS_SESSION);
 			dbus_test_task_set_name(DBUS_TEST_TASK(mock), "Notify");
 
-			DbusTestDbusMockObject * baseobj =dbus_test_dbus_mock_get_object(mock, "/org/freedesktop/Notifications", "org.freedesktop.Notifications", NULL);
+			baseobj =dbus_test_dbus_mock_get_object(mock, "/org/freedesktop/Notifications", "org.freedesktop.Notifications", NULL);
 
 			std::string capspython("ret = ");
 			capspython += vector2py(capabilities);
 			dbus_test_dbus_mock_object_add_method(mock, baseobj,
 				"GetCapabilities", NULL, G_VARIANT_TYPE("as"),
 				capspython.c_str(), NULL);
+
+			dbus_test_dbus_mock_object_add_method(mock, baseobj,
+				"Notify", NULL, G_VARIANT_TYPE("(susssasa{sv}i)"),
+				"ret = 10", NULL);
 		}
 
 		~NotificationsMock () {
@@ -70,5 +78,64 @@ class NotificationsMock
 
 		operator DbusTestDbusMock* () {
 			return mock;
+		}
+
+		struct Notification {
+			std::string app_name;
+			unsigned int replace_id;
+			std::string app_icon;
+			std::string summary;
+			std::string body;
+			std::vector<std::string> actions;
+			std::map<std::string, std::shared_ptr<GVariant>> hints;
+			int timeout;
+		};
+
+		std::shared_ptr<GVariant> childGet (GVariant * tuple, gsize index) {
+			return std::shared_ptr<GVariant>(g_variant_get_child_value(tuple, index),
+				[](GVariant * v){ if (v != nullptr) g_variant_unref(v); });
+		}
+
+		std::vector<Notification> getNotifications (void) {
+			std::vector<Notification> notifications;
+
+			unsigned int cnt, i;
+			auto calls = dbus_test_dbus_mock_object_get_method_calls(mock, baseobj, "Notify", &cnt, NULL);
+
+			for (i = 0; i < cnt; i++) {
+				auto call = calls[i];
+				Notification notification;
+
+				notification.app_name = g_variant_get_string(childGet(call.params, 0).get(), nullptr);
+				notification.replace_id = g_variant_get_uint32(childGet(call.params, 1).get());
+				notification.app_icon = g_variant_get_string(childGet(call.params, 2).get(), nullptr);
+				notification.summary = g_variant_get_string(childGet(call.params, 3).get(), nullptr);
+				notification.body = g_variant_get_string(childGet(call.params, 4).get(), nullptr);
+				notification.timeout = g_variant_get_int32(childGet(call.params, 7).get());
+
+				auto vactions = childGet(call.params, 5);
+				GVariantIter iactions = {0};
+				g_variant_iter_init(&iactions, vactions.get());
+				const gchar * action = NULL;
+				while (g_variant_iter_loop(&iactions, "&s", &action)) {
+					std::string saction(action);
+					notification.actions.push_back(saction);
+				}
+
+				auto vhints = childGet(call.params, 6);
+				GVariantIter ihints = {0};
+				g_variant_iter_init(&ihints, vhints.get());
+				const gchar * hint_key = NULL;
+				GVariant * hint_value = NULL;
+				while (g_variant_iter_loop(&ihints, "{&sv}", &hint_key, &hint_value)) {
+					std::string key(hint_key);
+					std::shared_ptr<GVariant> value(g_variant_ref(hint_value), [](GVariant * v){ if (v != nullptr) g_variant_unref(v); });
+					notification.hints[key] = value;
+				}
+
+				notifications.push_back(notification);
+			}
+
+			return notifications;
 		}
 };
