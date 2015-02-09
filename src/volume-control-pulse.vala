@@ -32,7 +32,7 @@ interface GreeterListInterface : Object
     public signal void entry_selected (string entry_name);
 }
 
-public class VolumeControl : Object
+public class VolumeControlPulse : VolumeControl
 {
 	/* this is static to ensure it being freed after @context (loop does not have ref counting) */
 	private static PulseAudio.GLibMainLoop loop;
@@ -54,7 +54,7 @@ public class VolumeControl : Object
 	private bool _pulse_use_stream_restore = false;
 	private uint32 _active_sink_input = -1;
 	private string[] _valid_roles = {"multimedia", "alert", "alarm", "phone"};
-	public string stream {
+	public override string stream {
 		get {
 			if (_active_sink_input < 0 || _active_sink_input >= _valid_roles.length)
 				return "multimedia";
@@ -79,19 +79,19 @@ public class VolumeControl : Object
 	private bool _active_port_headphone = false;
 
 	/** true when connected to the pulse server */
-	public bool ready { get; set; }
+	public override bool ready { get; private set; }
 
 	/** true when a microphone is active **/
-	public bool active_mic { get; private set; default = false; }
+	public override bool active_mic { get; private set; default = false; }
 
 	/** true when high volume warnings should be shown */
-	public bool high_volume {
+	public override bool high_volume {
 		get {
 			return this._volume > 0.75 && _active_port_headphone;	
 		}
 	}
 
-	public VolumeControl ()
+	public VolumeControlPulse ()
 	{
 		if (loop == null)
 			loop = new PulseAudio.GLibMainLoop ();
@@ -104,7 +104,7 @@ public class VolumeControl : Object
 		this.reconnect_to_pulse ();
 	}
 
-	~VolumeControl ()
+	~VolumeControlPulse ()
 	{
 		if (_reconnect_timer != 0) {
 			Source.remove (_reconnect_timer);
@@ -490,7 +490,7 @@ public class VolumeControl : Object
 		}
 	}
 
-	public void set_mute (bool mute)
+	public override void set_mute (bool mute)
 	{
 		if (set_mute_internal (mute))
 			sync_mute_to_accountsservice.begin (mute);
@@ -501,7 +501,7 @@ public class VolumeControl : Object
 		this.set_mute (!this._mute);
 	}
 
-	public bool mute
+	public override bool mute
 	{
 		get
 		{
@@ -509,7 +509,7 @@ public class VolumeControl : Object
 		}
 	}
 
-	public bool is_playing
+	public override bool is_playing
 	{
 		get
 		{
@@ -627,7 +627,7 @@ public class VolumeControl : Object
 		}
 	}
 
-	public double volume {
+	public override double volume {
 		get {
 			return _volume;
 		}
@@ -638,7 +638,7 @@ public class VolumeControl : Object
 		}
 	}
 
-	public double mic_volume {
+	public override double mic_volume {
 		get {
 			return _mic_volume;
 		}

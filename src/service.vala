@@ -32,7 +32,7 @@ public class IndicatorSound.Service: Object {
 		this.settings.bind ("visible", this, "visible", SettingsBindFlags.GET);
 		this.notify["visible"].connect ( () => this.update_root_icon () );
 
-		this.volume_control = new VolumeControl ();
+		this.volume_control = new VolumeControlPulse ();
 
 		/* If we're on the greeter, don't export */
 		if (GLib.Environment.get_user_name() != "lightdm") {

@@ -43,6 +43,7 @@ vala_add(indicator-sound-service
   DEPENDS
     sound-menu
     volume-control
+    volume-control-pulse
     media-player
     media-player-list
     mpris2-interfaces
@@ -50,6 +51,11 @@ vala_add(indicator-sound-service
 )
 vala_add(indicator-sound-service
   volume-control.vala
+)
+vala_add(indicator-sound-service
+  volume-control-pulse.vala
+  DEPENDS
+    volume-control
 )
 vala_add(indicator-sound-service
   media-player.vala
