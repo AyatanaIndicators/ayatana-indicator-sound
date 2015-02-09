@@ -17,7 +17,7 @@
  *      Ted Gould <ted@canonical.com>
  */
 
-public class MediaPlayerList {
+public abstract class MediaPlayerList : Object {
 	public class Iterator {
 		public virtual MediaPlayer? next_value() {
 			return null;
