@@ -201,6 +201,7 @@ target_link_libraries (
 	notifications-test
 	indicator-sound-service-lib
 	vala-mocks-lib
+	pulse-mock
 	gtest
 	${SOUNDSERVICE_LIBRARIES}
 	${TEST_LIBRARIES}
