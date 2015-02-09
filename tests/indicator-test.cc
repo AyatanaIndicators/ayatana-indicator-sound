@@ -58,7 +58,7 @@ protected:
 TEST_F(IndicatorTest, PhoneMenu) {
 	setMenu("/com/canonical/indicator/sound/phone");
 
-	EXPECT_MENU_ATTRIB({0}, "action", "indicator.root");
+	EXPECT_EVENTUALLY_MENU_ATTRIB(std::vector<int>({0}), "action", "indicator.root");
 	EXPECT_MENU_ATTRIB({0}, "x-canonical-type", "com.canonical.indicator.root");
 	EXPECT_MENU_ATTRIB({0}, "x-canonical-scroll-action", "indicator.scroll");
 	EXPECT_MENU_ATTRIB({0}, "x-canonical-secondary-action", "indicator.mute");

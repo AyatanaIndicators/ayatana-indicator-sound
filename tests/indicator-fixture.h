@@ -20,6 +20,8 @@
 #include <memory>
 #include <algorithm>
 #include <string>
+#include <functional>
+#include <future>
 
 #include <gtest/gtest.h>
 #include <gio/gio.h>
@@ -195,6 +197,44 @@ class IndicatorFixture : public ::testing::Test
 			waitForCore(G_OBJECT(group.get()), "action-added");
 		}
 
+		testing::AssertionResult expectEventually (std::function<testing::AssertionResult(void)> &testfunc) {
+			auto loop = std::shared_ptr<GMainLoop>(g_main_loop_new(nullptr, FALSE), [](GMainLoop * loop) { if (loop != nullptr) g_main_loop_unref(loop); });
+
+			std::promise<testing::AssertionResult> retpromise;
+			auto retfuture = retpromise.get_future();
+
+			/* The core of the idle function as an object so we can use the C++-isms
+			   of attaching the variables and make this code reasonably readable */
+			auto idlefunc = [&loop, &retpromise, &testfunc]() -> void {
+				auto result = testfunc();
+
+				if (result == false) {
+					/* TODO: Check time */
+					return;
+				}
+
+				retpromise.set_value(result);
+				g_main_loop_quit(loop.get());
+			};
+
+			/* Run once to see if we can avoid waiting */
+			idlefunc();
+			if (retfuture.valid()) {
+				return retfuture.get();
+			}
+
+			auto idlesrc = g_idle_add([](gpointer data) -> gboolean {
+				auto func = reinterpret_cast<std::function<void(void)> *>(data);
+				(*func)();
+				return G_SOURCE_CONTINUE;
+			}, &idlefunc);
+
+			g_main_loop_run(loop.get());
+			g_source_remove(idlesrc);
+
+			return retfuture.get();
+		}
+
 	protected:
 		void setMenu (const std::string& path) {
 			run->_menu.reset();
@@ -363,7 +403,7 @@ class IndicatorFixture : public ::testing::Test
 		}
 
 	protected:
-		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const gchar * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, GVariant * value) {
+		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const char * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, GVariant * value) {
 			auto varref = std::shared_ptr<GVariant>(g_variant_ref_sink(value), [](GVariant * varptr) {
 				if (varptr != nullptr)
 					g_variant_unref(varptr);
@@ -401,25 +441,35 @@ class IndicatorFixture : public ::testing::Test
 			}
 		}
 
-		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const gchar * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, bool value) {
+		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const char * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, bool value) {
 			GVariant * var = g_variant_new_boolean(value);
 			return expectMenuAttribute(menuLocationStr, attributeStr, valueStr, menuLocation, attribute, var);
 		}
 
-		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const gchar * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, std::string value) {
+		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const char * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, std::string value) {
 			GVariant * var = g_variant_new_string(value.c_str());
 			return expectMenuAttribute(menuLocationStr, attributeStr, valueStr, menuLocation, attribute, var);
 		}
 
-		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const gchar * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, const char * value) {
+		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const char * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, const char * value) {
 			GVariant * var = g_variant_new_string(value);
 			return expectMenuAttribute(menuLocationStr, attributeStr, valueStr, menuLocation, attribute, var);
 		}
 
+		template <typename... Args> testing::AssertionResult expectEventuallyMenuAttribute (Args&& ... args) {
+			std::function<testing::AssertionResult(void)> func = [&]() {
+				return expectMenuAttribute(std::forward<Args>(args)...);
+			};
+			return expectEventually(func);
+		}
 };
+
 
 #define EXPECT_MENU_ATTRIB(menu, attrib, value) \
 	EXPECT_PRED_FORMAT3(IndicatorFixture::expectMenuAttribute, menu, attrib, value)
+
+#define EXPECT_EVENTUALLY_MENU_ATTRIB(menu, attrib, value) \
+	EXPECT_PRED_FORMAT3(IndicatorFixture::expectEventuallyMenuAttribute, menu, attrib, value)
 
 #define ASSERT_MENU_ATTRIB(menu, attrib, value) \
 	ASSERT_PRED_FORMAT3(IndicatorFixture::expectMenuAttribute, menu, attrib, value)
