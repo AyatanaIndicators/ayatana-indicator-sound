@@ -39,6 +39,9 @@ protected:
 		//addMock(buildBustleMock("indicator-test-system.bustle", DBUS_TEST_SERVICE_BUS_SYSTEM));
 		g_setenv("LD_PRELOAD", PA_MOCK_LIB, TRUE);
 
+		g_setenv("GSETTINGS_SCHEMA_DIR", SCHEMA_DIR, TRUE);
+		g_setenv("GSETTINGS_BACKEND", "memory", TRUE);
+
 		as = std::make_shared<AccountsServiceMock>();
 		addMock(*as);
 
@@ -81,8 +84,8 @@ TEST_F(IndicatorTest, DesktopMenu) {
 	EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "action", "indicator.mute");
 	EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "label", "Mute");
 
-	EXPECT_MENU_ATTRIB(std::vector<int>({0, 2}), "action", "indicator.desktop-settings");
-	EXPECT_MENU_ATTRIB(std::vector<int>({0, 2}), "label", "Sound Settings…");
+	EXPECT_MENU_ATTRIB(std::vector<int>({0, 1}), "action", "indicator.desktop-settings");
+	EXPECT_MENU_ATTRIB(std::vector<int>({0, 1}), "label", "Sound Settings…");
 }
 
 TEST_F(IndicatorTest, BaseActions) {
@@ -99,7 +102,6 @@ TEST_F(IndicatorTest, BaseActions) {
 
 	ASSERT_ACTION_EXISTS("mute");
 	ASSERT_ACTION_STATE_TYPE("mute", G_VARIANT_TYPE_BOOLEAN);
-	EXPECT_ACTION_STATE("mute", false);
 
 	ASSERT_ACTION_EXISTS("mic-volume");
 	ASSERT_ACTION_STATE_TYPE("mic-volume", G_VARIANT_TYPE_DOUBLE);
