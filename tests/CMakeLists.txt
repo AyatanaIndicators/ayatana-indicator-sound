@@ -66,6 +66,10 @@ vala_add(vala-mocks
 )
 
 vala_add(vala-mocks
+	media-player-list-mock.vala
+)
+
+vala_add(vala-mocks
 	volume-control-mock.vala
 )
 
