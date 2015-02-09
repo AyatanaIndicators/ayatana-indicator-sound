@@ -33,6 +33,8 @@ class IndicatorFixture : public ::testing::Test
 		std::string _indicatorPath;
 		std::string _indicatorAddress;
 		std::vector<std::shared_ptr<DbusTestTask>> _mocks;
+	protected:
+		std::chrono::milliseconds _eventuallyTime;
 
 		class PerRunData {
 		public:
@@ -118,6 +120,7 @@ class IndicatorFixture : public ::testing::Test
 				const std::string& addr)
 			: _indicatorPath(path)
 			, _indicatorAddress(addr)
+			, _eventuallyTime(std::chrono::seconds(5))
 		{
 		};
 
@@ -202,14 +205,15 @@ class IndicatorFixture : public ::testing::Test
 
 			std::promise<testing::AssertionResult> retpromise;
 			auto retfuture = retpromise.get_future();
+			auto start = std::chrono::steady_clock::now();
 
 			/* The core of the idle function as an object so we can use the C++-isms
 			   of attaching the variables and make this code reasonably readable */
-			auto idlefunc = [&loop, &retpromise, &testfunc]() -> void {
+			auto idlefunc = [&loop, &retpromise, &testfunc, &start, this]() -> void {
 				auto result = testfunc();
+				g_debug("Idle Ran");
 
-				if (result == false) {
-					/* TODO: Check time */
+				if (result == false && _eventuallyTime > (std::chrono::steady_clock::now() - start)) {
 					return;
 				}
 
