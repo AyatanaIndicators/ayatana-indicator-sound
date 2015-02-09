@@ -22,19 +22,22 @@ main (int argc, char ** argv) {
 	notify_init ("indicator-sound");
 
 	MediaPlayerList * playerlist = NULL;
+	AccountsServiceUser * accounts = NULL;
 
 	if (g_strcmp0("lightdm", g_get_user_name()) == 0) {
 		playerlist = MEDIA_PLAYER_LIST(media_player_list_greeter_new());
 	} else {
 		playerlist = MEDIA_PLAYER_LIST(media_player_list_mpris_new());
+		accounts = accounts_service_user_new();
 	}
 
 	VolumeControlPulse * volume = volume_control_pulse_new();
 
-	service = indicator_sound_service_new (playerlist, volume);
+	service = indicator_sound_service_new (playerlist, volume, accounts);
 	result = indicator_sound_service_run (service);
 
 	g_object_unref(playerlist);
+	g_clear_object(&accounts);
 	g_object_unref(service);
 
 	return result;
