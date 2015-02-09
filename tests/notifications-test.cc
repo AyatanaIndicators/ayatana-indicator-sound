@@ -34,7 +34,6 @@ class NotificationsTest : public ::testing::Test
 {
 	protected:
 		DbusTestService * service = NULL;
-		DbusTestDbusMock * mock = NULL;
 
 		GDBusConnection * session = NULL;
 		std::shared_ptr<NotificationsMock> notifications;
@@ -55,7 +54,7 @@ class NotificationsTest : public ::testing::Test
 		}
 
 		virtual void TearDown() {
-			g_clear_object(&mock);
+			notifications.reset();
 			g_clear_object(&service);
 
 			g_object_unref(session);
