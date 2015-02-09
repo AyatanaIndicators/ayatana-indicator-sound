@@ -272,6 +272,13 @@ class IndicatorFixture : public ::testing::Test
 			return result;
 		}
 
+		template <typename... Args> testing::AssertionResult expectEventuallyActionStateExists (Args&& ... args) {
+			std::function<testing::AssertionResult(void)> func = [&]() {
+				return expectActionStateExists(std::forward<Args>(args)...);
+			};
+			return expectEventually(func);
+		}
+
 		testing::AssertionResult expectActionStateType (const char * nameStr, const char * typeStr, const std::string& name, const GVariantType * type) {
 			auto atype = g_action_group_get_action_state_type(run->_actions.get(), name.c_str());
 			bool same = false;
@@ -292,6 +299,13 @@ class IndicatorFixture : public ::testing::Test
 
 			auto result = testing::AssertionSuccess();
 			return result;
+		}
+
+		template <typename... Args> testing::AssertionResult expectEventuallyActionStateType (Args&& ... args) {
+			std::function<testing::AssertionResult(void)> func = [&]() {
+				return expectActionStateType(std::forward<Args>(args)...);
+			};
+			return expectEventually(func);
 		}
 
 		testing::AssertionResult expectActionStateIs (const char * nameStr, const char * valueStr, const std::string& name, GVariant * value) {
@@ -356,6 +370,13 @@ class IndicatorFixture : public ::testing::Test
 		testing::AssertionResult expectActionStateIs (const char * nameStr, const char * valueStr, const std::string& name, float value) {
 			GVariant * var = g_variant_new_double(value);
 			return expectActionStateIs(nameStr, valueStr, name, var);
+		}
+
+		template <typename... Args> testing::AssertionResult expectEventuallyActionStateIs (Args&& ... args) {
+			std::function<testing::AssertionResult(void)> func = [&]() {
+				return expectActionStateIs(std::forward<Args>(args)...);
+			};
+			return expectEventually(func);
 		}
 
 
@@ -462,6 +483,9 @@ class IndicatorFixture : public ::testing::Test
 		}
 };
 
+/* Menu Attrib */
+#define ASSERT_MENU_ATTRIB(menu, attrib, value) \
+	ASSERT_PRED_FORMAT3(IndicatorFixture::expectMenuAttribute, menu, attrib, value)
 
 #define EXPECT_MENU_ATTRIB(menu, attrib, value) \
 	EXPECT_PRED_FORMAT3(IndicatorFixture::expectMenuAttribute, menu, attrib, value)
@@ -469,24 +493,32 @@ class IndicatorFixture : public ::testing::Test
 #define EXPECT_EVENTUALLY_MENU_ATTRIB(menu, attrib, value) \
 	EXPECT_PRED_FORMAT3(IndicatorFixture::expectEventuallyMenuAttribute, menu, attrib, value)
 
-#define ASSERT_MENU_ATTRIB(menu, attrib, value) \
-	ASSERT_PRED_FORMAT3(IndicatorFixture::expectMenuAttribute, menu, attrib, value)
-
+/* Action Exists */
 #define ASSERT_ACTION_EXISTS(action) \
 	ASSERT_PRED_FORMAT1(IndicatorFixture::expectActionExists, action)
 
 #define EXPECT_ACTION_EXISTS(action) \
 	EXPECT_PRED_FORMAT1(IndicatorFixture::expectActionExists, action)
 
+#define EXPECT_EVENTUALLY_ACTION_EXISTS(action) \
+	EXPECT_PRED_FORMAT1(IndicatorFixture::expectEventuallyActionExists, action)
+
+/* Action State */
+#define ASSERT_ACTION_STATE(action, value) \
+	ASSERT_PRED_FORMAT2(IndicatorFixture::expectActionStateIs, action, value)
+
 #define EXPECT_ACTION_STATE(action, value) \
 	EXPECT_PRED_FORMAT2(IndicatorFixture::expectActionStateIs, action, value)
 
-#define ASSERT_ACTION_STATE(action, value) \
-	ASSERT_PRED_FORMAT2(IndicatorFixture::expectActionStateIs, action, value)
+#define EXPECT_EVENTUALLY_ACTION_STATE(action, value) \
+	EXPECT_PRED_FORMAT2(IndicatorFixture::expectEventuallyActionStateIs, action, value)
+
+/* Action State Type */
+#define ASSERT_ACTION_STATE_TYPE(action, type) \
+	ASSERT_PRED_FORMAT2(IndicatorFixture::expectActionStateType, action, type)
 
 #define EXPECT_ACTION_STATE_TYPE(action, type) \
 	EXPECT_PRED_FORMAT2(IndicatorFixture::expectActionStateType, action, type)
 
-#define ASSERT_ACTION_STATE_TYPE(action, type) \
-	ASSERT_PRED_FORMAT2(IndicatorFixture::expectActionStateType, action, type)
-
+#define EXPECT_EVENTUALLY_ACTION_STATE_TYPE(action, type) \
+	EXPECT_PRED_FORMAT2(IndicatorFixture::expectEventuallyActionStateType, action, type)
