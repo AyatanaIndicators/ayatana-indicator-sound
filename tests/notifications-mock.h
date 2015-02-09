@@ -16,6 +16,8 @@
  * Authors:
  *      Ted Gould <ted@canonical.com>
  */
+
+#include <algorithm>
 #include <map>
 #include <memory>
 #include <type_traits>

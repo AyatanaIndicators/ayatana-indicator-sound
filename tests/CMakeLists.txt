@@ -65,6 +65,10 @@ vala_add(vala-mocks
 	media-player-mock.vala
 )
 
+vala_add(vala-mocks
+	volume-control-mock.vala
+)
+
 vala_finish(vala-mocks
 	SOURCES
 		vala_mocks_VALA_SOURCES
@@ -182,6 +186,23 @@ target_link_libraries (
 )
 
 add_test(sound-menu-test sound-menu-test)
+
+###########################
+# Notification Test
+###########################
+
+include_directories(${CMAKE_SOURCE_DIR}/src)
+add_executable (notifications-test notifications-test.cc)
+target_link_libraries (
+	notifications-test
+	indicator-sound-service-lib
+	vala-mocks-lib
+	gtest
+	${SOUNDSERVICE_LIBRARIES}
+	${TEST_LIBRARIES}
+)
+
+add_test(notifications-test notifications-test)
 
 ###########################
 # Accounts Service User
