@@ -29,7 +29,9 @@ main (int argc, char ** argv) {
 		playerlist = MEDIA_PLAYER_LIST(media_player_list_mpris_new());
 	}
 
-	service = indicator_sound_service_new (playerlist);
+	VolumeControlPulse * volume = volume_control_pulse_new();
+
+	service = indicator_sound_service_new (playerlist, volume);
 	result = indicator_sound_service_run (service);
 
 	g_object_unref(playerlist);

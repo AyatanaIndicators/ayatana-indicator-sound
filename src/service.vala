@@ -18,7 +18,7 @@
  */
 
 public class IndicatorSound.Service: Object {
-	public Service (MediaPlayerList playerlist) {
+	public Service (MediaPlayerList playerlist, VolumeControl volume) {
 		sync_notification = new Notify.Notification(_("Volume"), "", "audio-volume-muted");
 		this.notification_server_watch = GLib.Bus.watch_name(GLib.BusType.SESSION,
 			"org.freedesktop.Notifications",
@@ -32,7 +32,7 @@ public class IndicatorSound.Service: Object {
 		this.settings.bind ("visible", this, "visible", SettingsBindFlags.GET);
 		this.notify["visible"].connect ( () => this.update_root_icon () );
 
-		this.volume_control = new VolumeControlPulse ();
+		this.volume_control = volume;
 
 		/* If we're on the greeter, don't export */
 		if (GLib.Environment.get_user_name() != "lightdm") {
