@@ -40,6 +40,9 @@ class NotificationsTest : public ::testing::Test
 		std::shared_ptr<NotificationsMock> notifications;
 
 		virtual void SetUp() {
+			g_setenv("GSETTINGS_SCHEMA_DIR", SCHEMA_DIR, TRUE);
+			g_setenv("GSETTINGS_BACKEND", "memory", TRUE);
+
 			service = dbus_test_service_new(NULL);
 			dbus_test_service_set_bus(service, DBUS_TEST_SERVICE_BUS_SESSION);
 
