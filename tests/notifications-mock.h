@@ -48,7 +48,7 @@ class NotificationsMock
 				"ret = ['notification-mock', 'Testing harness', '1.0', '1.1']", nullptr);
 
 			dbus_test_dbus_mock_object_add_method(mock, baseobj,
-				"Notify", G_VARIANT_TYPE("u"), G_VARIANT_TYPE("(susssasa{sv}i)"),
+				"Notify", G_VARIANT_TYPE("(susssasa{sv}i)"), G_VARIANT_TYPE("u"),
 				"ret = 10", nullptr);
 
 			dbus_test_dbus_mock_object_add_method(mock, baseobj,
