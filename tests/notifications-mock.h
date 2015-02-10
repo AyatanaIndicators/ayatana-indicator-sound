@@ -49,7 +49,7 @@ class NotificationsMock
 		}
 
 		~NotificationsMock () {
-			g_debug("Destroying the Accounts Service Mock");
+			g_debug("Destroying the Notifications Mock");
 			g_clear_object(&mock);
 		}
 
