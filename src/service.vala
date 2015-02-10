@@ -101,6 +101,11 @@ public class IndicatorSound.Service: Object {
 			GLib.Bus.unwatch_name(this.notification_server_watch);
 			this.notification_server_watch = 0;
 		}
+
+		if (this.export_actions != 0) {
+			bus.unexport_action_group(this.export_actions);
+			this.export_actions = 0;
+		}
 	}
 
 	bool greeter_show_track () {
@@ -480,9 +485,14 @@ public class IndicatorSound.Service: Object {
 		return high_volume_action;
 	}
 
+	DBusConnection? bus = null;
+	uint export_actions = 0;
+
 	void bus_acquired (DBusConnection connection, string name) {
+		bus = connection;
+
 		try {
-			connection.export_action_group ("/com/canonical/indicator/sound", this.actions);
+			export_actions = connection.export_action_group ("/com/canonical/indicator/sound", this.actions);
 		} catch (Error e) {
 			critical ("%s", e.message);
 		}
