@@ -35,17 +35,25 @@ class NotificationsMock
 			dbus_test_task_set_bus(DBUS_TEST_TASK(mock), DBUS_TEST_SERVICE_BUS_SESSION);
 			dbus_test_task_set_name(DBUS_TEST_TASK(mock), "Notify");
 
-			baseobj =dbus_test_dbus_mock_get_object(mock, "/org/freedesktop/Notifications", "org.freedesktop.Notifications", NULL);
+			baseobj =dbus_test_dbus_mock_get_object(mock, "/org/freedesktop/Notifications", "org.freedesktop.Notifications", nullptr);
 
 			std::string capspython("ret = ");
 			capspython += vector2py(capabilities);
 			dbus_test_dbus_mock_object_add_method(mock, baseobj,
-				"GetCapabilities", NULL, G_VARIANT_TYPE("as"),
-				capspython.c_str(), NULL);
+				"GetCapabilities", nullptr, G_VARIANT_TYPE("as"),
+				capspython.c_str(), nullptr);
 
 			dbus_test_dbus_mock_object_add_method(mock, baseobj,
-				"Notify", NULL, G_VARIANT_TYPE("(susssasa{sv}i)"),
-				"ret = 10", NULL);
+				"GetServerInformation", nullptr, G_VARIANT_TYPE("(ssss)"),
+				"ret = ['notification-mock', 'Testing harness', '1.0', '1.1']", nullptr);
+
+			dbus_test_dbus_mock_object_add_method(mock, baseobj,
+				"Notify", G_VARIANT_TYPE("u"), G_VARIANT_TYPE("(susssasa{sv}i)"),
+				"ret = 10", nullptr);
+
+			dbus_test_dbus_mock_object_add_method(mock, baseobj,
+				"CloseNotification", G_VARIANT_TYPE("u"), nullptr,
+				"", nullptr);
 		}
 
 		~NotificationsMock () {
@@ -102,7 +110,7 @@ class NotificationsMock
 			std::vector<Notification> notifications;
 
 			unsigned int cnt, i;
-			auto calls = dbus_test_dbus_mock_object_get_method_calls(mock, baseobj, "Notify", &cnt, NULL);
+			auto calls = dbus_test_dbus_mock_object_get_method_calls(mock, baseobj, "Notify", &cnt, nullptr);
 
 			for (i = 0; i < cnt; i++) {
 				auto call = calls[i];
@@ -118,7 +126,7 @@ class NotificationsMock
 				auto vactions = childGet(call.params, 5);
 				GVariantIter iactions = {0};
 				g_variant_iter_init(&iactions, vactions.get());
-				const gchar * action = NULL;
+				const gchar * action = nullptr;
 				while (g_variant_iter_loop(&iactions, "&s", &action)) {
 					std::string saction(action);
 					notification.actions.push_back(saction);
@@ -127,8 +135,8 @@ class NotificationsMock
 				auto vhints = childGet(call.params, 6);
 				GVariantIter ihints = {0};
 				g_variant_iter_init(&ihints, vhints.get());
-				const gchar * hint_key = NULL;
-				GVariant * hint_value = NULL;
+				const gchar * hint_key = nullptr;
+				GVariant * hint_value = nullptr;
 				while (g_variant_iter_loop(&ihints, "{&sv}", &hint_key, &hint_value)) {
 					std::string key(hint_key);
 					std::shared_ptr<GVariant> value(g_variant_ref(hint_value), [](GVariant * v){ if (v != nullptr) g_variant_unref(v); });
