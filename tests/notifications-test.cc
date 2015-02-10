@@ -104,4 +104,23 @@ TEST_F(NotificationsTest, BasicObject) {
 
 	/* Give some time settle */
 	loop(50);
+
+	/* Auto free */
+}
+
+TEST_F(NotificationsTest, VolumeChanges) {
+	auto playerList = std::shared_ptr<MediaPlayerList>(MEDIA_PLAYER_LIST(media_player_list_mock_new()), [](MediaPlayerList * list){g_clear_object(&list);});
+	auto volumeControl = std::shared_ptr<VolumeControl>(VOLUME_CONTROL(volume_control_mock_new()), [](VolumeControl * control){g_clear_object(&control);});
+	auto soundService = std::shared_ptr<IndicatorSoundService>(indicator_sound_service_new(playerList.get(), volumeControl.get(), nullptr), [](IndicatorSoundService * service){g_clear_object(&service);});
+
+	loop(50);
+
+	volume_control_set_volume(volumeControl.get(), 50.0);
+	
+	loop(50);
+
+	auto notev = notifications->getNotifications();
+
+	ASSERT_EQ(1, notev.size());
+	EXPECT_EQ("indicator-sound", notev[0].app_name);
 }
