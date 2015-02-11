@@ -9,14 +9,27 @@
 #include "indicator-sound-service.h"
 #include "config.h"
 
+gboolean
+sigterm_handler (gpointer data)
+{
+	g_debug("Got SIGTERM");
+	g_main_loop_quit((GMainLoop *)data);
+	return G_SOURCE_REMOVE;
+}
+
 int
 main (int argc, char ** argv) {
-	gint result = 0;
+	GMainLoop * loop = NULL;
 	IndicatorSoundService* service = NULL;
 
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	setlocale (LC_ALL, "");
 	bindtextdomain (GETTEXT_PACKAGE, GNOMELOCALEDIR);
+
+	/* Build Mainloop */
+	loop = g_main_loop_new(NULL, FALSE);
+
+	g_unix_signal_add(SIGTERM, sigterm_handler, loop); 
 
 	/* Initialize libnotify */
 	notify_init ("indicator-sound");
@@ -33,14 +46,15 @@ main (int argc, char ** argv) {
 
 	VolumeControlPulse * volume = volume_control_pulse_new();
 
-	service = indicator_sound_service_new (playerlist, volume, accounts);
-	result = indicator_sound_service_run (service);
+	service = indicator_sound_service_new (loop, playerlist, volume, accounts);
+
+	g_main_loop_run(loop);
 
 	g_object_unref(playerlist);
 	g_clear_object(&accounts);
 	g_object_unref(service);
 
-	return result;
+	return 0;
 }
 
 

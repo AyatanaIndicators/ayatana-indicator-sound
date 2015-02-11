@@ -18,7 +18,11 @@
  */
 
 public class IndicatorSound.Service: Object {
-	public Service (MediaPlayerList playerlist, VolumeControl volume, AccountsServiceUser? accounts) {
+	Cancellable cancel;
+
+	public Service (MainLoop inloop, MediaPlayerList playerlist, VolumeControl volume, AccountsServiceUser? accounts) {
+		loop = inloop;
+
 		sync_notification = new Notify.Notification(_("Volume"), "", "audio-volume-muted");
 		this.notification_server_watch = GLib.Bus.watch_name(GLib.BusType.SESSION,
 			"org.freedesktop.Notifications",
@@ -89,9 +93,17 @@ public class IndicatorSound.Service: Object {
 				}
 			}
 		});
+
+		Bus.own_name (BusType.SESSION, "com.canonical.indicator.sound", BusNameOwnerFlags.NONE,
+			this.bus_acquired, null, this.name_lost);
 	}
 
 	~Service() {
+		debug("Destroying Service Object");
+
+		cancel.cancel();
+		clear_acts_player();
+
 		if (this.sound_was_blocked_timeout_id > 0) {
 			Source.remove (this.sound_was_blocked_timeout_id);
 			this.sound_was_blocked_timeout_id = 0;
@@ -117,30 +129,6 @@ public class IndicatorSound.Service: Object {
 		   continue to export the player by keeping a ref in the timer */
 		if (this.accounts_service != null)
 			this.accounts_service.player = null;
-	}
-
-	public int run () {
-		if (this.loop != null) {
-			warning ("service is already running");
-			return 1;
-		}
-
-		Bus.own_name (BusType.SESSION, "com.canonical.indicator.sound", BusNameOwnerFlags.NONE,
-			this.bus_acquired, null, this.name_lost);
-
-		this.loop = new MainLoop (null, false);
-
-		GLib.Unix.signal_add(GLib.ProcessSignal.TERM, () => {
-			debug("SIGTERM recieved, stopping our mainloop");
-			this.loop.quit();
-			return false;
-		});
-
-		this.loop.run ();
-
-		clear_acts_player();
-
-		return 0;
 	}
 
 	public bool visible { get; set; }
@@ -488,19 +476,23 @@ public class IndicatorSound.Service: Object {
 	DBusConnection? bus = null;
 	uint export_actions = 0;
 
-	void bus_acquired (DBusConnection connection, string name) {
+	void bus_acquired (DBusConnection? connection, string name) {
+		if (connection == null)
+			return;
+
 		bus = connection;
 
 		try {
-			export_actions = connection.export_action_group ("/com/canonical/indicator/sound", this.actions);
+			export_actions = bus.export_action_group ("/com/canonical/indicator/sound", this.actions);
 		} catch (Error e) {
 			critical ("%s", e.message);
 		}
 
-		this.menus.@foreach ( (profile, menu) => menu.export (connection, @"/com/canonical/indicator/sound/$profile"));
+		return;
+		this.menus.@foreach ( (profile, menu) => menu.export (bus, @"/com/canonical/indicator/sound/$profile"));
 	}
 
-	void name_lost (DBusConnection connection, string name) {
+	void name_lost (DBusConnection? connection, string name) {
 		this.loop.quit ();
 	}
 
