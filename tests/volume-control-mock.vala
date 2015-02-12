@@ -20,7 +20,7 @@
 
 public class VolumeControlMock : VolumeControl
 {
-	public string mock_stream { get; set; }
+	public string mock_stream { get; set; default = "multimedia"; }
 	public override string stream { get { return mock_stream; } }
 	public override bool ready { get; set; }
 	public override bool active_mic { get; set; }
