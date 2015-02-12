@@ -25,6 +25,7 @@
 #include <libnotify/notify.h>
 
 #include "notifications-mock.h"
+#include "gtest-gvariant.h"
 
 extern "C" {
 #include "indicator-sound-service.h"
@@ -133,6 +134,10 @@ TEST_F(NotificationsTest, VolumeChanges) {
 	auto notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
 	EXPECT_EQ("indicator-sound", notev[0].app_name);
+	EXPECT_EQ("Volume", notev[0].summary);
+	EXPECT_EQ(0, notev[0].actions.size());
+	EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-private-synchronous"]);
+	EXPECT_GVARIANT_EQ("@i 5000", notev[0].hints["value"]);
 
 	/* Set a different volume */
 	notifications->clearNotifications();
@@ -140,6 +145,7 @@ TEST_F(NotificationsTest, VolumeChanges) {
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
+	EXPECT_GVARIANT_EQ("@i 6000", notev[0].hints["value"]);
 
 	/* Set the same volume */
 	notifications->clearNotifications();
