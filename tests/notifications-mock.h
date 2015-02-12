@@ -148,4 +148,8 @@ class NotificationsMock
 
 			return notifications;
 		}
+
+		bool clearNotifications (void) {
+			return dbus_test_dbus_mock_object_clear_method_calls(mock, baseobj, nullptr);
+		}
 };

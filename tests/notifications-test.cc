@@ -126,14 +126,25 @@ TEST_F(NotificationsTest, VolumeChanges) {
 	auto volumeControl = std::shared_ptr<VolumeControl>(VOLUME_CONTROL(volume_control_mock_new()), [](VolumeControl * control){g_clear_object(&control);});
 	auto soundService = std::shared_ptr<IndicatorSoundService>(indicator_sound_service_new(playerList.get(), volumeControl.get(), nullptr), [](IndicatorSoundService * service){g_clear_object(&service);});
 
-	loop(50);
-
+	/* Set a volume */
+	notifications->clearNotifications();
 	volume_control_set_volume(volumeControl.get(), 50.0);
-	
 	loop(50);
-
 	auto notev = notifications->getNotifications();
-
 	ASSERT_EQ(1, notev.size());
 	EXPECT_EQ("indicator-sound", notev[0].app_name);
+
+	/* Set a different volume */
+	notifications->clearNotifications();
+	volume_control_set_volume(volumeControl.get(), 60.0);
+	loop(50);
+	notev = notifications->getNotifications();
+	ASSERT_EQ(1, notev.size());
+
+	/* Set the same volume */
+	notifications->clearNotifications();
+	volume_control_set_volume(volumeControl.get(), 60.0);
+	loop(50);
+	notev = notifications->getNotifications();
+	ASSERT_EQ(0, notev.size());
 }
