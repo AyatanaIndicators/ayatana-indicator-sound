@@ -84,8 +84,9 @@ public class SoundMenu: Object
 	uint export_id = 0;
 
 	public void export (DBusConnection connection, string object_path) {
+		bus = connection;
 		try {
-			export_id = connection.export_menu_model (object_path, this.root);
+			export_id = bus.export_menu_model (object_path, this.root);
 		} catch (Error e) {
 			critical ("%s", e.message);
 		}
