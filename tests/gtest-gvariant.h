@@ -75,7 +75,7 @@ testing::AssertionResult expectVariantEqual (const gchar * expectStr, const gcha
 
 testing::AssertionResult expectVariantEqual (const gchar * expectStr, const gchar * haveStr, const char * expect, std::shared_ptr<GVariant> have)
 {
-	auto expectv = std::shared_ptr<GVariant>([expect]() {
+	auto expectv = std::shared_ptr<GVariant>([expect] {
 			auto variant = g_variant_parse(nullptr, expect, nullptr, nullptr, nullptr);
 			if (variant != nullptr)
 				g_variant_ref_sink(variant);
