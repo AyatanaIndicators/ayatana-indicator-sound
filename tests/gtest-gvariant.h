@@ -89,6 +89,21 @@ testing::AssertionResult expectVariantEqual (const gchar * expectStr, const gcha
 	return expectVariantEqual(expectStr, haveStr, expectv, have);
 }
 
+testing::AssertionResult expectVariantEqual (const gchar * expectStr, const gchar * haveStr, const char * expect, GVariant * have)
+{
+	auto havep = std::shared_ptr<GVariant>([have] {
+			if (have != nullptr)
+				g_variant_ref_sink(have);
+			return have;
+		}(),
+		[](GVariant * variant) {
+			if (variant != nullptr)
+				g_variant_unref(variant);
+		});
+
+	return expectVariantEqual(expectStr, haveStr, expect, havep);
+}
+
 }; // ns GTestGVariant 
 
 #define EXPECT_GVARIANT_EQ(expect, have) \
