@@ -154,7 +154,7 @@ TEST_F(NotificationsTest, VolumeChanges) {
 
 	/* Set a volume */
 	notifications->clearNotifications();
-	volume_control_set_volume(volumeControl.get(), 50.0);
+	volume_control_set_volume(volumeControl.get(), 0.50);
 	loop(50);
 	auto notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
@@ -162,26 +162,26 @@ TEST_F(NotificationsTest, VolumeChanges) {
 	EXPECT_EQ("Volume", notev[0].summary);
 	EXPECT_EQ(0, notev[0].actions.size());
 	EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-private-synchronous"]);
-	EXPECT_GVARIANT_EQ("@i 5000", notev[0].hints["value"]);
+	EXPECT_GVARIANT_EQ("@i 50", notev[0].hints["value"]);
 
 	/* Set a different volume */
 	notifications->clearNotifications();
-	volume_control_set_volume(volumeControl.get(), 60.0);
+	volume_control_set_volume(volumeControl.get(), 0.60);
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
-	EXPECT_GVARIANT_EQ("@i 6000", notev[0].hints["value"]);
+	EXPECT_GVARIANT_EQ("@i 60", notev[0].hints["value"]);
 
 	/* Set the same volume */
 	notifications->clearNotifications();
-	volume_control_set_volume(volumeControl.get(), 60.0);
+	volume_control_set_volume(volumeControl.get(), 0.60);
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(0, notev.size());
 
 	/* Change just a little */
 	notifications->clearNotifications();
-	volume_control_set_volume(volumeControl.get(), 60.001);
+	volume_control_set_volume(volumeControl.get(), 0.60001);
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(0, notev.size());
@@ -193,7 +193,7 @@ TEST_F(NotificationsTest, StreamChanges) {
 
 	/* Set a volume */
 	notifications->clearNotifications();
-	volume_control_set_volume(volumeControl.get(), 50.0);
+	volume_control_set_volume(volumeControl.get(), 0.5);
 	loop(50);
 	auto notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
@@ -201,7 +201,7 @@ TEST_F(NotificationsTest, StreamChanges) {
 	/* Change Streams, no volume change */
 	notifications->clearNotifications();
 	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "alarm");
-	volume_control_set_volume(volumeControl.get(), 50.0);
+	volume_control_set_volume(volumeControl.get(), 0.5);
 	loop(50);
 	notev = notifications->getNotifications();
 	EXPECT_EQ(0, notev.size());
@@ -209,7 +209,7 @@ TEST_F(NotificationsTest, StreamChanges) {
 	/* Change Streams, volume change */
 	notifications->clearNotifications();
 	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "alert");
-	volume_control_set_volume(volumeControl.get(), 60.0);
+	volume_control_set_volume(volumeControl.get(), 0.60);
 	loop(50);
 	notev = notifications->getNotifications();
 	EXPECT_EQ(0, notev.size());
@@ -217,10 +217,44 @@ TEST_F(NotificationsTest, StreamChanges) {
 	/* Change Streams, no volume change, volume up */
 	notifications->clearNotifications();
 	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "multimedia");
-	volume_control_set_volume(volumeControl.get(), 60.0);
+	volume_control_set_volume(volumeControl.get(), 0.60);
 	loop(50);
-	volume_control_set_volume(volumeControl.get(), 65.0);
+	volume_control_set_volume(volumeControl.get(), 0.65);
 	notev = notifications->getNotifications();
 	EXPECT_EQ(1, notev.size());
-	EXPECT_GVARIANT_EQ("@i 6500", notev[0].hints["value"]);
+	EXPECT_GVARIANT_EQ("@i 65", notev[0].hints["value"]);
+}
+
+TEST_F(NotificationsTest, IconTesting) {
+	auto volumeControl = volumeControlMock();
+	auto soundService = standardService(volumeControl, playerListMock());
+
+	/* Set an initial volume */
+	notifications->clearNotifications();
+	volume_control_set_volume(volumeControl.get(), 0.5);
+	loop(50);
+	auto notev = notifications->getNotifications();
+	ASSERT_EQ(1, notev.size());
+
+	/* Generate a set of notifications */
+	notifications->clearNotifications();
+	for (float i = 0.0; i < 1.01; i += 0.1) {
+		volume_control_set_volume(volumeControl.get(), i);
+	}
+
+	loop(50);
+	notev = notifications->getNotifications();
+	ASSERT_EQ(11, notev.size());
+
+	EXPECT_EQ("audio-volume-muted",  notev[0].app_icon);
+	EXPECT_EQ("audio-volume-low",    notev[1].app_icon);
+	EXPECT_EQ("audio-volume-low",    notev[2].app_icon);
+	EXPECT_EQ("audio-volume-medium", notev[3].app_icon);
+	EXPECT_EQ("audio-volume-medium", notev[4].app_icon);
+	EXPECT_EQ("audio-volume-medium", notev[5].app_icon);
+	EXPECT_EQ("audio-volume-medium", notev[6].app_icon);
+	EXPECT_EQ("audio-volume-high",   notev[7].app_icon);
+	EXPECT_EQ("audio-volume-high",   notev[8].app_icon);
+	EXPECT_EQ("audio-volume-high",   notev[9].app_icon);
+	EXPECT_EQ("audio-volume-high",   notev[10].app_icon);
 }
