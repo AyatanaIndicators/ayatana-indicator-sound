@@ -153,4 +153,11 @@ TEST_F(NotificationsTest, VolumeChanges) {
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(0, notev.size());
+
+	/* Change just a little */
+	notifications->clearNotifications();
+	volume_control_set_volume(volumeControl.get(), 60.001);
+	loop(50);
+	notev = notifications->getNotifications();
+	ASSERT_EQ(0, notev.size());
 }
