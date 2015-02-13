@@ -306,3 +306,47 @@ TEST_F(NotificationsTest, ServerRestart) {
 	ASSERT_EQ(1, notev.size());
 }
 
+TEST_F(NotificationsTest, HighVolume) {
+	auto volumeControl = volumeControlMock();
+	auto soundService = standardService(volumeControl, playerListMock());
+
+	/* Set a volume */
+	notifications->clearNotifications();
+	volume_control_set_volume(volumeControl.get(), 0.50);
+	loop(50);
+	auto notev = notifications->getNotifications();
+	ASSERT_EQ(1, notev.size());
+	EXPECT_EQ("Volume", notev[0].summary);
+	EXPECT_EQ("", notev[0].body);
+	EXPECT_GVARIANT_EQ("@s 'false'", notev[0].hints["x-canonical-value-bar-tint"]);
+	EXPECT_GVARIANT_EQ("@i 50", notev[0].hints["value"]);
+
+	/* Set high volume with volume change */
+	notifications->clearNotifications();
+	volume_control_mock_set_mock_high_volume(VOLUME_CONTROL_MOCK(volumeControl.get()), TRUE);
+	volume_control_set_volume(volumeControl.get(), 0.90);
+	loop(50);
+	notev = notifications->getNotifications();
+	ASSERT_EQ(1, notev.size());
+	EXPECT_EQ("Volume", notev[0].summary);
+	EXPECT_EQ("High volume", notev[0].body);
+	EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-value-bar-tint"]);
+	EXPECT_GVARIANT_EQ("@i 90", notev[0].hints["value"]);
+
+	/* Move it back */
+	volume_control_mock_set_mock_high_volume(VOLUME_CONTROL_MOCK(volumeControl.get()), FALSE);
+	volume_control_set_volume(volumeControl.get(), 0.50);
+	loop(50);
+
+	/* Set high volume without level change */
+	/* NOTE: This can happen if headphones are plugged in */
+	notifications->clearNotifications();
+	volume_control_mock_set_mock_high_volume(VOLUME_CONTROL_MOCK(volumeControl.get()), TRUE);
+	loop(50);
+	notev = notifications->getNotifications();
+	ASSERT_EQ(1, notev.size());
+	EXPECT_EQ("Volume", notev[0].summary);
+	EXPECT_EQ("High volume", notev[0].body);
+	EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-value-bar-tint"]);
+	EXPECT_GVARIANT_EQ("@i 90", notev[0].hints["value"]);
+}
