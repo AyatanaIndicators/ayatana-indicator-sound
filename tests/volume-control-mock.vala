@@ -39,5 +39,9 @@ public class VolumeControlMock : VolumeControl
 
 	public VolumeControlMock() { 
 		ready = true;
+		this.notify["mock-stream"].connect(() => this.notify_property("stream"));
+		this.notify["mock-high-volume"].connect(() => this.notify_property("high-volume"));
+		this.notify["mock-mute"].connect(() => this.notify_property("mute"));
+		this.notify["mock-is-playing"].connect(() => this.notify_property("is-playing"));
 	}
 }

@@ -186,3 +186,31 @@ TEST_F(NotificationsTest, VolumeChanges) {
 	notev = notifications->getNotifications();
 	ASSERT_EQ(0, notev.size());
 }
+
+TEST_F(NotificationsTest, StreamChanges) {
+	auto volumeControl = volumeControlMock();
+	auto soundService = standardService(volumeControl, playerListMock());
+
+	/* Set a volume */
+	notifications->clearNotifications();
+	volume_control_set_volume(volumeControl.get(), 50.0);
+	loop(50);
+	auto notev = notifications->getNotifications();
+	ASSERT_EQ(1, notev.size());
+
+	/* Change Streams, no volume change */
+	notifications->clearNotifications();
+	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "alarm");
+	volume_control_set_volume(volumeControl.get(), 50.0);
+	loop(50);
+	notev = notifications->getNotifications();
+	EXPECT_EQ(0, notev.size());
+
+	/* Change Streams, volume change */
+	notifications->clearNotifications();
+	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "alert");
+	volume_control_set_volume(volumeControl.get(), 60.0);
+	loop(50);
+	notev = notifications->getNotifications();
+	EXPECT_EQ(0, notev.size());
+}
