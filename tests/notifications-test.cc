@@ -213,4 +213,14 @@ TEST_F(NotificationsTest, StreamChanges) {
 	loop(50);
 	notev = notifications->getNotifications();
 	EXPECT_EQ(0, notev.size());
+
+	/* Change Streams, no volume change, volume up */
+	notifications->clearNotifications();
+	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "multimedia");
+	volume_control_set_volume(volumeControl.get(), 60.0);
+	loop(50);
+	volume_control_set_volume(volumeControl.get(), 65.0);
+	notev = notifications->getNotifications();
+	EXPECT_EQ(1, notev.size());
+	EXPECT_GVARIANT_EQ("@i 6500", notev[0].hints["value"]);
 }
