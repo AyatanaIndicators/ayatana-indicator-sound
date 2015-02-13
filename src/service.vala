@@ -33,11 +33,11 @@ public class IndicatorSound.Service: Object {
 			this.notification_proxy = new DBusProxy.for_bus_sync(GLib.BusType.SESSION,
 				DBusProxyFlags.DO_NOT_LOAD_PROPERTIES | DBusProxyFlags.DO_NOT_CONNECT_SIGNALS | DBusProxyFlags.DO_NOT_AUTO_START,
 				null, /* interface info */
-				"org.freedesktop.DBus",
-				"/org/freedesktop/DBus",
-				"org.freedesktop.DBus",
+				"org.freedesktop.Notifications",
+				"/org/freedesktop/Notifications",
+				"org.freedesktop.Notifications",
 				null);
-			this.notification_proxy.notify["g-name-owner"].connect ( () => { check_sync_notification = false; } );
+			this.notification_proxy.notify["g-name-owner"].connect ( () => { debug("Notifications name owner changed"); check_sync_notification = false; } );
 		} catch (GLib.Error e) {
 			error("Unable to build notification proxy: %s", e.message);
 		}
@@ -288,6 +288,7 @@ public class IndicatorSound.Service: Object {
 
 	void update_sync_notification () {
 		if (!check_sync_notification) {
+			support_sync_notification = false;
 			List<string> caps = Notify.get_server_caps ();
 			if (caps.find_custom ("x-canonical-private-synchronous", strcmp) != null) {
 				support_sync_notification = true;

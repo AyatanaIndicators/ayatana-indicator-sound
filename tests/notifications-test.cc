@@ -258,3 +258,51 @@ TEST_F(NotificationsTest, IconTesting) {
 	EXPECT_EQ("audio-volume-high",   notev[9].app_icon);
 	EXPECT_EQ("audio-volume-high",   notev[10].app_icon);
 }
+
+TEST_F(NotificationsTest, ServerRestart) {
+	auto volumeControl = volumeControlMock();
+	auto soundService = standardService(volumeControl, playerListMock());
+
+	/* Set a volume */
+	notifications->clearNotifications();
+	volume_control_set_volume(volumeControl.get(), 0.50);
+	loop(50);
+	auto notev = notifications->getNotifications();
+	ASSERT_EQ(1, notev.size());
+
+	/* Restart server without sync notifications */
+	notifications->clearNotifications();
+	dbus_test_service_remove_task(service, (DbusTestTask*)*notifications);
+	notifications.reset();
+
+	loop(50);
+
+	notifications = std::make_shared<NotificationsMock>(std::vector<std::string>({"body", "body-markup", "icon-static"}));
+	dbus_test_service_add_task(service, (DbusTestTask*)*notifications);
+	dbus_test_task_run((DbusTestTask*)*notifications);
+
+	/* Change the volume */
+	notifications->clearNotifications();
+	volume_control_set_volume(volumeControl.get(), 0.60);
+	loop(50);
+	notev = notifications->getNotifications();
+	ASSERT_EQ(0, notev.size());
+
+	/* Put a good server back */
+	dbus_test_service_remove_task(service, (DbusTestTask*)*notifications);
+	notifications.reset();
+
+	loop(50);
+
+	notifications = std::make_shared<NotificationsMock>();
+	dbus_test_service_add_task(service, (DbusTestTask*)*notifications);
+	dbus_test_task_run((DbusTestTask*)*notifications);
+
+	/* Change the volume again */
+	notifications->clearNotifications();
+	volume_control_set_volume(volumeControl.get(), 0.70);
+	loop(50);
+	notev = notifications->getNotifications();
+	ASSERT_EQ(1, notev.size());
+}
+
