@@ -299,21 +299,6 @@ public class IndicatorSound.Service: Object {
 		if (!support_sync_notification)
 			return;
 
-		/* Update our volume and output */
-		var oldoutput = this.last_output_notification;
-		this.last_output_notification = this.volume_control.stream;
-
-		var oldvolume = this.last_volume_notification;
-		this.last_volume_notification = volume_control.volume;
-
-		/* Suppress notifications of volume changes if it is because the 
-		   output stream changed. */
-		if (oldoutput != this.last_output_notification)
-			return;
-		/* Supress updates that don't change the value */
-		if (GLib.Math.fabs(oldvolume - this.last_volume_notification) < 0.01)
-			return;
-
 		var shown_action = actions.lookup_action ("indicator-shown") as SimpleAction;
 		if (shown_action != null && shown_action.get_state().get_boolean())
 			return;
@@ -461,6 +446,22 @@ public class IndicatorSound.Service: Object {
 			volume_action.set_state (new Variant.double (this.volume_control.volume / this.max_volume));
 
 			this.update_root_icon ();
+
+			/* Update our volume and output */
+			var oldoutput = this.last_output_notification;
+			this.last_output_notification = this.volume_control.stream;
+
+			var oldvolume = this.last_volume_notification;
+			this.last_volume_notification = volume_control.volume;
+
+			/* Suppress notifications of volume changes if it is because the 
+			   output stream changed. */
+			if (oldoutput != this.last_output_notification)
+				return;
+			/* Supress updates that don't change the value */
+			if (GLib.Math.fabs(oldvolume - this.last_volume_notification) < 0.01)
+				return;
+
 			this.update_sync_notification ();
 		});
 
