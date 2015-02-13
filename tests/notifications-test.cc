@@ -326,7 +326,7 @@ TEST_F(NotificationsTest, HighVolume) {
 	volume_control_set_volume(volumeControl.get(), 0.90);
 	loop(50);
 	notev = notifications->getNotifications();
-	ASSERT_LT(0, notev.size());
+	ASSERT_LT(0, notev.size()); /* This passes with one or two since it would just be an update to the first if a second was sent */
 	EXPECT_EQ("Volume", notev[0].summary);
 	EXPECT_EQ("High volume", notev[0].body);
 	EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-value-bar-tint"]);
