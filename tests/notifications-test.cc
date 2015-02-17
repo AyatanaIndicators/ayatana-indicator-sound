@@ -137,6 +137,15 @@ class NotificationsTest : public ::testing::Test
 
 			return soundService;
 		}
+
+		void setMockVolume (std::shared_ptr<VolumeControl> volumeControl, double volume, VolumeControlVolumeReasons reason = VOLUME_CONTROL_VOLUME_REASONS_USER_KEYPRESS) {
+			VolumeControlVolume * vol = volume_control_volume_new();
+			vol->volume = volume;
+			vol->reason = reason;
+
+			volume_control_set_volume(volumeControl.get(), vol);
+			g_object_unref(vol);
+		}
 };
 
 TEST_F(NotificationsTest, BasicObject) {
@@ -154,7 +163,7 @@ TEST_F(NotificationsTest, VolumeChanges) {
 
 	/* Set a volume */
 	notifications->clearNotifications();
-	volume_control_set_volume(volumeControl.get(), 0.50);
+	setMockVolume(volumeControl, 0.50);
 	loop(50);
 	auto notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
@@ -166,7 +175,7 @@ TEST_F(NotificationsTest, VolumeChanges) {
 
 	/* Set a different volume */
 	notifications->clearNotifications();
-	volume_control_set_volume(volumeControl.get(), 0.60);
+	setMockVolume(volumeControl, 0.60);
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
@@ -174,14 +183,14 @@ TEST_F(NotificationsTest, VolumeChanges) {
 
 	/* Set the same volume */
 	notifications->clearNotifications();
-	volume_control_set_volume(volumeControl.get(), 0.60);
+	setMockVolume(volumeControl, 0.60);
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(0, notev.size());
 
 	/* Change just a little */
 	notifications->clearNotifications();
-	volume_control_set_volume(volumeControl.get(), 0.60001);
+	setMockVolume(volumeControl, 0.60001);
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(0, notev.size());
@@ -193,7 +202,7 @@ TEST_F(NotificationsTest, StreamChanges) {
 
 	/* Set a volume */
 	notifications->clearNotifications();
-	volume_control_set_volume(volumeControl.get(), 0.5);
+	setMockVolume(volumeControl, 0.5);
 	loop(50);
 	auto notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
@@ -201,7 +210,7 @@ TEST_F(NotificationsTest, StreamChanges) {
 	/* Change Streams, no volume change */
 	notifications->clearNotifications();
 	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "alarm");
-	volume_control_set_volume(volumeControl.get(), 0.5);
+	setMockVolume(volumeControl, 0.5);
 	loop(50);
 	notev = notifications->getNotifications();
 	EXPECT_EQ(0, notev.size());
@@ -209,7 +218,7 @@ TEST_F(NotificationsTest, StreamChanges) {
 	/* Change Streams, volume change */
 	notifications->clearNotifications();
 	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "alert");
-	volume_control_set_volume(volumeControl.get(), 0.60);
+	setMockVolume(volumeControl, 0.60);
 	loop(50);
 	notev = notifications->getNotifications();
 	EXPECT_EQ(0, notev.size());
@@ -217,9 +226,9 @@ TEST_F(NotificationsTest, StreamChanges) {
 	/* Change Streams, no volume change, volume up */
 	notifications->clearNotifications();
 	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "multimedia");
-	volume_control_set_volume(volumeControl.get(), 0.60);
+	setMockVolume(volumeControl, 0.60);
 	loop(50);
-	volume_control_set_volume(volumeControl.get(), 0.65);
+	setMockVolume(volumeControl, 0.65);
 	notev = notifications->getNotifications();
 	EXPECT_EQ(1, notev.size());
 	EXPECT_GVARIANT_EQ("@i 65", notev[0].hints["value"]);
@@ -231,7 +240,7 @@ TEST_F(NotificationsTest, IconTesting) {
 
 	/* Set an initial volume */
 	notifications->clearNotifications();
-	volume_control_set_volume(volumeControl.get(), 0.5);
+	setMockVolume(volumeControl, 0.5);
 	loop(50);
 	auto notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
@@ -239,7 +248,7 @@ TEST_F(NotificationsTest, IconTesting) {
 	/* Generate a set of notifications */
 	notifications->clearNotifications();
 	for (float i = 0.0; i < 1.01; i += 0.1) {
-		volume_control_set_volume(volumeControl.get(), i);
+		setMockVolume(volumeControl, i);
 	}
 
 	loop(50);
@@ -265,7 +274,7 @@ TEST_F(NotificationsTest, ServerRestart) {
 
 	/* Set a volume */
 	notifications->clearNotifications();
-	volume_control_set_volume(volumeControl.get(), 0.50);
+	setMockVolume(volumeControl, 0.50);
 	loop(50);
 	auto notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
@@ -283,7 +292,7 @@ TEST_F(NotificationsTest, ServerRestart) {
 
 	/* Change the volume */
 	notifications->clearNotifications();
-	volume_control_set_volume(volumeControl.get(), 0.60);
+	setMockVolume(volumeControl, 0.60);
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(0, notev.size());
@@ -300,7 +309,7 @@ TEST_F(NotificationsTest, ServerRestart) {
 
 	/* Change the volume again */
 	notifications->clearNotifications();
-	volume_control_set_volume(volumeControl.get(), 0.70);
+	setMockVolume(volumeControl, 0.70);
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
@@ -312,7 +321,7 @@ TEST_F(NotificationsTest, HighVolume) {
 
 	/* Set a volume */
 	notifications->clearNotifications();
-	volume_control_set_volume(volumeControl.get(), 0.50);
+	setMockVolume(volumeControl, 0.50);
 	loop(50);
 	auto notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
@@ -323,7 +332,7 @@ TEST_F(NotificationsTest, HighVolume) {
 	/* Set high volume with volume change */
 	notifications->clearNotifications();
 	volume_control_mock_set_mock_high_volume(VOLUME_CONTROL_MOCK(volumeControl.get()), TRUE);
-	volume_control_set_volume(volumeControl.get(), 0.90);
+	setMockVolume(volumeControl, 0.90);
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_LT(0, notev.size()); /* This passes with one or two since it would just be an update to the first if a second was sent */
@@ -333,7 +342,7 @@ TEST_F(NotificationsTest, HighVolume) {
 
 	/* Move it back */
 	volume_control_mock_set_mock_high_volume(VOLUME_CONTROL_MOCK(volumeControl.get()), FALSE);
-	volume_control_set_volume(volumeControl.get(), 0.50);
+	setMockVolume(volumeControl, 0.50);
 	loop(50);
 
 	/* Set high volume without level change */

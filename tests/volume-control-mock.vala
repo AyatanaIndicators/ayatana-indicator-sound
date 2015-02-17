@@ -30,7 +30,8 @@ public class VolumeControlMock : VolumeControl
 	public override bool mute { get { return mock_mute; } }
 	public bool mock_is_playing { get; set; }
 	public override bool is_playing { get { return mock_is_playing; } }
-	public override double volume { get; set; }
+	private VolumeControl.Volume _vol = new VolumeControl.Volume();
+	public override VolumeControl.Volume volume { get { return _vol; } set { _vol = value; }}
 	public override double mic_volume { get; set; }
 
 	public override void set_mute (bool mute) {
