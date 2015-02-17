@@ -17,17 +17,9 @@
  *      Ted Gould <ted@canonical.com>
  */
 
-public abstract class MediaPlayerList : Object {
-	public class Iterator {
-		public virtual MediaPlayer? next_value() {
-			return null;
-		}
-	}
-	public virtual Iterator iterator () { return new Iterator(); }
+public class MediaPlayerListMock : MediaPlayerList {
+	public override MediaPlayerList.Iterator iterator () { return new MediaPlayerList.Iterator(); }
 
-	public virtual void sync (string[] ids) { return; }
-
-	public signal void player_added (MediaPlayer player);
-	public signal void player_removed (MediaPlayer player);
+	public override void sync (string[] ids) { return; }
 }
 

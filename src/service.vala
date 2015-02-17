@@ -18,13 +18,29 @@
  */
 
 public class IndicatorSound.Service: Object {
-	public Service (MediaPlayerList playerlist) {
+	DBusConnection bus;
+	DBusProxy notification_proxy;
+
+	public Service (MediaPlayerList playerlist, VolumeControl volume, AccountsServiceUser? accounts) {
+		try {
+			bus = Bus.get_sync(GLib.BusType.SESSION);
+		} catch (GLib.Error e) {
+			error("Unable to get DBus session bus: %s", e.message);
+		}
+
 		sync_notification = new Notify.Notification(_("Volume"), "", "audio-volume-muted");
-		this.notification_server_watch = GLib.Bus.watch_name(GLib.BusType.SESSION,
-			"org.freedesktop.Notifications",
-			GLib.BusNameWatcherFlags.NONE,
-			() => { check_sync_notification = false; },
-			() => { check_sync_notification = false; });
+		try {
+			this.notification_proxy = new DBusProxy.for_bus_sync(GLib.BusType.SESSION,
+				DBusProxyFlags.DO_NOT_LOAD_PROPERTIES | DBusProxyFlags.DO_NOT_CONNECT_SIGNALS | DBusProxyFlags.DO_NOT_AUTO_START,
+				null, /* interface info */
+				"org.freedesktop.Notifications",
+				"/org/freedesktop/Notifications",
+				"org.freedesktop.Notifications",
+				null);
+			this.notification_proxy.notify["g-name-owner"].connect ( () => { debug("Notifications name owner changed"); check_sync_notification = false; } );
+		} catch (GLib.Error e) {
+			error("Unable to build notification proxy: %s", e.message);
+		}
 
 		this.settings = new Settings ("com.canonical.indicator.sound");
 		this.sharedsettings = new Settings ("com.ubuntu.sound");
@@ -32,12 +48,11 @@ public class IndicatorSound.Service: Object {
 		this.settings.bind ("visible", this, "visible", SettingsBindFlags.GET);
 		this.notify["visible"].connect ( () => this.update_root_icon () );
 
-		this.volume_control = new VolumeControl ();
+		this.volume_control = volume;
 
+		this.accounts_service = accounts;
 		/* If we're on the greeter, don't export */
-		if (GLib.Environment.get_user_name() != "lightdm") {
-			this.accounts_service = new AccountsServiceUser();
-
+		if (this.accounts_service != null) {
 			this.accounts_service.notify["showDataOnGreeter"].connect(() => {
 				this.export_to_accounts_service = this.accounts_service.showDataOnGreeter;
 				eventually_update_player_actions();
@@ -90,9 +105,27 @@ public class IndicatorSound.Service: Object {
 				}
 			}
 		});
+
+		/* Everything is built, let's put it on the bus */
+		try {
+			export_actions = bus.export_action_group ("/com/canonical/indicator/sound", this.actions);
+		} catch (Error e) {
+			critical ("%s", e.message);
+		}
+
+		this.menus.@foreach ( (profile, menu) => menu.export (bus, @"/com/canonical/indicator/sound/$profile"));
 	}
 
 	~Service() {
+		debug("Destroying Service Object");
+
+		clear_acts_player();
+
+		if (this.player_action_update_id > 0) {
+			Source.remove (this.player_action_update_id);
+			this.player_action_update_id = 0;
+		}
+
 		if (this.sound_was_blocked_timeout_id > 0) {
 			Source.remove (this.sound_was_blocked_timeout_id);
 			this.sound_was_blocked_timeout_id = 0;
@@ -101,6 +134,11 @@ public class IndicatorSound.Service: Object {
 		if (this.notification_server_watch != 0) {
 			GLib.Bus.unwatch_name(this.notification_server_watch);
 			this.notification_server_watch = 0;
+		}
+
+		if (this.export_actions != 0) {
+			bus.unexport_action_group(this.export_actions);
+			this.export_actions = 0;
 		}
 	}
 
@@ -113,30 +151,6 @@ public class IndicatorSound.Service: Object {
 		   continue to export the player by keeping a ref in the timer */
 		if (this.accounts_service != null)
 			this.accounts_service.player = null;
-	}
-
-	public int run () {
-		if (this.loop != null) {
-			warning ("service is already running");
-			return 1;
-		}
-
-		Bus.own_name (BusType.SESSION, "com.canonical.indicator.sound", BusNameOwnerFlags.NONE,
-			this.bus_acquired, null, this.name_lost);
-
-		this.loop = new MainLoop (null, false);
-
-		GLib.Unix.signal_add(GLib.ProcessSignal.TERM, () => {
-			debug("SIGTERM recieved, stopping our mainloop");
-			this.loop.quit();
-			return false;
-		});
-
-		this.loop.run ();
-
-		clear_acts_player();
-
-		return 0;
 	}
 
 	public bool visible { get; set; }
@@ -171,7 +185,6 @@ public class IndicatorSound.Service: Object {
 		{ "indicator-shown", null, null, "@b false", null },
 	};
 
-	MainLoop loop;
 	SimpleActionGroup actions;
 	HashTable<string, SoundMenu> menus;
 	Settings settings;
@@ -275,6 +288,7 @@ public class IndicatorSound.Service: Object {
 
 	void update_sync_notification () {
 		if (!check_sync_notification) {
+			support_sync_notification = false;
 			List<string> caps = Notify.get_server_caps ();
 			if (caps.find_custom ("x-canonical-private-synchronous", strcmp) != null) {
 				support_sync_notification = true;
@@ -283,21 +297,6 @@ public class IndicatorSound.Service: Object {
 		}
 
 		if (!support_sync_notification)
-			return;
-
-		/* Update our volume and output */
-		var oldoutput = this.last_output_notification;
-		this.last_output_notification = this.volume_control.stream;
-
-		var oldvolume = this.last_volume_notification;
-		this.last_volume_notification = volume_control.volume;
-
-		/* Suppress notifications of volume changes if it is because the 
-		   output stream changed. */
-		if (oldoutput != this.last_output_notification)
-			return;
-		/* Supress updates that don't change the value */
-		if (GLib.Math.fabs(oldvolume - this.last_volume_notification) < 0.01)
 			return;
 
 		var shown_action = actions.lookup_action ("indicator-shown") as SimpleAction;
@@ -341,13 +340,14 @@ public class IndicatorSound.Service: Object {
 		}
 	}
 
+	SimpleAction silent_action;
 	Action create_silent_mode_action () {
 		bool silentNow = false;
 		if (this.accounts_service != null) {
 			silentNow = this.accounts_service.silentMode;
 		}
 
-		var silent_action = new SimpleAction.stateful ("silent-mode", null, new Variant.boolean (silentNow));
+		silent_action = new SimpleAction.stateful ("silent-mode", null, new Variant.boolean (silentNow));
 
 		/* If we're not dealing with accounts service, we'll just always be out
 		   of silent mode and that's cool. */
@@ -371,8 +371,9 @@ public class IndicatorSound.Service: Object {
 		return silent_action;
 	}
 
+	SimpleAction mute_action;
 	Action create_mute_action () {
-		var mute_action = new SimpleAction.stateful ("mute", null, new Variant.boolean (this.volume_control.mute));
+		mute_action = new SimpleAction.stateful ("mute", null, new Variant.boolean (this.volume_control.mute));
 
 		mute_action.activate.connect ( (action, param) => {
 			action.change_state (new Variant.boolean (!action.get_state ().get_boolean ()));
@@ -415,6 +416,7 @@ public class IndicatorSound.Service: Object {
 		return mute_action;
 	}
 
+	SimpleAction volume_action;
 	Action create_volume_action () {
 		/* The action's state is between be in [0.0, 1.0] instead of [0.0,
 		 * max_volume], so that we don't need to update the slider menu item
@@ -425,7 +427,7 @@ public class IndicatorSound.Service: Object {
 
 		double volume = this.volume_control.volume / this.max_volume;
 
-		var volume_action = new SimpleAction.stateful ("volume", VariantType.INT32, new Variant.double (volume));
+		volume_action = new SimpleAction.stateful ("volume", VariantType.INT32, new Variant.double (volume));
 
 		volume_action.change_state.connect ( (action, val) => {
 			double v = val.get_double () * this.max_volume;
@@ -440,12 +442,26 @@ public class IndicatorSound.Service: Object {
 		});
 
 		this.volume_control.notify["volume"].connect (() => {
-			var vol_action = this.actions.lookup_action ("volume") as SimpleAction;
-
 			/* Normalize volume, because the volume action's state is [0.0, 1.0], see create_volume_action() */
-			vol_action.set_state (new Variant.double (this.volume_control.volume / this.max_volume));
+			volume_action.set_state (new Variant.double (this.volume_control.volume / this.max_volume));
 
 			this.update_root_icon ();
+
+			/* Update our volume and output */
+			var oldoutput = this.last_output_notification;
+			this.last_output_notification = this.volume_control.stream;
+
+			var oldvolume = this.last_volume_notification;
+			this.last_volume_notification = volume_control.volume;
+
+			/* Suppress notifications of volume changes if it is because the 
+			   output stream changed. */
+			if (oldoutput != this.last_output_notification)
+				return;
+			/* Supress updates that don't change the value */
+			if (GLib.Math.fabs(oldvolume - this.last_volume_notification) < 0.01)
+				return;
+
 			this.update_sync_notification ();
 		});
 
@@ -454,24 +470,26 @@ public class IndicatorSound.Service: Object {
 		return volume_action;
 	}
 
+	SimpleAction mic_volume_action;
 	Action create_mic_volume_action () {
-		var volume_action = new SimpleAction.stateful ("mic-volume", null, new Variant.double (this.volume_control.mic_volume));
+		mic_volume_action = new SimpleAction.stateful ("mic-volume", null, new Variant.double (this.volume_control.mic_volume));
 
-		volume_action.change_state.connect ( (action, val) => {
+		mic_volume_action.change_state.connect ( (action, val) => {
 			volume_control.mic_volume = val.get_double ();
 		});
 
 		this.volume_control.notify["mic-volume"].connect ( () => {
-			volume_action.set_state (new Variant.double (this.volume_control.mic_volume));
+			mic_volume_action.set_state (new Variant.double (this.volume_control.mic_volume));
 		});
 
-		this.volume_control.bind_property ("ready", volume_action, "enabled", BindingFlags.SYNC_CREATE);
+		this.volume_control.bind_property ("ready", mic_volume_action, "enabled", BindingFlags.SYNC_CREATE);
 
-		return volume_action;
+		return mic_volume_action;
 	}
 
+	SimpleAction high_volume_action;
 	Action create_high_volume_action () {
-		var high_volume_action = new SimpleAction.stateful("high-volume", null, new Variant.boolean (this.volume_control.high_volume));
+		high_volume_action = new SimpleAction.stateful("high-volume", null, new Variant.boolean (this.volume_control.high_volume));
 
 		this.volume_control.notify["high-volume"].connect( () => {
 			high_volume_action.set_state(new Variant.boolean (this.volume_control.high_volume));
@@ -481,19 +499,7 @@ public class IndicatorSound.Service: Object {
 		return high_volume_action;
 	}
 
-	void bus_acquired (DBusConnection connection, string name) {
-		try {
-			connection.export_action_group ("/com/canonical/indicator/sound", this.actions);
-		} catch (Error e) {
-			critical ("%s", e.message);
-		}
-
-		this.menus.@foreach ( (profile, menu) => menu.export (connection, @"/com/canonical/indicator/sound/$profile"));
-	}
-
-	void name_lost (DBusConnection connection, string name) {
-		this.loop.quit ();
-	}
+	uint export_actions = 0;
 
 	Variant action_state_for_player (MediaPlayer player, bool show_track = true) {
 		var builder = new VariantBuilder (new VariantType ("a{sv}"));
