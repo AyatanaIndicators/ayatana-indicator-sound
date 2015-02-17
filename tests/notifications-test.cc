@@ -181,16 +181,16 @@ TEST_F(NotificationsTest, VolumeChanges) {
 	ASSERT_EQ(1, notev.size());
 	EXPECT_GVARIANT_EQ("@i 60", notev[0].hints["value"]);
 
-	/* Set the same volume */
+	/* Have pulse set a volume */
 	notifications->clearNotifications();
-	setMockVolume(volumeControl, 0.60);
+	setMockVolume(volumeControl, 0.70, VOLUME_CONTROL_VOLUME_REASONS_PULSE_CHANGE);
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(0, notev.size());
 
-	/* Change just a little */
+	/* Have AS set the volume */
 	notifications->clearNotifications();
-	setMockVolume(volumeControl, 0.60001);
+	setMockVolume(volumeControl, 0.80, VOLUME_CONTROL_VOLUME_REASONS_ACCOUNTS_SERVICE_SET);
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(0, notev.size());
@@ -210,7 +210,7 @@ TEST_F(NotificationsTest, StreamChanges) {
 	/* Change Streams, no volume change */
 	notifications->clearNotifications();
 	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "alarm");
-	setMockVolume(volumeControl, 0.5);
+	setMockVolume(volumeControl, 0.5, VOLUME_CONTROL_VOLUME_REASONS_VOLUME_STREAM_CHANGE);
 	loop(50);
 	notev = notifications->getNotifications();
 	EXPECT_EQ(0, notev.size());
@@ -218,7 +218,7 @@ TEST_F(NotificationsTest, StreamChanges) {
 	/* Change Streams, volume change */
 	notifications->clearNotifications();
 	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "alert");
-	setMockVolume(volumeControl, 0.60);
+	setMockVolume(volumeControl, 0.6, VOLUME_CONTROL_VOLUME_REASONS_VOLUME_STREAM_CHANGE);
 	loop(50);
 	notev = notifications->getNotifications();
 	EXPECT_EQ(0, notev.size());
@@ -226,7 +226,7 @@ TEST_F(NotificationsTest, StreamChanges) {
 	/* Change Streams, no volume change, volume up */
 	notifications->clearNotifications();
 	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "multimedia");
-	setMockVolume(volumeControl, 0.60);
+	setMockVolume(volumeControl, 0.6, VOLUME_CONTROL_VOLUME_REASONS_VOLUME_STREAM_CHANGE);
 	loop(50);
 	setMockVolume(volumeControl, 0.65);
 	notev = notifications->getNotifications();
