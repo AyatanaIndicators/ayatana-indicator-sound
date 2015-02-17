@@ -131,11 +131,6 @@ public class IndicatorSound.Service: Object {
 			this.sound_was_blocked_timeout_id = 0;
 		}
 
-		if (this.notification_server_watch != 0) {
-			GLib.Bus.unwatch_name(this.notification_server_watch);
-			this.notification_server_watch = 0;
-		}
-
 		if (this.export_actions != 0) {
 			bus.unexport_action_group(this.export_actions);
 			this.export_actions = 0;
@@ -198,7 +193,6 @@ public class IndicatorSound.Service: Object {
 	AccountsServiceUser? accounts_service = null;
 	bool export_to_accounts_service = false;
 	private Notify.Notification sync_notification;
-	private uint notification_server_watch;
 
 	/* Maximum volume as a scaling factor between the volume action's state and the value in
 	 * this.volume_control. See create_volume_action().
