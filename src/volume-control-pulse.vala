@@ -607,6 +607,8 @@ public class VolumeControlPulse : VolumeControl
 			return _volume;
 		}
 		set {
+			debug("Setting volume to %f for profile %ud because %d", value.volume, _active_sink_input, value.reason);
+
 			var old_high_volume = this.high_volume;
 			_volume = value;
 
