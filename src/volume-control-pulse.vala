@@ -565,8 +565,9 @@ public class VolumeControlPulse : VolumeControl
 			active_role_objp = _sink_input_hash.get (_active_sink_input);
 
 		try {
+			double vol = _volume.volume;
 			var builder = new VariantBuilder (new VariantType ("a(uu)"));
-			builder.add ("(uu)", 0, double_to_volume (_volume.volume));
+			builder.add ("(uu)", 0, double_to_volume (vol));
 			Variant volume = builder.end ();
 
 			/* Increase the signal counter so we can handle the callback */
@@ -579,7 +580,7 @@ public class VolumeControlPulse : VolumeControl
 					new Variant ("(ssv)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume", volume),
 					null, DBusCallFlags.NONE, -1);
 
-			this.notify_property("volume");
+			debug ("Set volume to %f on path %s", vol, active_role_objp);
 		} catch (GLib.Error e) {
 			lock (_pa_volume_sig_count) {
 				_pa_volume_sig_count--;
@@ -676,7 +677,7 @@ public class VolumeControlPulse : VolumeControl
 			}
 		}
 
-		stdout.printf ("PulseAudio dbus unix socket: %s\n", address);
+		debug ("PulseAudio dbus unix socket: %s", address);
 		try {
 			_pconn = new DBusConnection.for_address_sync (address, DBusConnectionFlags.AUTHENTICATION_CLIENT);
 		} catch (GLib.Error e) {
@@ -696,7 +697,7 @@ public class VolumeControlPulse : VolumeControl
 
 		/* Only use stream restore if every used role is available */
 		if (_objp_role_multimedia != null && _objp_role_alert != null && _objp_role_alarm != null && _objp_role_phone != null) {
-			stdout.printf ("Using PulseAudio DBUS Stream Restore module\n");
+			debug ("Using PulseAudio DBUS Stream Restore module");
 			/* Restore volume and update default entry */
 			update_active_sink_input.begin (-1);
 			_pulse_use_stream_restore = true;
@@ -712,7 +713,7 @@ public class VolumeControlPulse : VolumeControl
 			/* Workaround for older versions of vala that don't provide get_objv */
 			VariantIter iter = props_variant.iterator ();
 			iter.next ("o", &objp);
-			stdout.printf ("Found obj path %s for restore data named %s\n", objp, name);
+			debug ("Found obj path %s for restore data named %s\n", objp, name);
 		} catch (GLib.Error e) {
 			warning ("unable to find stream restore data for: %s", name);
 		}
