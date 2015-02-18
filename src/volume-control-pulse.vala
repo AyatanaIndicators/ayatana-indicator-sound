@@ -614,7 +614,7 @@ public class VolumeControlPulse : VolumeControl
 			_volume = value;
 
 			/* Make sure we're connected to Pulse and pulse didn't give us the change */
-			if (context.get_state () != Context.State.READY &&
+			if (context.get_state () == Context.State.READY &&
 					_volume.reason != VolumeControl.VolumeReasons.PULSE_CHANGE)
 				if (_pulse_use_stream_restore)
 					set_volume_active_role.begin ();
