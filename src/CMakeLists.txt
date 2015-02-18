@@ -160,6 +160,7 @@ set(
 
 add_definitions(
   -w
+  -DG_LOG_DOMAIN="indicator-sound"
 )
 
 add_library(
