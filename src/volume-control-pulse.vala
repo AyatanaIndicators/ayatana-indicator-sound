@@ -52,7 +52,7 @@ public class VolumeControlPulse : VolumeControl
 	private Gee.ArrayList<uint32> _sink_input_list = new Gee.ArrayList<uint32> ();
 	private HashMap<uint32, string> _sink_input_hash = new HashMap<uint32, string> ();
 	private bool _pulse_use_stream_restore = false;
-	private uint32 _active_sink_input = -1;
+	private int32 _active_sink_input = -1;
 	private string[] _valid_roles = {"multimedia", "alert", "alarm", "phone"};
 	public override string stream {
 		get {
@@ -282,7 +282,7 @@ public class VolumeControlPulse : VolumeControl
 		return message;
 	}
 
-	private async void update_active_sink_input (uint32 index)
+	private async void update_active_sink_input (int32 index)
 	{
 		if ((index == -1) || (index != _active_sink_input && index in _sink_input_list)) {
 			string sink_input_objp = _objp_role_alert;
@@ -350,7 +350,7 @@ public class VolumeControlPulse : VolumeControl
 				/* Only switch the active sink input in case a phone one is not active */
 				if (_active_sink_input == -1 ||
 						_sink_input_hash.get (_active_sink_input) != _objp_role_phone)
-					update_active_sink_input.begin (sink_input.index);
+					update_active_sink_input.begin ((int32)sink_input.index);
 			}
 		}
 	}
@@ -362,7 +362,7 @@ public class VolumeControlPulse : VolumeControl
 			_sink_input_hash.unset (index);
 			if (index == _active_sink_input) {
 				if (_sink_input_list.size != 0)
-					update_active_sink_input.begin (_sink_input_list.get (0));
+					update_active_sink_input.begin ((int32)_sink_input_list.get (0));
 				else
 					update_active_sink_input.begin (-1);
 			}
