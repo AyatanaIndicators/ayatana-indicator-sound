@@ -20,6 +20,8 @@
 #include <memory>
 #include <algorithm>
 #include <string>
+#include <functional>
+#include <future>
 
 #include <gtest/gtest.h>
 #include <gio/gio.h>
@@ -31,7 +33,10 @@ class IndicatorFixture : public ::testing::Test
 		std::string _indicatorPath;
 		std::string _indicatorAddress;
 		std::vector<std::shared_ptr<DbusTestTask>> _mocks;
+	protected:
+		std::chrono::milliseconds _eventuallyTime;
 
+	private:
 		class PerRunData {
 		public:
 			/* We're private in the fixture but other than that we don't care,
@@ -116,6 +121,7 @@ class IndicatorFixture : public ::testing::Test
 				const std::string& addr)
 			: _indicatorPath(path)
 			, _indicatorAddress(addr)
+			, _eventuallyTime(std::chrono::seconds(5))
 		{
 		};
 
@@ -195,6 +201,38 @@ class IndicatorFixture : public ::testing::Test
 			waitForCore(G_OBJECT(group.get()), "action-added");
 		}
 
+		testing::AssertionResult expectEventually (std::function<testing::AssertionResult(void)> &testfunc) {
+			auto loop = std::shared_ptr<GMainLoop>(g_main_loop_new(nullptr, FALSE), [](GMainLoop * loop) { if (loop != nullptr) g_main_loop_unref(loop); });
+
+			std::promise<testing::AssertionResult> retpromise;
+			auto retfuture = retpromise.get_future();
+			auto start = std::chrono::steady_clock::now();
+
+			/* The core of the idle function as an object so we can use the C++-isms
+			   of attaching the variables and make this code reasonably readable */
+			std::function<void(void)> idlefunc = [&loop, &retpromise, &testfunc, &start, this]() -> void {
+				auto result = testfunc();
+
+				if (result == false && _eventuallyTime > (std::chrono::steady_clock::now() - start)) {
+					return;
+				}
+
+				retpromise.set_value(result);
+				g_main_loop_quit(loop.get());
+			};
+
+			auto idlesrc = g_idle_add([](gpointer data) -> gboolean {
+				auto func = reinterpret_cast<std::function<void(void)> *>(data);
+				(*func)();
+				return G_SOURCE_CONTINUE;
+			}, &idlefunc);
+
+			g_main_loop_run(loop.get());
+			g_source_remove(idlesrc);
+
+			return retfuture.get();
+		}
+
 	protected:
 		void setMenu (const std::string& path) {
 			run->_menu.reset();
@@ -234,6 +272,13 @@ class IndicatorFixture : public ::testing::Test
 			return result;
 		}
 
+		template <typename... Args> testing::AssertionResult expectEventuallyActionStateExists (Args&& ... args) {
+			std::function<testing::AssertionResult(void)> func = [&]() {
+				return expectActionStateExists(std::forward<Args>(args)...);
+			};
+			return expectEventually(func);
+		}
+
 		testing::AssertionResult expectActionStateType (const char * nameStr, const char * typeStr, const std::string& name, const GVariantType * type) {
 			auto atype = g_action_group_get_action_state_type(run->_actions.get(), name.c_str());
 			bool same = false;
@@ -254,6 +299,13 @@ class IndicatorFixture : public ::testing::Test
 
 			auto result = testing::AssertionSuccess();
 			return result;
+		}
+
+		template <typename... Args> testing::AssertionResult expectEventuallyActionStateType (Args&& ... args) {
+			std::function<testing::AssertionResult(void)> func = [&]() {
+				return expectActionStateType(std::forward<Args>(args)...);
+			};
+			return expectEventually(func);
 		}
 
 		testing::AssertionResult expectActionStateIs (const char * nameStr, const char * valueStr, const std::string& name, GVariant * value) {
@@ -320,6 +372,13 @@ class IndicatorFixture : public ::testing::Test
 			return expectActionStateIs(nameStr, valueStr, name, var);
 		}
 
+		template <typename... Args> testing::AssertionResult expectEventuallyActionStateIs (Args&& ... args) {
+			std::function<testing::AssertionResult(void)> func = [&]() {
+				return expectActionStateIs(std::forward<Args>(args)...);
+			};
+			return expectEventually(func);
+		}
+
 
 	private:
 		std::shared_ptr<GVariant> getMenuAttributeVal (int location, std::shared_ptr<GMenuModel>& menu, const std::string& attribute, std::shared_ptr<GVariant>& value) {
@@ -363,7 +422,7 @@ class IndicatorFixture : public ::testing::Test
 		}
 
 	protected:
-		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const gchar * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, GVariant * value) {
+		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const char * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, GVariant * value) {
 			auto varref = std::shared_ptr<GVariant>(g_variant_ref_sink(value), [](GVariant * varptr) {
 				if (varptr != nullptr)
 					g_variant_unref(varptr);
@@ -401,44 +460,65 @@ class IndicatorFixture : public ::testing::Test
 			}
 		}
 
-		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const gchar * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, bool value) {
+		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const char * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, bool value) {
 			GVariant * var = g_variant_new_boolean(value);
 			return expectMenuAttribute(menuLocationStr, attributeStr, valueStr, menuLocation, attribute, var);
 		}
 
-		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const gchar * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, std::string value) {
+		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const char * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, std::string value) {
 			GVariant * var = g_variant_new_string(value.c_str());
 			return expectMenuAttribute(menuLocationStr, attributeStr, valueStr, menuLocation, attribute, var);
 		}
 
-		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const gchar * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, const char * value) {
+		testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const char * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, const char * value) {
 			GVariant * var = g_variant_new_string(value);
 			return expectMenuAttribute(menuLocationStr, attributeStr, valueStr, menuLocation, attribute, var);
 		}
 
+		template <typename... Args> testing::AssertionResult expectEventuallyMenuAttribute (Args&& ... args) {
+			std::function<testing::AssertionResult(void)> func = [&]() {
+				return expectMenuAttribute(std::forward<Args>(args)...);
+			};
+			return expectEventually(func);
+		}
 };
+
+/* Menu Attrib */
+#define ASSERT_MENU_ATTRIB(menu, attrib, value) \
+	ASSERT_PRED_FORMAT3(IndicatorFixture::expectMenuAttribute, menu, attrib, value)
 
 #define EXPECT_MENU_ATTRIB(menu, attrib, value) \
 	EXPECT_PRED_FORMAT3(IndicatorFixture::expectMenuAttribute, menu, attrib, value)
 
-#define ASSERT_MENU_ATTRIB(menu, attrib, value) \
-	ASSERT_PRED_FORMAT3(IndicatorFixture::expectMenuAttribute, menu, attrib, value)
+#define EXPECT_EVENTUALLY_MENU_ATTRIB(menu, attrib, value) \
+	EXPECT_PRED_FORMAT3(IndicatorFixture::expectEventuallyMenuAttribute, menu, attrib, value)
 
+/* Action Exists */
 #define ASSERT_ACTION_EXISTS(action) \
 	ASSERT_PRED_FORMAT1(IndicatorFixture::expectActionExists, action)
 
 #define EXPECT_ACTION_EXISTS(action) \
 	EXPECT_PRED_FORMAT1(IndicatorFixture::expectActionExists, action)
 
+#define EXPECT_EVENTUALLY_ACTION_EXISTS(action) \
+	EXPECT_PRED_FORMAT1(IndicatorFixture::expectEventuallyActionExists, action)
+
+/* Action State */
+#define ASSERT_ACTION_STATE(action, value) \
+	ASSERT_PRED_FORMAT2(IndicatorFixture::expectActionStateIs, action, value)
+
 #define EXPECT_ACTION_STATE(action, value) \
 	EXPECT_PRED_FORMAT2(IndicatorFixture::expectActionStateIs, action, value)
 
-#define ASSERT_ACTION_STATE(action, value) \
-	ASSERT_PRED_FORMAT2(IndicatorFixture::expectActionStateIs, action, value)
+#define EXPECT_EVENTUALLY_ACTION_STATE(action, value) \
+	EXPECT_PRED_FORMAT2(IndicatorFixture::expectEventuallyActionStateIs, action, value)
+
+/* Action State Type */
+#define ASSERT_ACTION_STATE_TYPE(action, type) \
+	ASSERT_PRED_FORMAT2(IndicatorFixture::expectActionStateType, action, type)
 
 #define EXPECT_ACTION_STATE_TYPE(action, type) \
 	EXPECT_PRED_FORMAT2(IndicatorFixture::expectActionStateType, action, type)
 
-#define ASSERT_ACTION_STATE_TYPE(action, type) \
-	ASSERT_PRED_FORMAT2(IndicatorFixture::expectActionStateType, action, type)
-
+#define EXPECT_EVENTUALLY_ACTION_STATE_TYPE(action, type) \
+	EXPECT_PRED_FORMAT2(IndicatorFixture::expectEventuallyActionStateType, action, type)
