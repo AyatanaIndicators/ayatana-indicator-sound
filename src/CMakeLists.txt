@@ -160,6 +160,7 @@ set(
 
 add_definitions(
   -w
+  -DG_LOG_DOMAIN="indicator-sound"
 )
 
 add_library(
@@ -170,6 +171,7 @@ add_library(
 target_link_libraries(
   indicator-sound-service-lib
   ${SOUNDSERVICE_LIBRARIES}
+  -lm
 )
 
 ###########################

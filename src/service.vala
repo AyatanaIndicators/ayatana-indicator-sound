@@ -168,7 +168,7 @@ public class IndicatorSound.Service: Object {
 			}
 
 			/* Normalize volume, because the volume action's state is [0.0, 1.0], see create_volume_action() */
-			this.actions.change_action_state ("volume", this.volume_control.volume / this.max_volume);
+			this.actions.change_action_state ("volume", this.volume_control.volume.volume / this.max_volume);
 		}
 	}
 
@@ -204,8 +204,11 @@ public class IndicatorSound.Service: Object {
 	void activate_scroll_action (SimpleAction action, Variant? param) {
 		int delta = param.get_int32(); /* positive for up, negative for down */
 
-		double v = this.volume_control.volume + volume_step_percentage * delta;
-		this.volume_control.volume = v.clamp (0.0, this.max_volume);
+		var scrollvol = new VolumeControl.Volume();
+		double v = this.volume_control.volume.volume + volume_step_percentage * delta;
+		scrollvol.volume = v.clamp (0.0, this.max_volume);
+		scrollvol.reason = VolumeControl.VolumeReasons.USER_KEYPRESS;
+		this.volume_control.volume = scrollvol;
 	}
 
 	void activate_desktop_settings (SimpleAction action, Variant? param) {
@@ -240,7 +243,7 @@ public class IndicatorSound.Service: Object {
 	}
 
 	void update_root_icon () {
-		double volume = this.volume_control.volume;
+		double volume = this.volume_control.volume.volume;
 		string icon;
 		if (this.volume_control.mute)
 			icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
@@ -277,8 +280,6 @@ public class IndicatorSound.Service: Object {
 
 	private bool check_sync_notification = false;
 	private bool support_sync_notification = false;
-	private string last_output_notification = "multimedia";
-	private double last_volume_notification = 0;
 
 	void update_sync_notification () {
 		if (!check_sync_notification) {
@@ -304,11 +305,11 @@ public class IndicatorSound.Service: Object {
 
 		/* Choose an icon */
 		string icon = "audio-volume-muted";
-		if (volume_control.volume <= 0.0)
+		if (volume_control.volume.volume <= 0.0)
 			icon = "audio-volume-muted";
-		else if (volume_control.volume <= 0.3)
+		else if (volume_control.volume.volume <= 0.3)
 			icon = "audio-volume-low";
-		else if (volume_control.volume <= 0.7)
+		else if (volume_control.volume.volume <= 0.7)
 			icon = "audio-volume-medium";
 		else
 			icon = "audio-volume-high";
@@ -321,7 +322,7 @@ public class IndicatorSound.Service: Object {
 		/* Put it all into the notification */
 		sync_notification.clear_hints ();
 		sync_notification.update (_("Volume"), volume_label, icon);
-		sync_notification.set_hint ("value", (int32)(volume_control.volume * 100.0));
+		sync_notification.set_hint ("value", (int32)Math.round(volume_control.volume.volume * 100.0));
 		sync_notification.set_hint ("x-canonical-value-bar-tint", tint);
 		sync_notification.set_hint ("x-canonical-private-synchronous", "true");
 		sync_notification.set_hint ("x-canonical-non-shaped-icon", "true");
@@ -419,44 +420,40 @@ public class IndicatorSound.Service: Object {
 		 * volume_control.set_volume().
 		 */
 
-		double volume = this.volume_control.volume / this.max_volume;
+		double volume = this.volume_control.volume.volume / this.max_volume;
 
 		volume_action = new SimpleAction.stateful ("volume", VariantType.INT32, new Variant.double (volume));
 
 		volume_action.change_state.connect ( (action, val) => {
 			double v = val.get_double () * this.max_volume;
-			volume_control.volume = v.clamp (0.0, this.max_volume);
+
+			var vol = new VolumeControl.Volume();
+			vol.volume = v.clamp (0.0, this.max_volume);
+			vol.reason = VolumeControl.VolumeReasons.USER_KEYPRESS;
+			volume_control.volume = vol;
 		});
 
 		/* activating this action changes the volume by the amount given in the parameter */
 		volume_action.activate.connect ( (action, param) => {
 			int delta = param.get_int32 ();
-			double v = volume_control.volume + volume_step_percentage * delta;
-			volume_control.volume = v.clamp (0.0, this.max_volume);
+			double v = volume_control.volume.volume + volume_step_percentage * delta;
+
+			var vol = new VolumeControl.Volume();
+			vol.volume = v.clamp (0.0, this.max_volume);
+			vol.reason = VolumeControl.VolumeReasons.USER_KEYPRESS;
+			volume_control.volume = vol;
 		});
 
 		this.volume_control.notify["volume"].connect (() => {
 			/* Normalize volume, because the volume action's state is [0.0, 1.0], see create_volume_action() */
-			volume_action.set_state (new Variant.double (this.volume_control.volume / this.max_volume));
+			volume_action.set_state (new Variant.double (this.volume_control.volume.volume / this.max_volume));
 
 			this.update_root_icon ();
 
-			/* Update our volume and output */
-			var oldoutput = this.last_output_notification;
-			this.last_output_notification = this.volume_control.stream;
-
-			var oldvolume = this.last_volume_notification;
-			this.last_volume_notification = volume_control.volume;
-
-			/* Suppress notifications of volume changes if it is because the 
-			   output stream changed. */
-			if (oldoutput != this.last_output_notification)
-				return;
-			/* Supress updates that don't change the value */
-			if (GLib.Math.fabs(oldvolume - this.last_volume_notification) < 0.01)
-				return;
-
-			this.update_sync_notification ();
+			var reason = volume_control.volume.reason;
+			if (reason == VolumeControl.VolumeReasons.USER_KEYPRESS ||
+					reason == VolumeControl.VolumeReasons.DEVICE_OUTPUT_CHANGE)
+				this.update_sync_notification ();
 		});
 
 		this.volume_control.bind_property ("ready", volume_action, "enabled", BindingFlags.SYNC_CREATE);

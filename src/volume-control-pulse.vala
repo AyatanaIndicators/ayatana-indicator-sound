@@ -42,7 +42,7 @@ public class VolumeControlPulse : VolumeControl
 	private PulseAudio.Context context;
 	private bool   _mute = true;
 	private bool   _is_playing = false;
-	private double _volume = 0.0;
+	private VolumeControl.Volume _volume = new VolumeControl.Volume();
 	private double _mic_volume = 0.0;
 
 	/* Used by the pulseaudio stream restore extension */
@@ -52,7 +52,7 @@ public class VolumeControlPulse : VolumeControl
 	private Gee.ArrayList<uint32> _sink_input_list = new Gee.ArrayList<uint32> ();
 	private HashMap<uint32, string> _sink_input_hash = new HashMap<uint32, string> ();
 	private bool _pulse_use_stream_restore = false;
-	private uint32 _active_sink_input = -1;
+	private int32 _active_sink_input = -1;
 	private string[] _valid_roles = {"multimedia", "alert", "alarm", "phone"};
 	public override string stream {
 		get {
@@ -87,12 +87,15 @@ public class VolumeControlPulse : VolumeControl
 	/** true when high volume warnings should be shown */
 	public override bool high_volume {
 		get {
-			return this._volume > 0.75 && _active_port_headphone;	
+			return this._volume.volume > 0.75 && _active_port_headphone;	
 		}
 	}
 
 	public VolumeControlPulse ()
 	{
+		_volume.volume = 0.0;
+		_volume.reason = VolumeControl.VolumeReasons.PULSE_CHANGE;
+
 		if (loop == null)
 			loop = new PulseAudio.GLibMainLoop ();
 
@@ -164,8 +167,6 @@ public class VolumeControlPulse : VolumeControl
 
 	private void sink_info_cb_for_props (Context c, SinkInfo? i, int eol)
 	{
-		bool old_high_volume = this.high_volume;
-
 		if (i == null)
 			return;
 
@@ -197,16 +198,13 @@ public class VolumeControlPulse : VolumeControl
 		}
 
 		if (_pulse_use_stream_restore == false &&
-				_volume != volume_to_double (i.volume.max ()))
+				_volume.volume != volume_to_double (i.volume.max ()))
 		{
-			_volume = volume_to_double (i.volume.max ());
-			this.notify_property("volume");
-			start_local_volume_timer();
+			var vol = new VolumeControl.Volume();
+			vol.volume = volume_to_double (i.volume.max ());
+			vol.reason = VolumeControl.VolumeReasons.PULSE_CHANGE;
+			this.volume = vol;
 		} 
-		
-		if (this.high_volume != old_high_volume) {
-			this.notify_property("high-volume");
-		}
 	}
 
 	private void source_info_cb (Context c, SourceInfo? i, int eol)
@@ -264,17 +262,18 @@ public class VolumeControlPulse : VolumeControl
 					Variant body = message.get_body ();
 					Variant varray = body.get_child_value (0);
 
-					uint32 type = 0, volume = 0;
+					uint32 type = 0, lvolume = 0;
 					VariantIter iter = varray.iterator ();
-					iter.next ("(uu)", &type, &volume);
+					iter.next ("(uu)", &type, &lvolume);
 					/* Here we need to compare integer values to avoid rounding issues, so just
 					 * using the volume values used by pulseaudio */
-					PulseAudio.Volume cvolume = double_to_volume (_volume);
-					if (volume != cvolume) {
+					PulseAudio.Volume cvolume = double_to_volume (_volume.volume);
+					if (lvolume != cvolume) {
 						/* Someone else changed the volume for this role, reflect on the indicator */
-						_volume = volume_to_double (volume);
-						this.notify_property("volume");
-						start_local_volume_timer();
+						var vol = new VolumeControl.Volume();
+						vol.volume = volume_to_double (lvolume);
+						vol.reason = VolumeControl.VolumeReasons.PULSE_CHANGE;
+						this.volume = vol;
 					}
 				}
 			}
@@ -283,7 +282,7 @@ public class VolumeControlPulse : VolumeControl
 		return message;
 	}
 
-	private async void update_active_sink_input (uint32 index)
+	private async void update_active_sink_input (int32 index)
 	{
 		if ((index == -1) || (index != _active_sink_input && index in _sink_input_list)) {
 			string sink_input_objp = _objp_role_alert;
@@ -315,9 +314,10 @@ public class VolumeControlPulse : VolumeControl
 				VariantIter iter = tmp.iterator ();
 				iter.next ("(uu)", &type, &volume);
 
-				_volume = volume_to_double (volume);
-				this.notify_property("volume");
-				start_local_volume_timer();
+				var vol = new VolumeControl.Volume();
+				vol.volume = volume_to_double (volume);
+				vol.reason = VolumeControl.VolumeReasons.VOLUME_STREAM_CHANGE;
+				this.volume = vol;
 			} catch (GLib.Error e) {
 				warning ("unable to get volume for active role %s (%s)", sink_input_objp, e.message);
 			}
@@ -350,7 +350,7 @@ public class VolumeControlPulse : VolumeControl
 				/* Only switch the active sink input in case a phone one is not active */
 				if (_active_sink_input == -1 ||
 						_sink_input_hash.get (_active_sink_input) != _objp_role_phone)
-					update_active_sink_input.begin (sink_input.index);
+					update_active_sink_input.begin ((int32)sink_input.index);
 			}
 		}
 	}
@@ -362,7 +362,7 @@ public class VolumeControlPulse : VolumeControl
 			_sink_input_hash.unset (index);
 			if (index == _active_sink_input) {
 				if (_sink_input_list.size != 0)
-					update_active_sink_input.begin (_sink_input_list.get (0));
+					update_active_sink_input.begin ((int32)_sink_input_list.get (0));
 				else
 					update_active_sink_input.begin (-1);
 			}
@@ -542,7 +542,7 @@ public class VolumeControlPulse : VolumeControl
 			return;
 
 		unowned CVolume cvol = i.volume;
-		cvol.scale (double_to_volume (_volume));
+		cvol.scale (double_to_volume (_volume.volume));
 		c.set_sink_volume_by_index (i.index, cvol, set_volume_success_cb);
 	}
 
@@ -565,8 +565,9 @@ public class VolumeControlPulse : VolumeControl
 			active_role_objp = _sink_input_hash.get (_active_sink_input);
 
 		try {
+			double vol = _volume.volume;
 			var builder = new VariantBuilder (new VariantType ("a(uu)"));
-			builder.add ("(uu)", 0, double_to_volume (_volume));
+			builder.add ("(uu)", 0, double_to_volume (vol));
 			Variant volume = builder.end ();
 
 			/* Increase the signal counter so we can handle the callback */
@@ -579,37 +580,12 @@ public class VolumeControlPulse : VolumeControl
 					new Variant ("(ssv)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume", volume),
 					null, DBusCallFlags.NONE, -1);
 
-			this.notify_property("volume");
+			debug ("Set volume to %f on path %s", vol, active_role_objp);
 		} catch (GLib.Error e) {
 			lock (_pa_volume_sig_count) {
 				_pa_volume_sig_count--;
 			}
 			warning ("unable to set volume for stream obj path %s (%s)", active_role_objp, e.message);
-		}
-	}
-
-	bool set_volume_internal (double volume)
-	{
-		if (context.get_state () != Context.State.READY)
-			return false;
-
-		if (_volume != volume) {
-			var old_high_volume = this.high_volume;
-
-			_volume = volume;
-			if (_pulse_use_stream_restore)
-				set_volume_active_role.begin ();
-			else
-				context.get_server_info (server_info_cb_for_set_volume);
-
-			this.notify_property("volume");
-
-			if (this.high_volume != old_high_volume)
-				this.notify_property("high-volume");
-
-			return true;
-		} else {
-			return false;
 		}
 	}
 
@@ -627,14 +603,28 @@ public class VolumeControlPulse : VolumeControl
 		}
 	}
 
-	public override double volume {
+	public override VolumeControl.Volume volume {
 		get {
 			return _volume;
 		}
 		set {
-			if (set_volume_internal (value)) {
-				start_local_volume_timer();
-			}
+			debug("Setting volume to %f for profile %d because %d", value.volume, _active_sink_input, value.reason);
+
+			var old_high_volume = this.high_volume;
+			_volume = value;
+
+			/* Make sure we're connected to Pulse and pulse didn't give us the change */
+			if (context.get_state () == Context.State.READY &&
+					_volume.reason != VolumeControl.VolumeReasons.PULSE_CHANGE)
+				if (_pulse_use_stream_restore)
+					set_volume_active_role.begin ();
+				else
+					context.get_server_info (server_info_cb_for_set_volume);
+
+			if (this.high_volume != old_high_volume)
+				this.notify_property("high-volume");
+
+			start_local_volume_timer();
 		}
 	}
 
@@ -687,7 +677,7 @@ public class VolumeControlPulse : VolumeControl
 			}
 		}
 
-		stdout.printf ("PulseAudio dbus unix socket: %s\n", address);
+		debug ("PulseAudio dbus unix socket: %s", address);
 		try {
 			_pconn = new DBusConnection.for_address_sync (address, DBusConnectionFlags.AUTHENTICATION_CLIENT);
 		} catch (GLib.Error e) {
@@ -707,7 +697,7 @@ public class VolumeControlPulse : VolumeControl
 
 		/* Only use stream restore if every used role is available */
 		if (_objp_role_multimedia != null && _objp_role_alert != null && _objp_role_alarm != null && _objp_role_phone != null) {
-			stdout.printf ("Using PulseAudio DBUS Stream Restore module\n");
+			debug ("Using PulseAudio DBUS Stream Restore module");
 			/* Restore volume and update default entry */
 			update_active_sink_input.begin (-1);
 			_pulse_use_stream_restore = true;
@@ -723,7 +713,7 @@ public class VolumeControlPulse : VolumeControl
 			/* Workaround for older versions of vala that don't provide get_objv */
 			VariantIter iter = props_variant.iterator ();
 			iter.next ("o", &objp);
-			stdout.printf ("Found obj path %s for restore data named %s\n", objp, name);
+			debug ("Found obj path %s for restore data named %s\n", objp, name);
 		} catch (GLib.Error e) {
 			warning ("unable to find stream restore data for: %s", name);
 		}
@@ -839,7 +829,7 @@ public class VolumeControlPulse : VolumeControl
 		}
 	}
 
-	private async void sync_volume_to_accountsservice (double volume)
+	private async void sync_volume_to_accountsservice (VolumeControl.Volume volume)
 	{
 		if (_user_proxy == null)
 			return;
@@ -848,7 +838,7 @@ public class VolumeControlPulse : VolumeControl
 		_volume_cancellable.reset ();
 
 		try {
-			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Volume", new Variant ("d", volume)), null, DBusCallFlags.NONE, -1, _volume_cancellable);
+			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Volume", new Variant ("d", volume.volume)), null, DBusCallFlags.NONE, -1, _volume_cancellable);
 		} catch (GLib.Error e) {
 			warning ("unable to sync volume to AccountsService: %s", e.message);
 		}
@@ -891,7 +881,11 @@ public class VolumeControlPulse : VolumeControl
 	{
 		if (_accountservice_volume_timer == 0) {
 			// If we haven't been messing with local volume recently, apply immediately.
-			if (_local_volume_timer == 0 && !set_volume_internal (_account_service_volume)) {
+			if (_local_volume_timer == 0) {
+				var vol = new VolumeControl.Volume();
+				vol.volume = _account_service_volume;
+				vol.reason = VolumeControl.VolumeReasons.ACCOUNTS_SERVICE_SET;
+				this.volume = vol;
 				return;
 			}
 			// Else check again in another second if needed.
