@@ -22,6 +22,7 @@
 
 #include "indicator-fixture.h"
 #include "accounts-service-mock.h"
+#include "notifications-mock.h"
 
 class IndicatorTest : public IndicatorFixture
 {
@@ -32,6 +33,7 @@ protected:
 	}
 
 	std::shared_ptr<AccountsServiceMock> as;
+	std::shared_ptr<NotificationsMock> notification;
 
 	virtual void SetUp() override
 	{
@@ -45,12 +47,16 @@ protected:
 		as = std::make_shared<AccountsServiceMock>();
 		addMock(*as);
 
+		notification = std::make_shared<NotificationsMock>();
+		addMock(*notification);
+
 		IndicatorFixture::SetUp();
 	}
 
 	virtual void TearDown() override
 	{
 		as.reset();
+		notification.reset();
 
 		IndicatorFixture::TearDown();
 	}

@@ -71,13 +71,13 @@ class VolumeControlTest : public ::testing::Test
 };
 
 TEST_F(VolumeControlTest, BasicObject) {
-	VolumeControl * control = volume_control_new();
+	VolumeControlPulse * control = volume_control_pulse_new();
 
 	/* Setup the PA backend */
 	loop(100);
 
 	/* Ready */
-	EXPECT_TRUE(volume_control_get_ready(control));
+	EXPECT_TRUE(volume_control_get_ready(VOLUME_CONTROL(control)));
 
 	g_clear_object(&control);
 }
