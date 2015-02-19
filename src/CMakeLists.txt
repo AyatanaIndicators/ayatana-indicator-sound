@@ -171,6 +171,7 @@ add_library(
 target_link_libraries(
   indicator-sound-service-lib
   ${SOUNDSERVICE_LIBRARIES}
+  -lm
 )
 
 ###########################

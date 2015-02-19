@@ -328,7 +328,7 @@ public class IndicatorSound.Service: Object {
 		/* Put it all into the notification */
 		sync_notification.clear_hints ();
 		sync_notification.update (_("Volume"), volume_label, icon);
-		sync_notification.set_hint ("value", (int32)(volume_control.volume.volume * 100.0));
+		sync_notification.set_hint ("value", (int32)Math.round(volume_control.volume.volume * 100.0));
 		sync_notification.set_hint ("x-canonical-value-bar-tint", tint);
 		sync_notification.set_hint ("x-canonical-private-synchronous", "true");
 		sync_notification.set_hint ("x-canonical-non-shaped-icon", "true");
