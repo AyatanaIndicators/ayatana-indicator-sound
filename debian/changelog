@@ -1,3 +1,13 @@
+indicator-sound (12.10.2+15.04.20150219.1-0ubuntu1) vivid; urgency=medium
+
+  [ Ted Gould ]
+  * Add eventually functions to indicator fixture
+  * Add notifications mock and tests
+  * Track the reason a volume was set to filter volume changes more
+    accurately (LP: #1416520)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Thu, 19 Feb 2015 16:27:48 +0000
+
 indicator-sound (12.10.2+15.04.20150205-0ubuntu1) vivid; urgency=medium
 
   [ Ted Gould ]
