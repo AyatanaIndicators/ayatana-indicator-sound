@@ -405,3 +405,44 @@ TEST_F(NotificationsTest, MenuHide) {
 	notev = notifications->getNotifications();
 	EXPECT_EQ(1, notev.size());
 }
+
+TEST_F(NotificationsTest, ExtendendVolumeNotification) {
+	auto volumeControl = volumeControlMock();
+	auto soundService = standardService(volumeControl, playerListMock());
+
+	/* Set a volume */
+	notifications->clearNotifications();
+	setMockVolume(volumeControl, 0.50);
+	loop(50);
+	auto notev = notifications->getNotifications();
+	ASSERT_EQ(1, notev.size());
+	EXPECT_EQ("indicator-sound", notev[0].app_name);
+	EXPECT_EQ("Volume", notev[0].summary);
+	EXPECT_EQ(0, notev[0].actions.size());
+	EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-private-synchronous"]);
+	EXPECT_GVARIANT_EQ("@i 50", notev[0].hints["value"]);
+
+	/* Allow an amplified volume */
+	notifications->clearNotifications();
+	indicator_sound_service_set_allow_amplified_volume(soundService.get(), TRUE);
+	loop(50);
+	notev = notifications->getNotifications();
+	ASSERT_EQ(1, notev.size());
+	EXPECT_GVARIANT_EQ("@i 33", notev[0].hints["value"]);
+
+	/* Set to 'over max' */
+	notifications->clearNotifications();
+	setMockVolume(volumeControl, 1.525);
+	loop(50);
+	notev = notifications->getNotifications();
+	ASSERT_EQ(1, notev.size());
+	EXPECT_GVARIANT_EQ("@i 100", notev[0].hints["value"]);
+
+	/* Put back */
+	notifications->clearNotifications();
+	indicator_sound_service_set_allow_amplified_volume(soundService.get(), FALSE);
+	loop(50);
+	notev = notifications->getNotifications();
+	ASSERT_EQ(1, notev.size());
+	EXPECT_GVARIANT_EQ("@i 100", notev[0].hints["value"]);
+}
