@@ -97,12 +97,16 @@ public class IndicatorSound.Service: Object {
 		/* Hide the notification when the menu is shown */
 		var shown_action = actions.lookup_action ("indicator-shown") as SimpleAction;
 		shown_action.change_state.connect ((state) => {
-			if (state.get_boolean()) {
+			block_notifications = state.get_boolean();
+			if (block_notifications) {
+				debug("Indicator is shown");
 				try {
 					sync_notification.close();
 				} catch (Error e) {
 					warning("Unable to close synchronous volume notification: %s", e.message);
 				}
+			} else {
+				debug("Indicator is hidden");
 			}
 		});
 
@@ -280,6 +284,7 @@ public class IndicatorSound.Service: Object {
 
 	private bool check_sync_notification = false;
 	private bool support_sync_notification = false;
+	private bool block_notifications = false;
 
 	void update_sync_notification () {
 		if (!check_sync_notification) {
@@ -294,8 +299,7 @@ public class IndicatorSound.Service: Object {
 		if (!support_sync_notification)
 			return;
 
-		var shown_action = actions.lookup_action ("indicator-shown") as SimpleAction;
-		if (shown_action != null && shown_action.get_state().get_boolean())
+		if (block_notifications)
 			return;
 
 		/* Determine Label */
