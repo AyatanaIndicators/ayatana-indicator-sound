@@ -146,6 +146,25 @@ class NotificationsTest : public ::testing::Test
 			volume_control_set_volume(volumeControl.get(), vol);
 			g_object_unref(vol);
 		}
+
+		void setIndicatorShown (bool shown) {
+			auto bus = g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr, nullptr);
+
+			g_dbus_connection_call(bus,
+				g_dbus_connection_get_unique_name(bus),
+				"/com/canonical/indicator/sound",
+				"org.gtk.Actions",
+				"SetState",
+				g_variant_new("(sva{sv})", "indicator-shown", g_variant_new_boolean(shown), nullptr),
+				nullptr,
+				G_DBUS_CALL_FLAGS_NONE,
+				-1,
+				nullptr,
+				nullptr,
+				nullptr);
+
+			g_clear_object(&bus);
+		}
 };
 
 TEST_F(NotificationsTest, BasicObject) {
@@ -355,4 +374,34 @@ TEST_F(NotificationsTest, HighVolume) {
 	EXPECT_EQ("Volume", notev[0].summary);
 	EXPECT_EQ("High volume", notev[0].body);
 	EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-value-bar-tint"]);
+}
+
+TEST_F(NotificationsTest, MenuHide) {
+	auto volumeControl = volumeControlMock();
+	auto soundService = standardService(volumeControl, playerListMock());
+
+	/* Set a volume */
+	notifications->clearNotifications();
+	setMockVolume(volumeControl, 0.50);
+	loop(50);
+	auto notev = notifications->getNotifications();
+	EXPECT_EQ(1, notev.size());
+
+	/* Set the indicator to shown, and set a new volume */
+	notifications->clearNotifications();
+	setIndicatorShown(true);
+	loop(50);
+	setMockVolume(volumeControl, 0.60);
+	loop(50);
+	notev = notifications->getNotifications();
+	EXPECT_EQ(0, notev.size());
+
+	/* Set the indicator to hidden, and set a new volume */
+	notifications->clearNotifications();
+	setIndicatorShown(false);
+	loop(50);
+	setMockVolume(volumeControl, 0.70);
+	loop(50);
+	notev = notifications->getNotifications();
+	EXPECT_EQ(1, notev.size());
 }
