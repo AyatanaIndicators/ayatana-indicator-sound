@@ -57,7 +57,7 @@ public class VolumeControlPulse : VolumeControl
 	public override string stream {
 		get {
 			if (_active_sink_input < 0 || _active_sink_input >= _valid_roles.length)
-				return "multimedia";
+				return "alert";
 			else
 				return _valid_roles[_active_sink_input];
 		}
@@ -87,7 +87,7 @@ public class VolumeControlPulse : VolumeControl
 	/** true when high volume warnings should be shown */
 	public override bool high_volume {
 		get {
-			return this._volume.volume > 0.75 && _active_port_headphone;	
+			return this._volume.volume > 0.75 && _active_port_headphone && stream == "multimedia";
 		}
 	}
 
