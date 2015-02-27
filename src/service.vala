@@ -216,7 +216,7 @@ public class IndicatorSound.Service: Object {
 		string cmd;
 		if (env == "xubuntu" || env == "ubuntustudio")
 			cmd = "pavucontrol";
-        else if (env == "mate")
+		else if (env == "mate")
 			cmd = "mate-volume-control";
 		else
 		{
