@@ -1,3 +1,15 @@
+indicator-sound (12.10.2+15.04.20150227.1-0ubuntu1) vivid; urgency=medium
+
+  [ Martin Wimpress ]
+  * Add support for settings on the MATE Desktop.
+
+  [ Ted Gould ]
+  * Check stream when looking at high volume (LP: #1418032)
+  * Switch to an internal variable to track blocking notifications
+  * Use max volume in calculating notification value (LP: #1422745)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 27 Feb 2015 22:36:34 +0000
+
 indicator-sound (12.10.2+15.04.20150219.1-0ubuntu1) vivid; urgency=medium
 
   [ Ted Gould ]
