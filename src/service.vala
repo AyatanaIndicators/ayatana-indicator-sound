@@ -216,6 +216,8 @@ public class IndicatorSound.Service: Object {
 		string cmd;
 		if (env == "xubuntu" || env == "ubuntustudio")
 			cmd = "pavucontrol";
+        else if (env == "mate")
+			cmd = "mate-volume-control";
 		else
 		{
 			if (Environment.get_variable ("XDG_CURRENT_DESKTOP") == "Unity" && Environment.find_program_in_path ("unity-control-center") != null)

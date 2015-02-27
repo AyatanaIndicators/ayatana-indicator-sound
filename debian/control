@@ -39,7 +39,7 @@ Depends: ${shlibs:Depends},
          ${misc:Depends},
          pulseaudio,
          gsettings-ubuntu-schemas (>= 0.0.1+14.04.20140224),
-Recommends: unity-control-center | gnome-control-center | ubuntu-system-settings | pavucontrol,
+Recommends: unity-control-center | gnome-control-center | ubuntu-system-settings | pavucontrol | mate-media,
             accountsservice,
 Suggests: unity-greeter-session-broadcast,
 Description: System sound indicator.
