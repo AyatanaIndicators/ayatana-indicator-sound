@@ -87,7 +87,7 @@ public class VolumeControlPulse : VolumeControl
 	/** true when high volume warnings should be shown */
 	public override bool high_volume {
 		get {
-			return this._volume.volume > 0.75 && _active_port_headphone;	
+			return this._volume.volume > 0.75 && _active_port_headphone && stream == "multimedia";
 		}
 	}
 
