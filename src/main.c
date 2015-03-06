@@ -32,7 +32,7 @@ sigterm_handler (gpointer data)
 static void
 name_lost (GDBusConnection * connection, const gchar * name, gpointer user_data)
 {
-	g_debug("Name lost");
+	g_warning("Name lost or unable to acquire bus: %s", name);
 	g_main_loop_quit((GMainLoop *)user_data);
 }
 
@@ -40,20 +40,10 @@ int
 main (int argc, char ** argv) {
 	GMainLoop * loop = NULL;
 	IndicatorSoundService* service = NULL;
-	GDBusConnection * bus = NULL;
 
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	setlocale (LC_ALL, "");
 	bindtextdomain (GETTEXT_PACKAGE, GNOMELOCALEDIR);
-
-	/* Grab DBus */
-	GError * error = NULL;
-	bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, &error);
-	if (error != NULL) {
-		g_error("Unable to get session bus: %s", error->message);
-		g_error_free(error);
-		return -1;
-	}
 
 	/* Build Mainloop */
 	loop = g_main_loop_new(NULL, FALSE);
@@ -62,6 +52,15 @@ main (int argc, char ** argv) {
 
 	/* Initialize libnotify */
 	notify_init ("indicator-sound");
+
+	g_bus_own_name(G_BUS_TYPE_SESSION,
+		"com.canonical.indicator.sound",
+		G_BUS_NAME_OWNER_FLAGS_NONE,
+		NULL, /* bus acquired */
+		NULL, /* name acquired */
+		name_lost,
+		loop,
+		NULL);
 
 	MediaPlayerList * playerlist = NULL;
 	AccountsServiceUser * accounts = NULL;
@@ -77,20 +76,11 @@ main (int argc, char ** argv) {
 
 	service = indicator_sound_service_new (playerlist, volume, accounts);
 
-	g_bus_own_name_on_connection(bus,
-		"com.canonical.indicator.sound",
-		G_BUS_NAME_OWNER_FLAGS_NONE,
-		NULL, /* acquired */
-		name_lost,
-		loop,
-		NULL);
-
 	g_main_loop_run(loop);
 
 	g_clear_object(&playerlist);
 	g_clear_object(&accounts);
 	g_clear_object(&service);
-	g_clear_object(&bus);
 
 	return 0;
 }
