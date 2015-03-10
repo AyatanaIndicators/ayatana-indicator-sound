@@ -96,6 +96,8 @@ main (int argc, char ** argv)
 
 	g_clear_object(&service);
 
+	notify_uninit();
+
 	return 0;
 }
 
