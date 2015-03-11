@@ -1,3 +1,11 @@
+indicator-sound (12.10.2+15.04.20150311-0ubuntu1) vivid; urgency=medium
+
+  [ Charles Kerr ]
+  * Exit more gracefully on startup when the session bus can't be found.
+    (LP: #1427708)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 11 Mar 2015 04:40:34 +0000
+
 indicator-sound (12.10.2+15.04.20150227.1-0ubuntu1) vivid; urgency=medium
 
   [ Martin Wimpress ]
