@@ -21,6 +21,8 @@
 #include "indicator-sound-service.h"
 #include "config.h"
 
+static IndicatorSoundService * service = NULL;
+
 static gboolean
 sigterm_handler (gpointer data)
 {
@@ -30,30 +32,48 @@ sigterm_handler (gpointer data)
 }
 
 static void
-name_lost (GDBusConnection * connection, const gchar * name, gpointer user_data)
+on_name_lost(GDBusConnection * connection,
+             const gchar * name,
+             gpointer user_data)
 {
-	g_debug("Name lost");
+	g_warning("Name lost or unable to acquire bus: %s", name);
 	g_main_loop_quit((GMainLoop *)user_data);
 }
 
+static void
+on_bus_acquired(GDBusConnection *connection,
+                const gchar *name,
+                gpointer user_data)
+{
+	MediaPlayerList * playerlist = NULL;
+	VolumeControlPulse * volume = NULL;
+	AccountsServiceUser * accounts = NULL;
+   
+
+	if (g_strcmp0("lightdm", g_get_user_name()) == 0) {
+		playerlist = MEDIA_PLAYER_LIST(media_player_list_greeter_new());
+	} else {
+		playerlist = MEDIA_PLAYER_LIST(media_player_list_mpris_new());
+		accounts = accounts_service_user_new();
+	}
+
+	volume = volume_control_pulse_new();
+
+	service = indicator_sound_service_new (playerlist, volume, accounts);
+
+	g_clear_object(&playerlist);
+	g_clear_object(&volume);
+	g_clear_object(&accounts);
+}
+
 int
-main (int argc, char ** argv) {
+main (int argc, char ** argv)
+{
 	GMainLoop * loop = NULL;
-	IndicatorSoundService* service = NULL;
-	GDBusConnection * bus = NULL;
 
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	setlocale (LC_ALL, "");
 	bindtextdomain (GETTEXT_PACKAGE, GNOMELOCALEDIR);
-
-	/* Grab DBus */
-	GError * error = NULL;
-	bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, &error);
-	if (error != NULL) {
-		g_error("Unable to get session bus: %s", error->message);
-		g_error_free(error);
-		return -1;
-	}
 
 	/* Build Mainloop */
 	loop = g_main_loop_new(NULL, FALSE);
@@ -63,34 +83,20 @@ main (int argc, char ** argv) {
 	/* Initialize libnotify */
 	notify_init ("indicator-sound");
 
-	MediaPlayerList * playerlist = NULL;
-	AccountsServiceUser * accounts = NULL;
-
-	if (g_strcmp0("lightdm", g_get_user_name()) == 0) {
-		playerlist = MEDIA_PLAYER_LIST(media_player_list_greeter_new());
-	} else {
-		playerlist = MEDIA_PLAYER_LIST(media_player_list_mpris_new());
-		accounts = accounts_service_user_new();
-	}
-
-	VolumeControlPulse * volume = volume_control_pulse_new();
-
-	service = indicator_sound_service_new (playerlist, volume, accounts);
-
-	g_bus_own_name_on_connection(bus,
+	g_bus_own_name(G_BUS_TYPE_SESSION,
 		"com.canonical.indicator.sound",
 		G_BUS_NAME_OWNER_FLAGS_NONE,
-		NULL, /* acquired */
-		name_lost,
+		on_bus_acquired,
+		NULL, /* name acquired */
+		on_name_lost,
 		loop,
 		NULL);
 
 	g_main_loop_run(loop);
 
-	g_clear_object(&playerlist);
-	g_clear_object(&accounts);
 	g_clear_object(&service);
-	g_clear_object(&bus);
+
+	notify_uninit();
 
 	return 0;
 }
