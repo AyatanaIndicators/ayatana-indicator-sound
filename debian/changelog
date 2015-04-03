@@ -1,3 +1,11 @@
+indicator-sound (12.10.2+15.04.20150403-0ubuntu1) vivid; urgency=medium
+
+  [ Ted Gould ]
+  * Handle Vala incorrectly returning null for a non-null type (LP:
+    #1428711)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 03 Apr 2015 14:52:02 +0000
+
 indicator-sound (12.10.2+15.04.20150311-0ubuntu1) vivid; urgency=medium
 
   [ Charles Kerr ]
