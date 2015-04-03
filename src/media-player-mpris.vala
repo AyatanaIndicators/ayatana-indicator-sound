@@ -202,7 +202,7 @@ public class MediaPlayerMpris: MediaPlayer {
 			gproxy.g_properties_changed.connect (this.proxy_properties_changed);
 
 			this.notify_property ("is-running");
-			this.state = this.proxy.PlaybackStatus;
+			this.state = this.proxy.PlaybackStatus != null ? this.proxy.PlaybackStatus : "Unknown";
 			this.update_current_track (gproxy.get_cached_property ("Metadata"));
 
 			if (this.play_when_attached) {
@@ -270,7 +270,7 @@ public class MediaPlayerMpris: MediaPlayer {
 
 	void proxy_properties_changed (DBusProxy proxy, Variant changed_properties, string[] invalidated_properties) {
 		if (changed_properties.lookup ("PlaybackStatus", "s", null)) {
-			this.state = this.proxy.PlaybackStatus;
+			this.state = this.proxy.PlaybackStatus != null ? this.proxy.PlaybackStatus : "Unknown";
 		}
 
 		var metadata = changed_properties.lookup_value ("Metadata", new VariantType ("a{sv}"));
