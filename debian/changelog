@@ -1,3 +1,18 @@
+indicator-sound (12.10.2+15.04.20150413-0ubuntu1) vivid; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Ricardo Salveti de Araujo ]
+  * volume-control-pulse: only set volume if value is indeed different
+    and reason not from AS (LP: #1443005)
+
+  [ Ted Gould ]
+  * Fix stream property lookup to reliably signal multimedia streams
+    (LP: #1436021)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Mon, 13 Apr 2015 06:02:32 +0000
+
 indicator-sound (12.10.2+15.04.20150403-0ubuntu1) vivid; urgency=medium
 
   [ Ted Gould ]
