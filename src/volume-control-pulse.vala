@@ -56,10 +56,18 @@ public class VolumeControlPulse : VolumeControl
 	private string[] _valid_roles = {"multimedia", "alert", "alarm", "phone"};
 	public override string stream {
 		get {
-			if (_active_sink_input < 0 || _active_sink_input >= _valid_roles.length)
+			if (_active_sink_input == -1)
 				return "alert";
-			else
-				return _valid_roles[_active_sink_input];
+			var path = _sink_input_hash[_active_sink_input];
+			if (path == _objp_role_multimedia)
+				return "multimedia";
+			if (path == _objp_role_alert)
+				return "alert";
+			if (path == _objp_role_alarm)
+				return "alarm";
+			if (path == _objp_role_phone)
+				return "phone";
+			return "alert";
 		}
 	}
 	private string? _objp_role_multimedia = null;
