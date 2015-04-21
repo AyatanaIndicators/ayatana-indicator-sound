@@ -616,25 +616,27 @@ public class VolumeControlPulse : VolumeControl
 			return _volume;
 		}
 		set {
-			if (value.volume != _volume.volume) {
-				debug("Setting volume to %f for profile %d because %d", value.volume, _active_sink_input, value.reason);
+			var volume_changed = (value.volume != _volume.volume);
+			debug("Setting volume to %f for profile %d because %d", value.volume, _active_sink_input, value.reason);
 
-				var old_high_volume = this.high_volume;
-				_volume = value;
+			var old_high_volume = this.high_volume;
+			_volume = value;
 
-				/* Make sure we're connected to Pulse and pulse didn't give us the change */
-				if (context.get_state () == Context.State.READY &&
-						_volume.reason != VolumeControl.VolumeReasons.PULSE_CHANGE)
-					if (_pulse_use_stream_restore)
-						set_volume_active_role.begin ();
-					else
-						context.get_server_info (server_info_cb_for_set_volume);
+			/* Make sure we're connected to Pulse and pulse didn't give us the change */
+			if (context.get_state () == Context.State.READY &&
+					_volume.reason != VolumeControl.VolumeReasons.PULSE_CHANGE &&
+					volume_changed)
+				if (_pulse_use_stream_restore)
+					set_volume_active_role.begin ();
+				else
+					context.get_server_info (server_info_cb_for_set_volume);
 
-				if (this.high_volume != old_high_volume)
-					this.notify_property("high-volume");
+			if (this.high_volume != old_high_volume)
+				this.notify_property("high-volume");
 
-				if (volume.reason != VolumeControl.VolumeReasons.ACCOUNTS_SERVICE_SET)
-					start_local_volume_timer();
+			if (volume.reason != VolumeControl.VolumeReasons.ACCOUNTS_SERVICE_SET
+				&& volume_changed) {
+				start_local_volume_timer();
 			}
 		}
 	}
