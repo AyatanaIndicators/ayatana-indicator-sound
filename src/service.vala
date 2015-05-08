@@ -19,7 +19,6 @@
 
 public class IndicatorSound.Service: Object {
 	DBusConnection bus;
-	DBusProxy notification_proxy;
 
 	public Service (MediaPlayerList playerlist, VolumeControl volume, AccountsServiceUser? accounts) {
 		try {
@@ -29,18 +28,10 @@ public class IndicatorSound.Service: Object {
 		}
 
 		sync_notification = new Notify.Notification(_("Volume"), "", "audio-volume-muted");
-		try {
-			this.notification_proxy = new DBusProxy.for_bus_sync(GLib.BusType.SESSION,
-				DBusProxyFlags.DO_NOT_LOAD_PROPERTIES | DBusProxyFlags.DO_NOT_CONNECT_SIGNALS | DBusProxyFlags.DO_NOT_AUTO_START,
-				null, /* interface info */
-				"org.freedesktop.Notifications",
-				"/org/freedesktop/Notifications",
-				"org.freedesktop.Notifications",
-				null);
-			this.notification_proxy.notify["g-name-owner"].connect ( () => { debug("Notifications name owner changed"); check_sync_notification = false; } );
-		} catch (GLib.Error e) {
-			error("Unable to build notification proxy: %s", e.message);
-		}
+		BusWatcher.watch_namespace (GLib.BusType.SESSION,
+		                            "org.freedesktop.Notifications",
+		                            () => { debug("Notifications name appeared"); check_sync_notification = false; },
+		                            () => { debug("Notifications name vanshed");  check_sync_notification = false; });
 
 		this.settings = new Settings ("com.canonical.indicator.sound");
 		this.sharedsettings = new Settings ("com.ubuntu.sound");
