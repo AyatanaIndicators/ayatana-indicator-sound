@@ -1,3 +1,14 @@
+indicator-sound (12.10.2+15.04.20150508-0ubuntu1) vivid; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Charles Kerr ]
+  * Use the BusWatcher to look for org.freedesktop.Notifications
+    ownership changes on the bus. (LP: #1432446)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 08 May 2015 12:20:07 +0000
+
 indicator-sound (12.10.2+15.04.20150421-0ubuntu1) vivid; urgency=medium
 
   [ Ted Gould ]
