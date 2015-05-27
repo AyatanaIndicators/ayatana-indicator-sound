@@ -17,6 +17,9 @@
  *      Ted Gould <ted@canonical.com>
  */
 
+#include <chrono>
+#include <future>
+
 #include <gtest/gtest.h>
 #include <gio/gio.h>
 #include <libdbustest/dbus-test.h>
@@ -36,6 +39,8 @@ class MediaPlayerUserTest : public ::testing::Test
 
 		GDBusConnection * system = NULL;
 		GDBusProxy * proxy = NULL;
+
+		std::chrono::milliseconds _eventuallyTime = std::chrono::seconds{5};
 
 		virtual void SetUp() {
 			service = dbus_test_service_new(NULL);
@@ -95,7 +100,77 @@ class MediaPlayerUserTest : public ::testing::Test
 		void set_property (const gchar * name, GVariant * value) {
 			dbus_test_dbus_mock_object_update_property((DbusTestDbusMock *)service_mock, service_mock.get_sound(), name, value, NULL);
 		}
+
+		testing::AssertionResult expectEventually (std::function<testing::AssertionResult(void)> &testfunc) {
+			auto loop = std::shared_ptr<GMainLoop>(g_main_loop_new(nullptr, FALSE), [](GMainLoop * loop) { if (loop != nullptr) g_main_loop_unref(loop); });
+
+			std::promise<testing::AssertionResult> retpromise;
+			auto retfuture = retpromise.get_future();
+			auto start = std::chrono::steady_clock::now();
+
+			/* The core of the idle function as an object so we can use the C++-isms
+			   of attaching the variables and make this code reasonably readable */
+			std::function<void(void)> idlefunc = [&loop, &retpromise, &testfunc, &start, this]() -> void {
+				auto result = testfunc();
+
+				if (result == false && _eventuallyTime > (std::chrono::steady_clock::now() - start)) {
+					return;
+				}
+
+				retpromise.set_value(result);
+				g_main_loop_quit(loop.get());
+			};
+
+			auto idlesrc = g_idle_add([](gpointer data) -> gboolean {
+				auto func = reinterpret_cast<std::function<void(void)> *>(data);
+				(*func)();
+				return G_SOURCE_CONTINUE;
+			}, &idlefunc);
+
+			g_main_loop_run(loop.get());
+			g_source_remove(idlesrc);
+
+			return retfuture.get();
+		}
+
+		/* Eventually Helpers */
+		#define _EVENTUALLY_HELPER(oper) \
+		template <typename... Args> testing::AssertionResult expectEventually##oper (Args&& ... args) { \
+			std::function<testing::AssertionResult(void)> func = [&]() { \
+				return testing::internal::CmpHelper##oper(std::forward<Args>(args)...); \
+			}; \
+			return expectEventually(func); \
+		}
+
+		_EVENTUALLY_HELPER(EQ);
+		_EVENTUALLY_HELPER(NE);
+		_EVENTUALLY_HELPER(LT);
+		_EVENTUALLY_HELPER(GT);
+		_EVENTUALLY_HELPER(STREQ);
+		_EVENTUALLY_HELPER(STRNE);
+
+		#undef _EVENTUALLY_HELPER
 };
+
+/* Helpers */
+#define EXPECT_EVENTUALLY_EQ(expected, actual) \
+	EXPECT_PRED_FORMAT2(MediaPlayerUserTest::expectEventuallyEQ, expected, actual)
+
+#define EXPECT_EVENTUALLY_NE(expected, actual) \
+	EXPECT_PRED_FORMAT2(MediaPlayerUserTest::expectEventuallyNE, expected, actual)
+
+#define EXPECT_EVENTUALLY_LT(expected, actual) \
+	EXPECT_PRED_FORMAT2(MediaPlayerUserTest::expectEventuallyLT, expected, actual)
+
+#define EXPECT_EVENTUALLY_GT(expected, actual) \
+	EXPECT_PRED_FORMAT2(MediaPlayerUserTest::expectEventuallyGT, expected, actual)
+
+#define EXPECT_EVENTUALLY_STREQ(expected, actual) \
+	EXPECT_PRED_FORMAT2(MediaPlayerUserTest::expectEventuallySTREQ, expected, actual)
+
+#define EXPECT_EVENTUALLY_STRNE(expected, actual) \
+	EXPECT_PRED_FORMAT2(MediaPlayerUserTest::expectEventuallySTRNE, expected, actual)
+
 
 TEST_F(MediaPlayerUserTest, BasicObject) {
 	MediaPlayerUser * player = media_player_user_new("user");
