@@ -242,6 +242,7 @@ TEST_F(MediaPlayerUserTest, DataSet) {
 	/* Ensure even with the proxy we don't have anything */
 	bool running = false;
 	g_signal_connect(G_OBJECT(player), "notify::is-running", G_CALLBACK(running_update), &running);
+	running_update(G_OBJECT(player), nullptr, &running);
 	EXPECT_EVENTUALLY_EQ(true, running);
 	EXPECT_TRUE(media_player_get_can_raise(MEDIA_PLAYER(player)));
 	EXPECT_STREQ("user", media_player_get_id(MEDIA_PLAYER(player)));
@@ -283,6 +284,7 @@ TEST_F(MediaPlayerUserTest, TimeoutTest) {
 
 	bool running = false;
 	g_signal_connect(G_OBJECT(player), "notify::is-running", G_CALLBACK(running_update), &running);
+	running_update(G_OBJECT(player), nullptr, &running);
 
 	/* Ensure that we show up as not running */
 	EXPECT_EVENTUALLY_EQ(false, running);
