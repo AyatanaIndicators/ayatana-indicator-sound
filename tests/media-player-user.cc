@@ -200,6 +200,11 @@ TEST_F(MediaPlayerUserTest, BasicObject) {
 	g_clear_object(&player);
 }
 
+void
+running_update (GObject * obj, GParamSpec * pspec, bool * running) {
+	*running = media_player_get_is_running(MEDIA_PLAYER(obj)) == TRUE;
+};
+
 TEST_F(MediaPlayerUserTest, DataSet) {
 	/* Put data into Acts */
 	set_property("Timestamp", g_variant_new_uint64(g_get_monotonic_time()));
@@ -216,11 +221,10 @@ TEST_F(MediaPlayerUserTest, DataSet) {
 	MediaPlayerUser * player = media_player_user_new("user");
 	ASSERT_NE(nullptr, player);
 
-	/* Get the proxy -- and it's precious precious data -- oh, my, precious! */
-	loop(100);
-
 	/* Ensure even with the proxy we don't have anything */
-	EXPECT_TRUE(media_player_get_is_running(MEDIA_PLAYER(player)));
+	bool running = false;
+	g_signal_connect(G_OBJECT(player), "notify::is-running", G_CALLBACK(running_update), &running);
+	EXPECT_EVENTUALLY_EQ(true, running);
 	EXPECT_TRUE(media_player_get_can_raise(MEDIA_PLAYER(player)));
 	EXPECT_STREQ("user", media_player_get_id(MEDIA_PLAYER(player)));
 	EXPECT_STREQ("The Player Formerly Known as Prince", media_player_get_name(MEDIA_PLAYER(player)));
@@ -255,24 +259,25 @@ TEST_F(MediaPlayerUserTest, TimeoutTest) {
 	set_property("Album", g_variant_new_string("Vinyl is dead"));
 	set_property("ArtUrl", g_variant_new_string("http://art.url"));
 
-	/* Ensure the properties get set before we pull them */
-	loop(100);
-
 	/* Build our media player */
 	MediaPlayerUser * player = media_player_user_new("user");
 	ASSERT_NE(nullptr, player);
 
-	/* Get the proxy -- and the old data, so old, like forever */
-	loop(100);
+	bool running = false;
+	g_signal_connect(G_OBJECT(player), "notify::is-running", G_CALLBACK(running_update), &running);
 
 	/* Ensure that we show up as not running */
-	EXPECT_FALSE(media_player_get_is_running(MEDIA_PLAYER(player)));
+	EXPECT_EVENTUALLY_EQ(false, running);
 
 	/* Update to make running */
 	set_property("Timestamp", g_variant_new_uint64(g_get_monotonic_time()));
-	loop(100);
 
-	EXPECT_TRUE(media_player_get_is_running(MEDIA_PLAYER(player)));
+	EXPECT_EVENTUALLY_EQ(true, running);
+
+	/* Clear to not run */
+	set_property("Timestamp", g_variant_new_uint64(1));
+
+	EXPECT_EVENTUALLY_EQ(false, running);
 
 	g_clear_object(&in_icon);
 	g_clear_object(&player);
