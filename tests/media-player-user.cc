@@ -34,26 +34,42 @@ class MediaPlayerUserTest : public ::testing::Test
 {
 
 	protected:
-		DbusTestService * service = NULL;
+		DbusTestService * testsystem = NULL;
 		AccountsServiceMock service_mock;
 
+		DbusTestService * testsession = NULL;
+
 		GDBusConnection * system = NULL;
+		GDBusConnection * session = NULL;
 		GDBusProxy * proxy = NULL;
 
 		std::chrono::milliseconds _eventuallyTime = std::chrono::seconds{5};
 
 		virtual void SetUp() {
-			service = dbus_test_service_new(NULL);
-			dbus_test_service_set_bus(service, DBUS_TEST_SERVICE_BUS_SYSTEM);
+			/* System Bus */
+			testsystem = dbus_test_service_new(NULL);
+			dbus_test_service_set_bus(testsystem, DBUS_TEST_SERVICE_BUS_SYSTEM);
 
-			dbus_test_service_add_task(service, (DbusTestTask*)service_mock);
-			dbus_test_service_start_tasks(service);
+			dbus_test_service_add_task(testsystem, (DbusTestTask*)service_mock);
+			dbus_test_service_start_tasks(testsystem);
 
 			system = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, NULL);
 			ASSERT_NE(nullptr, system);
 			g_dbus_connection_set_exit_on_close(system, FALSE);
 			g_object_add_weak_pointer(G_OBJECT(system), (gpointer *)&system);
 
+			/* Session Bus */
+			testsession = dbus_test_service_new(NULL);
+			dbus_test_service_set_bus(testsession, DBUS_TEST_SERVICE_BUS_SESSION);
+
+			dbus_test_service_start_tasks(testsession);
+
+			session = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, NULL);
+			ASSERT_NE(nullptr, session);
+			g_dbus_connection_set_exit_on_close(session, FALSE);
+			g_object_add_weak_pointer(G_OBJECT(session), (gpointer *)&session);
+
+			/* Setup proxy */
 			proxy = g_dbus_proxy_new_sync(system,
 				G_DBUS_PROXY_FLAGS_NONE,
 				NULL,
@@ -66,9 +82,11 @@ class MediaPlayerUserTest : public ::testing::Test
 
 		virtual void TearDown() {
 			g_clear_object(&proxy);
-			g_clear_object(&service);
+			g_clear_object(&testsystem);
+			g_clear_object(&testsession);
 
 			g_object_unref(system);
+			g_object_unref(session);
 
 			#if 0
 			/* Accounts Service keeps a bunch of references around so we
