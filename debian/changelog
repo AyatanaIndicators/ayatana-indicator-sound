@@ -1,4 +1,4 @@
-indicator-sound (12.10.2+15.10.20150507+eventually3-0ubuntu1) wily; urgency=medium
+indicator-sound (12.10.2+15.10.20150507+eventually4-0ubuntu1) wily; urgency=medium
 
   * Using eventually to avoid arbitrary timeouts in tests
 
