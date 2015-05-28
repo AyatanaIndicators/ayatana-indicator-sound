@@ -39,6 +39,9 @@ class MediaPlayerUserTest : public ::testing::Test
 
 		DbusTestService * testsession = NULL;
 
+		DbusTestProcess * systemmonitor = nullptr;
+		DbusTestProcess * sessionmonitor = nullptr;
+
 		GDBusConnection * system = NULL;
 		GDBusConnection * session = NULL;
 		GDBusProxy * proxy = NULL;
@@ -49,6 +52,11 @@ class MediaPlayerUserTest : public ::testing::Test
 			/* System Bus */
 			testsystem = dbus_test_service_new(NULL);
 			dbus_test_service_set_bus(testsystem, DBUS_TEST_SERVICE_BUS_SYSTEM);
+
+			systemmonitor = dbus_test_process_new("dbus-monitor");
+			dbus_test_process_append_param(systemmonitor, "--system");
+			dbus_test_task_set_name(DBUS_TEST_TASK(systemmonitor), "System");
+			dbus_test_service_add_task(testsystem, DBUS_TEST_TASK(systemmonitor));
 
 			dbus_test_service_add_task(testsystem, (DbusTestTask*)service_mock);
 			dbus_test_service_start_tasks(testsystem);
@@ -61,6 +69,11 @@ class MediaPlayerUserTest : public ::testing::Test
 			/* Session Bus */
 			testsession = dbus_test_service_new(NULL);
 			dbus_test_service_set_bus(testsession, DBUS_TEST_SERVICE_BUS_SESSION);
+
+			sessionmonitor = dbus_test_process_new("dbus-monitor");
+			dbus_test_process_append_param(sessionmonitor, "--session");
+			dbus_test_task_set_name(DBUS_TEST_TASK(sessionmonitor), "Session");
+			dbus_test_service_add_task(testsession, DBUS_TEST_TASK(sessionmonitor));
 
 			dbus_test_service_start_tasks(testsession);
 
@@ -81,6 +94,9 @@ class MediaPlayerUserTest : public ::testing::Test
 		}
 
 		virtual void TearDown() {
+			g_clear_object(&sessionmonitor);
+			g_clear_object(&systemmonitor);
+
 			g_clear_object(&proxy);
 			g_clear_object(&testsystem);
 			g_clear_object(&testsession);
