@@ -1,3 +1,9 @@
+indicator-sound (12.10.2+15.10.20150605-0ubuntu1) wily; urgency=medium
+
+  * 
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 05 Jun 2015 19:50:06 +0000
+
 indicator-sound (12.10.2+15.10.20150507+eventually4-0ubuntu1) wily; urgency=medium
 
   * Using eventually to avoid arbitrary timeouts in tests
