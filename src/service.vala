@@ -38,7 +38,7 @@ public class IndicatorSound.Service: Object {
 		});
 		warn_notification.add_action ("cancel", _("Cancel"), (n, a) => {
 			/* user rejected loud volume; re-clamp to just below the warning level */
-			set_clamped_volume (settings.get_double("high-volume-level") * 0.9);
+			set_clamped_volume (settings.get_double("high-volume-level") * 0.9, VolumeControl.VolumeReasons.USER_KEYPRESS);
 		});
 
 		BusWatcher.watch_namespace (GLib.BusType.SESSION,
@@ -226,17 +226,17 @@ public class IndicatorSound.Service: Object {
 
 	const double volume_step_percentage = 0.06;
 
-	void set_clamped_volume (double unclamped) {
+	void set_clamped_volume (double unclamped, VolumeControl.VolumeReasons reason) {
 		var vol = new VolumeControl.Volume();
 		vol.volume = unclamped.clamp (0.0, this.max_volume);
-		vol.reason = VolumeControl.VolumeReasons.USER_KEYPRESS;
+		vol.reason = reason;
 		this.volume_control.volume = vol;
 	}
 
 	void activate_scroll_action (SimpleAction action, Variant? param) {
 		int delta = param.get_int32(); /* positive for up, negative for down */
 		double v = this.volume_control.volume.volume + volume_step_percentage * delta;
-		set_clamped_volume(v);
+		set_clamped_volume (v, VolumeControl.VolumeReasons.USER_KEYPRESS);
 	}
 
 	void activate_desktop_settings (SimpleAction action, Variant? param) {
@@ -467,14 +467,14 @@ public class IndicatorSound.Service: Object {
 
 		volume_action.change_state.connect ( (action, val) => {
 			double v = val.get_double () * this.max_volume;
-			set_clamped_volume(v);
+			set_clamped_volume (v, VolumeControl.VolumeReasons.USER_KEYPRESS);
 		});
 
 		/* activating this action changes the volume by the amount given in the parameter */
 		volume_action.activate.connect ( (action, param) => {
 			int delta = param.get_int32 ();
 			double v = volume_control.volume.volume + volume_step_percentage * delta;
-			set_clamped_volume(v);
+			set_clamped_volume (v, VolumeControl.VolumeReasons.USER_KEYPRESS);
 		});
 
 		this.volume_control.notify["volume"].connect (() => {
