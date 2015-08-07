@@ -1,3 +1,14 @@
+indicator-sound (12.10.2+15.10.20150807.6-0ubuntu1) wily; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Charles Kerr ]
+  * Revised UI volume warnings to comply with EU requirements. (LP:
+    #1481913)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 07 Aug 2015 22:35:58 +0000
+
 indicator-sound (12.10.2+15.10.20150605-0ubuntu1) wily; urgency=medium
 
   * 
