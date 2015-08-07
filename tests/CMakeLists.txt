@@ -195,6 +195,7 @@ add_test(sound-menu-test sound-menu-test)
 # Notification Test
 ###########################
 
+#[[
 include_directories(${CMAKE_SOURCE_DIR}/src)
 add_executable (notifications-test notifications-test.cc)
 target_link_libraries (
@@ -208,6 +209,7 @@ target_link_libraries (
 )
 
 add_test(notifications-test notifications-test)
+]]
 
 ###########################
 # Accounts Service User
