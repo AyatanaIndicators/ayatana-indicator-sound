@@ -163,7 +163,7 @@ add_test(accounts-service-user-test-player
 ###########################
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
-add_executable (volume-control-test volume-control-test.cc)
+add_executable (volume-control-test volume-control-test.cc gschemas.compiled)
 target_link_libraries (
 	volume-control-test
 	indicator-sound-service-lib
