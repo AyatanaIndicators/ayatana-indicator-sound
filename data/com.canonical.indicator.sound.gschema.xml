@@ -39,5 +39,44 @@
         Whether or not to show the sound indicator in the menu bar.
       </description>
     </key>
+
+    <!-- VOLUME -->
+
+    <key name="high-volume-warning-enabled" type="b">
+      <default>true</default>
+      <summary>Whether or not to show the a volume warning.</summary>
+      <description>
+        Whether or not to show the a volume warning when the volume exceeds some level while headphones are plugged in.
+      </description>
+    </key>
+    <key name="high-volume-acknowledgment-ttl" type="i">
+      <default>1200</default>
+      <summary>How often, in hours, a user's high volume confirmation should be remembered.</summary>
+      <description>
+        After a user confirms that they want to listen at a higher volume, subsequent volume
+        changes do not need to re-trigger a warning until this interval has passed.
+        For example, EU standard EN 60950-1/Al2 cites "The acknowledgement does not need to
+        be repeated more than once every 20 h of cumulative listening time."
+      </description>
+    </key>
+    <key name="high-volume-level" type="d">
+      <default>0.75</default>
+      <summary>Volume level that triggers a high volume warning. [0.0..1.0]</summary><!-- FIXME: decibels would be better -->
+      <description>
+        When high volume warnings are enabled, a warning will be shown when
+        the volume level is raised past this level.
+      </description>
+    </key>
+<!-- FIXME: not used yet, needs to be worked into the service.max_volume property wrt allow_amplified_volume .
+     Also, decibels would be better here
+    <key name="maximum-volume" type="d">
+      <default>1.0</default>
+      <summary>Maximum volume level, [0.0..1.0]</summary>
+      <description>
+        Maximum volume level, [0.0..1.0]
+      </description>
+    </key>
+-->
+
   </schema>
 </schemalist>

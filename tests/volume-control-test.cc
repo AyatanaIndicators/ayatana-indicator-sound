@@ -32,7 +32,11 @@ class VolumeControlTest : public ::testing::Test
 		DbusTestService * service = NULL;
 		GDBusConnection * session = NULL;
 
-		virtual void SetUp() {
+		virtual void SetUp() override {
+
+			g_setenv("GSETTINGS_SCHEMA_DIR", SCHEMA_DIR, TRUE);
+			g_setenv("GSETTINGS_BACKEND", "memory", TRUE);
+
 			service = dbus_test_service_new(NULL);
 			dbus_test_service_start_tasks(service);
 
