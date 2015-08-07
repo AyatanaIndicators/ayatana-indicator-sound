@@ -314,11 +314,12 @@ public class IndicatorSound.Service: Object {
 	private bool block_info_notifications = false;
 	private int64 loudness_approved_timestamp = 0;
 
-	bool user_recently_approved_loudness() {
+	private bool user_recently_approved_loudness() {
 		int64 ttl_sec = this.settings.get_int("high-volume-acknowledgment-ttl");
 		int64 ttl_usec = ttl_sec * 1000000;
-		int64 oldest_time_allowed = GLib.get_monotonic_time() - ttl_usec;
-		return this.loudness_approved_timestamp >= oldest_time_allowed;
+		int64 now = GLib.get_monotonic_time();
+		return (this.loudness_approved_timestamp != 0)
+			&& (this.loudness_approved_timestamp + ttl_usec >= now);
 	}
 
 	void update_notification () {
