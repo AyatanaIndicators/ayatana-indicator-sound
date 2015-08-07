@@ -27,11 +27,24 @@ public class IndicatorSound.Service: Object {
 			error("Unable to get DBus session bus: %s", e.message);
 		}
 
-		sync_notification = new Notify.Notification(_("Volume"), "", "audio-volume-muted");
+		info_notification = new Notify.Notification(_("Volume"), "", "audio-volume-muted");
+
+		warn_notification = new Notify.Notification(_("Volume"), _("High volume can damage your hearing."), "audio-volume-high");
+		warn_notification.set_hint ("x-canonical-non-shaped-icon", "true");
+		warn_notification.set_hint ("x-canonical-snap-decisions", "true");
+		warn_notification.set_hint ("x-canonical-private-affirmative-tint", "true");
+		warn_notification.add_action ("ok", _("OK"), (n, a) => {
+			this.loudness_approved_timestamp = GLib.get_monotonic_time ();
+		});
+		warn_notification.add_action ("cancel", _("Cancel"), (n, a) => {
+			/* user rejected loud volume; re-clamp to just below the warning level */
+			set_clamped_volume (settings.get_double("high-volume-level") * 0.9);
+		});
+
 		BusWatcher.watch_namespace (GLib.BusType.SESSION,
 		                            "org.freedesktop.Notifications",
-		                            () => { debug("Notifications name appeared"); check_sync_notification = false; },
-		                            () => { debug("Notifications name vanshed");  check_sync_notification = false; });
+		                            () => { debug("Notifications name appeared"); notify_server_caps_checked = false; },
+		                            () => { debug("Notifications name vanshed");  notify_server_caps_checked = false; });
 
 		this.settings = new Settings ("com.canonical.indicator.sound");
 		this.sharedsettings = new Settings ("com.ubuntu.sound");
@@ -88,14 +101,10 @@ public class IndicatorSound.Service: Object {
 		/* Hide the notification when the menu is shown */
 		var shown_action = actions.lookup_action ("indicator-shown") as SimpleAction;
 		shown_action.change_state.connect ((state) => {
-			block_notifications = state.get_boolean();
-			if (block_notifications) {
+			block_info_notifications = state.get_boolean();
+			if (block_info_notifications) {
 				debug("Indicator is shown");
-				try {
-					sync_notification.close();
-				} catch (Error e) {
-					warning("Unable to close synchronous volume notification: %s", e.message);
-				}
+				close_notification(info_notification);
 			} else {
 				debug("Indicator is hidden");
 			}
@@ -109,6 +118,26 @@ public class IndicatorSound.Service: Object {
 		}
 
 		this.menus.@foreach ( (profile, menu) => menu.export (bus, @"/com/canonical/indicator/sound/$profile"));
+	}
+
+	private void close_notification(Notify.Notification? n) {
+		if ((n != null) && (n.id != 0)) {
+			try {
+				n.close();
+			} catch (GLib.Error e) {
+				warning("Unable to close notification: %s", e.message);
+			}
+		}
+	}
+
+	private void show_notification(Notify.Notification? n) {
+		if (n != null) {
+			try {
+				n.show ();			
+			} catch (GLib.Error e) {
+				warning ("Unable to show notification: %s", e.message);
+			}
+		}
 	}
 
 	~Service() {
@@ -187,7 +216,8 @@ public class IndicatorSound.Service: Object {
 	bool syncing_preferred_players = false;
 	AccountsServiceUser? accounts_service = null;
 	bool export_to_accounts_service = false;
-	private Notify.Notification sync_notification;
+	private Notify.Notification info_notification;
+	private Notify.Notification warn_notification;
 
 	/* Maximum volume as a scaling factor between the volume action's state and the value in
 	 * this.volume_control. See create_volume_action().
@@ -196,14 +226,17 @@ public class IndicatorSound.Service: Object {
 
 	const double volume_step_percentage = 0.06;
 
+	void set_clamped_volume (double unclamped) {
+		var vol = new VolumeControl.Volume();
+		vol.volume = unclamped.clamp (0.0, this.max_volume);
+		vol.reason = VolumeControl.VolumeReasons.USER_KEYPRESS;
+		this.volume_control.volume = vol;
+	}
+
 	void activate_scroll_action (SimpleAction action, Variant? param) {
 		int delta = param.get_int32(); /* positive for up, negative for down */
-
-		var scrollvol = new VolumeControl.Volume();
 		double v = this.volume_control.volume.volume + volume_step_percentage * delta;
-		scrollvol.volume = v.clamp (0.0, this.max_volume);
-		scrollvol.reason = VolumeControl.VolumeReasons.USER_KEYPRESS;
-		this.volume_control.volume = scrollvol;
+		set_clamped_volume(v);
 	}
 
 	void activate_desktop_settings (SimpleAction action, Variant? param) {
@@ -275,60 +308,71 @@ public class IndicatorSound.Service: Object {
 		root_action.set_state (builder.end());
 	}
 
-	private bool check_sync_notification = false;
-	private bool support_sync_notification = false;
-	private bool block_notifications = false;
+	private bool notify_server_caps_checked = false;
+	private bool notify_server_supports_actions = false;
+	private bool notify_server_supports_sync = false;
+	private bool block_info_notifications = false;
+	private int64 loudness_approved_timestamp = 0;
 
-	void update_sync_notification () {
-		if (!check_sync_notification) {
-			support_sync_notification = false;
+	bool user_recently_approved_loudness() {
+		int64 ttl_sec = this.settings.get_int("high-volume-acknowledgment-ttl");
+		int64 ttl_usec = ttl_sec * 1000000;
+		int64 oldest_time_allowed = GLib.get_monotonic_time() - ttl_usec;
+		return this.loudness_approved_timestamp >= oldest_time_allowed;
+	}
+
+	void update_notification () {
+
+		if (!notify_server_caps_checked) {
 			List<string> caps = Notify.get_server_caps ();
-			if (caps.find_custom ("x-canonical-private-synchronous", strcmp) != null) {
-				support_sync_notification = true;
-			}
-			check_sync_notification = true;
+			notify_server_supports_actions = caps.find_custom ("actions", strcmp) != null;
+			notify_server_supports_sync = caps.find_custom ("x-canonical-private-synchronous", strcmp) != null;
+			notify_server_caps_checked = true;
 		}
 
-		if (!support_sync_notification)
-			return;
+		var loud = volume_control.high_volume;
+		var warn = loud
+			&& this.notify_server_supports_actions
+			&& this.settings.get_boolean("high-volume-warning-enabled")
+			&& !this.user_recently_approved_loudness();
 
-		if (block_notifications)
-			return;
+		if (warn) {
+			close_notification(info_notification);
+			show_notification(warn_notification);
+		} else {
+			close_notification(warn_notification);
 
-		/* Determine Label */
-		string volume_label = "";
-		if (volume_control.high_volume)
-			volume_label = _("High volume");
+			if (notify_server_supports_sync && !block_info_notifications) {
 
-		/* Choose an icon */
-		string icon = "audio-volume-muted";
-		if (volume_control.volume.volume <= 0.0)
-			icon = "audio-volume-muted";
-		else if (volume_control.volume.volume <= 0.3)
-			icon = "audio-volume-low";
-		else if (volume_control.volume.volume <= 0.7)
-			icon = "audio-volume-medium";
-		else
-			icon = "audio-volume-high";
+				/* Determine Label */
+				string volume_label = "";
+				if (loud) {
+					volume_label = _("High volume can damage your hearing.");
+				}
 
-		/* Check tint */
-		string tint = "false";
-		if (volume_control.high_volume)
-			tint = "true";
+				/* Choose an icon */
+				string icon = "";
+				if (loud)
+					icon = "audio-volume-high";
+				else if (volume_control.volume.volume <= 0.0)
+					icon = "audio-volume-muted";
+				else if (volume_control.volume.volume <= 0.3)
+					icon = "audio-volume-low";
+				else if (volume_control.volume.volume <= 0.7)
+					icon = "audio-volume-medium";
+				else
+					icon = "audio-volume-high";
 
-		/* Put it all into the notification */
-		sync_notification.clear_hints ();
-		sync_notification.update (_("Volume"), volume_label, icon);
-		sync_notification.set_hint ("value", (int32)Math.round(volume_control.volume.volume / this.max_volume * 100.0));
-		sync_notification.set_hint ("x-canonical-value-bar-tint", tint);
-		sync_notification.set_hint ("x-canonical-private-synchronous", "true");
-		sync_notification.set_hint ("x-canonical-non-shaped-icon", "true");
-
-		/* Show it */
-		try {
-			sync_notification.show ();			
-		} catch (GLib.Error e) {
-			warning("Unable to send volume change notification: %s", e.message);
+				/* Reset the notification */
+				var n = this.info_notification;
+				n.update (_("Volume"), volume_label, icon);
+				n.clear_hints();
+				n.set_hint ("x-canonical-non-shaped-icon", "true");
+				n.set_hint ("x-canonical-private-synchronous", "true");
+				n.set_hint ("x-canonical-value-bar-tint", loud ? "true" : "false");
+				n.set_hint ("value", (int32)Math.round(volume_control.volume.volume / this.max_volume * 100.0));
+				show_notification(n);
+			}
 		}
 	}
 
@@ -423,22 +467,14 @@ public class IndicatorSound.Service: Object {
 
 		volume_action.change_state.connect ( (action, val) => {
 			double v = val.get_double () * this.max_volume;
-
-			var vol = new VolumeControl.Volume();
-			vol.volume = v.clamp (0.0, this.max_volume);
-			vol.reason = VolumeControl.VolumeReasons.USER_KEYPRESS;
-			volume_control.volume = vol;
+			set_clamped_volume(v);
 		});
 
 		/* activating this action changes the volume by the amount given in the parameter */
 		volume_action.activate.connect ( (action, param) => {
 			int delta = param.get_int32 ();
 			double v = volume_control.volume.volume + volume_step_percentage * delta;
-
-			var vol = new VolumeControl.Volume();
-			vol.volume = v.clamp (0.0, this.max_volume);
-			vol.reason = VolumeControl.VolumeReasons.USER_KEYPRESS;
-			volume_control.volume = vol;
+			set_clamped_volume(v);
 		});
 
 		this.volume_control.notify["volume"].connect (() => {
@@ -450,7 +486,7 @@ public class IndicatorSound.Service: Object {
 			var reason = volume_control.volume.reason;
 			if (reason == VolumeControl.VolumeReasons.USER_KEYPRESS ||
 					reason == VolumeControl.VolumeReasons.DEVICE_OUTPUT_CHANGE)
-				this.update_sync_notification ();
+				this.update_notification ();
 		});
 
 		this.volume_control.bind_property ("ready", volume_action, "enabled", BindingFlags.SYNC_CREATE);
@@ -481,7 +517,7 @@ public class IndicatorSound.Service: Object {
 
 		this.volume_control.notify["high-volume"].connect( () => {
 			high_volume_action.set_state(new Variant.boolean (this.volume_control.high_volume));
-			update_sync_notification();
+			update_notification();
 		});
 
 		return high_volume_action;
