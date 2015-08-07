@@ -282,7 +282,7 @@ TEST_F(MediaPlayerUserTest, DataSet) {
 	g_clear_object(&player);
 }
 
-TEST_F(MediaPlayerUserTest, TimeoutTest) {
+TEST_F(MediaPlayerUserTest, DISABLED_TimeoutTest) {
 	/* Put data into Acts -- but 15 minutes ago */
 	set_property("Timestamp", g_variant_new_uint64(g_get_monotonic_time() - 15 * 60 * 1000 * 1000));
 	set_property("PlayerName", g_variant_new_string("The Player Formerly Known as Prince"));
