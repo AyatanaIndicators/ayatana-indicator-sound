@@ -42,7 +42,7 @@ public abstract class VolumeControl : Object
 	private Volume _volume;
 	public virtual Volume volume { get { return _volume; } set { } }
 	public virtual double mic_volume { get { return 0.0; } set { } }
-	public virtual double max_volume { get; set; }
+	public virtual double max_volume { get { return 1.0; } protected set { } }
 
 	public virtual bool high_volume_approved { get { return false; } protected set { } }
 	public virtual void approve_high_volume() { }
