@@ -744,7 +744,7 @@ public class VolumeControlPulse : VolumeControl
 			int64 expires_at = _high_volume_approved_at + _high_volume_approved_ttl_usec;
 			int64 now = GLib.get_monotonic_time();
 			if (expires_at > now) {
-				var seconds_left = 1 + ((now - expires_at) / 1000000);
+				var seconds_left = 1 + ((expires_at - now) / 1000000);
 				_high_volume_approved_timer = Timeout.add_seconds((uint)seconds_left, on_high_volume_timer);
 			}
 		}
