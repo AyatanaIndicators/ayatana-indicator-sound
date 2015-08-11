@@ -192,7 +192,7 @@ public class IndicatorSound.Service: Object {
 
 	const double volume_step_percentage = 0.06;
 
-	void activate_scroll_action (SimpleAction action, Variant? param) {
+	private void activate_scroll_action (SimpleAction action, Variant? param) {
 		int delta = param.get_int32(); /* positive for up, negative for down */
 		double v = volume_control.volume.volume + volume_step_percentage * delta;
 		volume_control.set_volume_clamp (v, VolumeControl.VolumeReasons.USER_KEYPRESS);
@@ -272,7 +272,7 @@ public class IndicatorSound.Service: Object {
 	private bool notify_server_supports_sync = false;
 	private bool block_info_notifications = false;
 
-	void update_notification () {
+	private void update_notification () {
 
 		if (!notify_server_caps_checked) {
 			List<string> caps = Notify.get_server_caps ();
@@ -419,9 +419,8 @@ public class IndicatorSound.Service: Object {
 		volume_action.set_state(create_volume_action_state());
 	}
 
-
-	SimpleAction volume_action;
-	Action create_volume_action () {
+	private SimpleAction volume_action;
+	private Action create_volume_action () {
 		volume_action = new SimpleAction.stateful ("volume", VariantType.INT32, create_volume_action_state());
 
 		volume_action.change_state.connect ( (action, val) => {
@@ -430,7 +429,7 @@ public class IndicatorSound.Service: Object {
 		});
 
 		/* activating this action changes the volume by the amount given in the parameter */
-		volume_action.activate.connect ((action, param) => activate_scroll_action());
+		volume_action.activate.connect ((a,p) => activate_scroll_action(a,p));
 
 		this.volume_control.notify["max-volume"].connect(() => {
 			message("max-volume changed to %f", volume_control.max_volume);
