@@ -20,6 +20,13 @@
 public class IndicatorSound.Service: Object {
 	DBusConnection bus;
 
+	/**
+	 * A copy of volume_control.volume made before just warn_notification
+	 * is shown. Since the volume is clamped during the warning, we cache
+	 * the previous volume to use iff the user hits "OK".
+	 */
+	VolumeControl.Volume _pre_warn_volume = null;
+
 	public Service (MediaPlayerList playerlist, VolumeControl volume, AccountsServiceUser? accounts) {
 		try {
 			bus = Bus.get_sync(GLib.BusType.SESSION);
@@ -34,9 +41,18 @@ public class IndicatorSound.Service: Object {
 		warn_notification.set_hint ("x-canonical-snap-decisions", "true");
 		warn_notification.set_hint ("x-canonical-private-affirmative-tint", "true");
 		warn_notification.add_action ("ok", _("OK"), (n, a) => {
-			this.volume_control.approve_high_volume ();
+        		stop_clamp_to_high_timeout();
+			volume_control.approve_high_volume ();
+			if (_pre_warn_volume != null) {
+				var tmp = _pre_warn_volume;
+				_pre_warn_volume = null;
+				volume_control.volume = tmp;
+			}
 		});
-		warn_notification.add_action ("cancel", _("Cancel"), (n, a) => {});
+		warn_notification.add_action ("cancel", _("Cancel"), (n, a) => {
+			_pre_warn_volume = null;
+		});
+
 
 		BusWatcher.watch_namespace (GLib.BusType.SESSION,
 		                            "org.freedesktop.Notifications",
@@ -139,7 +155,7 @@ public class IndicatorSound.Service: Object {
 
 		clear_acts_player();
 
-        	stop_clamp_volume_timeout();
+        	stop_clamp_to_high_timeout();
 
 		if (this.player_action_update_id > 0) {
 			Source.remove (this.player_action_update_id);
@@ -290,7 +306,11 @@ public class IndicatorSound.Service: Object {
 
 		if (warn) {
 			close_notification(info_notification);
-			message("showing warning");
+			if (_pre_warn_volume == null) {
+				_pre_warn_volume = new VolumeControl.Volume();
+				_pre_warn_volume.volume = volume_control.volume.volume;
+				_pre_warn_volume.reason = volume_control.volume.reason;
+			}
 			show_notification(warn_notification);
 		} else {
 			message("closing warning");
@@ -450,10 +470,8 @@ public class IndicatorSound.Service: Object {
 					reason == VolumeControl.VolumeReasons.DEVICE_OUTPUT_CHANGE)
 				this.update_notification ();
 
-			/* if the volume changes while the "high volume"
-			 * warning dialog is up, clamp to high-volume */
-			if (this.warn_notification.id != 0)
-				this.clamp_volume_soon();
+			if ((warn_notification.id != 0) && (_pre_warn_volume != null))
+				clamp_to_high_soon();
 		});
 
 		this.volume_control.bind_property ("ready", volume_action, "enabled", BindingFlags.SYNC_CREATE);
@@ -610,23 +628,23 @@ public class IndicatorSound.Service: Object {
 
         /** VOLUME CLAMPING **/
 
-        private uint _clamp_volume_timeout = 0;
+        private uint _clamp_to_high_timeout = 0;
 
-        private void stop_clamp_volume_timeout() {
-                if (_clamp_volume_timeout != 0) {
-                        Source.remove(_clamp_volume_timeout);
-                        _clamp_volume_timeout = 0;
+        private void stop_clamp_to_high_timeout() {
+                if (_clamp_to_high_timeout != 0) {
+                        Source.remove(_clamp_to_high_timeout);
+                        _clamp_to_high_timeout = 0;
                 }
         }
 
-        private void clamp_volume_soon() {
+        private void clamp_to_high_soon() {
                 const uint interval_msec = 200; /* arbitrary, but works */
-                if (_clamp_volume_timeout == 0)
-                        _clamp_volume_timeout = Timeout.add(interval_msec, clamp_volume_idle);
+                if (_clamp_to_high_timeout == 0)
+                        _clamp_to_high_timeout = Timeout.add(interval_msec, clamp_to_high_idle);
         }
 
-        private bool clamp_volume_idle() {
-                _clamp_volume_timeout = 0;
+        private bool clamp_to_high_idle() {
+                _clamp_to_high_timeout = 0;
 		volume_control.clamp_to_high_volume();
                 return false; // Source.REMOVE;
         }
