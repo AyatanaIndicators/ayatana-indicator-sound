@@ -313,7 +313,6 @@ public class IndicatorSound.Service: Object {
 			}
 			show_notification(warn_notification);
 		} else {
-			message("closing warning");
 			close_notification(warn_notification);
 
 			if (notify_server_supports_sync && !block_info_notifications) {
@@ -438,9 +437,7 @@ public class IndicatorSound.Service: Object {
 	}
 
 	private void update_volume_action_state() {
-		var state = create_volume_action_state();
-		message("updating volume_action state to %s", state.print(true));
-		volume_action.set_state(state);
+		volume_action.set_state(create_volume_action_state());
 	}
 
 	private SimpleAction volume_action;
@@ -456,7 +453,6 @@ public class IndicatorSound.Service: Object {
 		volume_action.activate.connect ((a,p) => activate_scroll_action(a,p));
 
 		this.volume_control.notify["max-volume"].connect(() => {
-			message("max-volume changed to %f", volume_control.max_volume);
 			update_volume_action_state();
 		});
 

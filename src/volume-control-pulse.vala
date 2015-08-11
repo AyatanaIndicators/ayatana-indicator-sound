@@ -643,7 +643,6 @@ public class VolumeControlPulse : VolumeControl
 	/** MAX VOLUME PROPERTY **/
 
 	private void init_max_volume() {
-		message("woo");
 		_settings.changed["normal-volume-decibels"].connect(() => update_max_volume());
 		_settings.changed["amplified-volume-decibels"].connect(() => update_max_volume());
 		_shared_settings.changed["allow-amplified-volume"].connect(() => update_max_volume());
@@ -651,9 +650,8 @@ public class VolumeControlPulse : VolumeControl
 	}
 	private void update_max_volume () {
 		var new_max_volume = calculate_max_volume();
-		message ("old_max_volume %f new_max_volume %f", max_volume, new_max_volume);
 		if (max_volume != new_max_volume) {
-			message("changing max_volume from %f to %f", this.max_volume, new_max_volume);
+			debug("changing max_volume from %f to %f", this.max_volume, new_max_volume);
 			max_volume = calculate_max_volume();
 		}
 	}
@@ -684,20 +682,18 @@ public class VolumeControlPulse : VolumeControl
 		update_high_volume_cache();
 	}
 	private void update_high_volume_cache() {
-		_warning_volume_enabled = _settings.get_boolean("warning-volume-enabled");
-
 		var volume_dB = _settings.get_double ("warning-volume-decibels");
 		var volume_sw = PulseAudio.Volume.sw_from_dB (volume_dB);
 		var volume_norms = volume_to_double (volume_sw);
 		_warning_volume_norms = volume_norms;
-
-		message("updating high volume cache... enabled %d dB %f sw %lu norm %f", (int)_warning_volume_enabled, volume_dB, volume_sw, volume_norms);
+		_warning_volume_enabled = _settings.get_boolean("warning-volume-enabled");
+		debug("updating high volume cache... enabled %d dB %f sw %lu norm %f", (int)_warning_volume_enabled, volume_dB, volume_sw, volume_norms);
 		update_high_volume();
 	}
 	private void update_high_volume() {
 		var new_high_volume = calculate_high_volume();
 		if (high_volume != new_high_volume) {
-			message("changing high_volume from %d to %d", (int)high_volume, (int)new_high_volume);
+			debug("changing high_volume from %d to %d", (int)high_volume, (int)new_high_volume);
 			high_volume = new_high_volume;
 		}
 	}
@@ -705,7 +701,6 @@ public class VolumeControlPulse : VolumeControl
 		return calculate_high_volume_from_volume(_volume.volume);
 	}
 	private bool calculate_high_volume_from_volume(double volume) {
-		message ("headphones %d warning enabled %d (vol %f > loud %f) multimedia %d", (int)_active_port_headphone, (int)_warning_volume_enabled, (double)volume, (double)_warning_volume_norms, (int)(stream == "multimedia"));
 		return _active_port_headphone
 			&& _warning_volume_enabled
 			&& volume >= _warning_volume_norms
@@ -713,15 +708,12 @@ public class VolumeControlPulse : VolumeControl
 	}
 
 	public override void clamp_to_high_volume() {
-		if (_high_volume) {
-			message("_volume.volume(%f) _warning_volume_norms(%f)", _volume.volume, _warning_volume_norms);
-			if (_volume.volume > _warning_volume_norms) {
-				var vol = new VolumeControl.Volume();
-				vol.volume = _volume.volume.clamp(0, _warning_volume_norms);
-				vol.reason = _volume.reason;
-				message("Clamping from %f down to %f", _volume.volume, vol.volume);
-				volume = vol;
-			}
+		if (_high_volume && (_volume.volume > _warning_volume_norms)) {
+			var vol = new VolumeControl.Volume();
+			vol.volume = _volume.volume.clamp(0, _warning_volume_norms);
+			vol.reason = _volume.reason;
+			debug("Clamping from %f down to %f", _volume.volume, vol.volume);
+			volume = vol;
 		}
 	}
 
@@ -771,16 +763,14 @@ public class VolumeControlPulse : VolumeControl
 	private void update_high_volume_approved() {
 		var new_high_volume_approved = calculate_high_volume_approved();
 		if (high_volume_approved != new_high_volume_approved) {
-			message("changing high_volume_approved from %d to %d", (int)high_volume_approved, (int)new_high_volume_approved);
+			debug("changing high_volume_approved from %d to %d", (int)high_volume_approved, (int)new_high_volume_approved);
 			high_volume_approved = new_high_volume_approved;
 		}
 	}
 	private bool calculate_high_volume_approved() {
                 int64 now = GLib.get_monotonic_time();
-                var foo = (_high_volume_approved_at != 0)
+                return (_high_volume_approved_at != 0)
                         && (_high_volume_approved_at + _high_volume_approved_ttl_usec >= now);
-		message("approved: %d", (int)foo);
-		return foo;
 	}
 	public override void approve_high_volume() {
 		_high_volume_approved_at = GLib.get_monotonic_time();
