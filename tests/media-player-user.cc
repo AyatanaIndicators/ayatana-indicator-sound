@@ -239,7 +239,7 @@ running_update (GObject * obj, GParamSpec * pspec, bool * running) {
 	*running = media_player_get_is_running(MEDIA_PLAYER(obj)) == TRUE;
 };
 
-TEST_F(MediaPlayerUserTest, DISABLED_DataSet) {
+TEST_F(MediaPlayerUserTest, DataSet) {
 	/* Put data into Acts */
 	set_property("Timestamp", g_variant_new_uint64(g_get_monotonic_time()));
 	set_property("PlayerName", g_variant_new_string("The Player Formerly Known as Prince"));
@@ -282,7 +282,7 @@ TEST_F(MediaPlayerUserTest, DISABLED_DataSet) {
 	g_clear_object(&player);
 }
 
-TEST_F(MediaPlayerUserTest, DISABLED_TimeoutTest) {
+TEST_F(MediaPlayerUserTest, TimeoutTest) {
 	/* Put data into Acts -- but 15 minutes ago */
 	set_property("Timestamp", g_variant_new_uint64(g_get_monotonic_time() - 15 * 60 * 1000 * 1000));
 	set_property("PlayerName", g_variant_new_string("The Player Formerly Known as Prince"));
