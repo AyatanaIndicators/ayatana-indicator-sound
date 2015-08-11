@@ -40,20 +40,7 @@ public class IndicatorSound.Service: Object {
 		warn_notification.set_hint ("x-canonical-non-shaped-icon", "true");
 		warn_notification.set_hint ("x-canonical-snap-decisions", "true");
 		warn_notification.set_hint ("x-canonical-private-affirmative-tint", "true");
-		warn_notification.add_action ("ok", _("OK"), (n, a) => {
-        		stop_clamp_to_high_timeout();
-			volume_control.approve_high_volume ();
-			if (_pre_warn_volume != null) {
-				var tmp = _pre_warn_volume;
-				_pre_warn_volume = null;
-				volume_control.volume = tmp;
-			}
-		});
-		warn_notification.add_action ("cancel", _("Cancel"), (n, a) => {
-			_pre_warn_volume = null;
-		});
-
-
+		warn_notification.closed.connect((n) => { n.clear_actions(); });
 		BusWatcher.watch_namespace (GLib.BusType.SESSION,
 		                            "org.freedesktop.Notifications",
 		                            () => { debug("Notifications name appeared"); notify_server_caps_checked = false; },
@@ -131,7 +118,8 @@ public class IndicatorSound.Service: Object {
 	}
 
 	private void close_notification(Notify.Notification? n) {
-		if ((n != null) && (n.id != 0)) {
+		return_if_fail (n != null);
+		if (n.id != 0) {
 			try {
 				n.close();
 			} catch (GLib.Error e) {
@@ -141,12 +129,11 @@ public class IndicatorSound.Service: Object {
 	}
 
 	private void show_notification(Notify.Notification? n) {
-		if (n != null) {
-			try {
-				n.show ();			
-			} catch (GLib.Error e) {
-				warning ("Unable to show notification: %s", e.message);
-			}
+		return_if_fail (n != null);
+		try {
+			n.show ();
+		} catch (GLib.Error e) {
+			warning ("Unable to show notification: %s", e.message);
 		}
 	}
 
@@ -311,6 +298,19 @@ public class IndicatorSound.Service: Object {
 				_pre_warn_volume.volume = volume_control.volume.volume;
 				_pre_warn_volume.reason = volume_control.volume.reason;
 			}
+			warn_notification.clear_actions();
+			warn_notification.add_action ("ok", _("OK"), (n, a) => {
+				stop_clamp_to_high_timeout();
+				volume_control.approve_high_volume ();
+				if (_pre_warn_volume != null) {
+					var tmp = _pre_warn_volume;
+					_pre_warn_volume = null;
+					volume_control.volume = tmp;
+				}
+			});
+			warn_notification.add_action ("cancel", _("Cancel"), (n, a) => {
+				_pre_warn_volume = null;
+			});
 			show_notification(warn_notification);
 		} else {
 			close_notification(warn_notification);
