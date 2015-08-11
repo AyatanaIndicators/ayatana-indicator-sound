@@ -20,12 +20,14 @@
 
 public class VolumeControlMock : VolumeControl
 {
+	private bool _high_volume = false;
+	public override bool high_volume { get { return _high_volume; } protected set { _high_volume = value; } }
+	public void set_high_volume(bool b) { high_volume = b; }
+
 	public string mock_stream { get; set; default = "multimedia"; }
 	public override string stream { get { return mock_stream; } }
 	public override bool ready { get; set; }
 	public override bool active_mic { get; set; }
-	public bool mock_high_volume { get { return high_volume; } set { high_volume = value; } }
-	public override bool high_volume { get; private set; }
 	public bool mock_mute { get; set; }
 	public override bool mute { get { return mock_mute; } }
 	public bool mock_is_playing { get; set; }
