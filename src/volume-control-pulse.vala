@@ -616,16 +616,6 @@ public class VolumeControlPulse : VolumeControl
 			return _volume;
 		}
 		set {
-
-			if ((value.reason == VolumeReasons.USER_KEYPRESS)
-				&& !_high_volume_approved
-				&& calculate_high_volume_from_volume(value.volume))
-			{
-				var clamped = value.volume.clamp(0, _warning_volume_norms);
-				message("User is trying to raise volume past warning... clamping from %f down to %f", value.volume, clamped);
-				value.volume = clamped;
-			}
-
 			var volume_changed = (value.volume != _volume.volume);
 			debug("Setting volume to %f for profile %d because %d", value.volume, _active_sink_input, value.reason);
 
@@ -720,6 +710,19 @@ public class VolumeControlPulse : VolumeControl
 			&& _warning_volume_enabled
 			&& volume >= _warning_volume_norms
 			&& (stream == "multimedia");
+	}
+
+	public override void clamp_to_high_volume() {
+		if (_high_volume) {
+			message("_volume.volume(%f) _warning_volume_norms(%f)", _volume.volume, _warning_volume_norms);
+			if (_volume.volume > _warning_volume_norms) {
+				var vol = new VolumeControl.Volume();
+				vol.volume = _volume.volume.clamp(0, _warning_volume_norms);
+				vol.reason = _volume.reason;
+				message("Clamping from %f down to %f", _volume.volume, vol.volume);
+				volume = vol;
+			}
+		}
 	}
 
 	/** HIGH VOLUME APPROVED PROPERTY **/

@@ -139,6 +139,8 @@ public class IndicatorSound.Service: Object {
 
 		clear_acts_player();
 
+        	stop_clamp_volume_timeout();
+
 		if (this.player_action_update_id > 0) {
 			Source.remove (this.player_action_update_id);
 			this.player_action_update_id = 0;
@@ -416,7 +418,9 @@ public class IndicatorSound.Service: Object {
 	}
 
 	private void update_volume_action_state() {
-		volume_action.set_state(create_volume_action_state());
+		var state = create_volume_action_state();
+		message("updating volume_action state to %s", state.print(true));
+		volume_action.set_state(state);
 	}
 
 	private SimpleAction volume_action;
@@ -445,6 +449,11 @@ public class IndicatorSound.Service: Object {
 			if (reason == VolumeControl.VolumeReasons.USER_KEYPRESS ||
 					reason == VolumeControl.VolumeReasons.DEVICE_OUTPUT_CHANGE)
 				this.update_notification ();
+
+			/* if the volume changes while the "high volume"
+			 * warning dialog is up, clamp to high-volume */
+			if (this.warn_notification.id != 0)
+				this.clamp_volume_soon();
 		});
 
 		this.volume_control.bind_property ("ready", volume_action, "enabled", BindingFlags.SYNC_CREATE);
@@ -598,4 +607,27 @@ public class IndicatorSound.Service: Object {
 
 		this.update_preferred_players ();
 	}
+
+        /** VOLUME CLAMPING **/
+
+        private uint _clamp_volume_timeout = 0;
+
+        private void stop_clamp_volume_timeout() {
+                if (_clamp_volume_timeout != 0) {
+                        Source.remove(_clamp_volume_timeout);
+                        _clamp_volume_timeout = 0;
+                }
+        }
+
+        private void clamp_volume_soon() {
+                const uint interval_msec = 200; /* arbitrary, but works */
+                if (_clamp_volume_timeout == 0)
+                        _clamp_volume_timeout = Timeout.add(interval_msec, clamp_volume_idle);
+        }
+
+        private bool clamp_volume_idle() {
+                _clamp_volume_timeout = 0;
+		volume_control.clamp_to_high_volume();
+                return false; // Source.REMOVE;
+        }
 }
