@@ -36,12 +36,23 @@ public abstract class VolumeControl : Object
 	public virtual string stream { get { return ""; } }
 	public virtual bool ready { get { return false; } set { } }
 	public virtual bool active_mic { get { return false; } set { } }
-	public virtual bool high_volume { get { return false; } }
+	public virtual bool high_volume { get { return false; } protected set { } }
 	public virtual bool mute { get { return false; } }
 	public virtual bool is_playing { get { return false; } }
 	private Volume _volume;
 	public virtual Volume volume { get { return _volume; } set { } }
 	public virtual double mic_volume { get { return 0.0; } set { } }
+	public virtual double max_volume { get; set; }
+
+	public virtual bool high_volume_approved { get { return false; } protected set { } }
+	public virtual void approve_high_volume() { }
 
 	public abstract void set_mute (bool mute);
+
+        public void set_volume_clamp (double unclamped, VolumeControl.VolumeReasons reason) {
+                var v = new VolumeControl.Volume();
+                v.volume = unclamped.clamp (0.0, this.max_volume);
+                v.reason = reason;
+                this.volume = v;
+        }
 }

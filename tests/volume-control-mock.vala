@@ -24,8 +24,8 @@ public class VolumeControlMock : VolumeControl
 	public override string stream { get { return mock_stream; } }
 	public override bool ready { get; set; }
 	public override bool active_mic { get; set; }
-	public bool mock_high_volume { get; set; }
-	public override bool high_volume { get { return mock_high_volume; } }
+	public bool mock_high_volume { get { return high_volume; } set { high_volume = value; } }
+	public override bool high_volume { get; private set; }
 	public bool mock_mute { get; set; }
 	public override bool mute { get { return mock_mute; } }
 	public bool mock_is_playing { get; set; }

@@ -34,12 +34,9 @@ public class IndicatorSound.Service: Object {
 		warn_notification.set_hint ("x-canonical-snap-decisions", "true");
 		warn_notification.set_hint ("x-canonical-private-affirmative-tint", "true");
 		warn_notification.add_action ("ok", _("OK"), (n, a) => {
-			this.loudness_approved_timestamp = GLib.get_monotonic_time ();
+			this.volume_control.approve_high_volume ();
 		});
-		warn_notification.add_action ("cancel", _("Cancel"), (n, a) => {
-			/* user rejected loud volume; re-clamp to just below the warning level */
-			set_clamped_volume (settings.get_double("high-volume-level") * 0.9, VolumeControl.VolumeReasons.USER_KEYPRESS);
-		});
+		warn_notification.add_action ("cancel", _("Cancel"), (n, a) => {});
 
 		BusWatcher.watch_namespace (GLib.BusType.SESSION,
 		                            "org.freedesktop.Notifications",
@@ -47,7 +44,6 @@ public class IndicatorSound.Service: Object {
 		                            () => { debug("Notifications name vanshed");  notify_server_caps_checked = false; });
 
 		this.settings = new Settings ("com.canonical.indicator.sound");
-		this.sharedsettings = new Settings ("com.ubuntu.sound");
 
 		this.settings.bind ("visible", this, "visible", SettingsBindFlags.GET);
 		this.notify["visible"].connect ( () => this.update_root_icon () );
@@ -95,8 +91,6 @@ public class IndicatorSound.Service: Object {
 		this.settings.changed["interested-media-players"].connect ( () => {
 			this.sync_preferred_players ();
 		});
-
-		sharedsettings.bind ("allow-amplified-volume", this, "allow-amplified-volume", SettingsBindFlags.GET);
 
 		/* Hide the notification when the menu is shown */
 		var shown_action = actions.lookup_action ("indicator-shown") as SimpleAction;
@@ -174,28 +168,6 @@ public class IndicatorSound.Service: Object {
 
 	public bool visible { get; set; }
 
-	public bool allow_amplified_volume {
-		get {
-			return this.max_volume > 1.0;
-		}
-
-		set {
-			if (this.allow_amplified_volume == value)
-				return;
-
-			if (value) {
-				/* from pulse/volume.h: #define PA_VOLUME_UI_MAX (pa_sw_volume_from_dB(+11.0)) */
-				this.max_volume = (double)PulseAudio.Volume.sw_from_dB(11.0) / PulseAudio.Volume.NORM;
-			}
-			else {
-				this.max_volume = 1.0;
-			}
-
-			/* Normalize volume, because the volume action's state is [0.0, 1.0], see create_volume_action() */
-			this.actions.change_action_state ("volume", this.volume_control.volume.volume / this.max_volume);
-		}
-	}
-
 	const ActionEntry[] action_entries = {
 		{ "root", null, null, "@a{sv} {}", null },
 		{ "scroll", activate_scroll_action, "i", null, null },
@@ -207,7 +179,6 @@ public class IndicatorSound.Service: Object {
 	SimpleActionGroup actions;
 	HashTable<string, SoundMenu> menus;
 	Settings settings;
-	Settings sharedsettings;
 	VolumeControl volume_control;
 	MediaPlayerList players;
 	uint player_action_update_id;
@@ -219,24 +190,12 @@ public class IndicatorSound.Service: Object {
 	private Notify.Notification info_notification;
 	private Notify.Notification warn_notification;
 
-	/* Maximum volume as a scaling factor between the volume action's state and the value in
-	 * this.volume_control. See create_volume_action().
-	 */
-	double max_volume = 1.0;
-
 	const double volume_step_percentage = 0.06;
-
-	void set_clamped_volume (double unclamped, VolumeControl.VolumeReasons reason) {
-		var vol = new VolumeControl.Volume();
-		vol.volume = unclamped.clamp (0.0, this.max_volume);
-		vol.reason = reason;
-		this.volume_control.volume = vol;
-	}
 
 	void activate_scroll_action (SimpleAction action, Variant? param) {
 		int delta = param.get_int32(); /* positive for up, negative for down */
-		double v = this.volume_control.volume.volume + volume_step_percentage * delta;
-		set_clamped_volume (v, VolumeControl.VolumeReasons.USER_KEYPRESS);
+		double v = volume_control.volume.volume + volume_step_percentage * delta;
+		volume_control.set_volume_clamp (v, VolumeControl.VolumeReasons.USER_KEYPRESS);
 	}
 
 	void activate_desktop_settings (SimpleAction action, Variant? param) {
@@ -312,15 +271,6 @@ public class IndicatorSound.Service: Object {
 	private bool notify_server_supports_actions = false;
 	private bool notify_server_supports_sync = false;
 	private bool block_info_notifications = false;
-	private int64 loudness_approved_timestamp = 0;
-
-	private bool user_recently_approved_loudness() {
-		int64 ttl_sec = this.settings.get_int("high-volume-acknowledgment-ttl");
-		int64 ttl_usec = ttl_sec * 1000000;
-		int64 now = GLib.get_monotonic_time();
-		return (this.loudness_approved_timestamp != 0)
-			&& (this.loudness_approved_timestamp + ttl_usec >= now);
-	}
 
 	void update_notification () {
 
@@ -334,13 +284,14 @@ public class IndicatorSound.Service: Object {
 		var loud = volume_control.high_volume;
 		var warn = loud
 			&& this.notify_server_supports_actions
-			&& this.settings.get_boolean("high-volume-warning-enabled")
-			&& !this.user_recently_approved_loudness();
+			&& !this.volume_control.high_volume_approved;
 
 		if (warn) {
 			close_notification(info_notification);
+			message("showing warning");
 			show_notification(warn_notification);
 		} else {
+			message("closing warning");
 			close_notification(warn_notification);
 
 			if (notify_server_supports_sync && !block_info_notifications) {
@@ -371,7 +322,7 @@ public class IndicatorSound.Service: Object {
 				n.set_hint ("x-canonical-non-shaped-icon", "true");
 				n.set_hint ("x-canonical-private-synchronous", "true");
 				n.set_hint ("x-canonical-value-bar-tint", loud ? "true" : "false");
-				n.set_hint ("value", (int32)Math.round(volume_control.volume.volume / this.max_volume * 100.0));
+				n.set_hint ("value", (int32)Math.round(get_volume_percent() * 100.0));
 				show_notification(n);
 			}
 		}
@@ -453,34 +404,41 @@ public class IndicatorSound.Service: Object {
 		return mute_action;
 	}
 
+	/* return the current volume in the range of [0.0, 1.0] */
+	private double get_volume_percent() {
+		return volume_control.volume.volume / this.volume_control.max_volume;
+	}
+
+	/* volume control's range can vary depending on its max_volume property,
+	 * but the action always needs to be in [0.0, 1.0]... */
+	private Variant create_volume_action_state() {
+		return new Variant.double (get_volume_percent());
+	}
+
+	private void update_volume_action_state() {
+		volume_action.set_state(create_volume_action_state());
+	}
+
+
 	SimpleAction volume_action;
 	Action create_volume_action () {
-		/* The action's state is between be in [0.0, 1.0] instead of [0.0,
-		 * max_volume], so that we don't need to update the slider menu item
-		 * every time allow-amplified-volume is changed.  Convert between the
-		 * two here, so that we always pass the full range into
-		 * volume_control.set_volume().
-		 */
-
-		double volume = this.volume_control.volume.volume / this.max_volume;
-
-		volume_action = new SimpleAction.stateful ("volume", VariantType.INT32, new Variant.double (volume));
+		volume_action = new SimpleAction.stateful ("volume", VariantType.INT32, create_volume_action_state());
 
 		volume_action.change_state.connect ( (action, val) => {
-			double v = val.get_double () * this.max_volume;
-			set_clamped_volume (v, VolumeControl.VolumeReasons.USER_KEYPRESS);
+			double v = val.get_double () * this.volume_control.max_volume;
+			volume_control.set_volume_clamp (v, VolumeControl.VolumeReasons.USER_KEYPRESS);
 		});
 
 		/* activating this action changes the volume by the amount given in the parameter */
-		volume_action.activate.connect ( (action, param) => {
-			int delta = param.get_int32 ();
-			double v = volume_control.volume.volume + volume_step_percentage * delta;
-			set_clamped_volume (v, VolumeControl.VolumeReasons.USER_KEYPRESS);
+		volume_action.activate.connect ((action, param) => activate_scroll_action);
+
+		this.volume_control.notify["max-volume"].connect(() => {
+			message("max-volume changed to %f", volume_control.max_volume);
+			update_volume_action_state();
 		});
 
 		this.volume_control.notify["volume"].connect (() => {
-			/* Normalize volume, because the volume action's state is [0.0, 1.0], see create_volume_action() */
-			volume_action.set_state (new Variant.double (this.volume_control.volume.volume / this.max_volume));
+			update_volume_action_state();
 
 			this.update_root_icon ();
 

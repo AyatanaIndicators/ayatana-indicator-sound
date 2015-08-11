@@ -45,6 +45,7 @@ public class VolumeControlPulse : VolumeControl
 	private VolumeControl.Volume _volume = new VolumeControl.Volume();
 	private double _mic_volume = 0.0;
 	private Settings _settings = new Settings ("com.canonical.indicator.sound");
+	private Settings _shared_settings = new Settings ("com.ubuntu.sound");
 
 	/* Used by the pulseaudio stream restore extension */
 	private DBusConnection _pconn;
@@ -93,20 +94,6 @@ public class VolumeControlPulse : VolumeControl
 	/** true when a microphone is active **/
 	public override bool active_mic { get; private set; default = false; }
 
-	/** true when high volume warnings should be shown */
-	public override bool high_volume {
-		get {
-			if (!_active_port_headphone) {
-				return false;
-			}
-			if (stream != "multimedia") {
-				return false;
-			}
-			var high_volume_level = this._settings.get_double("high-volume-level");
-			return this._volume.volume > high_volume_level;
-		}
-	}
-
 	public VolumeControlPulse ()
 	{
 		_volume.volume = 0.0;
@@ -117,6 +104,10 @@ public class VolumeControlPulse : VolumeControl
 
 		_mute_cancellable = new Cancellable ();
 		_volume_cancellable = new Cancellable ();
+
+		init_max_volume();
+		init_high_volume();
+		init_high_volume_approved();
 
 		setup_accountsservice.begin ();
 
@@ -131,6 +122,7 @@ public class VolumeControlPulse : VolumeControl
 		}
 		stop_local_volume_timer();
 		stop_account_service_volume_timer();
+		stop_high_volume_approved_timer();
 	}
 
 	/* PulseAudio logic*/
@@ -624,10 +616,19 @@ public class VolumeControlPulse : VolumeControl
 			return _volume;
 		}
 		set {
+
+			if ((value.reason == VolumeReasons.USER_KEYPRESS)
+				&& !_high_volume_approved
+				&& calculate_high_volume_from_volume(value.volume))
+			{
+				var clamped = value.volume.clamp(0, _warning_volume_norms);
+				message("User is trying to raise volume past warning... clamping from %f down to %f", value.volume, clamped);
+				value.volume = clamped;
+			}
+
 			var volume_changed = (value.volume != _volume.volume);
 			debug("Setting volume to %f for profile %d because %d", value.volume, _active_sink_input, value.reason);
 
-			var old_high_volume = this.high_volume;
 			_volume = value;
 
 			/* Make sure we're connected to Pulse and pulse didn't give us the change */
@@ -639,15 +640,153 @@ public class VolumeControlPulse : VolumeControl
 				else
 					context.get_server_info (server_info_cb_for_set_volume);
 
-			if (this.high_volume != old_high_volume)
-				this.notify_property("high-volume");
 
 			if (volume.reason != VolumeControl.VolumeReasons.ACCOUNTS_SERVICE_SET
 				&& volume_changed) {
 				start_local_volume_timer();
 			}
+
+			update_high_volume();
 		}
 	}
+
+	/** MAX VOLUME PROPERTY **/
+
+	private void init_max_volume() {
+		message("woo");
+		_settings.changed["normal-volume-decibels"].connect(() => update_max_volume());
+		_settings.changed["amplified-volume-decibels"].connect(() => update_max_volume());
+		_shared_settings.changed["allow-amplified-volume"].connect(() => update_max_volume());
+		update_max_volume();
+	}
+	private void update_max_volume () {
+		var new_max_volume = calculate_max_volume();
+		message ("old_max_volume %f new_max_volume %f", max_volume, new_max_volume);
+		if (max_volume != new_max_volume) {
+			message("changing max_volume from %f to %f", this.max_volume, new_max_volume);
+			max_volume = calculate_max_volume();
+		}
+	}
+	private double calculate_max_volume () {
+		string decibel_key;
+		if (_shared_settings.get_boolean("allow-amplified-volume"))
+			decibel_key = "amplified-volume-decibels";
+		else
+			decibel_key = "normal-volume-decibels";
+
+		var volume_dB = _settings.get_double(decibel_key);
+		var volume_sw = PulseAudio.Volume.sw_from_dB (volume_dB);
+		return volume_to_double (volume_sw);
+	}
+
+	/** HIGH VOLUME PROPERTY **/
+
+	private bool _warning_volume_enabled;
+	private double _warning_volume_norms;
+	private bool _high_volume = false;
+	public override bool high_volume {
+		get { return this._high_volume; }
+		private set { this._high_volume = value; }
+	}
+	private void init_high_volume() {
+		_settings.changed["warning-volume-enabled"].connect(() => update_high_volume_cache());
+		_settings.changed["warning-volume-decibels"].connect(() => update_high_volume_cache());
+		update_high_volume_cache();
+	}
+	private void update_high_volume_cache() {
+		_warning_volume_enabled = _settings.get_boolean("warning-volume-enabled");
+
+		var volume_dB = _settings.get_double ("warning-volume-decibels");
+		var volume_sw = PulseAudio.Volume.sw_from_dB (volume_dB);
+		var volume_norms = volume_to_double (volume_sw);
+		_warning_volume_norms = volume_norms;
+
+		message("updating high volume cache... enabled %d dB %f sw %lu norm %f", (int)_warning_volume_enabled, volume_dB, volume_sw, volume_norms);
+		update_high_volume();
+	}
+	private void update_high_volume() {
+		var new_high_volume = calculate_high_volume();
+		if (high_volume != new_high_volume) {
+			message("changing high_volume from %d to %d", (int)high_volume, (int)new_high_volume);
+			high_volume = new_high_volume;
+		}
+	}
+	private bool calculate_high_volume() {
+		return calculate_high_volume_from_volume(_volume.volume);
+	}
+	private bool calculate_high_volume_from_volume(double volume) {
+		message ("headphones %d warning enabled %d (vol %f > loud %f) multimedia %d", (int)_active_port_headphone, (int)_warning_volume_enabled, (double)volume, (double)_warning_volume_norms, (int)(stream == "multimedia"));
+		return _active_port_headphone
+			&& _warning_volume_enabled
+			&& volume >= _warning_volume_norms
+			&& (stream == "multimedia");
+	}
+
+	/** HIGH VOLUME APPROVED PROPERTY **/
+
+	private bool _high_volume_approved = false;
+	private int64 _high_volume_approved_at = 0;
+	private int64 _high_volume_approved_ttl_usec = 0;
+	private uint _high_volume_approved_timer = 0;
+	public override bool high_volume_approved {
+		get { return this._high_volume_approved; }
+		private set { this._high_volume_approved = value; }
+	}
+	private void init_high_volume_approved() {
+		_settings.changed["warning-volume-confirmation-ttl"].connect(() => update_high_volume_approved_cache());
+		update_high_volume_approved_cache();
+	}
+	private void update_high_volume_approved_cache() {
+		_high_volume_approved_ttl_usec = _settings.get_int("warning-volume-confirmation-ttl");
+		_high_volume_approved_ttl_usec *= 1000000;
+
+		update_high_volume_approved();
+		update_high_volume_approved_timer();
+	}
+	private void update_high_volume_approved_timer() {
+		stop_high_volume_approved_timer();
+		if (_high_volume_approved_at != 0) {
+			int64 expires_at = _high_volume_approved_at + _high_volume_approved_ttl_usec;
+			int64 now = GLib.get_monotonic_time();
+			if (expires_at > now) {
+				var seconds_left = (now - expires_at) / 1000000;
+				_high_volume_approved_timer = Timeout.add_seconds((uint)seconds_left, on_high_volume_timer);
+			}
+		}
+	}
+	private void stop_high_volume_approved_timer() {
+		if (_high_volume_approved_timer != 0) {
+			Source.remove (_high_volume_approved_timer);
+			_high_volume_approved_timer = 0;
+		}
+	}
+	private bool on_high_volume_timer() {
+		_high_volume_approved_timer = 0;
+		update_high_volume_approved();
+		return false; /* Source.REMOVE */
+	}
+	private void update_high_volume_approved() {
+		var new_high_volume_approved = calculate_high_volume_approved();
+		if (high_volume_approved != new_high_volume_approved) {
+			message("changing high_volume_approved from %d to %d", (int)high_volume_approved, (int)new_high_volume_approved);
+			high_volume_approved = new_high_volume_approved;
+		}
+	}
+	private bool calculate_high_volume_approved() {
+                int64 now = GLib.get_monotonic_time();
+                var foo = (_high_volume_approved_at != 0)
+                        && (_high_volume_approved_at + _high_volume_approved_ttl_usec >= now);
+		message("approved: %d", (int)foo);
+		return foo;
+	}
+	public override void approve_high_volume() {
+		_high_volume_approved_at = GLib.get_monotonic_time();
+		update_high_volume_approved_timer();
+		update_high_volume_approved();
+	}
+
+
+	/** MIC VOLUME PROPERTY */
 
 	public override double mic_volume {
 		get {
