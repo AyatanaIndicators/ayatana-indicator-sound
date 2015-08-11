@@ -49,7 +49,7 @@
         If enabled on a device, a confirmation dialog will be presented to the user if
         (a) something is plugged into the headphone jack (ie, no warnings for speaker volumes) AND
         (b) media is playing (ie, no warnings for ringtone volumes) AND
-        (c) the user attempts to set the volume higher than warning-volume-dB AND
+        (c) the user attempts to set the volume higher than warning-volume-decibels AND
         (d) the user has not indicated approval in the last warning-volume-approval-ttl seconds.
       </description>
     </key>
