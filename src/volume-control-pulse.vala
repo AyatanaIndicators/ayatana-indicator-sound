@@ -656,12 +656,9 @@ public class VolumeControlPulse : VolumeControl
 		}
 	}
 	private double calculate_max_volume () {
-		string decibel_key;
-		if (_shared_settings.get_boolean("allow-amplified-volume"))
-			decibel_key = "amplified-volume-decibels";
-		else
-			decibel_key = "normal-volume-decibels";
-
+		unowned string decibel_key = _shared_settings.get_boolean("allow-amplified-volume")
+			? "amplified-volume-decibels"
+			: "normal-volume-decibels";
 		var volume_dB = _settings.get_double(decibel_key);
 		var volume_sw = PulseAudio.Volume.sw_from_dB (volume_dB);
 		return volume_to_double (volume_sw);
@@ -670,7 +667,7 @@ public class VolumeControlPulse : VolumeControl
 	/** HIGH VOLUME PROPERTY **/
 
 	private bool _warning_volume_enabled;
-	private double _warning_volume_norms;
+	private double _warning_volume_norms; /* 1.0 == PA_VOLUME_NORM */
 	private bool _high_volume = false;
 	public override bool high_volume {
 		get { return this._high_volume; }
@@ -720,9 +717,9 @@ public class VolumeControlPulse : VolumeControl
 	/** HIGH VOLUME APPROVED PROPERTY **/
 
 	private bool _high_volume_approved = false;
+	private uint _high_volume_approved_timer = 0;
 	private int64 _high_volume_approved_at = 0;
 	private int64 _high_volume_approved_ttl_usec = 0;
-	private uint _high_volume_approved_timer = 0;
 	public override bool high_volume_approved {
 		get { return this._high_volume_approved; }
 		private set { this._high_volume_approved = value; }
@@ -745,7 +742,7 @@ public class VolumeControlPulse : VolumeControl
 			int64 now = GLib.get_monotonic_time();
 			if (expires_at > now) {
 				var seconds_left = 1 + ((expires_at - now) / 1000000);
-				_high_volume_approved_timer = Timeout.add_seconds((uint)seconds_left, on_high_volume_timer);
+				_high_volume_approved_timer = Timeout.add_seconds((uint)seconds_left, on_high_volume_approved_timer);
 			}
 		}
 	}
@@ -755,7 +752,7 @@ public class VolumeControlPulse : VolumeControl
 			_high_volume_approved_timer = 0;
 		}
 	}
-	private bool on_high_volume_timer() {
+	private bool on_high_volume_approved_timer() {
 		_high_volume_approved_timer = 0;
 		update_high_volume_approved();
 		return false; /* Source.REMOVE */
@@ -774,8 +771,8 @@ public class VolumeControlPulse : VolumeControl
 	}
 	public override void approve_high_volume() {
 		_high_volume_approved_at = GLib.get_monotonic_time();
-		update_high_volume_approved_timer();
 		update_high_volume_approved();
+		update_high_volume_approved_timer();
 	}
 
 

@@ -318,23 +318,26 @@ public class IndicatorSound.Service: Object {
 			if (notify_server_supports_sync && !block_info_notifications) {
 
 				/* Determine Label */
-				string volume_label = "";
-				if (loud) {
-					volume_label = _("High volume can damage your hearing.");
-				}
+				unowned string volume_label = loud
+					 ? _("High volume can damage your hearing.")
+					 : "";
 
 				/* Choose an icon */
-				string icon = "";
-				if (loud)
+				unowned string icon;
+				if (loud) {
 					icon = "audio-volume-high";
-				else if (volume_control.volume.volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume_control.volume.volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume_control.volume.volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
+				} else {
+					var volume = volume_control.volume.volume;
+
+					if (volume <= 0.0)
+						icon = "audio-volume-muted";
+					else if (volume <= 0.3)
+						icon = "audio-volume-low";
+					else if (volume <= 0.7)
+						icon = "audio-volume-medium";
+					else
+						icon = "audio-volume-high";
+				}
 
 				/* Reset the notification */
 				var n = this.info_notification;
@@ -634,7 +637,7 @@ public class IndicatorSound.Service: Object {
 	}
 
 	private void clamp_to_high_soon() {
-		const uint interval_msec = 200; /* arbitrary, but works */
+		const uint interval_msec = 200;
 		if (_clamp_to_high_timeout == 0)
 		_clamp_to_high_timeout = Timeout.add(interval_msec, clamp_to_high_idle);
 	}
