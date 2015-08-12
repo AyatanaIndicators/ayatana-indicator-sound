@@ -105,16 +105,26 @@ public class VolumeControlPulse : VolumeControl
 		_mute_cancellable = new Cancellable ();
 		_volume_cancellable = new Cancellable ();
 
-		init_max_volume();
-		init_high_volume();
-		init_high_volume_approved();
+		init_all_properties();
 
 		setup_accountsservice.begin ();
 
 		this.reconnect_to_pulse ();
 	}
 
+	private void init_all_properties()
+	{
+		init_max_volume();
+		init_high_volume();
+		init_high_volume_approved();
+	}
+
 	~VolumeControlPulse ()
+	{
+		stop_all_timers();
+	}
+
+	private void stop_all_timers()
 	{
 		if (_reconnect_timer != 0) {
 			Source.remove (_reconnect_timer);
