@@ -639,7 +639,7 @@ public class IndicatorSound.Service: Object {
 	private void clamp_to_high_soon() {
 		const uint interval_msec = 200;
 		if (_clamp_to_high_timeout == 0)
-		_clamp_to_high_timeout = Timeout.add(interval_msec, clamp_to_high_idle);
+			_clamp_to_high_timeout = Timeout.add(interval_msec, clamp_to_high_idle);
 	}
 
 	private bool clamp_to_high_idle() {
