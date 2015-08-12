@@ -28,8 +28,8 @@ extern unowned PulseAudio.CVolume? vol_set (PulseAudio.CVolume? cv, uint channel
 [DBus (name="com.canonical.UnityGreeter.List")]
 interface GreeterListInterface : Object
 {
-    public abstract async string get_active_entry () throws IOError;
-    public signal void entry_selected (string entry_name);
+	public abstract async string get_active_entry () throws IOError;
+	public signal void entry_selected (string entry_name);
 }
 
 public class VolumeControlPulse : VolumeControl
@@ -212,7 +212,7 @@ public class VolumeControlPulse : VolumeControl
 			vol.volume = volume_to_double (i.volume.max ());
 			vol.reason = VolumeControl.VolumeReasons.PULSE_CHANGE;
 			this.volume = vol;
-		} 
+		}
 	}
 
 	private void source_info_cb (Context c, SourceInfo? i, int eol)
@@ -768,9 +768,9 @@ public class VolumeControlPulse : VolumeControl
 		}
 	}
 	private bool calculate_high_volume_approved() {
-                int64 now = GLib.get_monotonic_time();
-                return (_high_volume_approved_at != 0)
-                        && (_high_volume_approved_at + _high_volume_approved_ttl_usec >= now);
+		int64 now = GLib.get_monotonic_time();
+		return (_high_volume_approved_at != 0)
+			&& (_high_volume_approved_at + _high_volume_approved_ttl_usec >= now);
 	}
 	public override void approve_high_volume() {
 		_high_volume_approved_at = GLib.get_monotonic_time();

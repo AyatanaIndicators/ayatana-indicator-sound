@@ -142,7 +142,7 @@ public class IndicatorSound.Service: Object {
 
 		clear_acts_player();
 
-        	stop_clamp_to_high_timeout();
+		stop_clamp_to_high_timeout();
 
 		if (this.player_action_update_id > 0) {
 			Source.remove (this.player_action_update_id);
@@ -242,7 +242,7 @@ public class IndicatorSound.Service: Object {
 		if (this.volume_control.mute)
 			icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
 		else if (this.accounts_service != null && this.accounts_service.silentMode)
-		  icon = "audio-volume-muted-panel";
+			icon = "audio-volume-muted-panel";
 		else if (volume <= 0.0)
 			icon = "audio-volume-low-zero-panel";
 		else if (volume <= 0.3)
@@ -622,26 +622,26 @@ public class IndicatorSound.Service: Object {
 		this.update_preferred_players ();
 	}
 
-        /** VOLUME CLAMPING **/
+	/** VOLUME CLAMPING **/
 
-        private uint _clamp_to_high_timeout = 0;
+	private uint _clamp_to_high_timeout = 0;
 
-        private void stop_clamp_to_high_timeout() {
-                if (_clamp_to_high_timeout != 0) {
-                        Source.remove(_clamp_to_high_timeout);
-                        _clamp_to_high_timeout = 0;
-                }
-        }
+	private void stop_clamp_to_high_timeout() {
+		if (_clamp_to_high_timeout != 0) {
+			Source.remove(_clamp_to_high_timeout);
+			_clamp_to_high_timeout = 0;
+		}
+	}
 
-        private void clamp_to_high_soon() {
-                const uint interval_msec = 200; /* arbitrary, but works */
-                if (_clamp_to_high_timeout == 0)
-                        _clamp_to_high_timeout = Timeout.add(interval_msec, clamp_to_high_idle);
-        }
+	private void clamp_to_high_soon() {
+		const uint interval_msec = 200; /* arbitrary, but works */
+		if (_clamp_to_high_timeout == 0)
+		_clamp_to_high_timeout = Timeout.add(interval_msec, clamp_to_high_idle);
+	}
 
-        private bool clamp_to_high_idle() {
-                _clamp_to_high_timeout = 0;
+	private bool clamp_to_high_idle() {
+		_clamp_to_high_timeout = 0;
 		volume_control.clamp_to_high_volume();
-                return false; // Source.REMOVE;
-        }
+		return false; // Source.REMOVE;
+	}
 }
