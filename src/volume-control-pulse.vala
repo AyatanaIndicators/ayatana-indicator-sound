@@ -275,7 +275,7 @@ public class VolumeControlPulse : VolumeControl
 				}
 
 				/* We only care about signals if our internal count is zero */
-				if (sig_count == 0) {
+				//if (sig_count == 0) {
 					/* Extract volume and make sure it's not a side effect of us setting it */
 					Variant body = message.get_body ();
 					Variant varray = body.get_child_value (0);
@@ -293,7 +293,7 @@ public class VolumeControlPulse : VolumeControl
 						vol.reason = VolumeControl.VolumeReasons.PULSE_CHANGE;
 						this.volume = vol;
 					}
-				}
+				//}
 			}
 		}
 
@@ -478,7 +478,9 @@ public class VolumeControlPulse : VolumeControl
 		this.context = new PulseAudio.Context (loop.get_api(), null, props);
 		this.context.set_state_callback (context_state_callback);
 
-		if (context.connect(null, Context.Flags.NOFAIL, null) < 0)
+		var server_string = Environment.get_variable("PULSE_SERVER");
+		warning("XGM: PULSE_SERVER=%s", server_string);
+		if (context.connect(server_string, Context.Flags.NOFAIL, null) < 0)
 			warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(context.errno()));
 	}
 
@@ -627,7 +629,7 @@ public class VolumeControlPulse : VolumeControl
 		}
 		set {
 			var volume_changed = (value.volume != _volume.volume);
-			debug("Setting volume to %f for profile %d because %d", value.volume, _active_sink_input, value.reason);
+			warning("Setting volume to %f for profile %d because %d", value.volume, _active_sink_input, value.reason);
 
 			_volume = value;
 

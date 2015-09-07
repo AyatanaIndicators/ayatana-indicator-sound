@@ -1,0 +1,21 @@
+<node>
+  <interface name="org.freedesktop.DBus.Properties">
+    <method name="Set">
+      <arg direction="in" type="s" name="entry" />
+      <arg direction="in" type="s" name="property" />
+      <arg direction="in" type="v" name="value" />
+    </method>
+    <method name="Get">
+      <arg direction="in" type="s" name="entry" />
+      <arg direction="in" type="s" name="property" />
+      <arg direction="out" type="v" name="value" />
+    </method>
+
+    <signal name="PropertiesChanged">
+      <arg type="s" name="interface_name"/>
+      <arg type="a{sv}" name="changed_properties"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+      <arg type="as" name="invalidated_properties"/>
+    </signal>
+  </interface>
+</node>
