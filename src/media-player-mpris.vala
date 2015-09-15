@@ -79,6 +79,24 @@ public class MediaPlayerMpris: MediaPlayer {
 		}
 	}
 
+	public override bool can_do_play {
+		get {
+			return this.proxy.CanPlay;
+		}
+	}
+	
+	public override bool can_do_prev {
+		get {
+			return this.proxy.CanGoPrevious;
+		}
+	}
+
+	public override bool can_do_next {
+		get {
+			return this.proxy.CanGoNext;
+		}
+	}
+
 	/**
 	 * Attach this object to a process of the associated media player.  The player must own @dbus_name and
 	 * implement the org.mpris.MediaPlayer2.Player interface.
@@ -271,6 +289,9 @@ public class MediaPlayerMpris: MediaPlayer {
 	void proxy_properties_changed (DBusProxy proxy, Variant changed_properties, string[] invalidated_properties) {
 		if (changed_properties.lookup ("PlaybackStatus", "s", null)) {
 			this.state = this.proxy.PlaybackStatus != null ? this.proxy.PlaybackStatus : "Unknown";
+		}
+		if (changed_properties.lookup ("CanGoNext", "b", null) || changed_properties.lookup ("CanGoPrev", "b", null)) {
+			this.playbackstatus_changed ();
 		}
 
 		var metadata = changed_properties.lookup_value ("Metadata", new VariantType ("a{sv}"));

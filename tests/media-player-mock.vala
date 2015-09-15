@@ -28,6 +28,9 @@ public class MediaPlayerMock: MediaPlayer {
 
 	public override bool is_running { get { return mock_is_running; } }
 	public override bool can_raise { get {  return mock_can_raise; } }
+	public override bool can_do_next { get { return mock_can_do_next; } }
+	public override bool can_do_prev { get { return mock_can_do_prev; } }
+	public override bool can_do_play { get { return mock_can_do_play; } }
 
 	public override MediaPlayer.Track? current_track { get { return mock_current_track; } set { this.mock_current_track = value; } }
 
@@ -40,6 +43,9 @@ public class MediaPlayerMock: MediaPlayer {
 
 	public bool mock_is_running { get; set; }
 	public bool mock_can_raise { get; set; }
+	public bool mock_can_do_next { get; set; }
+	public bool mock_can_do_prev { get; set; }
+	public bool mock_can_do_play { get; set; }
 
 	public MediaPlayer.Track? mock_current_track { get; set; } 
 
