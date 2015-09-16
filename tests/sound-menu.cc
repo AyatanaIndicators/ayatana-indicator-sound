@@ -59,6 +59,56 @@ class SoundMenuTest : public ::testing::Test
             GVariant * itemval = g_menu_model_get_item_attribute_value(mm, index, name, type);
             EXPECT_EQ(itemval, nullptr);
         }
+
+        void check_player_control_buttons(bool canPlay, bool canNext, bool canPrev)
+        {
+            SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE);
+
+            MediaPlayerTrack * track = media_player_track_new("Artist", "Title", "Album", "http://art.url");
+
+            MediaPlayerMock * media = MEDIA_PLAYER_MOCK(
+                g_object_new(TYPE_MEDIA_PLAYER_MOCK,
+                    "mock-id", "player-id",
+                    "mock-name", "Test Player",
+                    "mock-state", "Playing",
+                    "mock-is-running", TRUE,
+                    "mock-can-raise", FALSE,
+                    "mock-current-track", track,
+                    "mock-can-do-play", canPlay,
+                    "mock-can-do-next", canNext,
+                    "mock-can-do-prev", canPrev,
+                    NULL)
+            );
+            g_clear_object(&track);
+
+            sound_menu_add_player(menu, MEDIA_PLAYER(media));
+
+            ASSERT_NE(nullptr, menu->menu);
+            EXPECT_EQ(2, g_menu_model_get_n_items(G_MENU_MODEL(menu->menu)));
+
+            GMenuModel * section = g_menu_model_get_item_link(G_MENU_MODEL(menu->menu), 1, G_MENU_LINK_SECTION);
+            ASSERT_NE(nullptr, section);
+            EXPECT_EQ(2, g_menu_model_get_n_items(section)); /* No playlists, so two items */
+
+            /* Player display */
+            verify_item_attribute(section, 0, "action", g_variant_new_string("indicator.player-id"));
+            verify_item_attribute(section, 0, "x-canonical-type", g_variant_new_string("com.canonical.unity.media-player"));
+
+            /* Player control */
+            verify_item_attribute(section, 1, "x-canonical-type", g_variant_new_string("com.canonical.unity.playback-item"));
+            verify_item_attribute(section, 1, "x-canonical-play-action", g_variant_new_string(canPlay ? "indicator.play.player-id" : "indicator.play.player-id.disabled"));
+            verify_item_attribute(section, 1, "x-canonical-next-action", g_variant_new_string(canNext ? "indicator.next.player-id" : "indicator.next.player-id.disabled"));
+            verify_item_attribute(section, 1, "x-canonical-previous-action", g_variant_new_string(canPrev ? "indicator.previous.player-id" : "indicator.previous.player-id.disabled"));
+
+            g_clear_object(&section);
+
+            sound_menu_remove_player(menu, MEDIA_PLAYER(media));
+
+            EXPECT_EQ(1, g_menu_model_get_n_items(G_MENU_MODEL(menu->menu)));
+
+            g_clear_object(&media);
+            g_clear_object(&menu);
+        }
 };
 
 TEST_F(SoundMenuTest, BasicObject) {
@@ -121,203 +171,19 @@ TEST_F(SoundMenuTest, AddRemovePlayer) {
 }
 
 TEST_F(SoundMenuTest, AddRemovePlayerNoPlayNextPrev) {
-    SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE);
-
-    MediaPlayerTrack * track = media_player_track_new("Artist", "Title", "Album", "http://art.url");
-
-    MediaPlayerMock * media = MEDIA_PLAYER_MOCK(
-        g_object_new(TYPE_MEDIA_PLAYER_MOCK,
-            "mock-id", "player-id",
-            "mock-name", "Test Player",
-            "mock-state", "Playing",
-            "mock-is-running", TRUE,
-            "mock-can-raise", FALSE,
-            "mock-current-track", track,
-            "mock-can-do-play", FALSE,
-            "mock-can-do-next", FALSE,
-            "mock-can-do-prev", FALSE,
-            NULL)
-    );
-    g_clear_object(&track);
-
-    sound_menu_add_player(menu, MEDIA_PLAYER(media));
-
-    ASSERT_NE(nullptr, menu->menu);
-    EXPECT_EQ(2, g_menu_model_get_n_items(G_MENU_MODEL(menu->menu)));
-
-    GMenuModel * section = g_menu_model_get_item_link(G_MENU_MODEL(menu->menu), 1, G_MENU_LINK_SECTION);
-    ASSERT_NE(nullptr, section);
-    EXPECT_EQ(2, g_menu_model_get_n_items(section)); /* No playlists, so two items */
-
-    /* Player display */
-    verify_item_attribute(section, 0, "action", g_variant_new_string("indicator.player-id"));
-    verify_item_attribute(section, 0, "x-canonical-type", g_variant_new_string("com.canonical.unity.media-player"));
-
-    /* Player control */
-    verify_item_attribute(section, 1, "x-canonical-type", g_variant_new_string("com.canonical.unity.playback-item"));
-    verify_item_attribute(section, 1, "x-canonical-play-action", g_variant_new_string("indicator.play.player-id.disabled"));
-    verify_item_attribute(section, 1, "x-canonical-next-action", g_variant_new_string("indicator.next.player-id.disabled"));
-    verify_item_attribute(section, 1, "x-canonical-previous-action", g_variant_new_string("indicator.previous.player-id.disabled"));
-
-    g_clear_object(&section);
-
-    sound_menu_remove_player(menu, MEDIA_PLAYER(media));
-
-    EXPECT_EQ(1, g_menu_model_get_n_items(G_MENU_MODEL(menu->menu)));
-
-    g_clear_object(&media);
-    g_clear_object(&menu);
-    return;
+    check_player_control_buttons(false, false, false);
 }
 
 TEST_F(SoundMenuTest, AddRemovePlayerNoNext) {
-    SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE);
-
-    MediaPlayerTrack * track = media_player_track_new("Artist", "Title", "Album", "http://art.url");
-
-    MediaPlayerMock * media = MEDIA_PLAYER_MOCK(
-        g_object_new(TYPE_MEDIA_PLAYER_MOCK,
-            "mock-id", "player-id",
-            "mock-name", "Test Player",
-            "mock-state", "Playing",
-            "mock-is-running", TRUE,
-            "mock-can-raise", FALSE,
-            "mock-current-track", track,
-            "mock-can-do-play", TRUE,
-            "mock-can-do-next", FALSE,
-            "mock-can-do-prev", TRUE,
-            NULL)
-    );
-    g_clear_object(&track);
-
-    sound_menu_add_player(menu, MEDIA_PLAYER(media));
-
-    ASSERT_NE(nullptr, menu->menu);
-    EXPECT_EQ(2, g_menu_model_get_n_items(G_MENU_MODEL(menu->menu)));
-
-    GMenuModel * section = g_menu_model_get_item_link(G_MENU_MODEL(menu->menu), 1, G_MENU_LINK_SECTION);
-    ASSERT_NE(nullptr, section);
-    EXPECT_EQ(2, g_menu_model_get_n_items(section)); /* No playlists, so two items */
-
-    /* Player display */
-    verify_item_attribute(section, 0, "action", g_variant_new_string("indicator.player-id"));
-    verify_item_attribute(section, 0, "x-canonical-type", g_variant_new_string("com.canonical.unity.media-player"));
-
-    /* Player control */
-    verify_item_attribute(section, 1, "x-canonical-type", g_variant_new_string("com.canonical.unity.playback-item"));
-    verify_item_attribute(section, 1, "x-canonical-play-action", g_variant_new_string("indicator.play.player-id"));
-    verify_item_attribute(section, 1, "x-canonical-next-action", g_variant_new_string("indicator.next.player-id.disabled"));
-    verify_item_attribute(section, 1, "x-canonical-previous-action", g_variant_new_string("indicator.previous.player-id"));
-
-    g_clear_object(&section);
-
-    sound_menu_remove_player(menu, MEDIA_PLAYER(media));
-
-    EXPECT_EQ(1, g_menu_model_get_n_items(G_MENU_MODEL(menu->menu)));
-
-    g_clear_object(&media);
-    g_clear_object(&menu);
-    return;
+    check_player_control_buttons(true, false, true);
 }
 
 TEST_F(SoundMenuTest, AddRemovePlayerNoPrev) {
-    SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE);
-
-    MediaPlayerTrack * track = media_player_track_new("Artist", "Title", "Album", "http://art.url");
-
-    MediaPlayerMock * media = MEDIA_PLAYER_MOCK(
-        g_object_new(TYPE_MEDIA_PLAYER_MOCK,
-            "mock-id", "player-id",
-            "mock-name", "Test Player",
-            "mock-state", "Playing",
-            "mock-is-running", TRUE,
-            "mock-can-raise", FALSE,
-            "mock-current-track", track,
-            "mock-can-do-play", TRUE,
-            "mock-can-do-next", TRUE,
-            "mock-can-do-prev", FALSE,
-            NULL)
-    );
-    g_clear_object(&track);
-
-    sound_menu_add_player(menu, MEDIA_PLAYER(media));
-
-    ASSERT_NE(nullptr, menu->menu);
-    EXPECT_EQ(2, g_menu_model_get_n_items(G_MENU_MODEL(menu->menu)));
-
-    GMenuModel * section = g_menu_model_get_item_link(G_MENU_MODEL(menu->menu), 1, G_MENU_LINK_SECTION);
-    ASSERT_NE(nullptr, section);
-    EXPECT_EQ(2, g_menu_model_get_n_items(section)); /* No playlists, so two items */
-
-    /* Player display */
-    verify_item_attribute(section, 0, "action", g_variant_new_string("indicator.player-id"));
-    verify_item_attribute(section, 0, "x-canonical-type", g_variant_new_string("com.canonical.unity.media-player"));
-
-    /* Player control */
-    verify_item_attribute(section, 1, "x-canonical-type", g_variant_new_string("com.canonical.unity.playback-item"));
-    verify_item_attribute(section, 1, "x-canonical-play-action", g_variant_new_string("indicator.play.player-id"));
-    verify_item_attribute(section, 1, "x-canonical-next-action", g_variant_new_string("indicator.next.player-id"));
-    verify_item_attribute(section, 1, "x-canonical-previous-action", g_variant_new_string("indicator.previous.player-id.disabled"));
-
-    g_clear_object(&section);
-
-    sound_menu_remove_player(menu, MEDIA_PLAYER(media));
-
-    EXPECT_EQ(1, g_menu_model_get_n_items(G_MENU_MODEL(menu->menu)));
-
-    g_clear_object(&media);
-    g_clear_object(&menu);
-    return;
+    check_player_control_buttons(true, true, false);
 }
 
 TEST_F(SoundMenuTest, AddRemovePlayerNoPlay) {
-    SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE);
-
-    MediaPlayerTrack * track = media_player_track_new("Artist", "Title", "Album", "http://art.url");
-
-    MediaPlayerMock * media = MEDIA_PLAYER_MOCK(
-        g_object_new(TYPE_MEDIA_PLAYER_MOCK,
-            "mock-id", "player-id",
-            "mock-name", "Test Player",
-            "mock-state", "Playing",
-            "mock-is-running", TRUE,
-            "mock-can-raise", FALSE,
-            "mock-current-track", track,
-            "mock-can-do-play", FALSE,
-            "mock-can-do-next", TRUE,
-            "mock-can-do-prev", TRUE,
-            NULL)
-    );
-    g_clear_object(&track);
-
-    sound_menu_add_player(menu, MEDIA_PLAYER(media));
-
-    ASSERT_NE(nullptr, menu->menu);
-    EXPECT_EQ(2, g_menu_model_get_n_items(G_MENU_MODEL(menu->menu)));
-
-    GMenuModel * section = g_menu_model_get_item_link(G_MENU_MODEL(menu->menu), 1, G_MENU_LINK_SECTION);
-    ASSERT_NE(nullptr, section);
-    EXPECT_EQ(2, g_menu_model_get_n_items(section)); /* No playlists, so two items */
-
-    /* Player display */
-    verify_item_attribute(section, 0, "action", g_variant_new_string("indicator.player-id"));
-    verify_item_attribute(section, 0, "x-canonical-type", g_variant_new_string("com.canonical.unity.media-player"));
-
-    /* Player control */
-    verify_item_attribute(section, 1, "x-canonical-type", g_variant_new_string("com.canonical.unity.playback-item"));
-    verify_item_attribute(section, 1, "x-canonical-play-action", g_variant_new_string("indicator.play.player-id.disabled"));
-    verify_item_attribute(section, 1, "x-canonical-next-action", g_variant_new_string("indicator.next.player-id"));
-    verify_item_attribute(section, 1, "x-canonical-previous-action", g_variant_new_string("indicator.previous.player-id"));
-
-    g_clear_object(&section);
-
-    sound_menu_remove_player(menu, MEDIA_PLAYER(media));
-
-    EXPECT_EQ(1, g_menu_model_get_n_items(G_MENU_MODEL(menu->menu)));
-
-    g_clear_object(&media);
-    g_clear_object(&menu);
-    return;
+    check_player_control_buttons(false, true, true);
 }
 
 //
