@@ -206,6 +206,13 @@ public class IndicatorSound.Service: Object {
 	void activate_desktop_settings (SimpleAction action, Variant? param) {
 		var env = Environment.get_variable ("DESKTOP_SESSION");
 		string cmd;
+
+		if (Environment.get_variable ("MIR_SOCKET") != null)
+		{
+			UrlDispatch.send ("settings:///system/sound");
+			return;
+		}
+
 		if (env == "xubuntu" || env == "ubuntustudio")
 			cmd = "pavucontrol";
 		else if (env == "mate")
