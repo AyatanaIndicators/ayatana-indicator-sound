@@ -112,12 +112,31 @@ void IndicatorSoundTestBase::startPulse()
     }
 }
 
+void IndicatorSoundTestBase::startAccountsService()
+{
+    try
+    {
+        accountsService.reset(
+                new QProcessDBusService(DBusTypes::ACCOUNTS_SERVICE,
+                                        QDBusConnection::SystemBus,
+                                        ACCOUNTS_SERVICE_BIN,
+                                        QStringList() ));
+        accountsService->start(dbusTestRunner.systemConnection());
+
+        initializeAccountsInterface();
+    }
+    catch (exception const& e)
+    {
+        cout << "accountsService(): " << e.what() << endl;
+        throw;
+    }
+}
+
 void IndicatorSoundTestBase::startIndicator()
 {
     try
     {
         setenv("PULSE_SERVER", "127.0.0.1", true);
-        setenv("DBUS_SYSTEM_BUS_ADDRESS", dbusTestRunner.systemBus().toStdString().c_str(), true);
         indicator.reset(
                 new QProcessDBusService(DBusTypes::DBUS_NAME,
                                         QDBusConnection::SessionBus,
@@ -144,7 +163,7 @@ mh::MenuMatcher::Parameters IndicatorSoundTestBase::desktopParameters()
 
 void IndicatorSoundTestBase::SetUp()
 {
-    initializeAccountsInterface();
+    setenv("DBUS_SYSTEM_BUS_ADDRESS", dbusTestRunner.systemBus().toStdString().c_str(), true);
 }
 
 void IndicatorSoundTestBase::TearDown()
@@ -216,7 +235,6 @@ bool IndicatorSoundTestBase::waitMenuChange()
 
 bool IndicatorSoundTestBase::waitVolumeChangedInIndicator()
 {
-    qDebug() << "IndicatorSoundTestBase::waitVolumeChangedInIndicator() signal " << (void *)signal_spy_volume_changed_.get();
     if (signal_spy_volume_changed_)
     {
         return signal_spy_volume_changed_->wait();
@@ -229,11 +247,9 @@ void IndicatorSoundTestBase::initializeAccountsInterface()
     auto username = qgetenv("USER");
     if (username != "")
     {
-        qDebug() << "Setting Accounts interface for user: " << username;
         std::unique_ptr<AccountsInterface> setInterface(new AccountsInterface("org.freedesktop.Accounts",
                                                         "/org/freedesktop/Accounts",
                                                         QDBusConnection::systemBus(), 0));
-        qDebug() << "Interface: " << setInterface.get();
 
         QDBusReply<QDBusObjectPath> userResp = setInterface->call(QLatin1String("FindUserByName"),
                                                                   QLatin1String(username));
@@ -252,7 +268,6 @@ void IndicatorSoundTestBase::initializeAccountsInterface()
             accounts_interface_.reset(new DBusPropertiesInterface("org.freedesktop.Accounts",
                                                                 userPath,
                                                                 soundInterface->connection(), 0));
-            qDebug() << "Interface for setting volume: " << accounts_interface_.get();
             if (!accounts_interface_->isValid())
             {
                 qWarning() << "SetVolume::initializeAccountsInterface(): D-Bus error: " << accounts_interface_->lastError().message();

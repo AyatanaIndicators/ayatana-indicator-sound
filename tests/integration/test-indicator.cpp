@@ -36,6 +36,7 @@ TEST_F(TestIndicator, ChangeRoleVolume)
 {
     double INITIAL_VOLUME = 0.0;
 
+    ASSERT_NO_THROW(startAccountsService());
     ASSERT_NO_THROW(startPulse());
 
     // initialize volumes in pulseaudio
@@ -140,6 +141,7 @@ TEST_F(TestIndicator, BasicInitialVolume)
 {
     double INITIAL_VOLUME = 0.0;
 
+    ASSERT_NO_THROW(startAccountsService());
     ASSERT_NO_THROW(startPulse());
 
     // initialize volumes in pulseaudio

@@ -32,6 +32,8 @@ namespace DBusTypes
 
     static constexpr char const* DBUS_PULSE = "org.PulseAudio1";
 
+    static constexpr char const* ACCOUNTS_SERVICE = "org.freedesktop.Accounts";
+
     static constexpr char const* STREAM_RESTORE_NAME = "org.PulseAudio.Ext.StreamRestore1";
 
     static constexpr char const* STREAM_RESTORE_PATH = "/org/pulseaudio/stream_restore1";

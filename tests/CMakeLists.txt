@@ -281,3 +281,4 @@ add_test(indcator-test
 
 add_subdirectory(integration)
 add_subdirectory(dbus-types)
+add_subdirectory(accounts-mock)

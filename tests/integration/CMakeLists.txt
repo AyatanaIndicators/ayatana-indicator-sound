@@ -29,6 +29,7 @@ include_directories("${CMAKE_BINARY_DIR}/tests/dbus-types")
 add_definitions(-DSOUND_SERVICE_BIN="${CMAKE_BINARY_DIR}/src/indicator-sound-service"
                 -DSTREAM_RESTORE_TABLE="${CMAKE_SOURCE_DIR}/tests/integration/touch-stream-restore.table"
                 -DVOLUME_SET_BIN="${CMAKE_BINARY_DIR}/tests/integration/set-volume"
+                -DACCOUNTS_SERVICE_BIN="${CMAKE_BINARY_DIR}/tests/accounts-mock/accounts-service-sound"
                 -DTEST_SOUND="${CMAKE_SOURCE_DIR}/tests/integration/test-sound.wav"
                 -DQT_NO_KEYWORDS=1
 )

@@ -46,6 +46,7 @@ protected:
 
     void startIndicator();
     void startPulse();
+    void startAccountsService();
 
     bool setVolume(QString const &role, double volume);
 
@@ -72,6 +73,8 @@ protected:
     QtDBusTest::DBusServicePtr indicator;
 
     QtDBusTest::DBusServicePtr pulseaudio;
+
+    QtDBusTest::DBusServicePtr accountsService;
 
     QProcess testSoundProcess;
 

@@ -479,7 +479,6 @@ public class VolumeControlPulse : VolumeControl
 		this.context.set_state_callback (context_state_callback);
 
 		var server_string = Environment.get_variable("PULSE_SERVER");
-		warning("XGM: PULSE_SERVER=%s", server_string);
 		if (context.connect(server_string, Context.Flags.NOFAIL, null) < 0)
 			warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(context.errno()));
 	}
@@ -629,7 +628,7 @@ public class VolumeControlPulse : VolumeControl
 		}
 		set {
 			var volume_changed = (value.volume != _volume.volume);
-			warning("Setting volume to %f for profile %d because %d", value.volume, _active_sink_input, value.reason);
+			debug("Setting volume to %f for profile %d because %d", value.volume, _active_sink_input, value.reason);
 
 			_volume = value;
 
