@@ -53,6 +53,9 @@ int main(int argc, char *argv[])
             qFatal("Could not register Accounts object.");
         }
     }
-    qDebug() << "Service is already registered!.";
+    else
+    {
+        qDebug() << "Service is already registered!.";
+    }
     return app.exec();
 }

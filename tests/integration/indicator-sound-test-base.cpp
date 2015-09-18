@@ -163,11 +163,15 @@ mh::MenuMatcher::Parameters IndicatorSoundTestBase::desktopParameters()
 
 void IndicatorSoundTestBase::SetUp()
 {
+    setenv("GSETTINGS_SCHEMA_DIR", SCHEMA_DIR, true);
+    setenv("GSETTINGS_BACKEND", "memory", true);
     setenv("DBUS_SYSTEM_BUS_ADDRESS", dbusTestRunner.systemBus().toStdString().c_str(), true);
 }
 
 void IndicatorSoundTestBase::TearDown()
 {
+    unsetenv("GSETTINGS_SCHEMA_DIR");
+    unsetenv("GSETTINGS_BACKEND");
     unsetenv("PULSE_SERVER");
 }
 

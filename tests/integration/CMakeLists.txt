@@ -32,6 +32,7 @@ add_definitions(-DSOUND_SERVICE_BIN="${CMAKE_BINARY_DIR}/src/indicator-sound-ser
                 -DACCOUNTS_SERVICE_BIN="${CMAKE_BINARY_DIR}/tests/accounts-mock/accounts-service-sound"
                 -DTEST_SOUND="${CMAKE_SOURCE_DIR}/tests/integration/test-sound.wav"
                 -DQT_NO_KEYWORDS=1
+                -DSCHEMA_DIR="${SCHEMA_DIR}"
 )
 
 set(GLIB_REQUIRED_VERSION 2.26)
