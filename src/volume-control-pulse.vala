@@ -628,7 +628,7 @@ public class VolumeControlPulse : VolumeControl
 		}
 		set {
 			var volume_changed = (value.volume != _volume.volume);
-			debug("Setting volume to %f for profile %d because %d", value.volume, _active_sink_input, value.reason);
+			warning("Setting volume to %f for profile %d because %d", value.volume, _active_sink_input, value.reason);
 
 			_volume = value;
 

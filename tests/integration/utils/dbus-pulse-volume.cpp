@@ -56,9 +56,9 @@ DBusPulseVolume::DBusPulseVolume() :
 
     qDebug() << "********************************Connetion: " << connection_string.value().toString();
 
-//    connection_.reset(new QDBusConnection(QDBusConnection::connectToPeer(connection_string.value().toString(), "set-volume")));
+    connection_.reset(new QDBusConnection(QDBusConnection::connectToPeer(connection_string.value().toString(), "set-volume")));
 
-    connection_.reset(new QDBusConnection(QDBusConnection::connectToPeer("unix:path=/run/user/1000/pulse/dbus-socket", "set-volume")));
+//    connection_.reset(new QDBusConnection(QDBusConnection::connectToPeer("unix:path=/run/user/1000/pulse/dbus-socket", "set-volume")));
     qDebug() << "Is connected " << connection_->isConnected();
 
     if (connection_->isConnected())
