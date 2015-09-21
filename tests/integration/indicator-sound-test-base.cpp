@@ -45,12 +45,31 @@ IndicatorSoundTestBase::~IndicatorSoundTestBase()
 
 }
 
-bool IndicatorSoundTestBase::setVolume(QString const &role, double volume)
+bool IndicatorSoundTestBase::setStreamRestoreVolume(QString const &role, double volume)
 {
     QProcess setVolume;
     setVolume.start(VOLUME_SET_BIN, QStringList()
                                         << role
                                         << QString("%1").arg(volume));
+    if (!setVolume.waitForStarted())
+        return false;
+
+    if (!setVolume.waitForFinished())
+        return false;
+
+    return setVolume.exitCode() == 0;
+}
+
+bool IndicatorSoundTestBase::setSinkVolume(double volume)
+{
+    QString volume_percentage = QString("%1\%").arg(volume*100);
+    QProcess setVolume;
+    setVolume.start("pactl", QStringList()
+                                        << "-s"
+                                        << "127.0.0.1"
+                                        << "set-sink-volume"
+                                        << "0"
+                                        << volume_percentage);
     if (!setVolume.waitForStarted())
         return false;
 
@@ -81,7 +100,37 @@ void IndicatorSoundTestBase::stopTestSound()
     testSoundProcess.terminate();
 }
 
-void IndicatorSoundTestBase::startPulse()
+void IndicatorSoundTestBase::startPulseDesktop()
+{
+    try
+    {
+        pulseaudio.reset(
+                new QProcessDBusService(DBusTypes::DBUS_PULSE,
+                                        QDBusConnection::SessionBus,
+                                        "pulseaudio",
+                                        QStringList() << "--start"
+                                                      << "-vvvv"
+                                                      << "--disable-shm=true"
+                                                      << "--daemonize=false"
+                                                      << "--use-pid-file=false"
+                                                      << "--system=false"
+                                                      << "--exit-idle-time=-1"
+                                                      << "-n"
+                                                      << "--load=module-null-sink"
+                                                      << "--log-target=file:/tmp/pulse-daemon.log"
+                                                      << "--load=module-dbus-protocol"
+                                                      << "--load=module-native-protocol-tcp auth-ip-acl=127.0.0.1"
+                ));
+        pulseaudio->start(dbusTestRunner.sessionConnection());
+    }
+    catch (exception const& e)
+    {
+        cout << "pulseaudio(): " << e.what() << endl;
+        throw;
+    }
+}
+
+void IndicatorSoundTestBase::startPulsePhone()
 {
     try
     {
@@ -151,14 +200,20 @@ void IndicatorSoundTestBase::startIndicator()
     }
 }
 
-// /usr/bin/pulseaudio --start -vvvv --disable-shm=true --daemonize=false --use-pid-file=false --system=false --exit-idle-time=-1 -n  "--load=module-null-sink sink_name=multimedia" --load=module-stream-restore
-
 mh::MenuMatcher::Parameters IndicatorSoundTestBase::desktopParameters()
 {
     return mh::MenuMatcher::Parameters(
             "com.canonical.indicator.sound",
             { { "indicator", "/com/canonical/indicator/sound" } },
             "/com/canonical/indicator/sound/desktop");
+}
+
+mh::MenuMatcher::Parameters IndicatorSoundTestBase::phoneParameters()
+{
+    return mh::MenuMatcher::Parameters(
+            "com.canonical.indicator.sound",
+            { { "indicator", "/com/canonical/indicator/sound" } },
+            "/com/canonical/indicator/sound/phone");
 }
 
 void IndicatorSoundTestBase::SetUp()
@@ -216,7 +271,20 @@ unity::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::volumeSlider(double
     return mh::MenuItemMatcher().radio()
             .label("Volume")
             .round_doubles(0.1)
+            .int32_attribute("target", 0)
+            .double_attribute("min-value", 0.0)
+            .double_attribute("max-value", 1.0)
+            .double_attribute("step", 0.01)
+            .string_attribute("x-canonical-type", "com.canonical.unity.slider")
             .pass_through_double_attribute("action", volume);
+}
+
+unity::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::silentModeSwitch(bool toggled)
+{
+    return mh::MenuItemMatcher::checkbox()
+        .label("Silent Mode")
+        .action("indicator.silent-mode")
+        .toggled(toggled);
 }
 
 bool IndicatorSoundTestBase::waitMenuChange()

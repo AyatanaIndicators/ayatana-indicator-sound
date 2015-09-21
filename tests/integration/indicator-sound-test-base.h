@@ -45,10 +45,13 @@ protected:
     void TearDown() override;
 
     void startIndicator();
-    void startPulse();
+    void startPulseDesktop();
+    void startPulsePhone();
     void startAccountsService();
 
-    bool setVolume(QString const &role, double volume);
+    bool setStreamRestoreVolume(QString const &role, double volume);
+
+    bool setSinkVolume(double volume);
 
     bool startTestSound(QString const &role);
 
@@ -58,7 +61,11 @@ protected:
 
     static unity::gmenuharness::MenuMatcher::Parameters desktopParameters();
 
+    static unity::gmenuharness::MenuMatcher::Parameters phoneParameters();
+
     static unity::gmenuharness::MenuItemMatcher volumeSlider(double volume);
+
+    static unity::gmenuharness::MenuItemMatcher silentModeSwitch(bool toggled);
 
     bool waitMenuChange();
 

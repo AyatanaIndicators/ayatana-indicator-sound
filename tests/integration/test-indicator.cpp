@@ -32,16 +32,15 @@ class TestIndicator: public IndicatorSoundTestBase
 {
 };
 
-TEST_F(TestIndicator, ChangeRoleVolume)
+TEST_F(TestIndicator, PhoneChangeRoleVolume)
 {
     double INITIAL_VOLUME = 0.0;
 
     ASSERT_NO_THROW(startAccountsService());
-    ASSERT_NO_THROW(startPulse());
+    ASSERT_NO_THROW(startPulsePhone());
 
     // initialize volumes in pulseaudio
-    EXPECT_TRUE(setVolume("mutimedia", INITIAL_VOLUME));
-    EXPECT_TRUE(setVolume("alert", INITIAL_VOLUME));
+    EXPECT_TRUE(setStreamRestoreVolume("alert", INITIAL_VOLUME));
 
     // start now the indicator, so it picks the new volumes
     ASSERT_NO_THROW(startIndicator());
@@ -53,7 +52,7 @@ TEST_F(TestIndicator, ChangeRoleVolume)
     double randomVolume = randInt / 100.0;
 
     // set an initial volume to the alert role
-    setVolume("alert", 1.0);
+    setStreamRestoreVolume("alert", 1.0);
     EXPECT_TRUE(waitVolumeChangedInIndicator());
 
     // play a test sound, it should change the role in the indicator
@@ -61,10 +60,207 @@ TEST_F(TestIndicator, ChangeRoleVolume)
     EXPECT_TRUE(waitVolumeChangedInIndicator());
 
     // set the random volume to the multimedia role
-    EXPECT_TRUE(setVolume("multimedia", randomVolume));
+    EXPECT_TRUE(setStreamRestoreVolume("multimedia", randomVolume));
     if (randomVolume != INITIAL_VOLUME)
     {
         EXPECT_TRUE(waitVolumeChangedInIndicator());
+    }
+
+    // check the indicator
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-scroll-action", "indicator.scroll")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .string_attribute("submenu-action", "indicator.indicator-shown")
+            .mode(mh::MenuItemMatcher::Mode::starts_with)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(silentModeSwitch(false))
+                .item(volumeSlider(randomVolume))
+            )
+        ).match());
+
+    // check that the last item is Sound Settings
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .mode(mh::MenuItemMatcher::Mode::ends_with)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .label("Sound Settings…")
+                .action("indicator.phone-settings")
+            )
+        ).match());
+
+    // stop the test sound, the role should change again to alert
+    stopTestSound();
+    if (randomVolume != 1.0)
+    {
+        // we only wait if the volume in the alert and the
+        // one set in the multimedia roles differ
+        EXPECT_TRUE(waitVolumeChangedInIndicator());
+    }
+
+    // check the initial volume for the alert role
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-scroll-action", "indicator.scroll")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .string_attribute("submenu-action", "indicator.indicator-shown")
+            .mode(mh::MenuItemMatcher::Mode::starts_with)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(silentModeSwitch(false))
+                .item(volumeSlider(1.0))
+            )
+        ).match());
+
+    // check that the last item is Sound Settings
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .mode(mh::MenuItemMatcher::Mode::ends_with)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .label("Sound Settings…")
+                .action("indicator.phone-settings")
+            )
+        ).match());
+}
+
+TEST_F(TestIndicator, PhoneBasicInitialVolume)
+{
+    double INITIAL_VOLUME = 0.0;
+
+    ASSERT_NO_THROW(startAccountsService());
+    ASSERT_NO_THROW(startPulsePhone());
+
+    // initialize volumes in pulseaudio
+    EXPECT_TRUE(setStreamRestoreVolume("alert", INITIAL_VOLUME));
+
+    // start now the indicator, so it picks the new volumes
+    ASSERT_NO_THROW(startIndicator());
+
+    // check the initial volume for the alert role
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-scroll-action", "indicator.scroll")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .string_attribute("submenu-action", "indicator.indicator-shown")
+            .mode(mh::MenuItemMatcher::Mode::starts_with)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(silentModeSwitch(false))
+                .item(volumeSlider(INITIAL_VOLUME))
+            )
+        ).match());
+
+    // check that the last item is Sound Settings
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .mode(mh::MenuItemMatcher::Mode::ends_with)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .label("Sound Settings…")
+                .action("indicator.phone-settings")
+            )
+        ).match());
+}
+
+TEST_F(TestIndicator, DesktopBasicInitialVolume)
+{
+    double INITIAL_VOLUME = 0.0;
+
+    ASSERT_NO_THROW(startAccountsService());
+    ASSERT_NO_THROW(startPulseDesktop());
+
+    // initialize volumes in pulseaudio
+    EXPECT_FALSE(setStreamRestoreVolume("alert", INITIAL_VOLUME));
+    EXPECT_TRUE(setSinkVolume(INITIAL_VOLUME));
+
+    // start now the indicator, so it picks the new volumes
+    ASSERT_NO_THROW(startIndicator());
+
+    // check the initial volume for the alert role
+    EXPECT_MATCHRESULT(mh::MenuMatcher(desktopParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .mode(mh::MenuItemMatcher::Mode::starts_with)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(mh::MenuItemMatcher().checkbox()
+                    .label("Mute")
+                )
+                .item(volumeSlider(INITIAL_VOLUME))
+            )
+        ).match());
+
+    // check that the last item is Sound Settings
+    EXPECT_MATCHRESULT(mh::MenuMatcher(desktopParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .mode(mh::MenuItemMatcher::Mode::ends_with)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .label("Sound Settings…")
+            )
+        ).match());
+}
+
+TEST_F(TestIndicator, DesktopChangeRoleVolume)
+{
+    double INITIAL_VOLUME = 0.0;
+
+    ASSERT_NO_THROW(startAccountsService());
+    ASSERT_NO_THROW(startPulseDesktop());
+
+    // initialize volumes in pulseaudio
+    // expect false for stream restore, because the module
+    // is not loaded in the desktop pulseaudio instance
+    EXPECT_FALSE(setStreamRestoreVolume("mutimedia", INITIAL_VOLUME));
+    EXPECT_FALSE(setStreamRestoreVolume("alert", INITIAL_VOLUME));
+
+    EXPECT_TRUE(setSinkVolume(INITIAL_VOLUME));
+
+    // start now the indicator, so it picks the new volumes
+    ASSERT_NO_THROW(startIndicator());
+
+    // Generate a random volume
+    QTime now = QTime::currentTime();
+    qsrand(now.msec());
+    int randInt = qrand() % 100;
+    double randomVolume = randInt / 100.0;
+
+//    // play a test sound, it should NOT change the role in the indicator
+    EXPECT_TRUE(startTestSound("multimedia"));
+    EXPECT_FALSE(waitVolumeChangedInIndicator());
+
+    // set the random volume
+    EXPECT_TRUE(setSinkVolume(randomVolume));
+    if (randomVolume != INITIAL_VOLUME)
+    {
+        EXPECT_FALSE(waitVolumeChangedInIndicator());
     }
 
     // check the indicator
@@ -99,32 +295,31 @@ TEST_F(TestIndicator, ChangeRoleVolume)
 
     // stop the test sound, the role should change again to alert
     stopTestSound();
-    if (randomVolume != 1.0)
-    {
-        // we only wait if the volume in the alert and the
-        // one set in the multimedia roles differ
-        EXPECT_TRUE(waitVolumeChangedInIndicator());
-    }
+
+    // although we were playing something in the multimedia role
+    // the server does not have the streamrestore module, so
+    // the volume does not change (the role does not change)
+    EXPECT_FALSE(waitVolumeChangedInIndicator());
 
     // check the initial volume for the alert role
-    EXPECT_MATCHRESULT(mh::MenuMatcher(desktopParameters())
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
         .item(mh::MenuItemMatcher()
             .action("indicator.root")
             .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-scroll-action", "indicator.scroll")
             .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .string_attribute("submenu-action", "indicator.indicator-shown")
             .mode(mh::MenuItemMatcher::Mode::starts_with)
             .submenu()
             .item(mh::MenuItemMatcher()
                 .section()
-                .item(mh::MenuItemMatcher().checkbox()
-                    .label("Mute")
-                )
-                .item(volumeSlider(1.0))
+                .item(silentModeSwitch(false))
+                .item(volumeSlider(randomVolume))
             )
         ).match());
 
     // check that the last item is Sound Settings
-    EXPECT_MATCHRESULT(mh::MenuMatcher(desktopParameters())
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
         .item(mh::MenuItemMatcher()
             .action("indicator.root")
             .string_attribute("x-canonical-type", "com.canonical.indicator.root")
@@ -133,50 +328,7 @@ TEST_F(TestIndicator, ChangeRoleVolume)
             .submenu()
             .item(mh::MenuItemMatcher()
                 .label("Sound Settings…")
-            )
-        ).match());
-}
-
-TEST_F(TestIndicator, BasicInitialVolume)
-{
-    double INITIAL_VOLUME = 0.0;
-
-    ASSERT_NO_THROW(startAccountsService());
-    ASSERT_NO_THROW(startPulse());
-
-    // initialize volumes in pulseaudio
-    EXPECT_TRUE(setVolume("alert", INITIAL_VOLUME));
-
-    // start now the indicator, so it picks the new volumes
-    ASSERT_NO_THROW(startIndicator());
-
-    // check the initial volume for the alert role
-    EXPECT_MATCHRESULT(mh::MenuMatcher(desktopParameters())
-        .item(mh::MenuItemMatcher()
-            .action("indicator.root")
-            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
-            .string_attribute("x-canonical-secondary-action", "indicator.mute")
-            .mode(mh::MenuItemMatcher::Mode::starts_with)
-            .submenu()
-            .item(mh::MenuItemMatcher()
-                .section()
-                .item(mh::MenuItemMatcher().checkbox()
-                    .label("Mute")
-                )
-                .item(volumeSlider(INITIAL_VOLUME))
-            )
-        ).match());
-
-    // check that the last item is Sound Settings
-    EXPECT_MATCHRESULT(mh::MenuMatcher(desktopParameters())
-        .item(mh::MenuItemMatcher()
-            .action("indicator.root")
-            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
-            .string_attribute("x-canonical-secondary-action", "indicator.mute")
-            .mode(mh::MenuItemMatcher::Mode::ends_with)
-            .submenu()
-            .item(mh::MenuItemMatcher()
-                .label("Sound Settings…")
+                .action("indicator.phone-settings")
             )
         ).match());
 }

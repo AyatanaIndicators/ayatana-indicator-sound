@@ -150,6 +150,11 @@ bool DBusPulseVolume::setVolume(QString const & role, double volume)
             }
         }
     }
+    else
+    {
+        qWarning() << "SetVolume::setVolume(): role " << role << " was not found.";
+        return false;
+    }
     return true;
 }
 

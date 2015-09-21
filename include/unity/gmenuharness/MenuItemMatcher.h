@@ -93,6 +93,10 @@ public:
 
     MenuItemMatcher& string_attribute(const std::string& name, const std::string& value);
 
+    MenuItemMatcher& int32_attribute(const std::string& name, int value);
+
+    MenuItemMatcher& double_attribute(const std::string& name, double value);
+
     MenuItemMatcher& toggled(bool toggled);
 
     MenuItemMatcher& mode(Mode mode);

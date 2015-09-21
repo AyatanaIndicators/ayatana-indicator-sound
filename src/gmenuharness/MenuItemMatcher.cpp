@@ -354,6 +354,22 @@ MenuItemMatcher& MenuItemMatcher::string_attribute(const string& name, const str
                                  &gvariant_deleter));
 }
 
+MenuItemMatcher& MenuItemMatcher::int32_attribute(const std::string& name, int value)
+{
+    return attribute(
+            name,
+            shared_ptr<GVariant>(g_variant_new_int32 (value),
+                                 &gvariant_deleter));
+}
+
+MenuItemMatcher& MenuItemMatcher::double_attribute(const std::string& name, double value)
+{
+    return attribute(
+            name,
+            shared_ptr<GVariant>(g_variant_new_double (value),
+                                 &gvariant_deleter));
+}
+
 MenuItemMatcher& MenuItemMatcher::toggled(bool isToggled)
 {
     p->m_isToggled = make_shared<bool>(isToggled);
