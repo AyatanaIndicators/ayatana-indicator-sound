@@ -16,13 +16,14 @@
  * Author: Xavi Garcia <xavi.garcia.mena@canonical.com>
  */
 
+#include "dbus-pulse-volume.h"
+
 #include "dbus_properties_interface.h"
 #include "dbus_accounts_interface.h"
 #include "dbus_accountssound_interface.h"
 #include "stream_restore_interface.h"
 
 #include <pulse/volume.h>
-#include "dbus-pulse-volume.h"
 
 #include <QSignalSpy>
 
@@ -54,20 +55,13 @@ DBusPulseVolume::DBusPulseVolume() :
         qWarning() << "DBusPulseVolume::DBusPulseVolume(): D-Bus error: " << connection_string.error().message();
     }
 
-    qDebug() << "********************************Connetion: " << connection_string.value().toString();
-
     connection_.reset(new QDBusConnection(QDBusConnection::connectToPeer(connection_string.value().toString(), "set-volume")));
-
-//    connection_.reset(new QDBusConnection(QDBusConnection::connectToPeer("unix:path=/run/user/1000/pulse/dbus-socket", "set-volume")));
-    qDebug() << "Is connected " << connection_->isConnected();
 
     if (connection_->isConnected())
     {
         interface_paths_.reset(new StreamRestoreInterface("org.PulseAudio.Ext.StreamRestore1",
                                                     "/org/pulseaudio/stream_restore1",
                                                     *(connection_.get()), 0));
-        qDebug() << "Interface " << (void *)interface_paths_.get();
-
         if (interface_paths_)
         {
             // get the role paths
@@ -87,7 +81,6 @@ DBusPulseVolume::DBusPulseVolume() :
 
 DBusPulseVolume::~DBusPulseVolume()
 {
-    connection_->disconnectFromPeer("unix:path=/run/user/1000/pulse/dbus-socket");
 }
 
 QString DBusPulseVolume::fillRolePath(QString const &role)
@@ -100,7 +93,7 @@ QString DBusPulseVolume::fillRolePath(QString const &role)
         qWarning() << "SetVolume::fillRolePath(): D-Bus error: " << objectPath.error().message();
         return "";
     }
-    qDebug() << "XGM: path for role " << role << "=" << objectPath.value().path();
+
     auto role_info = std::make_shared<RoleInformation>();
     role_info->interface_.reset(new DBusPropertiesInterface("org.PulseAudio.Ext.StreamRestore1.RestoreEntry",
                                                 objectPath.value().path(),
@@ -122,26 +115,10 @@ bool DBusPulseVolume::setVolume(QString const & role, double volume)
         qWarning() << "SetVolume::setVolume(): error: Volume interfaces are not initialized";
         return false;
     }
+
     RolesMap::const_iterator iter = roles_map_.find(role);
     if (iter != roles_map_.end())
     {
-        QDBusReply<QVariant> prev_vol = (*iter).second->interface_->call(QLatin1String("Get"),
-                QLatin1String("org.PulseAudio.Ext.StreamRestore1.RestoreEntry"),
-                QLatin1String("Volume"));
-
-        if (!prev_vol.isValid())
-        {
-            qWarning() << "SetVolume::setVolume(): D-Bus error: " << prev_vol.error().message();
-            return false;
-        }
-        QDBusArgument arg = prev_vol.value().value<QDBusArgument>();
-        PulseaudioVolumeArray element;
-        arg >> element;
-
-        PulseaudioVolume signal_vol(0, 4000);
-        PulseaudioVolumeArray vol_array;
-        vol_array.addItem(signal_vol);
-
         QVariant var;
         PulseaudioVolumeArray t;
         PulseaudioVolume vv(0, volumeDoubleToUint(volume));
@@ -209,7 +186,6 @@ void DBusPulseVolume::initializeAccountsInterface()
         std::unique_ptr<AccountsInterface> setInterface(new AccountsInterface("org.freedesktop.Accounts",
                                                         "/org/freedesktop/Accounts",
                                                         QDBusConnection::systemBus(), 0));
-        qDebug() << "Interface: " << setInterface.get();
 
         QDBusReply<QDBusObjectPath> userResp = setInterface->call(QLatin1String("FindUserByName"),
                                                                   QLatin1String(username));
@@ -228,7 +204,6 @@ void DBusPulseVolume::initializeAccountsInterface()
             accounts_interface_.reset(new DBusPropertiesInterface("org.freedesktop.Accounts",
                                                                 userPath,
                                                                 soundInterface->connection(), 0));
-            qDebug() << "Interface for setting volume: " << accounts_interface_.get();
             if (!accounts_interface_->isValid())
             {
                 qWarning() << "SetVolume::initializeAccountsInterface(): D-Bus error: " << accounts_interface_->lastError().message();

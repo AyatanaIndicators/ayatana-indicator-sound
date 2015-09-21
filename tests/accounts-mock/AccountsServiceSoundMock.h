@@ -20,10 +20,22 @@
 #include <QDBusContext>
 #include <QObject>
 
+#include "DBusPropertiesNotifier.h"
+
+namespace ubuntu
+{
+
+namespace indicators
+{
+
+namespace testing
+{
+
+class DBusPropertiesNotifier;
+
 class AccountsServiceSoundMock : public QObject, protected QDBusContext
 {
     Q_OBJECT
-//    Q_CLASSINFO("D-Bus Interface", "test.com.ubuntu.AccountsService.Sound")
     Q_PROPERTY(double Volume READ volume WRITE setVolume)
 
 public Q_SLOTS:
@@ -34,11 +46,13 @@ public:
     AccountsServiceSoundMock(QObject* parent = 0);
     virtual ~AccountsServiceSoundMock();
 
-protected:
-    void notifyPropertyChanged(QString const & interface,
-                                QString const & path,
-                                QString const & propertyName);
-
 private:
     double volume_;
+    DBusPropertiesNotifier notifier_;
 };
+
+} // namespace testing
+
+} // namespace indicators
+
+} // namespace ubuntu

@@ -42,9 +42,6 @@ private:
     unsigned int volume_;
 };
 
-Q_DECLARE_METATYPE(PulseaudioVolume)
-
-
 class PulseaudioVolumeArray
 {
 public:
@@ -68,4 +65,5 @@ private:
     QVector<PulseaudioVolume> volume_array_;
 };
 
+Q_DECLARE_METATYPE(PulseaudioVolume)
 Q_DECLARE_METATYPE(PulseaudioVolumeArray)

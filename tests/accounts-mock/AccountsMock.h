@@ -21,6 +21,15 @@
 #include <QDBusObjectPath>
 #include <QObject>
 
+namespace ubuntu
+{
+
+namespace indicators
+{
+
+namespace testing
+{
+
 class AccountsMock : public QObject, protected QDBusContext
 {
     Q_OBJECT
@@ -33,3 +42,9 @@ public:
     AccountsMock(QObject* parent = 0);
     virtual ~AccountsMock();
 };
+
+} // namespace testing
+
+} // namespace indicators
+
+} // namespace ubuntu

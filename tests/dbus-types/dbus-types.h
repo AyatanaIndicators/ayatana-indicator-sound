@@ -39,4 +39,6 @@ namespace DBusTypes
     static constexpr char const* STREAM_RESTORE_PATH = "/org/pulseaudio/stream_restore1";
 
     static constexpr char const* STREAM_RESTORE_ENTRY_NAME = "org.PulseAudio.Ext.StreamRestore1.RestoreEntry";
-}
+
+} // namespace DBusTypes
+

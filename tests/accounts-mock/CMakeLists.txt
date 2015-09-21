@@ -15,13 +15,13 @@ qt5_add_dbus_interface(interface_files ${dbusinterface_sound_xml} accountsservic
 qt5_add_dbus_adaptor(adaptor_files
     com.ubuntu.AccountsService.Sound.Mock.xml
     AccountsServiceSoundMock.h
-    AccountsServiceSoundMock
+    ubuntu::indicators::testing::AccountsServiceSoundMock
     AccountsServiceSoundMockAdaptor)
 
 qt5_add_dbus_adaptor(adaptor_files
     org.freedesktop.Accounts.Mock.xml
     AccountsMock.h
-    AccountsMock
+    ubuntu::indicators::testing::AccountsMock
     AccountsMockAdaptor)
 
 add_executable(
@@ -30,6 +30,7 @@ add_executable(
   ${adaptor_files}
   AccountsServiceSoundMock.cpp
   AccountsMock.cpp
+  DBusPropertiesNotifier.cpp
   main.cpp
 )
 

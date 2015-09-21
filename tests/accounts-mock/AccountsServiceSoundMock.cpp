@@ -22,6 +22,8 @@
 #include "AccountsServiceSoundMock.h"
 #include "AccountsDefs.h"
 
+using namespace ubuntu::indicators::testing;
+
 AccountsServiceSoundMock::AccountsServiceSoundMock(QObject* parent)
     : QObject(parent)
     , volume_(0.0)
@@ -38,23 +40,9 @@ double AccountsServiceSoundMock::volume() const
 void AccountsServiceSoundMock::setVolume(double volume)
 {
     volume_ = volume;
-    notifyPropertyChanged(ACCOUNTS_SOUND_INTERFACE,
-                          USER_PATH,
-                          "Volume");
-}
-
-void AccountsServiceSoundMock::notifyPropertyChanged(QString const & interface,
-                                                     QString const & path,
-                                                     QString const & propertyName)
-{
-    QDBusMessage signal = QDBusMessage::createSignal(
-        path,
-        "org.freedesktop.DBus.Properties",
-        "PropertiesChanged");
-    signal << interface;
-    QVariantMap changedProps;
-    changedProps.insert(propertyName, property(propertyName.toStdString().c_str()));
-    signal << changedProps;
-    signal << QStringList();
-    QDBusConnection::systemBus().send(signal);
+    notifier_.notifyPropertyChanged(QDBusConnection::systemBus(),
+                                    ACCOUNTS_SOUND_INTERFACE,
+                                    USER_PATH,
+                                    "Volume",
+                                    property("Volume"));
 }
