@@ -75,6 +75,8 @@ public:
 
     MenuItemMatcher& icon(const std::string& icon);
 
+    MenuItemMatcher& themed_icon(const std::string& iconName, const std::vector<std::string>& icons);
+
     MenuItemMatcher& widget(const std::string& widget);
 
     MenuItemMatcher& pass_through_attribute(const std::string& actionName, const std::shared_ptr<GVariant>& value);
@@ -94,6 +96,8 @@ public:
     MenuItemMatcher& string_attribute(const std::string& name, const std::string& value);
 
     MenuItemMatcher& int32_attribute(const std::string& name, int value);
+
+    MenuItemMatcher& int64_attribute(const std::string& name, int value);
 
     MenuItemMatcher& double_attribute(const std::string& name, double value);
 

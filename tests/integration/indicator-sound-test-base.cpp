@@ -276,6 +276,8 @@ unity::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::volumeSlider(double
             .double_attribute("max-value", 1.0)
             .double_attribute("step", 0.01)
             .string_attribute("x-canonical-type", "com.canonical.unity.slider")
+            .themed_icon("max-icon", {"audio-volume-high-panel", "audio-volume-high", "audio-volume", "audio"})
+            .themed_icon("min-icon", {"audio-volume-low-zero-panel", "audio-volume-low-zero", "audio-volume-low", "audio-volume", "audio"})
             .pass_through_double_attribute("action", volume);
 }
 
