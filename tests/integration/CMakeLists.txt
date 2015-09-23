@@ -29,10 +29,11 @@ include_directories("${CMAKE_BINARY_DIR}/tests/dbus-types")
 add_definitions(-DSOUND_SERVICE_BIN="${CMAKE_BINARY_DIR}/src/indicator-sound-service"
                 -DSTREAM_RESTORE_TABLE="${CMAKE_SOURCE_DIR}/tests/integration/touch-stream-restore.table"
                 -DVOLUME_SET_BIN="${CMAKE_BINARY_DIR}/tests/integration/set-volume"
-                -DACCOUNTS_SERVICE_BIN="${CMAKE_BINARY_DIR}/tests/accounts-mock/accounts-service-sound"
+                -DACCOUNTS_SERVICE_BIN="${CMAKE_BINARY_DIR}/tests/service-mocks/accounts-mock/accounts-service-sound"
+                -DMEDIA_PLAYER_MPRIS_BIN="${CMAKE_BINARY_DIR}/tests/service-mocks/media-player-mpris-mock/media-player-mpris-mock"
                 -DTEST_SOUND="${CMAKE_SOURCE_DIR}/tests/integration/test-sound.wav"
                 -DQT_NO_KEYWORDS=1
-                -DSCHEMA_DIR="${SCHEMA_DIR}"
+                -DXDG_DATA_DIRS="${XDG_DATA_DIRS}"
 )
 
 set(GLIB_REQUIRED_VERSION 2.26)

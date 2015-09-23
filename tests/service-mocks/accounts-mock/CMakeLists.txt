@@ -2,7 +2,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(Qt5DBus REQUIRED)
-include_directories(${Qt5DBus_INCLUDE_DIRS})
+include_directories(${Qt5DBus_INCLUDE_DIRS}
+                    "${CMAKE_SOURCE_DIR}/tests/service-mocks")
 
 add_definitions(-DQT_NO_KEYWORDS=1)
 
@@ -30,7 +31,7 @@ add_executable(
   ${adaptor_files}
   AccountsServiceSoundMock.cpp
   AccountsMock.cpp
-  DBusPropertiesNotifier.cpp
+  ${CMAKE_SOURCE_DIR}/tests/service-mocks/DBusPropertiesNotifier.cpp
   main.cpp
 )
 

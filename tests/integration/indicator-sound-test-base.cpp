@@ -79,6 +79,36 @@ bool IndicatorSoundTestBase::setSinkVolume(double volume)
     return setVolume.exitCode() == 0;
 }
 
+bool IndicatorSoundTestBase::clearGSettingsPlayers()
+{
+    QProcess clearPlayers;
+
+    clearPlayers.start("gsettings", QStringList()
+                                        << "set"
+                                        << "com.canonical.indicator.sound"
+                                        << "interested-media-players"
+                                        << "[]");
+    if (!clearPlayers.waitForStarted())
+        return false;
+
+    if (!clearPlayers.waitForFinished())
+        return false;
+
+    return clearPlayers.exitCode() == 0;
+}
+
+bool IndicatorSoundTestBase::startTestMprisPlayer(QString const& playerName)
+{
+    testPlayer1.terminate();
+    testPlayer1.start(MEDIA_PLAYER_MPRIS_BIN, QStringList()
+                                        << playerName);
+    if (!testPlayer1.waitForStarted())
+        return false;
+
+
+    return true;
+}
+
 bool IndicatorSoundTestBase::startTestSound(QString const &role)
 {
     testSoundProcess.terminate();
@@ -218,15 +248,13 @@ mh::MenuMatcher::Parameters IndicatorSoundTestBase::phoneParameters()
 
 void IndicatorSoundTestBase::SetUp()
 {
-    setenv("GSETTINGS_SCHEMA_DIR", SCHEMA_DIR, true);
-    setenv("GSETTINGS_BACKEND", "memory", true);
+    setenv("XDG_DATA_DIRS", XDG_DATA_DIRS, true);
     setenv("DBUS_SYSTEM_BUS_ADDRESS", dbusTestRunner.systemBus().toStdString().c_str(), true);
 }
 
 void IndicatorSoundTestBase::TearDown()
 {
-    unsetenv("GSETTINGS_SCHEMA_DIR");
-    unsetenv("GSETTINGS_BACKEND");
+    unsetenv("XDG_DATA_DIRS");
     unsetenv("PULSE_SERVER");
 }
 

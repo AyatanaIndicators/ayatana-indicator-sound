@@ -49,6 +49,10 @@ protected:
     void startPulsePhone();
     void startAccountsService();
 
+    bool clearGSettingsPlayers();
+
+    bool startTestMprisPlayer(QString const& playerName);
+
     bool setStreamRestoreVolume(QString const &role, double volume);
 
     bool setSinkVolume(double volume);
@@ -84,6 +88,8 @@ protected:
     QtDBusTest::DBusServicePtr accountsService;
 
     QProcess testSoundProcess;
+
+    QProcess testPlayer1;
 
     std::unique_ptr<MenusInterface> menu_interface_;
 

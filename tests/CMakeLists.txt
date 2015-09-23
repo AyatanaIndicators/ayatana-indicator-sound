@@ -22,7 +22,8 @@ set_source_files_properties (gschemas.compiled GENERATED)
 # GSettings:
 # compile the indicator-sound schema into a gschemas.compiled file in this directory,
 # and help the tests to find that file by setting -DSCHEMA_DIR
-set (SCHEMA_DIR "${CMAKE_CURRENT_BINARY_DIR}/gsettings-schemas")
+set (XDG_DATA_DIRS "${CMAKE_CURRENT_BINARY_DIR}/gsettings-schemas")
+set (SCHEMA_DIR "${XDG_DATA_DIRS}/glib-2.0/schemas")
 add_definitions(-DSCHEMA_DIR="${SCHEMA_DIR}")
 execute_process (COMMAND ${PKG_CONFIG_EXECUTABLE} gio-2.0 --variable glib_compile_schemas
                  OUTPUT_VARIABLE COMPILE_SCHEMA_EXECUTABLE
@@ -31,6 +32,7 @@ add_custom_command (OUTPUT gschemas.compiled
                     DEPENDS ${CMAKE_SOURCE_DIR}/data/com.canonical.indicator.sound.gschema.xml
                     COMMAND mkdir -p ${SCHEMA_DIR}
                     COMMAND cp -f ${CMAKE_SOURCE_DIR}/data/*gschema.xml ${SCHEMA_DIR}
+                    COMMAND cp -f /usr/share/glib-2.0/schemas/com.ubuntu.sound.gschema.xml ${SCHEMA_DIR}
                     COMMAND ${COMPILE_SCHEMA_EXECUTABLE} ${SCHEMA_DIR})
 
 ###########################
@@ -281,4 +283,4 @@ add_test(indcator-test
 
 add_subdirectory(integration)
 add_subdirectory(dbus-types)
-add_subdirectory(accounts-mock)
+add_subdirectory(service-mocks)
