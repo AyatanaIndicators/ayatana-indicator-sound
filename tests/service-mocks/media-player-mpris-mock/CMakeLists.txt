@@ -59,5 +59,5 @@ qt5_use_modules(
 # test players desktop files
 add_custom_command (OUTPUT testplayers
                     DEPENDS ${CMAKE_SOURCE_DIR}/tests/service-mocks/media-player-mpris-mock/applications
-                    COMMAND mkdir -p ${SCHEMA_DIR}
-                    COMMAND cp -r ${CMAKE_SOURCE_DIR}/tests/service-mocks/media-player-mpris-mock/applications ${SCHEMA_DIR})
+                    COMMAND mkdir -p ${XDG_DATA_DIRS}
+                    COMMAND cp -r ${CMAKE_SOURCE_DIR}/tests/service-mocks/media-player-mpris-mock/applications ${XDG_DATA_DIRS})
