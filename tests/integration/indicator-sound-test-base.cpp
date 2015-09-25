@@ -109,6 +109,25 @@ bool IndicatorSoundTestBase::startTestMprisPlayer(QString const& playerName)
     return true;
 }
 
+bool IndicatorSoundTestBase::setTestMprisPlayerProperty(QString const &testPlayer, QString const &property, bool value)
+{
+    QProcess setProperty;
+    QString strValue;
+    strValue = value ? "true" : "false";
+
+    setProperty.start(MEDIA_PLAYER_MPRIS_UPDATE_BIN, QStringList()
+                                        << testPlayer
+                                        << property
+                                        << strValue);
+    if (!setProperty.waitForStarted())
+        return false;
+
+    if (!setProperty.waitForFinished())
+        return false;
+
+    return setProperty.exitCode() == 0;
+}
+
 bool IndicatorSoundTestBase::startTestSound(QString const &role)
 {
     testSoundProcess.terminate();

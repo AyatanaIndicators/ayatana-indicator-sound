@@ -53,6 +53,8 @@ protected:
 
     bool startTestMprisPlayer(QString const& playerName);
 
+    bool setTestMprisPlayerProperty(QString const &testPlayer, QString const &property, bool value);
+
     bool setStreamRestoreVolume(QString const &role, double volume);
 
     bool setSinkVolume(double volume);

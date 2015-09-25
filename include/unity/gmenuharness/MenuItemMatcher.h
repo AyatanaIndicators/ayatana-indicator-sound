@@ -101,6 +101,8 @@ public:
 
     MenuItemMatcher& double_attribute(const std::string& name, double value);
 
+    MenuItemMatcher& attribute_not_set(const std::string& name);
+
     MenuItemMatcher& toggled(bool toggled);
 
     MenuItemMatcher& mode(Mode mode);

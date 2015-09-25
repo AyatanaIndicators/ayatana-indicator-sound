@@ -166,10 +166,41 @@ TEST_F(TestIndicator, PhoneBasicInitialVolume)
                 .item(silentModeSwitch(false))
                 .item(volumeSlider(INITIAL_VOLUME))
             )
-//            .item(mh::MenuItemMatcher()
-//                .section()
-//                .action("indicator.testplayer1.desktop")
-//            )
+            .item(mh::MenuItemMatcher()
+                .label("Sound Settings…")
+                .action("indicator.phone-settings")
+            )
+        ).match());
+}
+
+TEST_F(TestIndicator, PhoneAddMprisPlayer)
+{
+    double INITIAL_VOLUME = 0.0;
+
+    ASSERT_NO_THROW(startAccountsService());
+    EXPECT_TRUE(clearGSettingsPlayers());
+    ASSERT_NO_THROW(startPulsePhone());
+
+    // initialize volumes in pulseaudio
+    EXPECT_TRUE(setStreamRestoreVolume("alert", INITIAL_VOLUME));
+
+    // start now the indicator, so it picks the new volumes
+    ASSERT_NO_THROW(startIndicator());
+
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-scroll-action", "indicator.scroll")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .string_attribute("submenu-action", "indicator.indicator-shown")
+            .mode(mh::MenuItemMatcher::Mode::all)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(silentModeSwitch(false))
+                .item(volumeSlider(INITIAL_VOLUME))
+            )
             .item(mh::MenuItemMatcher()
                 .label("Sound Settings…")
                 .action("indicator.phone-settings")
@@ -189,6 +220,9 @@ TEST_F(TestIndicator, DesktopBasicInitialVolume)
     EXPECT_FALSE(setStreamRestoreVolume("alert", INITIAL_VOLUME));
     EXPECT_TRUE(setSinkVolume(INITIAL_VOLUME));
 
+    // start the test player
+    EXPECT_TRUE(startTestMprisPlayer("testplayer1"));
+
     // start now the indicator, so it picks the new volumes
     ASSERT_NO_THROW(startIndicator());
 
@@ -207,12 +241,27 @@ TEST_F(TestIndicator, DesktopBasicInitialVolume)
                 .item(volumeSlider(INITIAL_VOLUME))
             )
             .item(mh::MenuItemMatcher()
+                    .section()
+                    .item(mh::MenuItemMatcher()
+                        .action("indicator.testplayer1.desktop")
+                        .label("TestPlayer1")
+                        .themed_icon("icon", {"testplayer"})
+                        .string_attribute("x-canonical-type", "com.canonical.unity.media-player")
+                    )
+                    .item(mh::MenuItemMatcher()
+                        .string_attribute("x-canonical-previous-action","indicator.previous.testplayer1.desktop")
+                        .string_attribute("x-canonical-play-action","indicator.play.testplayer1.desktop")
+                        .string_attribute("x-canonical-next-action","indicator.next.testplayer1.desktop")
+                        .string_attribute("x-canonical-type","com.canonical.unity.playback-item")
+                    )
+                )
+            .item(mh::MenuItemMatcher()
                             .label("Sound Settings…")
              )
         ).match());
 }
 
-TEST_F(TestIndicator, DesktopAddPlayer)
+TEST_F(TestIndicator, DesktopAddMprisPlayer)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -231,6 +280,175 @@ TEST_F(TestIndicator, DesktopAddPlayer)
     ASSERT_NO_THROW(startIndicator());
 
     // check that the player is added
+    EXPECT_MATCHRESULT(mh::MenuMatcher(desktopParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .mode(mh::MenuItemMatcher::Mode::all)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(mh::MenuItemMatcher().checkbox()
+                    .label("Mute")
+                )
+                .item(volumeSlider(INITIAL_VOLUME))
+            )
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(mh::MenuItemMatcher()
+                    .action("indicator.testplayer1.desktop")
+                    .label("TestPlayer1")
+                    .themed_icon("icon", {"testplayer"})
+                    .string_attribute("x-canonical-type", "com.canonical.unity.media-player")
+                )
+                .item(mh::MenuItemMatcher()
+                    .string_attribute("x-canonical-previous-action","indicator.previous.testplayer1.desktop")
+                    .string_attribute("x-canonical-play-action","indicator.play.testplayer1.desktop")
+                    .string_attribute("x-canonical-next-action","indicator.next.testplayer1.desktop")
+                    .string_attribute("x-canonical-type","com.canonical.unity.playback-item")
+                )
+            )
+            .item(mh::MenuItemMatcher()
+                            .label("Sound Settings…")
+             )
+        ).match());
+}
+
+TEST_F(TestIndicator, DesktopMprisPlayerButtonsState)
+{
+    double INITIAL_VOLUME = 0.0;
+
+    ASSERT_NO_THROW(startAccountsService());
+    EXPECT_TRUE(clearGSettingsPlayers());
+    ASSERT_NO_THROW(startPulseDesktop());
+
+    // initialize volumes in pulseaudio
+    EXPECT_FALSE(setStreamRestoreVolume("alert", INITIAL_VOLUME));
+    EXPECT_TRUE(setSinkVolume(INITIAL_VOLUME));
+
+    // start the test player
+    EXPECT_TRUE(startTestMprisPlayer("testplayer1"));
+
+    // start now the indicator, so it picks the new volumes
+    ASSERT_NO_THROW(startIndicator());
+
+    // check that the player is added
+    EXPECT_MATCHRESULT(mh::MenuMatcher(desktopParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .mode(mh::MenuItemMatcher::Mode::all)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(mh::MenuItemMatcher().checkbox()
+                    .label("Mute")
+                )
+                .item(volumeSlider(INITIAL_VOLUME))
+            )
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(mh::MenuItemMatcher()
+                    .action("indicator.testplayer1.desktop")
+                    .label("TestPlayer1")
+                    .themed_icon("icon", {"testplayer"})
+                    .string_attribute("x-canonical-type", "com.canonical.unity.media-player")
+                )
+                .item(mh::MenuItemMatcher()
+                    .string_attribute("x-canonical-previous-action","indicator.previous.testplayer1.desktop")
+                    .string_attribute("x-canonical-play-action","indicator.play.testplayer1.desktop")
+                    .string_attribute("x-canonical-next-action","indicator.next.testplayer1.desktop")
+                    .string_attribute("x-canonical-type","com.canonical.unity.playback-item")
+                )
+            )
+            .item(mh::MenuItemMatcher()
+                            .label("Sound Settings…")
+             )
+        ).match());
+
+    // change the state of CanGoNext
+    EXPECT_TRUE(setTestMprisPlayerProperty("testplayer1", "CanGoNext", false));
+
+    // verify that the action changes
+    EXPECT_MATCHRESULT(mh::MenuMatcher(desktopParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .mode(mh::MenuItemMatcher::Mode::all)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(mh::MenuItemMatcher().checkbox()
+                    .label("Mute")
+                )
+                .item(volumeSlider(INITIAL_VOLUME))
+            )
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(mh::MenuItemMatcher()
+                    .action("indicator.testplayer1.desktop")
+                    .label("TestPlayer1")
+                    .themed_icon("icon", {"testplayer"})
+                    .string_attribute("x-canonical-type", "com.canonical.unity.media-player")
+                )
+                .item(mh::MenuItemMatcher()
+                    .string_attribute("x-canonical-previous-action","indicator.previous.testplayer1.desktop")
+                    .string_attribute("x-canonical-play-action","indicator.play.testplayer1.desktop")
+                    .attribute_not_set("x-canonical-next-action")
+                    .string_attribute("x-canonical-type","com.canonical.unity.playback-item")
+                )
+            )
+            .item(mh::MenuItemMatcher()
+                            .label("Sound Settings…")
+             )
+        ).match());
+
+
+    // change the state of CanGoPrevious
+    EXPECT_TRUE(setTestMprisPlayerProperty("testplayer1", "CanGoPrevious", false));
+
+    // verify that the action changes
+    EXPECT_MATCHRESULT(mh::MenuMatcher(desktopParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .mode(mh::MenuItemMatcher::Mode::all)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(mh::MenuItemMatcher().checkbox()
+                    .label("Mute")
+                )
+                .item(volumeSlider(INITIAL_VOLUME))
+            )
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(mh::MenuItemMatcher()
+                    .action("indicator.testplayer1.desktop")
+                    .label("TestPlayer1")
+                    .themed_icon("icon", {"testplayer"})
+                    .string_attribute("x-canonical-type", "com.canonical.unity.media-player")
+                )
+                .item(mh::MenuItemMatcher()
+                    .attribute_not_set("x-canonical-previous-action")
+                    .string_attribute("x-canonical-play-action","indicator.play.testplayer1.desktop")
+                    .attribute_not_set("x-canonical-next-action")
+                    .string_attribute("x-canonical-type","com.canonical.unity.playback-item")
+                )
+            )
+            .item(mh::MenuItemMatcher()
+                            .label("Sound Settings…")
+             )
+        ).match());
+
+    // set back both to true
+    EXPECT_TRUE(setTestMprisPlayerProperty("testplayer1", "CanGoNext", true));
+    EXPECT_TRUE(setTestMprisPlayerProperty("testplayer1", "CanGoPrevious", true));
+
     EXPECT_MATCHRESULT(mh::MenuMatcher(desktopParameters())
         .item(mh::MenuItemMatcher()
             .action("indicator.root")

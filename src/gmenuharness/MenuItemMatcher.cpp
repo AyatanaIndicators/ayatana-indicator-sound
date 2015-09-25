@@ -191,6 +191,8 @@ struct MenuItemMatcher::Priv
 
     vector<pair<string, shared_ptr<GVariant>>> m_attributes;
 
+    vector<string> m_not_exist_attributes;
+
     vector<pair<string, shared_ptr<GVariant>>> m_pass_through_attributes;
 
     shared_ptr<bool> m_isToggled;
@@ -249,6 +251,7 @@ MenuItemMatcher& MenuItemMatcher::operator=(const MenuItemMatcher& other)
     p->m_action = other.p->m_action;
     p->m_state_icons = other.p->m_state_icons;
     p->m_attributes = other.p->m_attributes;
+    p->m_not_exist_attributes = other.p->m_not_exist_attributes;
     p->m_pass_through_attributes = other.p->m_pass_through_attributes;
     p->m_isToggled = other.p->m_isToggled;
     p->m_linkType = other.p->m_linkType;
@@ -386,6 +389,12 @@ MenuItemMatcher& MenuItemMatcher::double_attribute(const std::string& name, doub
             name,
             shared_ptr<GVariant>(g_variant_new_double (value),
                                  &gvariant_deleter));
+}
+
+MenuItemMatcher& MenuItemMatcher::attribute_not_set(const std::string& name)
+{
+    p->m_not_exist_attributes.emplace_back (name);
+    return *this;
 }
 
 MenuItemMatcher& MenuItemMatcher::toggled(bool isToggled)
@@ -776,6 +785,17 @@ void MenuItemMatcher::match(
                             + ", but found " + actualString);
             g_free(expectedString);
             g_free(actualString);
+        }
+    }
+
+    for (const auto& e: p->m_not_exist_attributes)
+    {
+        auto value = get_attribute(menuItem, e.c_str());
+        if (value)
+        {
+            matchResult.failure(location,
+                    "Not expected attribute '" + e
+                            + "' was found");
         }
     }
 
