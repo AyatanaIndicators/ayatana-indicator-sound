@@ -1,3 +1,10 @@
+indicator-sound (12.10.2+15.10.20150917-0ubuntu1) vivid; urgency=medium
+
+  [ Xavi Garcia Mena ]
+  * Merged lp:~xavi-garcia-mena/indicator-sound/icon-volume-zero
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 15 Sep 2015 08:19:51 +0000
+
 indicator-sound (12.10.2+15.10.20150915-0ubuntu1) wily; urgency=medium
 
   [ Sebastien Bacher ]

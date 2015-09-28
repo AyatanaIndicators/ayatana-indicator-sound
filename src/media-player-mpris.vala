@@ -290,7 +290,7 @@ public class MediaPlayerMpris: MediaPlayer {
 		if (changed_properties.lookup ("PlaybackStatus", "s", null)) {
 			this.state = this.proxy.PlaybackStatus != null ? this.proxy.PlaybackStatus : "Unknown";
 		}
-		if (changed_properties.lookup ("CanGoNext", "b", null) || changed_properties.lookup ("CanGoPrev", "b", null)) {
+		if (changed_properties.lookup ("CanGoNext", "b", null) || changed_properties.lookup ("CanGoPrevious", "b", null)) {
 			this.playbackstatus_changed ();
 		}
 
