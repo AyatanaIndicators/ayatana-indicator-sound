@@ -39,6 +39,7 @@ public abstract class VolumeControl : Object
 	public virtual bool high_volume { get { return false; } protected set { } }
 	public virtual bool mute { get { return false; } }
 	public virtual bool is_playing { get { return false; } }
+    	public virtual bool active_bluetooth_headphone { get { return false; } }
 	private Volume _volume;
 	public virtual Volume volume { get { return _volume; } set { } }
 	public virtual double mic_volume { get { return 0.0; } set { } }
@@ -56,4 +57,6 @@ public abstract class VolumeControl : Object
 		v.reason = reason;
 		this.volume = v;
 	}
+
+	public signal void bluetooth_headset_status_changed (bool bluetooth_headset_active);
 }

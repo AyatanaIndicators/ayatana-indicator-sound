@@ -71,6 +71,7 @@ public class SoundMenu: Object
 		this.notify_handlers = new HashTable<MediaPlayer, ulong> (direct_hash, direct_equal);
 
 		this.greeter_players = (flags & DisplayFlags.GREETER_PLAYERS) != 0;
+
 	}
 
 	~SoundMenu () {
@@ -183,6 +184,17 @@ public class SoundMenu: Object
 
 		/* this'll drop our ref to it */
 		this.notify_handlers.remove (player);
+	}
+
+	public void update_volume_slider (bool bluetooth_headset_active) {
+		int index = find_action (this.volume_section, "indicator.volume");
+		if (index != -1) {
+			string label = bluetooth_headset_active ? "Volume (Bluetooth)" : "Volume";
+			this.volume_section.remove (index);
+			this.volume_section.insert_item (index, this.create_slider_menu_item (_(label), "indicator.volume(0)", 0.0, 1.0, 0.01,
+																  "audio-volume-low-zero-panel",
+																  "audio-volume-high-panel"));
+		}
 	}
 
 	public Menu root;

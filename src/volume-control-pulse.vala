@@ -87,6 +87,7 @@ public class VolumeControlPulse : VolumeControl
 	private bool _send_next_local_volume = false;
 	private double _account_service_volume = 0.0;
 	private bool _active_port_headphone = false;
+	private bool _active_port_headphone_bluetooth = false;
 
 	/** true when connected to the pulse server */
 	public override bool ready { get; private set; }
@@ -201,18 +202,34 @@ public class VolumeControlPulse : VolumeControl
 			this.notify_property ("is-playing");
 		}
 
-		/* Check if the current active port is headset/headphone */
-		/* There is not easy way to check if the port is a headset/headphone besides
-		 * checking for the port name. On touch (with the pulseaudio droid element)
-		 * the headset/headphone port is called 'output-headset' and 'output-headphone'.
-		 * On the desktop this is usually called 'analog-output-headphones' */
-		if (i.active_port != null &&
-			(i.active_port.name == "output-wired_headset" ||
-		 	 i.active_port.name == "output-wired_headphone" ||
-			 i.active_port.name == "analog-output-headphones")) {
-			_active_port_headphone = true;
-		} else {
-			_active_port_headphone = false;
+		// store the current status of the bluetooth headset
+		// if it changes we'll emit a signal
+		bool active_port_headphone_bluetooth_before = _active_port_headphone_bluetooth;
+
+        	/* Check if the current active port is headset/headphone */
+        	/* There is not easy way to check if the port is a headset/headphone besides
+        	 * checking for the port name. On touch (with the pulseaudio droid element)
+        	 * the headset/headphone port is called 'output-headset' and 'output-headphone'.
+        	 * On the desktop this is usually called 'analog-output-headphones' */
+        	if (i.active_port != null &&
+        	    (i.active_port.name.contains("headset") ||
+        	      i.active_port.name.contains("headphone"))) {
+        	    _active_port_headphone = true;
+        	    // check if it's a bluetooth device
+        	    var device_bus = i.proplist.gets ("device.bus");
+        	    if (device_bus != null && device_bus == "bluetooth") {
+			        _active_port_headphone_bluetooth = true;
+	
+	            } else {
+			        _active_port_headphone_bluetooth = false;
+	            }
+	        } else {
+	            _active_port_headphone = false;
+	            _active_port_headphone_bluetooth = false;
+	        }
+
+		if (_active_port_headphone_bluetooth != active_port_headphone_bluetooth_before) {
+			this.bluetooth_headset_status_changed (_active_port_headphone_bluetooth);
 		}
 
 		if (_pulse_use_stream_restore == false &&
@@ -532,6 +549,14 @@ public class VolumeControlPulse : VolumeControl
 		get
 		{
 			return this._is_playing;
+		}
+	}
+
+    	public override bool active_bluetooth_headphone
+	{
+		get
+		{
+			return this._active_port_headphone_bluetooth;
 		}
 	}
 
