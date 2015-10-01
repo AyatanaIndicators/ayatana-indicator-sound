@@ -213,7 +213,7 @@ TEST_F(TestIndicator, PhoneAddMprisPlayer)
     // start the test player
     EXPECT_TRUE(startTestMprisPlayer("testplayer1"));
 
-    // wait fot the menu change
+    // wait for the menu change
     EXPECT_TRUE(waitMenuChange());
 
     // finally verify that the player is added
