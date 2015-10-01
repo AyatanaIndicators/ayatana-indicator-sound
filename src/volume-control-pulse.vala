@@ -202,34 +202,38 @@ public class VolumeControlPulse : VolumeControl
 			this.notify_property ("is-playing");
 		}
 
-		// store the current status of the bluetooth headset
-		// if it changes we'll emit a signal
-		bool active_port_headphone_bluetooth_before = _active_port_headphone_bluetooth;
+		// store the current status of the active output
+		VolumeControl.ActiveOutput active_output_before = active_output;
 
-        	/* Check if the current active port is headset/headphone */
-        	/* There is not easy way to check if the port is a headset/headphone besides
-        	 * checking for the port name. On touch (with the pulseaudio droid element)
-        	 * the headset/headphone port is called 'output-headset' and 'output-headphone'.
-        	 * On the desktop this is usually called 'analog-output-headphones' */
-        	if (i.active_port != null &&
-        	    (i.active_port.name.contains("headset") ||
-        	      i.active_port.name.contains("headphone"))) {
-        	    _active_port_headphone = true;
-        	    // check if it's a bluetooth device
-        	    var device_bus = i.proplist.gets ("device.bus");
-        	    if (device_bus != null && device_bus == "bluetooth") {
-			        _active_port_headphone_bluetooth = true;
-	
-	            } else {
-			        _active_port_headphone_bluetooth = false;
-	            }
-	        } else {
-	            _active_port_headphone = false;
-	            _active_port_headphone_bluetooth = false;
-	        }
+    	/* Check if the current active port is headset/headphone */
+    	/* There is not easy way to check if the port is a headset/headphone besides
+    	 * checking for the port name. On touch (with the pulseaudio droid element)
+    	 * the headset/headphone port is called 'output-headset' and 'output-headphone'.
+    	 * On the desktop this is usually called 'analog-output-headphones' */
+    	if (i.active_port != null &&
+    	    (i.active_port.name.contains("headset") ||
+    	      i.active_port.name.contains("headphone"))) {
+    	    _active_port_headphone = true;
+    	    // check if it's a bluetooth device
+    	    var device_bus = i.proplist.gets ("device.bus");
+    	    if (device_bus != null && device_bus == "bluetooth") {
+		        _active_port_headphone_bluetooth = true;
 
-		if (_active_port_headphone_bluetooth != active_port_headphone_bluetooth_before) {
-			this.bluetooth_headset_status_changed (_active_port_headphone_bluetooth);
+            } else {
+		        _active_port_headphone_bluetooth = false;
+            }
+        } else {
+            _active_port_headphone = false;
+            _active_port_headphone_bluetooth = false;
+        }
+
+		VolumeControl.ActiveOutput active_output_now = active_output;
+		if (active_output_now != active_output_before) {
+			this.active_output_changed (active_output_now);
+			if (active_output_now == VolumeControl.ActiveOutput.SPEAKERS) {
+				_high_volume_approved = false;
+			}
+			update_high_volume();
 		}
 
 		if (_pulse_use_stream_restore == false &&
@@ -552,12 +556,16 @@ public class VolumeControlPulse : VolumeControl
 		}
 	}
 
-    	public override bool active_bluetooth_headphone
-	{
-		get
-		{
-			return this._active_port_headphone_bluetooth;
-		}
+	public override VolumeControl.ActiveOutput active_output 
+	{ 
+		get 
+		{ 
+			if (_active_port_headphone_bluetooth)
+				return VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES;
+			if (_active_port_headphone)
+				return VolumeControl.ActiveOutput.HEADPHONES;
+			return VolumeControl.ActiveOutput.SPEAKERS; 
+		} 
 	}
 
 	/* Volume operations */

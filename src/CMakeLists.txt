@@ -103,6 +103,7 @@ vala_add(indicator-sound-service
   sound-menu.vala
   DEPENDS
     media-player
+    volume-control
 )
 vala_add(indicator-sound-service
   accounts-service-user.vala

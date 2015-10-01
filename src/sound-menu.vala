@@ -186,10 +186,21 @@ public class SoundMenu: Object
 		this.notify_handlers.remove (player);
 	}
 
-	public void update_volume_slider (bool bluetooth_headset_active) {
+	public void update_volume_slider (VolumeControl.ActiveOutput active_output) {
 		int index = find_action (this.volume_section, "indicator.volume");
 		if (index != -1) {
-			string label = bluetooth_headset_active ? "Volume (Bluetooth)" : "Volume";
+			string label = "Volume";
+			switch (active_output) {
+				case VolumeControl.ActiveOutput.SPEAKERS:
+					label = "Volume";
+					break;
+				case VolumeControl.ActiveOutput.HEADPHONES:
+					label = "Volume (Headphones)";
+					break;
+				case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
+					label = "Volume (Bluetooth)";
+					break;
+			}
 			this.volume_section.remove (index);
 			this.volume_section.insert_item (index, this.create_slider_menu_item (_(label), "indicator.volume(0)", 0.0, 1.0, 0.01,
 																  "audio-volume-low-zero-panel",

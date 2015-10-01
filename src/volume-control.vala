@@ -28,6 +28,12 @@ public abstract class VolumeControl : Object
 		VOLUME_STREAM_CHANGE
 	}
 
+	public enum ActiveOutput {
+		SPEAKERS,
+		HEADPHONES,
+		BLUETOOTH_HEADPHONES
+	}
+
 	public class Volume : Object {
 		public double volume;
 		public VolumeReasons reason;
@@ -39,7 +45,7 @@ public abstract class VolumeControl : Object
 	public virtual bool high_volume { get { return false; } protected set { } }
 	public virtual bool mute { get { return false; } }
 	public virtual bool is_playing { get { return false; } }
-    	public virtual bool active_bluetooth_headphone { get { return false; } }
+	public virtual VolumeControl.ActiveOutput active_output { get { return VolumeControl.ActiveOutput.SPEAKERS; } }
 	private Volume _volume;
 	public virtual Volume volume { get { return _volume; } set { } }
 	public virtual double mic_volume { get { return 0.0; } set { } }
@@ -58,5 +64,5 @@ public abstract class VolumeControl : Object
 		this.volume = v;
 	}
 
-	public signal void bluetooth_headset_status_changed (bool bluetooth_headset_active);
+	public signal void active_output_changed (VolumeControl.ActiveOutput active_output);
 }
