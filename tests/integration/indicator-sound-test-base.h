@@ -75,6 +75,8 @@ protected:
 
     bool waitMenuChange();
 
+    bool initializeMenuChangedSignal();
+
     bool waitVolumeChangedInIndicator();
 
     void initializeAccountsInterface();
@@ -98,4 +100,6 @@ protected:
     std::unique_ptr<DBusPropertiesInterface> accounts_interface_;
 
     std::unique_ptr<QSignalSpy> signal_spy_volume_changed_;
+
+    std::unique_ptr<QSignalSpy> signal_spy_menu_changed_;
 };

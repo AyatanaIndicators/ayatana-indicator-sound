@@ -1,6 +1,0 @@
-<node>
-  <interface name="org.gtk.Menus">
-    <signal name="Changed">
-    </signal>
-  </interface>
-</node>

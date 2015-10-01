@@ -206,6 +206,51 @@ TEST_F(TestIndicator, PhoneAddMprisPlayer)
                 .action("indicator.phone-settings")
             )
         ).match());
+
+    // initialize the signal spy
+    EXPECT_TRUE(initializeMenuChangedSignal());
+
+    // start the test player
+    EXPECT_TRUE(startTestMprisPlayer("testplayer1"));
+
+    // wait fot the menu change
+    EXPECT_TRUE(waitMenuChange());
+
+    // finally verify that the player is added
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-scroll-action", "indicator.scroll")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .string_attribute("submenu-action", "indicator.indicator-shown")
+            .mode(mh::MenuItemMatcher::Mode::all)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(silentModeSwitch(false))
+                .item(volumeSlider(INITIAL_VOLUME))
+            )
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(mh::MenuItemMatcher()
+                    .action("indicator.testplayer1.desktop")
+                    .label("TestPlayer1")
+                    .themed_icon("icon", {"testplayer"})
+                    .string_attribute("x-canonical-type", "com.canonical.unity.media-player")
+                )
+                .item(mh::MenuItemMatcher()
+                    .string_attribute("x-canonical-previous-action","indicator.previous.testplayer1.desktop")
+                    .string_attribute("x-canonical-play-action","indicator.play.testplayer1.desktop")
+                    .string_attribute("x-canonical-next-action","indicator.next.testplayer1.desktop")
+                    .string_attribute("x-canonical-type","com.canonical.unity.playback-item")
+                )
+            )
+            .item(mh::MenuItemMatcher()
+                .label("Sound Settings…")
+                .action("indicator.phone-settings")
+            )
+        ).match());
 }
 
 TEST_F(TestIndicator, DesktopBasicInitialVolume)
@@ -516,7 +561,7 @@ TEST_F(TestIndicator, DesktopChangeRoleVolume)
     EXPECT_TRUE(setSinkVolume(randomVolume));
     if (randomVolume != INITIAL_VOLUME)
     {
-        EXPECT_FALSE(waitVolumeChangedInIndicator());
+        EXPECT_TRUE(waitVolumeChangedInIndicator());
     }
 
     // check the indicator

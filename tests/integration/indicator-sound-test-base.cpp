@@ -140,7 +140,6 @@ bool IndicatorSoundTestBase::startTestSound(QString const &role)
     if (!testSoundProcess.waitForStarted())
         return false;
 
-//    sleep(1);
     return true;
 }
 
@@ -218,7 +217,7 @@ void IndicatorSoundTestBase::startAccountsService()
                 new QProcessDBusService(DBusTypes::ACCOUNTS_SERVICE,
                                         QDBusConnection::SystemBus,
                                         ACCOUNTS_SERVICE_BIN,
-                                        QStringList() ));
+                                        QStringList()));
         accountsService->start(dbusTestRunner.systemConnection());
 
         initializeAccountsInterface();
@@ -275,6 +274,7 @@ void IndicatorSoundTestBase::TearDown()
 {
     unsetenv("XDG_DATA_DIRS");
     unsetenv("PULSE_SERVER");
+    unsetenv("DBUS_SYSTEM_BUS_ADDRESS");
 }
 
 void gvariant_deleter(GVariant* varptr)
@@ -338,20 +338,31 @@ unity::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::silentModeSwitch(bo
 
 bool IndicatorSoundTestBase::waitMenuChange()
 {
+    if (signal_spy_menu_changed_)
+    {
+        return signal_spy_menu_changed_->wait();
+    }
+    return false;
+}
+
+bool IndicatorSoundTestBase::initializeMenuChangedSignal()
+{
     if (!menu_interface_)
     {
         menu_interface_.reset(new MenusInterface("com.canonical.indicator.sound",
-                                                 "/com/canonical/indicator/sound/desktop",
-                                                QDBusConnection::sessionBus(), 0));
+                                                 "/com/canonical/indicator/sound",
+                                                 dbusTestRunner.sessionConnection(), 0));
     }
     if (menu_interface_)
     {
         qDebug() << "Waiting for signal";
-        QSignalSpy spy(menu_interface_.get(), &MenusInterface::Changed);
-        qDebug() << "Signal count " << spy.count();
-        return spy.wait();
+        signal_spy_menu_changed_.reset(new QSignalSpy(menu_interface_.get(), &MenusInterface::Changed));
     }
-    return false;
+    if (!menu_interface_ || !signal_spy_menu_changed_)
+    {
+        return false;
+    }
+    return true;
 }
 
 bool IndicatorSoundTestBase::waitVolumeChangedInIndicator()
@@ -368,27 +379,28 @@ void IndicatorSoundTestBase::initializeAccountsInterface()
     auto username = qgetenv("USER");
     if (username != "")
     {
-        std::unique_ptr<AccountsInterface> setInterface(new AccountsInterface("org.freedesktop.Accounts",
+        std::unique_ptr<AccountsInterface> accountsInterface(new AccountsInterface("org.freedesktop.Accounts",
                                                         "/org/freedesktop/Accounts",
-                                                        QDBusConnection::systemBus(), 0));
+                                                        dbusTestRunner.systemConnection(), 0));
 
-        QDBusReply<QDBusObjectPath> userResp = setInterface->call(QLatin1String("FindUserByName"),
+        QDBusReply<QDBusObjectPath> userResp = accountsInterface->call(QLatin1String("FindUserByName"),
                                                                   QLatin1String(username));
 
         if (!userResp.isValid())
         {
             qWarning() << "SetVolume::initializeAccountsInterface(): D-Bus error: " << userResp.error().message();
         }
+
         auto userPath = userResp.value().path();
         if (userPath != "")
         {
             std::unique_ptr<AccountsSoundInterface> soundInterface(new AccountsSoundInterface("org.freedesktop.Accounts",
                                                                     userPath,
-                                                                    QDBusConnection::systemBus(), 0));
+                                                                    dbusTestRunner.systemConnection(), 0));
 
             accounts_interface_.reset(new DBusPropertiesInterface("org.freedesktop.Accounts",
                                                                 userPath,
-                                                                soundInterface->connection(), 0));
+                                                                dbusTestRunner.systemConnection(), 0));
             if (!accounts_interface_->isValid())
             {
                 qWarning() << "SetVolume::initializeAccountsInterface(): D-Bus error: " << accounts_interface_->lastError().message();
