@@ -129,11 +129,12 @@ public class IndicatorSound.Service: Object {
 	}
 
 	private void show_notification(Notify.Notification? n) {
-		return_if_fail (n != null);
-		try {
-			n.show ();
-		} catch (GLib.Error e) {
-			warning ("Unable to show notification: %s", e.message);
+		if (n != null) {
+			try {
+				n.show ();
+			} catch (GLib.Error e) {
+				warning ("Unable to show notification: %s", e.message);
+			}
 		}
 	}
 
@@ -239,12 +240,10 @@ public class IndicatorSound.Service: Object {
 	void update_root_icon () {
 		double volume = this.volume_control.volume.volume;
 		string icon;
-		if (this.volume_control.mute)
+		if (this.volume_control.mute || volume <= 0.0)
 			icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
 		else if (this.accounts_service != null && this.accounts_service.silentMode)
-			icon = "audio-volume-muted-panel";
-		else if (volume <= 0.0)
-			icon = "audio-volume-low-zero-panel";
+		  icon = "audio-volume-muted-panel";
 		else if (volume <= 0.3)
 			icon = "audio-volume-low-panel";
 		else if (volume <= 0.7)
