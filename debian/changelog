@@ -1,3 +1,14 @@
+indicator-sound (12.10.2+15.10.20150812.3-0ubuntu1) vivid; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Charles Kerr ]
+  * When showing a "Loud volumes can damage your hearing" confirmation
+    warning, clamp the volume until the user hits "OK". (LP: #1481913)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 12 Aug 2015 20:55:05 +0000
+
 indicator-sound (12.10.2+15.10.20150807.6-0ubuntu1) vivid; urgency=medium
 
   [ CI Train Bot ]
