@@ -345,7 +345,7 @@ TEST_F(NotificationsTest, HighVolume) {
 	auto notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
 	EXPECT_EQ("Volume", notev[0].summary);
-	EXPECT_EQ("", notev[0].body);
+	EXPECT_EQ("Speakers", notev[0].body);
 	EXPECT_GVARIANT_EQ("@s 'false'", notev[0].hints["x-canonical-value-bar-tint"]);
 
 	/* Set high volume with volume change */
