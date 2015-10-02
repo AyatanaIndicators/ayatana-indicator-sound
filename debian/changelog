@@ -1,3 +1,17 @@
+indicator-sound (12.10.2+15.10.20150507+eventually4-0ubuntu1) vivid; urgency=medium
+
+  * Using eventually to avoid arbitrary timeouts in tests
+
+ -- Ted Gould <ted@ubuntu.com>  Wed, 27 May 2015 11:11:19 -0500
+
+indicator-sound (12.10.2+15.10.20150507-0ubuntu1) vivid; urgency=medium
+
+  [ Charles Kerr ]
+  * Use the BusWatcher to look for org.freedesktop.Notifications
+    ownership changes on the bus. (LP: #1432446)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Thu, 07 May 2015 15:27:00 +0000
+
 indicator-sound (12.10.2+15.04.20150508-0ubuntu1) vivid; urgency=medium
 
   [ CI Train Bot ]
