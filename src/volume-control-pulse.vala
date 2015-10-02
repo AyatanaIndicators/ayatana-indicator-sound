@@ -44,6 +44,7 @@ public class VolumeControlPulse : VolumeControl
 	private bool   _is_playing = false;
 	private VolumeControl.Volume _volume = new VolumeControl.Volume();
 	private double _mic_volume = 0.0;
+	private Settings _settings = new Settings ("com.canonical.indicator.sound");
 
 	/* Used by the pulseaudio stream restore extension */
 	private DBusConnection _pconn;
@@ -95,7 +96,14 @@ public class VolumeControlPulse : VolumeControl
 	/** true when high volume warnings should be shown */
 	public override bool high_volume {
 		get {
-			return this._volume.volume > 0.75 && _active_port_headphone && stream == "multimedia";
+			if (!_active_port_headphone) {
+				return false;
+			}
+			if (stream != "multimedia") {
+				return false;
+			}
+			var high_volume_level = this._settings.get_double("high-volume-level");
+			return this._volume.volume > high_volume_level;
 		}
 	}
 
