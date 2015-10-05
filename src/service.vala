@@ -367,6 +367,95 @@ public class IndicatorSound.Service: Object {
 		return icon;
 	}
 
+	private string get_volume_root_icon_by_volume (double volume, VolumeControl.ActiveOutput active_output)
+	{
+		string icon = "";
+		switch (active_output)
+		{
+			case VolumeControl.ActiveOutput.SPEAKERS:
+				if (volume <= 0.0)
+					icon = "audio-volume-muted-panel";
+				else if (volume <= 0.3)
+					icon = "audio-volume-low-panel";
+				else if (volume <= 0.7)
+					icon = "audio-volume-medium-panel";
+				else
+					icon = "audio-volume-high-panel";
+				break;
+			case VolumeControl.ActiveOutput.HEADPHONES:
+				if (volume <= 0.0)
+					icon = "audio-volume-muted-panel";
+				else if (volume <= 0.3)
+					icon = "audio-volume-low-panel";
+				else if (volume <= 0.7)
+					icon = "audio-volume-medium-panel";
+				else
+					icon = "audio-volume-high-panel";
+				break;
+			case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
+				if (volume <= 0.0)
+					icon = "audio-volume-muted-panel";
+				else if (volume <= 0.3)
+					icon = "audio-volume-low-panel";
+				else if (volume <= 0.7)
+					icon = "audio-volume-medium-panel";
+				else
+					icon = "audio-volume-high-panel";
+				break;
+			case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
+				if (volume <= 0.0)
+					icon = "audio-volume-muted-panel";
+				else if (volume <= 0.3)
+					icon = "audio-volume-low-panel";
+				else if (volume <= 0.7)
+					icon = "audio-volume-medium-panel";
+				else
+					icon = "audio-volume-high-panel";
+				break;
+			case VolumeControl.ActiveOutput.USB_SPEAKER:
+				if (volume <= 0.0)
+					icon = "audio-volume-muted-panel";
+				else if (volume <= 0.3)
+					icon = "audio-volume-low-panel";
+				else if (volume <= 0.7)
+					icon = "audio-volume-medium-panel";
+				else
+					icon = "audio-volume-high-panel";
+				break;
+			case VolumeControl.ActiveOutput.USB_HEADPHONES:
+				if (volume <= 0.0)
+					icon = "audio-volume-muted-panel";
+				else if (volume <= 0.3)
+					icon = "audio-volume-low-panel";
+				else if (volume <= 0.7)
+					icon = "audio-volume-medium-panel";
+				else
+					icon = "audio-volume-high-panel";
+				break;
+			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
+				if (volume <= 0.0)
+					icon = "audio-volume-muted-panel";
+				else if (volume <= 0.3)
+					icon = "audio-volume-low-panel";
+				else if (volume <= 0.7)
+					icon = "audio-volume-medium-panel";
+				else
+					icon = "audio-volume-high-panel";
+				break;
+			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
+				if (volume <= 0.0)
+					icon = "audio-volume-muted-panel";
+				else if (volume <= 0.3)
+					icon = "audio-volume-low-panel";
+				else if (volume <= 0.7)
+					icon = "audio-volume-medium-panel";
+				else
+					icon = "audio-volume-high-panel";
+				break;
+		}
+		return icon;
+	}
+
 	private string get_volume_notification_icon (double volume, bool loud, VolumeControl.ActiveOutput active_output) {
 		string icon = "";
 		if (loud) {
@@ -413,7 +502,7 @@ public class IndicatorSound.Service: Object {
 	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
 	 	        	 	icon = "audio-volume-muted-panel";
 		 	       	else
-					icon = get_volume_icon (volume, active_output);
+					icon = get_volume_root_icon_by_volume (volume, active_output);
 				break;
 			case VolumeControl.ActiveOutput.HEADPHONES:
 				if (mute || volume <= 0.0)
@@ -421,7 +510,7 @@ public class IndicatorSound.Service: Object {
 	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
 	 	        	 	icon = "audio-volume-muted-panel";
 		 	       	else
-					icon = get_volume_icon (volume, active_output);
+					icon = get_volume_root_icon_by_volume (volume, active_output);
 				break;
 			case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
 				if (mute || volume <= 0.0)
@@ -429,7 +518,7 @@ public class IndicatorSound.Service: Object {
 	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
 	 	        	 	icon = "audio-volume-muted-panel";
 		 	       	else
-					icon = get_volume_icon (volume, active_output);
+					icon = get_volume_root_icon_by_volume (volume, active_output);
 				break;
 			case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
 				if (mute || volume <= 0.0)
@@ -437,7 +526,7 @@ public class IndicatorSound.Service: Object {
 	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
 	 	        	 	icon = "audio-volume-muted-panel";
 		 	       	else
-					icon = get_volume_icon (volume, active_output);
+					icon = get_volume_root_icon_by_volume (volume, active_output);
 				break;
 			case VolumeControl.ActiveOutput.USB_SPEAKER:
 				if (mute || volume <= 0.0)
@@ -445,7 +534,7 @@ public class IndicatorSound.Service: Object {
 	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
 	 	        	 	icon = "audio-volume-muted-panel";
 		 	       	else
-					icon = get_volume_icon (volume, active_output);
+					icon = get_volume_root_icon_by_volume (volume, active_output);
 				break;
 			case VolumeControl.ActiveOutput.USB_HEADPHONES:
 				if (mute || volume <= 0.0)
@@ -453,7 +542,7 @@ public class IndicatorSound.Service: Object {
 	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
 	 	        	 	icon = "audio-volume-muted-panel";
 		 	       	else
-					icon = get_volume_icon (volume, active_output);
+					icon = get_volume_root_icon_by_volume (volume, active_output);
 				break;
 			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
 				if (mute || volume <= 0.0)
@@ -461,7 +550,7 @@ public class IndicatorSound.Service: Object {
 	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
 	 	        	 	icon = "audio-volume-muted-panel";
 		 	       	else
-					icon = get_volume_icon (volume, active_output);
+					icon = get_volume_root_icon_by_volume (volume, active_output);
 				break;
 			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
 				if (mute || volume <= 0.0)
@@ -469,7 +558,7 @@ public class IndicatorSound.Service: Object {
 	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
 	 	        	 	icon = "audio-volume-muted-panel";
 		 	       	else
-					icon = get_volume_icon (volume, active_output);
+					icon = get_volume_root_icon_by_volume (volume, active_output);
 				break;
 		}
 		return icon;
