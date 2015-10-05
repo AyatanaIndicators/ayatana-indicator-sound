@@ -313,6 +313,56 @@ public class IndicatorSound.Service: Object {
 				else
 					icon = "audio-volume-high";
 				break;
+			case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
+				if (volume <= 0.0)
+					icon = "audio-volume-muted";
+				else if (volume <= 0.3)
+					icon = "audio-volume-low";
+				else if (volume <= 0.7)
+					icon = "audio-volume-medium";
+				else
+					icon = "audio-volume-high";
+				break;
+			case VolumeControl.ActiveOutput.USB_SPEAKER:
+				if (volume <= 0.0)
+					icon = "audio-volume-muted";
+				else if (volume <= 0.3)
+					icon = "audio-volume-low";
+				else if (volume <= 0.7)
+					icon = "audio-volume-medium";
+				else
+					icon = "audio-volume-high";
+				break;
+			case VolumeControl.ActiveOutput.USB_HEADPHONES:
+				if (volume <= 0.0)
+					icon = "audio-volume-muted";
+				else if (volume <= 0.3)
+					icon = "audio-volume-low";
+				else if (volume <= 0.7)
+					icon = "audio-volume-medium";
+				else
+					icon = "audio-volume-high";
+				break;
+			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
+				if (volume <= 0.0)
+					icon = "audio-volume-muted";
+				else if (volume <= 0.3)
+					icon = "audio-volume-low";
+				else if (volume <= 0.7)
+					icon = "audio-volume-medium";
+				else
+					icon = "audio-volume-high";
+				break;
+			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
+				if (volume <= 0.0)
+					icon = "audio-volume-muted";
+				else if (volume <= 0.3)
+					icon = "audio-volume-low";
+				else if (volume <= 0.7)
+					icon = "audio-volume-medium";
+				else
+					icon = "audio-volume-high";
+				break;
 		}
 		return icon;
 	}
@@ -329,6 +379,21 @@ public class IndicatorSound.Service: Object {
 					icon = "audio-volume-high";
 					break;
 				case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
+					icon = "audio-volume-high";
+					break;
+				case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
+					icon = "audio-volume-high";
+					break;
+				case VolumeControl.ActiveOutput.USB_SPEAKER:
+					icon = "audio-volume-high";
+					break;
+				case VolumeControl.ActiveOutput.USB_HEADPHONES:
+					icon = "audio-volume-high";
+					break;
+				case VolumeControl.ActiveOutput.HDMI_SPEAKER:
+					icon = "audio-volume-high";
+					break;
+				case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
 					icon = "audio-volume-high";
 					break;
 			}
@@ -359,6 +424,46 @@ public class IndicatorSound.Service: Object {
 					icon = get_volume_icon (volume, active_output);
 				break;
 			case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
+				if (mute || volume <= 0.0)
+			    	    icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
+	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
+	 	        	 	icon = "audio-volume-muted-panel";
+		 	       	else
+					icon = get_volume_icon (volume, active_output);
+				break;
+			case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
+				if (mute || volume <= 0.0)
+			    	    icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
+	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
+	 	        	 	icon = "audio-volume-muted-panel";
+		 	       	else
+					icon = get_volume_icon (volume, active_output);
+				break;
+			case VolumeControl.ActiveOutput.USB_SPEAKER:
+				if (mute || volume <= 0.0)
+			    	    icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
+	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
+	 	        	 	icon = "audio-volume-muted-panel";
+		 	       	else
+					icon = get_volume_icon (volume, active_output);
+				break;
+			case VolumeControl.ActiveOutput.USB_HEADPHONES:
+				if (mute || volume <= 0.0)
+			    	    icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
+	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
+	 	        	 	icon = "audio-volume-muted-panel";
+		 	       	else
+					icon = get_volume_icon (volume, active_output);
+				break;
+			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
+				if (mute || volume <= 0.0)
+			    	    icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
+	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
+	 	        	 	icon = "audio-volume-muted-panel";
+		 	       	else
+					icon = get_volume_icon (volume, active_output);
+				break;
+			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
 				if (mute || volume <= 0.0)
 			    	    icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
 	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
@@ -421,12 +526,32 @@ public class IndicatorSound.Service: Object {
 					}
 
 					if (volume_control.active_output == VolumeControl.ActiveOutput.HEADPHONES) {
-                                	        volume_label = _("Headphones");
-                                	}
+						volume_label = _("Headphones");
+					}
 
 					if (volume_control.active_output == VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES) {
-                                	        volume_label = _("Bluetooth");
-                                	}
+						volume_label = _("Bluetooth headphones");
+					}
+					
+					if (volume_control.active_output == VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER) {
+						volume_label = _("Bluetooth speaker");
+					}
+
+					if (volume_control.active_output == VolumeControl.ActiveOutput.USB_SPEAKER) {
+						volume_label = _("Usb speaker");
+					}
+
+					if (volume_control.active_output == VolumeControl.ActiveOutput.USB_HEADPHONES) {
+						volume_label = _("Usb headphones");
+					}
+					
+					if (volume_control.active_output == VolumeControl.ActiveOutput.HDMI_SPEAKER) {
+						volume_label = _("HDMI speaker");
+					}
+			
+					if (volume_control.active_output == VolumeControl.ActiveOutput.HDMI_HEADPHONES) {
+						volume_label = _("HDMI headphones");
+					}
 				}
 
 				/* Choose an icon */

@@ -87,7 +87,7 @@ public class VolumeControlPulse : VolumeControl
 	private bool _send_next_local_volume = false;
 	private double _account_service_volume = 0.0;
 	private bool _active_port_headphone = false;
-	private bool _active_port_headphone_bluetooth = false;
+	private VolumeControl.ActiveOutput _active_output = VolumeControl.ActiveOutput.SPEAKERS;
 
 	/** true when connected to the pulse server */
 	public override bool ready { get; private set; }
@@ -134,6 +134,52 @@ public class VolumeControlPulse : VolumeControl
 		stop_local_volume_timer();
 		stop_account_service_volume_timer();
 		stop_high_volume_approved_timer();
+	}
+
+	private VolumeControl.ActiveOutput calculate_active_output (SinkInfo? sink) {
+		
+		VolumeControl.ActiveOutput ret_output = VolumeControl.ActiveOutput.SPEAKERS;
+		/* Check if the current active port is headset/headphone */
+    	/* There is not easy way to check if the port is a headset/headphone besides
+    	 * checking for the port name. On touch (with the pulseaudio droid element)
+    	 * the headset/headphone port is called 'output-headset' and 'output-headphone'.
+    	 * On the desktop this is usually called 'analog-output-headphones' */
+    	if (sink.active_port != null) {
+			// look if it's a headset/headphones
+			if (sink.active_port.name.contains("headset") ||
+    	         sink.active_port.name.contains("headphone")) {
+    	    	_active_port_headphone = true;
+    	    	// check if it's a bluetooth device
+    	    	var device_bus = sink.proplist.gets ("device.bus");
+    	    	if (device_bus != null && device_bus == "bluetooth") {
+					ret_output = VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES;
+            	} else if (device_bus != null && device_bus == "usb") {
+					ret_output = VolumeControl.ActiveOutput.USB_HEADPHONES;
+				} else if (device_bus != null && device_bus == "hdmi") {
+					ret_output = VolumeControl.ActiveOutput.HDMI_HEADPHONES;
+				} else {
+					ret_output = VolumeControl.ActiveOutput.HEADPHONES;
+            	}
+			} else {
+				// speaker
+				_active_port_headphone = false;
+				var device_bus = sink.proplist.gets ("device.bus");
+    	    	if (device_bus != null && device_bus == "bluetooth") {
+		    	    ret_output = VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER;
+            	} else if (device_bus != null && device_bus == "usb") {
+					ret_output = VolumeControl.ActiveOutput.USB_SPEAKER;
+				} else if (device_bus != null && device_bus == "hdmi") {
+					ret_output = VolumeControl.ActiveOutput.HDMI_SPEAKER;
+				} else {
+					ret_output = VolumeControl.ActiveOutput.SPEAKERS;
+            	}
+			}
+        } else {
+            _active_port_headphone = false;
+			ret_output = VolumeControl.ActiveOutput.SPEAKERS;
+        }
+	
+		return ret_output;
 	}
 
 	/* PulseAudio logic*/
@@ -205,28 +251,10 @@ public class VolumeControlPulse : VolumeControl
 		// store the current status of the active output
 		VolumeControl.ActiveOutput active_output_before = active_output;
 
-    	/* Check if the current active port is headset/headphone */
-    	/* There is not easy way to check if the port is a headset/headphone besides
-    	 * checking for the port name. On touch (with the pulseaudio droid element)
-    	 * the headset/headphone port is called 'output-headset' and 'output-headphone'.
-    	 * On the desktop this is usually called 'analog-output-headphones' */
-    	if (i.active_port != null &&
-    	    (i.active_port.name.contains("headset") ||
-    	      i.active_port.name.contains("headphone"))) {
-    	    _active_port_headphone = true;
-    	    // check if it's a bluetooth device
-    	    var device_bus = i.proplist.gets ("device.bus");
-    	    if (device_bus != null && device_bus == "bluetooth") {
-		        _active_port_headphone_bluetooth = true;
-
-            } else {
-		        _active_port_headphone_bluetooth = false;
-            }
-        } else {
-            _active_port_headphone = false;
-            _active_port_headphone_bluetooth = false;
-        }
-
+		// calculate the output 
+		_active_output = calculate_active_output (i);
+		
+		// check if the output has changed, if so... emit a signal
 		VolumeControl.ActiveOutput active_output_now = active_output;
 		if (active_output_now != active_output_before) {
 			this.active_output_changed (active_output_now);
@@ -560,11 +588,7 @@ public class VolumeControlPulse : VolumeControl
 	{ 
 		get 
 		{ 
-			if (_active_port_headphone_bluetooth)
-				return VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES;
-			if (_active_port_headphone)
-				return VolumeControl.ActiveOutput.HEADPHONES;
-			return VolumeControl.ActiveOutput.SPEAKERS; 
+			return _active_output; 
 		} 
 	}
 

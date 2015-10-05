@@ -31,7 +31,12 @@ public abstract class VolumeControl : Object
 	public enum ActiveOutput {
 		SPEAKERS,
 		HEADPHONES,
-		BLUETOOTH_HEADPHONES
+		BLUETOOTH_HEADPHONES,
+		BLUETOOTH_SPEAKER,
+		USB_SPEAKER,
+		USB_HEADPHONES,
+		HDMI_SPEAKER,
+		HDMI_HEADPHONES
 	}
 
 	public class Volume : Object {
