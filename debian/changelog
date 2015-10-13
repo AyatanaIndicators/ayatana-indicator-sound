@@ -1,4 +1,4 @@
-indicator-sound (12.10.2+15.10.20150812.3-0ubuntu1) vivid; urgency=medium
+indicator-sound (12.10.2+15.04.20150812.3-0ubuntu1) vivid; urgency=medium
 
   [ CI Train Bot ]
   * New rebuild forced.
@@ -9,7 +9,7 @@ indicator-sound (12.10.2+15.10.20150812.3-0ubuntu1) vivid; urgency=medium
 
  -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 12 Aug 2015 20:55:05 +0000
 
-indicator-sound (12.10.2+15.10.20150807.6-0ubuntu1) vivid; urgency=medium
+indicator-sound (12.10.2+15.04.20150807.6-0ubuntu1) vivid; urgency=medium
 
   [ CI Train Bot ]
   * New rebuild forced.
@@ -20,19 +20,19 @@ indicator-sound (12.10.2+15.10.20150807.6-0ubuntu1) vivid; urgency=medium
 
  -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 07 Aug 2015 22:35:58 +0000
 
-indicator-sound (12.10.2+15.10.20150605-0ubuntu1) vivid; urgency=medium
+indicator-sound (12.10.2+15.04.20150605-0ubuntu1) vivid; urgency=medium
 
   * 
 
  -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 05 Jun 2015 19:50:06 +0000
 
-indicator-sound (12.10.2+15.10.20150507+eventually4-0ubuntu1) vivid; urgency=medium
+indicator-sound (12.10.2+15.04.20150507+eventually4-0ubuntu1) vivid; urgency=medium
 
   * Using eventually to avoid arbitrary timeouts in tests
 
  -- Ted Gould <ted@ubuntu.com>  Wed, 27 May 2015 11:11:19 -0500
 
-indicator-sound (12.10.2+15.10.20150507-0ubuntu1) vivid; urgency=medium
+indicator-sound (12.10.2+15.04.20150507-0ubuntu1) vivid; urgency=medium
 
   [ Charles Kerr ]
   * Use the BusWatcher to look for org.freedesktop.Notifications
