@@ -1,11 +1,11 @@
-indicator-sound (12.10.2+15.10.20150917-0ubuntu1) vivid; urgency=medium
+indicator-sound (12.10.2+15.04.20150917-0ubuntu1) vivid; urgency=medium
 
   [ Xavi Garcia Mena ]
   * Merged lp:~xavi-garcia-mena/indicator-sound/icon-volume-zero
 
  -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 15 Sep 2015 08:19:51 +0000
 
-indicator-sound (12.10.2+15.10.20150915-0ubuntu1) wily; urgency=medium
+indicator-sound (12.10.2+15.04.20150915-0ubuntu1) vivid; urgency=medium
 
   [ Sebastien Bacher ]
   * under unity8 start system-settings instead unity-control-center (LP:
@@ -16,7 +16,7 @@ indicator-sound (12.10.2+15.10.20150915-0ubuntu1) wily; urgency=medium
 
  -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 15 Sep 2015 08:19:51 +0000
 
-indicator-sound (12.10.2+15.10.20150812.3-0ubuntu1) wily; urgency=medium
+indicator-sound (12.10.2+15.04.20150812.3-0ubuntu1) vivid; urgency=medium
 
   [ CI Train Bot ]
   * New rebuild forced.
@@ -27,7 +27,7 @@ indicator-sound (12.10.2+15.10.20150812.3-0ubuntu1) wily; urgency=medium
 
  -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 12 Aug 2015 20:55:05 +0000
 
-indicator-sound (12.10.2+15.10.20150807.6-0ubuntu1) wily; urgency=medium
+indicator-sound (12.10.2+15.04.20150807.6-0ubuntu1) vivid; urgency=medium
 
   [ CI Train Bot ]
   * New rebuild forced.
@@ -38,25 +38,36 @@ indicator-sound (12.10.2+15.10.20150807.6-0ubuntu1) wily; urgency=medium
 
  -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 07 Aug 2015 22:35:58 +0000
 
-indicator-sound (12.10.2+15.10.20150605-0ubuntu1) wily; urgency=medium
+indicator-sound (12.10.2+15.04.20150605-0ubuntu1) vivid; urgency=medium
 
   * 
 
  -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 05 Jun 2015 19:50:06 +0000
 
-indicator-sound (12.10.2+15.10.20150507+eventually4-0ubuntu1) wily; urgency=medium
+indicator-sound (12.10.2+15.04.20150507+eventually4-0ubuntu1) vivid; urgency=medium
 
   * Using eventually to avoid arbitrary timeouts in tests
 
  -- Ted Gould <ted@ubuntu.com>  Wed, 27 May 2015 11:11:19 -0500
 
-indicator-sound (12.10.2+15.10.20150507-0ubuntu1) wily; urgency=medium
+indicator-sound (12.10.2+15.04.20150507-0ubuntu1) vivid; urgency=medium
 
   [ Charles Kerr ]
   * Use the BusWatcher to look for org.freedesktop.Notifications
     ownership changes on the bus. (LP: #1432446)
 
  -- CI Train Bot <ci-train-bot@canonical.com>  Thu, 07 May 2015 15:27:00 +0000
+
+indicator-sound (12.10.2+15.04.20150508-0ubuntu1) vivid; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Charles Kerr ]
+  * Use the BusWatcher to look for org.freedesktop.Notifications
+    ownership changes on the bus. (LP: #1432446)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 08 May 2015 12:20:07 +0000
 
 indicator-sound (12.10.2+15.04.20150421-0ubuntu1) vivid; urgency=medium
 
