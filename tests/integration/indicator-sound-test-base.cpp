@@ -22,6 +22,7 @@
 #include "dbus_properties_interface.h"
 #include "dbus_accounts_interface.h"
 #include "dbus_accountssound_interface.h"
+#include "dbus_notifications_interface.h"
 #include "dbus-types.h"
 
 #include <gio/gio.h>
@@ -42,7 +43,67 @@ IndicatorSoundTestBase::IndicatorSoundTestBase() :
 
 IndicatorSoundTestBase::~IndicatorSoundTestBase()
 {
+}
 
+void IndicatorSoundTestBase::SetUp()
+{
+    setenv("XDG_DATA_DIRS", XDG_DATA_DIRS, true);
+    setenv("DBUS_SYSTEM_BUS_ADDRESS", dbusTestRunner.systemBus().toStdString().c_str(), true);
+    setenv("DBUS_SESSION_BUS_ADDRESS", dbusTestRunner.sessionBus().toStdString().c_str(), true);
+    dbusMock.registerNotificationDaemon();
+
+    dbusTestRunner.startServices();
+
+    auto& notifications = notificationsMockInterface();
+    notifications.AddMethod("org.freedesktop.Notifications",
+                            "GetCapabilities",
+                            "",
+                            "as",
+                            "ret = ['actions', 'body', 'body-markup', 'icon-static', 'image/svg+xml', 'x-canonical-private-synchronous', 'x-canonical-append', 'x-canonical-private-icon-only', 'x-canonical-truncation', 'private-synchronous', 'append', 'private-icon-only', 'truncation']"
+                         ).waitForFinished();
+}
+
+void IndicatorSoundTestBase::TearDown()
+{
+    unsetenv("XDG_DATA_DIRS");
+    unsetenv("PULSE_SERVER");
+    unsetenv("DBUS_SYSTEM_BUS_ADDRESS");
+}
+
+void gvariant_deleter(GVariant* varptr)
+{
+    if (varptr != nullptr)
+    {
+        g_variant_unref(varptr);
+    }
+}
+
+std::shared_ptr<GVariant> IndicatorSoundTestBase::volume_variant(double volume)
+{
+    GVariantBuilder builder;
+
+    g_variant_builder_init(&builder, G_VARIANT_TYPE_VARDICT);
+    g_variant_builder_add(&builder,
+                          "{sv}",
+                          "title",
+                          g_variant_new_string("_Sound"));
+
+    g_variant_builder_add(&builder,
+                          "{sv}",
+                          "accessible-desc",
+                          g_variant_new_string("_Sound"));
+
+    auto icon = g_themed_icon_new("icon");
+    g_variant_builder_add(&builder,
+                          "{sv}",
+                          "icon",
+                          g_icon_serialize(icon));
+
+    g_variant_builder_add(&builder,
+                          "{sv}",
+                          "visible",
+                          g_variant_new_boolean(true));
+    return shared_ptr<GVariant>(g_variant_builder_end(&builder), &gvariant_deleter);
 }
 
 bool IndicatorSoundTestBase::setStreamRestoreVolume(QString const &role, double volume)
@@ -164,7 +225,8 @@ void IndicatorSoundTestBase::startPulseDesktop()
                                                       << "--system=false"
                                                       << "--exit-idle-time=-1"
                                                       << "-n"
-                                                      << "--load=module-null-sink"
+                                                      << QString("--load=module-null-sink sink_name=indicator_sound_test_speaker")
+                                                      << QString("--load=module-null-sink sink_name=indicator_sound_test_headphones")
                                                       << "--log-target=file:/tmp/pulse-daemon.log"
                                                       << "--load=module-dbus-protocol"
                                                       << "--load=module-native-protocol-tcp auth-ip-acl=127.0.0.1"
@@ -194,7 +256,8 @@ void IndicatorSoundTestBase::startPulsePhone()
                                                       << "--system=false"
                                                       << "--exit-idle-time=-1"
                                                       << "-n"
-                                                      << "--load=module-null-sink"
+                                                      << QString("--load=module-null-sink sink_name=indicator_sound_test_speaker")
+                                                      << QString("--load=module-null-sink sink_name=indicator_sound_test_headphones")
                                                       << "--log-target=file:/tmp/pulse-daemon.log"
                                                       << QString("--load=module-stream-restore restore_device=false restore_muted=false fallback_table=%1").arg(STREAM_RESTORE_TABLE)
                                                       << "--load=module-dbus-protocol"
@@ -262,55 +325,6 @@ mh::MenuMatcher::Parameters IndicatorSoundTestBase::phoneParameters()
             "com.canonical.indicator.sound",
             { { "indicator", "/com/canonical/indicator/sound" } },
             "/com/canonical/indicator/sound/phone");
-}
-
-void IndicatorSoundTestBase::SetUp()
-{
-    setenv("XDG_DATA_DIRS", XDG_DATA_DIRS, true);
-    setenv("DBUS_SYSTEM_BUS_ADDRESS", dbusTestRunner.systemBus().toStdString().c_str(), true);
-}
-
-void IndicatorSoundTestBase::TearDown()
-{
-    unsetenv("XDG_DATA_DIRS");
-    unsetenv("PULSE_SERVER");
-    unsetenv("DBUS_SYSTEM_BUS_ADDRESS");
-}
-
-void gvariant_deleter(GVariant* varptr)
-{
-    if (varptr != nullptr)
-    {
-        g_variant_unref(varptr);
-    }
-}
-
-std::shared_ptr<GVariant> IndicatorSoundTestBase::volume_variant(double volume)
-{
-    GVariantBuilder builder;
-
-    g_variant_builder_init(&builder, G_VARIANT_TYPE_VARDICT);
-    g_variant_builder_add(&builder,
-                          "{sv}",
-                          "title",
-                          g_variant_new_string("_Sound"));
-
-    g_variant_builder_add(&builder,
-                          "{sv}",
-                          "accessible-desc",
-                          g_variant_new_string("_Sound"));
-
-    auto icon = g_themed_icon_new("icon");
-    g_variant_builder_add(&builder,
-                          "{sv}",
-                          "icon",
-                          g_icon_serialize(icon));
-
-    g_variant_builder_add(&builder,
-                          "{sv}",
-                          "visible",
-                          g_variant_new_boolean(true));
-    return shared_ptr<GVariant>(g_variant_builder_end(&builder), &gvariant_deleter);
 }
 
 unity::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::volumeSlider(double volume)
@@ -408,4 +422,207 @@ void IndicatorSoundTestBase::initializeAccountsInterface()
             signal_spy_volume_changed_.reset(new QSignalSpy(accounts_interface_.get(),&DBusPropertiesInterface::PropertiesChanged));
         }
     }
+}
+
+OrgFreedesktopDBusMockInterface& IndicatorSoundTestBase::notificationsMockInterface()
+{
+    return dbusMock.mockInterface("org.freedesktop.Notifications",
+                                   "/org/freedesktop/Notifications",
+                                   "org.freedesktop.Notifications",
+                                   QDBusConnection::SessionBus);
+}
+
+bool IndicatorSoundTestBase::setActionValue(const QString & action, QVariant value)
+{
+    QDBusInterface actionsInterface(DBusTypes::DBUS_NAME,
+                                    DBusTypes::MAIN_SERVICE_PATH,
+                                    DBusTypes::ACTIONS_INTERFACE,
+                                    dbusTestRunner.sessionConnection());
+
+    QDBusVariant dbusVar(value);
+    auto resp = actionsInterface.call("SetState",
+                                      action,
+                                      QVariant::fromValue(dbusVar),
+                                      QVariant::fromValue(QVariantMap()));
+
+    if (resp.type() == QDBusMessage::ErrorMessage)
+    {
+        qCritical() << "IndicatorSoundTestBase::setActionValue(): Failed to set value for action "
+                    << action
+                    << " "
+                    << resp.errorMessage();
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+bool IndicatorSoundTestBase::pressNotificationButton(int id, const QString & button)
+{
+    OrgFreedesktopDBusMockInterface actionsInterface("org.freedesktop.Notifications",
+                                                     "/org/freedesktop/Notifications",
+                                                     dbusTestRunner.sessionConnection());
+
+    actionsInterface.EmitSignal(
+            "org.freedesktop.Notifications",
+                            "ActionInvoked", "us", QVariantList() << id << button);
+
+    return true;
+}
+
+bool IndicatorSoundTestBase::qDBusArgumentToMap(QVariant const& variant, QVariantMap& map)
+{
+    if (variant.canConvert<QDBusArgument>())
+    {
+        QDBusArgument value(variant.value<QDBusArgument>());
+        if (value.currentType() == QDBusArgument::MapType)
+        {
+            value >> map;
+            return true;
+        }
+    }
+    return false;
+}
+
+void IndicatorSoundTestBase::checkVolumeNotification(double volume, QString const& label, bool isLoud, QVariantList call)
+{
+    QString icon;
+    if (volume <= 0.0)
+    {
+        icon = "audio-volume-muted";
+    }
+    else if (volume <= 0.3)
+    {
+        icon = "audio-volume-low";
+    }
+    else if (volume <= 0.7)
+    {
+        icon = "audio-volume-medium";
+    }
+    else
+    {
+        icon = "audio-volume-high";
+    }
+
+    ASSERT_NE(call.size(), 0);
+    EXPECT_EQ("Notify", call.at(0));
+
+    QVariantList const& args(call.at(1).toList());
+    ASSERT_EQ(8, args.size());
+    EXPECT_EQ("indicator-sound", args.at(0));
+    EXPECT_EQ(icon, args.at(2));
+    EXPECT_EQ("Volume", args.at(3));
+    EXPECT_EQ(label, args.at(4));
+    EXPECT_EQ(QStringList(), args.at(5));
+
+    QVariantMap hints;
+    ASSERT_TRUE(qDBusArgumentToMap(args.at(6), hints));
+    ASSERT_TRUE(hints.contains("value"));
+    ASSERT_TRUE(hints.contains("x-canonical-non-shaped-icon"));
+    ASSERT_TRUE(hints.contains("x-canonical-value-bar-tint"));
+    ASSERT_TRUE(hints.contains("x-canonical-private-synchronous"));
+
+    EXPECT_EQ(volume*100, hints["value"]);
+    EXPECT_EQ(true, hints["x-canonical-non-shaped-icon"]);
+    EXPECT_EQ(isLoud, hints["x-canonical-value-bar-tint"]);
+    EXPECT_EQ(true, hints["x-canonical-private-synchronous"]);
+}
+
+void IndicatorSoundTestBase::checkHighVolumeNotification(QVariantList call)
+{
+    ASSERT_NE(call.size(), 0);
+    EXPECT_EQ("Notify", call.at(0));
+
+    QVariantList const& args(call.at(1).toList());
+    ASSERT_EQ(8, args.size());
+    EXPECT_EQ("indicator-sound", args.at(0));
+    EXPECT_EQ("Volume", args.at(3));
+}
+
+void IndicatorSoundTestBase::checkCloseNotification(int id, QVariantList call)
+{
+    EXPECT_EQ("CloseNotification", call.at(0));
+    QVariantList const& args(call.at(1).toList());
+    ASSERT_EQ(1, args.size());
+}
+
+void IndicatorSoundTestBase::checkNotificationWithNoArgs(QString const& method, QVariantList call)
+{
+    EXPECT_EQ(method, call.at(0));
+    QVariantList const& args(call.at(1).toList());
+    ASSERT_EQ(0, args.size());
+}
+
+int IndicatorSoundTestBase::getNotificationID(QVariantList call)
+{
+    if (call.size() == 0)
+    {
+        return -1;
+    }
+    QVariantList const& args(call.at(1).toList());
+    if (args.size() != 8)
+    {
+        return -1;
+    }
+    if (args.at(0) != "indicator-sound")
+    {
+        return -1;
+    }
+
+    bool isInt;
+    int id = args.at(1).toInt(&isInt);
+    if (!isInt)
+    {
+        return -1;
+    }
+    return id;
+}
+
+bool IndicatorSoundTestBase::activateHeadphones(bool headphonesActive)
+{
+    QProcess pacltProcess;
+
+    QString defaultSinkName = "indicator_sound_test_speaker";
+    QString suspendedSinkName = "indicator_sound_test_headphones";
+    if (headphonesActive)
+    {
+        defaultSinkName = "indicator_sound_test_headphones";
+        suspendedSinkName = "indicator_sound_test_speaker";
+    }
+
+    pacltProcess.start("pactl", QStringList() << "-s"
+                                              << "127.0.0.1"
+                                              << "set-default-sink"
+                                              << defaultSinkName);
+    if (!pacltProcess.waitForStarted())
+        return false;
+
+    if (!pacltProcess.waitForFinished())
+        return false;
+
+    pacltProcess.start("pactl", QStringList() << "-s"
+                                              << "127.0.0.1"
+                                              << "suspend-sink"
+                                              << defaultSinkName
+                                              << "0");
+    if (!pacltProcess.waitForStarted())
+        return false;
+
+    if (!pacltProcess.waitForFinished())
+        return false;
+
+    pacltProcess.start("pactl", QStringList() << "-s"
+                                              << "127.0.0.1"
+                                              << "suspend-sink"
+                                              << suspendedSinkName
+                                              << "1");
+    if (!pacltProcess.waitForStarted())
+        return false;
+
+    if (!pacltProcess.waitForFinished())
+        return false;
+
+    return pacltProcess.exitCode() == 0;
 }

@@ -28,11 +28,16 @@ set(dbusinterface_actions_xml "org.gtk.Actions.xml")
 set_source_files_properties(${dbusinterface_actions_xml} PROPERTIES
   CLASSNAME MenusInterface)
 
+set(dbusinterface_notifications_xml "org.freedesktop.Notifications.xml")
+set_source_files_properties(${dbusinterface_notifications_xml} PROPERTIES
+  CLASSNAME NotificationsInterface)
+
 qt5_add_dbus_interface(interface_files ${dbusinterface_streamrestore_xml} stream_restore_interface)
 qt5_add_dbus_interface(interface_files ${dbusinterface_properties_xml} dbus_properties_interface)
 qt5_add_dbus_interface(interface_files ${dbusinterface_accounts_xml} dbus_accounts_interface)
 qt5_add_dbus_interface(interface_files ${dbusinterface_accountssound_xml} dbus_accountssound_interface)
 qt5_add_dbus_interface(interface_files ${dbusinterface_actions_xml} dbus_menus_interface)
+qt5_add_dbus_interface(interface_files ${dbusinterface_notifications_xml} dbus_notifications_interface)
 
 add_library(
   sound-indicator-dbus-interfaces

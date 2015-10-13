@@ -634,4 +634,292 @@ TEST_F(TestIndicator, DesktopChangeRoleVolume)
         ).match());
 }
 
+TEST_F(TestIndicator, PhoneNotificationVolume)
+{
+    double INITIAL_VOLUME = 0.0;
+
+    QSignalSpy notificationsSpy(&notificationsMockInterface(),
+                               SIGNAL(MethodCalled(const QString &, const QVariantList &)));
+
+    ASSERT_NO_THROW(startAccountsService());
+    EXPECT_TRUE(clearGSettingsPlayers());
+    ASSERT_NO_THROW(startPulsePhone());
+
+    // initialize volumes in pulseaudio
+    EXPECT_TRUE(setStreamRestoreVolume("alert", INITIAL_VOLUME));
+
+    // start now the indicator, so it picks the new volumes
+    ASSERT_NO_THROW(startIndicator());
+
+    // check the initial state
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-scroll-action", "indicator.scroll")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .string_attribute("submenu-action", "indicator.indicator-shown")
+            .mode(mh::MenuItemMatcher::Mode::all)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(silentModeSwitch(false))
+                .item(volumeSlider(INITIAL_VOLUME))
+            )
+            .item(mh::MenuItemMatcher()
+                .label("Sound Settings…")
+                .action("indicator.phone-settings")
+            )
+        ).match());
+
+    // change volume to 1.0
+    setActionValue("volume", QVariant::fromValue(1.0));
+
+    WAIT_FOR_SIGNALS(notificationsSpy, 3);
+
+    // the first time we also have the calls to
+    // GetServerInformation and GetCapabilities
+    checkNotificationWithNoArgs("GetServerInformation", notificationsSpy.at(0));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(1));
+    checkVolumeNotification(1.0, "", false, notificationsSpy.at(2));
+
+    notificationsSpy.clear();
+    setActionValue("volume", QVariant::fromValue(0.0));
+
+    WAIT_FOR_SIGNALS(notificationsSpy, 1)
+
+    checkVolumeNotification(0.0, "", false, notificationsSpy.at(0));
+
+    notificationsSpy.clear();
+    setActionValue("volume", QVariant::fromValue(0.5));
+
+    WAIT_FOR_SIGNALS(notificationsSpy, 1)
+
+    checkVolumeNotification(0.5, "", false, notificationsSpy.at(0));
+}
+
+TEST_F(TestIndicator, PhoneNotificationWarningVolume)
+{
+    double INITIAL_VOLUME = 0.0;
+
+    QSignalSpy notificationsSpy(&notificationsMockInterface(),
+                                   SIGNAL(MethodCalled(const QString &, const QVariantList &)));
+
+    ASSERT_NO_THROW(startAccountsService());
+    ASSERT_NO_THROW(startPulsePhone());
+
+    // initialize volumes in pulseaudio
+    EXPECT_TRUE(setStreamRestoreVolume("alert", INITIAL_VOLUME));
+    EXPECT_TRUE(setStreamRestoreVolume("multimedia", INITIAL_VOLUME));
+
+    // start now the indicator, so it picks the new volumes
+    ASSERT_NO_THROW(startIndicator());
+
+    // activate the headphones
+    EXPECT_TRUE(activateHeadphones(true));
+
+    // set an initial volume to the alert role
+    setStreamRestoreVolume("alert", 1.0);
+    EXPECT_TRUE(waitVolumeChangedInIndicator());
+
+    // play a test sound, it should change the role in the indicator
+    EXPECT_TRUE(startTestSound("multimedia"));
+    EXPECT_TRUE(waitVolumeChangedInIndicator());
+
+    // change volume to 0.0... no warning should be emitted
+    setActionValue("volume", QVariant::fromValue(0.0));
+
+    WAIT_FOR_SIGNALS(notificationsSpy, 3);
+
+    // the first time we also have the calls to
+    // GetServerInformation and GetCapabilities
+    checkNotificationWithNoArgs("GetServerInformation", notificationsSpy.at(0));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(1));
+    checkVolumeNotification(0.0, "", false, notificationsSpy.at(2));
+    notificationsSpy.clear();
+
+    // change volume to 0.5... no warning should be emitted
+    setActionValue("volume", QVariant::fromValue(0.5));
+
+    WAIT_FOR_SIGNALS(notificationsSpy, 1);
+
+    checkVolumeNotification(0.5, "", false, notificationsSpy.at(0));
+    notificationsSpy.clear();
+
+    // change volume to 1.0... warning should be emitted
+    setActionValue("volume", QVariant::fromValue(1.0));
+
+    WAIT_FOR_SIGNALS(notificationsSpy, 4);
+
+    // the notification is sent twice (TODO check why)
+    checkCloseNotification(1, notificationsSpy.at(0));
+    checkHighVolumeNotification(notificationsSpy.at(1));
+    checkCloseNotification(1, notificationsSpy.at(2));
+    checkHighVolumeNotification(notificationsSpy.at(3));
+
+    // get the last notification ID
+    int idNotification = getNotificationID(notificationsSpy.at(3));
+    ASSERT_NE(-1, idNotification);
+
+    qWarning() << "XGM: id Notification: " << idNotification;
+
+    // cancel the dialog
+    pressNotificationButton(idNotification, "cancel");
+
+    // check that the volume was clamped
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-scroll-action", "indicator.scroll")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .string_attribute("submenu-action", "indicator.indicator-shown")
+            .mode(mh::MenuItemMatcher::Mode::starts_with)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(silentModeSwitch(false))
+                .item(volumeSlider(0.74))
+            )
+        ).match());
+
+    // try again...
+    notificationsSpy.clear();
+    // change volume to 1.0... warning should be emitted
+    setActionValue("volume", QVariant::fromValue(1.0));
+
+    WAIT_FOR_SIGNALS(notificationsSpy, 4);
+
+    checkCloseNotification(1, notificationsSpy.at(0));
+    checkHighVolumeNotification(notificationsSpy.at(1));
+    checkCloseNotification(1, notificationsSpy.at(2));
+    checkHighVolumeNotification(notificationsSpy.at(3));
+
+    // get the last notification ID
+    idNotification = getNotificationID(notificationsSpy.at(3));
+    ASSERT_NE(-1, idNotification);
+
+    qWarning() << "XGM: id Notification: " << idNotification;
+
+    // this time we approve
+    pressNotificationButton(idNotification, "ok");
+
+    // check that the volume was applied
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-scroll-action", "indicator.scroll")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .string_attribute("submenu-action", "indicator.indicator-shown")
+            .mode(mh::MenuItemMatcher::Mode::starts_with)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(silentModeSwitch(false))
+                .item(volumeSlider(1.0))
+                .item(mh::MenuItemMatcher()
+                    .action("indicator.high-volume-warning-item")
+                    .label("High volume can damage your hearing.")
+                )
+            )
+        ).match());
+
+    // after the warning was approved we should be able to modify the volume
+    // and don't get the warning
+    notificationsSpy.clear();
+
+    // change volume to 0.5... no warning should be emitted
+    setActionValue("volume", QVariant::fromValue(0.5));
+
+    WAIT_FOR_SIGNALS(notificationsSpy, 2);
+
+    // check the notification TODO check why the sound indicator sends it twice
+    checkVolumeNotification(0.5, "", false, notificationsSpy.at(0));
+    checkVolumeNotification(0.5, "", false, notificationsSpy.at(1));
+
+    // check that the volume was applied
+    // and that we don't have the warning item
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-scroll-action", "indicator.scroll")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .string_attribute("submenu-action", "indicator.indicator-shown")
+            .mode(mh::MenuItemMatcher::Mode::starts_with)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(silentModeSwitch(false))
+                .item(volumeSlider(0.5))
+            )
+        ).match());
+
+    // now set high volume again, we should not get the warning dialog
+    // as we already approved it
+    notificationsSpy.clear();
+
+    setActionValue("volume", QVariant::fromValue(1.0));
+
+    WAIT_FOR_SIGNALS(notificationsSpy, 2);
+
+    // check the notification TODO check why the sound indicator sends it twice
+    checkVolumeNotification(1.0, "High volume can damage your hearing.", true, notificationsSpy.at(0));
+    checkVolumeNotification(1.0, "High volume can damage your hearing.", true, notificationsSpy.at(1));
+}
+
+TEST_F(TestIndicator, PhoneNotificationWarningVolumeAlertMode)
+{
+    double INITIAL_VOLUME = 0.0;
+
+    QSignalSpy notificationsSpy(&notificationsMockInterface(),
+                                   SIGNAL(MethodCalled(const QString &, const QVariantList &)));
+
+    ASSERT_NO_THROW(startAccountsService());
+    ASSERT_NO_THROW(startPulsePhone());
+
+    // initialize volumes in pulseaudio
+    EXPECT_TRUE(setStreamRestoreVolume("alert", INITIAL_VOLUME));
+    EXPECT_TRUE(setStreamRestoreVolume("multimedia", INITIAL_VOLUME));
+
+    // start now the indicator, so it picks the new volumes
+    ASSERT_NO_THROW(startIndicator());
+
+    // activate the headphones
+    EXPECT_TRUE(activateHeadphones(true));
+
+    // set an initial volume to the alert role
+    setStreamRestoreVolume("alert", 1.0);
+    EXPECT_TRUE(waitVolumeChangedInIndicator());
+
+    // change volume to 0.0... no warning should be emitted
+    setActionValue("volume", QVariant::fromValue(0.0));
+
+    WAIT_FOR_SIGNALS(notificationsSpy, 3);
+
+    // the first time we also have the calls to
+    // GetServerInformation and GetCapabilities
+    checkNotificationWithNoArgs("GetServerInformation", notificationsSpy.at(0));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(1));
+    checkVolumeNotification(0.0, "", false, notificationsSpy.at(2));
+    notificationsSpy.clear();
+
+    // change volume to 0.5... no warning should be emitted
+    setActionValue("volume", QVariant::fromValue(0.5));
+
+    WAIT_FOR_SIGNALS(notificationsSpy, 1);
+
+    checkVolumeNotification(0.5, "", false, notificationsSpy.at(0));
+    notificationsSpy.clear();
+
+    // change volume to 1.0... no warning should be emitted, we are in alert mode
+    setActionValue("volume", QVariant::fromValue(1.0));
+
+    WAIT_FOR_SIGNALS(notificationsSpy, 1);
+
+    checkVolumeNotification(1.0, "", false, notificationsSpy.at(0));
+    notificationsSpy.clear();
+}
+
 } // namespace

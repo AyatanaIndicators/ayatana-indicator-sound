@@ -33,6 +33,15 @@ class DBusPulseVolume;
 class DBusPropertiesInterface;
 class QSignalSpy;
 
+#define WAIT_FOR_SIGNALS(signalSpy, signalsExpected)\
+{\
+    while (signalSpy.size() < signalsExpected)\
+    {\
+        ASSERT_TRUE(signalSpy.wait());\
+    }\
+    ASSERT_EQ(signalsExpected, signalSpy.size());\
+}
+
 class IndicatorSoundTestBase: public testing::Test
 {
 public:
@@ -80,6 +89,26 @@ protected:
     bool waitVolumeChangedInIndicator();
 
     void initializeAccountsInterface();
+
+    OrgFreedesktopDBusMockInterface& notificationsMockInterface();
+
+    bool setActionValue(const QString & action, QVariant value);
+
+    bool pressNotificationButton(int id, const QString & button);
+
+    bool qDBusArgumentToMap(QVariant const& variant, QVariantMap& map);
+
+    void checkVolumeNotification(double volume, QString const& label, bool isLoud, QVariantList call);
+
+    void checkHighVolumeNotification(QVariantList call);
+
+    void checkCloseNotification(int id, QVariantList call);
+
+    void checkNotificationWithNoArgs(QString const& method, QVariantList call);
+
+    int getNotificationID(QVariantList call);
+
+    bool activateHeadphones(bool headphonesActive);
 
     QtDBusTest::DBusTestRunner dbusTestRunner;
 

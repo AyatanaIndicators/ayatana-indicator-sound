@@ -40,5 +40,9 @@ namespace DBusTypes
 
     static constexpr char const* STREAM_RESTORE_ENTRY_NAME = "org.PulseAudio.Ext.StreamRestore1.RestoreEntry";
 
+    static constexpr char const* MAIN_SERVICE_PATH = "/com/canonical/indicator/sound";
+
+    static constexpr char const* ACTIONS_INTERFACE = "org.gtk.Actions";
+
 } // namespace DBusTypes
 
