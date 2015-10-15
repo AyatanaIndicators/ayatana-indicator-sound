@@ -144,41 +144,38 @@ public class VolumeControlPulse : VolumeControl
     	 * checking for the port name. On touch (with the pulseaudio droid element)
     	 * the headset/headphone port is called 'output-headset' and 'output-headphone'.
     	 * On the desktop this is usually called 'analog-output-headphones' */
-    	if (sink.active_port != null) {
-			// look if it's a headset/headphones
-			if (sink.active_port.name.contains("headset") ||
-    	         sink.active_port.name.contains("headphone")) {
-    	    	_active_port_headphone = true;
-    	    	// check if it's a bluetooth device
-    	    	var device_bus = sink.proplist.gets ("device.bus");
-    	    	if (device_bus != null && device_bus == "bluetooth") {
-					ret_output = VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES;
-            	} else if (device_bus != null && device_bus == "usb") {
-					ret_output = VolumeControl.ActiveOutput.USB_HEADPHONES;
-				} else if (device_bus != null && device_bus == "hdmi") {
-					ret_output = VolumeControl.ActiveOutput.HDMI_HEADPHONES;
-				} else {
-					ret_output = VolumeControl.ActiveOutput.HEADPHONES;
-            	}
+		// look if it's a headset/headphones
+		if (sink.name == "indicator_sound_test_headphones" ||
+			(sink.active_port != null && 
+			 (sink.active_port.name.contains("headset") ||
+	          sink.active_port.name.contains("headphone")))) {
+	    	_active_port_headphone = true;
+	    	// check if it's a bluetooth device
+	    	var device_bus = sink.proplist.gets ("device.bus");
+	    	if (device_bus != null && device_bus == "bluetooth") {
+				ret_output = VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES;
+        	} else if (device_bus != null && device_bus == "usb") {
+				ret_output = VolumeControl.ActiveOutput.USB_HEADPHONES;
+			} else if (device_bus != null && device_bus == "hdmi") {
+				ret_output = VolumeControl.ActiveOutput.HDMI_HEADPHONES;
 			} else {
-				// speaker
-				_active_port_headphone = false;
-				var device_bus = sink.proplist.gets ("device.bus");
-    	    	if (device_bus != null && device_bus == "bluetooth") {
-		    	    ret_output = VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER;
-            	} else if (device_bus != null && device_bus == "usb") {
-					ret_output = VolumeControl.ActiveOutput.USB_SPEAKER;
-				} else if (device_bus != null && device_bus == "hdmi") {
-					ret_output = VolumeControl.ActiveOutput.HDMI_SPEAKER;
-				} else {
-					ret_output = VolumeControl.ActiveOutput.SPEAKERS;
-            	}
-			}
-        } else {
-            _active_port_headphone = false;
-			ret_output = VolumeControl.ActiveOutput.SPEAKERS;
-        }
-	
+				ret_output = VolumeControl.ActiveOutput.HEADPHONES;
+        	}
+		} else {
+			// speaker
+			_active_port_headphone = false;
+			var device_bus = sink.proplist.gets ("device.bus");
+	    	if (device_bus != null && device_bus == "bluetooth") {
+	    	    ret_output = VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER;
+        	} else if (device_bus != null && device_bus == "usb") {
+				ret_output = VolumeControl.ActiveOutput.USB_SPEAKER;
+			} else if (device_bus != null && device_bus == "hdmi") {
+				ret_output = VolumeControl.ActiveOutput.HDMI_SPEAKER;
+			} else {
+				ret_output = VolumeControl.ActiveOutput.SPEAKERS;
+        	}
+		}
+
 		return ret_output;
 	}
 
@@ -527,7 +524,8 @@ public class VolumeControlPulse : VolumeControl
 		this.context = new PulseAudio.Context (loop.get_api(), null, props);
 		this.context.set_state_callback (context_state_callback);
 
-		if (context.connect(null, Context.Flags.NOFAIL, null) < 0)
+		var server_string = Environment.get_variable("PULSE_SERVER");
+		if (context.connect(server_string, Context.Flags.NOFAIL, null) < 0)
 			warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(context.errno()));
 	}
 
@@ -767,7 +765,7 @@ public class VolumeControlPulse : VolumeControl
 	private bool calculate_high_volume_from_volume(double volume) {
 		return _active_port_headphone
 			&& _warning_volume_enabled
-			&& volume >= _warning_volume_norms
+			&& volume > _warning_volume_norms
 			&& (stream == "multimedia");
 	}
 

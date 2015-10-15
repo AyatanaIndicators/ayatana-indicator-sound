@@ -158,18 +158,26 @@ public class SoundMenu: Object
 		this.update_playlists (player);
 
 		var handler_id = player.notify["is-running"].connect ( () => {
-			if (player.is_running)
-				if (this.find_player_section(player) == -1)
+			if (player.is_running) {
+				int index = this.find_player_section(player);
+				if (index == -1) {
 					this.insert_player_section (player);
-			else
+				}
+				else {
+					update_player_section (player, index);
+				}
+			}
+			else {
 				if (this.hide_inactive)
 					this.remove_player_section (player);
+			}
 
 			this.update_playlists (player);
 		});
 		this.notify_handlers.insert (player, handler_id);
 
 		player.playlists_changed.connect (this.update_playlists);
+		player.playbackstatus_changed.connect (this.update_playbackstatus);
 	}
 
 	public void remove_player (MediaPlayer player) {
@@ -197,8 +205,23 @@ public class SoundMenu: Object
 				case VolumeControl.ActiveOutput.HEADPHONES:
 					label = "Volume (Headphones)";
 					break;
-				case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
+				case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
 					label = "Volume (Bluetooth)";
+					break;
+				case VolumeControl.ActiveOutput.USB_SPEAKER:
+					label = "Volume (Usb)";
+					break;
+				case VolumeControl.ActiveOutput.HDMI_SPEAKER:
+					label = "Volume (HDMI)";
+					break;
+				case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
+					label = "Volume (Bluetooth headphones)";
+					break;
+				case VolumeControl.ActiveOutput.USB_HEADPHONES:
+					label = "Volume (Usb headphones)";
+					break;
+				case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
+					label = "Volume (HDMI headphones)";
 					break;
 			}
 			this.volume_section.remove (index);
@@ -238,6 +261,23 @@ public class SoundMenu: Object
 		return -1;
 	}
 
+	MenuItem create_playback_menu_item (MediaPlayer player) {
+		var playback_item = new MenuItem (null, null);
+		playback_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.playback-item");
+		if (player.is_running) {
+			if (player.can_do_play) {
+				playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id);
+			}
+			if (player.can_do_next) {
+				playback_item.set_attribute ("x-canonical-next-action", "s", "indicator.next." + player.id);
+			}
+			if (player.can_do_prev) {
+				playback_item.set_attribute ("x-canonical-previous-action", "s", "indicator.previous." + player.id);
+			}
+		}
+		return playback_item;
+	}
+
 	void insert_player_section (MediaPlayer player) {
 		if (this.hide_players)
 			return;
@@ -263,9 +303,21 @@ public class SoundMenu: Object
 
 		var playback_item = new MenuItem (null, null);
 		playback_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.playback-item");
-		playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id);
-		playback_item.set_attribute ("x-canonical-next-action", "s", "indicator.next." + player.id);
-		playback_item.set_attribute ("x-canonical-previous-action", "s", "indicator.previous." + player.id);
+		playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id + ".disabled");
+		playback_item.set_attribute ("x-canonical-next-action", "s", "indicator.next." + player.id + ".disabled");
+		playback_item.set_attribute ("x-canonical-previous-action", "s", "indicator.previous." + player.id + ".disabled");
+
+		if (player.is_running) {
+			if (player.can_do_play) {
+				playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id);
+			}
+			if (player.can_do_next) {
+				playback_item.set_attribute ("x-canonical-next-action", "s", "indicator.next." + player.id);
+			}
+			if (player.can_do_prev) {
+				playback_item.set_attribute ("x-canonical-previous-action", "s", "indicator.previous." + player.id);
+			}
+		}
 		section.append_item (playback_item);
 
 		/* Add new players to the end of the player sections, just before the settings */
@@ -283,6 +335,17 @@ public class SoundMenu: Object
 		int index = this.find_player_section (player);
 		if (index >= 0)
 			this.menu.remove (index);
+	}
+
+	void update_player_section (MediaPlayer player, int index) {
+		var player_section = this.menu.get_item_link(index, Menu.LINK_SECTION) as Menu;
+		if (player_section.get_n_items () == 2) {
+			// we have 2 items, the second one is the playback item
+			// remove it first
+			player_section.remove (1);
+			MenuItem playback_item = create_playback_menu_item (player);
+			player_section.append_item (playback_item);
+		}
 	}
 
 	void update_playlists (MediaPlayer player) {
@@ -314,6 +377,13 @@ public class SoundMenu: Object
 		var submenu = new Menu ();
 		submenu.append_section (null, playlists_section);
 		player_section.append_submenu (_("Choose Playlist"), submenu);
+	}
+	
+	void update_playbackstatus (MediaPlayer player) {
+		int index = find_player_section (player);
+		if (index != -1) {
+			update_player_section (player, index);	
+		}
 	}
 
 	MenuItem create_slider_menu_item (string label, string action, double min, double max, double step, string min_icon_name, string max_icon_name) {
