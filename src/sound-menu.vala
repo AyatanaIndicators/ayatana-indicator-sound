@@ -200,28 +200,28 @@ public class SoundMenu: Object
 			string label = "Volume";
 			switch (active_output) {
 				case VolumeControl.ActiveOutput.SPEAKERS:
-					label = "Volume";
+					label = _("Volume");
 					break;
 				case VolumeControl.ActiveOutput.HEADPHONES:
-					label = "Volume (Headphones)";
+					label = _("Volume (Headphones)");
 					break;
 				case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
-					label = "Volume (Bluetooth)";
+					label = _("Volume (Bluetooth)");
 					break;
 				case VolumeControl.ActiveOutput.USB_SPEAKER:
-					label = "Volume (Usb)";
+					label = _("Volume (Usb)");
 					break;
 				case VolumeControl.ActiveOutput.HDMI_SPEAKER:
-					label = "Volume (HDMI)";
+					label = _("Volume (HDMI)");
 					break;
 				case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-					label = "Volume (Bluetooth headphones)";
+					label = _("Volume (Bluetooth headphones)");
 					break;
 				case VolumeControl.ActiveOutput.USB_HEADPHONES:
-					label = "Volume (Usb headphones)";
+					label = _("Volume (Usb headphones)");
 					break;
 				case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
-					label = "Volume (HDMI headphones)";
+					label = _("Volume (HDMI headphones)");
 					break;
 			}
 			this.volume_section.remove (index);
