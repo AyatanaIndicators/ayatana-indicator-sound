@@ -37,7 +37,10 @@ public interface MprisPlayer : Object {
   // properties
   public abstract HashTable<string, Variant?> Metadata{owned get; set;}
   public abstract int32 Position{owned get; set;}
-  public abstract string? PlaybackStatus{owned get; set;}  
+  public abstract string? PlaybackStatus{owned get; set;} 
+  public abstract bool CanPlay{owned get; set;}
+  public abstract bool CanGoNext{owned get; set;}
+  public abstract bool CanGoPrevious{owned get; set;}
   // methods
   public abstract async void PlayPause() throws IOError;
   public abstract async void Next() throws IOError;
