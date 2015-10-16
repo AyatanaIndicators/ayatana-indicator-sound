@@ -26,6 +26,8 @@
 #include "dbus-types.h"
 
 #include <gio/gio.h>
+#include <chrono>
+#include <thread>
 
 #include <QSignalSpy>
 #include "utils/dbus-pulse-volume.h"
@@ -35,6 +37,11 @@ using namespace QtDBusMock;
 using namespace std;
 using namespace testing;
 namespace mh = unity::gmenuharness;
+
+namespace
+{
+    const int MAX_TIME_WAITING_FOR_NOTIFICATIONS = 2000;
+}
 
 IndicatorSoundTestBase::IndicatorSoundTestBase() :
     dbusMock(dbusTestRunner)
@@ -61,6 +68,13 @@ void IndicatorSoundTestBase::SetUp()
                             "as",
                             "ret = ['actions', 'body', 'body-markup', 'icon-static', 'image/svg+xml', 'x-canonical-private-synchronous', 'x-canonical-append', 'x-canonical-private-icon-only', 'x-canonical-truncation', 'private-synchronous', 'append', 'private-icon-only', 'truncation']"
                          ).waitForFinished();
+
+    int waitedTime = 0;
+    while (!dbusTestRunner.sessionConnection().interface()->isServiceRegistered("org.freedesktop.Notifications") && waitedTime < MAX_TIME_WAITING_FOR_NOTIFICATIONS)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        waitedTime += 10;
+    }
 }
 
 void IndicatorSoundTestBase::TearDown()

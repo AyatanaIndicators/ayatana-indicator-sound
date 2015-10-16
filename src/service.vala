@@ -43,7 +43,7 @@ public class IndicatorSound.Service: Object {
 		warn_notification.closed.connect((n) => { n.clear_actions(); });
 		BusWatcher.watch_namespace (GLib.BusType.SESSION,
 		                            "org.freedesktop.Notifications",
-		                            () => { debug("Notifications name appeared"); notify_server_caps_checked = false; },
+		                            () => { debug("Notifications name appeared"); },
 		                            () => { debug("Notifications name vanshed");  notify_server_caps_checked = false; });
 
 		this.settings = new Settings ("com.canonical.indicator.sound");
