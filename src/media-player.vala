@@ -26,6 +26,9 @@ public abstract class MediaPlayer : Object {
 
 	public virtual bool is_running { get { not_implemented(); return false; } }
 	public virtual bool can_raise { get { not_implemented(); return false; } }
+	public virtual bool can_do_next { get { not_implemented(); return false; } }
+	public virtual bool can_do_prev { get { not_implemented(); return false; } }
+	public virtual bool can_do_play { get { not_implemented(); return false; } }
 
 	public class Track : Object {
 		public string artist { get; construct; }
@@ -44,6 +47,7 @@ public abstract class MediaPlayer : Object {
 	}
 
 	public signal void playlists_changed ();
+	public signal void playbackstatus_changed ();
 
 	public abstract void activate ();
 	public abstract void play_pause ();
