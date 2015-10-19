@@ -1,3 +1,10 @@
+indicator-sound (12.10.2+15.10.20151019-0ubuntu1) wily; urgency=medium
+
+  [ Xavi Garcia Mena ]
+  * Wily branch for MPRIS controls (LP: #1373313)
+
+ -- Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com>  Mon, 19 Oct 2015 07:54:05 +0000
+
 indicator-sound (12.10.2+15.10.20150915-0ubuntu1) wily; urgency=medium
 
   [ Sebastien Bacher ]
