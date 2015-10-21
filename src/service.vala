@@ -277,6 +277,7 @@ public class IndicatorSound.Service: Object {
 	private bool notify_server_supports_actions = false;
 	private bool notify_server_supports_sync = false;
 	private bool block_info_notifications = false;
+	private bool waiting_user_approve_warn = false;
 
 	private string get_volume_icon (double volume, VolumeControl.ActiveOutput active_output)
 	{
@@ -594,67 +595,72 @@ public class IndicatorSound.Service: Object {
 					_pre_warn_volume = null;
 					volume_control.volume = tmp;
 				}
+				waiting_user_approve_warn = false;
 			});
 			warn_notification.add_action ("cancel", _("Cancel"), (n, a) => {
 				_pre_warn_volume = null;
+				waiting_user_approve_warn = false;
 			});
+			waiting_user_approve_warn = true;
 			show_notification(warn_notification);
 		} else {
-			close_notification(warn_notification);
-
-			if (notify_server_supports_sync && !block_info_notifications) {
-
-				/* Determine Label */
-			        string volume_label = loud
-					 ? _("High volume can damage your hearing.")
-					 : "";
+			if (!waiting_user_approve_warn) {
+				close_notification(warn_notification);
+	
+				if (notify_server_supports_sync && !block_info_notifications) {
+	
+					/* Determine Label */
+				        string volume_label = loud
+						 ? _("High volume can damage your hearing.")
+						 : "";
 				
-				if (volume_label == "") {
-					if (volume_control.active_output == VolumeControl.ActiveOutput.SPEAKERS) {
-						volume_label = _("Speakers");
-					}
-
-					if (volume_control.active_output == VolumeControl.ActiveOutput.HEADPHONES) {
-						volume_label = _("Headphones");
-					}
-
-					if (volume_control.active_output == VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES) {
-						volume_label = _("Bluetooth headphones");
-					}
+					if (volume_label == "") {
+						if (volume_control.active_output == VolumeControl.ActiveOutput.SPEAKERS) {
+							volume_label = _("Speakers");
+						}
+	
+						if (volume_control.active_output == VolumeControl.ActiveOutput.HEADPHONES) {
+							volume_label = _("Headphones");
+						}
+	
+						if (volume_control.active_output == VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES) {
+							volume_label = _("Bluetooth headphones");
+						}
+						
+						if (volume_control.active_output == VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER) {
+							volume_label = _("Bluetooth speaker");
+						}
+	
+						if (volume_control.active_output == VolumeControl.ActiveOutput.USB_SPEAKER) {
+							volume_label = _("Usb speaker");
+						}
+	
+						if (volume_control.active_output == VolumeControl.ActiveOutput.USB_HEADPHONES) {
+							volume_label = _("Usb headphones");
+						}
+						
+						if (volume_control.active_output == VolumeControl.ActiveOutput.HDMI_SPEAKER) {
+							volume_label = _("HDMI speaker");
+						}
 					
-					if (volume_control.active_output == VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER) {
-						volume_label = _("Bluetooth speaker");
+						if (volume_control.active_output == VolumeControl.ActiveOutput.HDMI_HEADPHONES) {
+							volume_label = _("HDMI headphones");
+						}
 					}
+	
+					/* Choose an icon */
+				 	string icon = get_volume_notification_icon (volume_control.volume.volume, loud, volume_control.active_output);
 
-					if (volume_control.active_output == VolumeControl.ActiveOutput.USB_SPEAKER) {
-						volume_label = _("Usb speaker");
-					}
-
-					if (volume_control.active_output == VolumeControl.ActiveOutput.USB_HEADPHONES) {
-						volume_label = _("Usb headphones");
-					}
-					
-					if (volume_control.active_output == VolumeControl.ActiveOutput.HDMI_SPEAKER) {
-						volume_label = _("HDMI speaker");
-					}
-			
-					if (volume_control.active_output == VolumeControl.ActiveOutput.HDMI_HEADPHONES) {
-						volume_label = _("HDMI headphones");
-					}
+					/* Reset the notification */
+					var n = this.info_notification;
+					n.update (_("Volume"), volume_label, icon);
+					n.clear_hints();
+					n.set_hint ("x-canonical-non-shaped-icon", "true");
+					n.set_hint ("x-canonical-private-synchronous", "true");
+					n.set_hint ("x-canonical-value-bar-tint", loud ? "true" : "false");
+					n.set_hint ("value", (int32)Math.round(get_volume_percent() * 100.0));
+					show_notification(n);
 				}
-
-				/* Choose an icon */
-			 	string icon = get_volume_notification_icon (volume_control.volume.volume, loud, volume_control.active_output);
-
-				/* Reset the notification */
-				var n = this.info_notification;
-				n.update (_("Volume"), volume_label, icon);
-				n.clear_hints();
-				n.set_hint ("x-canonical-non-shaped-icon", "true");
-				n.set_hint ("x-canonical-private-synchronous", "true");
-				n.set_hint ("x-canonical-value-bar-tint", loud ? "true" : "false");
-				n.set_hint ("value", (int32)Math.round(get_volume_percent() * 100.0));
-				show_notification(n);
 			}
 		}
 	}

@@ -669,7 +669,7 @@ QString IndicatorSoundTestBase::getDevicePortString(DevicePortType port)
 
 void IndicatorSoundTestBase::checkPortDevicesLabels(DevicePortType speakerPort, DevicePortType headphonesPort)
 {
-    double INITIAL_VOLUME = 1.0;
+    double INITIAL_VOLUME = 0.0;
 
     QString speakerString;
     QString speakerStringMenu;
@@ -739,7 +739,7 @@ void IndicatorSoundTestBase::checkPortDevicesLabels(DevicePortType speakerPort, 
         // GetServerInformation and GetCapabilities
         checkNotificationWithNoArgs("GetServerInformation", notificationsSpy.at(0));
         checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(1));
-        checkVolumeNotification(1.0, speakerString, false, notificationsSpy.at(2));
+        checkVolumeNotification(INITIAL_VOLUME, speakerString, false, notificationsSpy.at(2));
         notificationsSpy.clear();
     }
 
@@ -754,13 +754,13 @@ void IndicatorSoundTestBase::checkPortDevicesLabels(DevicePortType speakerPort, 
         // GetServerInformation and GetCapabilities
         checkNotificationWithNoArgs("GetServerInformation", notificationsSpy.at(0));
         checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(1));
-        checkVolumeNotification(1.0, headphonesString, false, notificationsSpy.at(2));
+        checkVolumeNotification(INITIAL_VOLUME, headphonesString, false, notificationsSpy.at(2));
         notificationsSpy.clear();
     }
     else
     {
         WAIT_FOR_SIGNALS(notificationsSpy, 1);
-        checkVolumeNotification(1.0, headphonesString, false, notificationsSpy.at(0));
+        checkVolumeNotification(INITIAL_VOLUME, headphonesString, false, notificationsSpy.at(0));
         notificationsSpy.clear();
     }
 
@@ -777,7 +777,7 @@ void IndicatorSoundTestBase::checkPortDevicesLabels(DevicePortType speakerPort, 
             .item(mh::MenuItemMatcher()
                 .section()
                 .item(silentModeSwitch(false))
-                .item(volumeSlider(1.0, headphonesStringMenu))
+                .item(volumeSlider(INITIAL_VOLUME, headphonesStringMenu))
             )
         ).match());
 
@@ -785,7 +785,7 @@ void IndicatorSoundTestBase::checkPortDevicesLabels(DevicePortType speakerPort, 
     EXPECT_TRUE(activateHeadphones(false));
 
     WAIT_FOR_SIGNALS(notificationsSpy, 1);
-    checkVolumeNotification(1.0, speakerString, false, notificationsSpy.at(0));
+    checkVolumeNotification(INITIAL_VOLUME, speakerString, false, notificationsSpy.at(0));
     notificationsSpy.clear();
 
     // check the label in the menu
@@ -801,7 +801,7 @@ void IndicatorSoundTestBase::checkPortDevicesLabels(DevicePortType speakerPort, 
             .item(mh::MenuItemMatcher()
                 .section()
                 .item(silentModeSwitch(false))
-                .item(volumeSlider(1.0, speakerStringMenu))
+                .item(volumeSlider(INITIAL_VOLUME, speakerStringMenu))
             )
         ).match());
 }
