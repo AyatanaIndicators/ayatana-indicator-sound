@@ -56,7 +56,7 @@ TEST_F(TestIndicator, PhoneChangeRoleVolume)
     // set an initial volume to the alert role
     userAccountsSpy.clear();
     setStreamRestoreVolume("alert", 1.0);
-    WAIT_FOR_SIGNALS(userAccountsSpy, 2);
+    WAIT_AT_LEAST_SIGNALS(userAccountsSpy, 1);
 
     userAccountsSpy.clear();
     // play a test sound, it should change the role in the indicator

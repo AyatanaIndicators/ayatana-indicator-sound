@@ -42,6 +42,15 @@ class QSignalSpy;
     ASSERT_EQ(signalsExpected, signalSpy.size());\
 }
 
+#define WAIT_AT_LEAST_SIGNALS(signalSpy, signalsExpected)\
+{\
+    while (signalSpy.size() < signalsExpected)\
+    {\
+        ASSERT_TRUE(signalSpy.wait());\
+    }\
+    ASSERT_TRUE(signalsExpected <= signalSpy.size());\
+}
+
 class IndicatorSoundTestBase: public testing::Test
 {
 public:
