@@ -32,7 +32,6 @@ class TestIndicator: public IndicatorSoundTestBase
 {
 };
 
-/*
 TEST_F(TestIndicator, PhoneChangeRoleVolume)
 {
     double INITIAL_VOLUME = 0.0;
@@ -708,7 +707,6 @@ TEST_F(TestIndicator, PhoneNotificationVolume)
 
     checkVolumeNotification(0.5, "Speakers", false, notificationsSpy.at(0));
 }
-*/
 
 TEST_F(TestIndicator, PhoneNotificationWarningVolume)
 {
@@ -891,7 +889,7 @@ TEST_F(TestIndicator, PhoneNotificationWarningVolume)
     checkVolumeNotification(1.0, "Headphones", true, notificationsSpy.at(1));
 }
 
-/*
+
 TEST_F(TestIndicator, PhoneNotificationWarningVolumeAlertMode)
 {
     double INITIAL_VOLUME = 0.0;
@@ -965,6 +963,5 @@ TEST_F(TestIndicator, PhoneNotificationHeadphoneSpeakerHDMILabels)
 {
     checkPortDevicesLabels(HDMI, HDMI);
 }
-*/
 
 } // namespace
