@@ -32,7 +32,7 @@ class TestIndicator: public IndicatorSoundTestBase
 {
 };
 
-TEST_F(TestIndicator, PhoneChangeRoleVolume)
+TEST_F(TestIndicator, DISABLED_PhoneChangeRoleVolume)
 {
     double INITIAL_VOLUME = 0.0;
 
