@@ -32,6 +32,7 @@ class TestIndicator: public IndicatorSoundTestBase
 {
 };
 
+/*
 TEST_F(TestIndicator, PhoneChangeRoleVolume)
 {
     double INITIAL_VOLUME = 0.0;
@@ -707,6 +708,7 @@ TEST_F(TestIndicator, PhoneNotificationVolume)
 
     checkVolumeNotification(0.5, "Speakers", false, notificationsSpy.at(0));
 }
+*/
 
 TEST_F(TestIndicator, PhoneNotificationWarningVolume)
 {
@@ -810,16 +812,12 @@ TEST_F(TestIndicator, PhoneNotificationWarningVolume)
 
     WAIT_FOR_SIGNALS(notificationsSpy, 2);
 
-//    checkCloseNotification(1, notificationsSpy.at(0));
     checkHighVolumeNotification(notificationsSpy.at(0));
-//    checkCloseNotification(1, notificationsSpy.at(2));
     checkHighVolumeNotification(notificationsSpy.at(1));
 
     // get the last notification ID
     idNotification = getNotificationID(notificationsSpy.at(1));
     ASSERT_NE(-1, idNotification);
-
-    qWarning() << "XGM: id Notification: " << idNotification;
 
     // this time we approve
     pressNotificationButton(idNotification, "ok");
@@ -889,10 +887,11 @@ TEST_F(TestIndicator, PhoneNotificationWarningVolume)
     WAIT_FOR_SIGNALS(notificationsSpy, 2);
 
     // check the notification TODO check why the sound indicator sends it twice
-    checkVolumeNotification(1.0, "High volume can damage your hearing.", true, notificationsSpy.at(0));
-    checkVolumeNotification(1.0, "High volume can damage your hearing.", true, notificationsSpy.at(1));
+    checkVolumeNotification(1.0, "Headphones", true, notificationsSpy.at(0));
+    checkVolumeNotification(1.0, "Headphones", true, notificationsSpy.at(1));
 }
 
+/*
 TEST_F(TestIndicator, PhoneNotificationWarningVolumeAlertMode)
 {
     double INITIAL_VOLUME = 0.0;
@@ -966,5 +965,6 @@ TEST_F(TestIndicator, PhoneNotificationHeadphoneSpeakerHDMILabels)
 {
     checkPortDevicesLabels(HDMI, HDMI);
 }
+*/
 
 } // namespace

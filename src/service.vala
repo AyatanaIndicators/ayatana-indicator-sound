@@ -565,6 +565,35 @@ public class IndicatorSound.Service: Object {
 		return icon;
 	}
 
+	private string get_notification_label () {
+		string volume_label = "";
+		if (volume_control.active_output == VolumeControl.ActiveOutput.SPEAKERS) {
+			volume_label = _("Speakers");
+		}
+		if (volume_control.active_output == VolumeControl.ActiveOutput.HEADPHONES) {
+			volume_label = _("Headphones");
+		}
+		if (volume_control.active_output == VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES) {
+			volume_label = _("Bluetooth headphones");
+		}
+		if (volume_control.active_output == VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER) {
+			volume_label = _("Bluetooth speaker");
+		}
+		if (volume_control.active_output == VolumeControl.ActiveOutput.USB_SPEAKER) {
+			volume_label = _("Usb speaker");
+		}
+		if (volume_control.active_output == VolumeControl.ActiveOutput.USB_HEADPHONES) {
+			volume_label = _("Usb headphones");
+		}
+		if (volume_control.active_output == VolumeControl.ActiveOutput.HDMI_SPEAKER) {
+			volume_label = _("HDMI speaker");
+		}
+		if (volume_control.active_output == VolumeControl.ActiveOutput.HDMI_HEADPHONES) {
+			volume_label = _("HDMI headphones");
+		}
+		return volume_label;
+	}
+
 	private void update_notification () {
 
 		if (!notify_server_caps_checked) {
@@ -610,44 +639,8 @@ public class IndicatorSound.Service: Object {
 				if (notify_server_supports_sync && !block_info_notifications) {
 	
 					/* Determine Label */
-				        string volume_label = loud
-						 ? _("High volume can damage your hearing.")
-						 : "";
-				
-					if (volume_label == "") {
-						if (volume_control.active_output == VolumeControl.ActiveOutput.SPEAKERS) {
-							volume_label = _("Speakers");
-						}
-	
-						if (volume_control.active_output == VolumeControl.ActiveOutput.HEADPHONES) {
-							volume_label = _("Headphones");
-						}
-	
-						if (volume_control.active_output == VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES) {
-							volume_label = _("Bluetooth headphones");
-						}
-						
-						if (volume_control.active_output == VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER) {
-							volume_label = _("Bluetooth speaker");
-						}
-	
-						if (volume_control.active_output == VolumeControl.ActiveOutput.USB_SPEAKER) {
-							volume_label = _("Usb speaker");
-						}
-	
-						if (volume_control.active_output == VolumeControl.ActiveOutput.USB_HEADPHONES) {
-							volume_label = _("Usb headphones");
-						}
-						
-						if (volume_control.active_output == VolumeControl.ActiveOutput.HDMI_SPEAKER) {
-							volume_label = _("HDMI speaker");
-						}
-					
-						if (volume_control.active_output == VolumeControl.ActiveOutput.HDMI_HEADPHONES) {
-							volume_label = _("HDMI headphones");
-						}
-					}
-	
+				        string volume_label = get_notification_label ();
+
 					/* Choose an icon */
 				 	string icon = get_volume_notification_icon (volume_control.volume.volume, loud, volume_control.active_output);
 
