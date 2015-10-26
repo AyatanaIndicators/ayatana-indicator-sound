@@ -104,14 +104,15 @@ TEST_F(TestIndicator, PhoneChangeRoleVolume)
             )
         ).match());
 
+    // initialize the signal spy
+    EXPECT_TRUE(initializeMenuChangedSignal());
     userAccountsSpy.clear();
     // stop the test sound, the role should change again to alert
     stopTestSound();
     if (randomVolume != 1.0)
     {
-        // we only wait if the volume in the alert and the
-        // one set in the multimedia roles differ
-        WAIT_FOR_SIGNALS(userAccountsSpy, 1);
+        // wait for the menu change
+        EXPECT_TRUE(waitMenuChange());
     }
 
     // check the initial volume for the alert role
