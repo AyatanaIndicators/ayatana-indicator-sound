@@ -407,11 +407,11 @@ void IndicatorSoundTestBase::initializeAccountsInterface()
     auto username = qgetenv("USER");
     if (username != "")
     {
-        std::unique_ptr<AccountsInterface> accountsInterface(new AccountsInterface("org.freedesktop.Accounts",
+        main_accounts_interface_.reset(new AccountsInterface("org.freedesktop.Accounts",
                                                         "/org/freedesktop/Accounts",
                                                         dbusTestRunner.systemConnection(), 0));
 
-        QDBusReply<QDBusObjectPath> userResp = accountsInterface->call(QLatin1String("FindUserByName"),
+        QDBusReply<QDBusObjectPath> userResp = main_accounts_interface_->call(QLatin1String("FindUserByName"),
                                                                   QLatin1String(username));
 
         if (!userResp.isValid())
@@ -804,4 +804,17 @@ void IndicatorSoundTestBase::checkPortDevicesLabels(DevicePortType speakerPort, 
                 .item(volumeSlider(INITIAL_VOLUME, speakerStringMenu))
             )
         ).match());
+}
+
+bool IndicatorSoundTestBase::setVolumeUntilAccountsIsConnected(double volume)
+{
+    int RETRY_TIME = 5000;
+
+    setActionValue("volume", QVariant::fromValue(volume));
+    while(!signal_spy_volume_changed_->wait(10) && RETRY_TIME)
+    {
+        RETRY_TIME -= 10;
+        setActionValue("volume", QVariant::fromValue(volume));
+    }
+    return (signal_spy_volume_changed_->count() != 0);
 }

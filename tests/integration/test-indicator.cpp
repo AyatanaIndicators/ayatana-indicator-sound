@@ -32,7 +32,7 @@ class TestIndicator: public IndicatorSoundTestBase
 {
 };
 
-TEST_F(TestIndicator, DISABLED_PhoneChangeRoleVolume)
+TEST_F(TestIndicator, PhoneChangeRoleVolume)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -55,9 +55,7 @@ TEST_F(TestIndicator, DISABLED_PhoneChangeRoleVolume)
     QSignalSpy &userAccountsSpy = *signal_spy_volume_changed_;
     // set an initial volume to the alert role
     userAccountsSpy.clear();
-    setStreamRestoreVolume("alert", 1.0);
-    WAIT_AT_LEAST_SIGNALS(userAccountsSpy, 1);
-
+    EXPECT_TRUE(setVolumeUntilAccountsIsConnected(1.0));
     userAccountsSpy.clear();
     // play a test sound, it should change the role in the indicator
     EXPECT_TRUE(startTestSound("multimedia"));
@@ -69,7 +67,7 @@ TEST_F(TestIndicator, DISABLED_PhoneChangeRoleVolume)
 
     userAccountsSpy.clear();
     // set the random volume to the multimedia role
-    EXPECT_TRUE(setStreamRestoreVolume("multimedia", randomVolume));
+    setActionValue("volume", QVariant::fromValue(randomVolume));
     if (randomVolume != INITIAL_VOLUME)
     {
         WAIT_FOR_SIGNALS(userAccountsSpy, 1);

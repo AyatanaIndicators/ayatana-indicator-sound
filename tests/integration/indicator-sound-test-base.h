@@ -31,6 +31,7 @@
 class MenusInterface;
 class DBusPulseVolume;
 class DBusPropertiesInterface;
+class AccountsInterface;
 class QSignalSpy;
 
 #define WAIT_FOR_SIGNALS(signalSpy, signalsExpected)\
@@ -131,6 +132,8 @@ protected:
 
     void checkPortDevicesLabels(DevicePortType speakerPort, DevicePortType headphonesPort);
 
+    bool setVolumeUntilAccountsIsConnected(double volume);
+
     QtDBusTest::DBusTestRunner dbusTestRunner;
 
     QtDBusMock::DBusMock dbusMock;
@@ -148,6 +151,8 @@ protected:
     std::unique_ptr<MenusInterface> menu_interface_;
 
     std::unique_ptr<DBusPropertiesInterface> accounts_interface_;
+
+    std::unique_ptr<AccountsInterface> main_accounts_interface_;
 
     std::unique_ptr<QSignalSpy> signal_spy_volume_changed_;
 

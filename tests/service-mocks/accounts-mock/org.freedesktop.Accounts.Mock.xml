@@ -9,5 +9,7 @@
       <arg direction="in" type="x" name="uid" />
       <arg direction="out" type="o" name="path" />
     </method>
+    <signal name="FindUserByIdInvoked">
+    </signal>
   </interface>
 </node>

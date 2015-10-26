@@ -20,7 +20,7 @@ qt5_add_dbus_adaptor(adaptor_files
     AccountsServiceSoundMockAdaptor)
 
 qt5_add_dbus_adaptor(adaptor_files
-    org.freedesktop.Accounts.Mock.xml
+    ${CMAKE_SOURCE_DIR}/tests/dbus-types/org.freedesktop.Accounts.xml
     AccountsMock.h
     ubuntu::indicators::testing::AccountsMock
     AccountsMockAdaptor)
