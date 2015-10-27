@@ -567,30 +567,34 @@ public class IndicatorSound.Service: Object {
 
 	private string get_notification_label () {
 		string volume_label = "";
-		if (volume_control.active_output == VolumeControl.ActiveOutput.SPEAKERS) {
-			volume_label = _("Speakers");
+		switch (volume_control.active_output)
+		{
+			case VolumeControl.ActiveOutput.SPEAKERS:
+				volume_label = _("Speakers");
+				break;
+			case VolumeControl.ActiveOutput.HEADPHONES:
+				volume_label = _("Headphones");
+				break;
+			case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
+				volume_label = _("Bluetooth headphones");
+				break;
+			case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
+				volume_label = _("Bluetooth speaker");
+				break;
+			case VolumeControl.ActiveOutput.USB_SPEAKER:
+				volume_label = _("Usb speaker");
+				break;
+			case VolumeControl.ActiveOutput.USB_HEADPHONES:
+				volume_label = _("Usb headphones");
+				break;
+			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
+				volume_label = _("HDMI speaker");
+				break;
+			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
+				volume_label = _("HDMI headphones");
+				break;
 		}
-		if (volume_control.active_output == VolumeControl.ActiveOutput.HEADPHONES) {
-			volume_label = _("Headphones");
-		}
-		if (volume_control.active_output == VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES) {
-			volume_label = _("Bluetooth headphones");
-		}
-		if (volume_control.active_output == VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER) {
-			volume_label = _("Bluetooth speaker");
-		}
-		if (volume_control.active_output == VolumeControl.ActiveOutput.USB_SPEAKER) {
-			volume_label = _("Usb speaker");
-		}
-		if (volume_control.active_output == VolumeControl.ActiveOutput.USB_HEADPHONES) {
-			volume_label = _("Usb headphones");
-		}
-		if (volume_control.active_output == VolumeControl.ActiveOutput.HDMI_SPEAKER) {
-			volume_label = _("HDMI speaker");
-		}
-		if (volume_control.active_output == VolumeControl.ActiveOutput.HDMI_HEADPHONES) {
-			volume_label = _("HDMI headphones");
-		}
+
 		return volume_label;
 	}
 

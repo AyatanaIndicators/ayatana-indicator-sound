@@ -5,9 +5,5 @@
       <arg direction="in" type="s" name="user" />
       <arg direction="out" type="o" name="path" />
     </method>
-    <method name="FindUserById">
-      <arg direction="in" type="x" name="uid" />
-      <arg direction="out" type="o" name="path" />
-    </method>
   </interface>
 </node>
