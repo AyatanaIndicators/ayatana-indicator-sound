@@ -600,12 +600,10 @@ public class IndicatorSound.Service: Object {
 
 	private void update_notification () {
 
-		if (!notify_server_caps_checked) {
-			List<string> caps = Notify.get_server_caps ();
-			notify_server_supports_actions = caps.find_custom ("actions", strcmp) != null;
-			notify_server_supports_sync = caps.find_custom ("x-canonical-private-synchronous", strcmp) != null;
-			notify_server_caps_checked = true;
-		}
+		List<string> caps = Notify.get_server_caps ();
+		notify_server_supports_actions = caps.find_custom ("actions", strcmp) != null;
+		notify_server_supports_sync = caps.find_custom ("x-canonical-private-synchronous", strcmp) != null;
+		notify_server_caps_checked = true;
 
 		var loud = volume_control.high_volume;
 		var warn = loud
