@@ -695,16 +695,18 @@ TEST_F(TestIndicator, PhoneNotificationVolume)
     notificationsSpy.clear();
     setActionValue("volume", QVariant::fromValue(0.0));
 
-    WAIT_FOR_SIGNALS(notificationsSpy, 1)
+    WAIT_FOR_SIGNALS(notificationsSpy, 2)
 
-    checkVolumeNotification(0.0, "Speakers", false, notificationsSpy.at(0));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(0));
+    checkVolumeNotification(0.0, "Speakers", false, notificationsSpy.at(1));
 
     notificationsSpy.clear();
     setActionValue("volume", QVariant::fromValue(0.5));
 
-    WAIT_FOR_SIGNALS(notificationsSpy, 1)
+    WAIT_FOR_SIGNALS(notificationsSpy, 2)
 
-    checkVolumeNotification(0.5, "Speakers", false, notificationsSpy.at(0));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(0));
+    checkVolumeNotification(0.5, "Speakers", false, notificationsSpy.at(1));
 }
 
 TEST_F(TestIndicator, PhoneNotificationWarningVolume)
@@ -747,34 +749,38 @@ TEST_F(TestIndicator, PhoneNotificationWarningVolume)
     setActionValue("volume", QVariant::fromValue(0.3));
     EXPECT_TRUE(waitVolumeChangedInIndicator());
 
-    WAIT_FOR_SIGNALS(notificationsSpy, 1);
+    WAIT_FOR_SIGNALS(notificationsSpy, 2);
 
-    checkVolumeNotification(0.3, "Headphones", false, notificationsSpy.at(0));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(0));
+    checkVolumeNotification(0.3, "Headphones", false, notificationsSpy.at(1));
     notificationsSpy.clear();
 
     // change volume to 0.5... no warning should be emitted
     setActionValue("volume", QVariant::fromValue(0.5));
     EXPECT_TRUE(waitVolumeChangedInIndicator());
 
-    WAIT_FOR_SIGNALS(notificationsSpy, 1);
+    WAIT_FOR_SIGNALS(notificationsSpy, 2);
 
-    checkVolumeNotification(0.5, "Headphones", false, notificationsSpy.at(0));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(0));
+    checkVolumeNotification(0.5, "Headphones", false, notificationsSpy.at(1));
     notificationsSpy.clear();
 
     // change volume to 1.0... warning should be emitted
     setActionValue("volume", QVariant::fromValue(1.0));
     EXPECT_TRUE(waitVolumeChangedInIndicator());
 
-    WAIT_FOR_SIGNALS(notificationsSpy, 4);
+    WAIT_FOR_SIGNALS(notificationsSpy, 8);
 
     // the notification is sent twice (TODO check why)
-    checkCloseNotification(1, notificationsSpy.at(0));
-    checkHighVolumeNotification(notificationsSpy.at(1));
-    checkCloseNotification(1, notificationsSpy.at(2));
-    checkHighVolumeNotification(notificationsSpy.at(3));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(0));
+    checkCloseNotification(1, notificationsSpy.at(1));
+    checkHighVolumeNotification(notificationsSpy.at(2));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(3));
+    checkCloseNotification(1, notificationsSpy.at(4));
+    checkHighVolumeNotification(notificationsSpy.at(5));
 
     // get the last notification ID
-    int idNotification = getNotificationID(notificationsSpy.at(3));
+    int idNotification = getNotificationID(notificationsSpy.at(5));
     ASSERT_NE(-1, idNotification);
 
     qWarning() << "XGM: id Notification: " << idNotification;
@@ -807,10 +813,12 @@ TEST_F(TestIndicator, PhoneNotificationWarningVolume)
     setActionValue("volume", QVariant::fromValue(1.0));
     EXPECT_TRUE(waitVolumeChangedInIndicator());
 
-    WAIT_FOR_SIGNALS(notificationsSpy, 2);
+    WAIT_FOR_SIGNALS(notificationsSpy, 6);
 
-    checkHighVolumeNotification(notificationsSpy.at(0));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(0));
     checkHighVolumeNotification(notificationsSpy.at(1));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(2));
+    checkHighVolumeNotification(notificationsSpy.at(3));
 
     // get the last notification ID
     idNotification = getNotificationID(notificationsSpy.at(1));
@@ -848,13 +856,15 @@ TEST_F(TestIndicator, PhoneNotificationWarningVolume)
     setActionValue("volume", QVariant::fromValue(0.5));
     EXPECT_TRUE(waitVolumeChangedInIndicator());
 
-    WAIT_FOR_SIGNALS(notificationsSpy, 4);
+    WAIT_FOR_SIGNALS(notificationsSpy, 6);
 
     // check the notification TODO check why the sound indicator sends it twice
-    checkCloseNotification(idNotification, notificationsSpy.at(0));
-    checkVolumeNotification(0.5, "Headphones", false, notificationsSpy.at(1));
-    checkCloseNotification(idNotification, notificationsSpy.at(2));
-    checkVolumeNotification(0.5, "Headphones", false, notificationsSpy.at(3));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(0));
+    checkCloseNotification(idNotification, notificationsSpy.at(1));
+    checkVolumeNotification(0.5, "Headphones", false, notificationsSpy.at(2));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(3));
+    checkCloseNotification(idNotification, notificationsSpy.at(4));
+    checkVolumeNotification(0.5, "Headphones", false, notificationsSpy.at(5));
 
     // check that the volume was applied
     // and that we don't have the warning item
@@ -881,11 +891,13 @@ TEST_F(TestIndicator, PhoneNotificationWarningVolume)
     setActionValue("volume", QVariant::fromValue(1.0));
     EXPECT_TRUE(waitVolumeChangedInIndicator());
 
-    WAIT_FOR_SIGNALS(notificationsSpy, 2);
+    WAIT_FOR_SIGNALS(notificationsSpy, 4);
 
     // check the notification TODO check why the sound indicator sends it twice
-    checkVolumeNotification(1.0, "Headphones", true, notificationsSpy.at(0));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(0));
     checkVolumeNotification(1.0, "Headphones", true, notificationsSpy.at(1));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(2));
+    checkVolumeNotification(1.0, "Headphones", true, notificationsSpy.at(3));
 }
 
 
@@ -916,30 +928,33 @@ TEST_F(TestIndicator, PhoneNotificationWarningVolumeAlertMode)
     // change volume to 0.0... no warning should be emitted
     setActionValue("volume", QVariant::fromValue(0.0));
 
-    WAIT_FOR_SIGNALS(notificationsSpy, 4);
+    WAIT_FOR_SIGNALS(notificationsSpy, 5);
 
     // the first time we also have the calls to
     // GetServerInformation and GetCapabilities
     checkNotificationWithNoArgs("GetServerInformation", notificationsSpy.at(0));
     checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(1));
     checkVolumeNotification(0.0, "Headphones", false, notificationsSpy.at(2));
-    checkVolumeNotification(0.0, "Headphones", false, notificationsSpy.at(3));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(3));
+    checkVolumeNotification(0.0, "Headphones", false, notificationsSpy.at(4));
     notificationsSpy.clear();
 
     // change volume to 0.5... no warning should be emitted
     setActionValue("volume", QVariant::fromValue(0.5));
 
-    WAIT_FOR_SIGNALS(notificationsSpy, 1);
+    WAIT_FOR_SIGNALS(notificationsSpy, 2);
 
-    checkVolumeNotification(0.5, "Headphones", false, notificationsSpy.at(0));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(0));
+    checkVolumeNotification(0.5, "Headphones", false, notificationsSpy.at(1));
     notificationsSpy.clear();
 
     // change volume to 1.0... no warning should be emitted, we are in alert mode
     setActionValue("volume", QVariant::fromValue(1.0));
 
-    WAIT_FOR_SIGNALS(notificationsSpy, 1);
+    WAIT_FOR_SIGNALS(notificationsSpy, 2);
 
-    checkVolumeNotification(1.0, "Headphones", false, notificationsSpy.at(0));
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(0));
+    checkVolumeNotification(1.0, "Headphones", false, notificationsSpy.at(1));
     notificationsSpy.clear();
 }
 

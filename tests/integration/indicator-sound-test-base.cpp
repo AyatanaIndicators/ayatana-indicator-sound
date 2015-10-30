@@ -743,6 +743,7 @@ void IndicatorSoundTestBase::checkPortDevicesLabels(DevicePortType speakerPort, 
         notificationsSpy.clear();
     }
 
+    notificationsSpy.clear();
     // activate the headphones
     EXPECT_TRUE(activateHeadphones(true));
 
@@ -759,8 +760,9 @@ void IndicatorSoundTestBase::checkPortDevicesLabels(DevicePortType speakerPort, 
     }
     else
     {
-        WAIT_FOR_SIGNALS(notificationsSpy, 1);
-        checkVolumeNotification(INITIAL_VOLUME, headphonesString, false, notificationsSpy.at(0));
+        WAIT_FOR_SIGNALS(notificationsSpy, 2);
+        checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(0));
+        checkVolumeNotification(INITIAL_VOLUME, headphonesString, false, notificationsSpy.at(1));
         notificationsSpy.clear();
     }
 
@@ -784,8 +786,9 @@ void IndicatorSoundTestBase::checkPortDevicesLabels(DevicePortType speakerPort, 
     // deactivate the headphones
     EXPECT_TRUE(activateHeadphones(false));
 
-    WAIT_FOR_SIGNALS(notificationsSpy, 1);
-    checkVolumeNotification(INITIAL_VOLUME, speakerString, false, notificationsSpy.at(0));
+    WAIT_FOR_SIGNALS(notificationsSpy, 2);
+    checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(0));
+    checkVolumeNotification(INITIAL_VOLUME, speakerString, false, notificationsSpy.at(1));
     notificationsSpy.clear();
 
     // check the label in the menu
