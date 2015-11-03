@@ -8,12 +8,12 @@ set(SYMBOLS_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.def")
 set(VAPI_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.vapi")
 
 vapi_gen(accounts-service
-	LIBRARY
-		accounts-service
-	PACKAGES
-		gio-2.0
-	INPUT
-		/usr/share/gir-1.0/AccountsService-1.0.gir
+    LIBRARY
+        accounts-service
+    PACKAGES
+        gio-2.0
+    INPUT
+        /usr/share/gir-1.0/AccountsService-1.0.gir
 )
 
 vala_init(indicator-sound-service
@@ -70,7 +70,7 @@ vala_add(indicator-sound-service
   media-player-user.vala
   DEPENDS
     media-player
-	accounts-service-sound-settings
+    accounts-service-sound-settings
     greeter-broadcast
 )
 vala_add(indicator-sound-service
@@ -103,6 +103,7 @@ vala_add(indicator-sound-service
   sound-menu.vala
   DEPENDS
     media-player
+    volume-control
 )
 vala_add(indicator-sound-service
   accounts-service-user.vala
@@ -164,8 +165,8 @@ add_definitions(
 )
 
 add_library(
-	indicator-sound-service-lib STATIC
-	${INDICATOR_SOUND_SOURCES}
+    indicator-sound-service-lib STATIC
+    ${INDICATOR_SOUND_SOURCES}
 )
 
 target_link_libraries(
@@ -206,3 +207,5 @@ install(
   RUNTIME DESTINATION ${CMAKE_INSTALL_LIBEXECDIR}/indicator-sound/
 )
 
+# Disable integration tests
+# add_subdirectory(gmenuharness)

@@ -1,0 +1,7 @@
+<node>
+  <interface name="org.PulseAudio.Ext.StreamRestore1">
+    <method name="GetEntryByName">
+      <arg direction="in" type="s" name="entry" />
+      <arg direction="out" type="o" name="value" />
+  </interface>
+</node>

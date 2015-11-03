@@ -1,3 +1,10 @@
+indicator-sound (12.10.2+15.10.20151019-0ubuntu2) UNRELEASED; urgency=medium
+
+  * Added OSD notifications to show output source when the volume or 
+    source change (LP: #1382548, LP: #1415480, LP: #1484589)
+
+ -- Xavi Garcia <xavi.garcia.mena@canonical.com>  Tue, 03 Nov 2015 12:29:19 +0100
+
 indicator-sound (12.10.2+15.10.20151019-0ubuntu1) wily; urgency=medium
 
   [ Xavi Garcia Mena ]
