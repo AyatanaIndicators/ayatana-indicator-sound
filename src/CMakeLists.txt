@@ -207,4 +207,5 @@ install(
   RUNTIME DESTINATION ${CMAKE_INSTALL_LIBEXECDIR}/indicator-sound/
 )
 
-add_subdirectory(gmenuharness)
+# Disable integration tests
+# add_subdirectory(gmenuharness)

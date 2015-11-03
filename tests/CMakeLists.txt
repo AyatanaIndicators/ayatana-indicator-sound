@@ -281,6 +281,7 @@ add_test(indcator-test
     indicator-test
 )
 
-add_subdirectory(integration)
-add_subdirectory(dbus-types)
-add_subdirectory(service-mocks)
+# Disable integration tests
+# add_subdirectory(integration)
+# add_subdirectory(dbus-types)
+# add_subdirectory(service-mocks)
