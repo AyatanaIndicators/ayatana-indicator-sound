@@ -47,6 +47,7 @@ public class IndicatorSound.Service: Object {
 		                            () => { debug("Notifications name vanshed");  notify_server_caps_checked = false; });
 
 		this.settings = new Settings ("com.canonical.indicator.sound");
+		this.sharedsettings = new Settings ("com.ubuntu.sound");
 
 		this.settings.bind ("visible", this, "visible", SettingsBindFlags.GET);
 		this.notify["visible"].connect ( () => this.update_root_icon () );
@@ -94,6 +95,8 @@ public class IndicatorSound.Service: Object {
 		this.settings.changed["interested-media-players"].connect ( () => {
 			this.sync_preferred_players ();
 		});
+
+		sharedsettings.bind ("allow-amplified-volume", this, "allow-amplified-volume", SettingsBindFlags.GET);
 
 		/* Hide the notification when the menu is shown */
 		var shown_action = actions.lookup_action ("indicator-shown") as SimpleAction;
@@ -173,6 +176,28 @@ public class IndicatorSound.Service: Object {
 
 	public bool visible { get; set; }
 
+	public bool allow_amplified_volume {
+		get {
+			return this.volume_control.max_volume > 1.0;
+		}
+
+		set {
+			if (this.allow_amplified_volume == value)
+				return;
+
+			if (value) {
+				/* from pulse/volume.h: #define PA_VOLUME_UI_MAX (pa_sw_volume_from_dB(+11.0)) */
+				this.volume_control.max_volume = (double)PulseAudio.Volume.sw_from_dB(11.0) / PulseAudio.Volume.NORM;
+			}
+			else {
+				this.volume_control.max_volume = 1.0;
+			}
+
+			/* Normalize volume, because the volume action's state is [0.0, 1.0], see create_volume_action() */
+			this.actions.change_action_state ("volume", this.volume_control.volume.volume / this.volume_control.max_volume);
+		}
+	}
+
 	const ActionEntry[] action_entries = {
 		{ "root", null, null, "@a{sv} {}", null },
 		{ "scroll", activate_scroll_action, "i", null, null },
@@ -184,6 +209,7 @@ public class IndicatorSound.Service: Object {
 	SimpleActionGroup actions;
 	HashTable<string, SoundMenu> menus;
 	Settings settings;
+	Settings sharedsettings;
 	VolumeControl volume_control;
 	MediaPlayerList players;
 	uint player_action_update_id;
