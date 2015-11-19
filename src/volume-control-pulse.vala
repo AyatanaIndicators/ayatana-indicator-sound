@@ -738,6 +738,10 @@ public class VolumeControlPulse : VolumeControl
 		get { return this._high_volume; }
 		private set { this._high_volume = value; }
 	}
+        public override bool below_warning_volume {
+		get { return this._volume.volume < this._warning_volume_norms; }
+		private set { }
+	}
 	private void init_high_volume() {
 		_settings.changed["warning-volume-enabled"].connect(() => update_high_volume_cache());
 		_settings.changed["warning-volume-decibels"].connect(() => update_high_volume_cache());
