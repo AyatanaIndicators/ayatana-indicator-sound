@@ -783,6 +783,14 @@ public class VolumeControlPulse : VolumeControl
 		}
 	}
 
+	public override void set_warning_volume() {
+		var vol = new VolumeControl.Volume();
+                vol.volume = _warning_volume_norms;
+                vol.reason = _volume.reason;
+                debug("Setting warning level volume from %f down to %f", _volume.volume, vol.volume);
+                volume = vol;	 
+	}
+
 	/** HIGH VOLUME APPROVED PROPERTY **/
 
 	private bool _high_volume_approved = false;

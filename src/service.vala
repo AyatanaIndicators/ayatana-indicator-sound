@@ -610,6 +610,7 @@ public class IndicatorSound.Service: Object {
 			&& this.notify_server_supports_actions
 			&& !this.volume_control.high_volume_approved;
 		if (waiting_user_approve_warn && volume_control.below_warning_volume) {
+			volume_control.set_warning_volume();
 			close_notification(warn_notification);
 		} 
 		if (warn) {

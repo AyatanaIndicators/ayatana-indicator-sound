@@ -60,6 +60,7 @@ public abstract class VolumeControl : Object
 	public virtual bool high_volume_approved { get { return false; } protected set { } }
 	public virtual void approve_high_volume() { }
 	public virtual void clamp_to_high_volume() { }
+	public virtual void set_warning_volume() { }
 
 	public abstract void set_mute (bool mute);
 
