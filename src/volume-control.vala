@@ -36,7 +36,8 @@ public abstract class VolumeControl : Object
 		USB_SPEAKER,
 		USB_HEADPHONES,
 		HDMI_SPEAKER,
-		HDMI_HEADPHONES
+		HDMI_HEADPHONES,
+		CALL_MODE
 	}
 
 	public class Volume : Object {

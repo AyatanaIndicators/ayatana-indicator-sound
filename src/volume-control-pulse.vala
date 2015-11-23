@@ -140,40 +140,45 @@ public class VolumeControlPulse : VolumeControl
 		
 		VolumeControl.ActiveOutput ret_output = VolumeControl.ActiveOutput.SPEAKERS;
 		/* Check if the current active port is headset/headphone */
-    	/* There is not easy way to check if the port is a headset/headphone besides
-    	 * checking for the port name. On touch (with the pulseaudio droid element)
-    	 * the headset/headphone port is called 'output-headset' and 'output-headphone'.
-    	 * On the desktop this is usually called 'analog-output-headphones' */
+    		/* There is not easy way to check if the port is a headset/headphone besides
+    		 * checking for the port name. On touch (with the pulseaudio droid element)
+    		 * the headset/headphone port is called 'output-headset' and 'output-headphone'.
+    		 * On the desktop this is usually called 'analog-output-headphones' */
+		
+		// first of all check if we are in call mode
+		if (sink.active_port != null && sink.active_port.name == "output-speaker+wired_headphone") {
+			return VolumeControl.ActiveOutput.CALL_MODE;
+		}
 		// look if it's a headset/headphones
 		if (sink.name == "indicator_sound_test_headphones" ||
 			(sink.active_port != null && 
 			 (sink.active_port.name.contains("headset") ||
-	          sink.active_port.name.contains("headphone")))) {
-	    	_active_port_headphone = true;
-	    	// check if it's a bluetooth device
-	    	var device_bus = sink.proplist.gets ("device.bus");
-	    	if (device_bus != null && device_bus == "bluetooth") {
-				ret_output = VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES;
-        	} else if (device_bus != null && device_bus == "usb") {
-				ret_output = VolumeControl.ActiveOutput.USB_HEADPHONES;
-			} else if (device_bus != null && device_bus == "hdmi") {
-				ret_output = VolumeControl.ActiveOutput.HDMI_HEADPHONES;
-			} else {
-				ret_output = VolumeControl.ActiveOutput.HEADPHONES;
-        	}
+		          sink.active_port.name.contains("headphone")))) {
+			    	_active_port_headphone = true;
+	    			// check if it's a bluetooth device
+	    			var device_bus = sink.proplist.gets ("device.bus");
+	    			if (device_bus != null && device_bus == "bluetooth") {
+					ret_output = VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES;
+        			} else if (device_bus != null && device_bus == "usb") {
+					ret_output = VolumeControl.ActiveOutput.USB_HEADPHONES;
+				} else if (device_bus != null && device_bus == "hdmi") {
+					ret_output = VolumeControl.ActiveOutput.HDMI_HEADPHONES;
+				} else {
+					ret_output = VolumeControl.ActiveOutput.HEADPHONES;
+        		}
 		} else {
 			// speaker
 			_active_port_headphone = false;
 			var device_bus = sink.proplist.gets ("device.bus");
-	    	if (device_bus != null && device_bus == "bluetooth") {
-	    	    ret_output = VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER;
-        	} else if (device_bus != null && device_bus == "usb") {
+	    		if (device_bus != null && device_bus == "bluetooth") {
+	    		    ret_output = VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER;
+        		} else if (device_bus != null && device_bus == "usb") {
 				ret_output = VolumeControl.ActiveOutput.USB_SPEAKER;
 			} else if (device_bus != null && device_bus == "hdmi") {
 				ret_output = VolumeControl.ActiveOutput.HDMI_SPEAKER;
 			} else {
 				ret_output = VolumeControl.ActiveOutput.SPEAKERS;
-        	}
+        		}
 		}
 
 		return ret_output;
@@ -253,7 +258,9 @@ public class VolumeControlPulse : VolumeControl
 		
 		// check if the output has changed, if so... emit a signal
 		VolumeControl.ActiveOutput active_output_now = active_output;
-		if (active_output_now != active_output_before) {
+		if (active_output_now != active_output_before && 
+			(active_output_now != VolumeControl.ActiveOutput.CALL_MODE &&
+			 active_output_before != VolumeControl.ActiveOutput.CALL_MODE)) {
 			this.active_output_changed (active_output_now);
 			if (active_output_now == VolumeControl.ActiveOutput.SPEAKERS) {
 				_high_volume_approved = false;
