@@ -40,7 +40,11 @@ public class IndicatorSound.Service: Object {
 		warn_notification.set_hint ("x-canonical-non-shaped-icon", "true");
 		warn_notification.set_hint ("x-canonical-snap-decisions", "true");
 		warn_notification.set_hint ("x-canonical-private-affirmative-tint", "true");
-		warn_notification.closed.connect((n) => { n.clear_actions(); waiting_user_approve_warn=false; });
+		warn_notification.closed.connect((n) => { 
+			n.clear_actions(); 
+			waiting_user_approve_warn=false;
+			volume_sync_action.set_state(volume_sync_number_++); 
+		});
 		BusWatcher.watch_namespace (GLib.BusType.SESSION,
 		                            "org.freedesktop.Notifications",
 		                            () => { debug("Notifications name appeared"); },
@@ -77,6 +81,7 @@ public class IndicatorSound.Service: Object {
 		this.actions.add_action (this.create_volume_action ());
 		this.actions.add_action (this.create_mic_volume_action ());
 		this.actions.add_action (this.create_high_volume_action ());
+		this.actions.add_action (this.create_volume_sync_action ());
 
 		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
 		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.HIDE_PLAYERS | SoundMenu.DisplayFlags.GREETER_PLAYERS));
@@ -634,6 +639,7 @@ public class IndicatorSound.Service: Object {
 			warn_notification.add_action ("cancel", _("Cancel"), (n, a) => {
 				_pre_warn_volume = null;
 				waiting_user_approve_warn = false;
+				volume_sync_action.set_state(volume_sync_number_++);
 			});
 			waiting_user_approve_warn = true;
 			show_notification(warn_notification);
@@ -816,6 +822,14 @@ public class IndicatorSound.Service: Object {
 		});
 
 		return high_volume_action;
+	}
+
+	SimpleAction volume_sync_action;
+	uint64 volume_sync_number_ = 0;
+	Action create_volume_sync_action () {
+		volume_sync_action = new SimpleAction.stateful("volume-sync", null, new Variant.uint64 (volume_sync_number_));
+
+		return volume_sync_action;
 	}
 
 	uint export_actions = 0;
