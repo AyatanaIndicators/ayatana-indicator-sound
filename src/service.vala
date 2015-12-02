@@ -43,7 +43,7 @@ public class IndicatorSound.Service: Object {
 		warn_notification.closed.connect((n) => { 
 			n.clear_actions(); 
 			waiting_user_approve_warn=false;
-			volume_sync_action.set_state(volume_sync_number_++); 
+			volume_sync_action.set_state(new Variant.uint64 (++volume_sync_number_));
 		});
 		BusWatcher.watch_namespace (GLib.BusType.SESSION,
 		                            "org.freedesktop.Notifications",
@@ -639,7 +639,7 @@ public class IndicatorSound.Service: Object {
 			warn_notification.add_action ("cancel", _("Cancel"), (n, a) => {
 				_pre_warn_volume = null;
 				waiting_user_approve_warn = false;
-				volume_sync_action.set_state(volume_sync_number_++);
+				volume_sync_action.set_state(new Variant.uint64 (++volume_sync_number_));
 			});
 			waiting_user_approve_warn = true;
 			show_notification(warn_notification);
@@ -827,7 +827,7 @@ public class IndicatorSound.Service: Object {
 	SimpleAction volume_sync_action;
 	uint64 volume_sync_number_ = 0;
 	Action create_volume_sync_action () {
-		volume_sync_action = new SimpleAction.stateful("volume-sync", null, new Variant.uint64 (volume_sync_number_));
+		volume_sync_action = new SimpleAction.stateful("volume-sync", VariantType.UINT64, new Variant.uint64 (volume_sync_number_));
 
 		return volume_sync_action;
 	}

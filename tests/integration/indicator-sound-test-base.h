@@ -134,6 +134,12 @@ protected:
 
     bool setVolumeUntilAccountsIsConnected(double volume);
 
+    QVariantList getActionValue(QString const &action);
+
+    qlonglong getVolumeSyncValue(bool *isValid = nullptr);
+
+    float getVolumeValue(bool *isValid = nullptr);
+
     QtDBusTest::DBusTestRunner dbusTestRunner;
 
     QtDBusMock::DBusMock dbusMock;

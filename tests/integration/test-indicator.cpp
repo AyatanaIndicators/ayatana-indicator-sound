@@ -182,6 +182,7 @@ TEST_F(TestIndicator, PhoneBasicInitialVolume)
         ).match());
 }
 
+
 TEST_F(TestIndicator, PhoneAddMprisPlayer)
 {
     double INITIAL_VOLUME = 0.0;
@@ -783,7 +784,11 @@ TEST_F(TestIndicator, PhoneNotificationWarningVolume)
     int idNotification = getNotificationID(notificationsSpy.at(5));
     ASSERT_NE(-1, idNotification);
 
-    qWarning() << "XGM: id Notification: " << idNotification;
+    // check the sync value before cancelling the dialog
+    bool isValid;
+    qlonglong syncValue = getVolumeSyncValue(&isValid);
+    EXPECT_TRUE(isValid);
+    EXPECT_EQ(0, syncValue);
 
     // cancel the dialog
     pressNotificationButton(idNotification, "cancel");
@@ -804,6 +809,11 @@ TEST_F(TestIndicator, PhoneNotificationWarningVolume)
                 .item(volumeSlider(0.74, "Volume (Headphones)"))
             )
         ).match());
+
+    // verify that the sync value is increased
+    syncValue = getVolumeSyncValue(&isValid);
+    EXPECT_TRUE(isValid);
+    EXPECT_EQ(1, syncValue);
 
     // try again...
     notificationsSpy.clear();
@@ -899,7 +909,6 @@ TEST_F(TestIndicator, PhoneNotificationWarningVolume)
     checkNotificationWithNoArgs("GetCapabilities", notificationsSpy.at(2));
     checkVolumeNotification(1.0, "Headphones", true, notificationsSpy.at(3));
 }
-
 
 TEST_F(TestIndicator, PhoneNotificationWarningVolumeAlertMode)
 {
