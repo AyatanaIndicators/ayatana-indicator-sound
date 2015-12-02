@@ -786,9 +786,8 @@ TEST_F(TestIndicator, PhoneNotificationWarningVolume)
 
     // check the sync value before cancelling the dialog
     bool isValid;
-    qlonglong syncValue = getVolumeSyncValue(&isValid);
+    qlonglong syncValueBeforeCancel = getVolumeSyncValue(&isValid);
     EXPECT_TRUE(isValid);
-    EXPECT_EQ(0, syncValue);
 
     // cancel the dialog
     pressNotificationButton(idNotification, "cancel");
@@ -811,9 +810,9 @@ TEST_F(TestIndicator, PhoneNotificationWarningVolume)
         ).match());
 
     // verify that the sync value is increased
-    syncValue = getVolumeSyncValue(&isValid);
+    qlonglong syncValueAfterCancel = getVolumeSyncValue(&isValid);
     EXPECT_TRUE(isValid);
-    EXPECT_EQ(1, syncValue);
+    EXPECT_NE(syncValueBeforeCancel, syncValueAfterCancel);
 
     // try again...
     notificationsSpy.clear();
