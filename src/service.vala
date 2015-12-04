@@ -629,11 +629,13 @@ public class IndicatorSound.Service: Object {
 			warn_notification.add_action ("ok", _("OK"), (n, a) => {
 				stop_clamp_to_high_timeout();
 				volume_control.approve_high_volume ();
-				if (_pre_warn_volume != null) {
-					var tmp = _pre_warn_volume;
-					_pre_warn_volume = null;
-					volume_control.volume = tmp;
-				}
+				// restore the volume the user introduced
+				VolumeControl.Volume vol = new VolumeControl.Volume();
+				vol.volume = volume_control.get_pre_clamped_volume();
+				vol.reason = VolumeControl.VolumeReasons.USER_KEYPRESS;
+				_pre_warn_volume = null;
+				volume_control.volume = vol;
+				
 				waiting_user_approve_warn = false;
 			});
 			warn_notification.add_action ("cancel", _("Cancel"), (n, a) => {
