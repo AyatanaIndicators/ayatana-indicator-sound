@@ -55,9 +55,10 @@ public abstract class VolumeControl : Object
 	public virtual VolumeControl.ActiveOutput active_output { get { return VolumeControl.ActiveOutput.SPEAKERS; } }
 	private Volume _volume;
 	private double _pre_clamp_volume;
+	private double _max_volume = 1.0;
 	public virtual Volume volume { get { return _volume; } set { } }
 	public virtual double mic_volume { get { return 0.0; } set { } }
-	public virtual double max_volume { get { return 1.0; } protected set { } }
+	public virtual double max_volume { get { return _max_volume; } set { _max_volume = value;} }
 
 	public virtual bool high_volume_approved { get { return false; } protected set { } }
 	public virtual void approve_high_volume() { }
