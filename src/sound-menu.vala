@@ -398,7 +398,7 @@ public class SoundMenu: Object
 		slider.set_attribute ("max-value", "d", max);
 		slider.set_attribute ("step", "d", step);
 		if (sync_action) {
-			slider.set_attribute ("x-canonical-sync-action", "s", "volume-sync");
+			slider.set_attribute ("x-canonical-sync-action", "s", "indicator.volume-sync");
 		}
 
 		return slider;
