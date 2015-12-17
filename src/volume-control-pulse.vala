@@ -344,7 +344,10 @@ public class VolumeControlPulse : VolumeControl
 						var vol = new VolumeControl.Volume();
 						vol.volume = volume_to_double (lvolume);
 						vol.reason = VolumeControl.VolumeReasons.PULSE_CHANGE;
-						this.volume = vol;
+						// Ignore changes from PULSE to avoid issues with
+						// some apps that change the volume in the sink
+						// We only take into account volume changes from the user
+						//this.volume = vol;
 					}
 				}
 			}
@@ -388,7 +391,10 @@ public class VolumeControlPulse : VolumeControl
 				var vol = new VolumeControl.Volume();
 				vol.volume = volume_to_double (volume);
 				vol.reason = VolumeControl.VolumeReasons.VOLUME_STREAM_CHANGE;
-				this.volume = vol;
+				// Ignore changes from PULSE to avoid issues with
+                                // some apps that change the volume in the sink
+                                // We only take into account volume changes from the user
+				//this.volume = vol;
 			} catch (GLib.Error e) {
 				warning ("unable to get volume for active role %s (%s)", sink_input_objp, e.message);
 			}
