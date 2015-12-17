@@ -182,7 +182,6 @@ TEST_F(TestIndicator, PhoneBasicInitialVolume)
         ).match());
 }
 
-
 TEST_F(TestIndicator, PhoneAddMprisPlayer)
 {
     double INITIAL_VOLUME = 0.0;
@@ -644,7 +643,7 @@ TEST_F(TestIndicator, DesktopChangeRoleVolume)
         ).match());
 }
 
-TEST_F(TestIndicator, PhoneNotificationVolume)
+TEST_F(TestIndicator, DISABLED_PhoneNotificationVolume)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -710,7 +709,7 @@ TEST_F(TestIndicator, PhoneNotificationVolume)
     checkVolumeNotification(0.5, "Speakers", false, notificationsSpy.at(1));
 }
 
-TEST_F(TestIndicator, PhoneNotificationWarningVolume)
+TEST_F(TestIndicator, DISABLED_PhoneNotificationWarningVolume)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -909,7 +908,7 @@ TEST_F(TestIndicator, PhoneNotificationWarningVolume)
     checkVolumeNotification(1.0, "Headphones", true, notificationsSpy.at(3));
 }
 
-TEST_F(TestIndicator, PhoneNotificationWarningVolumeAlertMode)
+TEST_F(TestIndicator, DISABLED_PhoneNotificationWarningVolumeAlertMode)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -966,22 +965,22 @@ TEST_F(TestIndicator, PhoneNotificationWarningVolumeAlertMode)
     notificationsSpy.clear();
 }
 
-TEST_F(TestIndicator, PhoneNotificationHeadphoneSpeakerWiredLabels)
+TEST_F(TestIndicator, DISABLED_PhoneNotificationHeadphoneSpeakerWiredLabels)
 {
     checkPortDevicesLabels(WIRED, WIRED);
 }
 
-TEST_F(TestIndicator, PhoneNotificationHeadphoneSpeakerBluetoothLabels)
+TEST_F(TestIndicator, DISABLED_PhoneNotificationHeadphoneSpeakerBluetoothLabels)
 {
     checkPortDevicesLabels(BLUETOOTH, BLUETOOTH);
 }
 
-TEST_F(TestIndicator, PhoneNotificationHeadphoneSpeakerUSBLabels)
+TEST_F(TestIndicator, DISABLED_PhoneNotificationHeadphoneSpeakerUSBLabels)
 {
     checkPortDevicesLabels(USB, USB);
 }
 
-TEST_F(TestIndicator, PhoneNotificationHeadphoneSpeakerHDMILabels)
+TEST_F(TestIndicator, DISABLED_PhoneNotificationHeadphoneSpeakerHDMILabels)
 {
     checkPortDevicesLabels(HDMI, HDMI);
 }

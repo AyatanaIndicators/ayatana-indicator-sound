@@ -49,6 +49,7 @@ public abstract class VolumeControl : Object
 	public virtual bool ready { get { return false; } set { } }
 	public virtual bool active_mic { get { return false; } set { } }
 	public virtual bool high_volume { get { return false; } protected set { } }
+	public virtual bool ignore_high_volume { get { return false; } protected set { } }
 	public virtual bool below_warning_volume { get { return false; } protected set { } }	
 	public virtual bool mute { get { return false; } }
 	public virtual bool is_playing { get { return false; } }

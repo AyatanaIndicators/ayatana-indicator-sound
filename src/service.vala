@@ -611,9 +611,11 @@ public class IndicatorSound.Service: Object {
 		notify_server_caps_checked = true;
 
 		var loud = volume_control.high_volume;
+		bool ignore_warning_this_time = this.volume_control.ignore_high_volume;
 		var warn = loud
 			&& this.notify_server_supports_actions
-			&& !this.volume_control.high_volume_approved;
+			&& !this.volume_control.high_volume_approved
+			&& !ignore_warning_this_time;
 		if (waiting_user_approve_warn && volume_control.below_warning_volume) {
 			volume_control.set_warning_volume();
 			close_notification(warn_notification);
@@ -649,8 +651,7 @@ public class IndicatorSound.Service: Object {
 			if (!waiting_user_approve_warn) {
 				close_notification(warn_notification);
 	
-				if (notify_server_supports_sync && !block_info_notifications) {
-	
+				if (notify_server_supports_sync && !block_info_notifications && !ignore_warning_this_time) {
 					/* Determine Label */
 				        string volume_label = get_notification_label ();
 
