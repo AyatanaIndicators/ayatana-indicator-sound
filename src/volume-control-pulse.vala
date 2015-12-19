@@ -723,40 +723,24 @@ public class VolumeControlPulse : VolumeControl
 
 	/** HIGH VOLUME PROPERTY **/
 
-	private bool _warning_volume_enabled;
-	private double _warning_volume_norms; /* 1.0 == PA_VOLUME_NORM */
 	private bool _high_volume = false;
-	public override bool ignore_high_volume { 
-		get { 
+	public override bool ignore_high_volume {
+		get {
 			if (_ignore_warning_this_time) {
 				warning("Ignore");
 				_ignore_warning_this_time = false;
 				return true;
 			}
-			return false; 
-		} 
+			return false;
+		}
 		set { }
 	}
 	public override bool high_volume {
 		get { return this._high_volume; }
 		private set { this._high_volume = value; }
 	}
-        public override bool below_warning_volume {
-		get { return this._volume.volume < this._warning_volume_norms; }
-		private set { }
-	}
 	private void init_high_volume() {
-		_settings.changed["warning-volume-enabled"].connect(() => update_high_volume_cache());
-		_settings.changed["warning-volume-decibels"].connect(() => update_high_volume_cache());
-		update_high_volume_cache();
-	}
-	private void update_high_volume_cache() {
-		var volume_dB = _settings.get_double ("warning-volume-decibels");
-		var volume_sw = PulseAudio.Volume.sw_from_dB (volume_dB);
-		var volume_norms = volume_to_double (volume_sw);
-		_warning_volume_norms = volume_norms;
-		_warning_volume_enabled = _settings.get_boolean("warning-volume-enabled");
-		debug("updating high volume cache... enabled %d dB %f sw %lu norm %f", (int)_warning_volume_enabled, volume_dB, volume_sw, volume_norms);
+		_options.loud_changed.connect(() => update_high_volume());
 		update_high_volume();
 	}
 	private void update_high_volume() {
@@ -771,15 +755,14 @@ public class VolumeControlPulse : VolumeControl
 	}
 	private bool calculate_high_volume_from_volume(double volume) {
 		return _active_port_headphone
-			&& _warning_volume_enabled
-			&& volume > _warning_volume_norms
+			&& _options.is_loud(_volume)
 			&& (stream == "multimedia");
 	}
 
 	public override void clamp_to_high_volume() {
-		if (_high_volume && (_volume.volume > _warning_volume_norms)) {
+		if (_high_volume && _options.is_loud(_volume)) {
 			var vol = new VolumeControl.Volume();
-			vol.volume = _volume.volume.clamp(0, _warning_volume_norms);
+			vol.volume = _volume.volume.clamp(0, volume_to_double(_options.loud_volume()));
 			vol.reason = _volume.reason;
 			debug("Clamping from %f down to %f", _volume.volume, vol.volume);
 			volume = vol;
@@ -788,10 +771,10 @@ public class VolumeControlPulse : VolumeControl
 
 	public override void set_warning_volume() {
 		var vol = new VolumeControl.Volume();
-                vol.volume = _warning_volume_norms;
+                vol.volume = volume_to_double(_options.loud_volume());
                 vol.reason = _volume.reason;
                 debug("Setting warning level volume from %f down to %f", _volume.volume, vol.volume);
-                volume = vol;	 
+                volume = vol;
 	}
 
 	/** HIGH VOLUME APPROVED PROPERTY **/

@@ -54,18 +54,22 @@ vala_add(indicator-sound-service
 )
 vala_add(indicator-sound-service
   options.vala
+  DEPENDS
+    volume-control
+    volume-control-pulse
 )
 vala_add(indicator-sound-service
   options-gsettings.vala
   DEPENDS
     options
+      volume-control-pulse
     volume-control
-    volume-control-pulse
 )
 vala_add(indicator-sound-service
   volume-control.vala
   DEPENDS
     options
+      volume-control-pulse
 )
 vala_add(indicator-sound-service
   volume-control-pulse.vala
@@ -77,6 +81,7 @@ vala_add(indicator-sound-service
   volume-warning.vala
   DEPENDS
     options
+      volume-control-pulse
     volume-control
 )
 vala_add(indicator-sound-service
@@ -127,6 +132,7 @@ vala_add(indicator-sound-service
     media-player
     volume-control
       options
+          volume-control-pulse
 )
 vala_add(indicator-sound-service
   accounts-service-user.vala

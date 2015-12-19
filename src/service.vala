@@ -620,10 +620,10 @@ public class IndicatorSound.Service: Object {
 			&& this.notify_server_supports_actions
 			&& !this.volume_control.high_volume_approved
 			&& !ignore_warning_this_time;
-		if (waiting_user_approve_warn && volume_control.below_warning_volume) {
+		if (waiting_user_approve_warn && !_options.is_loud(volume_control.volume)) {
 			volume_control.set_warning_volume();
 			close_notification(warn_notification);
-		} 
+		}
 		if (warn) {
 			close_notification(info_notification);
 			if (_pre_warn_volume == null) {
@@ -641,7 +641,7 @@ public class IndicatorSound.Service: Object {
 				vol.reason = VolumeControl.VolumeReasons.USER_KEYPRESS;
 				_pre_warn_volume = null;
 				volume_control.volume = vol;
-				
+
 				waiting_user_approve_warn = false;
 			});
 			warn_notification.add_action ("cancel", _("Cancel"), (n, a) => {
