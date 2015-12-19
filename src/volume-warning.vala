@@ -23,10 +23,17 @@ using Notify;
 using Gee;
 
 [CCode(cname="pa_cvolume_set", cheader_filename = "pulse/volume.h")]
-extern unowned PulseAudio.CVolume? vol_set (PulseAudio.CVolume? cv, uint channels, PulseAudio.Volume v);
+extern unowned PulseAudio.CVolume? vol_set2 (PulseAudio.CVolume? cv, uint channels, PulseAudio.Volume v);
 
 public class VolumeWarning : VolumeControl
 {
+	// FIXME: this is temporarily necessary while bootstrapping this
+	// code because VolumeWarning is still subclassed from VolumeControl,
+	// but TBH we don't need any concept of mute here.
+        public override void set_mute (bool mute) {
+		warning("set_mute not supported for VolumeWarning");
+	}
+
 	/* this is static to ensure it being freed after @context (loop does not have ref counting) */
 	private static PulseAudio.GLibMainLoop loop;
 
@@ -613,7 +620,7 @@ public class VolumeWarning : VolumeControl
 	void set_mic_volume_get_server_info_cb (PulseAudio.Context c, PulseAudio.ServerInfo? i) {
 		if (i != null) {
 			unowned CVolume cvol = CVolume ();
-			cvol = vol_set (cvol, 1, double_to_volume (_mic_volume));
+			cvol = vol_set2 (cvol, 1, double_to_volume (_mic_volume));
 			c.set_source_volume_by_name (i.default_source_name, cvol, set_mic_volume_success_cb);
 		}
 	}
