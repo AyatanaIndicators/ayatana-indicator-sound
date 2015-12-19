@@ -40,7 +40,6 @@ public class VolumeWarning : VolumeControl
 	private uint _reconnect_timer = 0;
 
 	private PulseAudio.Context context;
-	private bool   _mute = true;
 	private bool   _is_playing = false;
 	private bool   _ignore_warning_this_time = false;
 	private VolumeControl.Volume _volume = new VolumeControl.Volume();
@@ -81,7 +80,6 @@ public class VolumeWarning : VolumeControl
 
 	private DBusProxy _user_proxy;
 	private GreeterListInterface _greeter_proxy;
-	private Cancellable _mute_cancellable;
 	private Cancellable _volume_cancellable;
 	private uint _local_volume_timer = 0;
 	private uint _accountservice_volume_timer = 0;
@@ -104,7 +102,6 @@ public class VolumeWarning : VolumeControl
 		if (loop == null)
 			loop = new PulseAudio.GLibMainLoop ();
 
-		_mute_cancellable = new Cancellable ();
 		_volume_cancellable = new Cancellable ();
 
 		init_all_properties();
@@ -237,12 +234,6 @@ public class VolumeWarning : VolumeControl
 	{
 		if (i == null)
 			return;
-
-		if (_mute != (bool)i.mute)
-		{
-			_mute = (bool)i.mute;
-			this.notify_property ("mute");
-		}
 
 		var playing = (i.state == PulseAudio.SinkState.RUNNING);
 		if (_is_playing != playing)
@@ -543,51 +534,6 @@ public class VolumeWarning : VolumeControl
 		var server_string = Environment.get_variable("PULSE_SERVER");
 		if (context.connect(server_string, Context.Flags.NOFAIL, null) < 0)
 			warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(context.errno()));
-	}
-
-	void sink_info_list_callback_set_mute (PulseAudio.Context context, PulseAudio.SinkInfo? sink, int eol) {
-		if (sink != null)
-			context.set_sink_mute_by_index (sink.index, true, null);
-	}
-
-	void sink_info_list_callback_unset_mute (PulseAudio.Context context, PulseAudio.SinkInfo? sink, int eol) {
-		if (sink != null)
-			context.set_sink_mute_by_index (sink.index, false, null);
-	}
-
-	/* Mute operations */
-	bool set_mute_internal (bool mute)
-	{
-		return_val_if_fail (context.get_state () == Context.State.READY, false);
-
-		if (_mute != mute) {
-			if (mute)
-				context.get_sink_info_list (sink_info_list_callback_set_mute);
-			else
-				context.get_sink_info_list (sink_info_list_callback_unset_mute);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	public override void set_mute (bool mute)
-	{
-		if (set_mute_internal (mute))
-			sync_mute_to_accountsservice.begin (mute);
-	}
-
-	public void toggle_mute ()
-	{
-		this.set_mute (!this._mute);
-	}
-
-	public override bool mute
-	{
-		get
-		{
-			return this._mute;
-		}
 	}
 
 	public override bool is_playing
