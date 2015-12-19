@@ -25,13 +25,6 @@ using Gee;
 [CCode(cname="pa_cvolume_set", cheader_filename = "pulse/volume.h")]
 extern unowned PulseAudio.CVolume? vol_set (PulseAudio.CVolume? cv, uint channels, PulseAudio.Volume v);
 
-[DBus (name="com.canonical.UnityGreeter.List")]
-interface GreeterListInterface : Object
-{
-	public abstract async string get_active_entry () throws IOError;
-	public signal void entry_selected (string entry_name);
-}
-
 public class VolumeWarning : VolumeControl
 {
 	/* this is static to ensure it being freed after @context (loop does not have ref counting) */
@@ -78,13 +71,6 @@ public class VolumeWarning : VolumeControl
 	private string? _objp_role_phone = null;
 	private uint _pa_volume_sig_count = 0;
 
-	private DBusProxy _user_proxy;
-	private GreeterListInterface _greeter_proxy;
-	private Cancellable _volume_cancellable;
-	private uint _local_volume_timer = 0;
-	private uint _accountservice_volume_timer = 0;
-	private bool _send_next_local_volume = false;
-	private double _account_service_volume = 0.0;
 	private bool _active_port_headphone = false;
 	private VolumeControl.ActiveOutput _active_output = VolumeControl.ActiveOutput.SPEAKERS;
 
@@ -102,11 +88,7 @@ public class VolumeWarning : VolumeControl
 		if (loop == null)
 			loop = new PulseAudio.GLibMainLoop ();
 
-		_volume_cancellable = new Cancellable ();
-
 		init_all_properties();
-
-		setup_accountsservice.begin ();
 
 		this.reconnect_to_pulse ();
 	}
@@ -129,8 +111,6 @@ public class VolumeWarning : VolumeControl
 			Source.remove (_reconnect_timer);
 			_reconnect_timer = 0;
 		}
-		stop_local_volume_timer();
-		stop_account_service_volume_timer();
 		stop_high_volume_approved_timer();
 	}
 
@@ -657,12 +637,6 @@ public class VolumeWarning : VolumeControl
 				else
 					context.get_server_info (server_info_cb_for_set_volume);
 
-
-			if (volume.reason != VolumeControl.VolumeReasons.ACCOUNTS_SERVICE_SET
-				&& volume_changed) {
-				start_local_volume_timer();
-			}
-
 			update_high_volume();
 		}
 	}
@@ -918,194 +892,5 @@ public class VolumeWarning : VolumeControl
 			warning ("unable to find stream restore data for: %s", name);
 		}
 		return objp;
-	}
-
-	/* AccountsService operations */
-	private void accountsservice_props_changed_cb (DBusProxy proxy, Variant changed_properties, string[]? invalidated_properties)
-	{
-		Variant volume_variant = changed_properties.lookup_value ("Volume", new VariantType ("d"));
-		if (volume_variant != null) {
-			var volume = volume_variant.get_double ();
-			if (volume >= 0) {
-				_account_service_volume = volume;
-				// we need to wait for this to settle.
-				start_account_service_volume_timer();
-			}
-		}
-
-		Variant mute_variant = changed_properties.lookup_value ("Muted", new VariantType ("b"));
-		if (mute_variant != null) {
-			var mute = mute_variant.get_boolean ();
-			set_mute_internal (mute);
-		}
-	}
-
-	private async void setup_user_proxy (string? username_in = null)
-	{
-		var username = username_in;
-		_user_proxy = null;
-
-		// Look up currently selected greeter user, if asked
-		if (username == null) {
-			try {
-				username = yield _greeter_proxy.get_active_entry ();
-				if (username == "" || username == null)
-					return;
-			} catch (GLib.Error e) {
-				warning ("unable to find Accounts path for user %s: %s", username, e.message);
-				return;
-			}
-		}
-
-		// Get master AccountsService object
-		DBusProxy accounts_proxy;
-		try {
-			accounts_proxy = yield DBusProxy.create_for_bus (BusType.SYSTEM, DBusProxyFlags.DO_NOT_LOAD_PROPERTIES | DBusProxyFlags.DO_NOT_CONNECT_SIGNALS, null, "org.freedesktop.Accounts", "/org/freedesktop/Accounts", "org.freedesktop.Accounts");
-		} catch (GLib.Error e) {
-			warning ("unable to get greeter proxy: %s", e.message);
-			return;
-		}
-
-		// Find user's AccountsService object
-		try {
-			var user_path_variant = yield accounts_proxy.call ("FindUserByName", new Variant ("(s)", username), DBusCallFlags.NONE, -1);
-			string user_path;
-			user_path_variant.get ("(o)", out user_path);
-			_user_proxy = yield DBusProxy.create_for_bus (BusType.SYSTEM, DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, "org.freedesktop.Accounts", user_path, "com.ubuntu.AccountsService.Sound");
-		} catch (GLib.Error e) {
-			warning ("unable to find Accounts path for user %s: %s", username, e.message);
-			return;
-		}
-
-		// Get current values and listen for changes
-		_user_proxy.g_properties_changed.connect (accountsservice_props_changed_cb);
-		try {
-			var props_variant = yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "GetAll", new Variant ("(s)", _user_proxy.get_interface_name ()), null, DBusCallFlags.NONE, -1);
-			Variant props;
-			props_variant.get ("(@a{sv})", out props);
-			accountsservice_props_changed_cb(_user_proxy, props, null);
-		} catch (GLib.Error e) {
-			debug("Unable to get properties for user %s at first try: %s", username, e.message);
-		}
-	}
-
-	private void greeter_user_changed (string username)
-	{
-		setup_user_proxy.begin (username);
-	}
-
-	private async void setup_accountsservice ()
-	{
-		if (Environment.get_variable ("XDG_SESSION_CLASS") == "greeter") {
-			try {
-				_greeter_proxy = yield Bus.get_proxy (BusType.SESSION, "com.canonical.UnityGreeter", "/list");
-			} catch (GLib.Error e) {
-				warning ("unable to get greeter proxy: %s", e.message);
-				return;
-			}
-			_greeter_proxy.entry_selected.connect (greeter_user_changed);
-			yield setup_user_proxy ();
-		} else {
-			// We are in a user session.  We just need our own proxy
-			var username = Environment.get_variable ("USER");
-			if (username != "" && username != null) {
-				yield setup_user_proxy (username);
-			}
-		}
-	}
-
-	private async void sync_mute_to_accountsservice (bool mute)
-	{
-		if (_user_proxy == null)
-			return;
-
-		_mute_cancellable.cancel ();
-		_mute_cancellable.reset ();
-
-		try {
-			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Muted", new Variant ("b", mute)), null, DBusCallFlags.NONE, -1, _mute_cancellable);
-		} catch (GLib.Error e) {
-			warning ("unable to sync mute to AccountsService: %s", e.message);
-		}
-	}
-
-	private async void sync_volume_to_accountsservice (VolumeControl.Volume volume)
-	{
-		if (_user_proxy == null)
-			return;
-
-		_volume_cancellable.cancel ();
-		_volume_cancellable.reset ();
-
-		try {
-			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Volume", new Variant ("d", volume.volume)), null, DBusCallFlags.NONE, -1, _volume_cancellable);
-		} catch (GLib.Error e) {
-			warning ("unable to sync volume to AccountsService: %s", e.message);
-		}
-	}
-
-	private void start_local_volume_timer()
-	{
-		// perform a slow sync with the accounts service. max at 1 per second.
-
-		// stop the AS update timer, as since we're going to be setting the volume.
-		stop_account_service_volume_timer();
-
-		if (_local_volume_timer == 0) {
-			sync_volume_to_accountsservice.begin (_volume);
-			_local_volume_timer = Timeout.add_seconds (1, local_volume_changed_timeout);
-		} else {
-			_send_next_local_volume = true;
-		}
-	}
-
-	private void stop_local_volume_timer()
-	{
-		if (_local_volume_timer != 0) {
-			Source.remove (_local_volume_timer);
-			_local_volume_timer = 0;
-		}
-	}
-
-	bool local_volume_changed_timeout()
-	{
-		_local_volume_timer = 0;
-		if (_send_next_local_volume) {
-			_send_next_local_volume = false;
-			start_local_volume_timer ();
-		}
-		return false; // G_SOURCE_REMOVE
-	}
-
-	private void start_account_service_volume_timer()
-	{
-		if (_accountservice_volume_timer == 0) {
-			// If we haven't been messing with local volume recently, apply immediately.
-			if (_local_volume_timer == 0) {
-				var vol = new VolumeControl.Volume();
-				vol.volume = _account_service_volume;
-				vol.reason = VolumeControl.VolumeReasons.ACCOUNTS_SERVICE_SET;
-				this.volume = vol;
-				return;
-			}
-			// Else check again in another second if needed.
-			// (if AS is throwing us lots of notifications, we update at most once a second)
-			_accountservice_volume_timer = Timeout.add_seconds (1, accountservice_volume_changed_timeout);
-		}
-	}
-
-	private void stop_account_service_volume_timer()
-	{
-		if (_accountservice_volume_timer != 0) {
-			Source.remove (_accountservice_volume_timer);
-			_accountservice_volume_timer = 0;
-		}
-	}
-
-	bool accountservice_volume_changed_timeout ()
-	{
-		_accountservice_volume_timer = 0;
-		start_account_service_volume_timer ();
-		return false; // G_SOURCE_REMOVE
 	}
 }
