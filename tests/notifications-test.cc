@@ -119,18 +119,27 @@ class NotificationsTest : public ::testing::Test
 			return playerList;
 		}
 
-		std::shared_ptr<VolumeControl> volumeControlMock () {
+		std::shared_ptr<IndicatorSoundOptions> optionsMock () {
+			auto options = std::shared_ptr<IndicatorSoundOptions>(
+				INDICATOR_SOUND_OPTIONS(options_mock_new()),
+				[](IndicatorSoundOptions * options){
+					g_clear_object(&options);
+				});
+			return options;
+		}
+
+		std::shared_ptr<VolumeControl> volumeControlMock (const std::shared_ptr<IndicatorSoundOptions>& optionsMock) {
 			auto volumeControl = std::shared_ptr<VolumeControl>(
-				VOLUME_CONTROL(volume_control_mock_new()),
+				VOLUME_CONTROL(volume_control_mock_new(optionsMock.get())),
 				[](VolumeControl * control){
 					g_clear_object(&control);
 				});
 			return volumeControl;
 		}
 
-		std::shared_ptr<IndicatorSoundService> standardService (std::shared_ptr<VolumeControl> volumeControl, std::shared_ptr<MediaPlayerList> playerList) {
+		std::shared_ptr<IndicatorSoundService> standardService (std::shared_ptr<VolumeControl> volumeControl, std::shared_ptr<MediaPlayerList> playerList, const std::shared_ptr<IndicatorSoundOptions>& options) {
 			auto soundService = std::shared_ptr<IndicatorSoundService>(
-				indicator_sound_service_new(playerList.get(), volumeControl.get(), nullptr),
+				indicator_sound_service_new(playerList.get(), volumeControl.get(), nullptr, options.get()),
 				[](IndicatorSoundService * service){
 					g_clear_object(&service);
 				});
@@ -168,7 +177,9 @@ class NotificationsTest : public ::testing::Test
 };
 
 TEST_F(NotificationsTest, BasicObject) {
-	auto soundService = standardService(volumeControlMock(), playerListMock());
+	auto options = optionsMock();
+	auto volumeControl = volumeControlMock(options);
+	auto soundService = standardService(volumeControl, playerListMock(), options);
 
 	/* Give some time settle */
 	loop(50);
@@ -177,8 +188,9 @@ TEST_F(NotificationsTest, BasicObject) {
 }
 
 TEST_F(NotificationsTest, VolumeChanges) {
-	auto volumeControl = volumeControlMock();
-	auto soundService = standardService(volumeControl, playerListMock());
+	auto options = optionsMock();
+	auto volumeControl = volumeControlMock(options);
+	auto soundService = standardService(volumeControl, playerListMock(), options);
 
 	/* Set a volume */
 	notifications->clearNotifications();
@@ -216,8 +228,9 @@ TEST_F(NotificationsTest, VolumeChanges) {
 }
 
 TEST_F(NotificationsTest, StreamChanges) {
-	auto volumeControl = volumeControlMock();
-	auto soundService = standardService(volumeControl, playerListMock());
+	auto options = optionsMock();
+	auto volumeControl = volumeControlMock(options);
+	auto soundService = standardService(volumeControl, playerListMock(), options);
 
 	/* Set a volume */
 	notifications->clearNotifications();
@@ -254,8 +267,9 @@ TEST_F(NotificationsTest, StreamChanges) {
 }
 
 TEST_F(NotificationsTest, IconTesting) {
-	auto volumeControl = volumeControlMock();
-	auto soundService = standardService(volumeControl, playerListMock());
+	auto options = optionsMock();
+	auto volumeControl = volumeControlMock(options);
+	auto soundService = standardService(volumeControl, playerListMock(), options);
 
 	/* Set an initial volume */
 	notifications->clearNotifications();
@@ -288,8 +302,9 @@ TEST_F(NotificationsTest, IconTesting) {
 }
 
 TEST_F(NotificationsTest, ServerRestart) {
-	auto volumeControl = volumeControlMock();
-	auto soundService = standardService(volumeControl, playerListMock());
+	auto options = optionsMock();
+	auto volumeControl = volumeControlMock(options);
+	auto soundService = standardService(volumeControl, playerListMock(), options);
 
 	/* Set a volume */
 	notifications->clearNotifications();
@@ -335,8 +350,9 @@ TEST_F(NotificationsTest, ServerRestart) {
 }
 
 TEST_F(NotificationsTest, HighVolume) {
-	auto volumeControl = volumeControlMock();
-	auto soundService = standardService(volumeControl, playerListMock());
+	auto options = optionsMock();
+	auto volumeControl = volumeControlMock(options);
+	auto soundService = standardService(volumeControl, playerListMock(), options);
 
 	/* Set a volume */
 	notifications->clearNotifications();
@@ -377,8 +393,9 @@ TEST_F(NotificationsTest, HighVolume) {
 }
 
 TEST_F(NotificationsTest, MenuHide) {
-	auto volumeControl = volumeControlMock();
-	auto soundService = standardService(volumeControl, playerListMock());
+	auto options = optionsMock();
+	auto volumeControl = volumeControlMock(options);
+	auto soundService = standardService(volumeControl, playerListMock(), options);
 
 	/* Set a volume */
 	notifications->clearNotifications();
@@ -407,8 +424,9 @@ TEST_F(NotificationsTest, MenuHide) {
 }
 
 TEST_F(NotificationsTest, DISABLED_ExtendendVolumeNotification) {
-	auto volumeControl = volumeControlMock();
-	auto soundService = standardService(volumeControl, playerListMock());
+	auto options = optionsMock();
+	auto volumeControl = volumeControlMock(options);
+	auto soundService = standardService(volumeControl, playerListMock(), options);
 
 	/* Set a volume */
 	notifications->clearNotifications();

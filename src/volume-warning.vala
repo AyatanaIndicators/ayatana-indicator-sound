@@ -45,7 +45,6 @@ public class VolumeWarning : VolumeControl
 	private VolumeControl.Volume _volume = new VolumeControl.Volume();
 	private double _mic_volume = 0.0;
 	private Settings _settings = new Settings ("com.canonical.indicator.sound");
-	private Settings _shared_settings = new Settings ("com.ubuntu.sound");
 
 	/* Used by the pulseaudio stream restore extension */
 	private DBusConnection _pconn;
@@ -87,8 +86,10 @@ public class VolumeWarning : VolumeControl
 	/** true when a microphone is active **/
 	public override bool active_mic { get; private set; default = false; }
 
-	public VolumeWarning ()
+	public VolumeWarning (IndicatorSound.Options options)
 	{
+		base(options);
+
 		_volume.volume = 0.0;
 		_volume.reason = VolumeControl.VolumeReasons.PULSE_CHANGE;
 
@@ -102,7 +103,6 @@ public class VolumeWarning : VolumeControl
 
 	private void init_all_properties()
 	{
-		init_max_volume();
 		init_high_volume();
 		init_high_volume_approved();
 	}
@@ -646,30 +646,6 @@ public class VolumeWarning : VolumeControl
 
 			update_high_volume();
 		}
-	}
-
-	/** MAX VOLUME PROPERTY **/
-
-	private void init_max_volume() {
-		_settings.changed["normal-volume-decibels"].connect(() => update_max_volume());
-		_settings.changed["amplified-volume-decibels"].connect(() => update_max_volume());
-		_shared_settings.changed["allow-amplified-volume"].connect(() => update_max_volume());
-		update_max_volume();
-	}
-	private void update_max_volume () {
-		var new_max_volume = calculate_max_volume();
-		if (max_volume != new_max_volume) {
-			debug("changing max_volume from %f to %f", this.max_volume, new_max_volume);
-			max_volume = calculate_max_volume();
-		}
-	}
-	private double calculate_max_volume () {
-		unowned string decibel_key = _shared_settings.get_boolean("allow-amplified-volume")
-			? "amplified-volume-decibels"
-			: "normal-volume-decibels";
-		var volume_dB = _settings.get_double(decibel_key);
-		var volume_sw = PulseAudio.Volume.sw_from_dB (volume_dB);
-		return volume_to_double (volume_sw);
 	}
 
 	/** HIGH VOLUME PROPERTY **/

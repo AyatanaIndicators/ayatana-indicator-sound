@@ -40,7 +40,9 @@ public class VolumeControlMock : VolumeControl
 	
 	}
 
-	public VolumeControlMock() { 
+	public VolumeControlMock(IndicatorSound.Options options) {
+		base(options);
+
 		ready = true;
 		this.notify["mock-stream"].connect(() => this.notify_property("stream"));
 		this.notify["mock-high-volume"].connect(() => this.notify_property("high-volume"));

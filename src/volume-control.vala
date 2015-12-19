@@ -45,6 +45,12 @@ public abstract class VolumeControl : Object
 		public VolumeReasons reason;
 	}
 
+	private IndicatorSound.Options _options = null;
+
+	public VolumeControl(IndicatorSound.Options options) {
+		_options = options;
+	}
+
 	public virtual string stream { get { return ""; } }
 	public virtual bool ready { get { return false; } set { } }
 	public virtual bool active_mic { get { return false; } set { } }
@@ -58,7 +64,6 @@ public abstract class VolumeControl : Object
 	private double _pre_clamp_volume;
 	public virtual Volume volume { get { return _volume; } set { } }
 	public virtual double mic_volume { get { return 0.0; } set { } }
-	public virtual double max_volume { get { return 1.0; } protected set { } }
 
 	public virtual bool high_volume_approved { get { return false; } protected set { } }
 	public virtual void approve_high_volume() { }
@@ -69,7 +74,7 @@ public abstract class VolumeControl : Object
 
 	public void set_volume_clamp (double unclamped, VolumeControl.VolumeReasons reason) {
 		var v = new VolumeControl.Volume();
-		v.volume = unclamped.clamp (0.0, this.max_volume);
+		v.volume = unclamped.clamp (0.0, _options.max_volume);
 		v.reason = reason;
 		this.volume = v;
 		_pre_clamp_volume = unclamped;

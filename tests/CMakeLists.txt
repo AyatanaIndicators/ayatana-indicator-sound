@@ -72,6 +72,10 @@ vala_add(vala-mocks
 )
 
 vala_add(vala-mocks
+    options-mock.vala
+)
+
+vala_add(vala-mocks
     volume-control-mock.vala
 )
 
@@ -169,6 +173,7 @@ add_executable (volume-control-test volume-control-test.cc gschemas.compiled)
 target_link_libraries (
     volume-control-test
     indicator-sound-service-lib
+    vala-mocks-lib
     pulse-mock
     gtest-static
     ${TEST_LIBRARIES}

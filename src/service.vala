@@ -27,7 +27,10 @@ public class IndicatorSound.Service: Object {
 	 */
 	VolumeControl.Volume _pre_warn_volume = null;
 
-	public Service (MediaPlayerList playerlist, VolumeControl volume, AccountsServiceUser? accounts) {
+	public Service (MediaPlayerList playerlist, VolumeControl volume, AccountsServiceUser? accounts, Options options) {
+
+		_options = options;
+
 		try {
 			bus = Bus.get_sync(GLib.BusType.SESSION);
 		} catch (GLib.Error e) {
@@ -205,6 +208,7 @@ public class IndicatorSound.Service: Object {
 	bool export_to_accounts_service = false;
 	private Notify.Notification info_notification;
 	private Notify.Notification warn_notification;
+	private Options _options = null;
 
 	const double volume_step_percentage = 0.06;
 
@@ -750,10 +754,10 @@ public class IndicatorSound.Service: Object {
 
 	/* return the current volume in the range of [0.0, 1.0] */
 	private double get_volume_percent() {
-		return volume_control.volume.volume / this.volume_control.max_volume;
+		return volume_control.volume.volume / _options.max_volume;
 	}
 
-	/* volume control's range can vary depending on its max_volume property,
+	/* volume control's range can vary depending on options.max_volume,
 	 * but the action always needs to be in [0.0, 1.0]... */
 	private Variant create_volume_action_state() {
 		return new Variant.double (get_volume_percent());
@@ -768,14 +772,14 @@ public class IndicatorSound.Service: Object {
 		volume_action = new SimpleAction.stateful ("volume", VariantType.INT32, create_volume_action_state());
 
 		volume_action.change_state.connect ( (action, val) => {
-			double v = val.get_double () * this.volume_control.max_volume;
+			double v = val.get_double () * _options.max_volume;
 			volume_control.set_volume_clamp (v, VolumeControl.VolumeReasons.USER_KEYPRESS);
 		});
 
 		/* activating this action changes the volume by the amount given in the parameter */
 		volume_action.activate.connect ((a,p) => activate_scroll_action(a,p));
 
-		this.volume_control.notify["max-volume"].connect(() => {
+		_options.notify["max_volume"].connect(() => {
 			update_volume_action_state();
 		});
 

@@ -45,22 +45,38 @@ vala_add(indicator-sound-service
     volume-control
     volume-control-pulse
     volume-warning
+    options
+    options-gsettings
     media-player
     media-player-list
     mpris2-interfaces
     accounts-service-user
 )
 vala_add(indicator-sound-service
+  options.vala
+)
+vala_add(indicator-sound-service
+  options-gsettings.vala
+  DEPENDS
+    options
+    volume-control
+    volume-control-pulse
+)
+vala_add(indicator-sound-service
   volume-control.vala
+  DEPENDS
+    options
 )
 vala_add(indicator-sound-service
   volume-control-pulse.vala
   DEPENDS
+    options
     volume-control
 )
 vala_add(indicator-sound-service
   volume-warning.vala
   DEPENDS
+    options
     volume-control
 )
 vala_add(indicator-sound-service
@@ -110,6 +126,7 @@ vala_add(indicator-sound-service
   DEPENDS
     media-player
     volume-control
+      options
 )
 vala_add(indicator-sound-service
   accounts-service-user.vala

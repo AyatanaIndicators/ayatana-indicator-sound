@@ -46,6 +46,7 @@ on_bus_acquired(GDBusConnection *connection,
                 gpointer user_data)
 {
 	MediaPlayerList * playerlist = NULL;
+	IndicatorSoundOptions * options = NULL;
 	VolumeControlPulse * volume = NULL;
 	AccountsServiceUser * accounts = NULL;
    
@@ -57,11 +58,13 @@ on_bus_acquired(GDBusConnection *connection,
 		accounts = accounts_service_user_new();
 	}
 
-	volume = volume_control_pulse_new();
+	options = indicator_sound_options_gsettings_new();
+	volume = volume_control_pulse_new(options);
 
-	service = indicator_sound_service_new (playerlist, volume, accounts);
+	service = indicator_sound_service_new (playerlist, volume, accounts, options);
 
 	g_clear_object(&playerlist);
+	g_clear_object(&options);
 	g_clear_object(&volume);
 	g_clear_object(&accounts);
 }
