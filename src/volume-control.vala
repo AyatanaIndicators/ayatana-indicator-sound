@@ -64,7 +64,6 @@ public abstract class VolumeControl : Object
 	public virtual double mic_volume { get { return 0.0; } set { } }
 
 	public virtual void clamp_to_high_volume() { }
-	public virtual void set_warning_volume() { }
 
 	public abstract void set_mute (bool mute);
 

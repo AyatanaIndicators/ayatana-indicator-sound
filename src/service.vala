@@ -624,7 +624,7 @@ public class IndicatorSound.Service: Object {
 			&& !_volume_warning.high_volume_approved
 			&& !ignore_warning_this_time;
 		if (_volume_warning.active && !_options.is_loud(volume_control.volume)) {
-			volume_control.set_warning_volume();
+			_volume_warning.set_warning_volume();
 			close_notification(warn_notification);
 		}
 		if (warn) {

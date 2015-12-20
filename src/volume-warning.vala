@@ -682,7 +682,7 @@ public class VolumeWarning : VolumeControl
 		}
 	}
 
-	public override void set_warning_volume() {
+	public void set_warning_volume() {
 		var vol = new VolumeControl.Volume();
                 vol.volume = volume_to_double(_options.loud_volume());
                 vol.reason = _volume.reason;

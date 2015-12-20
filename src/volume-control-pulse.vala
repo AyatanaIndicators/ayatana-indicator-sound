@@ -728,14 +728,6 @@ public class VolumeControlPulse : VolumeControl
 		}
 	}
 
-	public override void set_warning_volume() {
-		var vol = new VolumeControl.Volume();
-                vol.volume = volume_to_double(_options.loud_volume());
-                vol.reason = _volume.reason;
-                debug("Setting warning level volume from %f down to %f", _volume.volume, vol.volume);
-                volume = vol;
-	}
-
 	/** MIC VOLUME PROPERTY */
 
 	public override double mic_volume {
