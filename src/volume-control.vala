@@ -40,6 +40,13 @@ public abstract class VolumeControl : Object
 		CALL_MODE
 	}
 
+	public enum Stream {
+		ALERT,
+		MULTIMEDIA,
+		ALARM,
+		PHONE
+	}
+
 	public class Volume : Object {
 		public double volume;
 		public VolumeReasons reason;
@@ -51,7 +58,7 @@ public abstract class VolumeControl : Object
 		_options = options;
 	}
 
-	public virtual string stream { get { return ""; } }
+	public Stream active_stream { get; protected set; default = Stream.ALERT; }
 	public bool ready { get; protected set; default = false; }
 	public virtual bool active_mic { get { return false; } set { } }
 	public virtual bool mute { get { return false; } }

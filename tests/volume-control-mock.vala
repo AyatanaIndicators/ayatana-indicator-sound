@@ -20,13 +20,12 @@
 
 public class VolumeControlMock : VolumeControl
 {
-	public string mock_stream { get; set; default = "multimedia"; }
-	public override string stream { get { return mock_stream; } }
 	public void mock_set_is_ready(bool b) { ready = b; }
+	public void mock_set_active_stream(VolumeControl.Stream s) { active_stream = s; }
+	public void mock_set_is_playing(bool b) { is_playing = b; }
 	public override bool active_mic { get; set; }
 	public bool mock_mute { get; set; }
 	public override bool mute { get { return mock_mute; } }
-	public void mock_set_is_playing(bool b) { is_playing = b; }
 	private VolumeControl.Volume _vol = new VolumeControl.Volume();
 	public override VolumeControl.Volume volume { get { return _vol; } set { _vol = value; }}
 	public override double mic_volume { get; set; }

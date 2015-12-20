@@ -257,7 +257,7 @@ TEST_F(NotificationsTest, StreamChanges) {
 
 	/* Change Streams, no volume change */
 	notifications->clearNotifications();
-	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "alarm");
+	volume_control_mock_mock_set_active_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), VOLUME_CONTROL_STREAM_ALARM);
 	setMockVolume(volumeControl, 0.5, VOLUME_CONTROL_VOLUME_REASONS_VOLUME_STREAM_CHANGE);
 	loop(50);
 	notev = notifications->getNotifications();
@@ -265,7 +265,7 @@ TEST_F(NotificationsTest, StreamChanges) {
 
 	/* Change Streams, volume change */
 	notifications->clearNotifications();
-	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "alert");
+	volume_control_mock_mock_set_active_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), VOLUME_CONTROL_STREAM_ALERT);
 	setMockVolume(volumeControl, 0.6, VOLUME_CONTROL_VOLUME_REASONS_VOLUME_STREAM_CHANGE);
 	loop(50);
 	notev = notifications->getNotifications();
@@ -273,7 +273,7 @@ TEST_F(NotificationsTest, StreamChanges) {
 
 	/* Change Streams, no volume change, volume up */
 	notifications->clearNotifications();
-	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "multimedia");
+	volume_control_mock_mock_set_active_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), VOLUME_CONTROL_STREAM_MULTIMEDIA);
 	setMockVolume(volumeControl, 0.6, VOLUME_CONTROL_VOLUME_REASONS_VOLUME_STREAM_CHANGE);
 	loop(50);
 	setMockVolume(volumeControl, 0.65);

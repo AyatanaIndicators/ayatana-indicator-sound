@@ -53,22 +53,6 @@ public class VolumeControlPulse : VolumeControl
 	private bool _pulse_use_stream_restore = false;
 	private int32 _active_sink_input = -1;
 	private string[] _valid_roles = {"multimedia", "alert", "alarm", "phone"};
-	public override string stream {
-		get {
-			if (_active_sink_input == -1)
-				return "alert";
-			var path = _sink_input_hash[_active_sink_input];
-			if (path == _objp_role_multimedia)
-				return "multimedia";
-			if (path == _objp_role_alert)
-				return "alert";
-			if (path == _objp_role_alarm)
-				return "alarm";
-			if (path == _objp_role_phone)
-				return "phone";
-			return "alert";
-		}
-	}
 	private string? _objp_role_multimedia = null;
 	private string? _objp_role_alert = null;
 	private string? _objp_role_alarm = null;
@@ -329,6 +313,21 @@ public class VolumeControlPulse : VolumeControl
 		return message;
 	}
 
+	private VolumeControl.Stream calculate_active_stream()
+	{
+		if (_active_sink_input != -1) {
+			var path = _sink_input_hash[_active_sink_input];
+			if (path == _objp_role_multimedia)
+				return Stream.MULTIMEDIA;
+			if (path == _objp_role_alarm)
+				return Stream.ALARM;
+			if (path == _objp_role_phone)
+				return Stream.PHONE;
+		}
+
+		return VolumeControl.Stream.ALERT;
+	}
+
 	private async void update_active_sink_input (int32 index)
 	{
 		if ((index == -1) || (index != _active_sink_input && index in _sink_input_list)) {
@@ -336,6 +335,7 @@ public class VolumeControlPulse : VolumeControl
 			if (index != -1)
 				sink_input_objp = _sink_input_hash.get (index);
 			_active_sink_input = index;
+			active_stream = calculate_active_stream();
 
 			/* Listen for role volume changes from pulse itself (external clients) */
 			try {
