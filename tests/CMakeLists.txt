@@ -79,6 +79,10 @@ vala_add(vala-mocks
     volume-control-mock.vala
 )
 
+vala_add(vala-mocks
+    volume-warning-mock.vala
+)
+
 vala_finish(vala-mocks
     SOURCES
         vala_mocks_VALA_SOURCES

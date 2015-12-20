@@ -27,9 +27,10 @@ public class IndicatorSound.Service: Object {
 	 */
 	VolumeControl.Volume _pre_warn_volume = null;
 
-	public Service (MediaPlayerList playerlist, VolumeControl volume, AccountsServiceUser? accounts, Options options) {
+	public Service (MediaPlayerList playerlist, VolumeControl volume, AccountsServiceUser? accounts, Options options, VolumeWarning volume_warning) {
 
 		_options = options;
+		_volume_warning = volume_warning;
 
 		try {
 			bus = Bus.get_sync(GLib.BusType.SESSION);
@@ -43,8 +44,8 @@ public class IndicatorSound.Service: Object {
 		warn_notification.set_hint ("x-canonical-non-shaped-icon", "true");
 		warn_notification.set_hint ("x-canonical-snap-decisions", "true");
 		warn_notification.set_hint ("x-canonical-private-affirmative-tint", "true");
-		warn_notification.closed.connect((n) => { 
-			n.clear_actions(); 
+		warn_notification.closed.connect((n) => {
+			n.clear_actions();
 			waiting_user_approve_warn=false;
 			increment_volume_sync_action();
 		});
@@ -208,7 +209,8 @@ public class IndicatorSound.Service: Object {
 	bool export_to_accounts_service = false;
 	private Notify.Notification info_notification;
 	private Notify.Notification warn_notification;
-	private Options _options = null;
+	private Options _options;
+	private VolumeWarning _volume_warning;
 
 	const double volume_step_percentage = 0.06;
 

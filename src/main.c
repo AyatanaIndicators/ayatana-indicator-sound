@@ -49,6 +49,7 @@ on_bus_acquired(GDBusConnection *connection,
 	IndicatorSoundOptions * options = NULL;
 	VolumeControlPulse * volume = NULL;
 	AccountsServiceUser * accounts = NULL;
+	VolumeWarning * warning = NULL;
    
 
 	if (g_strcmp0("lightdm", g_get_user_name()) == 0) {
@@ -60,13 +61,15 @@ on_bus_acquired(GDBusConnection *connection,
 
 	options = indicator_sound_options_gsettings_new();
 	volume = volume_control_pulse_new(options);
+	warning = volume_warning_new(options);
 
-	service = indicator_sound_service_new (playerlist, volume, accounts, options);
+	service = indicator_sound_service_new (playerlist, volume, accounts, options, warning);
 
 	g_clear_object(&playerlist);
 	g_clear_object(&options);
 	g_clear_object(&volume);
 	g_clear_object(&accounts);
+	g_clear_object(&warning);
 }
 
 int
