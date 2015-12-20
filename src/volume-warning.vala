@@ -74,7 +74,7 @@ public class VolumeWarning : Object
 	private string? _objp_role_phone = null;
 	private uint _pa_volume_sig_count = 0;
 
-	private bool _active_port_headphone = false;
+	private bool _active_port_headphones = false;
 	private VolumeControl.ActiveOutput _active_output = VolumeControl.ActiveOutput.SPEAKERS;
 	private IndicatorSound.Options _options;
 
@@ -557,7 +557,7 @@ public class VolumeWarning : Object
 		return calculate_high_volume_from_volume(_volume.volume);
 	}
 	private bool calculate_high_volume_from_volume(double volume) {
-		return _active_port_headphone
+		return _active_port_headphones
 			&& _options.is_loud(_volume)
 			&& (stream == "multimedia");
 	}
