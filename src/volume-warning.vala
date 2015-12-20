@@ -37,6 +37,8 @@ public class VolumeWarning : VolumeControl
 		warning("set_mute not supported for VolumeWarning");
 	}
 
+	private IndicatorSound.WarnNotification _notification = new IndicatorSound.WarnNotification();
+
 	/* this is static to ensure it being freed after @context (loop does not have ref counting) */
 	private static PulseAudio.GLibMainLoop loop;
 

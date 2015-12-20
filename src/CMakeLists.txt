@@ -39,6 +39,14 @@ vala_init(indicator-sound-service
 )
 
 vala_add(indicator-sound-service
+  notification.vala
+)
+vala_add(indicator-sound-service
+  warn-notification.vala
+  DEPENDS
+    notification
+)
+vala_add(indicator-sound-service
   service.vala
   DEPENDS
     sound-menu
@@ -83,6 +91,8 @@ vala_add(indicator-sound-service
     options
       volume-control-pulse
     volume-control
+    warn-notification
+      notification
 )
 vala_add(indicator-sound-service
   media-player.vala
