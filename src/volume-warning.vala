@@ -36,8 +36,6 @@ public class VolumeWarning : Object
 	/* this is static to ensure it being freed after @context (loop does not have ref counting) */
 	private static PulseAudio.GLibMainLoop loop;
 
-	private uint _reconnect_timer = 0;
-
 	private PulseAudio.Context context;
 	private bool   _ignore_warning_this_time = false;
 	private VolumeControl.Volume _volume = new VolumeControl.Volume();
@@ -109,10 +107,7 @@ public class VolumeWarning : Object
 
 	private void stop_all_timers()
 	{
-		if (_reconnect_timer != 0) {
-			Source.remove (_reconnect_timer);
-			_reconnect_timer = 0;
-		}
+		stop_reconnect_timer();
 		stop_high_volume_approved_timer();
 		stop_clamp_to_loud_timeout();
 	}
@@ -362,6 +357,8 @@ public class VolumeWarning : Object
 
 	private bool _connected_to_pulse = false;
 
+	private uint _reconnect_timer = 0;
+
 	private void context_state_callback (Context c)
 	{
 		switch (c.get_state ()) {
@@ -390,6 +387,14 @@ public class VolumeWarning : Object
 			default:
 				_connected_to_pulse = false;
 				break;
+		}
+	}
+
+	private void stop_reconnect_timer()
+	{
+		if (_reconnect_timer != 0) {
+			Source.remove (_reconnect_timer);
+			_reconnect_timer = 0;
 		}
 	}
 
