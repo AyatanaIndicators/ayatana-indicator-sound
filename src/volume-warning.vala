@@ -48,7 +48,6 @@ public class VolumeWarning : VolumeControl
 	private PulseAudio.Context context;
 	private bool   _ignore_warning_this_time = false;
 	private VolumeControl.Volume _volume = new VolumeControl.Volume();
-	private double _mic_volume = 0.0;
 	private Settings _settings = new Settings ("com.canonical.indicator.sound");
 
 	/* Used by the pulseaudio stream restore extension */
@@ -84,9 +83,6 @@ public class VolumeWarning : VolumeControl
 
 	private bool _active_port_headphone = false;
 	private VolumeControl.ActiveOutput _active_output = VolumeControl.ActiveOutput.SPEAKERS;
-
-	/** true when a microphone is active **/
-	public override bool active_mic { get; private set; default = false; }
 
 	public VolumeWarning (IndicatorSound.Options options)
 	{
@@ -205,7 +201,6 @@ public class VolumeWarning : VolumeControl
 				break;
 
 			case Context.SubscriptionEventType.SOURCE:
-				update_source ();
 				break;
 
 			case Context.SubscriptionEventType.SOURCE_OUTPUT:
@@ -216,7 +211,6 @@ public class VolumeWarning : VolumeControl
 						break;
 
 					case Context.SubscriptionEventType.REMOVE:
-						this.active_mic = false;
 						break;
 				}
 				break;
@@ -256,18 +250,6 @@ public class VolumeWarning : VolumeControl
 		}
 	}
 
-	private void source_info_cb (Context c, SourceInfo? i, int eol)
-	{
-		if (i == null)
-			return;
-
-		if (_mic_volume != volume_to_double (i.volume.values[0]))
-		{
-			_mic_volume = volume_to_double (i.volume.values[0]);
-			this.notify_property ("mic-volume");
-		}
-	}
-
 	private void server_info_cb_for_props (Context c, ServerInfo? i)
 	{
 		if (i == null)
@@ -278,16 +260,6 @@ public class VolumeWarning : VolumeControl
 	private void update_sink ()
 	{
 		context.get_server_info (server_info_cb_for_props);
-	}
-
-	private void update_source_get_server_info_cb (PulseAudio.Context c, PulseAudio.ServerInfo? i) {
-		if (i != null)
-			context.get_source_info_by_name (i.default_source_name, source_info_cb);
-	}
-
-	private void update_source ()
-	{
-		context.get_server_info (update_source_get_server_info_cb);
 	}
 
 	private DBusMessage pulse_dbus_filter (DBusConnection connection, owned DBusMessage message, bool incoming)
@@ -477,7 +449,6 @@ public class VolumeWarning : VolumeControl
 				}
 				c.set_subscribe_callback (context_events_cb);
 				update_sink ();
-				update_source ();
 				_connected_to_pulse = true;
 				break;
 
@@ -604,20 +575,6 @@ public class VolumeWarning : VolumeControl
 		}
 	}
 
-	void set_mic_volume_success_cb (Context c, int success)
-	{
-		if ((bool)success)
-			this.notify_property ("mic-volume");
-	}
-
-	void set_mic_volume_get_server_info_cb (PulseAudio.Context c, PulseAudio.ServerInfo? i) {
-		if (i != null) {
-			unowned CVolume cvol = CVolume ();
-			cvol = vol_set2 (cvol, 1, double_to_volume (_mic_volume));
-			c.set_source_volume_by_name (i.default_source_name, cvol, set_mic_volume_success_cb);
-		}
-	}
-
 	public override VolumeControl.Volume volume {
 		get {
 			return _volume;
@@ -741,22 +698,6 @@ public class VolumeWarning : VolumeControl
 			&& (_high_volume_approved_at + _high_volume_approved_ttl_usec >= now);
 	}
 
-
-	/** MIC VOLUME PROPERTY */
-
-	public override double mic_volume {
-		get {
-			return _mic_volume;
-		}
-		set {
-			return_if_fail (context.get_state () == Context.State.READY);
-
-			_mic_volume = value;
-
-			context.get_server_info (set_mic_volume_get_server_info_cb);
-		}
-	}
-
 	/* PulseAudio Dbus (Stream Restore) logic */
 	private void reconnect_pulse_dbus ()
 	{
@@ -864,16 +805,6 @@ public class VolumeWarning : VolumeControl
 		this.active = true;
 	}
 
-	public enum Key {
-		VOLUME_UP,
-		VOLUME_DOWN
-	}
-
-	public void user_keypress(Key key) {
-		if (key == Key.VOLUME_DOWN)
-			on_user_response(IndicatorSound.WarnNotification.Response.CANCEL);
-	}
-
 	private void on_user_response(IndicatorSound.WarnNotification.Response response) {
 		_notification.close();
 		stop_clamp_to_loud_timeout();
@@ -889,6 +820,16 @@ public class VolumeWarning : VolumeControl
 		_ok_volume = null;
 
 		this.active = false;
+	}
+
+	public enum Key {
+		VOLUME_UP,
+		VOLUME_DOWN
+	}
+
+	public void user_keypress(Key key) {
+		if (key == Key.VOLUME_DOWN)
+			on_user_response(IndicatorSound.WarnNotification.Response.CANCEL);
 	}
 
 	// VOLUME CLAMPING
