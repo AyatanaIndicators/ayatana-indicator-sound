@@ -693,7 +693,7 @@ public class VolumeControlPulse : VolumeControl
 		}
 	}
 
-	public static DBusConnection create_pulse_dbus_connection()
+	public static DBusConnection? create_pulse_dbus_connection()
 	{
 		unowned string pulse_dbus_server_env = Environment.get_variable ("PULSE_DBUS_SERVER");
 		string address;
@@ -749,10 +749,10 @@ public class VolumeControlPulse : VolumeControl
 
 		/* Check if the 4 currently supported media roles are already available in StreamRestore
 		 * Roles: multimedia, alert, alarm and phone */
-		_objp_role_multimedia = stream_restore_get_object_path ("sink-input-by-media-role:multimedia");
-		_objp_role_alert = stream_restore_get_object_path ("sink-input-by-media-role:alert");
-		_objp_role_alarm = stream_restore_get_object_path ("sink-input-by-media-role:alarm");
-		_objp_role_phone = stream_restore_get_object_path ("sink-input-by-media-role:phone");
+		_objp_role_multimedia = stream_restore_get_object_path (_pconn, "sink-input-by-media-role:multimedia");
+		_objp_role_alert = stream_restore_get_object_path (_pconn, "sink-input-by-media-role:alert");
+		_objp_role_alarm = stream_restore_get_object_path (_pconn, "sink-input-by-media-role:alarm");
+		_objp_role_phone = stream_restore_get_object_path (_pconn, "sink-input-by-media-role:phone");
 
 		/* Only use stream restore if every used role is available */
 		if (_objp_role_multimedia != null && _objp_role_alert != null && _objp_role_alarm != null && _objp_role_phone != null) {
@@ -763,10 +763,10 @@ public class VolumeControlPulse : VolumeControl
 		}
 	}
 
-	private string? stream_restore_get_object_path (string name) {
+	public static string? stream_restore_get_object_path (DBusConnection pconn, string name) {
 		string? objp = null;
 		try {
-			Variant props_variant = _pconn.call_sync ("org.PulseAudio.Ext.StreamRestore1",
+			Variant props_variant = pconn.call_sync ("org.PulseAudio.Ext.StreamRestore1",
 					"/org/pulseaudio/stream_restore1", "org.PulseAudio.Ext.StreamRestore1",
 					"GetEntryByName", new Variant ("(s)", name), null, DBusCallFlags.NONE, -1);
 			/* Workaround for older versions of vala that don't provide get_objv */
