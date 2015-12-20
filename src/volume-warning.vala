@@ -30,51 +30,24 @@ public class VolumeWarning : Object
 	// true if the warning dialog is currently active
 	public bool active { get; public set; default = false; }
 
-	// true iff we're playing unapproved loud multimedia over headphones
+	// true if we're playing unapproved loud multimedia over headphones
 	public bool high_volume { get; protected set; default = false; }
 
-	/* this is static to ensure it being freed after @context (loop does not have ref counting) */
-	private static PulseAudio.GLibMainLoop loop;
+	// true if the active sink input has its role property set to multimedia
+	protected bool multimedia_active { get; set; default = false; }
 
-	private PulseAudio.Context context;
-	private bool   _ignore_warning_this_time = false;
-	private VolumeControl.Volume _volume = new VolumeControl.Volume();
-	private Settings _settings = new Settings ("com.canonical.indicator.sound");
+	// true if the user has approved high volumes recently
+	protected bool high_volume_approved { get; set; default = false; }
 
-	/* Used by the pulseaudio stream restore extension */
-	private DBusConnection _pconn;
-	/* Need both the list and hash so we can retrieve the last known sink-input after
-	 * releasing the current active one (restoring back to the previous known role) */
-	private Gee.ArrayList<uint32> _sink_input_list = new Gee.ArrayList<uint32> ();
-	private HashMap<uint32, string> _sink_input_hash = new HashMap<uint32, string> ();
-	private bool _pulse_use_stream_restore = false;
-	private int32 _active_sink_input = -1;
-	private string[] _valid_roles = {"multimedia", "alert", "alarm", "phone"};
-	private string stream {
-		get {
-			if (_active_sink_input == -1)
-				return "alert";
-			var path = _sink_input_hash[_active_sink_input];
-			if (path == _objp_role_multimedia)
-				return "multimedia";
-			if (path == _objp_role_alert)
-				return "alert";
-			if (path == _objp_role_alarm)
-				return "alarm";
-			if (path == _objp_role_phone)
-				return "phone";
-			return "alert";
-		}
+	public enum Key {
+		VOLUME_UP,
+		VOLUME_DOWN
 	}
-	private string? _objp_role_multimedia = null;
-	private string? _objp_role_alert = null;
-	private string? _objp_role_alarm = null;
-	private string? _objp_role_phone = null;
-	private uint _pa_volume_sig_count = 0;
 
-	private bool _active_port_headphones = false;
-	private VolumeControl.ActiveOutput _active_output = VolumeControl.ActiveOutput.SPEAKERS;
-	private IndicatorSound.Options _options;
+	public void user_keypress(Key key) {
+		if (key == Key.VOLUME_DOWN)
+			on_user_response(IndicatorSound.WarnNotification.Response.CANCEL);
+	}
 
 	public VolumeWarning (IndicatorSound.Options options)
 	{
@@ -93,6 +66,38 @@ public class VolumeWarning : Object
 		_notification = new IndicatorSound.WarnNotification();
 		_notification.user_responded.connect((n, response) => on_user_response(response));
         }
+
+	/***
+	****
+	***/
+
+	/* this is static to ensure it being freed after @context (loop does not have ref counting) */
+	private static PulseAudio.GLibMainLoop loop;
+
+	private PulseAudio.Context context;
+	private bool   _ignore_warning_this_time = false;
+	private VolumeControl.Volume _volume = new VolumeControl.Volume();
+	private Settings _settings = new Settings ("com.canonical.indicator.sound");
+
+	/* Used by the pulseaudio stream restore extension */
+	private DBusConnection _pconn;
+	/* Need both the list and hash so we can retrieve the last known sink-input after
+	 * releasing the current active one (restoring back to the previous known role) */
+	private Gee.ArrayList<uint32> _sink_input_list = new Gee.ArrayList<uint32> ();
+	private HashMap<uint32, string> _sink_input_hash = new HashMap<uint32, string> ();
+	private bool _pulse_use_stream_restore = false;
+	private int32 _active_sink_input = -1;
+	private string[] _valid_roles = {"multimedia", "alert", "alarm", "phone"};
+
+	private string? _objp_role_multimedia = null;
+	private string? _objp_role_alert = null;
+	private string? _objp_role_alarm = null;
+	private string? _objp_role_phone = null;
+	private uint _pa_volume_sig_count = 0;
+
+	private bool _active_port_headphones = false;
+	private VolumeControl.ActiveOutput _active_output = VolumeControl.ActiveOutput.SPEAKERS;
+	private IndicatorSound.Options _options;
 
 	private void init_all_properties()
 	{
@@ -248,6 +253,9 @@ public class VolumeWarning : Object
 			if (index != -1)
 				sink_input_objp = _sink_input_hash.get (index);
 			_active_sink_input = index;
+
+			multimedia_active = (index != -1)
+				&& (_sink_input_hash.get(index) == _objp_role_multimedia);
 
 			/* Listen for role volume changes from pulse itself (external clients) */
 			try {
@@ -610,20 +618,10 @@ public class VolumeWarning : Object
 	private bool calculate_high_volume_from_volume(double volume) {
 		return _active_port_headphones
 			&& _options.is_loud(_volume)
-			&& (stream == "multimedia");
-	}
-
-	public void set_warning_volume() {
-		var vol = new VolumeControl.Volume();
-                vol.volume = volume_to_double(_options.loud_volume());
-                vol.reason = _volume.reason;
-                debug("Setting warning level volume from %f down to %f", _volume.volume, vol.volume);
-                volume = vol;
+			&& multimedia_active;
 	}
 
 	/** HIGH VOLUME APPROVED PROPERTY **/
-
-	public bool high_volume_approved { get; private set; default = false; }
 
 	private void approve_high_volume() {
 		_high_volume_approved_at = GLib.get_monotonic_time();
@@ -723,16 +721,6 @@ public class VolumeWarning : Object
 		_ok_volume = null;
 
 		this.active = false;
-	}
-
-	public enum Key {
-		VOLUME_UP,
-		VOLUME_DOWN
-	}
-
-	public void user_keypress(Key key) {
-		if (key == Key.VOLUME_DOWN)
-			on_user_response(IndicatorSound.WarnNotification.Response.CANCEL);
 	}
 
 	// VOLUME CLAMPING
