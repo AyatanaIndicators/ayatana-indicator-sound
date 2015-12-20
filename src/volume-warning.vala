@@ -25,20 +25,13 @@ using Gee;
 [CCode(cname="pa_cvolume_set", cheader_filename = "pulse/volume.h")]
 extern unowned PulseAudio.CVolume? vol_set2 (PulseAudio.CVolume? cv, uint channels, PulseAudio.Volume v);
 
-public class VolumeWarning : VolumeControl
+public class VolumeWarning : Object
 {
 	// true if the warning dialog is currently active
 	public bool active { get; public set; default = false; }
 
 	// true iff we're playing unapproved loud multimedia over headphones
 	public bool high_volume { get; protected set; default = false; }
-
-	// FIXME: this is temporarily necessary while bootstrapping this
-	// code because VolumeWarning is still subclassed from VolumeControl,
-	// but TBH we don't need any concept of mute here.
-        public override void set_mute (bool mute) {
-		warning("set_mute not supported for VolumeWarning");
-	}
 
 	/* this is static to ensure it being freed after @context (loop does not have ref counting) */
 	private static PulseAudio.GLibMainLoop loop;
@@ -59,7 +52,7 @@ public class VolumeWarning : VolumeControl
 	private bool _pulse_use_stream_restore = false;
 	private int32 _active_sink_input = -1;
 	private string[] _valid_roles = {"multimedia", "alert", "alarm", "phone"};
-	public override string stream {
+	private string stream {
 		get {
 			if (_active_sink_input == -1)
 				return "alert";
@@ -83,10 +76,11 @@ public class VolumeWarning : VolumeControl
 
 	private bool _active_port_headphone = false;
 	private VolumeControl.ActiveOutput _active_output = VolumeControl.ActiveOutput.SPEAKERS;
+	private IndicatorSound.Options _options;
 
 	public VolumeWarning (IndicatorSound.Options options)
 	{
-		base(options);
+		_options = options;
 
 		_volume.volume = 0.0;
 		_volume.reason = VolumeControl.VolumeReasons.PULSE_CHANGE;
@@ -201,18 +195,7 @@ public class VolumeWarning : VolumeControl
 				break;
 
 			case Context.SubscriptionEventType.SOURCE:
-				break;
-
 			case Context.SubscriptionEventType.SOURCE_OUTPUT:
-				switch (t & Context.SubscriptionEventType.TYPE_MASK)
-				{
-					case Context.SubscriptionEventType.NEW:
-						c.get_source_output_info (index, source_output_info_cb);
-						break;
-
-					case Context.SubscriptionEventType.REMOVE:
-						break;
-				}
 				break;
 		}
 	}
@@ -233,7 +216,6 @@ public class VolumeWarning : VolumeControl
 		if (active_output_now != active_output_before &&
 			(active_output_now != VolumeControl.ActiveOutput.CALL_MODE &&
 			 active_output_before != VolumeControl.ActiveOutput.CALL_MODE)) {
-			this.active_output_changed (active_output_now);
 			if (active_output_now == VolumeControl.ActiveOutput.SPEAKERS) {
 				_high_volume_approved = false;
 			}
@@ -421,16 +403,6 @@ public class VolumeWarning : VolumeControl
 		}
 	}
 
-	private void source_output_info_cb (Context c, SourceOutputInfo? i, int eol)
-	{
-		if (i == null)
-			return;
-
-		var role = i.proplist.gets (PulseAudio.Proplist.PROP_MEDIA_ROLE);
-		if (role == "phone" || role == "production")
-			this.active_mic = true;
-	}
-
 	private bool _connected_to_pulse = false;
 
 	private void context_state_callback (Context c)
@@ -495,7 +467,7 @@ public class VolumeWarning : VolumeControl
 			warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(context.errno()));
 	}
 
-	public override VolumeControl.ActiveOutput active_output
+	private VolumeControl.ActiveOutput active_output
 	{
 		get
 		{
@@ -575,7 +547,7 @@ public class VolumeWarning : VolumeControl
 		}
 	}
 
-	public override VolumeControl.Volume volume {
+	private VolumeControl.Volume volume {
 		get {
 			return _volume;
 		}
@@ -620,6 +592,8 @@ public class VolumeWarning : VolumeControl
 		if (high_volume != new_high_volume) {
 			debug("changing high_volume from %d to %d", (int)high_volume, (int)new_high_volume);
 			high_volume = new_high_volume;
+			if (high_volume && !active)
+				show(_volume);
 		}
 	}
 	private bool calculate_high_volume() {
@@ -789,7 +763,7 @@ public class VolumeWarning : VolumeControl
 	private VolumeControl.Volume _cancel_volume = null;
 	private VolumeControl.Volume _ok_volume = null;
 
-	public void show(VolumeControl.Volume volume) {
+	private void show(VolumeControl.Volume volume) {
 
 		// the volume to use if user hits 'cancel'
 		_cancel_volume = new VolumeControl.Volume();
