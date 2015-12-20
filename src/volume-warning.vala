@@ -27,6 +27,9 @@ extern unowned PulseAudio.CVolume? vol_set2 (PulseAudio.CVolume? cv, uint channe
 
 public class VolumeWarning : VolumeControl
 {
+	// true if the warning dialog is currently active
+	public bool active { get; public set; default = false; }
+
 	// FIXME: this is temporarily necessary while bootstrapping this
 	// code because VolumeWarning is still subclassed from VolumeControl,
 	// but TBH we don't need any concept of mute here.

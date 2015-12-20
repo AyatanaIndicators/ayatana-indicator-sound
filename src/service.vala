@@ -45,8 +45,8 @@ public class IndicatorSound.Service: Object {
 		warn_notification.set_hint ("x-canonical-snap-decisions", "true");
 		warn_notification.set_hint ("x-canonical-private-affirmative-tint", "true");
 		warn_notification.closed.connect((n) => {
-			n.clear_actions();
-			waiting_user_approve_warn=false;
+			n.clear_actions ();
+			_volume_warning.active = false;
 			increment_volume_sync_action();
 		});
 		BusWatcher.watch_namespace (GLib.BusType.SESSION,
@@ -288,7 +288,6 @@ public class IndicatorSound.Service: Object {
 	private bool notify_server_supports_actions = false;
 	private bool notify_server_supports_sync = false;
 	private bool block_info_notifications = false;
-	private bool waiting_user_approve_warn = false;
 
 	private string get_volume_icon (double volume, VolumeControl.ActiveOutput active_output)
 	{
@@ -624,7 +623,7 @@ public class IndicatorSound.Service: Object {
 			&& this.notify_server_supports_actions
 			&& !_volume_warning.high_volume_approved
 			&& !ignore_warning_this_time;
-		if (waiting_user_approve_warn && !_options.is_loud(volume_control.volume)) {
+		if (_volume_warning.active && !_options.is_loud(volume_control.volume)) {
 			volume_control.set_warning_volume();
 			close_notification(warn_notification);
 		}
@@ -645,18 +644,17 @@ public class IndicatorSound.Service: Object {
 				vol.reason = VolumeControl.VolumeReasons.USER_KEYPRESS;
 				_pre_warn_volume = null;
 				volume_control.volume = vol;
-
-				waiting_user_approve_warn = false;
+				_volume_warning.active = false;
 			});
 			warn_notification.add_action ("cancel", _("Cancel"), (n, a) => {
 				_pre_warn_volume = null;
-				waiting_user_approve_warn = false;
+				_volume_warning.active = false;
 				increment_volume_sync_action();
 			});
-			waiting_user_approve_warn = true;
+			_volume_warning.active = true;
 			show_notification(warn_notification);
 		} else {
-			if (!waiting_user_approve_warn) {
+			if (!_volume_warning.active) {
 				close_notification(warn_notification);
 
 				if (notify_server_supports_sync && !block_info_notifications && !ignore_warning_this_time) {
