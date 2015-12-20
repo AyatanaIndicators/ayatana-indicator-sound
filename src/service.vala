@@ -622,7 +622,7 @@ public class IndicatorSound.Service: Object {
 		bool ignore_warning_this_time = _volume_warning.ignore_high_volume;
 		var warn = loud
 			&& this.notify_server_supports_actions
-			&& !this.volume_control.high_volume_approved
+			&& !_volume_warning.high_volume_approved
 			&& !ignore_warning_this_time;
 		if (waiting_user_approve_warn && !_options.is_loud(volume_control.volume)) {
 			volume_control.set_warning_volume();
@@ -638,7 +638,7 @@ public class IndicatorSound.Service: Object {
 			warn_notification.clear_actions();
 			warn_notification.add_action ("ok", _("OK"), (n, a) => {
 				stop_clamp_to_high_timeout();
-				volume_control.approve_high_volume ();
+				_volume_warning.approve_high_volume ();
 				// restore the volume the user introduced
 				VolumeControl.Volume vol = new VolumeControl.Volume();
 				vol.volume = volume_control.get_pre_clamped_volume();
@@ -658,7 +658,7 @@ public class IndicatorSound.Service: Object {
 		} else {
 			if (!waiting_user_approve_warn) {
 				close_notification(warn_notification);
-	
+
 				if (notify_server_supports_sync && !block_info_notifications && !ignore_warning_this_time) {
 					/* Determine Label */
 				        string volume_label = get_notification_label ();

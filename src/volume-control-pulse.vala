@@ -44,7 +44,6 @@ public class VolumeControlPulse : VolumeControl
 	private bool   _is_playing = false;
 	private VolumeControl.Volume _volume = new VolumeControl.Volume();
 	private double _mic_volume = 0.0;
-	private Settings _settings = new Settings ("com.canonical.indicator.sound");
 
 	/* Used by the pulseaudio stream restore extension */
 	private DBusConnection _pconn;
@@ -117,7 +116,6 @@ public class VolumeControlPulse : VolumeControl
 	private void init_all_properties()
 	{
 		init_high_volume();
-		init_high_volume_approved();
 	}
 
 	~VolumeControlPulse ()
@@ -133,7 +131,6 @@ public class VolumeControlPulse : VolumeControl
 		}
 		stop_local_volume_timer();
 		stop_account_service_volume_timer();
-		stop_high_volume_approved_timer();
 	}
 
 	private VolumeControl.ActiveOutput calculate_active_output (SinkInfo? sink) {
@@ -262,9 +259,6 @@ public class VolumeControlPulse : VolumeControl
 			(active_output_now != VolumeControl.ActiveOutput.CALL_MODE &&
 			 active_output_before != VolumeControl.ActiveOutput.CALL_MODE)) {
 			this.active_output_changed (active_output_now);
-			if (active_output_now == VolumeControl.ActiveOutput.SPEAKERS) {
-				_high_volume_approved = false;
-			}
 			update_high_volume();
 		}
 
@@ -756,68 +750,6 @@ public class VolumeControlPulse : VolumeControl
                 debug("Setting warning level volume from %f down to %f", _volume.volume, vol.volume);
                 volume = vol;
 	}
-
-	/** HIGH VOLUME APPROVED PROPERTY **/
-
-	private bool _high_volume_approved = false;
-	private uint _high_volume_approved_timer = 0;
-	private int64 _high_volume_approved_at = 0;
-	private int64 _high_volume_approved_ttl_usec = 0;
-	public override bool high_volume_approved {
-		get { return this._high_volume_approved; }
-		private set { this._high_volume_approved = value; }
-	}
-	private void init_high_volume_approved() {
-		_settings.changed["warning-volume-confirmation-ttl"].connect(() => update_high_volume_approved_cache());
-		update_high_volume_approved_cache();
-	}
-	private void update_high_volume_approved_cache() {
-		_high_volume_approved_ttl_usec = _settings.get_int("warning-volume-confirmation-ttl");
-		_high_volume_approved_ttl_usec *= 1000000;
-
-		update_high_volume_approved();
-		update_high_volume_approved_timer();
-	}
-	private void update_high_volume_approved_timer() {
-		stop_high_volume_approved_timer();
-		if (_high_volume_approved_at != 0) {
-			int64 expires_at = _high_volume_approved_at + _high_volume_approved_ttl_usec;
-			int64 now = GLib.get_monotonic_time();
-			if (expires_at > now) {
-				var seconds_left = 1 + ((expires_at - now) / 1000000);
-				_high_volume_approved_timer = Timeout.add_seconds((uint)seconds_left, on_high_volume_approved_timer);
-			}
-		}
-	}
-	private void stop_high_volume_approved_timer() {
-		if (_high_volume_approved_timer != 0) {
-			Source.remove (_high_volume_approved_timer);
-			_high_volume_approved_timer = 0;
-		}
-	}
-	private bool on_high_volume_approved_timer() {
-		_high_volume_approved_timer = 0;
-		update_high_volume_approved();
-		return false; /* Source.REMOVE */
-	}
-	private void update_high_volume_approved() {
-		var new_high_volume_approved = calculate_high_volume_approved();
-		if (high_volume_approved != new_high_volume_approved) {
-			debug("changing high_volume_approved from %d to %d", (int)high_volume_approved, (int)new_high_volume_approved);
-			high_volume_approved = new_high_volume_approved;
-		}
-	}
-	private bool calculate_high_volume_approved() {
-		int64 now = GLib.get_monotonic_time();
-		return (_high_volume_approved_at != 0)
-			&& (_high_volume_approved_at + _high_volume_approved_ttl_usec >= now);
-	}
-	public override void approve_high_volume() {
-		_high_volume_approved_at = GLib.get_monotonic_time();
-		update_high_volume_approved();
-		update_high_volume_approved_timer();
-	}
-
 
 	/** MIC VOLUME PROPERTY */
 

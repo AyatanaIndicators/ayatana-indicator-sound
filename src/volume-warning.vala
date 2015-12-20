@@ -706,14 +706,17 @@ public class VolumeWarning : VolumeControl
 
 	/** HIGH VOLUME APPROVED PROPERTY **/
 
-	private bool _high_volume_approved = false;
+	public bool high_volume_approved { get; private set; default = false; }
+
+	public void approve_high_volume() {
+		_high_volume_approved_at = GLib.get_monotonic_time();
+		update_high_volume_approved();
+		update_high_volume_approved_timer();
+	}
+
 	private uint _high_volume_approved_timer = 0;
 	private int64 _high_volume_approved_at = 0;
 	private int64 _high_volume_approved_ttl_usec = 0;
-	public override bool high_volume_approved {
-		get { return this._high_volume_approved; }
-		private set { this._high_volume_approved = value; }
-	}
 	private void init_high_volume_approved() {
 		_settings.changed["warning-volume-confirmation-ttl"].connect(() => update_high_volume_approved_cache());
 		update_high_volume_approved_cache();
@@ -758,11 +761,6 @@ public class VolumeWarning : VolumeControl
 		int64 now = GLib.get_monotonic_time();
 		return (_high_volume_approved_at != 0)
 			&& (_high_volume_approved_at + _high_volume_approved_ttl_usec >= now);
-	}
-	public override void approve_high_volume() {
-		_high_volume_approved_at = GLib.get_monotonic_time();
-		update_high_volume_approved();
-		update_high_volume_approved_timer();
 	}
 
 
