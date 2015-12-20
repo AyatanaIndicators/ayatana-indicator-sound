@@ -49,8 +49,26 @@ public class IndicatorSound.Service: Object {
 		this.notify["visible"].connect ( () => this.update_root_icon () );
 
 		this.volume_control = volume;
-		this.volume_control.active_output_changed.connect(() => this.update_root_icon());
-		this.volume_control.active_output_changed.connect(() => this.update_notification());
+		this.volume_control.notify["active-stream"].connect(() => {
+			_volume_warning.multimedia_active =
+				VolumeControl.Stream.MULTIMEDIA == volume_control.active_stream;
+		});
+		this.volume_control.active_output_changed.connect(() => {
+			switch(volume_control.active_output) {
+				case VolumeControl.ActiveOutput.HEADPHONES:
+				case VolumeControl.ActiveOutput.USB_HEADPHONES:
+				case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
+				case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
+					_volume_warning.headphones_active = true;
+					break;
+
+				default:
+					_volume_warning.headphones_active = false;
+					break;
+			}
+			update_root_icon();
+			update_notification();
+		});
 
 		this.accounts_service = accounts;
 		/* If we're on the greeter, don't export */
