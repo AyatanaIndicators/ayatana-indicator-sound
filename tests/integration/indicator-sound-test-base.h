@@ -77,6 +77,8 @@ protected:
     void startAccountsService();
 
     bool clearGSettingsPlayers();
+    bool resetAllowAmplifiedVolume();
+    bool runProcess(QProcess&);
 
     bool startTestMprisPlayer(QString const& playerName);
 

@@ -542,6 +542,7 @@ TEST_F(TestIndicator, DesktopChangeRoleVolume)
 {
     double INITIAL_VOLUME = 0.0;
 
+    EXPECT_TRUE(resetAllowAmplifiedVolume());
     ASSERT_NO_THROW(startAccountsService());
     ASSERT_NO_THROW(startPulseDesktop());
 

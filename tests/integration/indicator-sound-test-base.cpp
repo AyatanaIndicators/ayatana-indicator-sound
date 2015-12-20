@@ -163,13 +163,31 @@ bool IndicatorSoundTestBase::clearGSettingsPlayers()
                                         << "com.canonical.indicator.sound"
                                         << "interested-media-players"
                                         << "[]");
-    if (!clearPlayers.waitForStarted())
+
+    return runProcess(clearPlayers);
+}
+
+bool IndicatorSoundTestBase::resetAllowAmplifiedVolume()
+{
+    QProcess proc;
+
+    proc.start("gsettings", QStringList()
+                                << "reset"
+                                << "com.ubuntu.sound"
+                                << "allow-amplified-volume");
+
+    return runProcess(proc);
+}
+
+bool IndicatorSoundTestBase::runProcess(QProcess& proc)
+{
+    if (!proc.waitForStarted())
         return false;
 
-    if (!clearPlayers.waitForFinished())
+    if (!proc.waitForFinished())
         return false;
 
-    return clearPlayers.exitCode() == 0;
+    return proc.exitCode() == 0;
 }
 
 bool IndicatorSoundTestBase::startTestMprisPlayer(QString const& playerName)
