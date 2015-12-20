@@ -41,7 +41,6 @@ public class VolumeControlPulse : VolumeControl
 
 	private PulseAudio.Context context;
 	private bool   _mute = true;
-	private bool   _is_playing = false;
 	private VolumeControl.Volume _volume = new VolumeControl.Volume();
 	private double _mic_volume = 0.0;
 
@@ -241,11 +240,8 @@ public class VolumeControlPulse : VolumeControl
 		}
 
 		var playing = (i.state == PulseAudio.SinkState.RUNNING);
-		if (_is_playing != playing)
-		{
-			_is_playing = playing;
-			this.notify_property ("is-playing");
-		}
+		if (is_playing != playing)
+			is_playing = playing;
 
 		// store the current status of the active output
 		VolumeControl.ActiveOutput active_output_before = active_output;
@@ -572,14 +568,6 @@ public class VolumeControlPulse : VolumeControl
 		get
 		{
 			return this._mute;
-		}
-	}
-
-	public override bool is_playing
-	{
-		get
-		{
-			return this._is_playing;
 		}
 	}
 

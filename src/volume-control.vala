@@ -56,7 +56,7 @@ public abstract class VolumeControl : Object
 	public virtual bool active_mic { get { return false; } set { } }
 	public virtual bool high_volume { get { return false; } protected set { } }
 	public virtual bool mute { get { return false; } }
-	public virtual bool is_playing { get { return false; } }
+	public bool is_playing { get; protected set; default = false; }
 	public virtual VolumeControl.ActiveOutput active_output { get { return VolumeControl.ActiveOutput.SPEAKERS; } }
 	private Volume _volume;
 	private double _pre_clamp_volume;

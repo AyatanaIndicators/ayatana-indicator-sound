@@ -43,7 +43,6 @@ public class VolumeWarning : VolumeControl
 	private uint _reconnect_timer = 0;
 
 	private PulseAudio.Context context;
-	private bool   _is_playing = false;
 	private bool   _ignore_warning_this_time = false;
 	private VolumeControl.Volume _volume = new VolumeControl.Volume();
 	private double _mic_volume = 0.0;
@@ -125,21 +124,21 @@ public class VolumeWarning : VolumeControl
 	}
 
 	private VolumeControl.ActiveOutput calculate_active_output (SinkInfo? sink) {
-		
+
 		VolumeControl.ActiveOutput ret_output = VolumeControl.ActiveOutput.SPEAKERS;
 		/* Check if the current active port is headset/headphone */
     		/* There is not easy way to check if the port is a headset/headphone besides
     		 * checking for the port name. On touch (with the pulseaudio droid element)
     		 * the headset/headphone port is called 'output-headset' and 'output-headphone'.
     		 * On the desktop this is usually called 'analog-output-headphones' */
-		
+
 		// first of all check if we are in call mode
 		if (sink.active_port != null && sink.active_port.name == "output-speaker+wired_headphone") {
 			return VolumeControl.ActiveOutput.CALL_MODE;
 		}
 		// look if it's a headset/headphones
 		if (sink.name == "indicator_sound_test_headphones" ||
-			(sink.active_port != null && 
+			(sink.active_port != null &&
 			 (sink.active_port.name.contains("headset") ||
 		          sink.active_port.name.contains("headphone")))) {
 			    	_active_port_headphone = true;
@@ -225,22 +224,15 @@ public class VolumeWarning : VolumeControl
 		if (i == null)
 			return;
 
-		var playing = (i.state == PulseAudio.SinkState.RUNNING);
-		if (_is_playing != playing)
-		{
-			_is_playing = playing;
-			this.notify_property ("is-playing");
-		}
-
 		// store the current status of the active output
 		VolumeControl.ActiveOutput active_output_before = active_output;
 
-		// calculate the output 
+		// calculate the output
 		_active_output = calculate_active_output (i);
-		
+
 		// check if the output has changed, if so... emit a signal
 		VolumeControl.ActiveOutput active_output_now = active_output;
-		if (active_output_now != active_output_before && 
+		if (active_output_now != active_output_before &&
 			(active_output_now != VolumeControl.ActiveOutput.CALL_MODE &&
 			 active_output_before != VolumeControl.ActiveOutput.CALL_MODE)) {
 			this.active_output_changed (active_output_now);
@@ -526,20 +518,12 @@ public class VolumeWarning : VolumeControl
 			warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(context.errno()));
 	}
 
-	public override bool is_playing
+	public override VolumeControl.ActiveOutput active_output
 	{
 		get
 		{
-			return this._is_playing;
+			return _active_output;
 		}
-	}
-
-	public override VolumeControl.ActiveOutput active_output 
-	{ 
-		get 
-		{ 
-			return _active_output; 
-		} 
 	}
 
 	/* Volume operations */
