@@ -617,7 +617,7 @@ public class IndicatorSound.Service: Object {
 			notify_server_caps_checked = true;
 		}
 
-		var loud = volume_control.high_volume;
+		var loud = _volume_warning.high_volume;
 		bool ignore_warning_this_time = _volume_warning.ignore_high_volume;
 		var warn = loud
 			&& this.notify_server_supports_actions
@@ -821,12 +821,19 @@ public class IndicatorSound.Service: Object {
 		return mic_volume_action;
 	}
 
+	private Variant create_high_volume_action_state() {
+		return new Variant.boolean (_volume_warning.high_volume);
+	}
+	private void update_high_volume_action_state() {
+		high_volume_action.set_state(create_high_volume_action_state());
+	}
+
 	SimpleAction high_volume_action;
 	Action create_high_volume_action () {
-		high_volume_action = new SimpleAction.stateful("high-volume", null, new Variant.boolean (this.volume_control.high_volume));
+		high_volume_action = new SimpleAction.stateful("high-volume", null, create_high_volume_action_state());
 
-		this.volume_control.notify["high-volume"].connect( () => {
-			high_volume_action.set_state(new Variant.boolean (this.volume_control.high_volume));
+		_volume_warning.notify["high-volume"].connect( () => {
+			update_high_volume_action_state();
 			update_notification();
 		});
 
@@ -982,7 +989,7 @@ public class IndicatorSound.Service: Object {
 
 	private bool clamp_to_high_idle() {
 		_clamp_to_high_timeout = 0;
-		volume_control.clamp_to_high_volume();
+		_volume_warning.clamp_to_high_volume();
 		return false; // Source.REMOVE;
 	}
 }

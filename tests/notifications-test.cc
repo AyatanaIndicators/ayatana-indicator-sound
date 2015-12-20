@@ -385,7 +385,7 @@ TEST_F(NotificationsTest, HighVolume) {
 
 	/* Set high volume with volume change */
 	notifications->clearNotifications();
-	volume_control_mock_set_high_volume(VOLUME_CONTROL_MOCK(volumeControl.get()), true);
+	volume_warning_mock_set_high_volume(VOLUME_WARNING_MOCK(volumeWarning.get()), true);
 	setMockVolume(volumeControl, 0.90);
 	loop(50);
 	notev = notifications->getNotifications();
@@ -395,14 +395,14 @@ TEST_F(NotificationsTest, HighVolume) {
 	EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-value-bar-tint"]);
 
 	/* Move it back */
-	volume_control_mock_set_high_volume(VOLUME_CONTROL_MOCK(volumeControl.get()), false);
+	volume_warning_mock_set_high_volume(VOLUME_WARNING_MOCK(volumeWarning.get()), false);
 	setMockVolume(volumeControl, 0.50);
 	loop(50);
 
 	/* Set high volume without level change */
 	/* NOTE: This can happen if headphones are plugged in */
 	notifications->clearNotifications();
-	volume_control_mock_set_high_volume(VOLUME_CONTROL_MOCK(volumeControl.get()), TRUE);
+	volume_warning_mock_set_high_volume(VOLUME_WARNING_MOCK(volumeWarning.get()), true);
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());

@@ -102,16 +102,9 @@ public class VolumeControlPulse : VolumeControl
 		_mute_cancellable = new Cancellable ();
 		_volume_cancellable = new Cancellable ();
 
-		init_all_properties();
-
 		setup_accountsservice.begin ();
 
 		this.reconnect_to_pulse ();
-	}
-
-	private void init_all_properties()
-	{
-		init_high_volume();
 	}
 
 	~VolumeControlPulse ()
@@ -252,7 +245,6 @@ public class VolumeControlPulse : VolumeControl
 			(active_output_now != VolumeControl.ActiveOutput.CALL_MODE &&
 			 active_output_before != VolumeControl.ActiveOutput.CALL_MODE)) {
 			this.active_output_changed (active_output_now);
-			update_high_volume();
 		}
 
 		if (_pulse_use_stream_restore == false &&
@@ -686,45 +678,6 @@ public class VolumeControlPulse : VolumeControl
 				&& volume_changed) {
 				start_local_volume_timer();
 			}
-
-			update_high_volume();
-		}
-	}
-
-	/** HIGH VOLUME PROPERTY **/
-
-	private bool _high_volume = false;
-	public override bool high_volume {
-		get { return this._high_volume; }
-		private set { this._high_volume = value; }
-	}
-	private void init_high_volume() {
-		_options.loud_changed.connect(() => update_high_volume());
-		update_high_volume();
-	}
-	private void update_high_volume() {
-		var new_high_volume = calculate_high_volume();
-		if (high_volume != new_high_volume) {
-			debug("changing high_volume from %d to %d", (int)high_volume, (int)new_high_volume);
-			high_volume = new_high_volume;
-		}
-	}
-	private bool calculate_high_volume() {
-		return calculate_high_volume_from_volume(_volume.volume);
-	}
-	private bool calculate_high_volume_from_volume(double volume) {
-		return _active_port_headphone
-			&& _options.is_loud(_volume)
-			&& (stream == "multimedia");
-	}
-
-	public override void clamp_to_high_volume() {
-		if (_high_volume && _options.is_loud(_volume)) {
-			var vol = new VolumeControl.Volume();
-			vol.volume = _volume.volume.clamp(0, volume_to_double(_options.loud_volume()));
-			vol.reason = _volume.reason;
-			debug("Clamping from %f down to %f", _volume.volume, vol.volume);
-			volume = vol;
 		}
 	}
 

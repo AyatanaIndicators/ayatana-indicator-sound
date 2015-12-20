@@ -20,10 +20,6 @@
 
 public class VolumeControlMock : VolumeControl
 {
-	private bool _high_volume = false;
-	public override bool high_volume { get { return _high_volume; } protected set { _high_volume = value; } }
-	public void set_high_volume(bool b) { high_volume = b; }
-
 	public string mock_stream { get; set; default = "multimedia"; }
 	public override string stream { get { return mock_stream; } }
 	public void mock_set_is_ready(bool b) { ready = b; }

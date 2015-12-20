@@ -30,6 +30,9 @@ public class VolumeWarning : VolumeControl
 	// true if the warning dialog is currently active
 	public bool active { get; public set; default = false; }
 
+	// true iff we're playing unapproved loud multimedia over headphones
+	public bool high_volume { get; protected set; default = false; }
+
 	// FIXME: this is temporarily necessary while bootstrapping this
 	// code because VolumeWarning is still subclassed from VolumeControl,
 	// but TBH we don't need any concept of mute here.
@@ -638,7 +641,6 @@ public class VolumeWarning : VolumeControl
 
 	/** HIGH VOLUME PROPERTY **/
 
-	private bool _high_volume = false;
 	public bool ignore_high_volume {
 		get {
 			if (_ignore_warning_this_time) {
@@ -649,10 +651,6 @@ public class VolumeWarning : VolumeControl
 			return false;
 		}
 		set { }
-	}
-	public override bool high_volume {
-		get { return this._high_volume; }
-		private set { this._high_volume = value; }
 	}
 	private void init_high_volume() {
 		_options.loud_changed.connect(() => update_high_volume());
@@ -674,7 +672,7 @@ public class VolumeWarning : VolumeControl
 			&& (stream == "multimedia");
 	}
 
-	public override void clamp_to_high_volume() {
+	public void clamp_to_high_volume() {
 		if (_high_volume && _options.is_loud(_volume)) {
 			var vol = new VolumeControl.Volume();
 			vol.volume = _volume.volume.clamp(0, volume_to_double(_options.loud_volume()));
