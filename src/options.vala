@@ -22,7 +22,7 @@ public abstract class IndicatorSound.Options : Object
 {
 	// MAX VOLUME
 
-	public virtual double max_volume { get; protected set; }
+	public double max_volume { get; protected set; default = 1.0; }
 
 	// LOUD
 
