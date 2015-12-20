@@ -40,8 +40,6 @@ public class VolumeWarning : VolumeControl
 		warning("set_mute not supported for VolumeWarning");
 	}
 
-	private IndicatorSound.WarnNotification _notification = new IndicatorSound.WarnNotification();
-
 	/* this is static to ensure it being freed after @context (loop does not have ref counting) */
 	private static PulseAudio.GLibMainLoop loop;
 
@@ -103,7 +101,10 @@ public class VolumeWarning : VolumeControl
 		init_all_properties();
 
 		this.reconnect_to_pulse ();
-	}
+
+		_notification = new IndicatorSound.WarnNotification();
+		_notification.user_responded.connect((n, response) => on_user_response(response));
+        }
 
 	private void init_all_properties()
 	{
@@ -123,6 +124,7 @@ public class VolumeWarning : VolumeControl
 			_reconnect_timer = 0;
 		}
 		stop_high_volume_approved_timer();
+		stop_clamp_to_loud_timeout();
 	}
 
 	private VolumeControl.ActiveOutput calculate_active_output (SinkInfo? sink) {
@@ -672,16 +674,6 @@ public class VolumeWarning : VolumeControl
 			&& (stream == "multimedia");
 	}
 
-	public void clamp_to_high_volume() {
-		if (_high_volume && _options.is_loud(_volume)) {
-			var vol = new VolumeControl.Volume();
-			vol.volume = _volume.volume.clamp(0, volume_to_double(_options.loud_volume()));
-			vol.reason = _volume.reason;
-			debug("Clamping from %f down to %f", _volume.volume, vol.volume);
-			volume = vol;
-		}
-	}
-
 	public void set_warning_volume() {
 		var vol = new VolumeControl.Volume();
                 vol.volume = volume_to_double(_options.loud_volume());
@@ -694,7 +686,7 @@ public class VolumeWarning : VolumeControl
 
 	public bool high_volume_approved { get; private set; default = false; }
 
-	public void approve_high_volume() {
+	private void approve_high_volume() {
 		_high_volume_approved_at = GLib.get_monotonic_time();
 		update_high_volume_approved();
 		update_high_volume_approved_timer();
@@ -842,5 +834,90 @@ public class VolumeWarning : VolumeControl
 			warning ("unable to find stream restore data for: %s", name);
 		}
 		return objp;
+	}
+
+	private void set_multimedia_volume(VolumeControl.Volume volume)
+	{
+		// FIXME
+	}
+
+	// NOTIFICATION
+
+	private IndicatorSound.WarnNotification _notification = new IndicatorSound.WarnNotification();
+
+	private VolumeControl.Volume _cancel_volume = null;
+	private VolumeControl.Volume _ok_volume = null;
+
+	public void show(VolumeControl.Volume volume) {
+
+		// the volume to use if user hits 'cancel'
+		_cancel_volume = new VolumeControl.Volume();
+		_cancel_volume.volume = VolumeControlPulse.volume_to_double(_options.loud_volume());
+		_cancel_volume.reason = VolumeControl.VolumeReasons.USER_KEYPRESS;
+
+		// the volume to use if user hits 'ok'
+		_ok_volume = new VolumeControl.Volume();
+		_ok_volume.volume = volume.volume;
+		_ok_volume.reason = VolumeControl.VolumeReasons.USER_KEYPRESS;
+
+		_notification.show();
+		this.active = true;
+	}
+
+	public enum Key {
+		VOLUME_UP,
+		VOLUME_DOWN
+	}
+
+	public void user_keypress(Key key) {
+		if (key == Key.VOLUME_DOWN)
+			on_user_response(IndicatorSound.WarnNotification.Response.CANCEL);
+	}
+
+	private void on_user_response(IndicatorSound.WarnNotification.Response response) {
+		_notification.close();
+		stop_clamp_to_loud_timeout();
+
+		if (response == IndicatorSound.WarnNotification.Response.OK) {
+			approve_high_volume();
+			set_multimedia_volume(_ok_volume);
+		} else { // WarnNotification.CANCEL
+			set_multimedia_volume(_cancel_volume);
+		}
+
+		_cancel_volume = null;
+		_ok_volume = null;
+
+		this.active = false;
+	}
+
+	// VOLUME CLAMPING
+
+	private uint _clamp_to_loud_timeout = 0;
+
+	private void stop_clamp_to_loud_timeout() {
+		if (_clamp_to_loud_timeout != 0) {
+			Source.remove(_clamp_to_loud_timeout);
+			_clamp_to_loud_timeout = 0;
+		}
+	}
+
+	private void clamp_to_loud_soon() {
+		const uint interval_msec = 200;
+		if (_clamp_to_loud_timeout == 0)
+			_clamp_to_loud_timeout = Timeout.add(interval_msec, clamp_to_loud_idle);
+	}
+
+	private bool clamp_to_loud_idle() {
+		_clamp_to_loud_timeout = 0;
+		clamp_to_loud_volume();
+		return false; // Source.REMOVE;
+	}
+
+	private void clamp_to_loud_volume() {
+		if ((_cancel_volume != null) && (_volume.volume > _cancel_volume.volume)) {
+			debug("Clamping from %f down to %f", _volume.volume, _cancel_volume.volume);
+			set_multimedia_volume (_cancel_volume);
+		}
 	}
 }
