@@ -619,7 +619,7 @@ public class IndicatorSound.Service: Object {
 		}
 
 		var loud = volume_control.high_volume;
-		bool ignore_warning_this_time = this.volume_control.ignore_high_volume;
+		bool ignore_warning_this_time = _volume_warning.ignore_high_volume;
 		var warn = loud
 			&& this.notify_server_supports_actions
 			&& !this.volume_control.high_volume_approved

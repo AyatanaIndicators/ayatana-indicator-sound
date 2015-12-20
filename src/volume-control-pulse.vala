@@ -42,7 +42,6 @@ public class VolumeControlPulse : VolumeControl
 	private PulseAudio.Context context;
 	private bool   _mute = true;
 	private bool   _is_playing = false;
-	private bool   _ignore_warning_this_time = false;
 	private VolumeControl.Volume _volume = new VolumeControl.Volume();
 	private double _mic_volume = 0.0;
 	private Settings _settings = new Settings ("com.canonical.indicator.sound");
@@ -345,10 +344,6 @@ public class VolumeControlPulse : VolumeControl
 						var vol = new VolumeControl.Volume();
 						vol.volume = volume_to_double (lvolume);
 						vol.reason = VolumeControl.VolumeReasons.PULSE_CHANGE;
-						// Ignore changes from PULSE to avoid issues with
-						// some apps that change the volume in the sink
-						// We only take into account volume changes from the user
-						this._ignore_warning_this_time = true;
 						this.volume = vol;
 					}
 				}
@@ -393,10 +388,6 @@ public class VolumeControlPulse : VolumeControl
 				var vol = new VolumeControl.Volume();
 				vol.volume = volume_to_double (volume);
 				vol.reason = VolumeControl.VolumeReasons.VOLUME_STREAM_CHANGE;
-				// Ignore changes from PULSE to avoid issues with
-                                // some apps that change the volume in the sink
-                                // We only take into account volume changes from the user
-				this._ignore_warning_this_time = true;
 				this.volume = vol;
 			} catch (GLib.Error e) {
 				warning ("unable to get volume for active role %s (%s)", sink_input_objp, e.message);
@@ -724,17 +715,6 @@ public class VolumeControlPulse : VolumeControl
 	/** HIGH VOLUME PROPERTY **/
 
 	private bool _high_volume = false;
-	public override bool ignore_high_volume {
-		get {
-			if (_ignore_warning_this_time) {
-				warning("Ignore");
-				_ignore_warning_this_time = false;
-				return true;
-			}
-			return false;
-		}
-		set { }
-	}
 	public override bool high_volume {
 		get { return this._high_volume; }
 		private set { this._high_volume = value; }

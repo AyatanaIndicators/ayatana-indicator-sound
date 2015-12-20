@@ -651,7 +651,7 @@ public class VolumeWarning : VolumeControl
 	/** HIGH VOLUME PROPERTY **/
 
 	private bool _high_volume = false;
-	public override bool ignore_high_volume {
+	public bool ignore_high_volume {
 		get {
 			if (_ignore_warning_this_time) {
 				warning("Ignore");
