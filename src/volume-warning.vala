@@ -22,9 +22,6 @@ using PulseAudio;
 using Notify;
 using Gee;
 
-[CCode(cname="pa_cvolume_set", cheader_filename = "pulse/volume.h")]
-extern unowned PulseAudio.CVolume? vol_set2 (PulseAudio.CVolume? cv, uint channels, PulseAudio.Volume v);
-
 public class VolumeWarning : Object
 {
 	// true if the active sink input has its role property set to multimedia
