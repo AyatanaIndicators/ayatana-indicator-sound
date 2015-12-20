@@ -121,7 +121,7 @@ public class VolumeControlPulse : VolumeControl
 		stop_account_service_volume_timer();
 	}
 
-	private VolumeControl.ActiveOutput calculate_active_output (SinkInfo? sink) {
+	public static VolumeControl.ActiveOutput calculate_active_output (SinkInfo? sink) {
 		
 		VolumeControl.ActiveOutput ret_output = VolumeControl.ActiveOutput.SPEAKERS;
 		/* Check if the current active port is headset/headphone */
@@ -693,15 +693,10 @@ public class VolumeControlPulse : VolumeControl
 		}
 	}
 
-	/* PulseAudio Dbus (Stream Restore) logic */
-	private void reconnect_pulse_dbus ()
+	public static DBusConnection create_pulse_dbus_connection()
 	{
 		unowned string pulse_dbus_server_env = Environment.get_variable ("PULSE_DBUS_SERVER");
 		string address;
-
-		/* In case of a reconnect */
-		_pulse_use_stream_restore = false;
-		_pa_volume_sig_count = 0;
 
 		if (pulse_dbus_server_env != null) {
 			address = pulse_dbus_server_env;
@@ -713,7 +708,7 @@ public class VolumeControlPulse : VolumeControl
 				conn = Bus.get_sync (BusType.SESSION);
 			} catch (GLib.IOError e) {
 				warning ("unable to get the dbus session bus: %s", e.message);
-				return;
+				return null;
 			}
 
 			try {
@@ -725,17 +720,29 @@ public class VolumeControlPulse : VolumeControl
 				address = props.get_string ();
 			} catch (GLib.Error e) {
 				warning ("unable to get pulse unix socket: %s", e.message);
-				return;
+				return null;
 			}
 		}
 
 		debug ("PulseAudio dbus unix socket: %s", address);
 		try {
-			_pconn = new DBusConnection.for_address_sync (address, DBusConnectionFlags.AUTHENTICATION_CLIENT);
+			return new DBusConnection.for_address_sync (address, DBusConnectionFlags.AUTHENTICATION_CLIENT);
 		} catch (GLib.Error e) {
 			/* If it fails, it means the dbus pulse extension is not available */
-			return;
+			return null;
 		}
+	}
+
+	/* PulseAudio Dbus (Stream Restore) logic */
+	private void reconnect_pulse_dbus ()
+	{
+		/* In case of a reconnect */
+		_pulse_use_stream_restore = false;
+		_pa_volume_sig_count = 0;
+
+		_pconn = create_pulse_dbus_connection();
+		if (_pconn == null)
+			return;
 
 		/* For pulse dbus related events */
 		_pconn.add_filter (pulse_dbus_filter);

@@ -117,54 +117,6 @@ public class VolumeWarning : Object
 		stop_clamp_to_loud_timeout();
 	}
 
-	private VolumeControl.ActiveOutput calculate_active_output (SinkInfo? sink) {
-
-		VolumeControl.ActiveOutput ret_output = VolumeControl.ActiveOutput.SPEAKERS;
-		/* Check if the current active port is headset/headphone */
-    		/* There is not easy way to check if the port is a headset/headphone besides
-    		 * checking for the port name. On touch (with the pulseaudio droid element)
-    		 * the headset/headphone port is called 'output-headset' and 'output-headphone'.
-    		 * On the desktop this is usually called 'analog-output-headphones' */
-
-		// first of all check if we are in call mode
-		if (sink.active_port != null && sink.active_port.name == "output-speaker+wired_headphone") {
-			return VolumeControl.ActiveOutput.CALL_MODE;
-		}
-		// look if it's a headset/headphones
-		if (sink.name == "indicator_sound_test_headphones" ||
-			(sink.active_port != null &&
-			 (sink.active_port.name.contains("headset") ||
-		          sink.active_port.name.contains("headphone")))) {
-			    	_active_port_headphone = true;
-	    			// check if it's a bluetooth device
-	    			var device_bus = sink.proplist.gets ("device.bus");
-	    			if (device_bus != null && device_bus == "bluetooth") {
-					ret_output = VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES;
-        			} else if (device_bus != null && device_bus == "usb") {
-					ret_output = VolumeControl.ActiveOutput.USB_HEADPHONES;
-				} else if (device_bus != null && device_bus == "hdmi") {
-					ret_output = VolumeControl.ActiveOutput.HDMI_HEADPHONES;
-				} else {
-					ret_output = VolumeControl.ActiveOutput.HEADPHONES;
-        		}
-		} else {
-			// speaker
-			_active_port_headphone = false;
-			var device_bus = sink.proplist.gets ("device.bus");
-	    		if (device_bus != null && device_bus == "bluetooth") {
-	    		    ret_output = VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER;
-        		} else if (device_bus != null && device_bus == "usb") {
-				ret_output = VolumeControl.ActiveOutput.USB_SPEAKER;
-			} else if (device_bus != null && device_bus == "hdmi") {
-				ret_output = VolumeControl.ActiveOutput.HDMI_SPEAKER;
-			} else {
-				ret_output = VolumeControl.ActiveOutput.SPEAKERS;
-        		}
-		}
-
-		return ret_output;
-	}
-
 	/* PulseAudio logic*/
 	private void context_events_cb (Context c, Context.SubscriptionEventType t, uint32 index)
 	{
@@ -205,22 +157,28 @@ public class VolumeWarning : Object
 		if (i == null)
 			return;
 
-		// store the current status of the active output
-		VolumeControl.ActiveOutput active_output_before = active_output;
+		var old_active_output = active_output;
+		var new_active_output = VolumeControlPulse.calculate_active_output(i);
 
-		// calculate the output
-		_active_output = calculate_active_output (i);
+		_active_output = new_active_output;
 
-		// check if the output has changed, if so... emit a signal
-		VolumeControl.ActiveOutput active_output_now = active_output;
-		if (active_output_now != active_output_before &&
-			(active_output_now != VolumeControl.ActiveOutput.CALL_MODE &&
-			 active_output_before != VolumeControl.ActiveOutput.CALL_MODE)) {
-			if (active_output_now == VolumeControl.ActiveOutput.SPEAKERS) {
-				_high_volume_approved = false;
-			}
-			update_high_volume();
+		switch (new_active_output) {
+			case VolumeControl.ActiveOutput.HEADPHONES:
+			case VolumeControl.ActiveOutput.USB_HEADPHONES:
+			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
+			case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
+				_active_port_headphones = true;
+				break;
+
+			default:
+				_active_port_headphones = false;
+				break;
 		}
+
+		if ((new_active_output != old_active_output)
+				&& (new_active_output != VolumeControl.ActiveOutput.CALL_MODE)
+				&& (old_active_output != VolumeControl.ActiveOutput.CALL_MODE))
+			update_high_volume();
 
 		if (_pulse_use_stream_restore == false &&
 				_volume.volume != volume_to_double (i.volume.max ()))
@@ -234,9 +192,8 @@ public class VolumeWarning : Object
 
 	private void server_info_cb_for_props (Context c, ServerInfo? i)
 	{
-		if (i == null)
-			return;
-		context.get_sink_info_by_name (i.default_sink_name, sink_info_cb_for_props);
+		if (i != null)
+			context.get_sink_info_by_name (i.default_sink_name, sink_info_cb_for_props);
 	}
 
 	private void update_sink ()
@@ -675,46 +632,13 @@ public class VolumeWarning : Object
 	/* PulseAudio Dbus (Stream Restore) logic */
 	private void reconnect_pulse_dbus ()
 	{
-		unowned string pulse_dbus_server_env = Environment.get_variable ("PULSE_DBUS_SERVER");
-		string address;
-
 		/* In case of a reconnect */
 		_pulse_use_stream_restore = false;
 		_pa_volume_sig_count = 0;
 
-		if (pulse_dbus_server_env != null) {
-			address = pulse_dbus_server_env;
-		} else {
-			DBusConnection conn;
-			Variant props;
-
-			try {
-				conn = Bus.get_sync (BusType.SESSION);
-			} catch (GLib.IOError e) {
-				warning ("unable to get the dbus session bus: %s", e.message);
-				return;
-			}
-
-			try {
-				var props_variant = conn.call_sync ("org.PulseAudio1",
-						"/org/pulseaudio/server_lookup1", "org.freedesktop.DBus.Properties",
-						"Get", new Variant ("(ss)", "org.PulseAudio.ServerLookup1", "Address"),
-						null, DBusCallFlags.NONE, -1);
-				props_variant.get ("(v)", out props);
-				address = props.get_string ();
-			} catch (GLib.Error e) {
-				warning ("unable to get pulse unix socket: %s", e.message);
-				return;
-			}
-		}
-
-		debug ("PulseAudio dbus unix socket: %s", address);
-		try {
-			_pconn = new DBusConnection.for_address_sync (address, DBusConnectionFlags.AUTHENTICATION_CLIENT);
-		} catch (GLib.Error e) {
-			/* If it fails, it means the dbus pulse extension is not available */
+		_pconn = VolumeControlPulse.create_pulse_dbus_connection();
+		if (_pconn == null)
 			return;
-		}
 
 		/* For pulse dbus related events */
 		_pconn.add_filter (pulse_dbus_filter);
