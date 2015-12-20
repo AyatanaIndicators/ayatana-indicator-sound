@@ -33,14 +33,6 @@ public class VolumeWarning : Object
 	// true if we're playing unapproved loud multimedia over headphones
 	public bool high_volume { get; protected set; default = false; }
 
-	// true if the active sink input has its role property set to multimedia
-	protected bool multimedia_active { get; set; default = false; }
-
-	// true if the user has approved high volumes recently
-	protected bool high_volume_approved { get; set; default = false; }
-
-	protected PulseAudio.Volume multimedia_volume { get; set; default = PulseAudio.Volume.MUTED; }
-
 	public enum Key {
 		VOLUME_UP,
 		VOLUME_DOWN
@@ -51,8 +43,7 @@ public class VolumeWarning : Object
 			on_user_response(IndicatorSound.WarnNotification.Response.CANCEL);
 	}
 
-	public VolumeWarning (IndicatorSound.Options options)
-	{
+	public VolumeWarning (IndicatorSound.Options options) {
 		_options = options;
 
 		if (loop == null)
@@ -65,6 +56,43 @@ public class VolumeWarning : Object
 		_notification = new IndicatorSound.WarnNotification();
 		_notification.user_responded.connect((n, response) => on_user_response(response));
         }
+
+	/***
+	****
+	***/
+
+	// true if the user has approved high volumes recently
+	protected bool high_volume_approved { get; set; default = false; }
+
+	// true if the active sink input has its role property set to multimedia
+	protected bool multimedia_active { get; set; default = false; }
+
+	// the multimedia volume
+	protected PulseAudio.Volume multimedia_volume { get; set; default = PulseAudio.Volume.MUTED; }
+
+	// true if headphones are currently in use
+	protected bool headphones_active { get; set; default = false; }
+
+	protected virtual async void set_pulse_multimedia_volume(PulseAudio.Volume volume)
+	{
+		var objp = _multimedia_objp;
+		if (objp == null)
+			return;
+
+		try {
+			var builder = new VariantBuilder (new VariantType ("a(uu)"));
+			builder.add ("(uu)", 0, volume);
+
+			yield _pconn.call ("org.PulseAudio.Ext.StreamRestore1.RestoreEntry",
+					objp, "org.freedesktop.DBus.Properties", "Set",
+					new Variant ("(ssv)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume", builder),
+					null, DBusCallFlags.NONE, -1);
+
+			debug ("Set multimedia volume to %d on path %s", (int)volume, objp);
+		} catch (GLib.Error e) {
+			warning ("unable to set volume for stream obj path %s (%s)", objp, e.message);
+		}
+	}
 
 	/***
 	****
@@ -94,7 +122,6 @@ public class VolumeWarning : Object
 	private string? _objp_role_phone = null;
 	private uint _pa_volume_sig_count = 0;
 
-	private bool _active_port_headphones = false;
 	private VolumeControl.ActiveOutput _active_output = VolumeControl.ActiveOutput.SPEAKERS;
 	private IndicatorSound.Options _options;
 
@@ -166,11 +193,11 @@ public class VolumeWarning : Object
 			case VolumeControl.ActiveOutput.USB_HEADPHONES:
 			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
 			case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-				_active_port_headphones = true;
+				headphones_active = true;
 				break;
 
 			default:
-				_active_port_headphones = false;
+				headphones_active = false;
 				break;
 		}
 
@@ -518,24 +545,21 @@ public class VolumeWarning : Object
 	}
 	private void init_high_volume() {
 		_options.loud_changed.connect(() => update_high_volume());
+		notify["multimedia-volume"].connect(() => update_high_volume());
+		notify["high-volume-approved"].connect(() => update_high_volume());
 		update_high_volume();
 	}
 	private void update_high_volume() {
-		var new_high_volume = calculate_high_volume();
+		var new_high_volume = headphones_active
+			&& !high_volume_approved
+			&& multimedia_active
+			&& _options.is_loud_pulse(multimedia_volume);
 		if (high_volume != new_high_volume) {
 			debug("changing high_volume from %d to %d", (int)high_volume, (int)new_high_volume);
 			high_volume = new_high_volume;
 			if (high_volume && !active)
 				show();
 		}
-	}
-	private bool calculate_high_volume() {
-		return calculate_high_volume_from_volume(multimedia_volume);
-	}
-	private bool calculate_high_volume_from_volume(PulseAudio.Volume volume) {
-		return _active_port_headphones
-			&& _options.is_loud_pulse(volume)
-			&& multimedia_active;
 	}
 
 	/** HIGH VOLUME APPROVED PROPERTY **/
@@ -593,27 +617,6 @@ public class VolumeWarning : Object
 		int64 now = GLib.get_monotonic_time();
 		return (_high_volume_approved_at != 0)
 			&& (_high_volume_approved_at + _high_volume_approved_ttl_usec >= now);
-	}
-
-	protected virtual async void set_pulse_multimedia_volume(PulseAudio.Volume volume)
-	{
-		var objp = _multimedia_objp;
-		if (objp == null)
-			return;
-
-		try {
-			var builder = new VariantBuilder (new VariantType ("a(uu)"));
-			builder.add ("(uu)", 0, volume);
-
-			yield _pconn.call ("org.PulseAudio.Ext.StreamRestore1.RestoreEntry",
-					objp, "org.freedesktop.DBus.Properties", "Set",
-					new Variant ("(ssv)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume", builder),
-					null, DBusCallFlags.NONE, -1);
-
-			debug ("Set multimedia volume to %d on path %s", (int)volume, objp);
-		} catch (GLib.Error e) {
-			warning ("unable to set volume for stream obj path %s (%s)", objp, e.message);
-		}
 	}
 
 	// NOTIFICATION
