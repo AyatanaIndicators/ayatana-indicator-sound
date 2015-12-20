@@ -405,7 +405,7 @@ public class VolumeWarning : Object
 		return false; // G_SOURCE_REMOVE
 	}
 
-	void reconnect_to_pulse ()
+	private void reconnect_to_pulse ()
 	{
 		if (_connected_to_pulse) {
 			this.context.disconnect ();
@@ -413,14 +413,13 @@ public class VolumeWarning : Object
 			_connected_to_pulse = false;
 		}
 
+		reconnect_pulse_dbus ();
+
 		var props = new Proplist ();
 		props.sets (Proplist.PROP_APPLICATION_NAME, "Ubuntu Audio Settings");
 		props.sets (Proplist.PROP_APPLICATION_ID, "com.canonical.settings.sound");
 		props.sets (Proplist.PROP_APPLICATION_ICON_NAME, "multimedia-volume-control");
 		props.sets (Proplist.PROP_APPLICATION_VERSION, "0.1");
-
-		reconnect_pulse_dbus ();
-
 		this.context = new PulseAudio.Context (loop.get_api(), null, props);
 		this.context.set_state_callback (context_state_callback);
 
@@ -428,6 +427,53 @@ public class VolumeWarning : Object
 		if (context.connect(server_string, Context.Flags.NOFAIL, null) < 0)
 			warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(context.errno()));
 	}
+
+	private void reconnect_pulse_dbus ()
+	{
+		/* In case of a reconnect */
+		_pulse_use_stream_restore = false;
+		_pa_volume_sig_count = 0;
+
+		_pconn = VolumeControlPulse.create_pulse_dbus_connection();
+		if (_pconn == null)
+			return;
+
+		/* For pulse dbus related events */
+		_pconn.add_filter (pulse_dbus_filter);
+
+		/* Check if the 4 currently supported media roles are already available in StreamRestore
+		 * Roles: multimedia, alert, alarm and phone */
+		_objp_role_multimedia = stream_restore_get_object_path ("sink-input-by-media-role:multimedia");
+		_objp_role_alert = stream_restore_get_object_path ("sink-input-by-media-role:alert");
+		_objp_role_alarm = stream_restore_get_object_path ("sink-input-by-media-role:alarm");
+		_objp_role_phone = stream_restore_get_object_path ("sink-input-by-media-role:phone");
+
+		/* Only use stream restore if every used role is available */
+		if (_objp_role_multimedia != null && _objp_role_alert != null && _objp_role_alarm != null && _objp_role_phone != null) {
+			debug ("Using PulseAudio DBUS Stream Restore module");
+			/* Restore volume and update default entry */
+			update_active_sink_input.begin (-1);
+			_pulse_use_stream_restore = true;
+		}
+	}
+
+	private string? stream_restore_get_object_path (string name) {
+		string? objp = null;
+		try {
+			Variant props_variant = _pconn.call_sync ("org.PulseAudio.Ext.StreamRestore1",
+					"/org/pulseaudio/stream_restore1", "org.PulseAudio.Ext.StreamRestore1",
+					"GetEntryByName", new Variant ("(s)", name), null, DBusCallFlags.NONE, -1);
+			/* Workaround for older versions of vala that don't provide get_objv */
+			VariantIter iter = props_variant.iterator ();
+			iter.next ("o", &objp);
+			debug ("Found obj path %s for restore data named %s\n", objp, name);
+		} catch (GLib.Error e) {
+			warning ("unable to find stream restore data for: %s", name);
+		}
+		return objp;
+	}
+
+	// ACTIVE OUTPUT
 
 	private VolumeControl.ActiveOutput active_output
 	{
@@ -632,52 +678,6 @@ public class VolumeWarning : Object
 		int64 now = GLib.get_monotonic_time();
 		return (_high_volume_approved_at != 0)
 			&& (_high_volume_approved_at + _high_volume_approved_ttl_usec >= now);
-	}
-
-	/* PulseAudio Dbus (Stream Restore) logic */
-	private void reconnect_pulse_dbus ()
-	{
-		/* In case of a reconnect */
-		_pulse_use_stream_restore = false;
-		_pa_volume_sig_count = 0;
-
-		_pconn = VolumeControlPulse.create_pulse_dbus_connection();
-		if (_pconn == null)
-			return;
-
-		/* For pulse dbus related events */
-		_pconn.add_filter (pulse_dbus_filter);
-
-		/* Check if the 4 currently supported media roles are already available in StreamRestore
-		 * Roles: multimedia, alert, alarm and phone */
-		_objp_role_multimedia = stream_restore_get_object_path ("sink-input-by-media-role:multimedia");
-		_objp_role_alert = stream_restore_get_object_path ("sink-input-by-media-role:alert");
-		_objp_role_alarm = stream_restore_get_object_path ("sink-input-by-media-role:alarm");
-		_objp_role_phone = stream_restore_get_object_path ("sink-input-by-media-role:phone");
-
-		/* Only use stream restore if every used role is available */
-		if (_objp_role_multimedia != null && _objp_role_alert != null && _objp_role_alarm != null && _objp_role_phone != null) {
-			debug ("Using PulseAudio DBUS Stream Restore module");
-			/* Restore volume and update default entry */
-			update_active_sink_input.begin (-1);
-			_pulse_use_stream_restore = true;
-		}
-	}
-
-	private string? stream_restore_get_object_path (string name) {
-		string? objp = null;
-		try {
-			Variant props_variant = _pconn.call_sync ("org.PulseAudio.Ext.StreamRestore1",
-					"/org/pulseaudio/stream_restore1", "org.PulseAudio.Ext.StreamRestore1",
-					"GetEntryByName", new Variant ("(s)", name), null, DBusCallFlags.NONE, -1);
-			/* Workaround for older versions of vala that don't provide get_objv */
-			VariantIter iter = props_variant.iterator ();
-			iter.next ("o", &objp);
-			debug ("Found obj path %s for restore data named %s\n", objp, name);
-		} catch (GLib.Error e) {
-			warning ("unable to find stream restore data for: %s", name);
-		}
-		return objp;
 	}
 
 	private void set_multimedia_volume(VolumeControl.Volume volume)
