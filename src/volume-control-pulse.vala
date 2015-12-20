@@ -83,7 +83,6 @@ public class VolumeControlPulse : VolumeControl
 	private uint _accountservice_volume_timer = 0;
 	private bool _send_next_local_volume = false;
 	private double _account_service_volume = 0.0;
-	private bool _active_port_headphone = false;
 	private VolumeControl.ActiveOutput _active_output = VolumeControl.ActiveOutput.SPEAKERS;
 
 	/** true when a microphone is active **/
@@ -140,7 +139,6 @@ public class VolumeControlPulse : VolumeControl
 			(sink.active_port != null && 
 			 (sink.active_port.name.contains("headset") ||
 		          sink.active_port.name.contains("headphone")))) {
-			    	_active_port_headphone = true;
 	    			// check if it's a bluetooth device
 	    			var device_bus = sink.proplist.gets ("device.bus");
 	    			if (device_bus != null && device_bus == "bluetooth") {
@@ -154,7 +152,6 @@ public class VolumeControlPulse : VolumeControl
         		}
 		} else {
 			// speaker
-			_active_port_headphone = false;
 			var device_bus = sink.proplist.gets ("device.bus");
 	    		if (device_bus != null && device_bus == "bluetooth") {
 	    		    ret_output = VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER;
