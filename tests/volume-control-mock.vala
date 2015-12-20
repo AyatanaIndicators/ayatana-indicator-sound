@@ -26,7 +26,7 @@ public class VolumeControlMock : VolumeControl
 
 	public string mock_stream { get; set; default = "multimedia"; }
 	public override string stream { get { return mock_stream; } }
-	public override bool ready { get; set; }
+	public void mock_set_is_ready(bool b) { ready = b; }
 	public override bool active_mic { get; set; }
 	public bool mock_mute { get; set; }
 	public override bool mute { get { return mock_mute; } }

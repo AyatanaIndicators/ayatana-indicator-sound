@@ -52,7 +52,7 @@ public abstract class VolumeControl : Object
 	}
 
 	public virtual string stream { get { return ""; } }
-	public virtual bool ready { get { return false; } set { } }
+	public bool ready { get; protected set; default = false; }
 	public virtual bool active_mic { get { return false; } set { } }
 	public virtual bool high_volume { get { return false; } protected set { } }
 	public virtual bool mute { get { return false; } }

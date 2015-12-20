@@ -82,9 +82,6 @@ public class VolumeWarning : VolumeControl
 	private bool _active_port_headphone = false;
 	private VolumeControl.ActiveOutput _active_output = VolumeControl.ActiveOutput.SPEAKERS;
 
-	/** true when connected to the pulse server */
-	public override bool ready { get; private set; }
-
 	/** true when a microphone is active **/
 	public override bool active_mic { get; private set; default = false; }
 
@@ -455,6 +452,8 @@ public class VolumeWarning : VolumeControl
 			this.active_mic = true;
 	}
 
+	private bool _connected_to_pulse = false;
+
 	private void context_state_callback (Context c)
 	{
 		switch (c.get_state ()) {
@@ -472,7 +471,7 @@ public class VolumeWarning : VolumeControl
 				c.set_subscribe_callback (context_events_cb);
 				update_sink ();
 				update_source ();
-				this.ready = true;
+				_connected_to_pulse = true;
 				break;
 
 			case Context.State.FAILED:
@@ -482,7 +481,7 @@ public class VolumeWarning : VolumeControl
 				break;
 
 			default:
-				this.ready = false;
+				_connected_to_pulse = false;
 				break;
 		}
 	}
@@ -496,10 +495,10 @@ public class VolumeWarning : VolumeControl
 
 	void reconnect_to_pulse ()
 	{
-		if (this.ready) {
+		if (_connected_to_pulse) {
 			this.context.disconnect ();
 			this.context = null;
-			this.ready = false;
+			_connected_to_pulse = false;
 		}
 
 		var props = new Proplist ();

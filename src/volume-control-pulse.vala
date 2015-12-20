@@ -86,9 +86,6 @@ public class VolumeControlPulse : VolumeControl
 	private bool _active_port_headphone = false;
 	private VolumeControl.ActiveOutput _active_output = VolumeControl.ActiveOutput.SPEAKERS;
 
-	/** true when connected to the pulse server */
-	public override bool ready { get; private set; }
-
 	/** true when a microphone is active **/
 	public override bool active_mic { get; private set; default = false; }
 
@@ -480,7 +477,7 @@ public class VolumeControlPulse : VolumeControl
 				c.set_subscribe_callback (context_events_cb);
 				update_sink ();
 				update_source ();
-				this.ready = true;
+				this.ready = true; // true because we're connected to the pulse server
 				break;
 
 			case Context.State.FAILED:
