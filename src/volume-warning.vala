@@ -118,7 +118,6 @@ public class VolumeWarning : Object
 	private void stop_all_timers()
 	{
 		stop_high_volume_approved_timer();
-		stop_clamp_to_loud_timeout();
 	}
 
 	/***
@@ -349,61 +348,27 @@ public class VolumeWarning : Object
 
 	private IndicatorSound.WarnNotification _notification = new IndicatorSound.WarnNotification();
 
-	private PulseAudio.Volume _cancel_volume = PulseAudio.Volume.INVALID;
 	private PulseAudio.Volume _ok_volume = PulseAudio.Volume.INVALID;
 
 	private void show() {
-		_cancel_volume = _options.loud_volume();
 		_ok_volume = multimedia_volume;
 		_notification.show();
 		this.active = true;
+
+		// lower the volume to just under the warning level
+		set_pulse_multimedia_volume.begin (_options.loud_volume()-1);
 	}
 
 	private void on_user_response(IndicatorSound.WarnNotification.Response response) {
 		_notification.close();
-		stop_clamp_to_loud_timeout();
 
 		if (response == IndicatorSound.WarnNotification.Response.OK) {
 			approve_high_volume();
 			set_pulse_multimedia_volume.begin(_ok_volume);
-		} else { // WarnNotification.CANCEL
-			set_pulse_multimedia_volume.begin(_cancel_volume);
 		}
 
-		_cancel_volume = PulseAudio.Volume.INVALID;
 		_ok_volume = PulseAudio.Volume.INVALID;
 
 		this.active = false;
-	}
-
-	// VOLUME CLAMPING
-
-	private uint _clamp_to_loud_timeout = 0;
-
-	private void stop_clamp_to_loud_timeout() {
-		if (_clamp_to_loud_timeout != 0) {
-			Source.remove(_clamp_to_loud_timeout);
-			_clamp_to_loud_timeout = 0;
-		}
-	}
-
-	private void clamp_to_loud_soon() {
-		const uint interval_msec = 200;
-		if (_clamp_to_loud_timeout == 0)
-			_clamp_to_loud_timeout = Timeout.add(interval_msec, clamp_to_loud_idle);
-	}
-
-	private bool clamp_to_loud_idle() {
-		_clamp_to_loud_timeout = 0;
-		clamp_to_loud_volume();
-		return false; // Source.REMOVE;
-	}
-
-	private void clamp_to_loud_volume() {
-		var loud_volume = _options.loud_volume();
-		if (multimedia_volume > loud_volume) {
-			debug("Clamping from %d down to %d", (int)multimedia_volume, (int)loud_volume);
-			set_pulse_multimedia_volume.begin (loud_volume);
-		}
 	}
 }
