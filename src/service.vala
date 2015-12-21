@@ -148,7 +148,9 @@ public class IndicatorSound.Service: Object {
 		return_if_fail (n != null);
 		if (n.id != 0) {
 			try {
+				GLib.message("calling n.close()");
 				n.close();
+				GLib.message("done calling n.close()");
 			} catch (GLib.Error e) {
 				warning("Unable to close notification: %s", e.message);
 			}
@@ -158,7 +160,9 @@ public class IndicatorSound.Service: Object {
 	private void show_notification(Notify.Notification? n) {
 		return_if_fail (n != null);
 		try {
+			GLib.message("calling n.show()");
 			n.show ();
+			GLib.message("done calling n.show()");
 		} catch (GLib.Error e) {
 			warning ("Unable to show notification: %s", e.message);
 		}
@@ -629,16 +633,14 @@ public class IndicatorSound.Service: Object {
 
 		if (!notify_server_caps_checked)
 		{
+			GLib.message("service checking server caps");
 			List<string> caps = Notify.get_server_caps ();
 			notify_server_supports_sync = caps.find_custom ("x-canonical-private-synchronous", strcmp) != null;
 			notify_server_caps_checked = true;
+			GLib.message("service done checking server caps");
 		}
 
-		if (_volume_warning.active)
-		{
-			close_notification(info_notification);
-		}
-		else if (notify_server_supports_sync && !block_info_notifications)
+		if (!_volume_warning.active && notify_server_supports_sync && !block_info_notifications)
 		{
 			bool is_loud = _volume_warning.high_volume;
 
@@ -646,6 +648,7 @@ public class IndicatorSound.Service: Object {
 		 	string icon = get_volume_notification_icon (volume_control.volume.volume, is_loud, volume_control.active_output);
 
 			/* Reset the notification */
+			GLib.message("service showing info notification");
 			var n = this.info_notification;
 			n.update (_("Volume"), volume_label, icon);
 			n.clear_hints();
@@ -654,6 +657,7 @@ public class IndicatorSound.Service: Object {
 			n.set_hint ("x-canonical-value-bar-tint", is_loud ? "true" : "false");
 			n.set_hint ("value", (int32)Math.round(get_volume_percent() * 100.0));
 			show_notification(n);
+			GLib.message("service done showing info notification");
 		}
 	}
 
@@ -809,8 +813,11 @@ public class IndicatorSound.Service: Object {
 		high_volume_action = new SimpleAction.stateful("high-volume", null, create_high_volume_action_state());
 
 		_volume_warning.notify["high-volume"].connect( () => {
+			GLib.message("in service, due to high-volume change, updating high-volume-action-state");
 			update_high_volume_action_state();
+			GLib.message("in service, due to high-volume change, updating notification");
 			update_notification();
+			GLib.message("in service, finished handling high-volume notify");
 		});
 
 		return high_volume_action;

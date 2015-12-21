@@ -39,11 +39,11 @@ public abstract class IndicatorSound.Notification: Object
 		close();
 	}
 
-	protected void show_() {
+	protected async void show_() {
 		try {
 			GLib.message("calling _notification.show");
 			_notification.show ();
-			message("after calling show, n.id is %d", (int)_notification.id);
+			GLib.message("after calling show, n.id is %d", (int)_notification.id);
 			visible = true;
 		} catch (GLib.Error e) {
 			warning ("Unable to show notification: %s", e.message);

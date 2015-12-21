@@ -38,7 +38,6 @@ public class IndicatorSound.WarnNotification: Notification
 	}
 
 	public bool show() {
-		close();
 
 		if (!notify_server_supports("actions"))
 			return false;
@@ -51,7 +50,7 @@ public class IndicatorSound.WarnNotification: Notification
 			user_responded(Response.CANCEL);
 		});
 		GLib.message("showing warning dialog");
-		show_();
+		show_.begin();
 
 		return true;
 	}
