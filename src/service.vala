@@ -50,22 +50,27 @@ public class IndicatorSound.Service: Object {
 
 		this.volume_control = volume;
 		this.volume_control.notify["active-stream"].connect(() => {
-			_volume_warning.multimedia_active =
-				VolumeControl.Stream.MULTIMEDIA == volume_control.active_stream;
+			var b = VolumeControl.Stream.MULTIMEDIA == volume_control.active_stream;
+			message("updating _volume_warning.multimedia_active to %d", (int)b);
+			_volume_warning.multimedia_active = b;
 		});
 		this.volume_control.active_output_changed.connect(() => {
+			bool headphones;
 			switch(volume_control.active_output) {
 				case VolumeControl.ActiveOutput.HEADPHONES:
 				case VolumeControl.ActiveOutput.USB_HEADPHONES:
 				case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
 				case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-					_volume_warning.headphones_active = true;
+					headphones = true;
 					break;
 
 				default:
-					_volume_warning.headphones_active = false;
+					headphones = false;
 					break;
 			}
+			message("setting _volume_warning.headphones_active to %d", (int)headphones);
+			_volume_warning.headphones_active = headphones;
+
 			update_root_icon();
 			update_notification();
 		});
@@ -105,7 +110,7 @@ public class IndicatorSound.Service: Object {
 		});
 
 		this.menus.@foreach ( (profile, menu) => {
-			this.volume_control.bind_property ("high-volume", menu, "show-high-volume-warning", BindingFlags.SYNC_CREATE);
+			_volume_warning.bind_property ("high-volume", menu, "show-high-volume-warning", BindingFlags.SYNC_CREATE);
 		});
 
 		this.menus.@foreach ( (profile, menu) => {
