@@ -330,12 +330,18 @@ public class VolumeControlPulse : VolumeControl
 
 	private async void update_active_sink_input (int32 index)
 	{
+		GLib.message("index %d _active_sink_input %d in list %d", (int)index, (int)_active_sink_input, (int)(index in _sink_input_list));
 		if ((index == -1) || (index != _active_sink_input && index in _sink_input_list)) {
 			string sink_input_objp = _objp_role_alert;
 			if (index != -1)
 				sink_input_objp = _sink_input_hash.get (index);
 			_active_sink_input = index;
-			active_stream = calculate_active_stream();
+			var stream = calculate_active_stream();
+			GLib.message("calculating active stream: %d", (int)stream);
+			if (active_stream != stream) {
+				GLib.message("changing active_stream from %d to %d", (int)active_stream, stream);
+				active_stream = stream;
+			}
 
 			/* Listen for role volume changes from pulse itself (external clients) */
 			try {
@@ -364,6 +370,7 @@ public class VolumeControlPulse : VolumeControl
 				var vol = new VolumeControl.Volume();
 				vol.volume = volume_to_double (volume);
 				vol.reason = VolumeControl.VolumeReasons.VOLUME_STREAM_CHANGE;
+				GLib.message("setting volume to %f due to stream change", vol.volume);
 				this.volume = vol;
 			} catch (GLib.Error e) {
 				warning ("unable to get volume for active role %s (%s)", sink_input_objp, e.message);
@@ -379,6 +386,7 @@ public class VolumeControlPulse : VolumeControl
 		if (role != null && role in _valid_roles) {
 			if (sink_input.corked == 0 || role == "phone") {
 				_sink_input_list.insert (0, sink_input.index);
+				GLib.message("role %s _objp_role_multimedia %s", role, _objp_role_multimedia);
 				switch (role)
 				{
 					case "multimedia":
@@ -623,12 +631,13 @@ public class VolumeControlPulse : VolumeControl
 				_pa_volume_sig_count++;
 			}
 
+			GLib.message ("Calling org.PulseAudio.Ext.StreamRestore1.RestoreEntry Set Volume");
 			yield _pconn.call ("org.PulseAudio.Ext.StreamRestore1.RestoreEntry",
 					active_role_objp, "org.freedesktop.DBus.Properties", "Set",
 					new Variant ("(ssv)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume", volume),
 					null, DBusCallFlags.NONE, -1);
 
-			debug ("Set volume to %f on path %s", vol, active_role_objp);
+			GLib.message ("Set volume to %f on path %s", vol, active_role_objp);
 		} catch (GLib.Error e) {
 			lock (_pa_volume_sig_count) {
 				_pa_volume_sig_count--;
@@ -724,13 +733,16 @@ public class VolumeControlPulse : VolumeControl
 			}
 		}
 
-		debug ("PulseAudio dbus unix socket: %s", address);
+		GLib.message ("PulseAudio dbus unix socket: %s", address);
+		DBusConnection conn = null;
 		try {
-			return new DBusConnection.for_address_sync (address, DBusConnectionFlags.AUTHENTICATION_CLIENT);
+			conn = new DBusConnection.for_address_sync (address, DBusConnectionFlags.AUTHENTICATION_CLIENT);
 		} catch (GLib.Error e) {
+			GLib.warning("Unable to connect to dbus server at '%s': %s", address, e.message);
 			/* If it fails, it means the dbus pulse extension is not available */
-			return null;
 		}
+		GLib.message("conn is %p", (void*)conn);
+		return conn;
 	}
 
 	/* PulseAudio Dbus (Stream Restore) logic */
@@ -944,6 +956,7 @@ public class VolumeControlPulse : VolumeControl
 				var vol = new VolumeControl.Volume();
 				vol.volume = _account_service_volume;
 				vol.reason = VolumeControl.VolumeReasons.ACCOUNTS_SERVICE_SET;
+				GLib.message("setting volume to %f due to accounts service set", vol.volume);
 				this.volume = vol;
 				return;
 			}
