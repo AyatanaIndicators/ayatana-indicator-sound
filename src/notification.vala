@@ -41,6 +41,7 @@ public abstract class IndicatorSound.Notification: Object
 
 	protected void show_() {
 		try {
+			GLib.message("calling _notification.show");
 			_notification.show ();
 			message("after calling show, n.id is %d", (int)_notification.id);
 			visible = true;
@@ -66,8 +67,9 @@ public abstract class IndicatorSound.Notification: Object
 
 	protected bool notify_server_supports(string cap) {
 		if (_server_caps == null) {
-			message("getting server caps");
+			GLib.message("getting server caps");
 			_server_caps = Notify.get_server_caps();
+			GLib.message("got server caps");
 		}
 
 		var ret = _server_caps.find_custom(cap, strcmp) != null;

@@ -47,11 +47,10 @@ public class IndicatorSound.WarnNotification: Notification
 		_notification.add_action ("ok", _("OK"), (n, a) => {
 			user_responded(Response.OK);
 		});
-
 		_notification.add_action ("cancel", _("Cancel"), (n, a) => {
 			user_responded(Response.CANCEL);
 		});
-
+		GLib.message("showing warning dialog");
 		show_();
 
 		return true;
