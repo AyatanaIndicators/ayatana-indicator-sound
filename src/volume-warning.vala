@@ -64,8 +64,10 @@ public class VolumeWarning : Object
 	// true if the user has approved high volumes recently
 	protected bool high_volume_approved { get; set; default = false; }
 
-	// the multimedia volume
-	protected PulseAudio.Volume multimedia_volume { get; set; default = PulseAudio.Volume.MUTED; }
+	/* The multimedia volume.
+	   NB: this is a PulseAudio.Volume type in all but name.
+	   The next line says 'uint' to unconfuse valac's code generator */
+	protected uint multimedia_volume { get; set; default = PulseAudio.Volume.MUTED; }
 
 	protected virtual async void set_pulse_multimedia_volume(PulseAudio.Volume volume)
 	{
@@ -74,17 +76,19 @@ public class VolumeWarning : Object
 			return;
 
 		try {
-			var builder = new VariantBuilder (new VariantType ("a(uu)"));
-			builder.add ("(uu)", 0, volume);
+                        var builder = new VariantBuilder (new VariantType ("a(uu)"));
+                        builder.add ("(uu)", 0, volume);
+                        var volvar = builder.end ();
 
-			yield _pconn.call ("org.PulseAudio.Ext.StreamRestore1.RestoreEntry",
-					objp, "org.freedesktop.DBus.Properties", "Set",
-					new Variant ("(ssv)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume", builder),
+                        GLib.message ("Setting multimedia volume to %s on path %s", volvar.print(true), objp);
+                        yield _pconn.call ("org.PulseAudio.Ext.StreamRestore1.RestoreEntry",
+                                        objp, "org.freedesktop.DBus.Properties", "Set",
+					new Variant ("(ssv)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume", volvar),
 					null, DBusCallFlags.NONE, -1);
 
 			debug ("Set multimedia volume to %d on path %s", (int)volume, objp);
 		} catch (GLib.Error e) {
-			warning ("unable to set volume for stream obj path %s (%s)", objp, e.message);
+			warning ("unable to set multimedia volume for stream obj path %s (%s)", objp, e.message);
 		}
 	}
 
@@ -127,7 +131,7 @@ public class VolumeWarning : Object
 		{
 			var member = message.get_member();
 			var path = message.get_path();
-			GLib.message ("path [%s] member [%s]", path, member);
+			GLib.message ("path [%s] member [%s] _multimedia_objp [%s]", path, member, _multimedia_objp);
 
 			if ((member == "VolumeUpdated") && (path == _multimedia_objp))
 			{
@@ -136,8 +140,10 @@ public class VolumeWarning : Object
 				uint32 type = 0, lvolume = 0;
 				VariantIter iter = varray.iterator ();
 				iter.next ("(uu)", &type, &lvolume);
-				if (multimedia_volume != lvolume)
+				if (multimedia_volume != lvolume) {
+					GLib.message("setting multimedia_volume to %d from VolumeUpdated signal %s", (int)lvolume, body.print(true));
 					multimedia_volume = lvolume;
+				}
 			}
 			else if (((member == "NewEntry") || (member == "EntryRemoved")) && (path == "/org/pulseaudio/stream_restore1"))
 			{
@@ -151,6 +157,7 @@ public class VolumeWarning : Object
 	private async void connect_to_stream_restore()
 	{
 		_pconn = VolumeControlPulse.create_pulse_dbus_connection();
+		GLib.message("_pconn is %p", (void*)_pconn);
 		if (_pconn == null)
 			return;
 
@@ -249,15 +256,28 @@ public class VolumeWarning : Object
 	}
 	private void init_high_volume() {
 		_options.loud_changed.connect(() => update_high_volume());
-		notify["multimedia-volume"].connect(() => update_high_volume());
+		this.notify["multimedia-volume"].connect(() => {
+			GLib.message("recalculating high-volume due to multimedia-volume change");
+			this.update_high_volume();
+		});
+		this.notify["multimedia-active"].connect(() => {
+			GLib.message("recalculating high-volume due to multimedia-active change");
+			this.update_high_volume();
+		});
+		this.notify["headphones-active"].connect(() => {
+			GLib.message("recalculating high-volume due to headphones-active change");
+			this.update_high_volume();
+		});
 		notify["high-volume-approved"].connect(() => update_high_volume());
 		update_high_volume();
 	}
 	private void update_high_volume() {
+		GLib.message("calculating high volume... headphones_active %d high_volume_approved %d multimedia_active %d multimedia_volume %d is_loud %d", (int)headphones_active, (int)high_volume_approved, (int)multimedia_active, (int)multimedia_volume, (int)_options.is_loud_pulse(multimedia_volume));
 		var new_high_volume = headphones_active
 			&& !high_volume_approved
 			&& multimedia_active
 			&& _options.is_loud_pulse(multimedia_volume);
+		GLib.message("so the new high_volume is %d, was %d", (int)new_high_volume, (int)high_volume);
 		if (high_volume != new_high_volume) {
 			debug("changing high_volume from %d to %d", (int)high_volume, (int)new_high_volume);
 			high_volume = new_high_volume;
