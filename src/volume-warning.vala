@@ -118,6 +118,7 @@ public class VolumeWarning : Object
 	private void stop_all_timers()
 	{
 		stop_high_volume_approved_timer();
+        	stop_show_timeout();
 	}
 
 	/***
@@ -350,17 +351,42 @@ public class VolumeWarning : Object
 
 	private PulseAudio.Volume _ok_volume = PulseAudio.Volume.INVALID;
 
+        private uint _show_timeout = 0;
+
+        private void stop_show_timeout() {
+                if (_show_timeout != 0) {
+                        Source.remove(_show_timeout);
+                        _show_timeout = 0;
+                }
+        }
+
+        private void show_soon() {
+                const uint interval_msec = 200;
+                if (_show_timeout == 0)
+                        _show_timeout = Timeout.add(interval_msec, show_idle);
+        }
+
+        private bool show_idle() {
+                _show_timeout = 0;
+                this.show();
+                return false; // Source.REMOVE;
+        }
+
 	private void show() {
+		GLib.message("in show()");
 		_ok_volume = multimedia_volume;
+		GLib.message("calling notification.show");
 		_notification.show();
+		GLib.message("setting 'active' property to true");
 		this.active = true;
 
 		// lower the volume to just under the warning level
+		GLib.message("setting multimedia volume to be just under the warning level");
 		set_pulse_multimedia_volume.begin (_options.loud_volume()-1);
+		GLib.message("leaving show()");
 	}
 
 	private void on_user_response(IndicatorSound.WarnNotification.Response response) {
-		_notification.close();
 
 		if (response == IndicatorSound.WarnNotification.Response.OK) {
 			approve_high_volume();
@@ -368,7 +394,6 @@ public class VolumeWarning : Object
 		}
 
 		_ok_volume = PulseAudio.Volume.INVALID;
-
 		this.active = false;
 	}
 }
