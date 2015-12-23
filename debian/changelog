@@ -1,3 +1,10 @@
+indicator-sound (12.10.2+16.04.20151223-0ubuntu1) xenial; urgency=medium
+
+  [ CI Train Bot ]
+  * No-change rebuild.
+
+ -- Xavi Garcia <xavi.garcia.mena@canonical.com>  Wed, 23 Dec 2015 12:54:33 +0000
+
 indicator-sound (12.10.2+16.04.20151222-0ubuntu1) xenial; urgency=medium
 
   [ Xavi Garcia Mena ]
