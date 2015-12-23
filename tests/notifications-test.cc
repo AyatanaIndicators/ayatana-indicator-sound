@@ -345,7 +345,7 @@ TEST_F(NotificationsTest, HighVolume) {
 	auto notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
 	EXPECT_EQ("Volume", notev[0].summary);
-	EXPECT_EQ("Speakers", notev[0].body);
+	EXPECT_EQ("", notev[0].body);
 	EXPECT_GVARIANT_EQ("@s 'false'", notev[0].hints["x-canonical-value-bar-tint"]);
 
 	/* Set high volume with volume change */
@@ -356,7 +356,7 @@ TEST_F(NotificationsTest, HighVolume) {
 	notev = notifications->getNotifications();
 	ASSERT_LT(0, notev.size()); /* This passes with one or two since it would just be an update to the first if a second was sent */
 	EXPECT_EQ("Volume", notev[0].summary);
-	EXPECT_EQ("Speakers", notev[0].body);
+	EXPECT_EQ("High volume can damage your hearing.", notev[0].body);
 	EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-value-bar-tint"]);
 
 	/* Move it back */
@@ -372,7 +372,7 @@ TEST_F(NotificationsTest, HighVolume) {
 	notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
 	EXPECT_EQ("Volume", notev[0].summary);
-	EXPECT_EQ("Speakers", notev[0].body);
+	EXPECT_EQ("High volume can damage your hearing.", notev[0].body);
 	EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-value-bar-tint"]);
 }
 

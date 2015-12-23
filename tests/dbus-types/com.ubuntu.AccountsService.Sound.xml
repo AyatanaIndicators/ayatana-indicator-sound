@@ -1,9 +1,0 @@
-<node>
-  <interface name="com.ubuntu.AccountsService.Sound">
-    <method name="Set">
-      <arg direction="in" type="s" name="interface" />
-      <arg direction="in" type="s" name="property" />
-      <arg direction="out" type="o" name="path" />
-    </method>
-  </interface>
-</node>
