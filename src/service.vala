@@ -40,7 +40,7 @@ public class IndicatorSound.Service: Object {
 		warn_notification.set_hint ("x-canonical-non-shaped-icon", "true");
 		warn_notification.set_hint ("x-canonical-snap-decisions", "true");
 		warn_notification.set_hint ("x-canonical-private-affirmative-tint", "true");
-		warn_notification.closed.connect((n) => { n.clear_actions(); });
+		warn_notification.closed.connect((n) => { n.clear_actions(); waiting_user_approve_warn=false; });
 		BusWatcher.watch_namespace (GLib.BusType.SESSION,
 		                            "org.freedesktop.Notifications",
 		                            () => { debug("Notifications name appeared"); },
@@ -609,7 +609,10 @@ public class IndicatorSound.Service: Object {
 		var warn = loud
 			&& this.notify_server_supports_actions
 			&& !this.volume_control.high_volume_approved;
-
+		if (waiting_user_approve_warn && volume_control.below_warning_volume) {
+			volume_control.set_warning_volume();
+			close_notification(warn_notification);
+		} 
 		if (warn) {
 			close_notification(info_notification);
 			if (_pre_warn_volume == null) {
