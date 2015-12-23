@@ -1,3 +1,29 @@
+indicator-sound (12.10.2+16.04.20151222-0ubuntu1) xenial; urgency=medium
+
+  [ Xavi Garcia Mena ]
+  * Very simple change to make upstart try to respawn the process 30
+    times (instead of 2). This is a workaround for the case when dbus
+    session is not ready yet at startup.
+
+  [ Timo Jyrinki ]
+  * Note: this release was reverted on 20151223, ignore this changelog entry.
+
+ -- Xavi Garcia <xavi.garcia.mena@canonical.com>  Tue, 22 Dec 2015 09:50:08 +0000
+
+indicator-sound (12.10.2+16.04.20151103.2-0ubuntu1) xenial; urgency=medium
+
+  [ Xavi Garcia ]
+  * Added OSD notifications to show output source when the volume or 
+    source change (LP: #1382548, LP: #1415480, LP: #1484589)
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Timo Jyrinki ]
+  * Note: this release was reverted on 20151223, ignore this changelog entry.
+
+ -- Xavi Garcia <xavi.garcia.mena@canonical.com>  Tue, 03 Nov 2015 17:47:10 +0000
+
 indicator-sound (12.10.2+15.10.20151019-0ubuntu1) wily; urgency=medium
 
   [ Xavi Garcia Mena ]
