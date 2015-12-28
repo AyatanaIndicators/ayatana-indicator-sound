@@ -68,7 +68,7 @@ public class VolumeWarning : Object
 	/* The multimedia volume.
 	   NB: this is a PulseAudio.Volume type in all but name.
 	   The next line says 'uint' to unconfuse valac's code generator */
-	protected uint multimedia_volume { get; set; default = PulseAudio.Volume.MUTED; }
+	protected uint multimedia_volume { get; set; default = PulseAudio.Volume.INVALID; }
 
 	protected virtual void _set_multimedia_volume(PulseAudio.Volume volume) {
 		pulse_set_sink_input_volume(volume);
@@ -356,11 +356,13 @@ public class VolumeWarning : Object
 		update_high_volume();
 	}
 	private void update_high_volume() {
-		GLib.message("calculating high volume... headphones_active %d high_volume_approved %d multimedia_active %d multimedia_volume %d is_loud %d", (int)headphones_active, (int)high_volume_approved, (int)multimedia_active, (int)multimedia_volume, (int)_options.is_loud_pulse(multimedia_volume));
+		var mv = multimedia_volume;
+		GLib.message("calculating high volume... headphones_active %d high_volume_approved %d multimedia_active %d multimedia_volume %d is_invalid %d, is_loud %d", (int)headphones_active, (int)high_volume_approved, (int)multimedia_active, (int)mv, (int)(mv == PulseAudio.Volume.INVALID), (int)_options.is_loud_pulse(mv));
 		var new_high_volume = headphones_active
 			&& !high_volume_approved
 			&& multimedia_active
-			&& _options.is_loud_pulse(multimedia_volume);
+			&& (mv != PulseAudio.Volume.INVALID)
+			&& _options.is_loud_pulse(mv);
 		GLib.message("so the new high_volume is %d, was %d", (int)new_high_volume, (int)high_volume);
 		if (high_volume != new_high_volume) {
 			debug("changing high_volume from %d to %d", (int)high_volume, (int)new_high_volume);
