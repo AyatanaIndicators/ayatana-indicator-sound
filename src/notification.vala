@@ -78,6 +78,6 @@ public abstract class IndicatorSound.Notification: Object
 	}
 
 	protected Notify.Notification _notification = null;
-	private List<string> _server_caps = null;
 
+	private static List<string> _server_caps = null;
 }
