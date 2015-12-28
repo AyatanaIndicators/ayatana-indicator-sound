@@ -42,8 +42,10 @@ public class VolumeWarning : Object
 	}
 
 	public void user_keypress(Key key) {
-		if (key == Key.VOLUME_DOWN)
+		if ((key == Key.VOLUME_DOWN) && active) {
+			_notification.close();
 			on_user_response(IndicatorSound.WarnNotification.Response.CANCEL);
+		}
 	}
 
 	public VolumeWarning (IndicatorSound.Options options, PulseAudio.GLibMainLoop pgloop) {
@@ -393,12 +395,13 @@ public class VolumeWarning : Object
 
 	private void on_user_response(IndicatorSound.WarnNotification.Response response) {
 
+		this.active = false;
+
 		if (response == IndicatorSound.WarnNotification.Response.OK) {
 			approve_high_volume();
 			_set_multimedia_volume(_ok_volume);
 		}
 
 		_ok_volume = PulseAudio.Volume.INVALID;
-		this.active = false;
 	}
 }
