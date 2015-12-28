@@ -328,16 +328,13 @@ public class VolumeControlPulse : VolumeControl
 
 	private async void update_active_sink_input (int32 index)
 	{
-		GLib.message("index %d _active_sink_input %d in list %d", (int)index, (int)_active_sink_input, (int)(index in _sink_input_list));
 		if ((index == -1) || (index != _active_sink_input && index in _sink_input_list)) {
 			string sink_input_objp = _objp_role_alert;
 			if (index != -1)
 				sink_input_objp = _sink_input_hash.get (index);
 			_active_sink_input = index;
 			var stream = calculate_active_stream();
-			GLib.message("calculating active stream: %d", (int)stream);
 			if (active_stream != stream) {
-				GLib.message("changing active_stream from %d to %d", (int)active_stream, stream);
 				active_stream = stream;
 			}
 
@@ -731,7 +728,6 @@ public class VolumeControlPulse : VolumeControl
 			}
 		}
 
-		GLib.message ("PulseAudio dbus unix socket: %s", address);
 		DBusConnection conn = null;
 		try {
 			conn = new DBusConnection.for_address_sync (address, DBusConnectionFlags.AUTHENTICATION_CLIENT);
@@ -739,7 +735,7 @@ public class VolumeControlPulse : VolumeControl
 			GLib.warning("Unable to connect to dbus server at '%s': %s", address, e.message);
 			/* If it fails, it means the dbus pulse extension is not available */
 		}
-		GLib.message("conn is %p", (void*)conn);
+		GLib.debug ("PulseAudio dbus address is '%s', connection is '%p'", address, conn);
 		return conn;
 	}
 

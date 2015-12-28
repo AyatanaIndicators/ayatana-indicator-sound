@@ -131,7 +131,6 @@ public class VolumeWarning : Object
 	private void pulse_on_sink_input_info (Context c, SinkInputInfo? i, int eol)
 	{
 		if (eol != 0) {
-			GLib.message("at end of list, _multimedia_sink_input_index is %d", (int)_multimedia_sink_input_index);
 			_sink_input_info_list_operation = null;
 		}
 
@@ -139,7 +138,7 @@ public class VolumeWarning : Object
 			return;
 
 		if (is_active_multimedia(i)) {
-			GLib.message("setting multimedia index to %d, volume to %d", (int)i.index, (int)i.volume.max());
+			GLib.message("pulse_on_sink_input_info() setting multimedia index to %d, volume to %d", (int)i.index, (int)i.volume.max());
 			_multimedia_sink_input_index = i.index;
 			_multimedia_cvolume = i.volume;
 			multimedia_volume = i.volume.max();

@@ -148,11 +148,9 @@ public class IndicatorSound.Service: Object {
 		return_if_fail (n != null);
 		if (n.id != 0) {
 			try {
-				GLib.message("calling n.close()");
 				n.close();
-				GLib.message("done calling n.close()");
 			} catch (GLib.Error e) {
-				warning("Unable to close notification: %s", e.message);
+				GLib.warning("Unable to close notification: %s", e.message);
 			}
 		}
 	}
@@ -160,11 +158,9 @@ public class IndicatorSound.Service: Object {
 	private void show_notification(Notify.Notification? n) {
 		return_if_fail (n != null);
 		try {
-			GLib.message("calling n.show()");
 			n.show ();
-			GLib.message("done calling n.show()");
 		} catch (GLib.Error e) {
-			warning ("Unable to show notification: %s", e.message);
+			GLib.warning ("Unable to show notification: %s", e.message);
 		}
 	}
 
