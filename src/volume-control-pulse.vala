@@ -34,8 +34,7 @@ interface GreeterListInterface : Object
 
 public class VolumeControlPulse : VolumeControl
 {
-	/* this is static to ensure it being freed after @context (loop does not have ref counting) */
-	private static PulseAudio.GLibMainLoop loop;
+	private unowned PulseAudio.GLibMainLoop loop = null;
 
 	private uint _reconnect_timer = 0;
 
@@ -72,15 +71,14 @@ public class VolumeControlPulse : VolumeControl
 	/** true when a microphone is active **/
 	public override bool active_mic { get; private set; default = false; }
 
-	public VolumeControlPulse (IndicatorSound.Options options)
+	public VolumeControlPulse (IndicatorSound.Options options, PulseAudio.GLibMainLoop loop)
 	{
 		base(options);
 
 		_volume.volume = 0.0;
 		_volume.reason = VolumeControl.VolumeReasons.PULSE_CHANGE;
 
-		if (loop == null)
-			loop = new PulseAudio.GLibMainLoop ();
+		this.loop = loop;
 
 		_mute_cancellable = new Cancellable ();
 		_volume_cancellable = new Cancellable ();

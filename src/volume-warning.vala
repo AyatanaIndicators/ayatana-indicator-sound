@@ -46,16 +46,17 @@ public class VolumeWarning : Object
 			on_user_response(IndicatorSound.WarnNotification.Response.CANCEL);
 	}
 
-	public VolumeWarning (IndicatorSound.Options options) {
+	public VolumeWarning (IndicatorSound.Options options, PulseAudio.GLibMainLoop pgloop) {
 		_options = options;
+		_pgloop = pgloop;
 
 		init_all_properties();
 
-		connect_to_stream_restore.begin();
+		pulse_start();
 
 		_notification = new IndicatorSound.WarnNotification();
 		_notification.user_responded.connect((n, response) => on_user_response(response));
-        }
+	}
 
 	/***
 	****
@@ -71,6 +72,7 @@ public class VolumeWarning : Object
 
 	protected virtual async void set_pulse_multimedia_volume(PulseAudio.Volume volume)
 	{
+#if 0
 		var objp = _multimedia_objp;
 		if (objp == null)
 			return;
@@ -90,6 +92,7 @@ public class VolumeWarning : Object
 		} catch (GLib.Error e) {
 			warning ("unable to set multimedia volume for stream obj path %s (%s)", objp, e.message);
 		}
+#endif
 	}
 
 	/***
@@ -99,8 +102,10 @@ public class VolumeWarning : Object
 	// FIXME: what to do with this now?
 	private bool   _ignore_warning_this_time = false;
 
+#if 0
 	/* Used by the pulseaudio stream restore extension */
 	private DBusConnection _pconn;
+#endif
 
 	private IndicatorSound.Options _options;
 
@@ -113,6 +118,8 @@ public class VolumeWarning : Object
 	~VolumeWarning ()
 	{
 		stop_all_timers();
+
+		pulse_stop();
 	}
 
 	private void stop_all_timers()
@@ -122,37 +129,183 @@ public class VolumeWarning : Object
 	}
 
 	/***
+	****  PulseAudio: Tracking which sink input (if any) is active multimedia
+	***/
+
+	private unowned PulseAudio.GLibMainLoop _pgloop = null;
+	private PulseAudio.Context _pulse_context = null;
+	private uint _pulse_reconnect_timer = 0;
+	private uint32 _multimedia_sink_input_index = PulseAudio.INVALID_INDEX;
+
+	private bool is_active_multimedia (SinkInputInfo i)
+	{
+		if (i.corked != 0)
+			return false;
+
+		GLib.message("proplist: %s", i.proplist.to_string());
+		var media_role = i.proplist.gets(PulseAudio.Proplist.PROP_MEDIA_ROLE);
+		if (media_role != "multimedia")
+			return false;
+
+		return true;
+	}
+
+	private PulseAudio.Operation _sink_input_info_list_operation = null;
+
+	private void pulse_on_sink_input_info (Context c, SinkInputInfo? i, int eol)
+	{
+		if (i == null)
+			return;
+
+		bool active = is_active_multimedia(i);
+
+		if (active)
+			_multimedia_sink_input_index = i.index;
+		else if (i.index == _multimedia_sink_input_index)
+			_multimedia_sink_input_index = PulseAudio.INVALID_INDEX;
+
+		if (active) {
+			GLib.message("index %d", (int)i.index);
+			GLib.message("name %s", i.name);
+			GLib.message("sink %d", (int)i.sink);
+			GLib.message("has_volume %d", (int)i.has_volume);
+			GLib.message("volume %s", i.volume.to_string());
+			GLib.message("driver %s", i.driver);
+		}
+
+		if (eol != 0)
+			GLib.message("at end of list, _multimedia_sink_input_index is %d", (int)_multimedia_sink_input_index);
+	}
+
+	private void pulse_update_sink_inputs_cancel()
+	{
+		if (_sink_input_info_list_operation != null)
+		{
+			_sink_input_info_list_operation.cancel();
+			_sink_input_info_list_operation = null;
+		}
+	}
+
+	private void pulse_update_sink_inputs()
+	{
+		GLib.message("list_input_sinks");
+
+		pulse_update_sink_inputs_cancel ();
+
+		_sink_input_info_list_operation = _pulse_context.get_sink_input_info_list (pulse_on_sink_input_info);
+	}
+
+
+	private void context_events_cb (Context c, Context.SubscriptionEventType t, uint32 index)
+	{
+		GLib.message("");
+		if ((t & Context.SubscriptionEventType.FACILITY_MASK) != Context.SubscriptionEventType.SINK_INPUT)
+			return;
+
+		switch (t & Context.SubscriptionEventType.TYPE_MASK)
+		{
+			case Context.SubscriptionEventType.NEW:
+				GLib.message("Context.SubscriptionEventType.NEW");
+				pulse_update_sink_inputs();
+				break;
+			case Context.SubscriptionEventType.CHANGE:
+				GLib.message("Context.SubscriptionEventType.CHANGE");
+				pulse_update_sink_inputs();
+				break;
+			case Context.SubscriptionEventType.REMOVE:
+				GLib.message("Context.SubscriptionEventType.REMOVE");
+				pulse_update_sink_inputs();
+				break;
+			default:
+				GLib.message("Sink input event not known.");
+				break;
+		}
+	}
+
+	private void pulse_context_state_callback (Context c)
+	{
+		switch (c.get_state ()) {
+			case Context.State.READY:
+				c.subscribe (PulseAudio.Context.SubscriptionMask.SINK_INPUT);
+				c.set_subscribe_callback (context_events_cb);
+				pulse_update_sink_inputs();
+                                break;
+
+                        case Context.State.FAILED:
+                        case Context.State.TERMINATED:
+				pulse_reconnect_soon();
+                                break;
+
+                        default:
+                                break;
+                }
+        }
+
+	private void pulse_disconnect()
+	{
+                if (_pulse_context != null) {
+                        _pulse_context.disconnect ();
+                        _pulse_context = null;
+                }
+	}
+
+	private void pulse_reconnect_soon ()
+	{
+		if (_pulse_reconnect_timer == 0)
+			_pulse_reconnect_timer = Timeout.add_seconds (2, pulse_reconnect_timeout);
+	}
+
+        private void pulse_reconnect_soon_cancel()
+	{
+                if (_pulse_reconnect_timer != 0) {
+                        Source.remove(_pulse_reconnect_timer);
+                        _pulse_reconnect_timer = 0;
+                }
+        }
+
+        private bool pulse_reconnect_timeout ()
+        {
+                _pulse_reconnect_timer = 0;
+                pulse_reconnect ();
+                return false; // G_SOURCE_REMOVE
+        }
+
+        void pulse_reconnect ()
+        {
+		pulse_disconnect();
+
+                var props = new Proplist ();
+                props.sets (Proplist.PROP_APPLICATION_NAME, "Ubuntu Audio Settings");
+                props.sets (Proplist.PROP_APPLICATION_ID, "com.canonical.settings.sound");
+                props.sets (Proplist.PROP_APPLICATION_ICON_NAME, "multimedia-volume-control");
+                props.sets (Proplist.PROP_APPLICATION_VERSION, "0.1");
+
+                _pulse_context = new PulseAudio.Context (_pgloop.get_api(), null, props);
+                _pulse_context.set_state_callback (pulse_context_state_callback);
+
+                var server_string = Environment.get_variable("PULSE_SERVER");
+                if (_pulse_context.connect(server_string, Context.Flags.NOFAIL, null) < 0)
+                        warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(_pulse_context.errno()));
+        }
+
+
+	private void pulse_start()
+	{
+		pulse_reconnect();
+	}
+
+	private void pulse_stop()
+	{
+		pulse_reconnect_soon_cancel();
+		pulse_disconnect();
+		pulse_update_sink_inputs_cancel();
+	}
+
+#if 0
+	/***
 	****  Tracking multimedia volume via StreamRestore
 	***/
 
-	private DBusMessage pulse_dbus_filter (DBusConnection connection, owned DBusMessage message, bool incoming)
-	{
-		if (message.get_message_type() == DBusMessageType.SIGNAL)
-		{
-			var member = message.get_member();
-			var path = message.get_path();
-			GLib.message ("path [%s] member [%s] _multimedia_objp [%s]", path, member, _multimedia_objp);
-
-			if ((member == "VolumeUpdated") && (path == _multimedia_objp))
-			{
-				Variant body = message.get_body ();
-				Variant varray = body.get_child_value (0);
-				uint32 type = 0, lvolume = 0;
-				VariantIter iter = varray.iterator ();
-				iter.next ("(uu)", &type, &lvolume);
-				if (multimedia_volume != lvolume) {
-					GLib.message("setting multimedia_volume to %d from VolumeUpdated signal %s", (int)lvolume, body.print(true));
-					multimedia_volume = lvolume;
-				}
-			}
-			else if (((member == "NewEntry") || (member == "EntryRemoved")) && (path == "/org/pulseaudio/stream_restore1"))
-			{
-				update_multimedia_objp();
-			}
-		}
-
-		return message;
-	}
 
 	private async void connect_to_stream_restore()
 	{
@@ -240,6 +393,7 @@ public class VolumeWarning : Object
 			warning ("unable to get volume for multimedia role %s (%s)", _multimedia_objp, e.message);
 		}
 	}
+#endif
 
 	/** HIGH VOLUME PROPERTY **/
 
