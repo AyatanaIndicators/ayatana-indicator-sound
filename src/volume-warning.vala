@@ -138,18 +138,7 @@ public class VolumeWarning : Object
 		if (i == null)
 			return;
 
-		bool active = is_active_multimedia(i);
-
-		if (active) {
-			GLib.message("index %d", (int)i.index);
-			GLib.message("name %s", i.name);
-			GLib.message("sink %d", (int)i.sink);
-			GLib.message("has_volume %d", (int)i.has_volume);
-			GLib.message("volume %s", i.volume.to_string());
-			GLib.message("driver %s", i.driver);
-		}
-
-		if (active) {
+		if (is_active_multimedia(i)) {
 			GLib.message("setting multimedia index to %d, volume to %d", (int)i.index, (int)i.volume.max());
 			_multimedia_sink_input_index = i.index;
 			_multimedia_cvolume = i.volume;
@@ -172,7 +161,7 @@ public class VolumeWarning : Object
 
 	private void pulse_update_sink_inputs()
 	{
-		GLib.message("list_input_sinks");
+		GLib.message("--> list_input_sinks");
 
 		pulse_update_sink_inputs_cancel ();
 
@@ -183,21 +172,22 @@ public class VolumeWarning : Object
 	private void context_events_cb (Context c, Context.SubscriptionEventType t, uint32 index)
 	{
 		GLib.message("");
+
 		if ((t & Context.SubscriptionEventType.FACILITY_MASK) != Context.SubscriptionEventType.SINK_INPUT)
 			return;
 
 		switch (t & Context.SubscriptionEventType.TYPE_MASK)
 		{
 			case Context.SubscriptionEventType.NEW:
-				GLib.message("Context.SubscriptionEventType.NEW");
+				GLib.message("-> Context.SubscriptionEventType.NEW");
 				pulse_update_sink_inputs();
 				break;
 			case Context.SubscriptionEventType.CHANGE:
-				GLib.message("Context.SubscriptionEventType.CHANGE");
+				GLib.message("-> Context.SubscriptionEventType.CHANGE");
 				pulse_update_sink_inputs();
 				break;
 			case Context.SubscriptionEventType.REMOVE:
-				GLib.message("Context.SubscriptionEventType.REMOVE");
+				GLib.message("-> Context.SubscriptionEventType.REMOVE");
 				pulse_update_sink_inputs();
 				break;
 			default:
@@ -465,6 +455,7 @@ public class VolumeWarning : Object
 	private void show() {
 		GLib.message("in show()");
 		preshow();
+		_ok_volume = multimedia_volume;
 
 		GLib.message("calling notification.show");
 		_notification.show();
