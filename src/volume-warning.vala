@@ -110,6 +110,7 @@ public class VolumeWarning : Object
 	private PulseAudio.Context _pulse_context = null;
 	private uint _pulse_reconnect_timer = 0;
 	private uint32 _multimedia_sink_input_index = PulseAudio.INVALID_INDEX;
+	private uint32 _warning_sink_input_index = PulseAudio.INVALID_INDEX;
 	private PulseAudio.Operation _sink_input_info_list_operation = null;
 	private PulseAudio.Operation _set_sink_input_volume_operation = null;
 	private unowned PulseAudio.CVolume _multimedia_cvolume;
@@ -283,6 +284,8 @@ public class VolumeWarning : Object
 
 	private void on_set_sink_input_volume_success(Context c, int success)
 	{
+		GLib.message("on_set_sink_input_volume_success returned %d", (int)success);
+
 		if (success != 0) {
 			GLib.message("setting multimedia volume from on_set_sink_input_volume_success");
 		}
@@ -290,8 +293,10 @@ public class VolumeWarning : Object
 
 	void pulse_set_sink_input_volume(PulseAudio.Volume volume)
 	{
+		var index = _warning_sink_input_index;
+
 		GLib.return_if_fail(_pulse_context != null);
-		GLib.return_if_fail(_multimedia_sink_input_index != PulseAudio.INVALID_INDEX);
+		GLib.return_if_fail(index != PulseAudio.INVALID_INDEX);
 
 		pulse_set_sink_input_volume_cancel();
 
@@ -299,7 +304,7 @@ public class VolumeWarning : Object
 		cvol.set(_multimedia_cvolume.channels, volume);
 		GLib.message("setting multimedia volume to %s", cvol.to_string());
 		_set_sink_input_volume_operation = _pulse_context.set_sink_input_volume(
-			_multimedia_sink_input_index,
+			index,
 			cvol,
 			on_set_sink_input_volume_success);
 	}
@@ -451,9 +456,14 @@ public class VolumeWarning : Object
                 return false; // Source.REMOVE;
         }
 
+	protected virtual preshow() {
+		_warning_sink_input_index = _multimedia_sink_input_index;
+	}
+
 	private void show() {
 		GLib.message("in show()");
-		_ok_volume = multimedia_volume;
+		preshow();
+
 		GLib.message("calling notification.show");
 		_notification.show();
 		GLib.message("setting 'active' property to true");
