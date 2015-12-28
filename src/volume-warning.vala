@@ -309,9 +309,9 @@ public class VolumeWarning : Object
 		GLib.message("so the new high_volume is %d, was %d", (int)new_high_volume, (int)high_volume);
 		if (high_volume != new_high_volume) {
 			debug("changing high_volume from %d to %d", (int)high_volume, (int)new_high_volume);
-			high_volume = new_high_volume;
-			if (high_volume && !active)
+			if (new_high_volume && !active)
 				show();
+			high_volume = new_high_volume;
 		}
 	}
 
