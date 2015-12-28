@@ -456,7 +456,7 @@ public class VolumeWarning : Object
                 return false; // Source.REMOVE;
         }
 
-	protected virtual preshow() {
+	protected virtual void preshow() {
 		_warning_sink_input_index = _multimedia_sink_input_index;
 	}
 
