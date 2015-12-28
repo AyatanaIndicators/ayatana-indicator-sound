@@ -70,7 +70,7 @@ public class VolumeWarning : Object
 	   The next line says 'uint' to unconfuse valac's code generator */
 	protected uint multimedia_volume { get; set; default = PulseAudio.Volume.MUTED; }
 
-	protected virtual void set_multimedia_volume(PulseAudio.Volume volume) {
+	protected virtual void _set_multimedia_volume(PulseAudio.Volume volume) {
 		pulse_set_sink_input_volume(volume);
 	}
 
@@ -273,8 +273,6 @@ public class VolumeWarning : Object
 
 	///
 
-	private PulseAudio.Operation _set_sink_input_volume_operation = null;
-
 	private void pulse_set_sink_input_volume_cancel()
 	{
 		if (_set_sink_input_volume_operation != null) {
@@ -295,13 +293,12 @@ public class VolumeWarning : Object
 		GLib.return_if_fail(_pulse_context != null);
 		GLib.return_if_fail(_multimedia_sink_input_index != PulseAudio.INVALID_INDEX);
 
-		unowned CVolume cvol = CVolume();
-		cvol.pa_cvolume_set(_multimedia_cvolume.channels, volume);
-		GLib.message("setting multimedia volume to %s", cvol.to_string());
-
 		pulse_set_sink_input_volume_cancel();
 
-		_set_sink_input_volume_operation = set_sink_input_volume(
+		unowned CVolume cvol = CVolume();
+		cvol.set(_multimedia_cvolume.channels, volume);
+		GLib.message("setting multimedia volume to %s", cvol.to_string());
+		_set_sink_input_volume_operation = _pulse_context.set_sink_input_volume(
 			_multimedia_sink_input_index,
 			cvol,
 			on_set_sink_input_volume_success);
@@ -464,9 +461,7 @@ public class VolumeWarning : Object
 
 		// lower the volume to just under the warning level
 		GLib.message("setting multimedia volume to be just under the warning level");
-		pulse_set_sink_input_volume(pulse_set_sink_input_volume(zzz
-
-		set_multimedia_volume (_options.loud_volume()-1);
+		_set_multimedia_volume (_options.loud_volume()-1);
 		GLib.message("leaving show()");
 	}
 
@@ -474,7 +469,7 @@ public class VolumeWarning : Object
 
 		if (response == IndicatorSound.WarnNotification.Response.OK) {
 			approve_high_volume();
-			set_multimedia_volume(_ok_volume);
+			_set_multimedia_volume(_ok_volume);
 		}
 
 		_ok_volume = PulseAudio.Volume.INVALID;
