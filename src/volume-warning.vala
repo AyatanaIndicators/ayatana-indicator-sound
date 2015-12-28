@@ -143,16 +143,12 @@ public class VolumeWarning : Object
 
 	private void pulse_update_sink_inputs()
 	{
-		GLib.message("--> list_input_sinks");
-
 		_pulse_context.get_sink_input_info_list (pulse_on_sink_input_info);
 	}
 
 
 	private void context_events_cb (Context c, Context.SubscriptionEventType t, uint32 index)
 	{
-		GLib.message("");
-
 		if ((t & Context.SubscriptionEventType.FACILITY_MASK) != Context.SubscriptionEventType.SINK_INPUT)
 			return;
 
@@ -168,7 +164,7 @@ public class VolumeWarning : Object
 				pulse_update_sink_inputs();
 				break;
 			default:
-				GLib.message("Sink input event not known.");
+				GLib.debug("Sink input event not known.");
 				break;
 		}
 	}
@@ -385,19 +381,14 @@ public class VolumeWarning : Object
 	}
 
 	private void show() {
-		GLib.message("in show()");
 		preshow();
 		_ok_volume = multimedia_volume;
 
-		GLib.message("calling notification.show");
 		_notification.show();
-		GLib.message("setting 'active' property to true");
 		this.active = true;
 
 		// lower the volume to just under the warning level
-		GLib.message("setting multimedia volume to be just under the warning level");
 		_set_multimedia_volume (_options.loud_volume()-1);
-		GLib.message("leaving show()");
 	}
 
 	private void on_user_response(IndicatorSound.WarnNotification.Response response) {
