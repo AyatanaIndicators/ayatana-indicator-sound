@@ -70,29 +70,8 @@ public class VolumeWarning : Object
 	   The next line says 'uint' to unconfuse valac's code generator */
 	protected uint multimedia_volume { get; set; default = PulseAudio.Volume.MUTED; }
 
-	protected virtual async void set_pulse_multimedia_volume(PulseAudio.Volume volume)
-	{
-#if 0
-		var objp = _multimedia_objp;
-		if (objp == null)
-			return;
-
-		try {
-                        var builder = new VariantBuilder (new VariantType ("a(uu)"));
-                        builder.add ("(uu)", 0, volume);
-                        var volvar = builder.end ();
-
-                        GLib.message ("Setting multimedia volume to %s on path %s", volvar.print(true), objp);
-                        yield _pconn.call ("org.PulseAudio.Ext.StreamRestore1.RestoreEntry",
-                                        objp, "org.freedesktop.DBus.Properties", "Set",
-					new Variant ("(ssv)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume", volvar),
-					null, DBusCallFlags.NONE, -1);
-
-			debug ("Set multimedia volume to %d on path %s", (int)volume, objp);
-		} catch (GLib.Error e) {
-			warning ("unable to set multimedia volume for stream obj path %s (%s)", objp, e.message);
-		}
-#endif
+	protected virtual void set_multimedia_volume(PulseAudio.Volume volume) {
+		pulse_set_sink_input_volume(volume);
 	}
 
 	/***
@@ -101,11 +80,6 @@ public class VolumeWarning : Object
 
 	// FIXME: what to do with this now?
 	private bool   _ignore_warning_this_time = false;
-
-#if 0
-	/* Used by the pulseaudio stream restore extension */
-	private DBusConnection _pconn;
-#endif
 
 	private IndicatorSound.Options _options;
 
@@ -136,6 +110,9 @@ public class VolumeWarning : Object
 	private PulseAudio.Context _pulse_context = null;
 	private uint _pulse_reconnect_timer = 0;
 	private uint32 _multimedia_sink_input_index = PulseAudio.INVALID_INDEX;
+	private PulseAudio.Operation _sink_input_info_list_operation = null;
+	private PulseAudio.Operation _set_sink_input_volume_operation = null;
+	private unowned PulseAudio.CVolume _multimedia_cvolume;
 
 	private bool is_active_multimedia (SinkInputInfo i)
 	{
@@ -150,22 +127,17 @@ public class VolumeWarning : Object
 		return true;
 	}
 
-	private PulseAudio.Operation _sink_input_info_list_operation = null;
-
 	private void pulse_on_sink_input_info (Context c, SinkInputInfo? i, int eol)
 	{
-		if (eol != 0)
+		if (eol != 0) {
 			GLib.message("at end of list, _multimedia_sink_input_index is %d", (int)_multimedia_sink_input_index);
+			_sink_input_info_list_operation = null;
+		}
 
 		if (i == null)
 			return;
 
 		bool active = is_active_multimedia(i);
-
-		if (active)
-			_multimedia_sink_input_index = i.index;
-		else if (i.index == _multimedia_sink_input_index)
-			_multimedia_sink_input_index = PulseAudio.INVALID_INDEX;
 
 		if (active) {
 			GLib.message("index %d", (int)i.index);
@@ -176,12 +148,15 @@ public class VolumeWarning : Object
 			GLib.message("driver %s", i.driver);
 		}
 
-		if (i.index == _multimedia_sink_input_index) {
-			var vol = i.volume.max();
-			if (multimedia_volume != vol) {
-				GLib.message("setting multimedia_volume to %d from pulse_on_sink_input_info()", (int)vol);
-				multimedia_volume = vol;
-			}
+		if (active) {
+			GLib.message("setting multimedia index to %d, volume to %d", (int)i.index, (int)i.volume.max());
+			_multimedia_sink_input_index = i.index;
+			_multimedia_cvolume = i.volume;
+			multimedia_volume = i.volume.max();
+		}
+		else if (i.index == _multimedia_sink_input_index) {
+			_multimedia_sink_input_index = PulseAudio.INVALID_INDEX;
+			multimedia_volume = PulseAudio.Volume.INVALID;
 		}
 	}
 
@@ -296,6 +271,43 @@ public class VolumeWarning : Object
                         warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(_pulse_context.errno()));
         }
 
+	///
+
+	private PulseAudio.Operation _set_sink_input_volume_operation = null;
+
+	private void pulse_set_sink_input_volume_cancel()
+	{
+		if (_set_sink_input_volume_operation != null) {
+			_set_sink_input_volume_operation.cancel();
+			_set_sink_input_volume_operation = null;
+		}
+	}
+
+	private void on_set_sink_input_volume_success(Context c, int success)
+	{
+		if (success != 0) {
+			GLib.message("setting multimedia volume from on_set_sink_input_volume_success");
+		}
+	}
+
+	void pulse_set_sink_input_volume(PulseAudio.Volume volume)
+	{
+		GLib.return_if_fail(_pulse_context != null);
+		GLib.return_if_fail(_multimedia_sink_input_index != PulseAudio.INVALID_INDEX);
+
+		unowned CVolume cvol = CVolume();
+		cvol.pa_cvolume_set(_multimedia_cvolume.channels, volume);
+		GLib.message("setting multimedia volume to %s", cvol.to_string());
+
+		pulse_set_sink_input_volume_cancel();
+
+		_set_sink_input_volume_operation = set_sink_input_volume(
+			_multimedia_sink_input_index,
+			cvol,
+			on_set_sink_input_volume_success);
+	}
+
+	///
 
 	private void pulse_start()
 	{
@@ -305,103 +317,11 @@ public class VolumeWarning : Object
 	private void pulse_stop()
 	{
 		pulse_reconnect_soon_cancel();
-		pulse_disconnect();
 		pulse_update_sink_inputs_cancel();
+		pulse_set_sink_input_volume_cancel();
+		pulse_disconnect();
 	}
 
-#if 0
-	/***
-	****  Tracking multimedia volume via StreamRestore
-	***/
-
-
-	private async void connect_to_stream_restore()
-	{
-		_pconn = VolumeControlPulse.create_pulse_dbus_connection();
-		GLib.message("_pconn is %p", (void*)_pconn);
-		if (_pconn == null)
-			return;
-
-		_pconn.add_filter (pulse_dbus_filter);
-
-		update_multimedia_objp();
-
-		// listen for StreamRestore1's NewEntry and EntryRemoved signals
-		try {
-			var builder = new VariantBuilder (new VariantType ("ao"));
-			builder.add ("o", "/org/pulseaudio/stream_restore1");
-			yield _pconn.call ("org.PulseAudio.Core1", "/org/pulseaudio/core1",
-					"org.PulseAudio.Core1", "ListenForSignal",
-					new Variant ("(sao)", "org.PulseAudio.Ext.StreamRestore1.NewEntry", builder),
-					null, DBusCallFlags.NONE, -1);
-
-			builder = new VariantBuilder (new VariantType ("ao"));
-			builder.add ("o", "/org/pulseaudio/stream_restore1");
-			yield _pconn.call ("org.PulseAudio.Core1", "/org/pulseaudio/core1",
-					"org.PulseAudio.Core1", "ListenForSignal",
-					new Variant ("(sao)", "org.PulseAudio.Ext.StreamRestore1.EntryRemoved", builder),
-					null, DBusCallFlags.NONE, -1);
-		} catch (GLib.Error e) {
-			warning ("unable to listen for StreamRestore1 dbus signals (%s)", e.message);
-		}
-	}
-
-	private void update_multimedia_objp()
-	{
-		var objp = VolumeControlPulse.stream_restore_get_object_path(
-			_pconn,
-			"sink-input-by-media-role:multimedia");
-		set_multimedia_object_path.begin(objp);
-	}
-
-	private string _multimedia_objp = null;
-
-	private async void set_multimedia_object_path(string objp)
-	{
-		if (_multimedia_objp == objp)
-			return;
-
-		_multimedia_objp = objp;
-
-		// listen for RestoreEntry.VolumeUpdated from this entry
-		try {
-			var builder = new VariantBuilder (new VariantType ("ao"));
-			builder.add ("o", _multimedia_objp);
-			yield _pconn.call ("org.PulseAudio.Core1", "/org/pulseaudio/core1",
-				"org.PulseAudio.Core1", "ListenForSignal",
-				new Variant ("(sao)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry.VolumeUpdated", builder),
-				null, DBusCallFlags.NONE, -1);
-		} catch (GLib.Error e) {
-			warning ("unable to listen for RestoreEntry dbus signals (%s)", e.message);
-		}
-
-		update_multimedia_volume.begin();
-	}
-
-	private async void update_multimedia_volume()
-	{
-		try {
-			var props_variant = yield _pconn.call (
-				"org.PulseAudio.Ext.StreamRestore1.RestoreEntry",
-				_multimedia_objp,
-				"org.freedesktop.DBus.Properties",
-				"Get",
-				new Variant ("(ss)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume"),
-				null,
-				DBusCallFlags.NONE,
-				-1);
-                                Variant tmp;
-			props_variant.get ("(v)", out tmp);
-			uint32 type = 0, volume = 0;
-			VariantIter iter = tmp.iterator ();
-			iter.next ("(uu)", &type, &volume);
-			if (multimedia_volume != volume)
-				multimedia_volume = volume;
-		} catch (GLib.Error e) {
-			warning ("unable to get volume for multimedia role %s (%s)", _multimedia_objp, e.message);
-		}
-	}
-#endif
 
 	/** HIGH VOLUME PROPERTY **/
 
@@ -544,7 +464,9 @@ public class VolumeWarning : Object
 
 		// lower the volume to just under the warning level
 		GLib.message("setting multimedia volume to be just under the warning level");
-		set_pulse_multimedia_volume.begin (_options.loud_volume()-1);
+		pulse_set_sink_input_volume(pulse_set_sink_input_volume(zzz
+
+		set_multimedia_volume (_options.loud_volume()-1);
 		GLib.message("leaving show()");
 	}
 
@@ -552,7 +474,7 @@ public class VolumeWarning : Object
 
 		if (response == IndicatorSound.WarnNotification.Response.OK) {
 			approve_high_volume();
-			set_pulse_multimedia_volume.begin(_ok_volume);
+			set_multimedia_volume(_ok_volume);
 		}
 
 		_ok_volume = PulseAudio.Volume.INVALID;
