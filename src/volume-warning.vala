@@ -99,7 +99,6 @@ public class VolumeWarning : Object
 	private void stop_all_timers()
 	{
 		stop_high_volume_approved_timer();
-        	stop_show_timeout();
 	}
 
 	/***
@@ -425,27 +424,6 @@ public class VolumeWarning : Object
 	private IndicatorSound.WarnNotification _notification = new IndicatorSound.WarnNotification();
 
 	private PulseAudio.Volume _ok_volume = PulseAudio.Volume.INVALID;
-
-        private uint _show_timeout = 0;
-
-        private void stop_show_timeout() {
-                if (_show_timeout != 0) {
-                        Source.remove(_show_timeout);
-                        _show_timeout = 0;
-                }
-        }
-
-        private void show_soon() {
-                const uint interval_msec = 200;
-                if (_show_timeout == 0)
-                        _show_timeout = Timeout.add(interval_msec, show_idle);
-        }
-
-        private bool show_idle() {
-                _show_timeout = 0;
-                this.show();
-                return false; // Source.REMOVE;
-        }
 
 	protected virtual void preshow() {
 		_warning_sink_input_index = _multimedia_sink_input_index;
