@@ -147,7 +147,7 @@ public class VolumeWarningPulse : VolumeWarning
 		_pending_sink_inputs.add(index);
 
 		if (_update_sink_inputs_timer == 0) {
-			_update_sink_inputs_timer = Timeout.add_seconds (soon_interval_msec, () => {
+			_update_sink_inputs_timer = Timeout.add (soon_interval_msec, () => {
 				_pending_sink_inputs.foreach((i) => {
 					GLib.message("flushing input sink queue: index %d", (int)i);
 					update_sink_input(i);
