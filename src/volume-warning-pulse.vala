@@ -39,8 +39,21 @@ public class VolumeWarningPulse : VolumeWarning
 	}
 
 	protected override void sound_system_set_multimedia_volume (PulseAudio.Volume volume) {
-		pulse_set_sink_volume(volume);
+		var index = _warning_sink_index;
+
+		GLib.return_if_fail(_pulse_context != null);
+		GLib.return_if_fail(index != PulseAudio.INVALID_INDEX);
+		GLib.return_if_fail(volume != PulseAudio.Volume.INVALID);
+
+		unowned CVolume cvol = CVolume ();
+		cvol.set (_multimedia_cvolume.channels, volume);
+		GLib.message ("setting multimedia volume to %s", cvol.to_string());
+		_pulse_context.set_sink_volume_by_index (index, cvol);
 	}
+
+        protected override void preshow () {
+                _warning_sink_index = _multimedia_sink_index;
+        }
 
 	/***
 	****  PulseAudio: Tracking the active multimedia sink input
@@ -256,21 +269,4 @@ public class VolumeWarningPulse : VolumeWarning
 		if (_pulse_context.connect (server_string, Context.Flags.NOFAIL, null) < 0)
 			GLib.warning ("pa_context_connect() failed: %s\n", PulseAudio.strerror(_pulse_context.errno()));
 	}
-
-	void pulse_set_sink_volume (PulseAudio.Volume volume) {
-		var index = _warning_sink_index;
-
-		GLib.return_if_fail(_pulse_context != null);
-		GLib.return_if_fail(index != PulseAudio.INVALID_INDEX);
-		GLib.return_if_fail(volume != PulseAudio.Volume.INVALID);
-
-		unowned CVolume cvol = CVolume ();
-		cvol.set (_multimedia_cvolume.channels, volume);
-		GLib.message ("setting multimedia volume to %s", cvol.to_string());
-		_pulse_context.set_sink_volume_by_index (index, cvol);
-	}
-
-        protected override void preshow () {
-                _warning_sink_index = _multimedia_sink_index;
-        }
 }
