@@ -73,10 +73,11 @@ public class VolumeWarningPulse : VolumeWarning
 		GLib.return_if_fail(_multimedia_sink_index != PulseAudio.INVALID_INDEX);
 
 		_pulse_context.get_sink_info_by_index(_multimedia_sink_index, (c,i) => {
-			GLib.return_if_fail(i != null);
-			GLib.message("setting multimedia_volume to %s", i.volume.to_string());
-			_multimedia_cvolume = i.volume;
-			multimedia_volume = i.volume.max();
+			if (i != null) {
+				GLib.message("setting multimedia_volume to %s", i.volume.to_string());
+				_multimedia_cvolume = i.volume;
+				multimedia_volume = i.volume.max();
+			}
 		});
 	}
 
