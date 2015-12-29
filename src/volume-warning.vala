@@ -284,21 +284,13 @@ public class VolumeWarning : Object
 	}
 	private void init_high_volume() {
 		_options.loud_changed.connect(() => update_high_volume());
-		this.notify["multimedia-volume"].connect(() => {
-			GLib.message("recalculating high-volume due to multimedia-volume change");
-			this.update_high_volume();
-		});
-		this.notify["multimedia-active"].connect(() => {
-			GLib.message("recalculating high-volume due to multimedia-active change");
-			this.update_high_volume();
-		});
-		this.notify["headphones-active"].connect(() => {
-			GLib.message("recalculating high-volume due to headphones-active change");
-			this.update_high_volume();
-		});
-		notify["high-volume-approved"].connect(() => update_high_volume());
+		this.notify["multimedia-volume"].connect(() => update_high_volume());
+		this.notify["multimedia-active"].connect(() => update_high_volume());
+		this.notify["headphones-active"].connect(() => update_high_volume());
+		this.notify["high-volume-approved"].connect(() => update_high_volume());
 		update_high_volume();
 	}
+
 	private void update_high_volume() {
 		PulseAudio.Volume mm_vol = multimedia_volume;
 		var approved = high_volume_approved;
