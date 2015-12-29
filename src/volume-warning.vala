@@ -177,8 +177,8 @@ public class VolumeWarning : Object
 	{
 		switch (c.get_state ()) {
 			case Context.State.READY:
-				c.subscribe (PulseAudio.Context.SubscriptionMask.SINK_INPUT);
 				c.set_subscribe_callback (context_events_cb);
+				c.subscribe (PulseAudio.Context.SubscriptionMask.SINK_INPUT);
 				pulse_update_sink_inputs();
                                 break;
 
