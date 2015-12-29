@@ -32,7 +32,9 @@ public class VolumeWarningPulse : VolumeWarning
 	}
 
 	~VolumeWarningPulse () {
-		pulse_reconnect_soon_cancel();
+		clear_timer(ref _pulse_reconnect_timer);
+		clear_timer(ref _update_sink_timer);
+		clear_timer(ref _update_sink_inputs_timer);
 		pulse_disconnect();
 	}
 
@@ -47,6 +49,10 @@ public class VolumeWarningPulse : VolumeWarning
 	private unowned PulseAudio.GLibMainLoop _pgloop = null;
 	private PulseAudio.Context _pulse_context = null;
 	private uint _pulse_reconnect_timer = 0;
+	private uint _update_sink_timer = 0;
+	private uint _update_sink_inputs_timer = 0;
+        private GenericSet<uint32> _pending_sink_inputs = new GenericSet<uint32>(int_hash, int_equal);
+
 
 	private uint32 _warning_sink_index          = PulseAudio.INVALID_INDEX;
 	private uint32 _multimedia_sink_index       = PulseAudio.INVALID_INDEX;
@@ -54,18 +60,7 @@ public class VolumeWarningPulse : VolumeWarning
 
 	private unowned PulseAudio.CVolume _multimedia_cvolume;
 
-	private bool is_active_multimedia (SinkInputInfo i) {
-
-		if (i.corked != 0)
-			return false;
-
-		var key = PulseAudio.Proplist.PROP_MEDIA_ROLE;
-		var media_role = i.proplist.gets(key);
-		if (media_role != "multimedia")
-			return false;
-
-		return true;
-	}
+	/***/
 
 	private void update_multimedia_volume () {
 
@@ -81,6 +76,18 @@ public class VolumeWarningPulse : VolumeWarning
 		});
 	}
 
+	private void update_multimedia_volume_soon () {
+
+		GLib.message("updating multimedia volume soon");
+		if (_update_sink_timer == 0) {
+			_update_sink_timer = Timeout.add_seconds (1, () => {
+				_update_sink_timer = 0;
+				update_multimedia_volume ();
+				return Source.REMOVE;
+			});
+		}
+	}
+
 	private void set_multimedia_sink_index(uint32 index) {
 
 		if (index == PulseAudio.INVALID_INDEX) {
@@ -89,8 +96,23 @@ public class VolumeWarningPulse : VolumeWarning
 		} else if (_multimedia_sink_index != index) {
 			_multimedia_sink_index = index;
 			multimedia_volume = PulseAudio.Volume.INVALID;
-			update_multimedia_volume();
+			update_multimedia_volume_soon();
 		}
+	}
+
+	/***/
+
+	private bool is_active_multimedia (SinkInputInfo i) {
+
+		if (i.corked != 0)
+			return false;
+
+		var key = PulseAudio.Proplist.PROP_MEDIA_ROLE;
+		var media_role = i.proplist.gets(key);
+		if (media_role != "multimedia")
+			return false;
+
+		return true;
 	}
 
 	private void on_sink_input_info (Context c, SinkInputInfo? i, int eol) {
@@ -111,17 +133,37 @@ public class VolumeWarningPulse : VolumeWarning
 		}
 	}
 
-	private void pulse_update_sink_inputs () {
+	private void update_all_sink_inputs () {
 		_pulse_context.get_sink_input_info_list (on_sink_input_info);
 	}
+	private void update_sink_input (uint32 index) {
+		_pulse_context.get_sink_input_info (index, on_sink_input_info);
+	}
 
+	private void update_sink_input_soon (uint32 index) {
+
+		GLib.message("adding %d to queue", (int)index);
+		_pending_sink_inputs.add(index);
+
+		if (_update_sink_inputs_timer == 0) {
+			_update_sink_inputs_timer = Timeout.add_seconds (1, () => {
+				_pending_sink_inputs.foreach((i) => {
+					GLib.message("flushing input sink queue: index %d", (int)i);
+					update_sink_input(i);
+				});
+				_pending_sink_inputs.remove_all();
+				_update_sink_inputs_timer = 0;
+				return Source.REMOVE;
+			});
+		}
+	}
 
         private void context_events_cb (Context c, Context.SubscriptionEventType t, uint32 index) {
 		switch (t & Context.SubscriptionEventType.FACILITY_MASK)
 		{
 			case Context.SubscriptionEventType.SINK:
 				if ((index == _multimedia_sink_index) && (index != PulseAudio.INVALID_INDEX))
-					update_multimedia_volume();
+					update_multimedia_volume_soon();
 				break;
 
 			case Context.SubscriptionEventType.SINK_INPUT:
@@ -130,11 +172,11 @@ public class VolumeWarningPulse : VolumeWarning
 					case Context.SubscriptionEventType.NEW:
 					case Context.SubscriptionEventType.CHANGE:
 						GLib.message ("-> Context.SubscriptionEventType.CHANGE or NEW");
-						c.get_sink_input_info (index, on_sink_input_info);
+						update_sink_input_soon(index);
 						break;
 					case Context.SubscriptionEventType.REMOVE:
 						GLib.message ("-> Context.SubscriptionEventType.REMOVE");
-						pulse_update_sink_inputs ();
+						update_all_sink_inputs ();
 						break;
 					default:
 						GLib.debug ("Sink input event not known.");
@@ -153,7 +195,7 @@ public class VolumeWarningPulse : VolumeWarning
 				c.set_subscribe_callback (context_events_cb);
 				c.subscribe (PulseAudio.Context.SubscriptionMask.SINK |
 				             PulseAudio.Context.SubscriptionMask.SINK_INPUT);
-				pulse_update_sink_inputs ();
+				update_all_sink_inputs ();
 				break;
 
 			case Context.State.FAILED:
@@ -176,13 +218,6 @@ public class VolumeWarningPulse : VolumeWarning
 	private void pulse_reconnect_soon () {
 		if (_pulse_reconnect_timer == 0)
 			_pulse_reconnect_timer = Timeout.add_seconds (2, pulse_reconnect_timeout);
-	}
-
-	private void pulse_reconnect_soon_cancel () {
-		if (_pulse_reconnect_timer != 0) {
-			Source.remove (_pulse_reconnect_timer);
-			_pulse_reconnect_timer = 0;
-		}
 	}
 
 	private bool pulse_reconnect_timeout () {

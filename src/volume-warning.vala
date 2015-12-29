@@ -76,6 +76,13 @@ public abstract class VolumeWarning : Object
 
 	protected abstract void sound_system_set_multimedia_volume(PulseAudio.Volume volume);
 
+	protected void clear_timer (ref uint timer) {
+		if (timer != 0) {
+			Source.remove (timer);
+			timer = 0;
+		}
+	}
+
 	/***
 	****
 	***/
@@ -174,10 +181,7 @@ public abstract class VolumeWarning : Object
 		}
 	}
 	private void stop_high_volume_approved_timer() {
-		if (_high_volume_approved_timer != 0) {
-			Source.remove (_high_volume_approved_timer);
-			_high_volume_approved_timer = 0;
-		}
+		clear_timer(ref _high_volume_approved_timer);
 	}
 	private bool on_high_volume_approved_timer() {
 		_high_volume_approved_timer = 0;
