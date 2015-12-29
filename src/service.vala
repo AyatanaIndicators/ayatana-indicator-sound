@@ -507,7 +507,7 @@ public class IndicatorSound.Service: Object {
 					this.mute_blocks_sound = false;
 					this.sound_was_blocked_timeout_id = 0;
 					this.update_root_icon ();
-					return false;
+					return Source.REMOVE;
 				});
 			}
 
@@ -657,7 +657,7 @@ public class IndicatorSound.Service: Object {
 			clear_acts_player();
 
 		this.player_action_update_id = 0;
-		return false;
+		return Source.REMOVE;
 	}
 
 	void eventually_update_player_actions () {

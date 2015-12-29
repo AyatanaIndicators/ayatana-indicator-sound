@@ -75,8 +75,7 @@ public class MediaPlayerUser : MediaPlayer {
 
 		properties_queued.remove_all();
 
-		/* Remove source */
-		return false;
+		return Source.REMOVE;
 	}
 
 	/* Turns the DBus names into the object properties */
