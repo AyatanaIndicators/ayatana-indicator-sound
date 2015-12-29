@@ -87,9 +87,6 @@ public abstract class VolumeWarning : Object
 	****
 	***/
 
-	// FIXME: what to do with this now?
-	private bool   _ignore_warning_this_time = false;
-
 	private IndicatorSound.Options _options;
 
 	private void init_all_properties()
@@ -107,17 +104,6 @@ public abstract class VolumeWarning : Object
 	*** HIGH VOLUME PROPERTY
 	**/
 
-	public bool ignore_high_volume {
-		get {
-			if (_ignore_warning_this_time) {
-				warning("Ignore");
-				_ignore_warning_this_time = false;
-				return true;
-			}
-			return false;
-		}
-		set { }
-	}
 	private void init_high_volume () {
 		_options.loud_changed.connect(() => update_high_volume());
 		this.notify["multimedia-volume"].connect(() => update_high_volume());
