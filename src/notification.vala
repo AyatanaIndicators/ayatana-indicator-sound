@@ -21,33 +21,16 @@ public abstract class IndicatorSound.Notification: Object
 {
 	public bool visible { get; protected set; default = false; }
 
-	public Notification() {
+	public Notification () {
 		BusWatcher.watch_namespace (GLib.BusType.SESSION,
 		                            "org.freedesktop.Notifications",
 		                            () => { debug("Notifications name appeared"); },
 		                            () => { debug("Notifications name vanshed"); _server_caps = null; });
 
-		_notification = create_notification();
+		_notification = create_notification ();
 		_notification.closed.connect((n) => {
 			visible = false;
 		});
-	}
-
-	protected abstract Notify.Notification create_notification();
-
-	~Notification() {
-		close();
-	}
-
-	protected async void show_() {
-		try {
-			GLib.message("calling _notification.show");
-			_notification.show ();
-			GLib.message("after calling show, n.id is %d", (int)_notification.id);
-			visible = true;
-		} catch (GLib.Error e) {
-			warning ("Unable to show notification: %s", e.message);
-		}
 	}
 
 	public void close() {
@@ -55,26 +38,35 @@ public abstract class IndicatorSound.Notification: Object
 
 		return_if_fail (n != null);
 
-		message("closing id %d", n.id);
 		if (n.id != 0) {
 			try {
 				n.close();
 			} catch (GLib.Error e) {
-				warning("Unable to close notification: %s", e.message);
+				GLib.warning("Unable to close notification: %s", e.message);
 			}
 		}
 	}
 
-	protected bool notify_server_supports(string cap) {
-		if (_server_caps == null) {
-			GLib.message("getting server caps");
-			_server_caps = Notify.get_server_caps();
-			GLib.message("got server caps");
-		}
+	~Notification () {
+		close ();
+	}
 
-		var ret = _server_caps.find_custom(cap, strcmp) != null;
-		message("%s --> %d", cap, (int)ret);
-		return ret;
+	protected abstract Notify.Notification create_notification ();
+
+	protected void show_notification () {
+		try {
+			_notification.show ();
+			visible = true;
+		} catch (GLib.Error e) {
+			GLib.warning ("Unable to show notification: %s", e.message);
+		}
+	}
+
+	protected bool notify_server_supports (string cap) {
+		if (_server_caps == null)
+			_server_caps = Notify.get_server_caps();
+
+		return _server_caps.find_custom(cap, strcmp) != null;
 	}
 
 	protected Notify.Notification _notification = null;

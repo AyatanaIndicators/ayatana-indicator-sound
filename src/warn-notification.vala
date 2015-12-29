@@ -24,10 +24,12 @@ public class IndicatorSound.WarnNotification: Notification
 		OK
 	}
 
-	public signal void user_responded(WarnNotification.Response response);
+	public signal void user_responded (WarnNotification.Response response);
 
-        protected override Notify.Notification create_notification() {
-		var n = new Notify.Notification(_("Volume"), _("High volume can damage your hearing."), "audio-volume-high");
+        protected override Notify.Notification create_notification () {
+		var n = new Notify.Notification(_("Volume"),
+		                                _("High volume can damage your hearing."),
+		                                "audio-volume-high");
 		n.set_hint ("x-canonical-non-shaped-icon", "true");
 		n.set_hint ("x-canonical-snap-decisions", "true");
 		n.set_hint ("x-canonical-private-affirmative-tint", "true");
@@ -37,7 +39,7 @@ public class IndicatorSound.WarnNotification: Notification
 		return n;
 	}
 
-	public bool show() {
+	public bool show () {
 
 		if (!notify_server_supports("actions"))
 			return false;
@@ -50,7 +52,7 @@ public class IndicatorSound.WarnNotification: Notification
 			user_responded(Response.CANCEL);
 		});
 		GLib.message("showing warning dialog");
-		show_.begin();
+		show_notification();
 
 		return true;
 	}
