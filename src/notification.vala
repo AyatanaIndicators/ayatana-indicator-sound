@@ -19,8 +19,6 @@
 
 public abstract class IndicatorSound.Notification: Object
 {
-	public bool visible { get; protected set; default = false; }
-
 	public Notification () {
 		BusWatcher.watch_namespace (GLib.BusType.SESSION,
 		                            "org.freedesktop.Notifications",
@@ -28,9 +26,6 @@ public abstract class IndicatorSound.Notification: Object
 		                            () => { debug("Notifications name vanshed"); _server_caps = null; });
 
 		_notification = create_notification ();
-		_notification.closed.connect((n) => {
-			visible = false;
-		});
 	}
 
 	public void close() {
@@ -56,7 +51,6 @@ public abstract class IndicatorSound.Notification: Object
 	protected void show_notification () {
 		try {
 			_notification.show ();
-			visible = true;
 		} catch (GLib.Error e) {
 			GLib.warning ("Unable to show notification: %s", e.message);
 		}
