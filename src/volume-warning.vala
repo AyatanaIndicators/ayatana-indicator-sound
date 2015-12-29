@@ -245,6 +245,7 @@ public class VolumeWarning : Object
 
 		GLib.return_if_fail(_pulse_context != null);
 		GLib.return_if_fail(index != PulseAudio.INVALID_INDEX);
+		GLib.return_if_fail(volume != PulseAudio.Volume.INVALID);
 
 		unowned CVolume cvol = CVolume();
 		cvol.set(_multimedia_cvolume.channels, volume);
