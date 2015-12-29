@@ -63,7 +63,7 @@ on_bus_acquired(GDBusConnection *connection,
 	pgloop = pa_glib_mainloop_new(NULL);
 	options = indicator_sound_options_gsettings_new();
 	volume = volume_control_pulse_new(options, pgloop);
-	warning = volume_warning_new(options, pgloop);
+	warning = volume_warning_pulse_new(options, pgloop);
 
 	service = indicator_sound_service_new (playerlist, volume, accounts, options, warning);
 

@@ -105,6 +105,16 @@ vala_add(indicator-sound-service
       notification
 )
 vala_add(indicator-sound-service
+  volume-warning-pulse.vala
+  DEPENDS
+    volume-warning
+      options
+        volume-control-pulse
+      volume-control
+      warn-notification
+        notification
+)
+vala_add(indicator-sound-service
   media-player.vala
 )
 vala_add(indicator-sound-service

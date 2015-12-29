@@ -20,9 +20,8 @@
  */
 
 using PulseAudio;
-using Notify;
 
-public class VolumeWarning : Object
+public abstract class VolumeWarning : Object
 {
 	// true if headphones are in use
 	public bool headphones_active { get; set; default = false; }
@@ -45,24 +44,18 @@ public class VolumeWarning : Object
 		}
 	}
 
-	public VolumeWarning (IndicatorSound.Options options,
-	                      PulseAudio.GLibMainLoop pgloop) {
+	public VolumeWarning (IndicatorSound.Options options) {
+
 		_options = options;
-		_pgloop = pgloop;
 
 		init_all_properties();
-
-		pulse_start();
 
 		_notification = new IndicatorSound.WarnNotification ();
 		_notification.user_responded.connect((n, r) => on_user_response(r));
 	}
 
-	~VolumeWarning ()
-	{
+	~VolumeWarning () {
 		stop_all_timers();
-
-		pulse_stop();
 	}
 
 	/***
@@ -81,9 +74,7 @@ public class VolumeWarning : Object
 	   NB: This PulseAudio.Volume is typed as uint to unconfuse valac. */
 	protected uint multimedia_volume { get; set; default = PulseAudio.Volume.INVALID; }
 
-	protected virtual void sound_system_set_multimedia_volume(PulseAudio.Volume volume) {
-		pulse_set_sink_input_volume(volume);
-	}
+	protected abstract void sound_system_set_multimedia_volume(PulseAudio.Volume volume);
 
 	/***
 	****
@@ -105,170 +96,9 @@ public class VolumeWarning : Object
 		stop_high_volume_approved_timer();
 	}
 
-	/***
-	****  PulseAudio: Tracking the active multimedia sink input
-	***/
-
-	private unowned PulseAudio.GLibMainLoop _pgloop = null;
-	private PulseAudio.Context _pulse_context = null;
-	private uint _pulse_reconnect_timer = 0;
-	private uint32 _multimedia_sink_input_index = PulseAudio.INVALID_INDEX;
-	private uint32 _warning_sink_input_index = PulseAudio.INVALID_INDEX;
-	private unowned PulseAudio.CVolume _multimedia_cvolume;
-
-	private bool is_active_multimedia (SinkInputInfo i)
-	{
-		if (i.corked != 0)
-			return false;
-
-		var key = PulseAudio.Proplist.PROP_MEDIA_ROLE;
-		var media_role = i.proplist.gets(key);
-		if (media_role != "multimedia")
-			return false;
-
-		return true;
-	}
-
-	private void on_sink_input_info (Context c, SinkInputInfo? i, int eol)
-	{
-		if (i == null)
-			return;
-
-		if (is_active_multimedia(i)) {
-			GLib.message("on_sink_input_info() setting multimedia index to %d, volume to %d", (int)i.index, (int)i.volume.max());
-			_multimedia_sink_input_index = i.index;
-			_multimedia_cvolume = i.volume;
-			multimedia_volume = i.volume.max();
-			multimedia_active = true;
-		}
-		else if (i.index == _multimedia_sink_input_index) {
-			_multimedia_sink_input_index = PulseAudio.INVALID_INDEX;
-			multimedia_volume = PulseAudio.Volume.INVALID;
-			multimedia_active = false;
-		}
-	}
-
-	private void pulse_update_sink_inputs()
-	{
-		_pulse_context.get_sink_input_info_list (on_sink_input_info);
-	}
-
-
-	private void context_events_cb (Context c, Context.SubscriptionEventType t, uint32 index)
-	{
-		if ((t & Context.SubscriptionEventType.FACILITY_MASK) != Context.SubscriptionEventType.SINK_INPUT)
-			return;
-
-		switch (t & Context.SubscriptionEventType.TYPE_MASK)
-		{
-			case Context.SubscriptionEventType.NEW:
-			case Context.SubscriptionEventType.CHANGE:
-				GLib.message("-> Context.SubscriptionEventType.CHANGE or NEW");
-				c.get_sink_input_info(index, on_sink_input_info);
-				break;
-			case Context.SubscriptionEventType.REMOVE:
-				GLib.message("-> Context.SubscriptionEventType.REMOVE");
-				pulse_update_sink_inputs();
-				break;
-			default:
-				GLib.debug("Sink input event not known.");
-				break;
-		}
-	}
-
-	private void pulse_context_state_callback (Context c)
-	{
-		switch (c.get_state ()) {
-			case Context.State.READY:
-				c.set_subscribe_callback (context_events_cb);
-				c.subscribe (PulseAudio.Context.SubscriptionMask.SINK_INPUT);
-				pulse_update_sink_inputs();
-				break;
-
-			case Context.State.FAILED:
-			case Context.State.TERMINATED:
-				pulse_reconnect_soon();
-				break;
-
-			default:
-				break;
-		}
-	}
-
-	private void pulse_disconnect()
-	{
-		if (_pulse_context != null) {
-			_pulse_context.disconnect ();
-			_pulse_context = null;
-		}
-	}
-
-	private void pulse_reconnect_soon ()
-	{
-		if (_pulse_reconnect_timer == 0)
-			_pulse_reconnect_timer = Timeout.add_seconds (2, pulse_reconnect_timeout);
-	}
-
-	private void pulse_reconnect_soon_cancel()
-	{
-		if (_pulse_reconnect_timer != 0) {
-			Source.remove(_pulse_reconnect_timer);
-			_pulse_reconnect_timer = 0;
-		}
-	}
-
-	private bool pulse_reconnect_timeout ()
-	{
-		_pulse_reconnect_timer = 0;
-		pulse_reconnect ();
-		return Source.REMOVE;
-	}
-
-	void pulse_reconnect ()
-	{
-		pulse_disconnect();
-
-		var props = new Proplist ();
-		props.sets (Proplist.PROP_APPLICATION_NAME, "Ubuntu Audio Settings");
-		props.sets (Proplist.PROP_APPLICATION_ID, "com.canonical.settings.sound");
-		props.sets (Proplist.PROP_APPLICATION_ICON_NAME, "multimedia-volume-control");
-		props.sets (Proplist.PROP_APPLICATION_VERSION, "0.1");
-
-		_pulse_context = new PulseAudio.Context (_pgloop.get_api(), null, props);
-		_pulse_context.set_state_callback (pulse_context_state_callback);
-
-		var server_string = Environment.get_variable("PULSE_SERVER");
-		if (_pulse_context.connect(server_string, Context.Flags.NOFAIL, null) < 0)
-			warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(_pulse_context.errno()));
-	}
-
-	void pulse_set_sink_input_volume(PulseAudio.Volume volume)
-	{
-		var index = _warning_sink_input_index;
-
-		GLib.return_if_fail(_pulse_context != null);
-		GLib.return_if_fail(index != PulseAudio.INVALID_INDEX);
-		GLib.return_if_fail(volume != PulseAudio.Volume.INVALID);
-
-		unowned CVolume cvol = CVolume();
-		cvol.set(_multimedia_cvolume.channels, volume);
-		GLib.message("setting multimedia volume to %s", cvol.to_string());
-		_pulse_context.set_sink_input_volume(index, cvol, null);
-	}
-
-	private void pulse_start()
-	{
-		pulse_reconnect();
-	}
-
-	private void pulse_stop()
-	{
-		pulse_reconnect_soon_cancel();
-		pulse_disconnect();
-	}
-
-
-	/** HIGH VOLUME PROPERTY **/
+	/**
+	*** HIGH VOLUME PROPERTY
+	**/
 
 	public bool ignore_high_volume {
 		get {
@@ -306,7 +136,9 @@ public class VolumeWarning : Object
 		}
 	}
 
-	/** HIGH VOLUME APPROVED PROPERTY **/
+	/**
+	*** HIGH VOLUME APPROVED PROPERTY
+	**/
 
 	private Settings _settings = new Settings ("com.canonical.indicator.sound");
 	private uint _high_volume_approved_timer = 0;
@@ -370,9 +202,7 @@ public class VolumeWarning : Object
 	private IndicatorSound.WarnNotification _notification = new IndicatorSound.WarnNotification();
 	private PulseAudio.Volume _ok_volume = PulseAudio.Volume.INVALID;
 
-	protected virtual void preshow() {
-		_warning_sink_input_index = _multimedia_sink_input_index;
-	}
+	protected virtual void preshow() {}
 
 	private void show() {
 		preshow();

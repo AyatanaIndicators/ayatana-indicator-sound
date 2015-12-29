@@ -25,4 +25,8 @@ public class VolumeWarningMock : VolumeWarning
 	public VolumeWarningMock(IndicatorSound.Options options) {
 		base(options);
 	}
+
+        protected override void sound_system_set_multimedia_volume(PulseAudio.Volume volume) {
+		GLib.message("volume-warning-mock setting multimedia volume to %d", (int)volume);
+	}
 }

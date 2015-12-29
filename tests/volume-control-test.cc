@@ -77,7 +77,8 @@ class VolumeControlTest : public ::testing::Test
 
 TEST_F(VolumeControlTest, BasicObject) {
 	auto options = options_mock_new();
-	auto control = volume_control_pulse_new(INDICATOR_SOUND_OPTIONS(options));
+	auto pgloop = pa_glib_mainloop_new(NULL);
+	auto control = volume_control_pulse_new(INDICATOR_SOUND_OPTIONS(options), pgloop);
 
 	/* Setup the PA backend */
 	loop(100);
@@ -87,4 +88,5 @@ TEST_F(VolumeControlTest, BasicObject) {
 
 	g_clear_object(&control);
 	g_clear_object(&options);
+	g_clear_pointer(&pgloop, pa_glib_mainloop_free);
 }
