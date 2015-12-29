@@ -23,9 +23,6 @@ using Notify;
 
 public class VolumeWarning : Object
 {
-	// true if the active sink input has its role property set to multimedia
-	public bool multimedia_active { get; set; default = false; }
-
 	// true if headphones are currently in use
 	public bool headphones_active { get; set; default = false; }
 
@@ -65,6 +62,9 @@ public class VolumeWarning : Object
 
 	// true if the user has approved high volumes recently
 	protected bool high_volume_approved { get; set; default = false; }
+
+	// true if multimedia is currently playing
+	protected bool multimedia_active { get; set; default = false; }
 
 	/* Cached value of what pulse says the multimedia volume is.
 	   This is a PulseAudio.Volume but typed as uint to unconfuse valac.
@@ -136,10 +136,12 @@ public class VolumeWarning : Object
 			_multimedia_sink_input_index = i.index;
 			_multimedia_cvolume = i.volume;
 			cached_multimedia_volume = i.volume.max();
+			multimedia_active = true;
 		}
 		else if (i.index == _multimedia_sink_input_index) {
 			_multimedia_sink_input_index = PulseAudio.INVALID_INDEX;
 			cached_multimedia_volume = PulseAudio.Volume.INVALID;
+			multimedia_active = false;
 		}
 	}
 
@@ -282,8 +284,8 @@ public class VolumeWarning : Object
 	}
 	private void init_high_volume() {
 		_options.loud_changed.connect(() => update_high_volume());
-		this.notify["multimedia-volume"].connect(() => {
-			GLib.message("recalculating high-volume due to multimedia-volume change");
+		this.notify["cached-multimedia-volume"].connect(() => {
+			GLib.message("recalculating high-volume due to cached-multimedia-volume change");
 			this.update_high_volume();
 		});
 		this.notify["multimedia-active"].connect(() => {
@@ -298,13 +300,12 @@ public class VolumeWarning : Object
 		update_high_volume();
 	}
 	private void update_high_volume() {
-		PulseAudio.Volume vol = cached_multimedia_volume;
-		GLib.message("calculating high volume... headphones_active %d high_volume_approved %d multimedia_active %d multimedia_volume %d is_invalid %d, is_loud %d", (int)headphones_active, (int)high_volume_approved, (int)multimedia_active, (int)vol, (int)(vol == PulseAudio.Volume.INVALID), (int)_options.is_loud_pulse(vol));
-		var new_high_volume = headphones_active
-			&& !high_volume_approved
-			&& multimedia_active
-			&& (vol != PulseAudio.Volume.INVALID)
-			&& _options.is_loud_pulse(vol);
+		PulseAudio.Volume mm_vol = cached_multimedia_volume;
+		var approved = high_volume_approved;
+		var hp_active = headphones_active;
+		var mm_active = multimedia_active;
+		GLib.message("calculating high volume... headphones_active %d high_volume_approved %d multimedia_active %d multimedia_volume %d is_invalid %d, is_loud %d", (int)hp_active, (int)approved, (int)mm_active, (int)mm_vol, (int)(mm_vol == PulseAudio.Volume.INVALID), (int)_options.is_loud_pulse(mm_vol));
+		var new_high_volume = hp_active && !approved && mm_active && (mm_vol != PulseAudio.Volume.INVALID) && _options.is_loud_pulse(mm_vol);
 		GLib.message("so the new high_volume is %d, was %d", (int)new_high_volume, (int)high_volume);
 		if (high_volume != new_high_volume) {
 			debug("changing high_volume from %d to %d", (int)high_volume, (int)new_high_volume);
