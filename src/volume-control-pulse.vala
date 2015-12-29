@@ -22,9 +22,6 @@ using PulseAudio;
 using Notify;
 using Gee;
 
-[CCode(cname="pa_cvolume_set", cheader_filename = "pulse/volume.h")]
-extern unowned PulseAudio.CVolume? vol_set (PulseAudio.CVolume? cv, uint channels, PulseAudio.Volume v);
-
 [DBus (name="com.canonical.UnityGreeter.List")]
 interface GreeterListInterface : Object
 {
@@ -645,7 +642,7 @@ public class VolumeControlPulse : VolumeControl
 	void set_mic_volume_get_server_info_cb (PulseAudio.Context c, PulseAudio.ServerInfo? i) {
 		if (i != null) {
 			unowned CVolume cvol = CVolume ();
-			cvol = vol_set (cvol, 1, double_to_volume (_mic_volume));
+			cvol.set (1, double_to_volume (_mic_volume));
 			c.set_source_volume_by_name (i.default_source_name, cvol, set_mic_volume_success_cb);
 		}
 	}
