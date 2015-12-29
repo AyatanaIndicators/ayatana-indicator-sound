@@ -53,6 +53,7 @@ public class VolumeWarningPulse : VolumeWarning
 	private uint _update_sink_inputs_timer = 0;
         private GenericSet<uint32> _pending_sink_inputs = new GenericSet<uint32>(direct_hash, direct_equal);
 
+	private uint soon_interval_msec = 500;
 
 	private uint32 _warning_sink_index          = PulseAudio.INVALID_INDEX;
 	private uint32 _multimedia_sink_index       = PulseAudio.INVALID_INDEX;
@@ -80,7 +81,7 @@ public class VolumeWarningPulse : VolumeWarning
 
 		GLib.message("updating multimedia volume soon");
 		if (_update_sink_timer == 0) {
-			_update_sink_timer = Timeout.add_seconds (1, () => {
+			_update_sink_timer = Timeout.add (soon_interval_msec, () => {
 				_update_sink_timer = 0;
 				update_multimedia_volume ();
 				return Source.REMOVE;
@@ -146,7 +147,7 @@ public class VolumeWarningPulse : VolumeWarning
 		_pending_sink_inputs.add(index);
 
 		if (_update_sink_inputs_timer == 0) {
-			_update_sink_inputs_timer = Timeout.add_seconds (1, () => {
+			_update_sink_inputs_timer = Timeout.add_seconds (soon_interval_msec, () => {
 				_pending_sink_inputs.foreach((i) => {
 					GLib.message("flushing input sink queue: index %d", (int)i);
 					update_sink_input(i);
