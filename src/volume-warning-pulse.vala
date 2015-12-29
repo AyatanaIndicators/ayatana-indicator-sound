@@ -51,7 +51,7 @@ public class VolumeWarningPulse : VolumeWarning
 	private uint _pulse_reconnect_timer = 0;
 	private uint _update_sink_timer = 0;
 	private uint _update_sink_inputs_timer = 0;
-        private GenericSet<uint32> _pending_sink_inputs = new GenericSet<uint32>(int_hash, int_equal);
+        private GenericSet<uint32> _pending_sink_inputs = new GenericSet<uint32>(direct_hash, direct_equal);
 
 
 	private uint32 _warning_sink_index          = PulseAudio.INVALID_INDEX;
