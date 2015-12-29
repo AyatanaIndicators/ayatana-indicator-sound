@@ -593,11 +593,8 @@ public class IndicatorSound.Service: Object {
 		high_volume_action = new SimpleAction.stateful("high-volume", null, create_high_volume_action_state());
 
 		_volume_warning.notify["high-volume"].connect( () => {
-			GLib.message("in service, due to high-volume change, updating high-volume-action-state");
 			update_high_volume_action_state();
-			GLib.message("in service, due to high-volume change, updating notification");
 			update_notification();
-			GLib.message("in service, finished handling high-volume notify");
 		});
 
 		return high_volume_action;

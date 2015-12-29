@@ -365,7 +365,6 @@ public class VolumeControlPulse : VolumeControl
 				var vol = new VolumeControl.Volume();
 				vol.volume = volume_to_double (volume);
 				vol.reason = VolumeControl.VolumeReasons.VOLUME_STREAM_CHANGE;
-				GLib.message("setting volume to %f due to stream change", vol.volume);
 				this.volume = vol;
 			} catch (GLib.Error e) {
 				warning ("unable to get volume for active role %s (%s)", sink_input_objp, e.message);
@@ -381,7 +380,6 @@ public class VolumeControlPulse : VolumeControl
 		if (role != null && role in _valid_roles) {
 			if (sink_input.corked == 0 || role == "phone") {
 				_sink_input_list.insert (0, sink_input.index);
-				GLib.message("role %s _objp_role_multimedia %s", role, _objp_role_multimedia);
 				switch (role)
 				{
 					case "multimedia":
@@ -626,13 +624,10 @@ public class VolumeControlPulse : VolumeControl
 				_pa_volume_sig_count++;
 			}
 
-			GLib.message ("Calling org.PulseAudio.Ext.StreamRestore1.RestoreEntry Set Volume");
 			yield _pconn.call ("org.PulseAudio.Ext.StreamRestore1.RestoreEntry",
 					active_role_objp, "org.freedesktop.DBus.Properties", "Set",
 					new Variant ("(ssv)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume", volume),
 					null, DBusCallFlags.NONE, -1);
-
-			GLib.message ("Set volume to %f on path %s", vol, active_role_objp);
 		} catch (GLib.Error e) {
 			lock (_pa_volume_sig_count) {
 				_pa_volume_sig_count--;
@@ -950,7 +945,6 @@ public class VolumeControlPulse : VolumeControl
 				var vol = new VolumeControl.Volume();
 				vol.volume = _account_service_volume;
 				vol.reason = VolumeControl.VolumeReasons.ACCOUNTS_SERVICE_SET;
-				GLib.message("setting volume to %f due to accounts service set", vol.volume);
 				this.volume = vol;
 				return;
 			}

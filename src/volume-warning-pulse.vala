@@ -87,7 +87,6 @@ public class VolumeWarningPulse : VolumeWarning
 
 	private void update_multimedia_volume_soon () {
 
-		GLib.message("updating multimedia volume soon");
 		if (_update_sink_timer == 0) {
 			_update_sink_timer = Timeout.add (soon_interval_msec, () => {
 				_update_sink_timer = 0;
@@ -155,15 +154,11 @@ public class VolumeWarningPulse : VolumeWarning
 
 	private void update_sink_input_soon (uint32 index) {
 
-		GLib.message("adding %d to queue", (int)index);
 		_pending_sink_inputs.add(index);
 
 		if (_update_sink_inputs_timer == 0) {
 			_update_sink_inputs_timer = Timeout.add (soon_interval_msec, () => {
-				_pending_sink_inputs.foreach((i) => {
-					GLib.message("flushing input sink queue: index %d", (int)i);
-					update_sink_input(i);
-				});
+				_pending_sink_inputs.foreach((i) => update_sink_input(i));
 				_pending_sink_inputs.remove_all();
 				_update_sink_inputs_timer = 0;
 				return Source.REMOVE;
@@ -188,7 +183,6 @@ public class VolumeWarningPulse : VolumeWarning
 					// to keep our multimedia indices up-to-date
 					case Context.SubscriptionEventType.NEW:
 					case Context.SubscriptionEventType.CHANGE:
-						GLib.message ("-> Context.SubscriptionEventType.CHANGE or NEW");
 						update_sink_input_soon(index);
 						break;
 
