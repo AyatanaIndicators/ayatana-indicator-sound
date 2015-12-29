@@ -68,15 +68,31 @@ public class VolumeWarningPulse : VolumeWarning
 
 	private void update_multimedia_volume()
 	{
-		GLib.return_if_fail(_pulse_context != null;
+		GLib.return_if_fail(_pulse_context != null);
 		GLib.return_if_fail(_multimedia_sink_index != PulseAudio.INVALID_INDEX);
 
 		GLib.message("updating multimedia volume");
+
 		_pulse_context.get_sink_info_by_index(_multimedia_sink_index, (c,i) => {
 			GLib.return_if_fail(i != null);
 			_multimedia_cvolume = i.volume;
 			multimedia_volume = i.volume.max();
 		});
+	}
+
+	private void set_multimedia_sink_index(uint32 index)
+	{
+		if (index == PulseAudio.INVALID_INDEX)
+		{
+			_multimedia_sink_index = PulseAudio.INVALID_INDEX;
+			multimedia_volume = PulseAudio.Volume.INVALID;
+		}
+		else if (_multimedia_sink_index != index)
+		{
+			_multimedia_sink_index = index;
+			multimedia_volume = PulseAudio.Volume.INVALID;
+			update_multimedia_volume();
+		}
 	}
 
 	private void on_sink_input_info (Context c, SinkInputInfo? i, int eol)
@@ -86,16 +102,13 @@ public class VolumeWarningPulse : VolumeWarning
 
 		if (is_active_multimedia(i)) {
 			GLib.message("on_sink_input_info() setting multimedia sink input index to %d, sink index to %d", (int)i.index, (int)i.sink);
-			_multimedia_sink_index = i.sink;
 			_multimedia_sink_input_index = i.index;
-			multimedia_volume = PulseAudio.Volume.INVALID; // don't let high-volume get set to 'true' until multimedia_volume is updated
-			update_multimedia_volume();
+			set_multimedia_sink_index(i.sink);
 			multimedia_active = true;
 		}
 		else if (i.index == _multimedia_sink_input_index) {
-			_multimedia_sink_index = PulseAudio.INVALID_INDEX;
 			_multimedia_sink_input_index = PulseAudio.INVALID_INDEX;
-			multimedia_volume = PulseAudio.Volume.INVALID;
+			set_multimedia_sink_index(PulseAudio.INVALID_INDEX);
 			multimedia_active = false;
 		}
 	}
