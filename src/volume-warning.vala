@@ -180,24 +180,24 @@ public class VolumeWarning : Object
 				c.set_subscribe_callback (context_events_cb);
 				c.subscribe (PulseAudio.Context.SubscriptionMask.SINK_INPUT);
 				pulse_update_sink_inputs();
-                                break;
+				break;
 
-                        case Context.State.FAILED:
-                        case Context.State.TERMINATED:
+			case Context.State.FAILED:
+			case Context.State.TERMINATED:
 				pulse_reconnect_soon();
-                                break;
+				break;
 
-                        default:
-                                break;
-                }
-        }
+			default:
+				break;
+		}
+	}
 
 	private void pulse_disconnect()
 	{
-                if (_pulse_context != null) {
-                        _pulse_context.disconnect ();
-                        _pulse_context = null;
-                }
+		if (_pulse_context != null) {
+			_pulse_context.disconnect ();
+			_pulse_context = null;
+		}
 	}
 
 	private void pulse_reconnect_soon ()
@@ -206,38 +206,38 @@ public class VolumeWarning : Object
 			_pulse_reconnect_timer = Timeout.add_seconds (2, pulse_reconnect_timeout);
 	}
 
-        private void pulse_reconnect_soon_cancel()
+	private void pulse_reconnect_soon_cancel()
 	{
-                if (_pulse_reconnect_timer != 0) {
-                        Source.remove(_pulse_reconnect_timer);
-                        _pulse_reconnect_timer = 0;
-                }
-        }
+		if (_pulse_reconnect_timer != 0) {
+			Source.remove(_pulse_reconnect_timer);
+			_pulse_reconnect_timer = 0;
+		}
+	}
 
-        private bool pulse_reconnect_timeout ()
-        {
-                _pulse_reconnect_timer = 0;
-                pulse_reconnect ();
-                return false; // G_SOURCE_REMOVE
-        }
+	private bool pulse_reconnect_timeout ()
+	{
+		_pulse_reconnect_timer = 0;
+		pulse_reconnect ();
+		return false; // G_SOURCE_REMOVE
+	}
 
-        void pulse_reconnect ()
-        {
+	void pulse_reconnect ()
+	{
 		pulse_disconnect();
 
-                var props = new Proplist ();
-                props.sets (Proplist.PROP_APPLICATION_NAME, "Ubuntu Audio Settings");
-                props.sets (Proplist.PROP_APPLICATION_ID, "com.canonical.settings.sound");
-                props.sets (Proplist.PROP_APPLICATION_ICON_NAME, "multimedia-volume-control");
-                props.sets (Proplist.PROP_APPLICATION_VERSION, "0.1");
+		var props = new Proplist ();
+		props.sets (Proplist.PROP_APPLICATION_NAME, "Ubuntu Audio Settings");
+		props.sets (Proplist.PROP_APPLICATION_ID, "com.canonical.settings.sound");
+		props.sets (Proplist.PROP_APPLICATION_ICON_NAME, "multimedia-volume-control");
+		props.sets (Proplist.PROP_APPLICATION_VERSION, "0.1");
 
-                _pulse_context = new PulseAudio.Context (_pgloop.get_api(), null, props);
-                _pulse_context.set_state_callback (pulse_context_state_callback);
+		_pulse_context = new PulseAudio.Context (_pgloop.get_api(), null, props);
+		_pulse_context.set_state_callback (pulse_context_state_callback);
 
-                var server_string = Environment.get_variable("PULSE_SERVER");
-                if (_pulse_context.connect(server_string, Context.Flags.NOFAIL, null) < 0)
-                        warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(_pulse_context.errno()));
-        }
+		var server_string = Environment.get_variable("PULSE_SERVER");
+		if (_pulse_context.connect(server_string, Context.Flags.NOFAIL, null) < 0)
+			warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(_pulse_context.errno()));
+	}
 
 	///
 
