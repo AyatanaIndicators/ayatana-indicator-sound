@@ -42,13 +42,6 @@ public class IndicatorSound.Service: Object {
 		this.notify["visible"].connect ( () => this.update_root_icon () );
 
 		this.volume_control = volume;
-#if 0
-		this.volume_control.notify["active-stream"].connect(() => {
-			var b = VolumeControl.Stream.MULTIMEDIA == volume_control.active_stream;
-			message("updating _volume_warning.multimedia_active to %d", (int)b);
-			_volume_warning.multimedia_active = b;
-		});
-#endif
 		this.volume_control.active_output_changed.connect(() => {
 			bool headphones;
 			switch(volume_control.active_output) {

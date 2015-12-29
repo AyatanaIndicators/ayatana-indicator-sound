@@ -218,7 +218,7 @@ public class VolumeWarning : Object
 	{
 		_pulse_reconnect_timer = 0;
 		pulse_reconnect ();
-		return false; // G_SOURCE_REMOVE
+		return Source.REMOVE;
 	}
 
 	void pulse_reconnect ()
@@ -351,7 +351,7 @@ public class VolumeWarning : Object
 	private bool on_high_volume_approved_timer() {
 		_high_volume_approved_timer = 0;
 		update_high_volume_approved();
-		return false; /* Source.REMOVE */
+		return Source.REMOVE;
 	}
 	private void update_high_volume_approved() {
 		var new_high_volume_approved = calculate_high_volume_approved();

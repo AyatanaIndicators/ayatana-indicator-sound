@@ -488,7 +488,7 @@ public class VolumeControlPulse : VolumeControl
 	{
 		_reconnect_timer = 0;
 		reconnect_to_pulse ();
-		return false; // G_SOURCE_REMOVE
+		return Source.REMOVE;
 	}
 
 	void reconnect_to_pulse ()
@@ -939,7 +939,7 @@ public class VolumeControlPulse : VolumeControl
 			_send_next_local_volume = false;
 			start_local_volume_timer ();
 		}
-		return false; // G_SOURCE_REMOVE
+		return Source.REMOVE;
 	}
 
 	private void start_account_service_volume_timer()
@@ -972,6 +972,6 @@ public class VolumeControlPulse : VolumeControl
 	{
 		_accountservice_volume_timer = 0;
 		start_account_service_volume_timer ();
-		return false; // G_SOURCE_REMOVE
+		return Source.REMOVE;
 	}
 }
