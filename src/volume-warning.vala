@@ -1,6 +1,7 @@
 /*
  * -*- Mode:Vala; indent-tabs-mode:t; tab-width:4; encoding:utf8 -*-
- * Copyright 2013 Canonical Ltd.
+ *
+ * Copyright 2015 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authors:
- *      Alberto Ruiz <alberto.ruiz@canonical.com>
+ *      Charles Kerr <charles.kerr@canonical.com>
  */
 
 using PulseAudio;
@@ -23,10 +24,10 @@ using Notify;
 
 public class VolumeWarning : Object
 {
-	// true if headphones are currently in use
+	// true if headphones are in use
 	public bool headphones_active { get; set; default = false; }
 
-	// true if the warning dialog is currently active
+	// true if the warning dialog is being shown
 	public bool active { get; protected set; default = false; }
 
 	// true if we're playing unapproved loud multimedia over headphones
@@ -37,14 +38,15 @@ public class VolumeWarning : Object
 		VOLUME_DOWN
 	}
 
-	public void user_keypress(Key key) {
+	public void user_keypress (Key key) {
 		if ((key == Key.VOLUME_DOWN) && active) {
 			_notification.close();
 			on_user_response(IndicatorSound.WarnNotification.Response.CANCEL);
 		}
 	}
 
-	public VolumeWarning (IndicatorSound.Options options, PulseAudio.GLibMainLoop pgloop) {
+	public VolumeWarning (IndicatorSound.Options options,
+	                      PulseAudio.GLibMainLoop pgloop) {
 		_options = options;
 		_pgloop = pgloop;
 
@@ -52,8 +54,15 @@ public class VolumeWarning : Object
 
 		pulse_start();
 
-		_notification = new IndicatorSound.WarnNotification();
-		_notification.user_responded.connect((n, response) => on_user_response(response));
+		_notification = new IndicatorSound.WarnNotification ();
+		_notification.user_responded.connect((n, r) => on_user_response(r));
+	}
+
+	~VolumeWarning ()
+	{
+		stop_all_timers();
+
+		pulse_stop();
 	}
 
 	/***
@@ -66,10 +75,10 @@ public class VolumeWarning : Object
 	// true if multimedia is currently playing
 	protected bool multimedia_active { get; set; default = false; }
 
-	/* Cached value of what pulse says the multimedia volume is.
-	   This is a PulseAudio.Volume but typed as uint to unconfuse valac.
-	   Setting this only updates the cache --
-	   to actually change the volume, use sound_system_set_multimedia_volume(). */
+	/* Cached value of the multimedia volume reported by pulse.
+	   Setting this only updates the cache -- to change the volume,
+	   use sound_system_set_multimedia_volume().
+	   NB: This PulseAudio.Volume is typed as uint to unconfuse valac. */
 	protected uint multimedia_volume { get; set; default = PulseAudio.Volume.INVALID; }
 
 	protected virtual void sound_system_set_multimedia_volume(PulseAudio.Volume volume) {
@@ -91,20 +100,13 @@ public class VolumeWarning : Object
 		init_high_volume_approved();
 	}
 
-	~VolumeWarning ()
-	{
-		stop_all_timers();
-
-		pulse_stop();
-	}
-
 	private void stop_all_timers()
 	{
 		stop_high_volume_approved_timer();
 	}
 
 	/***
-	****  PulseAudio: Tracking which sink input (if any) is active multimedia
+	****  PulseAudio: Tracking the active multimedia sink input
 	***/
 
 	private unowned PulseAudio.GLibMainLoop _pgloop = null;
@@ -119,20 +121,21 @@ public class VolumeWarning : Object
 		if (i.corked != 0)
 			return false;
 
-		var media_role = i.proplist.gets(PulseAudio.Proplist.PROP_MEDIA_ROLE);
+		var key = PulseAudio.Proplist.PROP_MEDIA_ROLE;
+		var media_role = i.proplist.gets(key);
 		if (media_role != "multimedia")
 			return false;
 
 		return true;
 	}
 
-	private void pulse_on_sink_input_info (Context c, SinkInputInfo? i, int eol)
+	private void on_sink_input_info (Context c, SinkInputInfo? i, int eol)
 	{
 		if (i == null)
 			return;
 
 		if (is_active_multimedia(i)) {
-			GLib.message("pulse_on_sink_input_info() setting multimedia index to %d, volume to %d", (int)i.index, (int)i.volume.max());
+			GLib.message("on_sink_input_info() setting multimedia index to %d, volume to %d", (int)i.index, (int)i.volume.max());
 			_multimedia_sink_input_index = i.index;
 			_multimedia_cvolume = i.volume;
 			multimedia_volume = i.volume.max();
@@ -147,7 +150,7 @@ public class VolumeWarning : Object
 
 	private void pulse_update_sink_inputs()
 	{
-		_pulse_context.get_sink_input_info_list (pulse_on_sink_input_info);
+		_pulse_context.get_sink_input_info_list (on_sink_input_info);
 	}
 
 
@@ -161,7 +164,7 @@ public class VolumeWarning : Object
 			case Context.SubscriptionEventType.NEW:
 			case Context.SubscriptionEventType.CHANGE:
 				GLib.message("-> Context.SubscriptionEventType.CHANGE or NEW");
-				c.get_sink_input_info(index, pulse_on_sink_input_info);
+				c.get_sink_input_info(index, on_sink_input_info);
 				break;
 			case Context.SubscriptionEventType.REMOVE:
 				GLib.message("-> Context.SubscriptionEventType.REMOVE");
@@ -239,8 +242,6 @@ public class VolumeWarning : Object
 			warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(_pulse_context.errno()));
 	}
 
-	///
-
 	void pulse_set_sink_input_volume(PulseAudio.Volume volume)
 	{
 		var index = _warning_sink_input_index;
@@ -254,8 +255,6 @@ public class VolumeWarning : Object
 		GLib.message("setting multimedia volume to %s", cvol.to_string());
 		_pulse_context.set_sink_input_volume(index, cvol, null);
 	}
-
-	///
 
 	private void pulse_start()
 	{
@@ -310,6 +309,9 @@ public class VolumeWarning : Object
 	/** HIGH VOLUME APPROVED PROPERTY **/
 
 	private Settings _settings = new Settings ("com.canonical.indicator.sound");
+	private uint _high_volume_approved_timer = 0;
+	private int64 _high_volume_approved_at = 0;
+	private int64 _high_volume_approved_ttl_usec = 0;
 
 	private void approve_high_volume() {
 		_high_volume_approved_at = GLib.get_monotonic_time();
@@ -317,9 +319,6 @@ public class VolumeWarning : Object
 		update_high_volume_approved_timer();
 	}
 
-	private uint _high_volume_approved_timer = 0;
-	private int64 _high_volume_approved_at = 0;
-	private int64 _high_volume_approved_ttl_usec = 0;
 	private void init_high_volume_approved() {
 		_settings.changed["warning-volume-confirmation-ttl"].connect(() => update_high_volume_approved_cache());
 		update_high_volume_approved_cache();
@@ -369,7 +368,6 @@ public class VolumeWarning : Object
 	// NOTIFICATION
 
 	private IndicatorSound.WarnNotification _notification = new IndicatorSound.WarnNotification();
-
 	private PulseAudio.Volume _ok_volume = PulseAudio.Volume.INVALID;
 
 	protected virtual void preshow() {
