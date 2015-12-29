@@ -21,6 +21,11 @@
 
 using PulseAudio;
 
+/**
+ * A VolumeWarning that uses PulseAudio to
+ * (a) implement sound_system_set_multimedia_volume() and
+ * (b) keep the multimedia_active and multimedia_volume properties up-to-date
+ */
 public class VolumeWarningPulse : VolumeWarning
 {
 	public VolumeWarningPulse (IndicatorSound.Options options,
@@ -38,22 +43,24 @@ public class VolumeWarningPulse : VolumeWarning
 		pulse_disconnect();
 	}
 
-	protected override void sound_system_set_multimedia_volume (PulseAudio.Volume volume) {
-		var index = _warning_sink_index;
+        protected override void preshow () {
+		/* showing the dialog can change the sink input index (bug #1484589)
+		 * so cache it here for later use in sound_system_set_multimedia_volume() */
+                _target_sink_index = _multimedia_sink_index;
+        }
 
-		GLib.return_if_fail(_pulse_context != null);
-		GLib.return_if_fail(index != PulseAudio.INVALID_INDEX);
-		GLib.return_if_fail(volume != PulseAudio.Volume.INVALID);
+	protected override void sound_system_set_multimedia_volume (PulseAudio.Volume volume) {
+		var index = _target_sink_index;
+
+		GLib.return_if_fail (_pulse_context != null);
+		GLib.return_if_fail (index != PulseAudio.INVALID_INDEX);
+		GLib.return_if_fail (volume != PulseAudio.Volume.INVALID);
 
 		unowned CVolume cvol = CVolume ();
 		cvol.set (1, volume);
 		GLib.message ("setting multimedia volume to %s", cvol.to_string());
 		_pulse_context.set_sink_volume_by_index (index, cvol);
 	}
-
-        protected override void preshow () {
-                _warning_sink_index = _multimedia_sink_index;
-        }
 
 	/***
 	****  PulseAudio: Tracking the active multimedia sink input
@@ -68,7 +75,7 @@ public class VolumeWarningPulse : VolumeWarning
 
 	private uint soon_interval_msec = 500;
 
-	private uint32 _warning_sink_index          = PulseAudio.INVALID_INDEX;
+	private uint32 _target_sink_index           = PulseAudio.INVALID_INDEX;
 	private uint32 _multimedia_sink_index       = PulseAudio.INVALID_INDEX;
 	private uint32 _multimedia_sink_input_index = PulseAudio.INVALID_INDEX;
 
