@@ -116,6 +116,12 @@ public class VolumeWarningPulse : VolumeWarning
 		return true;
 	}
 
+	private void clear_multimedia () {
+		_multimedia_sink_input_index = PulseAudio.INVALID_INDEX;
+		set_multimedia_sink_index (PulseAudio.INVALID_INDEX);
+		multimedia_active = false;
+	}
+
 	private void on_sink_input_info (Context c, SinkInputInfo? i, int eol) {
 
 		if (i == null)
@@ -128,9 +134,7 @@ public class VolumeWarningPulse : VolumeWarning
 			multimedia_active = true;
 		}
 		else if (i.index == _multimedia_sink_input_index) {
-			_multimedia_sink_input_index = PulseAudio.INVALID_INDEX;
-			set_multimedia_sink_index (PulseAudio.INVALID_INDEX);
-			multimedia_active = false;
+			clear_multimedia();
 		}
 	}
 
@@ -163,6 +167,8 @@ public class VolumeWarningPulse : VolumeWarning
 		switch (t & Context.SubscriptionEventType.FACILITY_MASK)
 		{
 			case Context.SubscriptionEventType.SINK:
+				// if something happens to the sink connected to our mm sink input,
+				// get its updated info to keep our multimedia volume up-to-date
 				if ((index == _multimedia_sink_index) && (index != PulseAudio.INVALID_INDEX))
 					update_multimedia_volume_soon();
 				break;
@@ -170,15 +176,23 @@ public class VolumeWarningPulse : VolumeWarning
 			case Context.SubscriptionEventType.SINK_INPUT:
 				switch (t & Context.SubscriptionEventType.TYPE_MASK)
 				{
+					// if a SinkInput changed, get its updated info
+					// to keep our multimedia indices up-to-date
 					case Context.SubscriptionEventType.NEW:
 					case Context.SubscriptionEventType.CHANGE:
 						GLib.message ("-> Context.SubscriptionEventType.CHANGE or NEW");
 						update_sink_input_soon(index);
 						break;
+
+					// if the multimedia sink input was removed,
+					// reset our mm fields and look for a new mm sink input
 					case Context.SubscriptionEventType.REMOVE:
-						GLib.message ("-> Context.SubscriptionEventType.REMOVE");
-						update_all_sink_inputs ();
+						if (index == _multimedia_sink_input_index) {
+							clear_multimedia();
+							update_all_sink_inputs ();
+						}
 						break;
+
 					default:
 						GLib.debug ("Sink input event not known.");
 						break;
@@ -217,14 +231,13 @@ public class VolumeWarningPulse : VolumeWarning
 	}
 
 	private void pulse_reconnect_soon () {
-		if (_pulse_reconnect_timer == 0)
-			_pulse_reconnect_timer = Timeout.add_seconds (2, pulse_reconnect_timeout);
-	}
-
-	private bool pulse_reconnect_timeout () {
-		_pulse_reconnect_timer = 0;
-		pulse_reconnect ();
-		return Source.REMOVE;
+		if (_pulse_reconnect_timer == 0) {
+			_pulse_reconnect_timer = Timeout.add_seconds (2, () => {
+				_pulse_reconnect_timer = 0;
+				pulse_reconnect();
+				return Source.REMOVE;
+			});
+		}
 	}
 
 	void pulse_reconnect () {
