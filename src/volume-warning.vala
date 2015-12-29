@@ -69,10 +69,10 @@ public class VolumeWarning : Object
 	/* Cached value of what pulse says the multimedia volume is.
 	   This is a PulseAudio.Volume but typed as uint to unconfuse valac.
 	   Setting this only updates the cache --
-	   to actually change the volume, use set_multimedia_volume(). */
-	protected uint cached_multimedia_volume { get; set; default = PulseAudio.Volume.INVALID; }
+	   to actually change the volume, use sound_system_set_multimedia_volume(). */
+	protected uint multimedia_volume { get; set; default = PulseAudio.Volume.INVALID; }
 
-	protected virtual void set_multimedia_volume(PulseAudio.Volume volume) {
+	protected virtual void sound_system_set_multimedia_volume(PulseAudio.Volume volume) {
 		pulse_set_sink_input_volume(volume);
 	}
 
@@ -135,12 +135,12 @@ public class VolumeWarning : Object
 			GLib.message("pulse_on_sink_input_info() setting multimedia index to %d, volume to %d", (int)i.index, (int)i.volume.max());
 			_multimedia_sink_input_index = i.index;
 			_multimedia_cvolume = i.volume;
-			cached_multimedia_volume = i.volume.max();
+			multimedia_volume = i.volume.max();
 			multimedia_active = true;
 		}
 		else if (i.index == _multimedia_sink_input_index) {
 			_multimedia_sink_input_index = PulseAudio.INVALID_INDEX;
-			cached_multimedia_volume = PulseAudio.Volume.INVALID;
+			multimedia_volume = PulseAudio.Volume.INVALID;
 			multimedia_active = false;
 		}
 	}
@@ -284,8 +284,8 @@ public class VolumeWarning : Object
 	}
 	private void init_high_volume() {
 		_options.loud_changed.connect(() => update_high_volume());
-		this.notify["cached-multimedia-volume"].connect(() => {
-			GLib.message("recalculating high-volume due to cached-multimedia-volume change");
+		this.notify["multimedia-volume"].connect(() => {
+			GLib.message("recalculating high-volume due to multimedia-volume change");
 			this.update_high_volume();
 		});
 		this.notify["multimedia-active"].connect(() => {
@@ -300,7 +300,7 @@ public class VolumeWarning : Object
 		update_high_volume();
 	}
 	private void update_high_volume() {
-		PulseAudio.Volume mm_vol = cached_multimedia_volume;
+		PulseAudio.Volume mm_vol = multimedia_volume;
 		var approved = high_volume_approved;
 		var hp_active = headphones_active;
 		var mm_active = multimedia_active;
@@ -386,13 +386,13 @@ public class VolumeWarning : Object
 
 	private void show() {
 		preshow();
-		_ok_volume = cached_multimedia_volume;
+		_ok_volume = multimedia_volume;
 
 		_notification.show();
 		this.active = true;
 
 		// lower the volume to just under the warning level
-		set_multimedia_volume (_options.loud_volume()-1);
+		sound_system_set_multimedia_volume (_options.loud_volume()-1);
 	}
 
 	private void on_user_response(IndicatorSound.WarnNotification.Response response) {
@@ -401,7 +401,7 @@ public class VolumeWarning : Object
 
 		if (response == IndicatorSound.WarnNotification.Response.OK) {
 			approve_high_volume();
-			set_multimedia_volume(_ok_volume);
+			sound_system_set_multimedia_volume(_ok_volume);
 		}
 
 		_ok_volume = PulseAudio.Volume.INVALID;
