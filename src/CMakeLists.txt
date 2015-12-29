@@ -32,6 +32,7 @@ vala_init(indicator-sound-service
   OPTIONS
     --ccode
     --thread
+    --target-glib=${GLIB_2_0_REQUIRED_VERSION}
     --vapidir=${CMAKE_SOURCE_DIR}/vapi/
     --vapidir=.
     --pkg=url-dispatcher
