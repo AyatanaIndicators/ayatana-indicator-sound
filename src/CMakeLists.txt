@@ -42,6 +42,13 @@ vala_add(indicator-sound-service
   notification.vala
 )
 vala_add(indicator-sound-service
+  info-notification.vala
+  DEPENDS
+    notification
+      volume-control
+        options
+)
+vala_add(indicator-sound-service
   warn-notification.vala
   DEPENDS
     notification
@@ -52,6 +59,8 @@ vala_add(indicator-sound-service
     sound-menu
     volume-control
     volume-control-pulse
+    notification
+    info-notification
     volume-warning
     options
     options-gsettings

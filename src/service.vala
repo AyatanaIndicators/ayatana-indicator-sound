@@ -30,18 +30,11 @@ public class IndicatorSound.Service: Object {
 
 		_options = options;
 
-		info_notification = new Notify.Notification(_("Volume"), "", "audio-volume-muted");
-
 		_volume_warning = volume_warning;
 		_volume_warning.notify["active"].connect(() => {
 			this.increment_volume_sync_action();
 			this.update_notification();
 		});
-
-		BusWatcher.watch_namespace (GLib.BusType.SESSION,
-		                            "org.freedesktop.Notifications",
-		                            () => { debug("Notifications name appeared"); },
-		                            () => { debug("Notifications name vanshed");  notify_server_caps_checked = false; });
 
 		this.settings = new Settings ("com.canonical.indicator.sound");
 
@@ -130,7 +123,7 @@ public class IndicatorSound.Service: Object {
 			block_info_notifications = state.get_boolean();
 			if (block_info_notifications) {
 				debug("Indicator is shown");
-				close_notification(info_notification);
+				_info_notification.close();
 			} else {
 				debug("Indicator is hidden");
 			}
@@ -144,26 +137,6 @@ public class IndicatorSound.Service: Object {
 		}
 
 		this.menus.@foreach ( (profile, menu) => menu.export (bus, @"/com/canonical/indicator/sound/$profile"));
-	}
-
-	private void close_notification(Notify.Notification? n) {
-		return_if_fail (n != null);
-		if (n.id != 0) {
-			try {
-				n.close();
-			} catch (GLib.Error e) {
-				GLib.warning("Unable to close notification: %s", e.message);
-			}
-		}
-	}
-
-	private void show_notification(Notify.Notification? n) {
-		return_if_fail (n != null);
-		try {
-			n.show ();
-		} catch (GLib.Error e) {
-			GLib.warning ("Unable to show notification: %s", e.message);
-		}
 	}
 
 	~Service() {
@@ -219,9 +192,9 @@ public class IndicatorSound.Service: Object {
 	bool syncing_preferred_players = false;
 	AccountsServiceUser? accounts_service = null;
 	bool export_to_accounts_service = false;
-	private Notify.Notification info_notification;
 	private Options _options;
 	private VolumeWarning _volume_warning;
+	private IndicatorSound.InfoNotification _info_notification = new IndicatorSound.InfoNotification();
 
 	const double volume_step_percentage = 0.06;
 
@@ -304,98 +277,7 @@ public class IndicatorSound.Service: Object {
 		root_action.set_state (builder.end());
 	}
 
-	private bool notify_server_caps_checked = false;
-	private bool notify_server_supports_sync = false;
 	private bool block_info_notifications = false;
-
-	private string get_volume_icon (double volume, VolumeControl.ActiveOutput active_output)
-	{
-		string icon = "";
-		switch (active_output)
-		{
-			case VolumeControl.ActiveOutput.SPEAKERS:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
-			case VolumeControl.ActiveOutput.HEADPHONES:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
-			case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
-			case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
-			case VolumeControl.ActiveOutput.USB_SPEAKER:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
-			case VolumeControl.ActiveOutput.USB_HEADPHONES:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
-			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
-			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
-		}
-		return icon;
-	}
 
 	private string get_volume_root_icon_by_volume (double volume, VolumeControl.ActiveOutput active_output)
 	{
@@ -486,42 +368,6 @@ public class IndicatorSound.Service: Object {
 		return icon;
 	}
 
-	private string get_volume_notification_icon (double volume, bool loud, VolumeControl.ActiveOutput active_output) {
-		string icon = "";
-		if (loud) {
-			switch (active_output)
-			{
-				case VolumeControl.ActiveOutput.SPEAKERS:
-					icon = "audio-volume-high";
-					break;
-				case VolumeControl.ActiveOutput.HEADPHONES:
-					icon = "audio-volume-high";
-					break;
-				case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-					icon = "audio-volume-high";
-					break;
-				case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
-					icon = "audio-volume-high";
-					break;
-				case VolumeControl.ActiveOutput.USB_SPEAKER:
-					icon = "audio-volume-high";
-					break;
-				case VolumeControl.ActiveOutput.USB_HEADPHONES:
-					icon = "audio-volume-high";
-					break;
-				case VolumeControl.ActiveOutput.HDMI_SPEAKER:
-					icon = "audio-volume-high";
-					break;
-				case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
-					icon = "audio-volume-high";
-					break;
-			}
-		} else {
-			icon = get_volume_icon (volume, active_output);
-		}
-		return icon;
-        }
-	
 	private string get_volume_root_icon (double volume, bool mute, VolumeControl.ActiveOutput active_output) {
 		string icon = "";
 		switch (active_output)
@@ -594,68 +440,11 @@ public class IndicatorSound.Service: Object {
 		return icon;
 	}
 
-	private string get_notification_label () {
-		string volume_label = "";
-		switch (volume_control.active_output)
-		{
-			case VolumeControl.ActiveOutput.SPEAKERS:
-				volume_label = _("Speakers");
-				break;
-			case VolumeControl.ActiveOutput.HEADPHONES:
-				volume_label = _("Headphones");
-				break;
-			case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-				volume_label = _("Bluetooth headphones");
-				break;
-			case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
-				volume_label = _("Bluetooth speaker");
-				break;
-			case VolumeControl.ActiveOutput.USB_SPEAKER:
-				volume_label = _("Usb speaker");
-				break;
-			case VolumeControl.ActiveOutput.USB_HEADPHONES:
-				volume_label = _("Usb headphones");
-				break;
-			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
-				volume_label = _("HDMI speaker");
-				break;
-			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
-				volume_label = _("HDMI headphones");
-				break;
-		}
-
-		return volume_label;
-	}
-
 	private void update_notification () {
-
-		if (!notify_server_caps_checked)
-		{
-			GLib.message("service checking server caps");
-			List<string> caps = Notify.get_server_caps ();
-			notify_server_supports_sync = caps.find_custom ("x-canonical-private-synchronous", strcmp) != null;
-			notify_server_caps_checked = true;
-			GLib.message("service done checking server caps");
-		}
-
-		if (!_volume_warning.active && notify_server_supports_sync && !block_info_notifications)
-		{
-			bool is_loud = _volume_warning.high_volume;
-
-		        string volume_label = get_notification_label ();
-		 	string icon = get_volume_notification_icon (volume_control.volume.volume, is_loud, volume_control.active_output);
-
-			/* Reset the notification */
-			GLib.message("service showing info notification");
-			var n = this.info_notification;
-			n.update (_("Volume"), volume_label, icon);
-			n.clear_hints();
-			n.set_hint ("x-canonical-non-shaped-icon", "true");
-			n.set_hint ("x-canonical-private-synchronous", "true");
-			n.set_hint ("x-canonical-value-bar-tint", is_loud ? "true" : "false");
-			n.set_hint ("value", (int32)Math.round(get_volume_percent() * 100.0));
-			show_notification(n);
-			GLib.message("service done showing info notification");
+		if (!_volume_warning.active && !block_info_notifications) {
+			_info_notification.show(this.volume_control.active_output,
+			                        this.volume_control.volume.volume,
+			                        _volume_warning.high_volume);
 		}
 	}
 
