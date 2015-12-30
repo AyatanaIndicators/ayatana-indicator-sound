@@ -20,7 +20,7 @@
 
 public class VolumeWarningMock : VolumeWarning
 {
-	public void set_high_volume(bool b) { high_volume = b; }
+	public void set_high_volume(bool val) { high_volume = val; }
 
 	public VolumeWarningMock(IndicatorSound.Options options) {
 		base(options);
@@ -29,4 +29,12 @@ public class VolumeWarningMock : VolumeWarning
         protected override void sound_system_set_multimedia_volume(PulseAudio.Volume volume) {
 		GLib.message("volume-warning-mock setting multimedia volume to %d", (int)volume);
 	}
+
+	public void set_multimedia_active(bool val) { multimedia_active = val; }
+
+	public void set_multimedia_volume(PulseAudio.Volume val) { multimedia_volume = val; }
+
+	public void set_high_volume_approved(bool val) { high_volume_approved = val; }
+
+	public bool is_high_volume_approved() { return high_volume_approved; }
 }
