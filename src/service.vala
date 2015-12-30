@@ -436,7 +436,7 @@ public class IndicatorSound.Service: Object {
 	private void update_notification () {
 		if (!_volume_warning.active && !block_info_notifications) {
 			_info_notification.show(this.volume_control.active_output,
-			                        this.volume_control.volume.volume,
+						get_volume_percent(),
 			                        _volume_warning.high_volume);
 		}
 	}
