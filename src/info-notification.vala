@@ -44,7 +44,7 @@ public class IndicatorSound.InfoNotification: Notification
 		n.set_hint ("x-canonical-non-shaped-icon", "true");
 		n.set_hint ("x-canonical-private-synchronous", "true");
 		n.set_hint ("x-canonical-value-bar-tint", is_high_volume ? "true" : "false");
-		n.set_hint ("value", (int32)(volume * 100.0));
+		n.set_hint ("value", (int32)((volume * 100.0) + 0.5));
 		show_notification();
 	}
 
