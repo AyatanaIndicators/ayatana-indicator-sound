@@ -443,7 +443,7 @@ TEST_F(NotificationsTest, MenuHide) {
 	EXPECT_EQ(1, notev.size());
 }
 
-TEST_F(NotificationsTest, DISABLED_ExtendendVolumeNotification) {
+TEST_F(NotificationsTest, ExtendendVolumeNotification) {
 	auto options = optionsMock();
 	auto volumeControl = volumeControlMock(options);
 	auto volumeWarning = volumeWarningMock(options);
@@ -463,7 +463,8 @@ TEST_F(NotificationsTest, DISABLED_ExtendendVolumeNotification) {
 
 	/* Allow an amplified volume */
 	notifications->clearNotifications();
-	//indicator_sound_service_set_allow_amplified_volume(soundService.get(), TRUE);
+	volume_control_mock_mock_set_active_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), VOLUME_CONTROL_STREAM_ALARM);
+	options_mock_mock_set_max_volume(OPTIONS_MOCK(options.get()), 1.5);
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
@@ -479,7 +480,7 @@ TEST_F(NotificationsTest, DISABLED_ExtendendVolumeNotification) {
 
 	/* Put back */
 	notifications->clearNotifications();
-	//indicator_sound_service_set_allow_amplified_volume(soundService.get(), FALSE);
+	options_mock_mock_set_max_volume(OPTIONS_MOCK(options.get()), 1.0);
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
