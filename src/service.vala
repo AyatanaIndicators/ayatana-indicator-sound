@@ -29,6 +29,10 @@ public class IndicatorSound.Service: Object {
 		}
 
 		_options = options;
+		_options.notify["max-volume"].connect(() => {
+			update_volume_action_state();
+			this.update_notification();
+		});
 
 		_volume_warning = volume_warning;
 		_volume_warning.notify["active"].connect(() => {
