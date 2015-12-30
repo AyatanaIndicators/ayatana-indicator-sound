@@ -486,3 +486,62 @@ TEST_F(NotificationsTest, ExtendendVolumeNotification) {
 	ASSERT_EQ(1, notev.size());
 	EXPECT_GVARIANT_EQ("@i 100", notev[0].hints["value"]);
 }
+
+TEST_F(NotificationsTest, WarningRequiresHeadphones) {
+
+	const std::set<VolumeControlActiveOutput> headphones {
+		VOLUME_CONTROL_ACTIVE_OUTPUT_HEADPHONES,
+		VOLUME_CONTROL_ACTIVE_OUTPUT_BLUETOOTH_HEADPHONES,
+		VOLUME_CONTROL_ACTIVE_OUTPUT_USB_HEADPHONES,
+		VOLUME_CONTROL_ACTIVE_OUTPUT_HDMI_HEADPHONES
+	};
+
+	const std::set<VolumeControlActiveOutput> all_outputs {
+		VOLUME_CONTROL_ACTIVE_OUTPUT_SPEAKERS,
+		VOLUME_CONTROL_ACTIVE_OUTPUT_HEADPHONES,
+		VOLUME_CONTROL_ACTIVE_OUTPUT_BLUETOOTH_HEADPHONES,
+		VOLUME_CONTROL_ACTIVE_OUTPUT_BLUETOOTH_SPEAKER,
+		VOLUME_CONTROL_ACTIVE_OUTPUT_USB_SPEAKER,
+		VOLUME_CONTROL_ACTIVE_OUTPUT_USB_HEADPHONES,
+		VOLUME_CONTROL_ACTIVE_OUTPUT_HDMI_SPEAKER,
+		VOLUME_CONTROL_ACTIVE_OUTPUT_HDMI_HEADPHONES,
+		VOLUME_CONTROL_ACTIVE_OUTPUT_CALL_MODE
+	};
+
+	for(const auto& output : all_outputs)
+	{
+		// instantiate the test subjects
+		auto options = optionsMock();
+		auto volumeControl = volumeControlMock(options);
+		auto volumeWarning = volumeWarningMock(options);
+		auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning);
+
+		// prime them for a volume warning
+		const pa_volume_t volume = 100;
+		options_mock_mock_set_loud_volume(OPTIONS_MOCK(options.get()), volume);
+		options_mock_mock_set_loud_warning_enabled(OPTIONS_MOCK(options.get()), true);
+		volume_warning_mock_set_high_volume_approved(VOLUME_WARNING_MOCK(volumeWarning.get()), false);
+		volume_warning_mock_set_multimedia_volume(VOLUME_WARNING_MOCK(volumeWarning.get()), volume);
+		volume_warning_mock_set_multimedia_active(VOLUME_WARNING_MOCK(volumeWarning.get()), true);
+
+		// cycle through the different outputs
+		notifications->clearNotifications();
+		volume_control_mock_mock_set_active_output(VOLUME_CONTROL_MOCK(volumeControl.get()), output);
+		loop(50);
+
+		auto notev = notifications->getNotifications();
+		if (headphones.count(output)) {
+			EXPECT_TRUE(volume_warning_get_active(volumeWarning.get()));
+			ASSERT_EQ(1, notev.size());
+			EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-snap-decisions"]);
+			EXPECT_GVARIANT_EQ(nullptr, notev[0].hints["x-canonical-private-synchronous"]);
+		}
+		else {
+			EXPECT_FALSE(volume_warning_get_active(volumeWarning.get()));
+			ASSERT_EQ(1, notev.size());
+			EXPECT_GVARIANT_EQ(nullptr, notev[0].hints["x-canonical-snap-decisions"]);
+			EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-private-synchronous"]);
+		}
+	}
+}
+
