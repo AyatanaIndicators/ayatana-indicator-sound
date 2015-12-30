@@ -209,18 +209,16 @@ public class VolumeControlPulse : VolumeControl
 		if (is_playing != playing)
 			is_playing = playing;
 
-		// store the current status of the active output
-		VolumeControl.ActiveOutput active_output_before = active_output;
+		var oldval = _active_output;
+		var newval = calculate_active_output(i);
 
-		// calculate the output 
-		_active_output = calculate_active_output (i);
-		
-		// check if the output has changed, if so... emit a signal
-		VolumeControl.ActiveOutput active_output_now = active_output;
-		if (active_output_now != active_output_before && 
-			(active_output_now != VolumeControl.ActiveOutput.CALL_MODE &&
-			 active_output_before != VolumeControl.ActiveOutput.CALL_MODE)) {
-			this.active_output_changed (active_output_now);
+		_active_output = newval;
+
+		// Emit a change signal iff CALL_MODE wasn't involved. (FIXME: yuck.)
+		if ((oldval != VolumeControl.ActiveOutput.CALL_MODE) &&
+		    (newval != VolumeControl.ActiveOutput.CALL_MODE) &&
+		    (oldval != newval)) {
+			this.active_output_changed (newval);
 		}
 
 		if (_pulse_use_stream_restore == false &&
@@ -555,12 +553,9 @@ public class VolumeControlPulse : VolumeControl
 		}
 	}
 
-	public override VolumeControl.ActiveOutput active_output 
-	{ 
-		get 
-		{ 
-			return _active_output; 
-		} 
+	public override VolumeControl.ActiveOutput active_output()
+	{
+		return _active_output;
 	}
 
 	/* Volume operations */

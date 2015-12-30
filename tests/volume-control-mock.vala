@@ -31,7 +31,17 @@ public class VolumeControlMock : VolumeControl
 	public override double mic_volume { get; set; }
 
 	public override void set_mute (bool mute) {
-	
+	}
+
+	private VolumeControl.ActiveOutput _active_output = VolumeControl.ActiveOutput.SPEAKERS;
+
+        public override VolumeControl.ActiveOutput active_output() {
+		return _active_output;
+	}
+
+	public void mock_set_active_output (VolumeControl.ActiveOutput val) {
+		_active_output = val;
+		this.active_output_changed(val);
 	}
 
 	public VolumeControlMock(IndicatorSound.Options options) {

@@ -63,7 +63,6 @@ public abstract class VolumeControl : Object
 	public virtual bool active_mic { get { return false; } set { } }
 	public virtual bool mute { get { return false; } }
 	public bool is_playing { get; protected set; default = false; }
-	public virtual VolumeControl.ActiveOutput active_output { get { return VolumeControl.ActiveOutput.SPEAKERS; } }
 	private Volume _volume;
 	public virtual Volume volume { get { return _volume; } set { } }
 	public virtual double mic_volume { get { return 0.0; } set { } }
@@ -77,5 +76,6 @@ public abstract class VolumeControl : Object
 		this.volume = v;
 	}
 
+	public abstract VolumeControl.ActiveOutput active_output();
 	public signal void active_output_changed (VolumeControl.ActiveOutput active_output);
 }

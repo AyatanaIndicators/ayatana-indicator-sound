@@ -48,7 +48,7 @@ public class IndicatorSound.Service: Object {
 		this.volume_control = volume;
 		this.volume_control.active_output_changed.connect(() => {
 			bool headphones;
-			switch(volume_control.active_output) {
+			switch(volume_control.active_output()) {
 				case VolumeControl.ActiveOutput.HEADPHONES:
 				case VolumeControl.ActiveOutput.USB_HEADPHONES:
 				case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
@@ -252,7 +252,7 @@ public class IndicatorSound.Service: Object {
 
 	void update_root_icon () {
 		double volume = this.volume_control.volume.volume;
-		string icon = get_volume_root_icon (volume, this.volume_control.mute, volume_control.active_output);
+		string icon = get_volume_root_icon (volume, this.volume_control.mute, volume_control.active_output());
 
 		string accessible_name;
 		if (this.volume_control.mute) {
@@ -276,7 +276,7 @@ public class IndicatorSound.Service: Object {
 
 	private bool block_info_notifications = false;
 
-	private string get_volume_root_icon_by_volume (double volume, VolumeControl.ActiveOutput active_output)
+	private static string get_volume_root_icon_by_volume (double volume, VolumeControl.ActiveOutput active_output)
 	{
 		string icon = "";
 		switch (active_output)
@@ -439,7 +439,7 @@ public class IndicatorSound.Service: Object {
 
 	private void update_notification () {
 		if (!_volume_warning.active && !block_info_notifications) {
-			_info_notification.show(this.volume_control.active_output,
+			_info_notification.show(this.volume_control.active_output(),
 						get_volume_percent(),
 			                        _volume_warning.high_volume);
 		}
