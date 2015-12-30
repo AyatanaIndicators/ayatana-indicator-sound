@@ -62,18 +62,6 @@ public class IndicatorSound.OptionsGSettings : Options
 
 	/** LOUD VOLUME **/
 
-	private PulseAudio.Volume _loud_volume;
-
-	public override PulseAudio.Volume loud_volume() {
-		return _loud_volume;
-	}
-
-	private bool _loud_volume_warning_enabled;
-
-	public override bool loud_volume_warning_enabled() {
-		return _loud_volume_warning_enabled;
-	}
-
 	private string loud_enabled_key = "warning-volume-enabled";
 	private string loud_decibel_key = "warning-volume-decibels";
 
@@ -83,22 +71,13 @@ public class IndicatorSound.OptionsGSettings : Options
 		update_loud_volume();
 	}
 	private void update_loud_volume() {
-                var changed = false;
+
 		var vol = PulseAudio.Volume.sw_from_dB (_settings.get_double (loud_decibel_key));
+		if (loud_volume != vol)
+			loud_volume = vol;
+
 		var enabled = _settings.get_boolean(loud_enabled_key);
-
-                if (_loud_volume != vol) {
-                        debug("updating loud_volume_sw to %d", (int)vol);
-                        _loud_volume = vol;
-                        changed = true;
-                }
-                if (_loud_volume_warning_enabled != enabled) {
-                        debug("updating loud_volume_warning_enabled to %d", (int)enabled);
-                        _loud_volume_warning_enabled = enabled;
-                        changed = true;
-                }
-
-                if (changed)
-                        loud_changed();
+		if (loud_warning_enabled != enabled)
+			loud_warning_enabled = enabled;
         }
 }

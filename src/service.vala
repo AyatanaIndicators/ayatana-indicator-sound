@@ -544,7 +544,7 @@ public class IndicatorSound.Service: Object {
 		/* activating this action changes the volume by the amount given in the parameter */
 		volume_action.activate.connect ((a,p) => activate_scroll_action(a,p));
 
-		_options.notify["max_volume"].connect(() => {
+		_options.notify["max-volume"].connect(() => {
 			update_volume_action_state();
 		});
 

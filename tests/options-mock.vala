@@ -20,28 +20,9 @@
 
 public class OptionsMock : IndicatorSound.Options
 {
-        // MAX VOLUME
+        public void mock_set_max_volume (double val) { max_volume = val; }
 
-        public void mock_set_max_volume(double val) { max_volume = val; }
+	public void mock_set_loud_volume (PulseAudio.Volume val) { loud_volume = val; }
 
-        // LOUD
-
-	private bool _loud_enabled = true;
-	private PulseAudio.Volume _loud_volume;
-
-        public override PulseAudio.Volume loud_volume() {
-		return _loud_volume;
-	}
-        public override bool loud_volume_warning_enabled() {
-		return _loud_enabled;
-	}
-
-	public void set_loud_enabled(bool v) {
-		_loud_enabled = v;
-		loud_changed();
-	}
-	public void set_loud_volume(PulseAudio.Volume v) {
-		_loud_volume = v;
-		loud_changed();
-	}
+	public void mock_set_loud_warning_enabled (bool val) { loud_warning_enabled = val; }
 }

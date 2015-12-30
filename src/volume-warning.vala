@@ -105,27 +105,29 @@ public abstract class VolumeWarning : Object
 	**/
 
 	private void init_high_volume () {
-		_options.loud_changed.connect(() => update_high_volume());
 		this.notify["multimedia-volume"].connect(() => update_high_volume());
 		this.notify["multimedia-active"].connect(() => update_high_volume());
 		this.notify["headphones-active"].connect(() => update_high_volume());
 		this.notify["high-volume-approved"].connect(() => update_high_volume());
+		_options.notify["loud-volume"].connect(() => update_high_volume());
+		_options.notify["loud-warning-enabled"].connect(() => update_high_volume());
 		update_high_volume();
 	}
 
 	private void update_high_volume () {
-		PulseAudio.Volume mm_vol = multimedia_volume;
-		var approved = high_volume_approved;
-		var hp_active = headphones_active;
-		var mm_active = multimedia_active;
-		GLib.message("calculating high volume... headphones_active %d high_volume_approved %d multimedia_active %d multimedia_volume %d is_invalid %d, is_loud %d", (int)hp_active, (int)approved, (int)mm_active, (int)mm_vol, (int)(mm_vol == PulseAudio.Volume.INVALID), (int)_options.is_loud_pulse(mm_vol));
-		var new_high_volume = hp_active && !approved && mm_active && (mm_vol != PulseAudio.Volume.INVALID) && _options.is_loud_pulse(mm_vol);
-		GLib.message("so the new high_volume is %d, was %d", (int)new_high_volume, (int)high_volume);
-		if (high_volume != new_high_volume) {
-			debug("changing high_volume from %d to %d", (int)high_volume, (int)new_high_volume);
-			if (new_high_volume && !active)
+
+		var newval = _options.loud_warning_enabled
+			&& headphones_active
+			&& multimedia_active
+			&& !high_volume_approved
+			&& (multimedia_volume != PulseAudio.Volume.INVALID)
+			&& (multimedia_volume >= _options.loud_volume);
+
+		if (high_volume != newval) {
+			debug("changing high_volume from %d to %d", (int)high_volume, (int)newval);
+			if (newval && !active)
 				show();
-			high_volume = new_high_volume;
+			high_volume = newval;
 		}
 	}
 
@@ -202,7 +204,7 @@ public abstract class VolumeWarning : Object
 		this.active = true;
 
 		// lower the volume to just under the warning level
-		sound_system_set_multimedia_volume (_options.loud_volume()-1);
+		sound_system_set_multimedia_volume (_options.loud_volume-1);
 	}
 
 	private void on_user_response(IndicatorSound.WarnNotification.Response response) {

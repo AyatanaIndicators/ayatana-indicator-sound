@@ -20,21 +20,9 @@
 
 public abstract class IndicatorSound.Options : Object
 {
-	// MAX VOLUME
-
 	public double max_volume { get; protected set; default = 1.0; }
 
-	// LOUD
+	public uint loud_volume { get; protected set; default = PulseAudio.Volume.sw_from_dB(8); }
 
-	public signal void loud_changed();
-	public abstract PulseAudio.Volume loud_volume();
-	public abstract bool loud_volume_warning_enabled();
-
-	public bool is_loud_pulse (PulseAudio.Volume volume) {
-		return loud_volume_warning_enabled() && (volume >= loud_volume());
-	}
-
-	public bool is_loud (VolumeControl.Volume volume) {
-		return is_loud_pulse(VolumeControlPulse.double_to_volume(volume.volume));
-	}
+	public bool loud_warning_enabled { get; protected set; default = true; }
 }
