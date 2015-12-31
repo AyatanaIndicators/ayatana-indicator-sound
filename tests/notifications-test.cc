@@ -487,50 +487,88 @@ TEST_F(NotificationsTest, ExtendendVolumeNotification) {
 	EXPECT_GVARIANT_EQ("@i 100", notev[0].hints["value"]);
 }
 
-TEST_F(NotificationsTest, WarningRequiresHeadphones) {
+TEST_F(NotificationsTest, TriggerWarning) {
 
-	const std::set<VolumeControlActiveOutput> headphones {
-		VOLUME_CONTROL_ACTIVE_OUTPUT_HEADPHONES,
-		VOLUME_CONTROL_ACTIVE_OUTPUT_BLUETOOTH_HEADPHONES,
-		VOLUME_CONTROL_ACTIVE_OUTPUT_USB_HEADPHONES,
-		VOLUME_CONTROL_ACTIVE_OUTPUT_HDMI_HEADPHONES
+	// Tests all the conditions needed to trigger a volume warning.
+	// There are many possible combinations, so this test is slow. :P
+
+	const struct {
+		bool expected;
+		VolumeControlActiveOutput output;
+	} test_outputs[] = {
+		{ false, VOLUME_CONTROL_ACTIVE_OUTPUT_SPEAKERS },
+		{ true,  VOLUME_CONTROL_ACTIVE_OUTPUT_HEADPHONES },
+		{ true,  VOLUME_CONTROL_ACTIVE_OUTPUT_BLUETOOTH_HEADPHONES },
+		{ false, VOLUME_CONTROL_ACTIVE_OUTPUT_BLUETOOTH_SPEAKER },
+		{ false, VOLUME_CONTROL_ACTIVE_OUTPUT_USB_SPEAKER },
+		{ true,  VOLUME_CONTROL_ACTIVE_OUTPUT_USB_HEADPHONES },
+		{ false, VOLUME_CONTROL_ACTIVE_OUTPUT_HDMI_SPEAKER },
+		{ true,  VOLUME_CONTROL_ACTIVE_OUTPUT_HDMI_HEADPHONES },
+		{ false, VOLUME_CONTROL_ACTIVE_OUTPUT_CALL_MODE }
 	};
 
-	const std::set<VolumeControlActiveOutput> all_outputs {
-		VOLUME_CONTROL_ACTIVE_OUTPUT_SPEAKERS,
-		VOLUME_CONTROL_ACTIVE_OUTPUT_HEADPHONES,
-		VOLUME_CONTROL_ACTIVE_OUTPUT_BLUETOOTH_HEADPHONES,
-		VOLUME_CONTROL_ACTIVE_OUTPUT_BLUETOOTH_SPEAKER,
-		VOLUME_CONTROL_ACTIVE_OUTPUT_USB_SPEAKER,
-		VOLUME_CONTROL_ACTIVE_OUTPUT_USB_HEADPHONES,
-		VOLUME_CONTROL_ACTIVE_OUTPUT_HDMI_SPEAKER,
-		VOLUME_CONTROL_ACTIVE_OUTPUT_HDMI_HEADPHONES,
-		VOLUME_CONTROL_ACTIVE_OUTPUT_CALL_MODE
+	const struct {
+		bool expected;
+		pa_volume_t volume;
+		pa_volume_t loud_volume;
+	} test_volumes[] = {
+		{ false,   50, 100 },
+		{ false,   99, 100 },
+		{ true,   100, 100 },
+		{ true,   101, 100 }
 	};
 
-	for(const auto& output : all_outputs)
-	{
+	const struct {
+		bool expected;
+		bool approved;
+	} test_approved[] = {
+		{ true,  false },
+		{ false, true }
+	};
+
+	const struct {
+		bool expected;
+		bool warnings_enabled;
+	} test_warnings_enabled[] = {
+		{ true,  true },
+		{ false, false }
+	};
+
+	const struct {
+		bool expected;
+		bool multimedia_active;
+	} test_multimedia_active[] = {
+		{ true,  true },
+		{ false, false }
+	};
+
+	for (const auto& outputs : test_outputs) {
+	for (const auto& volumes : test_volumes) {
+	for (const auto& approved : test_approved) {
+	for (const auto& warnings_enabled : test_warnings_enabled) {
+	for (const auto& multimedia_active : test_multimedia_active) {
+
+		notifications->clearNotifications();
+
 		// instantiate the test subjects
 		auto options = optionsMock();
 		auto volumeControl = volumeControlMock(options);
 		auto volumeWarning = volumeWarningMock(options);
 		auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning);
 
-		// prime them for a volume warning
-		const pa_volume_t volume = 100;
-		options_mock_mock_set_loud_volume(OPTIONS_MOCK(options.get()), volume);
-		options_mock_mock_set_loud_warning_enabled(OPTIONS_MOCK(options.get()), true);
-		volume_warning_mock_set_approved(VOLUME_WARNING_MOCK(volumeWarning.get()), false);
-		volume_warning_mock_set_multimedia_volume(VOLUME_WARNING_MOCK(volumeWarning.get()), volume);
-		volume_warning_mock_set_multimedia_active(VOLUME_WARNING_MOCK(volumeWarning.get()), true);
-
-		// cycle through the different outputs
-		notifications->clearNotifications();
-		volume_control_mock_mock_set_active_output(VOLUME_CONTROL_MOCK(volumeControl.get()), output);
+		// run the test
+		options_mock_mock_set_loud_volume(OPTIONS_MOCK(options.get()), volumes.loud_volume);
+		options_mock_mock_set_loud_warning_enabled(OPTIONS_MOCK(options.get()), warnings_enabled.warnings_enabled);
+		volume_warning_mock_set_approved(VOLUME_WARNING_MOCK(volumeWarning.get()), approved.approved);
+		volume_warning_mock_set_multimedia_volume(VOLUME_WARNING_MOCK(volumeWarning.get()), volumes.volume);
+		volume_warning_mock_set_multimedia_active(VOLUME_WARNING_MOCK(volumeWarning.get()), multimedia_active.multimedia_active);
+		volume_control_mock_mock_set_active_output(VOLUME_CONTROL_MOCK(volumeControl.get()), outputs.output);
 		loop(50);
 
+		// check the result
+		const bool warning_expected = outputs.expected && volumes.expected && approved.expected && warnings_enabled.expected && multimedia_active.expected;
 		auto notev = notifications->getNotifications();
-		if (headphones.count(output)) {
+		if (warning_expected) {
 			EXPECT_TRUE(volume_warning_get_active(volumeWarning.get()));
 			ASSERT_EQ(1, notev.size());
 			EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-snap-decisions"]);
@@ -542,6 +580,11 @@ TEST_F(NotificationsTest, WarningRequiresHeadphones) {
 			EXPECT_GVARIANT_EQ(nullptr, notev[0].hints["x-canonical-snap-decisions"]);
 			EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-private-synchronous"]);
 		}
-	}
+
+	} // multimedia_active
+	} // warnings_enabled
+	} // approved
+	} // volumes
+	} // outputs
 }
 
