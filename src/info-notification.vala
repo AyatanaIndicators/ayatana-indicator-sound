@@ -32,10 +32,10 @@ public class IndicatorSound.InfoNotification: Notification
 			return;
 
 		/* Determine Label */
-	        string volume_label = get_notification_label (active_output);
+	        unowned string volume_label = get_notification_label (active_output);
 
 		/* Choose an icon */
-	 	string icon = get_volume_notification_icon (active_output, volume, is_high_volume);
+	 	unowned string icon = get_volume_notification_icon (active_output, volume, is_high_volume);
 
 		/* Reset the notification */
 		var n = _notification;
@@ -48,8 +48,8 @@ public class IndicatorSound.InfoNotification: Notification
 		show_notification ();
 	}
 
-	private static string get_notification_label (VolumeControl.ActiveOutput active_output) {
-		string volume_label = "";
+	private static unowned string get_notification_label (VolumeControl.ActiveOutput active_output) {
+		unowned string volume_label = "";
 
 		switch (active_output) {
 			case VolumeControl.ActiveOutput.SPEAKERS:
@@ -81,10 +81,10 @@ public class IndicatorSound.InfoNotification: Notification
 		return volume_label;
 	}
 
-	private static string get_volume_notification_icon (VolumeControl.ActiveOutput active_output,
-	                                                    double volume,
-	                                                    bool is_high_volume) {
-		string icon = "";
+	private static unowned string get_volume_notification_icon (VolumeControl.ActiveOutput active_output,
+	                                                            double volume,
+	                                                            bool is_high_volume) {
+		unowned string icon = "";
 
 		if (is_high_volume) {
 			switch (active_output) {
@@ -106,10 +106,10 @@ public class IndicatorSound.InfoNotification: Notification
 		return icon;
 	}
 
-	private static string get_volume_icon (VolumeControl.ActiveOutput active_output,
-	                                       double volume)
+	private static unowned string get_volume_icon (VolumeControl.ActiveOutput active_output,
+	                                               double volume)
 	{
-		string icon = "";
+		unowned string icon = "";
 
 		switch (active_output) {
 			case VolumeControl.ActiveOutput.SPEAKERS:

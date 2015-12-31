@@ -252,7 +252,7 @@ public class IndicatorSound.Service: Object {
 
 	void update_root_icon () {
 		double volume = this.volume_control.volume.volume;
-		string icon = get_volume_root_icon (volume, this.volume_control.mute, volume_control.active_output());
+		unowned string icon = get_volume_root_icon (volume, this.volume_control.mute, volume_control.active_output());
 
 		string accessible_name;
 		if (this.volume_control.mute) {
@@ -276,9 +276,9 @@ public class IndicatorSound.Service: Object {
 
 	private bool block_info_notifications = false;
 
-	private static string get_volume_root_icon_by_volume (double volume, VolumeControl.ActiveOutput active_output)
+	private static unowned string get_volume_root_icon_by_volume (double volume, VolumeControl.ActiveOutput active_output)
 	{
-		string icon = "";
+		unowned string icon = "";
 		switch (active_output)
 		{
 			case VolumeControl.ActiveOutput.SPEAKERS:
@@ -365,8 +365,8 @@ public class IndicatorSound.Service: Object {
 		return icon;
 	}
 
-	private string get_volume_root_icon (double volume, bool mute, VolumeControl.ActiveOutput active_output) {
-		string icon = "";
+	private unowned string get_volume_root_icon (double volume, bool mute, VolumeControl.ActiveOutput active_output) {
+		unowned string icon = "";
 		switch (active_output)
 		{
 			case VolumeControl.ActiveOutput.SPEAKERS:
