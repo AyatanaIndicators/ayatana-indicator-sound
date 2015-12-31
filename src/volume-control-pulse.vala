@@ -119,7 +119,7 @@ public class VolumeControlPulse : VolumeControl
 			 (sink.active_port.name.contains("headset") ||
 		          sink.active_port.name.contains("headphone")))) {
 	    			// check if it's a bluetooth device
-	    			var device_bus = sink.proplist.gets ("device.bus");
+	    			unowned string device_bus = sink.proplist.gets ("device.bus");
 	    			if (device_bus != null && device_bus == "bluetooth") {
 					ret_output = VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES;
         			} else if (device_bus != null && device_bus == "usb") {
@@ -131,7 +131,7 @@ public class VolumeControlPulse : VolumeControl
         		}
 		} else {
 			// speaker
-			var device_bus = sink.proplist.gets ("device.bus");
+			unowned string device_bus = sink.proplist.gets ("device.bus");
 	    		if (device_bus != null && device_bus == "bluetooth") {
 	    		    ret_output = VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER;
         		} else if (device_bus != null && device_bus == "usb") {
@@ -370,7 +370,7 @@ public class VolumeControlPulse : VolumeControl
 	private void add_sink_input_into_list (SinkInputInfo sink_input)
 	{
 		/* We're only adding ones that are not corked and with a valid role */
-		var role = sink_input.proplist.gets (PulseAudio.Proplist.PROP_MEDIA_ROLE);
+		unowned string role = sink_input.proplist.gets (PulseAudio.Proplist.PROP_MEDIA_ROLE);
 
 		if (role != null && role in _valid_roles) {
 			if (sink_input.corked == 0 || role == "phone") {
@@ -440,7 +440,7 @@ public class VolumeControlPulse : VolumeControl
 		if (i == null)
 			return;
 
-		var role = i.proplist.gets (PulseAudio.Proplist.PROP_MEDIA_ROLE);
+		unowned string role = i.proplist.gets (PulseAudio.Proplist.PROP_MEDIA_ROLE);
 		if (role == "phone" || role == "production")
 			this.active_mic = true;
 	}
