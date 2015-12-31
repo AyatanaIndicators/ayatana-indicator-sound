@@ -49,68 +49,55 @@ public class IndicatorSound.InfoNotification: Notification
 	}
 
 	private static unowned string get_notification_label (VolumeControl.ActiveOutput active_output) {
-		unowned string volume_label = "";
 
 		switch (active_output) {
 			case VolumeControl.ActiveOutput.SPEAKERS:
-				volume_label = _("Speakers");
-				break;
+				return _("Speakers");
 			case VolumeControl.ActiveOutput.HEADPHONES:
-				volume_label = _("Headphones");
-				break;
+				return _("Headphones");
 			case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-				volume_label = _("Bluetooth headphones");
-				break;
+				return _("Bluetooth headphones");
 			case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
-				volume_label = _("Bluetooth speaker");
-				break;
+				return _("Bluetooth speaker");
 			case VolumeControl.ActiveOutput.USB_SPEAKER:
-				volume_label = _("Usb speaker");
-				break;
+				return _("Usb speaker");
 			case VolumeControl.ActiveOutput.USB_HEADPHONES:
-				volume_label = _("Usb headphones");
-				break;
+				return _("Usb headphones");
 			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
-				volume_label = _("HDMI speaker");
-				break;
+				return _("HDMI speaker");
 			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
-				volume_label = _("HDMI headphones");
-				break;
+				return _("HDMI headphones");
+			default:
+				return "";
 		}
-
-		return volume_label;
 	}
 
 	private static unowned string get_volume_notification_icon (VolumeControl.ActiveOutput active_output,
 	                                                            double volume,
 	                                                            bool is_high_volume) {
-		unowned string icon = "";
 
-		if (is_high_volume) {
-			switch (active_output) {
-				case VolumeControl.ActiveOutput.SPEAKERS:
-				case VolumeControl.ActiveOutput.HEADPHONES:
-				case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-				case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
-				case VolumeControl.ActiveOutput.USB_SPEAKER:
-				case VolumeControl.ActiveOutput.USB_HEADPHONES:
-				case VolumeControl.ActiveOutput.HDMI_SPEAKER:
-				case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
-					icon = "audio-volume-high";
-					break;
-			}
-		} else {
-			icon = get_volume_icon (active_output, volume);
+		if (!is_high_volume)
+			return get_volume_icon (active_output, volume);
+
+		switch (active_output) {
+			case VolumeControl.ActiveOutput.SPEAKERS:
+			case VolumeControl.ActiveOutput.HEADPHONES:
+			case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
+			case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
+			case VolumeControl.ActiveOutput.USB_SPEAKER:
+			case VolumeControl.ActiveOutput.USB_HEADPHONES:
+			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
+			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
+				return "audio-volume-high";
+
+			default:
+				return "";
 		}
-
-		return icon;
 	}
 
 	private static unowned string get_volume_icon (VolumeControl.ActiveOutput active_output,
 	                                               double volume)
 	{
-		unowned string icon = "";
-
 		switch (active_output) {
 			case VolumeControl.ActiveOutput.SPEAKERS:
 			case VolumeControl.ActiveOutput.HEADPHONES:
@@ -121,17 +108,16 @@ public class IndicatorSound.InfoNotification: Notification
 			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
 			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
 				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
-		}
+					return "audio-volume-muted";
+				if (volume <= 0.3)
+					return "audio-volume-low";
+				if (volume <= 0.7)
+					return "audio-volume-medium";
+				return "audio-volume-high";
 
-		return icon;
+			default:
+				return "";
+		}
 	}
 }
 
