@@ -89,26 +89,12 @@ public class IndicatorSound.InfoNotification: Notification
 		if (is_high_volume) {
 			switch (active_output) {
 				case VolumeControl.ActiveOutput.SPEAKERS:
-					icon = "audio-volume-high";
-					break;
 				case VolumeControl.ActiveOutput.HEADPHONES:
-					icon = "audio-volume-high";
-					break;
 				case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-					icon = "audio-volume-high";
-					break;
 				case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
-					icon = "audio-volume-high";
-					break;
 				case VolumeControl.ActiveOutput.USB_SPEAKER:
-					icon = "audio-volume-high";
-					break;
 				case VolumeControl.ActiveOutput.USB_HEADPHONES:
-					icon = "audio-volume-high";
-					break;
 				case VolumeControl.ActiveOutput.HDMI_SPEAKER:
-					icon = "audio-volume-high";
-					break;
 				case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
 					icon = "audio-volume-high";
 					break;
@@ -127,75 +113,12 @@ public class IndicatorSound.InfoNotification: Notification
 
 		switch (active_output) {
 			case VolumeControl.ActiveOutput.SPEAKERS:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
 			case VolumeControl.ActiveOutput.HEADPHONES:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
 			case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
 			case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
 			case VolumeControl.ActiveOutput.USB_SPEAKER:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
 			case VolumeControl.ActiveOutput.USB_HEADPHONES:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
 			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
 			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
 				if (volume <= 0.0)
 					icon = "audio-volume-muted";
@@ -207,6 +130,7 @@ public class IndicatorSound.InfoNotification: Notification
 					icon = "audio-volume-high";
 				break;
 		}
+
 		return icon;
 	}
 }
