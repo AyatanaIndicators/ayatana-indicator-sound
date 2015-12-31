@@ -295,7 +295,7 @@ public class MediaPlayerMpris: MediaPlayer {
 			this.playbackstatus_changed ();
 		}
 
-		var metadata = changed_properties.lookup_value ("Metadata", new VariantType ("a{sv}"));
+		var metadata = changed_properties.lookup_value ("Metadata", VariantType.VARDICT);
 		if (metadata != null)
 			this.update_current_track (metadata);
 	}

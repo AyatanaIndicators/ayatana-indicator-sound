@@ -335,7 +335,7 @@ public class VolumeControlPulse : VolumeControl
 
 			/* Listen for role volume changes from pulse itself (external clients) */
 			try {
-				var builder = new VariantBuilder (new VariantType ("ao"));
+				var builder = new VariantBuilder (VariantType.OBJECT_PATH_ARRAY);
 				builder.add ("o", sink_input_objp);
 
 				yield _pconn.call ("org.PulseAudio.Core1", "/org/pulseaudio/core1",
@@ -775,7 +775,7 @@ public class VolumeControlPulse : VolumeControl
 	/* AccountsService operations */
 	private void accountsservice_props_changed_cb (DBusProxy proxy, Variant changed_properties, string[]? invalidated_properties)
 	{
-		Variant volume_variant = changed_properties.lookup_value ("Volume", new VariantType ("d"));
+		Variant volume_variant = changed_properties.lookup_value ("Volume", VariantType.DOUBLE);
 		if (volume_variant != null) {
 			var volume = volume_variant.get_double ();
 			if (volume >= 0) {
@@ -785,7 +785,7 @@ public class VolumeControlPulse : VolumeControl
 			}
 		}
 
-		Variant mute_variant = changed_properties.lookup_value ("Muted", new VariantType ("b"));
+		Variant mute_variant = changed_properties.lookup_value ("Muted", VariantType.BOOLEAN);
 		if (mute_variant != null) {
 			var mute = mute_variant.get_boolean ();
 			set_mute_internal (mute);

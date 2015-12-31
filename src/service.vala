@@ -266,7 +266,7 @@ public class IndicatorSound.Service: Object {
 		}
 
 		var root_action = actions.lookup_action ("root") as SimpleAction;
-		var builder = new VariantBuilder (new VariantType ("a{sv}"));
+		var builder = new VariantBuilder (VariantType.VARDICT);
 		builder.add ("{sv}", "title", new Variant.string (_("Sound")));
 		builder.add ("{sv}", "accessible-desc", new Variant.string (accessible_name));
 		builder.add ("{sv}", "icon", serialize_themed_icon (icon));
@@ -619,7 +619,7 @@ public class IndicatorSound.Service: Object {
 	uint export_actions = 0;
 
 	Variant action_state_for_player (MediaPlayer player, bool show_track = true) {
-		var builder = new VariantBuilder (new VariantType ("a{sv}"));
+		var builder = new VariantBuilder (VariantType.VARDICT);
 		builder.add ("{sv}", "running", new Variant ("b", player.is_running));
 		builder.add ("{sv}", "state", new Variant ("s", player.state));
 		if (player.current_track != null && show_track) {

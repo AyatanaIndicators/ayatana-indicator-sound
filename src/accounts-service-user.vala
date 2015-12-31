@@ -185,7 +185,7 @@ public class AccountsServiceUser : Object {
 			this.privacyproxy = Bus.get_proxy.end (res);
 
 			(this.privacyproxy as DBusProxy).g_properties_changed.connect((proxy, changed, invalid) => {
-				var welcomeval = changed.lookup_value("MessagesWelcomeScreen", new VariantType("b"));
+				var welcomeval = changed.lookup_value("MessagesWelcomeScreen", VariantType.BOOLEAN);
 				if (welcomeval != null) {
 					debug("Messages on welcome screen changed");
 					this.showDataOnGreeter = welcomeval.get_boolean();
@@ -204,7 +204,7 @@ public class AccountsServiceUser : Object {
 			this.syssoundproxy = Bus.get_proxy.end (res);
 
 			(this.syssoundproxy as DBusProxy).g_properties_changed.connect((proxy, changed, invalid) => {
-				var silentvar = changed.lookup_value("SilentMode", new VariantType("b"));
+				var silentvar = changed.lookup_value("SilentMode", VariantType.BOOLEAN);
 				if (silentvar != null) {
 					debug("Silent Mode changed");
 					this._silentMode = silentvar.get_boolean();
