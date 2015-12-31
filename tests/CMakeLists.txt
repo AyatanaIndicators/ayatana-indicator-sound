@@ -218,7 +218,7 @@ target_link_libraries (
     ${TEST_LIBRARIES}
 )
 
-#add_test(notifications-test notifications-test)
+add_test(notifications-test notifications-test)
 
 ###########################
 # Accounts Service User
