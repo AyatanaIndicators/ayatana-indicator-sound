@@ -105,6 +105,30 @@ class NotificationsTest : public ::testing::Test
 			g_main_loop_unref(loop);
 		}
 
+		void loop_until_notifications(unsigned int max_seconds=1) {
+			struct Data {
+				std::shared_ptr<NotificationsMock> notifications;
+				GMainLoop * loop = g_main_loop_new(nullptr, false);
+				gint64 deadline;
+			} data;
+			data.notifications = notifications;
+			data.deadline = g_get_monotonic_time() + (gint64(max_seconds) * G_USEC_PER_SEC);
+
+			auto timerfunc = [](gpointer gdata) -> gboolean {
+				auto data = static_cast<Data*>(gdata);
+				if (data->notifications->getNotifications().empty() && (g_get_monotonic_time() < data->deadline))
+					return G_SOURCE_CONTINUE;
+				g_main_loop_quit(data->loop);
+				return G_SOURCE_REMOVE;
+			};
+
+			static constexpr guint interval_milliseconds = 10;
+			g_timeout_add (interval_milliseconds, timerfunc, &data);
+			g_main_loop_run(data.loop);
+
+			g_main_loop_unref(data.loop);
+		}
+
 		static int unref_idle (gpointer user_data) {
 			g_variant_unref(static_cast<GVariant *>(user_data));
 			return G_SOURCE_REMOVE;
@@ -187,6 +211,7 @@ class NotificationsTest : public ::testing::Test
 
 			g_clear_object(&bus);
 		}
+
 };
 
 TEST_F(NotificationsTest, BasicObject) {
@@ -563,11 +588,12 @@ TEST_F(NotificationsTest, TriggerWarning) {
 		volume_warning_mock_set_multimedia_volume(VOLUME_WARNING_MOCK(volumeWarning.get()), volumes.volume);
 		volume_warning_mock_set_multimedia_active(VOLUME_WARNING_MOCK(volumeWarning.get()), multimedia_active.multimedia_active);
 		volume_control_mock_mock_set_active_output(VOLUME_CONTROL_MOCK(volumeControl.get()), outputs.output);
-		loop(50);
+
+		loop_until_notifications();
 
 		// check the result
-		const bool warning_expected = outputs.expected && volumes.expected && approved.expected && warnings_enabled.expected && multimedia_active.expected;
 		auto notev = notifications->getNotifications();
+		const bool warning_expected = outputs.expected && volumes.expected && approved.expected && warnings_enabled.expected && multimedia_active.expected;
 		if (warning_expected) {
 			EXPECT_TRUE(volume_warning_get_active(volumeWarning.get()));
 			ASSERT_EQ(1, notev.size());
