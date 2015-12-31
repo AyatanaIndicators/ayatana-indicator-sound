@@ -34,7 +34,7 @@ public class VolumeWarningMock : VolumeWarning
 
 	public void set_multimedia_volume(PulseAudio.Volume val) { multimedia_volume = val; }
 
-	public void set_high_volume_approved(bool val) { high_volume_approved = val; }
+	public void set_approved(bool val) { approved = val; }
 
-	public bool is_high_volume_approved() { return high_volume_approved; }
+	public bool is_approved() { return approved; }
 }

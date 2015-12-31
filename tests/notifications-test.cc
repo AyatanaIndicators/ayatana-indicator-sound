@@ -520,7 +520,7 @@ TEST_F(NotificationsTest, WarningRequiresHeadphones) {
 		const pa_volume_t volume = 100;
 		options_mock_mock_set_loud_volume(OPTIONS_MOCK(options.get()), volume);
 		options_mock_mock_set_loud_warning_enabled(OPTIONS_MOCK(options.get()), true);
-		volume_warning_mock_set_high_volume_approved(VOLUME_WARNING_MOCK(volumeWarning.get()), false);
+		volume_warning_mock_set_approved(VOLUME_WARNING_MOCK(volumeWarning.get()), false);
 		volume_warning_mock_set_multimedia_volume(VOLUME_WARNING_MOCK(volumeWarning.get()), volume);
 		volume_warning_mock_set_multimedia_active(VOLUME_WARNING_MOCK(volumeWarning.get()), true);
 
