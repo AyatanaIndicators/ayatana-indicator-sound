@@ -35,10 +35,14 @@ public class IndicatorSound.OptionsGSettings : Options
 
         /** MAX VOLUME PROPERTY **/
 
+	private static const string AMP_dB_KEY = "amplified-volume-decibels";
+	private static const string NORMAL_dB_KEY = "normal-volume-decibels";
+	private static const string ALLOW_AMP_KEY = "allow-amplified-volume";
+
         private void init_max_volume() {
-                _settings.changed["normal-volume-decibels"].connect(() => update_max_volume());
-                _settings.changed["amplified-volume-decibels"].connect(() => update_max_volume());
-                _shared_settings.changed["allow-amplified-volume"].connect(() => update_max_volume());
+                _settings.changed[NORMAL_dB_KEY].connect(() => update_max_volume());
+                _settings.changed[AMP_dB_KEY].connect(() => update_max_volume());
+                _shared_settings.changed[ALLOW_AMP_KEY].connect(() => update_max_volume());
                 update_max_volume();
         }
         private void update_max_volume () {
@@ -51,9 +55,9 @@ public class IndicatorSound.OptionsGSettings : Options
                 }
         }
         private double calculate_max_volume () {
-                unowned string decibel_key = _shared_settings.get_boolean("allow-amplified-volume")
-                        ? "amplified-volume-decibels"
-                        : "normal-volume-decibels";
+                unowned string decibel_key = _shared_settings.get_boolean(ALLOW_AMP_KEY)
+                        ? AMP_dB_KEY
+                        : NORMAL_dB_KEY;
                 var volume_dB = _settings.get_double(decibel_key);
                 var volume_sw = PulseAudio.Volume.sw_from_dB (volume_dB);
                 return VolumeControlPulse.volume_to_double (volume_sw);
@@ -62,21 +66,21 @@ public class IndicatorSound.OptionsGSettings : Options
 
 	/** LOUD VOLUME **/
 
-	private string loud_enabled_key = "warning-volume-enabled";
-	private string loud_decibel_key = "warning-volume-decibels";
+	private static const string LOUD_ENABLED_KEY = "warning-volume-enabled";
+	private static const string LOUD_DECIBEL_KEY = "warning-volume-decibels";
 
         private void init_loud_volume() {
-                _settings.changed[loud_enabled_key].connect(() => update_loud_volume());
-                _settings.changed[loud_decibel_key].connect(() => update_loud_volume());
+                _settings.changed[LOUD_ENABLED_KEY].connect(() => update_loud_volume());
+                _settings.changed[LOUD_DECIBEL_KEY].connect(() => update_loud_volume());
 		update_loud_volume();
 	}
 	private void update_loud_volume() {
 
-		var vol = PulseAudio.Volume.sw_from_dB (_settings.get_double (loud_decibel_key));
+		var vol = PulseAudio.Volume.sw_from_dB (_settings.get_double (LOUD_DECIBEL_KEY));
 		if (loud_volume != vol)
 			loud_volume = vol;
 
-		var enabled = _settings.get_boolean(loud_enabled_key);
+		var enabled = _settings.get_boolean(LOUD_ENABLED_KEY);
 		if (loud_warning_enabled != enabled)
 			loud_warning_enabled = enabled;
         }
