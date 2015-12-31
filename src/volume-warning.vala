@@ -48,13 +48,14 @@ public abstract class VolumeWarning : Object
 
 		_options = options;
 
-		init_all_properties ();
+		init_high_volume ();
+		init_approved ();
 
 		_notification.user_responded.connect ((n, r) => on_user_response (r));
 	}
 
 	~VolumeWarning () {
-		stop_all_timers ();
+		clear_timer (ref _approved_timer);
 	}
 
 	/***
@@ -82,34 +83,29 @@ public abstract class VolumeWarning : Object
 		}
 	}
 
-	/***
-	****
-	***/
-
 	private IndicatorSound.Options _options;
-
-	private void init_all_properties ()
-	{
-		init_high_volume ();
-		init_approved ();
-	}
-
-	private void stop_all_timers ()
-	{
-		stop_approved_timer ();
-	}
 
 	/**
 	*** HIGH VOLUME PROPERTY
 	**/
 
 	private void init_high_volume () {
-		this.notify["multimedia-volume"].connect (() => update_high_volume ());
-		this.notify["multimedia-active"].connect (() => update_high_volume ());
-		this.notify["headphones-active"].connect (() => update_high_volume ());
-		this.notify["high-volume-approved"].connect (() => update_high_volume ());
-		_options.notify["loud-volume"].connect (() => update_high_volume ());
-		_options.notify["loud-warning-enabled"].connect (() => update_high_volume ());
+		const string self_keys[] = {
+			"multimedia-volume",
+			"multimedia-active",
+			"headphones-active",
+			"high-volume-approved"
+		};
+		foreach (var key in self_keys)
+			this.notify[key].connect (() => update_high_volume ());
+
+		const string options_keys[] = {
+			"loud-volume",
+			"loud-warning-enabled"
+		};
+		foreach (var key in options_keys)
+			_options.notify[key].connect (() => update_high_volume ());
+
 		update_high_volume ();
 	}
 
@@ -158,23 +154,22 @@ public abstract class VolumeWarning : Object
 		update_approved_timer ();
 	}
 	private void update_approved_timer () {
-		stop_approved_timer ();
-		if (_approved_at != 0) {
-			int64 expires_at = _approved_at + _approved_ttl_usec;
-			int64 now = GLib.get_monotonic_time ();
-			if (expires_at > now) {
-				var seconds_left = 1 + ((expires_at - now) / 1000000);
-				_approved_timer = Timeout.add_seconds ((uint)seconds_left, on_approved_timer);
-			}
-		}
-	}
-	private void stop_approved_timer () {
+
 		clear_timer (ref _approved_timer);
-	}
-	private bool on_approved_timer () {
-		_approved_timer = 0;
-		update_approved ();
-		return Source.REMOVE;
+
+		if (_approved_at == 0)
+			return;
+
+		int64 expires_at = _approved_at + _approved_ttl_usec;
+		int64 now = GLib.get_monotonic_time ();
+		if (expires_at > now) {
+			var seconds_left = 1 + ((expires_at - now) / 1000000);
+			_approved_timer = Timeout.add_seconds ((uint)seconds_left, () => {
+				_approved_timer = 0;
+				update_approved ();
+				return Source.REMOVE;
+			});
+		}
 	}
 	private void update_approved () {
 		var new_approved = calculate_approved ();

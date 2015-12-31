@@ -39,7 +39,7 @@ public class VolumeWarningPulse : VolumeWarning
 	~VolumeWarningPulse () {
 		clear_timer (ref _pulse_reconnect_timer);
 		clear_timer (ref _update_sink_timer);
-		clear_timer (ref _update_sink_inputs_timer);
+		clear_timer (ref _pending_sink_inputs_timer);
 		pulse_disconnect ();
 	}
 
@@ -62,15 +62,11 @@ public class VolumeWarningPulse : VolumeWarning
 		_pulse_context.set_sink_volume_by_index (index, cvol);
 	}
 
-	/***
-	****  PulseAudio: Tracking the active multimedia sink input
-	***/
-
 	private unowned PulseAudio.GLibMainLoop _pgloop = null;
 	private PulseAudio.Context _pulse_context = null;
 	private uint _pulse_reconnect_timer = 0;
 	private uint _update_sink_timer = 0;
-	private uint _update_sink_inputs_timer = 0;
+	private uint _pending_sink_inputs_timer = 0;
         private GenericSet<uint32> _pending_sink_inputs = new GenericSet<uint32>(direct_hash, direct_equal);
 
 	private uint soon_interval_msec = 500;
@@ -105,29 +101,21 @@ public class VolumeWarningPulse : VolumeWarning
 
 	private void set_multimedia_sink_index (uint32 index) {
 
-		if (index == PulseAudio.INVALID_INDEX) {
-			_multimedia_sink_index = PulseAudio.INVALID_INDEX;
-			multimedia_volume = PulseAudio.Volume.INVALID;
-		} else if (_multimedia_sink_index != index) {
+		if (_multimedia_sink_index != index) {
 			_multimedia_sink_index = index;
+
 			multimedia_volume = PulseAudio.Volume.INVALID;
-			update_multimedia_volume_soon ();
+			if (index != PulseAudio.INVALID_INDEX)
+				update_multimedia_volume_soon ();
 		}
 	}
 
 	/***/
 
 	private bool is_active_multimedia (SinkInputInfo i) {
+		return (i.corked == 0) &&
+		       (i.proplist.gets(PulseAudio.Proplist.PROP_MEDIA_ROLE) == "multimedia");
 
-		if (i.corked != 0)
-			return false;
-
-		var key = PulseAudio.Proplist.PROP_MEDIA_ROLE;
-		var media_role = i.proplist.gets (key);
-		if (media_role != "multimedia")
-			return false;
-
-		return true;
 	}
 
 	private void clear_multimedia () {
@@ -163,11 +151,11 @@ public class VolumeWarningPulse : VolumeWarning
 
 		_pending_sink_inputs.add (index);
 
-		if (_update_sink_inputs_timer == 0) {
-			_update_sink_inputs_timer = Timeout.add (soon_interval_msec, () => {
+		if (_pending_sink_inputs_timer == 0) {
+			_pending_sink_inputs_timer = Timeout.add (soon_interval_msec, () => {
+				_pending_sink_inputs_timer = 0;
 				_pending_sink_inputs.foreach ((i) => update_sink_input (i));
 				_pending_sink_inputs.remove_all ();
-				_update_sink_inputs_timer = 0;
 				return Source.REMOVE;
 			});
 		}
@@ -261,7 +249,7 @@ public class VolumeWarningPulse : VolumeWarning
 		_pulse_context = new PulseAudio.Context (_pgloop.get_api(), null, props);
 		_pulse_context.set_state_callback (pulse_context_state_callback);
 
-		var server_string = Environment.get_variable ("PULSE_SERVER");
+		unowned string server_string = Environment.get_variable ("PULSE_SERVER");
 		if (_pulse_context.connect (server_string, Context.Flags.NOFAIL, null) < 0)
 			GLib.warning ("pa_context_connect() failed: %s\n", PulseAudio.strerror(_pulse_context.errno()));
 	}
