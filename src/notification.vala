@@ -20,24 +20,25 @@
 public abstract class IndicatorSound.Notification: Object
 {
 	public Notification () {
-		BusWatcher.watch_namespace (GLib.BusType.SESSION,
-		                            "org.freedesktop.Notifications",
-		                            () => { debug("Notifications name appeared"); },
-		                            () => { debug("Notifications name vanshed"); _server_caps = null; });
+		BusWatcher.watch_namespace (
+			GLib.BusType.SESSION,
+			"org.freedesktop.Notifications",
+			() => { debug ("Notifications name appeared"); },
+			() => { debug ("Notifications name vanshed"); _server_caps = null; });
 
 		_notification = create_notification ();
 	}
 
-	public void close() {
+	public void close () {
 		var n = _notification;
 
 		return_if_fail (n != null);
 
 		if (n.id != 0) {
 			try {
-				n.close();
+				n.close ();
 			} catch (GLib.Error e) {
-				GLib.warning("Unable to close notification: %s", e.message);
+				GLib.warning ("Unable to close notification: %s", e.message);
 			}
 		}
 	}
@@ -58,9 +59,9 @@ public abstract class IndicatorSound.Notification: Object
 
 	protected bool notify_server_supports (string cap) {
 		if (_server_caps == null)
-			_server_caps = Notify.get_server_caps();
+			_server_caps = Notify.get_server_caps ();
 
-		return _server_caps.find_custom(cap, strcmp) != null;
+		return _server_caps.find_custom (cap, strcmp) != null;
 	}
 
 	protected Notify.Notification _notification = null;

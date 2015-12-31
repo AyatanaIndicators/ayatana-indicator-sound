@@ -22,13 +22,13 @@ using Notify;
 public class IndicatorSound.InfoNotification: Notification
 {
 	protected override Notify.Notification create_notification () {
-		return new Notify.Notification(_("Volume"), "", "audio-volume-muted");
+		return new Notify.Notification (_("Volume"), "", "audio-volume-muted");
 	}
 
 	public void show (VolumeControl.ActiveOutput active_output,
 	                  double volume,
 	                  bool is_high_volume) {
-		if (!notify_server_supports("x-canonical-private-synchronous"))
+		if (!notify_server_supports ("x-canonical-private-synchronous"))
 			return;
 
 		/* Determine Label */
@@ -45,7 +45,7 @@ public class IndicatorSound.InfoNotification: Notification
 		n.set_hint ("x-canonical-private-synchronous", "true");
 		n.set_hint ("x-canonical-value-bar-tint", is_high_volume ? "true" : "false");
 		n.set_hint ("value", ((int32)((volume * 100.0) + 0.5)).clamp(0, 100));
-		show_notification();
+		show_notification ();
 	}
 
 	private static string get_notification_label (VolumeControl.ActiveOutput active_output) {
