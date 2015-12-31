@@ -30,17 +30,17 @@ public class VolumeWarningPulse : VolumeWarning
 {
 	public VolumeWarningPulse (IndicatorSound.Options options,
 	                           PulseAudio.GLibMainLoop pgloop) {
-		base(options);
+		base (options);
 
 		_pgloop = pgloop;
-		pulse_reconnect();
+		pulse_reconnect ();
 	}
 
 	~VolumeWarningPulse () {
-		clear_timer(ref _pulse_reconnect_timer);
-		clear_timer(ref _update_sink_timer);
-		clear_timer(ref _update_sink_inputs_timer);
-		pulse_disconnect();
+		clear_timer (ref _pulse_reconnect_timer);
+		clear_timer (ref _update_sink_timer);
+		clear_timer (ref _update_sink_inputs_timer);
+		pulse_disconnect ();
 	}
 
         protected override void preshow () {
@@ -52,13 +52,13 @@ public class VolumeWarningPulse : VolumeWarning
 	protected override void sound_system_set_multimedia_volume (PulseAudio.Volume volume) {
 		var index = _target_sink_index;
 
-		GLib.return_if_fail (_pulse_context != null);
-		GLib.return_if_fail (index != PulseAudio.INVALID_INDEX);
-		GLib.return_if_fail (volume != PulseAudio.Volume.INVALID);
+		return_if_fail (_pulse_context != null);
+		return_if_fail (index != PulseAudio.INVALID_INDEX);
+		return_if_fail (volume != PulseAudio.Volume.INVALID);
 
 		unowned CVolume cvol = CVolume ();
 		cvol.set (1, volume);
-		GLib.message ("setting multimedia volume to %s", cvol.to_string());
+		debug ("setting multimedia volume to %s", cvol.to_string ());
 		_pulse_context.set_sink_volume_by_index (index, cvol);
 	}
 
@@ -83,12 +83,12 @@ public class VolumeWarningPulse : VolumeWarning
 
 	private void update_multimedia_volume () {
 
-		GLib.return_if_fail(_pulse_context != null);
-		GLib.return_if_fail(_multimedia_sink_index != PulseAudio.INVALID_INDEX);
+		return_if_fail (_pulse_context != null);
+		return_if_fail (_multimedia_sink_index != PulseAudio.INVALID_INDEX);
 
-		_pulse_context.get_sink_info_by_index(_multimedia_sink_index, (c,i) => {
+		_pulse_context.get_sink_info_by_index (_multimedia_sink_index, (c,i) => {
 			if (i != null)
-				multimedia_volume = i.volume.max();
+				multimedia_volume = i.volume.max ();
 		});
 	}
 
@@ -103,7 +103,7 @@ public class VolumeWarningPulse : VolumeWarning
 		}
 	}
 
-	private void set_multimedia_sink_index(uint32 index) {
+	private void set_multimedia_sink_index (uint32 index) {
 
 		if (index == PulseAudio.INVALID_INDEX) {
 			_multimedia_sink_index = PulseAudio.INVALID_INDEX;
@@ -111,7 +111,7 @@ public class VolumeWarningPulse : VolumeWarning
 		} else if (_multimedia_sink_index != index) {
 			_multimedia_sink_index = index;
 			multimedia_volume = PulseAudio.Volume.INVALID;
-			update_multimedia_volume_soon();
+			update_multimedia_volume_soon ();
 		}
 	}
 
@@ -123,7 +123,7 @@ public class VolumeWarningPulse : VolumeWarning
 			return false;
 
 		var key = PulseAudio.Proplist.PROP_MEDIA_ROLE;
-		var media_role = i.proplist.gets(key);
+		var media_role = i.proplist.gets (key);
 		if (media_role != "multimedia")
 			return false;
 
@@ -148,7 +148,7 @@ public class VolumeWarningPulse : VolumeWarning
 			multimedia_active = true;
 		}
 		else if (i.index == _multimedia_sink_input_index) {
-			clear_multimedia();
+			clear_multimedia ();
 		}
 	}
 
@@ -161,12 +161,12 @@ public class VolumeWarningPulse : VolumeWarning
 
 	private void update_sink_input_soon (uint32 index) {
 
-		_pending_sink_inputs.add(index);
+		_pending_sink_inputs.add (index);
 
 		if (_update_sink_inputs_timer == 0) {
 			_update_sink_inputs_timer = Timeout.add (soon_interval_msec, () => {
-				_pending_sink_inputs.foreach((i) => update_sink_input(i));
-				_pending_sink_inputs.remove_all();
+				_pending_sink_inputs.foreach ((i) => update_sink_input (i));
+				_pending_sink_inputs.remove_all ();
 				_update_sink_inputs_timer = 0;
 				return Source.REMOVE;
 			});
@@ -190,14 +190,14 @@ public class VolumeWarningPulse : VolumeWarning
 					// to keep our multimedia indices up-to-date
 					case Context.SubscriptionEventType.NEW:
 					case Context.SubscriptionEventType.CHANGE:
-						update_sink_input_soon(index);
+						update_sink_input_soon (index);
 						break;
 
 					// if the multimedia sink input was removed,
 					// reset our mm fields and look for a new mm sink input
 					case Context.SubscriptionEventType.REMOVE:
 						if (index == _multimedia_sink_input_index) {
-							clear_multimedia();
+							clear_multimedia ();
 							update_all_sink_inputs ();
 						}
 						break;
@@ -243,14 +243,14 @@ public class VolumeWarningPulse : VolumeWarning
 		if (_pulse_reconnect_timer == 0) {
 			_pulse_reconnect_timer = Timeout.add_seconds (2, () => {
 				_pulse_reconnect_timer = 0;
-				pulse_reconnect();
+				pulse_reconnect ();
 				return Source.REMOVE;
 			});
 		}
 	}
 
 	void pulse_reconnect () {
-		pulse_disconnect();
+		pulse_disconnect ();
 
 		var props = new Proplist ();
 		props.sets (Proplist.PROP_APPLICATION_NAME, "Ubuntu Audio Settings");
