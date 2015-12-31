@@ -503,7 +503,7 @@ public class VolumeControlPulse : VolumeControl
 		this.context = new PulseAudio.Context (loop.get_api(), null, props);
 		this.context.set_state_callback (context_state_callback);
 
-		var server_string = Environment.get_variable("PULSE_SERVER");
+		unowned string server_string = Environment.get_variable("PULSE_SERVER");
 		if (context.connect(server_string, Context.Flags.NOFAIL, null) < 0)
 			warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(context.errno()));
 	}
@@ -859,7 +859,7 @@ public class VolumeControlPulse : VolumeControl
 			yield setup_user_proxy ();
 		} else {
 			// We are in a user session.  We just need our own proxy
-			var username = Environment.get_variable ("USER");
+			unowned string username = Environment.get_variable ("USER");
 			if (username != "" && username != null) {
 				yield setup_user_proxy (username);
 			}
