@@ -60,9 +60,9 @@ public class IndicatorSound.InfoNotification: Notification
 			case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
 				return _("Bluetooth speaker");
 			case VolumeControl.ActiveOutput.USB_SPEAKER:
-				return _("Usb speaker");
+				return _("USB speaker");
 			case VolumeControl.ActiveOutput.USB_HEADPHONES:
-				return _("Usb headphones");
+				return _("USB headphones");
 			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
 				return _("HDMI speaker");
 			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
