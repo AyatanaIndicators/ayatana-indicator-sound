@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015 Canonical Ltd.
+ * Copyright © 2015-2016 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,10 @@
  *
  * Authors:
  *      Ted Gould <ted@canonical.com>
+ *      Charles Kerr <charles.kerr@canonical.com>
  */
 
+#include <algorithm>
 #include <memory>
 
 #include <gtest/gtest.h>
@@ -105,28 +107,37 @@ class NotificationsTest : public ::testing::Test
 			g_main_loop_unref(loop);
 		}
 
-		void loop_until_notifications(unsigned int max_seconds=1) {
-			struct Data {
-				std::shared_ptr<NotificationsMock> notifications;
-				GMainLoop * loop = g_main_loop_new(nullptr, false);
-				gint64 deadline;
-			} data;
-			data.notifications = notifications;
-			data.deadline = g_get_monotonic_time() + (gint64(max_seconds) * G_USEC_PER_SEC);
+		void loop_until(const std::function<bool()>& test, unsigned int max_ms=50, unsigned int test_interval_ms=10) {
 
+			// g_timeout's callback only allows a single pointer,
+			// so use a temporary stack struct to wedge everything into one pointer
+			struct CallbackData {
+				const std::function<bool()>& test;
+				const gint64 deadline;
+				GMainLoop* loop = g_main_loop_new(nullptr, false);
+				CallbackData (const std::function<bool()>& f, unsigned int max_ms):
+					test{f},
+					deadline{g_get_monotonic_time() + (max_ms*1000)} {}
+				~CallbackData() {g_main_loop_unref(loop);}
+			} data(test, max_ms);
+
+			// tell the timer to stop looping on success or deadline
 			auto timerfunc = [](gpointer gdata) -> gboolean {
-				auto data = static_cast<Data*>(gdata);
-				if (data->notifications->getNotifications().empty() && (g_get_monotonic_time() < data->deadline))
+				auto& data = *static_cast<CallbackData*>(gdata);
+				if (!data.test() && (g_get_monotonic_time() < data.deadline))
 					return G_SOURCE_CONTINUE;
-				g_main_loop_quit(data->loop);
+				g_main_loop_quit(data.loop);
 				return G_SOURCE_REMOVE;
 			};
 
-			static constexpr guint interval_milliseconds = 10;
-			g_timeout_add (interval_milliseconds, timerfunc, &data);
+			// start looping
+			g_timeout_add (std::min(max_ms, test_interval_ms), timerfunc, &data);
 			g_main_loop_run(data.loop);
+		}
 
-			g_main_loop_unref(data.loop);
+		void loop_until_notifications(unsigned int max_seconds=1) {
+			auto test = [this]{ return !notifications->getNotifications().empty(); };
+			loop_until(test, max_seconds);
 		}
 
 		static int unref_idle (gpointer user_data) {
