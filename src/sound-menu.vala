@@ -71,6 +71,7 @@ public class SoundMenu: Object
 		this.notify_handlers = new HashTable<MediaPlayer, ulong> (direct_hash, direct_equal);
 
 		this.greeter_players = (flags & DisplayFlags.GREETER_PLAYERS) != 0;
+
 	}
 
 	~SoundMenu () {
@@ -191,6 +192,43 @@ public class SoundMenu: Object
 
 		/* this'll drop our ref to it */
 		this.notify_handlers.remove (player);
+	}
+
+	public void update_volume_slider (VolumeControl.ActiveOutput active_output) {
+		int index = find_action (this.volume_section, "indicator.volume");
+		if (index != -1) {
+			string label = "Volume";
+			switch (active_output) {
+				case VolumeControl.ActiveOutput.SPEAKERS:
+					label = _("Volume");
+					break;
+				case VolumeControl.ActiveOutput.HEADPHONES:
+					label = _("Volume (Headphones)");
+					break;
+				case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
+					label = _("Volume (Bluetooth)");
+					break;
+				case VolumeControl.ActiveOutput.USB_SPEAKER:
+					label = _("Volume (Usb)");
+					break;
+				case VolumeControl.ActiveOutput.HDMI_SPEAKER:
+					label = _("Volume (HDMI)");
+					break;
+				case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
+					label = _("Volume (Bluetooth headphones)");
+					break;
+				case VolumeControl.ActiveOutput.USB_HEADPHONES:
+					label = _("Volume (Usb headphones)");
+					break;
+				case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
+					label = _("Volume (HDMI headphones)");
+					break;
+			}
+			this.volume_section.remove (index);
+			this.volume_section.insert_item (index, this.create_slider_menu_item (_(label), "indicator.volume(0)", 0.0, 1.0, 0.01,
+																  "audio-volume-low-zero-panel",
+																  "audio-volume-high-panel"));
+		}
 	}
 
 	public Menu root;
