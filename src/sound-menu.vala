@@ -209,7 +209,7 @@ public class SoundMenu: Object
 					label = _("Volume (Bluetooth)");
 					break;
 				case VolumeControl.ActiveOutput.USB_SPEAKER:
-					label = _("Volume (USB)");
+					label = _("Volume (Usb)");
 					break;
 				case VolumeControl.ActiveOutput.HDMI_SPEAKER:
 					label = _("Volume (HDMI)");
@@ -218,7 +218,7 @@ public class SoundMenu: Object
 					label = _("Volume (Bluetooth headphones)");
 					break;
 				case VolumeControl.ActiveOutput.USB_HEADPHONES:
-					label = _("Volume (USB headphones)");
+					label = _("Volume (Usb headphones)");
 					break;
 				case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
 					label = _("Volume (HDMI headphones)");
