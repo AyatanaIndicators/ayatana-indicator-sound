@@ -36,7 +36,8 @@ public abstract class VolumeControl : Object
 		USB_SPEAKER,
 		USB_HEADPHONES,
 		HDMI_SPEAKER,
-		HDMI_HEADPHONES
+		HDMI_HEADPHONES,
+		CALL_MODE
 	}
 
 	public class Volume : Object {
@@ -48,6 +49,7 @@ public abstract class VolumeControl : Object
 	public virtual bool ready { get { return false; } set { } }
 	public virtual bool active_mic { get { return false; } set { } }
 	public virtual bool high_volume { get { return false; } protected set { } }
+	public virtual bool below_warning_volume { get { return false; } protected set { } }	
 	public virtual bool mute { get { return false; } }
 	public virtual bool is_playing { get { return false; } }
 	public virtual VolumeControl.ActiveOutput active_output { get { return VolumeControl.ActiveOutput.SPEAKERS; } }
@@ -59,6 +61,7 @@ public abstract class VolumeControl : Object
 	public virtual bool high_volume_approved { get { return false; } protected set { } }
 	public virtual void approve_high_volume() { }
 	public virtual void clamp_to_high_volume() { }
+	public virtual void set_warning_volume() { }
 
 	public abstract void set_mute (bool mute);
 
