@@ -1,3 +1,31 @@
+indicator-sound (12.10.2+16.04.20151223.1-0ubuntu1) xenial; urgency=medium
+
+  [ Xavi Garcia Mena ]
+  * Very simple change to make upstart try to respawn the process 30
+    times (instead of 2). This is a workaround for the case when dbus
+    session is not ready yet at startup.
+
+ -- Xavi Garcia <xavi.garcia.mena@canonical.com>  Wed, 23 Dec 2015 14:20:45 +0000
+
+indicator-sound (12.10.2+16.04.20151223-0ubuntu1) xenial; urgency=medium
+
+  [ CI Train Bot ]
+  * No-change rebuild.
+
+ -- Xavi Garcia <xavi.garcia.mena@canonical.com>  Wed, 23 Dec 2015 12:54:33 +0000
+
+indicator-sound (12.10.2+16.04.20151222-0ubuntu1) xenial; urgency=medium
+
+  [ Xavi Garcia Mena ]
+  * Very simple change to make upstart try to respawn the process 30
+    times (instead of 2). This is a workaround for the case when dbus
+    session is not ready yet at startup.
+
+  [ Timo Jyrinki ]
+  * Note: this release was reverted on 20151223, ignore this changelog entry.
+
+ -- Xavi Garcia <xavi.garcia.mena@canonical.com>  Tue, 22 Dec 2015 09:50:08 +0000
+
 indicator-sound (12.10.2+16.04.20151103.2-0ubuntu1) xenial; urgency=medium
 
   [ Xavi Garcia ]
@@ -7,84 +35,10 @@ indicator-sound (12.10.2+16.04.20151103.2-0ubuntu1) xenial; urgency=medium
   [ CI Train Bot ]
   * New rebuild forced.
 
+  [ Timo Jyrinki ]
+  * Note: this release was reverted on 20151223, ignore this changelog entry.
+
  -- Xavi Garcia <xavi.garcia.mena@canonical.com>  Tue, 03 Nov 2015 17:47:10 +0000
-
-indicator-sound (12.10.2+15.10.20151019-0ubuntu3) UNRELEASED; urgency=medium
-
-  [ Xavi Garcia ]
-  * Added OSD notifications to show output source when the volume or 
-    source change (LP: #1382548, LP: #1415480, LP: #1484589)
-    
-  * debian/control:
-    Added the following build dependencies:
-    - cmake-extras (>= 0.4), 
-    - google-mock (>= 1.6.0+svn437),
-    - libqtdbusmock1-dev (>= 0.3),
-    - libqtdbustest1-dev,
-    - libunity-api-dev,
-    - pulseaudio,
-    - qt5-default,
-    - qtbase5-dev,
-    - qtbase5-dev-tools,
-    - qtdeclarative5-dev,
-    - qtdeclarative5-dev-tools
-  * Added gmenuharness library for integration tests support.
-    New Files: 
-    - src/gmenuharness/CMakeLists.txt
-    - src/gmenuharness/MatchResult.cpp
-    - src/gmenuharness/MatchUtils.cpp
-    - src/gmenuharness/MenuItemMatcher.cpp
-    - src/gmenuharness/MenuMatcher.cpp
-    - include/unity/gmenuharness/MatchResult.h
-    - include/unity/gmenuharness/MatchUtils.h
-    - include/unity/gmenuharness/MenuItemMatcher.h
-    - include/unity/gmenuharness/MenuMatcher.h
-  * Added integration tests using gmenuharness
-    New Files:
-    - tests/dbus-types/CMakeLists.txt
-    - tests/dbus-types/com.ubuntu.AccountsService.Sound.xml
-    - tests/dbus-types/dbus-types.h
-    - tests/dbus-types/org.PulseAudio.Ext.StreamRestore1.xml
-    - tests/dbus-types/org.freedesktop.Accounts.xml
-    - tests/dbus-types/org.freedesktop.DBus.Properties.xml
-    - tests/dbus-types/org.freedesktop.Notifications.xml
-    - tests/dbus-types/org.gtk.Actions.xml
-    - tests/dbus-types/pulseaudio-volume.cpp
-    - tests/dbus-types/pulseaudio-volume.h
-    - tests/integration/CMakeLists.txt
-    - tests/integration/indicator-sound-test-base.cpp
-    - tests/integration/indicator-sound-test-base.h
-    - tests/integration/main.cpp
-    - tests/integration/test-indicator.cpp
-    - tests/integration/touch-stream-restore.table
-    - tests/integration/utils/dbus-pulse-volume.cpp
-    - tests/integration/utils/dbus-pulse-volume.h
-    - tests/integration/utils/get-volume.cpp
-    - tests/integration/utils/set-volume.cpp
-    - tests/service-mocks/CMakeLists.txt
-    - tests/service-mocks/DBusPropertiesNotifier.cpp
-    - tests/service-mocks/DBusPropertiesNotifier.h
-    - tests/service-mocks/accounts-mock/AccountsDefs.h
-    - tests/service-mocks/accounts-mock/AccountsMock.cpp
-    - tests/service-mocks/accounts-mock/AccountsMock.h
-    - tests/service-mocks/accounts-mock/AccountsServiceSoundMock.cpp
-    - tests/service-mocks/accounts-mock/AccountsServiceSoundMock.h
-    - tests/service-mocks/accounts-mock/CMakeLists.txt
-    - tests/service-mocks/accounts-mock/com.ubuntu.AccountsService.Sound.Mock.xml
-    - tests/service-mocks/accounts-mock/main.cpp
-    - tests/service-mocks/accounts-mock/org.freedesktop.Accounts.Mock.xml
-    - tests/service-mocks/media-player-mpris-mock/CMakeLists.txt
-    - tests/service-mocks/media-player-mpris-mock/MediaPlayerMprisDefs.h
-    - tests/service-mocks/media-player-mpris-mock/MediaPlayerMprisMock.cpp
-    - tests/service-mocks/media-player-mpris-mock/MediaPlayerMprisMock.h
-    - tests/service-mocks/media-player-mpris-mock/applications/testplayer1.desktop
-    - tests/service-mocks/media-player-mpris-mock/main.cpp
-    - tests/service-mocks/media-player-mpris-mock/org.mpris.MediaPlayer2.Player.xml
-    - tests/service-mocks/media-player-mpris-mock/org.mpris.MediaPlayer2.xml
-    - tests/service-mocks/media-player-mpris-mock/player-update.cpp   
-
-
- -- Xavi Garcia <xavi.garcia.mena@canonical.com>  Wed, 11 Nov 2015 12:40:10 +0100
 
 indicator-sound (12.10.2+15.10.20151019-0ubuntu1) wily; urgency=medium
 
