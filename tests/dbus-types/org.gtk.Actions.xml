@@ -9,5 +9,10 @@
           <arg name="actionsAdded" type="a{s(bgav)}" direction="in" />
           <annotation name="org.qtproject.QtDBus.QtTypeName.In3" value="QVariantMap"/>
     </signal>
+    <method name="Describe">
+      <arg name="action" type="s" direction="in"/>
+      <arg name="result" type="(bgav)" direction="out"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="DBusActionResult"/>
+    </method>
   </interface>
 </node>

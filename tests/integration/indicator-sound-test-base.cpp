@@ -821,3 +821,69 @@ bool IndicatorSoundTestBase::setVolumeUntilAccountsIsConnected(double volume)
     }
     return (signal_spy_volume_changed_->count() != 0);
 }
+
+QVariantList IndicatorSoundTestBase::getActionValue(QString const &action)
+{
+    if (!menu_interface_)
+    {
+        menu_interface_.reset(new MenusInterface("com.canonical.indicator.sound",
+                                                 "/com/canonical/indicator/sound",
+                                                 dbusTestRunner.sessionConnection(), 0));
+    }
+    if (menu_interface_)
+    {
+        QDBusReply<DBusActionResult> resp = menu_interface_->call(QLatin1String("Describe"),
+                                                                  action);
+        if (!resp.isValid())
+        {
+            qWarning() << "IndicatorSoundTestBase::getActionValue(): D-Bus error: " << resp.error().message();
+            return QVariantList();
+        }
+        else
+        {
+            return resp.value().getValue();
+        }
+    }
+
+    return QVariantList();
+}
+
+qlonglong IndicatorSoundTestBase::getVolumeSyncValue(bool *isValid)
+{
+    qlonglong result = 0;
+
+    QVariantList varList = getActionValue("volume-sync");
+    if (varList.size() == 1)
+    {
+        result = varList.at(0).toULongLong(isValid);
+    }
+    else
+    {
+        if (isValid)
+        {
+            *isValid = false;
+        }
+    }
+
+    return result;
+}
+
+float IndicatorSoundTestBase::getVolumeValue(bool *isValid)
+{
+    float result = 0.0;
+
+    QVariantList varList = getActionValue("volume");
+    if (varList.size() == 1)
+    {
+        result = varList.at(0).toFloat(isValid);
+    }
+    else
+    {
+        if (isValid)
+        {
+            *isValid = false;
+        }
+    }
+
+    return result;
+}

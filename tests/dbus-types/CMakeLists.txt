@@ -26,7 +26,8 @@ set_source_files_properties(${dbusinterface_properties_xml} PROPERTIES
 
 set(dbusinterface_actions_xml "org.gtk.Actions.xml")
 set_source_files_properties(${dbusinterface_actions_xml} PROPERTIES
-  CLASSNAME MenusInterface)
+  CLASSNAME MenusInterface
+  INCLUDE "dbus-action-result.h")
 
 set(dbusinterface_notifications_xml "org.freedesktop.Notifications.xml")
 set_source_files_properties(${dbusinterface_notifications_xml} PROPERTIES
@@ -44,6 +45,7 @@ add_library(
   STATIC
   ${interface_files}
   pulseaudio-volume.cpp
+  dbus-action-result.cpp
 )
 
 qt5_use_modules(

@@ -46,7 +46,7 @@ public class SoundMenu: Object
 
 		volume_section.append_item (this.create_slider_menu_item (_("Volume"), "indicator.volume(0)", 0.0, 1.0, 0.01,
 																  "audio-volume-low-zero-panel",
-																  "audio-volume-high-panel"));
+																  "audio-volume-high-panel", true));
 
 		this.menu = new Menu ();
 		this.menu.append_section (null, volume_section);
@@ -101,7 +101,7 @@ public class SoundMenu: Object
 			if (value && !this.mic_volume_shown) {
 				var slider = this.create_slider_menu_item (_("Microphone Volume"), "indicator.mic-volume", 0.0, 1.0, 0.01,
 														   "audio-input-microphone-low-zero-panel",
-														   "audio-input-microphone-high-panel");
+														   "audio-input-microphone-high-panel", false);
 				volume_section.append_item (slider);
 				this.mic_volume_shown = true;
 			}
@@ -227,7 +227,7 @@ public class SoundMenu: Object
 			this.volume_section.remove (index);
 			this.volume_section.insert_item (index, this.create_slider_menu_item (_(label), "indicator.volume(0)", 0.0, 1.0, 0.01,
 																  "audio-volume-low-zero-panel",
-																  "audio-volume-high-panel"));
+																  "audio-volume-high-panel", true));
 		}
 	}
 
@@ -386,7 +386,7 @@ public class SoundMenu: Object
 		}
 	}
 
-	MenuItem create_slider_menu_item (string label, string action, double min, double max, double step, string min_icon_name, string max_icon_name) {
+	MenuItem create_slider_menu_item (string label, string action, double min, double max, double step, string min_icon_name, string max_icon_name, bool sync_action) {
 		var min_icon = new ThemedIcon.with_default_fallbacks (min_icon_name);
 		var max_icon = new ThemedIcon.with_default_fallbacks (max_icon_name);
 
@@ -397,6 +397,9 @@ public class SoundMenu: Object
 		slider.set_attribute ("min-value", "d", min);
 		slider.set_attribute ("max-value", "d", max);
 		slider.set_attribute ("step", "d", step);
+		if (sync_action) {
+			slider.set_attribute ("x-canonical-sync-action", "s", "indicator.volume-sync");
+		}
 
 		return slider;
 	}

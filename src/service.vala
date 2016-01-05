@@ -40,7 +40,11 @@ public class IndicatorSound.Service: Object {
 		warn_notification.set_hint ("x-canonical-non-shaped-icon", "true");
 		warn_notification.set_hint ("x-canonical-snap-decisions", "true");
 		warn_notification.set_hint ("x-canonical-private-affirmative-tint", "true");
-		warn_notification.closed.connect((n) => { n.clear_actions(); waiting_user_approve_warn=false; });
+		warn_notification.closed.connect((n) => { 
+			n.clear_actions(); 
+			waiting_user_approve_warn=false;
+			increment_volume_sync_action();
+		});
 		BusWatcher.watch_namespace (GLib.BusType.SESSION,
 		                            "org.freedesktop.Notifications",
 		                            () => { debug("Notifications name appeared"); },
@@ -77,6 +81,7 @@ public class IndicatorSound.Service: Object {
 		this.actions.add_action (this.create_volume_action ());
 		this.actions.add_action (this.create_mic_volume_action ());
 		this.actions.add_action (this.create_high_volume_action ());
+		this.actions.add_action (this.create_volume_sync_action ());
 
 		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
 		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.HIDE_PLAYERS | SoundMenu.DisplayFlags.GREETER_PLAYERS));
@@ -606,9 +611,11 @@ public class IndicatorSound.Service: Object {
 		notify_server_caps_checked = true;
 
 		var loud = volume_control.high_volume;
+		bool ignore_warning_this_time = this.volume_control.ignore_high_volume;
 		var warn = loud
 			&& this.notify_server_supports_actions
-			&& !this.volume_control.high_volume_approved;
+			&& !this.volume_control.high_volume_approved
+			&& !ignore_warning_this_time;
 		if (waiting_user_approve_warn && volume_control.below_warning_volume) {
 			volume_control.set_warning_volume();
 			close_notification(warn_notification);
@@ -624,16 +631,19 @@ public class IndicatorSound.Service: Object {
 			warn_notification.add_action ("ok", _("OK"), (n, a) => {
 				stop_clamp_to_high_timeout();
 				volume_control.approve_high_volume ();
-				if (_pre_warn_volume != null) {
-					var tmp = _pre_warn_volume;
-					_pre_warn_volume = null;
-					volume_control.volume = tmp;
-				}
+				// restore the volume the user introduced
+				VolumeControl.Volume vol = new VolumeControl.Volume();
+				vol.volume = volume_control.get_pre_clamped_volume();
+				vol.reason = VolumeControl.VolumeReasons.USER_KEYPRESS;
+				_pre_warn_volume = null;
+				volume_control.volume = vol;
+				
 				waiting_user_approve_warn = false;
 			});
 			warn_notification.add_action ("cancel", _("Cancel"), (n, a) => {
 				_pre_warn_volume = null;
 				waiting_user_approve_warn = false;
+				increment_volume_sync_action();
 			});
 			waiting_user_approve_warn = true;
 			show_notification(warn_notification);
@@ -641,8 +651,7 @@ public class IndicatorSound.Service: Object {
 			if (!waiting_user_approve_warn) {
 				close_notification(warn_notification);
 	
-				if (notify_server_supports_sync && !block_info_notifications) {
-	
+				if (notify_server_supports_sync && !block_info_notifications && !ignore_warning_this_time) {
 					/* Determine Label */
 				        string volume_label = get_notification_label ();
 
@@ -816,6 +825,18 @@ public class IndicatorSound.Service: Object {
 		});
 
 		return high_volume_action;
+	}
+
+	SimpleAction volume_sync_action;
+	uint64 volume_sync_number_ = 0;
+	Action create_volume_sync_action () {
+		volume_sync_action = new SimpleAction.stateful("volume-sync", VariantType.UINT64, new Variant.uint64 (volume_sync_number_));
+
+		return volume_sync_action;
+	}
+
+	void increment_volume_sync_action () {
+		volume_sync_action.set_state(new Variant.uint64 (++volume_sync_number_));
 	}
 
 	uint export_actions = 0;
