@@ -49,11 +49,13 @@ public abstract class VolumeControl : Object
 	public virtual bool ready { get { return false; } set { } }
 	public virtual bool active_mic { get { return false; } set { } }
 	public virtual bool high_volume { get { return false; } protected set { } }
+	public virtual bool ignore_high_volume { get { return false; } protected set { } }
 	public virtual bool below_warning_volume { get { return false; } protected set { } }	
 	public virtual bool mute { get { return false; } }
 	public virtual bool is_playing { get { return false; } }
 	public virtual VolumeControl.ActiveOutput active_output { get { return VolumeControl.ActiveOutput.SPEAKERS; } }
 	private Volume _volume;
+	private double _pre_clamp_volume;
 	public virtual Volume volume { get { return _volume; } set { } }
 	public virtual double mic_volume { get { return 0.0; } set { } }
 	public virtual double max_volume { get { return 1.0; } protected set { } }
@@ -70,6 +72,11 @@ public abstract class VolumeControl : Object
 		v.volume = unclamped.clamp (0.0, this.max_volume);
 		v.reason = reason;
 		this.volume = v;
+		_pre_clamp_volume = unclamped;
+	}
+
+	public double get_pre_clamped_volume () {
+		return _pre_clamp_volume;
 	}
 
 	public signal void active_output_changed (VolumeControl.ActiveOutput active_output);

@@ -19,6 +19,7 @@
 
 #include <QDBusMetaType>
 #include "pulseaudio-volume.h"
+#include "dbus-action-result.h"
 
 namespace DBusTypes
 {
@@ -26,6 +27,7 @@ namespace DBusTypes
     {
         PulseaudioVolume::registerMetaType();
         PulseaudioVolumeArray::registerMetaType();
+        DBusActionResult::registerMetaType();
     }
 
     static constexpr char const* DBUS_NAME = "com.canonical.indicator.sound";
