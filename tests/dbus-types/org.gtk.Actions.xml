@@ -1,0 +1,13 @@
+<node>
+  <interface name="org.gtk.Actions">
+    <signal name="Changed">
+          <arg name="removedActions" type="as" direction="in" />
+          <arg name="actionsFlags" type="a{sb}" direction="in" />
+          <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
+          <arg name="actionsChanged" type="a{sv}" direction="in" />
+          <annotation name="org.qtproject.QtDBus.QtTypeName.In2" value="QVariantMap"/>
+          <arg name="actionsAdded" type="a{s(bgav)}" direction="in" />
+          <annotation name="org.qtproject.QtDBus.QtTypeName.In3" value="QVariantMap"/>
+    </signal>
+  </interface>
+</node>
