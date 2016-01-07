@@ -64,6 +64,7 @@ public abstract class VolumeControl : Object
 	public virtual bool mute { get { return false; } }
 	public bool is_playing { get; protected set; default = false; }
 	private Volume _volume;
+	private double _pre_clamp_volume;
 	public virtual Volume volume { get { return _volume; } set { } }
 	public virtual double mic_volume { get { return 0.0; } set { } }
 
@@ -74,6 +75,11 @@ public abstract class VolumeControl : Object
 		v.volume = unclamped.clamp (0.0, _options.max_volume);
 		v.reason = reason;
 		this.volume = v;
+		_pre_clamp_volume = unclamped;
+	}
+
+	public double get_pre_clamped_volume () {
+		return _pre_clamp_volume;
 	}
 
 	public abstract VolumeControl.ActiveOutput active_output();
