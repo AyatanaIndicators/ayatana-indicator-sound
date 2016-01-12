@@ -38,7 +38,6 @@ public class VolumeWarningPulse : VolumeWarning
 
 	~VolumeWarningPulse () {
 		clear_timer (ref _pulse_reconnect_timer);
-		clear_timer (ref _update_sink_timer);
 		clear_timer (ref _pending_sink_inputs_timer);
 		pulse_disconnect ();
 	}
@@ -65,7 +64,6 @@ public class VolumeWarningPulse : VolumeWarning
 	private unowned PulseAudio.GLibMainLoop _pgloop = null;
 	private PulseAudio.Context _pulse_context = null;
 	private uint _pulse_reconnect_timer = 0;
-	private uint _update_sink_timer = 0;
 	private uint _pending_sink_inputs_timer = 0;
         private GenericSet<uint32> _pending_sink_inputs = new GenericSet<uint32>(direct_hash, direct_equal);
 
