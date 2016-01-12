@@ -46,11 +46,11 @@ public class VolumeWarningPulse : VolumeWarning
         protected override void preshow () {
 		/* showing the dialog can change the sink input index (bug #1484589)
 		 * so cache it here for later use in sound_system_set_multimedia_volume() */
-                _target_sink_index = _multimedia_sink_index;
+                _target_sink_input_index = _multimedia_sink_input_index;
         }
 
 	protected override void sound_system_set_multimedia_volume (PulseAudio.Volume volume) {
-		var index = _target_sink_index;
+		var index = _target_sink_input_index;
 
 		return_if_fail (_pulse_context != null);
 		return_if_fail (index != PulseAudio.INVALID_INDEX);
@@ -58,8 +58,8 @@ public class VolumeWarningPulse : VolumeWarning
 
 		unowned CVolume cvol = CVolume ();
 		cvol.set (1, volume);
-		debug ("setting multimedia volume to %s", cvol.to_string ());
-		_pulse_context.set_sink_volume_by_index (index, cvol);
+		debug ("setting multimedia (sink_input index %d) volume to %s", (int)index, cvol.to_string ());
+		_pulse_context.set_sink_input_volume (index, cvol);
 	}
 
 	private unowned PulseAudio.GLibMainLoop _pgloop = null;
@@ -71,44 +71,8 @@ public class VolumeWarningPulse : VolumeWarning
 
 	private uint soon_interval_msec = 500;
 
-	private uint32 _target_sink_index           = PulseAudio.INVALID_INDEX;
-	private uint32 _multimedia_sink_index       = PulseAudio.INVALID_INDEX;
+	private uint32 _target_sink_input_index     = PulseAudio.INVALID_INDEX;
 	private uint32 _multimedia_sink_input_index = PulseAudio.INVALID_INDEX;
-
-	/***/
-
-	private void update_multimedia_volume () {
-
-		return_if_fail (_pulse_context != null);
-		return_if_fail (_multimedia_sink_index != PulseAudio.INVALID_INDEX);
-
-		_pulse_context.get_sink_info_by_index (_multimedia_sink_index, (c,i) => {
-			if (i != null)
-				multimedia_volume = i.volume.max ();
-		});
-	}
-
-	private void update_multimedia_volume_soon () {
-
-		if (_update_sink_timer == 0) {
-			_update_sink_timer = Timeout.add (soon_interval_msec, () => {
-				_update_sink_timer = 0;
-				update_multimedia_volume ();
-				return Source.REMOVE;
-			});
-		}
-	}
-
-	private void set_multimedia_sink_index (uint32 index) {
-
-		if (_multimedia_sink_index != index) {
-			_multimedia_sink_index = index;
-
-			multimedia_volume = PulseAudio.Volume.INVALID;
-			if (index != PulseAudio.INVALID_INDEX)
-				update_multimedia_volume_soon ();
-		}
-	}
 
 	/***/
 
@@ -120,7 +84,7 @@ public class VolumeWarningPulse : VolumeWarning
 
 	private void clear_multimedia () {
 		_multimedia_sink_input_index = PulseAudio.INVALID_INDEX;
-		set_multimedia_sink_index (PulseAudio.INVALID_INDEX);
+		multimedia_volume = PulseAudio.Volume.INVALID;
 		multimedia_active = false;
 	}
 
@@ -132,7 +96,7 @@ public class VolumeWarningPulse : VolumeWarning
 		if (is_active_multimedia (i)) {
 			GLib.message ("on_sink_input_info() setting multimedia sink input index to %d, sink index to %d", (int)i.index, (int)i.sink);
 			_multimedia_sink_input_index = i.index;
-			set_multimedia_sink_index (i.sink);
+			multimedia_volume = i.volume.max ();
 			multimedia_active = true;
 		}
 		else if (i.index == _multimedia_sink_input_index) {
@@ -164,13 +128,6 @@ public class VolumeWarningPulse : VolumeWarning
         private void context_events_cb (Context c, Context.SubscriptionEventType t, uint32 index) {
 		switch (t & Context.SubscriptionEventType.FACILITY_MASK)
 		{
-			case Context.SubscriptionEventType.SINK:
-				// if something happens to the sink connected to our mm sink input,
-				// get its updated info to keep our multimedia volume up-to-date
-				if ((index == _multimedia_sink_index) && (index != PulseAudio.INVALID_INDEX))
-					update_multimedia_volume_soon();
-				break;
-
 			case Context.SubscriptionEventType.SINK_INPUT:
 				switch (t & Context.SubscriptionEventType.TYPE_MASK)
 				{
