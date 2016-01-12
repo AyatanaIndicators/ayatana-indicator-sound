@@ -92,7 +92,7 @@ public class VolumeWarningPulse : VolumeWarning
 			return;
 
 		if (is_active_multimedia (i)) {
-			GLib.message ("on_sink_input_info() setting multimedia sink input index to %d, sink index to %d", (int)i.index, (int)i.sink);
+			GLib.debug ("on_sink_input_info() setting multimedia sink input index to %d, sink index to %d", (int)i.index, (int)i.sink);
 			_multimedia_sink_input_index = i.index;
 			multimedia_volume = i.volume.max ();
 			multimedia_active = true;
