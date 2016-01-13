@@ -351,6 +351,25 @@ pa_context_set_source_volume_by_name (pa_context *c, const char * name, const pa
 	return dummy_operation();
 }
 
+pa_operation*
+pa_context_get_sink_input_info_list(pa_context *c, pa_sink_input_info_cb_t cb, void *userdata)
+{
+	reinterpret_cast<PAMockContext*>(c)->idleOnce(
+	[c, cb, userdata]() {
+
+		pa_sink_input_info sink_input;
+		sink_input.name = "default-sink-input";
+		sink_input.proplist = nullptr;
+		sink_input.has_volume = false;
+
+		if (cb != nullptr)
+			cb(c, &sink_input, true, userdata);
+	});
+
+	return dummy_operation();
+}
+
+
 /* *******************************
  * subscribe.h
  * *******************************/
