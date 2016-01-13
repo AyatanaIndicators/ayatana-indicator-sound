@@ -1,3 +1,15 @@
+indicator-sound (12.10.2+16.04.20160113.1-0ubuntu1) xenial; urgency=medium
+
+  [ Charles Kerr ]
+  * Be more selective about when to show and dismiss the High Volume
+    Warning Dialog. (LP: #1504065)
+
+  [ charles kerr ]
+  * Be more selective about when to show and dismiss the High Volume
+    Warning Dialog. (LP: #1504065)
+
+ -- Charles Kerr <charles.kerr@canonical.com>  Wed, 13 Jan 2016 20:37:58 +0000
+
 indicator-sound (12.10.2+16.04.20160105.2-0ubuntu1) xenial; urgency=medium
 
   [ Xavi Garcia Mena ]
