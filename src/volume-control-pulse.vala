@@ -22,9 +22,6 @@ using PulseAudio;
 using Notify;
 using Gee;
 
-[CCode(cname="pa_cvolume_set", cheader_filename = "pulse/volume.h")]
-extern unowned PulseAudio.CVolume? vol_set (PulseAudio.CVolume? cv, uint channels, PulseAudio.Volume v);
-
 [DBus (name="com.canonical.UnityGreeter.List")]
 interface GreeterListInterface : Object
 {
@@ -34,19 +31,14 @@ interface GreeterListInterface : Object
 
 public class VolumeControlPulse : VolumeControl
 {
-	/* this is static to ensure it being freed after @context (loop does not have ref counting) */
-	private static PulseAudio.GLibMainLoop loop;
+	private unowned PulseAudio.GLibMainLoop loop = null;
 
 	private uint _reconnect_timer = 0;
 
 	private PulseAudio.Context context;
 	private bool   _mute = true;
-	private bool   _is_playing = false;
-	private bool   _ignore_warning_this_time = false;
 	private VolumeControl.Volume _volume = new VolumeControl.Volume();
 	private double _mic_volume = 0.0;
-	private Settings _settings = new Settings ("com.canonical.indicator.sound");
-	private Settings _shared_settings = new Settings ("com.ubuntu.sound");
 
 	/* Used by the pulseaudio stream restore extension */
 	private DBusConnection _pconn;
@@ -57,22 +49,6 @@ public class VolumeControlPulse : VolumeControl
 	private bool _pulse_use_stream_restore = false;
 	private int32 _active_sink_input = -1;
 	private string[] _valid_roles = {"multimedia", "alert", "alarm", "phone"};
-	public override string stream {
-		get {
-			if (_active_sink_input == -1)
-				return "alert";
-			var path = _sink_input_hash[_active_sink_input];
-			if (path == _objp_role_multimedia)
-				return "multimedia";
-			if (path == _objp_role_alert)
-				return "alert";
-			if (path == _objp_role_alarm)
-				return "alarm";
-			if (path == _objp_role_phone)
-				return "phone";
-			return "alert";
-		}
-	}
 	private string? _objp_role_multimedia = null;
 	private string? _objp_role_alert = null;
 	private string? _objp_role_alarm = null;
@@ -87,38 +63,26 @@ public class VolumeControlPulse : VolumeControl
 	private uint _accountservice_volume_timer = 0;
 	private bool _send_next_local_volume = false;
 	private double _account_service_volume = 0.0;
-	private bool _active_port_headphone = false;
 	private VolumeControl.ActiveOutput _active_output = VolumeControl.ActiveOutput.SPEAKERS;
-
-	/** true when connected to the pulse server */
-	public override bool ready { get; private set; }
 
 	/** true when a microphone is active **/
 	public override bool active_mic { get; private set; default = false; }
 
-	public VolumeControlPulse ()
+	public VolumeControlPulse (IndicatorSound.Options options, PulseAudio.GLibMainLoop loop)
 	{
+		base(options);
+
 		_volume.volume = 0.0;
 		_volume.reason = VolumeControl.VolumeReasons.PULSE_CHANGE;
 
-		if (loop == null)
-			loop = new PulseAudio.GLibMainLoop ();
+		this.loop = loop;
 
 		_mute_cancellable = new Cancellable ();
 		_volume_cancellable = new Cancellable ();
 
-		init_all_properties();
-
 		setup_accountsservice.begin ();
 
 		this.reconnect_to_pulse ();
-	}
-
-	private void init_all_properties()
-	{
-		init_max_volume();
-		init_high_volume();
-		init_high_volume_approved();
 	}
 
 	~VolumeControlPulse ()
@@ -134,10 +98,9 @@ public class VolumeControlPulse : VolumeControl
 		}
 		stop_local_volume_timer();
 		stop_account_service_volume_timer();
-		stop_high_volume_approved_timer();
 	}
 
-	private VolumeControl.ActiveOutput calculate_active_output (SinkInfo? sink) {
+	public static VolumeControl.ActiveOutput calculate_active_output (SinkInfo? sink) {
 		
 		VolumeControl.ActiveOutput ret_output = VolumeControl.ActiveOutput.SPEAKERS;
 		/* Check if the current active port is headset/headphone */
@@ -155,9 +118,8 @@ public class VolumeControlPulse : VolumeControl
 			(sink.active_port != null && 
 			 (sink.active_port.name.contains("headset") ||
 		          sink.active_port.name.contains("headphone")))) {
-			    	_active_port_headphone = true;
 	    			// check if it's a bluetooth device
-	    			var device_bus = sink.proplist.gets ("device.bus");
+	    			unowned string device_bus = sink.proplist.gets ("device.bus");
 	    			if (device_bus != null && device_bus == "bluetooth") {
 					ret_output = VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES;
         			} else if (device_bus != null && device_bus == "usb") {
@@ -169,8 +131,7 @@ public class VolumeControlPulse : VolumeControl
         		}
 		} else {
 			// speaker
-			_active_port_headphone = false;
-			var device_bus = sink.proplist.gets ("device.bus");
+			unowned string device_bus = sink.proplist.gets ("device.bus");
 	    		if (device_bus != null && device_bus == "bluetooth") {
 	    		    ret_output = VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER;
         		} else if (device_bus != null && device_bus == "usb") {
@@ -245,28 +206,19 @@ public class VolumeControlPulse : VolumeControl
 		}
 
 		var playing = (i.state == PulseAudio.SinkState.RUNNING);
-		if (_is_playing != playing)
-		{
-			_is_playing = playing;
-			this.notify_property ("is-playing");
-		}
+		if (is_playing != playing)
+			is_playing = playing;
 
-		// store the current status of the active output
-		VolumeControl.ActiveOutput active_output_before = active_output;
+		var oldval = _active_output;
+		var newval = calculate_active_output(i);
 
-		// calculate the output 
-		_active_output = calculate_active_output (i);
-		
-		// check if the output has changed, if so... emit a signal
-		VolumeControl.ActiveOutput active_output_now = active_output;
-		if (active_output_now != active_output_before && 
-			(active_output_now != VolumeControl.ActiveOutput.CALL_MODE &&
-			 active_output_before != VolumeControl.ActiveOutput.CALL_MODE)) {
-			this.active_output_changed (active_output_now);
-			if (active_output_now == VolumeControl.ActiveOutput.SPEAKERS) {
-				_high_volume_approved = false;
-			}
-			update_high_volume();
+		_active_output = newval;
+
+		// Emit a change signal iff CALL_MODE wasn't involved. (FIXME: yuck.)
+		if ((oldval != VolumeControl.ActiveOutput.CALL_MODE) &&
+		    (newval != VolumeControl.ActiveOutput.CALL_MODE) &&
+		    (oldval != newval)) {
+			this.active_output_changed (newval);
 		}
 
 		if (_pulse_use_stream_restore == false &&
@@ -345,10 +297,6 @@ public class VolumeControlPulse : VolumeControl
 						var vol = new VolumeControl.Volume();
 						vol.volume = volume_to_double (lvolume);
 						vol.reason = VolumeControl.VolumeReasons.PULSE_CHANGE;
-						// Ignore changes from PULSE to avoid issues with
-						// some apps that change the volume in the sink
-						// We only take into account volume changes from the user
-						this._ignore_warning_this_time = true;
 						this.volume = vol;
 					}
 				}
@@ -358,6 +306,21 @@ public class VolumeControlPulse : VolumeControl
 		return message;
 	}
 
+	private VolumeControl.Stream calculate_active_stream()
+	{
+		if (_active_sink_input != -1) {
+			var path = _sink_input_hash[_active_sink_input];
+			if (path == _objp_role_multimedia)
+				return Stream.MULTIMEDIA;
+			if (path == _objp_role_alarm)
+				return Stream.ALARM;
+			if (path == _objp_role_phone)
+				return Stream.PHONE;
+		}
+
+		return VolumeControl.Stream.ALERT;
+	}
+
 	private async void update_active_sink_input (int32 index)
 	{
 		if ((index == -1) || (index != _active_sink_input && index in _sink_input_list)) {
@@ -365,10 +328,14 @@ public class VolumeControlPulse : VolumeControl
 			if (index != -1)
 				sink_input_objp = _sink_input_hash.get (index);
 			_active_sink_input = index;
+			var stream = calculate_active_stream();
+			if (active_stream != stream) {
+				active_stream = stream;
+			}
 
 			/* Listen for role volume changes from pulse itself (external clients) */
 			try {
-				var builder = new VariantBuilder (new VariantType ("ao"));
+				var builder = new VariantBuilder (VariantType.OBJECT_PATH_ARRAY);
 				builder.add ("o", sink_input_objp);
 
 				yield _pconn.call ("org.PulseAudio.Core1", "/org/pulseaudio/core1",
@@ -393,10 +360,6 @@ public class VolumeControlPulse : VolumeControl
 				var vol = new VolumeControl.Volume();
 				vol.volume = volume_to_double (volume);
 				vol.reason = VolumeControl.VolumeReasons.VOLUME_STREAM_CHANGE;
-				// Ignore changes from PULSE to avoid issues with
-                                // some apps that change the volume in the sink
-                                // We only take into account volume changes from the user
-				this._ignore_warning_this_time = true;
 				this.volume = vol;
 			} catch (GLib.Error e) {
 				warning ("unable to get volume for active role %s (%s)", sink_input_objp, e.message);
@@ -407,7 +370,7 @@ public class VolumeControlPulse : VolumeControl
 	private void add_sink_input_into_list (SinkInputInfo sink_input)
 	{
 		/* We're only adding ones that are not corked and with a valid role */
-		var role = sink_input.proplist.gets (PulseAudio.Proplist.PROP_MEDIA_ROLE);
+		unowned string role = sink_input.proplist.gets (PulseAudio.Proplist.PROP_MEDIA_ROLE);
 
 		if (role != null && role in _valid_roles) {
 			if (sink_input.corked == 0 || role == "phone") {
@@ -477,7 +440,7 @@ public class VolumeControlPulse : VolumeControl
 		if (i == null)
 			return;
 
-		var role = i.proplist.gets (PulseAudio.Proplist.PROP_MEDIA_ROLE);
+		unowned string role = i.proplist.gets (PulseAudio.Proplist.PROP_MEDIA_ROLE);
 		if (role == "phone" || role == "production")
 			this.active_mic = true;
 	}
@@ -499,7 +462,7 @@ public class VolumeControlPulse : VolumeControl
 				c.set_subscribe_callback (context_events_cb);
 				update_sink ();
 				update_source ();
-				this.ready = true;
+				this.ready = true; // true because we're connected to the pulse server
 				break;
 
 			case Context.State.FAILED:
@@ -518,7 +481,7 @@ public class VolumeControlPulse : VolumeControl
 	{
 		_reconnect_timer = 0;
 		reconnect_to_pulse ();
-		return false; // G_SOURCE_REMOVE
+		return Source.REMOVE;
 	}
 
 	void reconnect_to_pulse ()
@@ -540,7 +503,7 @@ public class VolumeControlPulse : VolumeControl
 		this.context = new PulseAudio.Context (loop.get_api(), null, props);
 		this.context.set_state_callback (context_state_callback);
 
-		var server_string = Environment.get_variable("PULSE_SERVER");
+		unowned string server_string = Environment.get_variable("PULSE_SERVER");
 		if (context.connect(server_string, Context.Flags.NOFAIL, null) < 0)
 			warning( "pa_context_connect() failed: %s\n", PulseAudio.strerror(context.errno()));
 	}
@@ -590,30 +553,19 @@ public class VolumeControlPulse : VolumeControl
 		}
 	}
 
-	public override bool is_playing
+	public override VolumeControl.ActiveOutput active_output()
 	{
-		get
-		{
-			return this._is_playing;
-		}
-	}
-
-	public override VolumeControl.ActiveOutput active_output 
-	{ 
-		get 
-		{ 
-			return _active_output; 
-		} 
+		return _active_output;
 	}
 
 	/* Volume operations */
-	private static PulseAudio.Volume double_to_volume (double vol)
+	public static PulseAudio.Volume double_to_volume (double vol)
 	{
 		double tmp = (double)(PulseAudio.Volume.NORM - PulseAudio.Volume.MUTED) * vol;
 		return (PulseAudio.Volume)tmp + PulseAudio.Volume.MUTED;
 	}
 
-	private static double volume_to_double (PulseAudio.Volume vol)
+	public static double volume_to_double (PulseAudio.Volume vol)
 	{
 		double tmp = (double)(vol - PulseAudio.Volume.MUTED);
 		return tmp / (double)(PulseAudio.Volume.NORM - PulseAudio.Volume.MUTED);
@@ -668,8 +620,6 @@ public class VolumeControlPulse : VolumeControl
 					active_role_objp, "org.freedesktop.DBus.Properties", "Set",
 					new Variant ("(ssv)", "org.PulseAudio.Ext.StreamRestore1.RestoreEntry", "Volume", volume),
 					null, DBusCallFlags.NONE, -1);
-
-			debug ("Set volume to %f on path %s", vol, active_role_objp);
 		} catch (GLib.Error e) {
 			lock (_pa_volume_sig_count) {
 				_pa_volume_sig_count--;
@@ -687,7 +637,7 @@ public class VolumeControlPulse : VolumeControl
 	void set_mic_volume_get_server_info_cb (PulseAudio.Context c, PulseAudio.ServerInfo? i) {
 		if (i != null) {
 			unowned CVolume cvol = CVolume ();
-			cvol = vol_set (cvol, 1, double_to_volume (_mic_volume));
+			cvol.set (1, double_to_volume (_mic_volume));
 			c.set_source_volume_by_name (i.default_source_name, cvol, set_mic_volume_success_cb);
 		}
 	}
@@ -716,169 +666,8 @@ public class VolumeControlPulse : VolumeControl
 				&& volume_changed) {
 				start_local_volume_timer();
 			}
-
-			update_high_volume();
 		}
 	}
-
-	/** MAX VOLUME PROPERTY **/
-
-	private void init_max_volume() {
-		_settings.changed["normal-volume-decibels"].connect(() => update_max_volume());
-		_settings.changed["amplified-volume-decibels"].connect(() => update_max_volume());
-		_shared_settings.changed["allow-amplified-volume"].connect(() => update_max_volume());
-		update_max_volume();
-	}
-	private void update_max_volume () {
-		var new_max_volume = calculate_max_volume();
-		if (max_volume != new_max_volume) {
-			debug("changing max_volume from %f to %f", this.max_volume, new_max_volume);
-			max_volume = calculate_max_volume();
-		}
-	}
-	private double calculate_max_volume () {
-		unowned string decibel_key = _shared_settings.get_boolean("allow-amplified-volume")
-			? "amplified-volume-decibels"
-			: "normal-volume-decibels";
-		var volume_dB = _settings.get_double(decibel_key);
-		var volume_sw = PulseAudio.Volume.sw_from_dB (volume_dB);
-		return volume_to_double (volume_sw);
-	}
-
-	/** HIGH VOLUME PROPERTY **/
-
-	private bool _warning_volume_enabled;
-	private double _warning_volume_norms; /* 1.0 == PA_VOLUME_NORM */
-	private bool _high_volume = false;
-	public override bool ignore_high_volume { 
-		get { 
-			if (_ignore_warning_this_time) {
-				warning("Ignore");
-				_ignore_warning_this_time = false;
-				return true;
-			}
-			return false; 
-		} 
-		set { }
-	}
-	public override bool high_volume {
-		get { return this._high_volume; }
-		private set { this._high_volume = value; }
-	}
-        public override bool below_warning_volume {
-		get { return this._volume.volume < this._warning_volume_norms; }
-		private set { }
-	}
-	private void init_high_volume() {
-		_settings.changed["warning-volume-enabled"].connect(() => update_high_volume_cache());
-		_settings.changed["warning-volume-decibels"].connect(() => update_high_volume_cache());
-		update_high_volume_cache();
-	}
-	private void update_high_volume_cache() {
-		var volume_dB = _settings.get_double ("warning-volume-decibels");
-		var volume_sw = PulseAudio.Volume.sw_from_dB (volume_dB);
-		var volume_norms = volume_to_double (volume_sw);
-		_warning_volume_norms = volume_norms;
-		_warning_volume_enabled = _settings.get_boolean("warning-volume-enabled");
-		debug("updating high volume cache... enabled %d dB %f sw %lu norm %f", (int)_warning_volume_enabled, volume_dB, volume_sw, volume_norms);
-		update_high_volume();
-	}
-	private void update_high_volume() {
-		var new_high_volume = calculate_high_volume();
-		if (high_volume != new_high_volume) {
-			debug("changing high_volume from %d to %d", (int)high_volume, (int)new_high_volume);
-			high_volume = new_high_volume;
-		}
-	}
-	private bool calculate_high_volume() {
-		return calculate_high_volume_from_volume(_volume.volume);
-	}
-	private bool calculate_high_volume_from_volume(double volume) {
-		return _active_port_headphone
-			&& _warning_volume_enabled
-			&& volume > _warning_volume_norms
-			&& (stream == "multimedia");
-	}
-
-	public override void clamp_to_high_volume() {
-		if (_high_volume && (_volume.volume > _warning_volume_norms)) {
-			var vol = new VolumeControl.Volume();
-			vol.volume = _volume.volume.clamp(0, _warning_volume_norms);
-			vol.reason = _volume.reason;
-			debug("Clamping from %f down to %f", _volume.volume, vol.volume);
-			volume = vol;
-		}
-	}
-
-	public override void set_warning_volume() {
-		var vol = new VolumeControl.Volume();
-                vol.volume = _warning_volume_norms;
-                vol.reason = _volume.reason;
-                debug("Setting warning level volume from %f down to %f", _volume.volume, vol.volume);
-                volume = vol;	 
-	}
-
-	/** HIGH VOLUME APPROVED PROPERTY **/
-
-	private bool _high_volume_approved = false;
-	private uint _high_volume_approved_timer = 0;
-	private int64 _high_volume_approved_at = 0;
-	private int64 _high_volume_approved_ttl_usec = 0;
-	public override bool high_volume_approved {
-		get { return this._high_volume_approved; }
-		private set { this._high_volume_approved = value; }
-	}
-	private void init_high_volume_approved() {
-		_settings.changed["warning-volume-confirmation-ttl"].connect(() => update_high_volume_approved_cache());
-		update_high_volume_approved_cache();
-	}
-	private void update_high_volume_approved_cache() {
-		_high_volume_approved_ttl_usec = _settings.get_int("warning-volume-confirmation-ttl");
-		_high_volume_approved_ttl_usec *= 1000000;
-
-		update_high_volume_approved();
-		update_high_volume_approved_timer();
-	}
-	private void update_high_volume_approved_timer() {
-		stop_high_volume_approved_timer();
-		if (_high_volume_approved_at != 0) {
-			int64 expires_at = _high_volume_approved_at + _high_volume_approved_ttl_usec;
-			int64 now = GLib.get_monotonic_time();
-			if (expires_at > now) {
-				var seconds_left = 1 + ((expires_at - now) / 1000000);
-				_high_volume_approved_timer = Timeout.add_seconds((uint)seconds_left, on_high_volume_approved_timer);
-			}
-		}
-	}
-	private void stop_high_volume_approved_timer() {
-		if (_high_volume_approved_timer != 0) {
-			Source.remove (_high_volume_approved_timer);
-			_high_volume_approved_timer = 0;
-		}
-	}
-	private bool on_high_volume_approved_timer() {
-		_high_volume_approved_timer = 0;
-		update_high_volume_approved();
-		return false; /* Source.REMOVE */
-	}
-	private void update_high_volume_approved() {
-		var new_high_volume_approved = calculate_high_volume_approved();
-		if (high_volume_approved != new_high_volume_approved) {
-			debug("changing high_volume_approved from %d to %d", (int)high_volume_approved, (int)new_high_volume_approved);
-			high_volume_approved = new_high_volume_approved;
-		}
-	}
-	private bool calculate_high_volume_approved() {
-		int64 now = GLib.get_monotonic_time();
-		return (_high_volume_approved_at != 0)
-			&& (_high_volume_approved_at + _high_volume_approved_ttl_usec >= now);
-	}
-	public override void approve_high_volume() {
-		_high_volume_approved_at = GLib.get_monotonic_time();
-		update_high_volume_approved();
-		update_high_volume_approved_timer();
-	}
-
 
 	/** MIC VOLUME PROPERTY */
 
@@ -895,15 +684,10 @@ public class VolumeControlPulse : VolumeControl
 		}
 	}
 
-	/* PulseAudio Dbus (Stream Restore) logic */
-	private void reconnect_pulse_dbus ()
+	public static DBusConnection? create_pulse_dbus_connection()
 	{
 		unowned string pulse_dbus_server_env = Environment.get_variable ("PULSE_DBUS_SERVER");
 		string address;
-
-		/* In case of a reconnect */
-		_pulse_use_stream_restore = false;
-		_pa_volume_sig_count = 0;
 
 		if (pulse_dbus_server_env != null) {
 			address = pulse_dbus_server_env;
@@ -915,7 +699,7 @@ public class VolumeControlPulse : VolumeControl
 				conn = Bus.get_sync (BusType.SESSION);
 			} catch (GLib.IOError e) {
 				warning ("unable to get the dbus session bus: %s", e.message);
-				return;
+				return null;
 			}
 
 			try {
@@ -927,27 +711,41 @@ public class VolumeControlPulse : VolumeControl
 				address = props.get_string ();
 			} catch (GLib.Error e) {
 				warning ("unable to get pulse unix socket: %s", e.message);
-				return;
+				return null;
 			}
 		}
 
-		debug ("PulseAudio dbus unix socket: %s", address);
+		DBusConnection conn = null;
 		try {
-			_pconn = new DBusConnection.for_address_sync (address, DBusConnectionFlags.AUTHENTICATION_CLIENT);
+			conn = new DBusConnection.for_address_sync (address, DBusConnectionFlags.AUTHENTICATION_CLIENT);
 		} catch (GLib.Error e) {
+			GLib.warning("Unable to connect to dbus server at '%s': %s", address, e.message);
 			/* If it fails, it means the dbus pulse extension is not available */
-			return;
 		}
+		GLib.debug ("PulseAudio dbus address is '%s', connection is '%p'", address, conn);
+		return conn;
+	}
+
+	/* PulseAudio Dbus (Stream Restore) logic */
+	private void reconnect_pulse_dbus ()
+	{
+		/* In case of a reconnect */
+		_pulse_use_stream_restore = false;
+		_pa_volume_sig_count = 0;
+
+		_pconn = create_pulse_dbus_connection();
+		if (_pconn == null)
+			return;
 
 		/* For pulse dbus related events */
 		_pconn.add_filter (pulse_dbus_filter);
 
 		/* Check if the 4 currently supported media roles are already available in StreamRestore
 		 * Roles: multimedia, alert, alarm and phone */
-		_objp_role_multimedia = stream_restore_get_object_path ("sink-input-by-media-role:multimedia");
-		_objp_role_alert = stream_restore_get_object_path ("sink-input-by-media-role:alert");
-		_objp_role_alarm = stream_restore_get_object_path ("sink-input-by-media-role:alarm");
-		_objp_role_phone = stream_restore_get_object_path ("sink-input-by-media-role:phone");
+		_objp_role_multimedia = stream_restore_get_object_path (_pconn, "sink-input-by-media-role:multimedia");
+		_objp_role_alert = stream_restore_get_object_path (_pconn, "sink-input-by-media-role:alert");
+		_objp_role_alarm = stream_restore_get_object_path (_pconn, "sink-input-by-media-role:alarm");
+		_objp_role_phone = stream_restore_get_object_path (_pconn, "sink-input-by-media-role:phone");
 
 		/* Only use stream restore if every used role is available */
 		if (_objp_role_multimedia != null && _objp_role_alert != null && _objp_role_alarm != null && _objp_role_phone != null) {
@@ -958,10 +756,10 @@ public class VolumeControlPulse : VolumeControl
 		}
 	}
 
-	private string? stream_restore_get_object_path (string name) {
+	public static string? stream_restore_get_object_path (DBusConnection pconn, string name) {
 		string? objp = null;
 		try {
-			Variant props_variant = _pconn.call_sync ("org.PulseAudio.Ext.StreamRestore1",
+			Variant props_variant = pconn.call_sync ("org.PulseAudio.Ext.StreamRestore1",
 					"/org/pulseaudio/stream_restore1", "org.PulseAudio.Ext.StreamRestore1",
 					"GetEntryByName", new Variant ("(s)", name), null, DBusCallFlags.NONE, -1);
 			/* Workaround for older versions of vala that don't provide get_objv */
@@ -977,7 +775,7 @@ public class VolumeControlPulse : VolumeControl
 	/* AccountsService operations */
 	private void accountsservice_props_changed_cb (DBusProxy proxy, Variant changed_properties, string[]? invalidated_properties)
 	{
-		Variant volume_variant = changed_properties.lookup_value ("Volume", new VariantType ("d"));
+		Variant volume_variant = changed_properties.lookup_value ("Volume", VariantType.DOUBLE);
 		if (volume_variant != null) {
 			var volume = volume_variant.get_double ();
 			if (volume >= 0) {
@@ -987,7 +785,7 @@ public class VolumeControlPulse : VolumeControl
 			}
 		}
 
-		Variant mute_variant = changed_properties.lookup_value ("Muted", new VariantType ("b"));
+		Variant mute_variant = changed_properties.lookup_value ("Muted", VariantType.BOOLEAN);
 		if (mute_variant != null) {
 			var mute = mute_variant.get_boolean ();
 			set_mute_internal (mute);
@@ -1061,7 +859,7 @@ public class VolumeControlPulse : VolumeControl
 			yield setup_user_proxy ();
 		} else {
 			// We are in a user session.  We just need our own proxy
-			var username = Environment.get_variable ("USER");
+			unowned string username = Environment.get_variable ("USER");
 			if (username != "" && username != null) {
 				yield setup_user_proxy (username);
 			}
@@ -1128,7 +926,7 @@ public class VolumeControlPulse : VolumeControl
 			_send_next_local_volume = false;
 			start_local_volume_timer ();
 		}
-		return false; // G_SOURCE_REMOVE
+		return Source.REMOVE;
 	}
 
 	private void start_account_service_volume_timer()
@@ -1160,6 +958,6 @@ public class VolumeControlPulse : VolumeControl
 	{
 		_accountservice_volume_timer = 0;
 		start_account_service_volume_timer ();
-		return false; // G_SOURCE_REMOVE
+		return Source.REMOVE;
 	}
 }

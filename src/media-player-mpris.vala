@@ -226,7 +226,7 @@ public class MediaPlayerMpris: MediaPlayer {
 			if (this.play_when_attached) {
 				/* wait a little before calling PlayPause, some players need some time to
 				   set themselves up */
-				Timeout.add (1000, () => { proxy.PlayPause.begin (); return false; } );
+				Timeout.add (1000, () => { proxy.PlayPause.begin (); return Source.REMOVE; } );
 				this.play_when_attached = false;
 			}
 		}
@@ -269,7 +269,7 @@ public class MediaPlayerMpris: MediaPlayer {
 			return;
 		}
 
-		Timeout.add (500, () => { this.fetch_playlists (); return false; } );
+		Timeout.add (500, () => { this.fetch_playlists (); return Source.REMOVE; } );
 	}
 
 	/* some players (e.g. Spotify) don't follow the spec closely and pass single strings in metadata fields
@@ -295,7 +295,7 @@ public class MediaPlayerMpris: MediaPlayer {
 			this.playbackstatus_changed ();
 		}
 
-		var metadata = changed_properties.lookup_value ("Metadata", new VariantType ("a{sv}"));
+		var metadata = changed_properties.lookup_value ("Metadata", VariantType.VARDICT);
 		if (metadata != null)
 			this.update_current_track (metadata);
 	}

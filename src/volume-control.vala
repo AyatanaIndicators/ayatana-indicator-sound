@@ -40,36 +40,39 @@ public abstract class VolumeControl : Object
 		CALL_MODE
 	}
 
+	public enum Stream {
+		ALERT,
+		MULTIMEDIA,
+		ALARM,
+		PHONE
+	}
+
 	public class Volume : Object {
 		public double volume;
 		public VolumeReasons reason;
 	}
 
-	public virtual string stream { get { return ""; } }
-	public virtual bool ready { get { return false; } set { } }
+	protected IndicatorSound.Options _options = null;
+
+	public VolumeControl(IndicatorSound.Options options) {
+		_options = options;
+	}
+
+	public Stream active_stream { get; protected set; default = Stream.ALERT; }
+	public bool ready { get; protected set; default = false; }
 	public virtual bool active_mic { get { return false; } set { } }
-	public virtual bool high_volume { get { return false; } protected set { } }
-	public virtual bool ignore_high_volume { get { return false; } protected set { } }
-	public virtual bool below_warning_volume { get { return false; } protected set { } }	
 	public virtual bool mute { get { return false; } }
-	public virtual bool is_playing { get { return false; } }
-	public virtual VolumeControl.ActiveOutput active_output { get { return VolumeControl.ActiveOutput.SPEAKERS; } }
+	public bool is_playing { get; protected set; default = false; }
 	private Volume _volume;
 	private double _pre_clamp_volume;
 	public virtual Volume volume { get { return _volume; } set { } }
 	public virtual double mic_volume { get { return 0.0; } set { } }
-	public virtual double max_volume { get { return 1.0; } protected set { } }
-
-	public virtual bool high_volume_approved { get { return false; } protected set { } }
-	public virtual void approve_high_volume() { }
-	public virtual void clamp_to_high_volume() { }
-	public virtual void set_warning_volume() { }
 
 	public abstract void set_mute (bool mute);
 
 	public void set_volume_clamp (double unclamped, VolumeControl.VolumeReasons reason) {
 		var v = new VolumeControl.Volume();
-		v.volume = unclamped.clamp (0.0, this.max_volume);
+		v.volume = unclamped.clamp (0.0, _options.max_volume);
 		v.reason = reason;
 		this.volume = v;
 		_pre_clamp_volume = unclamped;
@@ -79,5 +82,6 @@ public abstract class VolumeControl : Object
 		return _pre_clamp_volume;
 	}
 
+	public abstract VolumeControl.ActiveOutput active_output();
 	public signal void active_output_changed (VolumeControl.ActiveOutput active_output);
 }

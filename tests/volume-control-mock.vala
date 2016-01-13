@@ -20,27 +20,33 @@
 
 public class VolumeControlMock : VolumeControl
 {
-	private bool _high_volume = false;
-	public override bool high_volume { get { return _high_volume; } protected set { _high_volume = value; } }
-	public void set_high_volume(bool b) { high_volume = b; }
-
-	public string mock_stream { get; set; default = "multimedia"; }
-	public override string stream { get { return mock_stream; } }
-	public override bool ready { get; set; }
+	public void mock_set_is_ready(bool b) { ready = b; }
+	public void mock_set_active_stream(VolumeControl.Stream s) { active_stream = s; }
+	public void mock_set_is_playing(bool b) { is_playing = b; }
 	public override bool active_mic { get; set; }
 	public bool mock_mute { get; set; }
 	public override bool mute { get { return mock_mute; } }
-	public bool mock_is_playing { get; set; }
-	public override bool is_playing { get { return mock_is_playing; } }
 	private VolumeControl.Volume _vol = new VolumeControl.Volume();
 	public override VolumeControl.Volume volume { get { return _vol; } set { _vol = value; }}
 	public override double mic_volume { get; set; }
 
 	public override void set_mute (bool mute) {
-	
 	}
 
-	public VolumeControlMock() { 
+	private VolumeControl.ActiveOutput _active_output = VolumeControl.ActiveOutput.SPEAKERS;
+
+        public override VolumeControl.ActiveOutput active_output() {
+		return _active_output;
+	}
+
+	public void mock_set_active_output (VolumeControl.ActiveOutput val) {
+		_active_output = val;
+		this.active_output_changed(val);
+	}
+
+	public VolumeControlMock(IndicatorSound.Options options) {
+		base(options);
+
 		ready = true;
 		this.notify["mock-stream"].connect(() => this.notify_property("stream"));
 		this.notify["mock-high-volume"].connect(() => this.notify_property("high-volume"));

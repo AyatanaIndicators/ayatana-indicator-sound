@@ -20,35 +20,25 @@
 public class IndicatorSound.Service: Object {
 	DBusConnection bus;
 
-	/**
-	 * A copy of volume_control.volume made before just warn_notification
-	 * is shown. Since the volume is clamped during the warning, we cache
-	 * the previous volume to use iff the user hits "OK".
-	 */
-	VolumeControl.Volume _pre_warn_volume = null;
+	public Service (MediaPlayerList playerlist, VolumeControl volume, AccountsServiceUser? accounts, Options options, VolumeWarning volume_warning) {
 
-	public Service (MediaPlayerList playerlist, VolumeControl volume, AccountsServiceUser? accounts) {
 		try {
 			bus = Bus.get_sync(GLib.BusType.SESSION);
 		} catch (GLib.Error e) {
 			error("Unable to get DBus session bus: %s", e.message);
 		}
 
-		info_notification = new Notify.Notification(_("Volume"), "", "audio-volume-muted");
-
-		warn_notification = new Notify.Notification(_("Volume"), _("High volume can damage your hearing."), "audio-volume-high");
-		warn_notification.set_hint ("x-canonical-non-shaped-icon", "true");
-		warn_notification.set_hint ("x-canonical-snap-decisions", "true");
-		warn_notification.set_hint ("x-canonical-private-affirmative-tint", "true");
-		warn_notification.closed.connect((n) => { 
-			n.clear_actions(); 
-			waiting_user_approve_warn=false;
-			increment_volume_sync_action();
+		_options = options;
+		_options.notify["max-volume"].connect(() => {
+			update_volume_action_state();
+			this.update_notification();
 		});
-		BusWatcher.watch_namespace (GLib.BusType.SESSION,
-		                            "org.freedesktop.Notifications",
-		                            () => { debug("Notifications name appeared"); },
-		                            () => { debug("Notifications name vanshed");  notify_server_caps_checked = false; });
+
+		_volume_warning = volume_warning;
+		_volume_warning.notify["active"].connect(() => {
+			this.increment_volume_sync_action();
+			this.update_notification();
+		});
 
 		this.settings = new Settings ("com.canonical.indicator.sound");
 
@@ -56,8 +46,26 @@ public class IndicatorSound.Service: Object {
 		this.notify["visible"].connect ( () => this.update_root_icon () );
 
 		this.volume_control = volume;
-		this.volume_control.active_output_changed.connect (this.update_root_icon);
-		this.volume_control.active_output_changed.connect (this.update_notification);
+		this.volume_control.active_output_changed.connect(() => {
+			bool headphones;
+			switch(volume_control.active_output()) {
+				case VolumeControl.ActiveOutput.HEADPHONES:
+				case VolumeControl.ActiveOutput.USB_HEADPHONES:
+				case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
+				case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
+					headphones = true;
+					break;
+
+				default:
+					headphones = false;
+					break;
+			}
+			message("setting _volume_warning.headphones_active to %d", (int)headphones);
+			_volume_warning.headphones_active = headphones;
+
+			update_root_icon();
+			update_notification();
+		});
 
 		this.accounts_service = accounts;
 		/* If we're on the greeter, don't export */
@@ -94,7 +102,7 @@ public class IndicatorSound.Service: Object {
 		});
 
 		this.menus.@foreach ( (profile, menu) => {
-			this.volume_control.bind_property ("high-volume", menu, "show-high-volume-warning", BindingFlags.SYNC_CREATE);
+			_volume_warning.bind_property ("high-volume", menu, "show-high-volume-warning", BindingFlags.SYNC_CREATE);
 		});
 
 		this.menus.@foreach ( (profile, menu) => {
@@ -112,7 +120,7 @@ public class IndicatorSound.Service: Object {
 			block_info_notifications = state.get_boolean();
 			if (block_info_notifications) {
 				debug("Indicator is shown");
-				close_notification(info_notification);
+				_info_notification.close();
 			} else {
 				debug("Indicator is hidden");
 			}
@@ -128,32 +136,10 @@ public class IndicatorSound.Service: Object {
 		this.menus.@foreach ( (profile, menu) => menu.export (bus, @"/com/canonical/indicator/sound/$profile"));
 	}
 
-	private void close_notification(Notify.Notification? n) {
-		return_if_fail (n != null);
-		if (n.id != 0) {
-			try {
-				n.close();
-			} catch (GLib.Error e) {
-				warning("Unable to close notification: %s", e.message);
-			}
-		}
-	}
-
-	private void show_notification(Notify.Notification? n) {
-		return_if_fail (n != null);
-		try {
-			n.show ();
-		} catch (GLib.Error e) {
-			warning ("Unable to show notification: %s", e.message);
-		}
-	}
-
 	~Service() {
 		debug("Destroying Service Object");
 
 		clear_acts_player();
-
-		stop_clamp_to_high_timeout();
 
 		if (this.player_action_update_id > 0) {
 			Source.remove (this.player_action_update_id);
@@ -203,19 +189,29 @@ public class IndicatorSound.Service: Object {
 	bool syncing_preferred_players = false;
 	AccountsServiceUser? accounts_service = null;
 	bool export_to_accounts_service = false;
-	private Notify.Notification info_notification;
-	private Notify.Notification warn_notification;
+	private Options _options;
+	private VolumeWarning _volume_warning;
+	private IndicatorSound.InfoNotification _info_notification = new IndicatorSound.InfoNotification();
 
 	const double volume_step_percentage = 0.06;
 
 	private void activate_scroll_action (SimpleAction action, Variant? param) {
-		int delta = param.get_int32(); /* positive for up, negative for down */
-		double v = volume_control.volume.volume + volume_step_percentage * delta;
-		volume_control.set_volume_clamp (v, VolumeControl.VolumeReasons.USER_KEYPRESS);
+		int direction = param.get_int32(); // positive for up, negative for down
+		message("scroll: %d", direction);
+
+		if (_volume_warning.active) {
+			_volume_warning.user_keypress(direction>0
+				? VolumeWarning.Key.VOLUME_UP
+				: VolumeWarning.Key.VOLUME_DOWN);
+		} else {
+			double delta = volume_step_percentage * direction;
+			double v = volume_control.volume.volume + delta;
+			volume_control.set_volume_clamp (v, VolumeControl.VolumeReasons.USER_KEYPRESS);
+		}
 	}
 
 	void activate_desktop_settings (SimpleAction action, Variant? param) {
-		var env = Environment.get_variable ("DESKTOP_SESSION");
+		unowned string env = Environment.get_variable ("DESKTOP_SESSION");
 		string cmd;
 
 		if (Environment.get_variable ("MIR_SOCKET") != null)
@@ -256,7 +252,7 @@ public class IndicatorSound.Service: Object {
 
 	void update_root_icon () {
 		double volume = this.volume_control.volume.volume;
-		string icon = get_volume_root_icon (volume, this.volume_control.mute, volume_control.active_output);
+		unowned string icon = get_volume_root_icon (volume, this.volume_control.mute, volume_control.active_output());
 
 		string accessible_name;
 		if (this.volume_control.mute) {
@@ -270,7 +266,7 @@ public class IndicatorSound.Service: Object {
 		}
 
 		var root_action = actions.lookup_action ("root") as SimpleAction;
-		var builder = new VariantBuilder (new VariantType ("a{sv}"));
+		var builder = new VariantBuilder (VariantType.VARDICT);
 		builder.add ("{sv}", "title", new Variant.string (_("Sound")));
 		builder.add ("{sv}", "accessible-desc", new Variant.string (accessible_name));
 		builder.add ("{sv}", "icon", serialize_themed_icon (icon));
@@ -278,397 +274,57 @@ public class IndicatorSound.Service: Object {
 		root_action.set_state (builder.end());
 	}
 
-	private bool notify_server_caps_checked = false;
-	private bool notify_server_supports_actions = false;
-	private bool notify_server_supports_sync = false;
 	private bool block_info_notifications = false;
-	private bool waiting_user_approve_warn = false;
 
-	private string get_volume_icon (double volume, VolumeControl.ActiveOutput active_output)
-	{
-		string icon = "";
-		switch (active_output)
-		{
+	private static unowned string get_volume_root_icon_by_volume (double volume, VolumeControl.ActiveOutput active_output) {
+		switch (active_output) {
 			case VolumeControl.ActiveOutput.SPEAKERS:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
 			case VolumeControl.ActiveOutput.HEADPHONES:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
 			case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
 			case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
 			case VolumeControl.ActiveOutput.USB_SPEAKER:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
 			case VolumeControl.ActiveOutput.USB_HEADPHONES:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
 			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
 			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
 				if (volume <= 0.0)
-					icon = "audio-volume-muted";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium";
-				else
-					icon = "audio-volume-high";
-				break;
+					return "audio-volume-muted-panel";
+				if (volume <= 0.3)
+					return "audio-volume-low-panel";
+				if (volume <= 0.7)
+					return "audio-volume-medium-panel";
+				return "audio-volume-high-panel";
+
+			default:
+				return "";
 		}
-		return icon;
 	}
 
-	private string get_volume_root_icon_by_volume (double volume, VolumeControl.ActiveOutput active_output)
-	{
-		string icon = "";
-		switch (active_output)
-		{
+	private unowned string get_volume_root_icon (double volume, bool mute, VolumeControl.ActiveOutput active_output) {
+		switch (active_output) {
 			case VolumeControl.ActiveOutput.SPEAKERS:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted-panel";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low-panel";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium-panel";
-				else
-					icon = "audio-volume-high-panel";
-				break;
 			case VolumeControl.ActiveOutput.HEADPHONES:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted-panel";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low-panel";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium-panel";
-				else
-					icon = "audio-volume-high-panel";
-				break;
 			case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted-panel";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low-panel";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium-panel";
-				else
-					icon = "audio-volume-high-panel";
-				break;
 			case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted-panel";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low-panel";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium-panel";
-				else
-					icon = "audio-volume-high-panel";
-				break;
 			case VolumeControl.ActiveOutput.USB_SPEAKER:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted-panel";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low-panel";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium-panel";
-				else
-					icon = "audio-volume-high-panel";
-				break;
 			case VolumeControl.ActiveOutput.USB_HEADPHONES:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted-panel";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low-panel";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium-panel";
-				else
-					icon = "audio-volume-high-panel";
-				break;
 			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted-panel";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low-panel";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium-panel";
-				else
-					icon = "audio-volume-high-panel";
-				break;
-			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
-				if (volume <= 0.0)
-					icon = "audio-volume-muted-panel";
-				else if (volume <= 0.3)
-					icon = "audio-volume-low-panel";
-				else if (volume <= 0.7)
-					icon = "audio-volume-medium-panel";
-				else
-					icon = "audio-volume-high-panel";
-				break;
-		}
-		return icon;
-	}
-
-	private string get_volume_notification_icon (double volume, bool loud, VolumeControl.ActiveOutput active_output) {
-		string icon = "";
-		if (loud) {
-			switch (active_output)
-			{
-				case VolumeControl.ActiveOutput.SPEAKERS:
-					icon = "audio-volume-high";
-					break;
-				case VolumeControl.ActiveOutput.HEADPHONES:
-					icon = "audio-volume-high";
-					break;
-				case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-					icon = "audio-volume-high";
-					break;
-				case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
-					icon = "audio-volume-high";
-					break;
-				case VolumeControl.ActiveOutput.USB_SPEAKER:
-					icon = "audio-volume-high";
-					break;
-				case VolumeControl.ActiveOutput.USB_HEADPHONES:
-					icon = "audio-volume-high";
-					break;
-				case VolumeControl.ActiveOutput.HDMI_SPEAKER:
-					icon = "audio-volume-high";
-					break;
-				case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
-					icon = "audio-volume-high";
-					break;
-			}
-		} else {
-			icon = get_volume_icon (volume, active_output);
-		}
-		return icon;
-        }
-	
-	private string get_volume_root_icon (double volume, bool mute, VolumeControl.ActiveOutput active_output) {
-		string icon = "";
-		switch (active_output)
-		{
-			case VolumeControl.ActiveOutput.SPEAKERS:
-		 		if (mute || volume <= 0.0)
-			    	    icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
-	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
-	 	        	 	icon = "audio-volume-muted-panel";
-		 	       	else
-					icon = get_volume_root_icon_by_volume (volume, active_output);
-				break;
-			case VolumeControl.ActiveOutput.HEADPHONES:
-				if (mute || volume <= 0.0)
-			    	    icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
-	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
-	 	        	 	icon = "audio-volume-muted-panel";
-		 	       	else
-					icon = get_volume_root_icon_by_volume (volume, active_output);
-				break;
-			case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-				if (mute || volume <= 0.0)
-			    	    icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
-	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
-	 	        	 	icon = "audio-volume-muted-panel";
-		 	       	else
-					icon = get_volume_root_icon_by_volume (volume, active_output);
-				break;
-			case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
-				if (mute || volume <= 0.0)
-			    	    icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
-	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
-	 	        	 	icon = "audio-volume-muted-panel";
-		 	       	else
-					icon = get_volume_root_icon_by_volume (volume, active_output);
-				break;
-			case VolumeControl.ActiveOutput.USB_SPEAKER:
-				if (mute || volume <= 0.0)
-			    	    icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
-	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
-	 	        	 	icon = "audio-volume-muted-panel";
-		 	       	else
-					icon = get_volume_root_icon_by_volume (volume, active_output);
-				break;
-			case VolumeControl.ActiveOutput.USB_HEADPHONES:
-				if (mute || volume <= 0.0)
-			    	    icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
-	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
-	 	        	 	icon = "audio-volume-muted-panel";
-		 	       	else
-					icon = get_volume_root_icon_by_volume (volume, active_output);
-				break;
-			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
-				if (mute || volume <= 0.0)
-			    	    icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
-	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
-	 	        	 	icon = "audio-volume-muted-panel";
-		 	       	else
-					icon = get_volume_root_icon_by_volume (volume, active_output);
-				break;
 			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
 				if (mute || volume <= 0.0)
-			    	    icon = this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
-	 	       		else if (this.accounts_service != null && this.accounts_service.silentMode)
-	 	        	 	icon = "audio-volume-muted-panel";
-		 	       	else
-					icon = get_volume_root_icon_by_volume (volume, active_output);
-				break;
-		}
-		return icon;
-	}
+					return this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
+				if (this.accounts_service != null && this.accounts_service.silentMode)
+					return "audio-volume-muted-panel";
+				return get_volume_root_icon_by_volume (volume, active_output);
 
-	private string get_notification_label () {
-		string volume_label = "";
-		switch (volume_control.active_output)
-		{
-			case VolumeControl.ActiveOutput.SPEAKERS:
-				volume_label = _("Speakers");
-				break;
-			case VolumeControl.ActiveOutput.HEADPHONES:
-				volume_label = _("Headphones");
-				break;
-			case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-				volume_label = _("Bluetooth headphones");
-				break;
-			case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
-				volume_label = _("Bluetooth speaker");
-				break;
-			case VolumeControl.ActiveOutput.USB_SPEAKER:
-				volume_label = _("Usb speaker");
-				break;
-			case VolumeControl.ActiveOutput.USB_HEADPHONES:
-				volume_label = _("Usb headphones");
-				break;
-			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
-				volume_label = _("HDMI speaker");
-				break;
-			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
-				volume_label = _("HDMI headphones");
-				break;
+			default:
+				return "";
 		}
-
-		return volume_label;
 	}
 
 	private void update_notification () {
-
-		List<string> caps = Notify.get_server_caps ();
-		notify_server_supports_actions = caps.find_custom ("actions", strcmp) != null;
-		notify_server_supports_sync = caps.find_custom ("x-canonical-private-synchronous", strcmp) != null;
-		notify_server_caps_checked = true;
-
-		var loud = volume_control.high_volume;
-		bool ignore_warning_this_time = this.volume_control.ignore_high_volume;
-		var warn = loud
-			&& this.notify_server_supports_actions
-			&& !this.volume_control.high_volume_approved
-			&& !ignore_warning_this_time;
-		if (waiting_user_approve_warn && volume_control.below_warning_volume) {
-			volume_control.set_warning_volume();
-			close_notification(warn_notification);
-		} 
-		if (warn) {
-			close_notification(info_notification);
-			if (_pre_warn_volume == null) {
-				_pre_warn_volume = new VolumeControl.Volume();
-				_pre_warn_volume.volume = volume_control.volume.volume;
-				_pre_warn_volume.reason = volume_control.volume.reason;
-			}
-			warn_notification.clear_actions();
-			warn_notification.add_action ("ok", _("OK"), (n, a) => {
-				stop_clamp_to_high_timeout();
-				volume_control.approve_high_volume ();
-				// restore the volume the user introduced
-				VolumeControl.Volume vol = new VolumeControl.Volume();
-				vol.volume = volume_control.get_pre_clamped_volume();
-				vol.reason = VolumeControl.VolumeReasons.USER_KEYPRESS;
-				_pre_warn_volume = null;
-				volume_control.volume = vol;
-				
-				waiting_user_approve_warn = false;
-			});
-			warn_notification.add_action ("cancel", _("Cancel"), (n, a) => {
-				_pre_warn_volume = null;
-				waiting_user_approve_warn = false;
-				increment_volume_sync_action();
-			});
-			waiting_user_approve_warn = true;
-			show_notification(warn_notification);
-		} else {
-			if (!waiting_user_approve_warn) {
-				close_notification(warn_notification);
-	
-				if (notify_server_supports_sync && !block_info_notifications && !ignore_warning_this_time) {
-					/* Determine Label */
-				        string volume_label = get_notification_label ();
-
-					/* Choose an icon */
-				 	string icon = get_volume_notification_icon (volume_control.volume.volume, loud, volume_control.active_output);
-
-					/* Reset the notification */
-					var n = this.info_notification;
-					n.update (_("Volume"), volume_label, icon);
-					n.clear_hints();
-					n.set_hint ("x-canonical-non-shaped-icon", "true");
-					n.set_hint ("x-canonical-private-synchronous", "true");
-					n.set_hint ("x-canonical-value-bar-tint", loud ? "true" : "false");
-					n.set_hint ("value", (int32)Math.round(get_volume_percent() * 100.0));
-					show_notification(n);
-				}
-			}
+		if (!_volume_warning.active && !block_info_notifications) {
+			_info_notification.show(this.volume_control.active_output(),
+						get_volume_percent(),
+			                        _volume_warning.high_volume);
 		}
 	}
 
@@ -738,7 +394,7 @@ public class IndicatorSound.Service: Object {
 					this.mute_blocks_sound = false;
 					this.sound_was_blocked_timeout_id = 0;
 					this.update_root_icon ();
-					return false;
+					return Source.REMOVE;
 				});
 			}
 
@@ -750,10 +406,10 @@ public class IndicatorSound.Service: Object {
 
 	/* return the current volume in the range of [0.0, 1.0] */
 	private double get_volume_percent() {
-		return volume_control.volume.volume / this.volume_control.max_volume;
+		return volume_control.volume.volume / _options.max_volume;
 	}
 
-	/* volume control's range can vary depending on its max_volume property,
+	/* volume control's range can vary depending on options.max_volume,
 	 * but the action always needs to be in [0.0, 1.0]... */
 	private Variant create_volume_action_state() {
 		return new Variant.double (get_volume_percent());
@@ -768,14 +424,14 @@ public class IndicatorSound.Service: Object {
 		volume_action = new SimpleAction.stateful ("volume", VariantType.INT32, create_volume_action_state());
 
 		volume_action.change_state.connect ( (action, val) => {
-			double v = val.get_double () * this.volume_control.max_volume;
+			double v = val.get_double () * _options.max_volume;
 			volume_control.set_volume_clamp (v, VolumeControl.VolumeReasons.USER_KEYPRESS);
 		});
 
 		/* activating this action changes the volume by the amount given in the parameter */
 		volume_action.activate.connect ((a,p) => activate_scroll_action(a,p));
 
-		this.volume_control.notify["max-volume"].connect(() => {
+		_options.notify["max-volume"].connect(() => {
 			update_volume_action_state();
 		});
 
@@ -788,9 +444,6 @@ public class IndicatorSound.Service: Object {
 			if (reason == VolumeControl.VolumeReasons.USER_KEYPRESS ||
 					reason == VolumeControl.VolumeReasons.DEVICE_OUTPUT_CHANGE)
 				this.update_notification ();
-
-			if ((warn_notification.id != 0) && (_pre_warn_volume != null))
-				clamp_to_high_soon();
 		});
 
 		this.volume_control.bind_property ("ready", volume_action, "enabled", BindingFlags.SYNC_CREATE);
@@ -815,12 +468,19 @@ public class IndicatorSound.Service: Object {
 		return mic_volume_action;
 	}
 
+	private Variant create_high_volume_action_state() {
+		return new Variant.boolean (_volume_warning.high_volume);
+	}
+	private void update_high_volume_action_state() {
+		high_volume_action.set_state(create_high_volume_action_state());
+	}
+
 	SimpleAction high_volume_action;
 	Action create_high_volume_action () {
-		high_volume_action = new SimpleAction.stateful("high-volume", null, new Variant.boolean (this.volume_control.high_volume));
+		high_volume_action = new SimpleAction.stateful("high-volume", null, create_high_volume_action_state());
 
-		this.volume_control.notify["high-volume"].connect( () => {
-			high_volume_action.set_state(new Variant.boolean (this.volume_control.high_volume));
+		_volume_warning.notify["high-volume"].connect( () => {
+			update_high_volume_action_state();
 			update_notification();
 		});
 
@@ -842,7 +502,7 @@ public class IndicatorSound.Service: Object {
 	uint export_actions = 0;
 
 	Variant action_state_for_player (MediaPlayer player, bool show_track = true) {
-		var builder = new VariantBuilder (new VariantType ("a{sv}"));
+		var builder = new VariantBuilder (VariantType.VARDICT);
 		builder.add ("{sv}", "running", new Variant ("b", player.is_running));
 		builder.add ("{sv}", "state", new Variant ("s", player.state));
 		if (player.current_track != null && show_track) {
@@ -881,7 +541,7 @@ public class IndicatorSound.Service: Object {
 			clear_acts_player();
 
 		this.player_action_update_id = 0;
-		return false;
+		return Source.REMOVE;
 	}
 
 	void eventually_update_player_actions () {
@@ -955,28 +615,5 @@ public class IndicatorSound.Service: Object {
 		this.menus.@foreach ( (profile, menu) => menu.remove_player (player));
 
 		this.update_preferred_players ();
-	}
-
-	/** VOLUME CLAMPING **/
-
-	private uint _clamp_to_high_timeout = 0;
-
-	private void stop_clamp_to_high_timeout() {
-		if (_clamp_to_high_timeout != 0) {
-			Source.remove(_clamp_to_high_timeout);
-			_clamp_to_high_timeout = 0;
-		}
-	}
-
-	private void clamp_to_high_soon() {
-		const uint interval_msec = 200;
-		if (_clamp_to_high_timeout == 0)
-			_clamp_to_high_timeout = Timeout.add(interval_msec, clamp_to_high_idle);
-	}
-
-	private bool clamp_to_high_idle() {
-		_clamp_to_high_timeout = 0;
-		volume_control.clamp_to_high_volume();
-		return false; // Source.REMOVE;
 	}
 }

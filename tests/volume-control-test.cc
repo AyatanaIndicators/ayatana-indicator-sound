@@ -23,6 +23,7 @@
 
 extern "C" {
 #include "indicator-sound-service.h"
+#include "vala-mocks.h"
 }
 
 class VolumeControlTest : public ::testing::Test
@@ -75,7 +76,9 @@ class VolumeControlTest : public ::testing::Test
 };
 
 TEST_F(VolumeControlTest, BasicObject) {
-	VolumeControlPulse * control = volume_control_pulse_new();
+	auto options = options_mock_new();
+	auto pgloop = pa_glib_mainloop_new(NULL);
+	auto control = volume_control_pulse_new(INDICATOR_SOUND_OPTIONS(options), pgloop);
 
 	/* Setup the PA backend */
 	loop(100);
@@ -84,4 +87,6 @@ TEST_F(VolumeControlTest, BasicObject) {
 	EXPECT_TRUE(volume_control_get_ready(VOLUME_CONTROL(control)));
 
 	g_clear_object(&control);
+	g_clear_object(&options);
+	g_clear_pointer(&pgloop, pa_glib_mainloop_free);
 }

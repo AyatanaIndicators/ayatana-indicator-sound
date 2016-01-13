@@ -22,6 +22,7 @@
 #include "config.h"
 
 static IndicatorSoundService * service = NULL;
+static pa_glib_mainloop * pgloop = NULL;
 
 static gboolean
 sigterm_handler (gpointer data)
@@ -46,8 +47,10 @@ on_bus_acquired(GDBusConnection *connection,
                 gpointer user_data)
 {
 	MediaPlayerList * playerlist = NULL;
+	IndicatorSoundOptions * options = NULL;
 	VolumeControlPulse * volume = NULL;
 	AccountsServiceUser * accounts = NULL;
+	VolumeWarning * warning = NULL;
    
 
 	if (g_strcmp0("lightdm", g_get_user_name()) == 0) {
@@ -57,20 +60,24 @@ on_bus_acquired(GDBusConnection *connection,
 		accounts = accounts_service_user_new();
 	}
 
-	volume = volume_control_pulse_new();
+	pgloop = pa_glib_mainloop_new(NULL);
+	options = indicator_sound_options_gsettings_new();
+	volume = volume_control_pulse_new(options, pgloop);
+	warning = volume_warning_pulse_new(options, pgloop);
 
-	service = indicator_sound_service_new (playerlist, volume, accounts);
+	service = indicator_sound_service_new (playerlist, volume, accounts, options, warning);
 
 	g_clear_object(&playerlist);
+	g_clear_object(&options);
 	g_clear_object(&volume);
 	g_clear_object(&accounts);
+	g_clear_object(&warning);
 }
 
 int
 main (int argc, char ** argv)
 {
 	GMainLoop * loop = NULL;
-
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	setlocale (LC_ALL, "");
 	bindtextdomain (GETTEXT_PACKAGE, GNOMELOCALEDIR);
@@ -95,6 +102,7 @@ main (int argc, char ** argv)
 	g_main_loop_run(loop);
 
 	g_clear_object(&service);
+	g_clear_pointer(&pgloop, pa_glib_mainloop_free);
 
 	notify_uninit();
 

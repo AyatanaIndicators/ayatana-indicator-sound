@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015 Canonical Ltd.
+ * Copyright © 2015-2016 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,10 @@
  *
  * Authors:
  *      Ted Gould <ted@canonical.com>
+ *      Charles Kerr <charles.kerr@canonical.com>
  */
 
+#include <algorithm>
 #include <memory>
 
 #include <gtest/gtest.h>
@@ -105,6 +107,39 @@ class NotificationsTest : public ::testing::Test
 			g_main_loop_unref(loop);
 		}
 
+		void loop_until(const std::function<bool()>& test, unsigned int max_ms=50, unsigned int test_interval_ms=10) {
+
+			// g_timeout's callback only allows a single pointer,
+			// so use a temporary stack struct to wedge everything into one pointer
+			struct CallbackData {
+				const std::function<bool()>& test;
+				const gint64 deadline;
+				GMainLoop* loop = g_main_loop_new(nullptr, false);
+				CallbackData (const std::function<bool()>& f, unsigned int max_ms):
+					test{f},
+					deadline{g_get_monotonic_time() + (max_ms*1000)} {}
+				~CallbackData() {g_main_loop_unref(loop);}
+			} data(test, max_ms);
+
+			// tell the timer to stop looping on success or deadline
+			auto timerfunc = [](gpointer gdata) -> gboolean {
+				auto& data = *static_cast<CallbackData*>(gdata);
+				if (!data.test() && (g_get_monotonic_time() < data.deadline))
+					return G_SOURCE_CONTINUE;
+				g_main_loop_quit(data.loop);
+				return G_SOURCE_REMOVE;
+			};
+
+			// start looping
+			g_timeout_add (std::min(max_ms, test_interval_ms), timerfunc, &data);
+			g_main_loop_run(data.loop);
+		}
+
+		void loop_until_notifications(unsigned int max_seconds=1) {
+			auto test = [this]{ return !notifications->getNotifications().empty(); };
+			loop_until(test, max_seconds);
+		}
+
 		static int unref_idle (gpointer user_data) {
 			g_variant_unref(static_cast<GVariant *>(user_data));
 			return G_SOURCE_REMOVE;
@@ -119,18 +154,40 @@ class NotificationsTest : public ::testing::Test
 			return playerList;
 		}
 
-		std::shared_ptr<VolumeControl> volumeControlMock () {
+		std::shared_ptr<IndicatorSoundOptions> optionsMock () {
+			auto options = std::shared_ptr<IndicatorSoundOptions>(
+				INDICATOR_SOUND_OPTIONS(options_mock_new()),
+				[](IndicatorSoundOptions * options){
+					g_clear_object(&options);
+				});
+			return options;
+		}
+
+		std::shared_ptr<VolumeControl> volumeControlMock (const std::shared_ptr<IndicatorSoundOptions>& optionsMock) {
 			auto volumeControl = std::shared_ptr<VolumeControl>(
-				VOLUME_CONTROL(volume_control_mock_new()),
+				VOLUME_CONTROL(volume_control_mock_new(optionsMock.get())),
 				[](VolumeControl * control){
 					g_clear_object(&control);
 				});
 			return volumeControl;
 		}
 
-		std::shared_ptr<IndicatorSoundService> standardService (std::shared_ptr<VolumeControl> volumeControl, std::shared_ptr<MediaPlayerList> playerList) {
+		std::shared_ptr<VolumeWarning> volumeWarningMock (const std::shared_ptr<IndicatorSoundOptions>& optionsMock) {
+			auto volumeWarning = std::shared_ptr<VolumeWarning>(
+				VOLUME_WARNING(volume_warning_mock_new(optionsMock.get())),
+				[](VolumeWarning * warning){
+					g_clear_object(&warning);
+				});
+			return volumeWarning;
+		}
+
+		std::shared_ptr<IndicatorSoundService> standardService (
+				const std::shared_ptr<VolumeControl>& volumeControl,
+				const std::shared_ptr<MediaPlayerList>& playerList,
+				const std::shared_ptr<IndicatorSoundOptions>& options,
+				const std::shared_ptr<VolumeWarning>& warning) {
 			auto soundService = std::shared_ptr<IndicatorSoundService>(
-				indicator_sound_service_new(playerList.get(), volumeControl.get(), nullptr),
+				indicator_sound_service_new(playerList.get(), volumeControl.get(), nullptr, options.get(), warning.get()),
 				[](IndicatorSoundService * service){
 					g_clear_object(&service);
 				});
@@ -165,10 +222,14 @@ class NotificationsTest : public ::testing::Test
 
 			g_clear_object(&bus);
 		}
+
 };
 
 TEST_F(NotificationsTest, BasicObject) {
-	auto soundService = standardService(volumeControlMock(), playerListMock());
+	auto options = optionsMock();
+	auto volumeControl = volumeControlMock(options);
+	auto volumeWarning = volumeWarningMock(options);
+	auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning);
 
 	/* Give some time settle */
 	loop(50);
@@ -177,8 +238,10 @@ TEST_F(NotificationsTest, BasicObject) {
 }
 
 TEST_F(NotificationsTest, VolumeChanges) {
-	auto volumeControl = volumeControlMock();
-	auto soundService = standardService(volumeControl, playerListMock());
+	auto options = optionsMock();
+	auto volumeControl = volumeControlMock(options);
+	auto volumeWarning = volumeWarningMock(options);
+	auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning);
 
 	/* Set a volume */
 	notifications->clearNotifications();
@@ -216,8 +279,10 @@ TEST_F(NotificationsTest, VolumeChanges) {
 }
 
 TEST_F(NotificationsTest, StreamChanges) {
-	auto volumeControl = volumeControlMock();
-	auto soundService = standardService(volumeControl, playerListMock());
+	auto options = optionsMock();
+	auto volumeControl = volumeControlMock(options);
+	auto volumeWarning = volumeWarningMock(options);
+	auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning);
 
 	/* Set a volume */
 	notifications->clearNotifications();
@@ -228,7 +293,7 @@ TEST_F(NotificationsTest, StreamChanges) {
 
 	/* Change Streams, no volume change */
 	notifications->clearNotifications();
-	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "alarm");
+	volume_control_mock_mock_set_active_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), VOLUME_CONTROL_STREAM_ALARM);
 	setMockVolume(volumeControl, 0.5, VOLUME_CONTROL_VOLUME_REASONS_VOLUME_STREAM_CHANGE);
 	loop(50);
 	notev = notifications->getNotifications();
@@ -236,7 +301,7 @@ TEST_F(NotificationsTest, StreamChanges) {
 
 	/* Change Streams, volume change */
 	notifications->clearNotifications();
-	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "alert");
+	volume_control_mock_mock_set_active_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), VOLUME_CONTROL_STREAM_ALERT);
 	setMockVolume(volumeControl, 0.6, VOLUME_CONTROL_VOLUME_REASONS_VOLUME_STREAM_CHANGE);
 	loop(50);
 	notev = notifications->getNotifications();
@@ -244,7 +309,7 @@ TEST_F(NotificationsTest, StreamChanges) {
 
 	/* Change Streams, no volume change, volume up */
 	notifications->clearNotifications();
-	volume_control_mock_set_mock_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), "multimedia");
+	volume_control_mock_mock_set_active_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), VOLUME_CONTROL_STREAM_MULTIMEDIA);
 	setMockVolume(volumeControl, 0.6, VOLUME_CONTROL_VOLUME_REASONS_VOLUME_STREAM_CHANGE);
 	loop(50);
 	setMockVolume(volumeControl, 0.65);
@@ -254,8 +319,10 @@ TEST_F(NotificationsTest, StreamChanges) {
 }
 
 TEST_F(NotificationsTest, IconTesting) {
-	auto volumeControl = volumeControlMock();
-	auto soundService = standardService(volumeControl, playerListMock());
+	auto options = optionsMock();
+	auto volumeControl = volumeControlMock(options);
+	auto volumeWarning = volumeWarningMock(options);
+	auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning);
 
 	/* Set an initial volume */
 	notifications->clearNotifications();
@@ -288,8 +355,10 @@ TEST_F(NotificationsTest, IconTesting) {
 }
 
 TEST_F(NotificationsTest, ServerRestart) {
-	auto volumeControl = volumeControlMock();
-	auto soundService = standardService(volumeControl, playerListMock());
+	auto options = optionsMock();
+	auto volumeControl = volumeControlMock(options);
+	auto volumeWarning = volumeWarningMock(options);
+	auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning);
 
 	/* Set a volume */
 	notifications->clearNotifications();
@@ -335,8 +404,10 @@ TEST_F(NotificationsTest, ServerRestart) {
 }
 
 TEST_F(NotificationsTest, HighVolume) {
-	auto volumeControl = volumeControlMock();
-	auto soundService = standardService(volumeControl, playerListMock());
+	auto options = optionsMock();
+	auto volumeControl = volumeControlMock(options);
+	auto volumeWarning = volumeWarningMock(options);
+	auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning);
 
 	/* Set a volume */
 	notifications->clearNotifications();
@@ -350,7 +421,7 @@ TEST_F(NotificationsTest, HighVolume) {
 
 	/* Set high volume with volume change */
 	notifications->clearNotifications();
-	volume_control_mock_set_high_volume(VOLUME_CONTROL_MOCK(volumeControl.get()), true);
+	volume_warning_mock_set_high_volume(VOLUME_WARNING_MOCK(volumeWarning.get()), true);
 	setMockVolume(volumeControl, 0.90);
 	loop(50);
 	notev = notifications->getNotifications();
@@ -360,14 +431,14 @@ TEST_F(NotificationsTest, HighVolume) {
 	EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-value-bar-tint"]);
 
 	/* Move it back */
-	volume_control_mock_set_high_volume(VOLUME_CONTROL_MOCK(volumeControl.get()), false);
+	volume_warning_mock_set_high_volume(VOLUME_WARNING_MOCK(volumeWarning.get()), false);
 	setMockVolume(volumeControl, 0.50);
 	loop(50);
 
 	/* Set high volume without level change */
 	/* NOTE: This can happen if headphones are plugged in */
 	notifications->clearNotifications();
-	volume_control_mock_set_high_volume(VOLUME_CONTROL_MOCK(volumeControl.get()), TRUE);
+	volume_warning_mock_set_high_volume(VOLUME_WARNING_MOCK(volumeWarning.get()), true);
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
@@ -377,8 +448,10 @@ TEST_F(NotificationsTest, HighVolume) {
 }
 
 TEST_F(NotificationsTest, MenuHide) {
-	auto volumeControl = volumeControlMock();
-	auto soundService = standardService(volumeControl, playerListMock());
+	auto options = optionsMock();
+	auto volumeControl = volumeControlMock(options);
+	auto volumeWarning = volumeWarningMock(options);
+	auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning);
 
 	/* Set a volume */
 	notifications->clearNotifications();
@@ -406,9 +479,11 @@ TEST_F(NotificationsTest, MenuHide) {
 	EXPECT_EQ(1, notev.size());
 }
 
-TEST_F(NotificationsTest, DISABLED_ExtendendVolumeNotification) {
-	auto volumeControl = volumeControlMock();
-	auto soundService = standardService(volumeControl, playerListMock());
+TEST_F(NotificationsTest, ExtendendVolumeNotification) {
+	auto options = optionsMock();
+	auto volumeControl = volumeControlMock(options);
+	auto volumeWarning = volumeWarningMock(options);
+	auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning);
 
 	/* Set a volume */
 	notifications->clearNotifications();
@@ -424,7 +499,8 @@ TEST_F(NotificationsTest, DISABLED_ExtendendVolumeNotification) {
 
 	/* Allow an amplified volume */
 	notifications->clearNotifications();
-	//indicator_sound_service_set_allow_amplified_volume(soundService.get(), TRUE);
+	volume_control_mock_mock_set_active_stream(VOLUME_CONTROL_MOCK(volumeControl.get()), VOLUME_CONTROL_STREAM_ALARM);
+	options_mock_mock_set_max_volume(OPTIONS_MOCK(options.get()), 1.5);
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
@@ -440,9 +516,112 @@ TEST_F(NotificationsTest, DISABLED_ExtendendVolumeNotification) {
 
 	/* Put back */
 	notifications->clearNotifications();
-	//indicator_sound_service_set_allow_amplified_volume(soundService.get(), FALSE);
+	options_mock_mock_set_max_volume(OPTIONS_MOCK(options.get()), 1.0);
 	loop(50);
 	notev = notifications->getNotifications();
 	ASSERT_EQ(1, notev.size());
 	EXPECT_GVARIANT_EQ("@i 100", notev[0].hints["value"]);
 }
+
+TEST_F(NotificationsTest, TriggerWarning) {
+
+	// Tests all the conditions needed to trigger a volume warning.
+	// There are many possible combinations, so this test is slow. :P
+
+	const struct {
+		bool expected;
+		VolumeControlActiveOutput output;
+	} test_outputs[] = {
+		{ false, VOLUME_CONTROL_ACTIVE_OUTPUT_SPEAKERS },
+		{ true,  VOLUME_CONTROL_ACTIVE_OUTPUT_HEADPHONES },
+		{ true,  VOLUME_CONTROL_ACTIVE_OUTPUT_BLUETOOTH_HEADPHONES },
+		{ false, VOLUME_CONTROL_ACTIVE_OUTPUT_BLUETOOTH_SPEAKER },
+		{ false, VOLUME_CONTROL_ACTIVE_OUTPUT_USB_SPEAKER },
+		{ true,  VOLUME_CONTROL_ACTIVE_OUTPUT_USB_HEADPHONES },
+		{ false, VOLUME_CONTROL_ACTIVE_OUTPUT_HDMI_SPEAKER },
+		{ true,  VOLUME_CONTROL_ACTIVE_OUTPUT_HDMI_HEADPHONES },
+		{ false, VOLUME_CONTROL_ACTIVE_OUTPUT_CALL_MODE }
+	};
+
+	const struct {
+		bool expected;
+		pa_volume_t volume;
+		pa_volume_t loud_volume;
+	} test_volumes[] = {
+		{ false,   50, 100 },
+		{ false,   99, 100 },
+		{ true,   100, 100 },
+		{ true,   101, 100 }
+	};
+
+	const struct {
+		bool expected;
+		bool approved;
+	} test_approved[] = {
+		{ true,  false },
+		{ false, true }
+	};
+
+	const struct {
+		bool expected;
+		bool warnings_enabled;
+	} test_warnings_enabled[] = {
+		{ true,  true },
+		{ false, false }
+	};
+
+	const struct {
+		bool expected;
+		bool multimedia_active;
+	} test_multimedia_active[] = {
+		{ true,  true },
+		{ false, false }
+	};
+
+	for (const auto& outputs : test_outputs) {
+	for (const auto& volumes : test_volumes) {
+	for (const auto& approved : test_approved) {
+	for (const auto& warnings_enabled : test_warnings_enabled) {
+	for (const auto& multimedia_active : test_multimedia_active) {
+
+		notifications->clearNotifications();
+
+		// instantiate the test subjects
+		auto options = optionsMock();
+		auto volumeControl = volumeControlMock(options);
+		auto volumeWarning = volumeWarningMock(options);
+		auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning);
+
+		// run the test
+		options_mock_mock_set_loud_volume(OPTIONS_MOCK(options.get()), volumes.loud_volume);
+		options_mock_mock_set_loud_warning_enabled(OPTIONS_MOCK(options.get()), warnings_enabled.warnings_enabled);
+		volume_warning_mock_set_approved(VOLUME_WARNING_MOCK(volumeWarning.get()), approved.approved);
+		volume_warning_mock_set_multimedia_volume(VOLUME_WARNING_MOCK(volumeWarning.get()), volumes.volume);
+		volume_warning_mock_set_multimedia_active(VOLUME_WARNING_MOCK(volumeWarning.get()), multimedia_active.multimedia_active);
+		volume_control_mock_mock_set_active_output(VOLUME_CONTROL_MOCK(volumeControl.get()), outputs.output);
+
+		loop_until_notifications();
+
+		// check the result
+		auto notev = notifications->getNotifications();
+		const bool warning_expected = outputs.expected && volumes.expected && approved.expected && warnings_enabled.expected && multimedia_active.expected;
+		if (warning_expected) {
+			EXPECT_TRUE(volume_warning_get_active(volumeWarning.get()));
+			ASSERT_EQ(1, notev.size());
+			EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-snap-decisions"]);
+			EXPECT_GVARIANT_EQ(nullptr, notev[0].hints["x-canonical-private-synchronous"]);
+		}
+		else {
+			EXPECT_FALSE(volume_warning_get_active(volumeWarning.get()));
+			ASSERT_EQ(1, notev.size());
+			EXPECT_GVARIANT_EQ(nullptr, notev[0].hints["x-canonical-snap-decisions"]);
+			EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-private-synchronous"]);
+		}
+
+	} // multimedia_active
+	} // warnings_enabled
+	} // approved
+	} // volumes
+	} // outputs
+}
+

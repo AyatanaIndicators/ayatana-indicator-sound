@@ -32,6 +32,7 @@ vala_init(indicator-sound-service
   OPTIONS
     --ccode
     --thread
+    --target-glib=${GLIB_2_0_REQUIRED_VERSION}
     --vapidir=${CMAKE_SOURCE_DIR}/vapi/
     --vapidir=.
     --pkg=url-dispatcher
@@ -39,23 +40,79 @@ vala_init(indicator-sound-service
 )
 
 vala_add(indicator-sound-service
+  notification.vala
+)
+vala_add(indicator-sound-service
+  info-notification.vala
+  DEPENDS
+    notification
+      volume-control
+        options
+)
+vala_add(indicator-sound-service
+  warn-notification.vala
+  DEPENDS
+    notification
+)
+vala_add(indicator-sound-service
   service.vala
   DEPENDS
     sound-menu
     volume-control
     volume-control-pulse
+    notification
+    info-notification
+    volume-warning
+    options
+    options-gsettings
     media-player
     media-player-list
     mpris2-interfaces
     accounts-service-user
 )
 vala_add(indicator-sound-service
+  options.vala
+  DEPENDS
+    volume-control
+    volume-control-pulse
+)
+vala_add(indicator-sound-service
+  options-gsettings.vala
+  DEPENDS
+    options
+      volume-control-pulse
+    volume-control
+)
+vala_add(indicator-sound-service
   volume-control.vala
+  DEPENDS
+    options
+      volume-control-pulse
 )
 vala_add(indicator-sound-service
   volume-control-pulse.vala
   DEPENDS
+    options
     volume-control
+)
+vala_add(indicator-sound-service
+  volume-warning.vala
+  DEPENDS
+    options
+      volume-control-pulse
+    volume-control
+    warn-notification
+      notification
+)
+vala_add(indicator-sound-service
+  volume-warning-pulse.vala
+  DEPENDS
+    volume-warning
+      options
+        volume-control-pulse
+      volume-control
+      warn-notification
+        notification
 )
 vala_add(indicator-sound-service
   media-player.vala
@@ -104,6 +161,8 @@ vala_add(indicator-sound-service
   DEPENDS
     media-player
     volume-control
+      options
+          volume-control-pulse
 )
 vala_add(indicator-sound-service
   accounts-service-user.vala

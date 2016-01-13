@@ -1,18 +1,18 @@
 /*
-Copyright 2010 Canonical Ltd.
+Copyright 2010-2015 Canonical Ltd.
 Authors:
     Conor Curran <conor.curran@canonical.com>
 
-This program is free software: you can redistribute it and/or modify it 
-under the terms of the GNU General Public License version 3, as published 
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License version 3, as published
 by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful, but 
-WITHOUT ANY WARRANTY; without even the implied warranties of 
-MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR 
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranties of
+MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR
 PURPOSE.  See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along 
+You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
@@ -36,8 +36,8 @@ public interface MprisRoot : Object {
 public interface MprisPlayer : Object {
   // properties
   public abstract HashTable<string, Variant?> Metadata{owned get; set;}
-  public abstract int32 Position{owned get; set;}
-  public abstract string? PlaybackStatus{owned get; set;} 
+  public abstract int64 Position{owned get; set;}
+  public abstract string? PlaybackStatus{owned get; set;}
   public abstract bool CanPlay{owned get; set;}
   public abstract bool CanGoNext{owned get; set;}
   public abstract bool CanGoPrevious{owned get; set;}

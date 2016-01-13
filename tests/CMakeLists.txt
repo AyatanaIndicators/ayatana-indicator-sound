@@ -72,7 +72,15 @@ vala_add(vala-mocks
 )
 
 vala_add(vala-mocks
+    options-mock.vala
+)
+
+vala_add(vala-mocks
     volume-control-mock.vala
+)
+
+vala_add(vala-mocks
+    volume-warning-mock.vala
 )
 
 vala_finish(vala-mocks
@@ -169,6 +177,7 @@ add_executable (volume-control-test volume-control-test.cc gschemas.compiled)
 target_link_libraries (
     volume-control-test
     indicator-sound-service-lib
+    vala-mocks-lib
     pulse-mock
     gtest-static
     ${TEST_LIBRARIES}
@@ -209,7 +218,7 @@ target_link_libraries (
     ${TEST_LIBRARIES}
 )
 
-#add_test(notifications-test notifications-test)
+add_test(notifications-test notifications-test)
 
 ###########################
 # Accounts Service User

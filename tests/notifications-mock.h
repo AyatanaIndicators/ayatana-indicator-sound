@@ -30,7 +30,7 @@ class NotificationsMock
 		DbusTestDbusMockObject * baseobj = nullptr;
 
 	public:
-		NotificationsMock (std::vector<std::string> capabilities = {"body", "body-markup", "icon-static", "image/svg+xml", "x-canonical-private-synchronous", "x-canonical-append", "x-canonical-private-icon-only", "x-canonical-truncation", "private-synchronous", "append", "private-icon-only", "truncation"}) {
+		NotificationsMock (std::vector<std::string> capabilities = {"actions", "body", "body-markup", "icon-static", "image/svg+xml", "x-canonical-private-synchronous", "x-canonical-append", "x-canonical-private-icon-only", "x-canonical-truncation", "private-synchronous", "append", "private-icon-only", "truncation"}) {
 			mock = dbus_test_dbus_mock_new("org.freedesktop.Notifications");
 			dbus_test_task_set_bus(DBUS_TEST_TASK(mock), DBUS_TEST_SERVICE_BUS_SESSION);
 			dbus_test_task_set_name(DBUS_TEST_TASK(mock), "Notify");

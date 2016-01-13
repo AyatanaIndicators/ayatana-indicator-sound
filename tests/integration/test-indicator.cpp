@@ -32,7 +32,7 @@ class TestIndicator: public IndicatorSoundTestBase
 {
 };
 
-TEST_F(TestIndicator, PhoneChangeRoleVolume)
+TEST_F(TestIndicator, DISABLED_PhoneChangeRoleVolume)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -46,11 +46,11 @@ TEST_F(TestIndicator, PhoneChangeRoleVolume)
     // start now the indicator, so it picks the new volumes
     ASSERT_NO_THROW(startIndicator());
 
-    // Generate a random volume
+    // Generate a random volume in the range [0...0.33]
     QTime now = QTime::currentTime();
     qsrand(now.msec());
-    int randInt = qrand() % 100;
-    double randomVolume = randInt / 100.0;
+    int randInt = qrand() % 33;
+    const double randomVolume = randInt / 100.0;
 
     QSignalSpy &userAccountsSpy = *signal_spy_volume_changed_;
     // set an initial volume to the alert role
@@ -542,6 +542,7 @@ TEST_F(TestIndicator, DesktopChangeRoleVolume)
 {
     double INITIAL_VOLUME = 0.0;
 
+    EXPECT_TRUE(resetAllowAmplifiedVolume());
     ASSERT_NO_THROW(startAccountsService());
     ASSERT_NO_THROW(startPulseDesktop());
 
@@ -556,11 +557,11 @@ TEST_F(TestIndicator, DesktopChangeRoleVolume)
     // start now the indicator, so it picks the new volumes
     ASSERT_NO_THROW(startIndicator());
 
-    // Generate a random volume
+    // Generate a random volume in the range [0...0.33]
     QTime now = QTime::currentTime();
     qsrand(now.msec());
-    int randInt = qrand() % 100;
-    double randomVolume = randInt / 100.0;
+    int randInt = qrand() % 33;
+    const double randomVolume = randInt / 100.0;
 
     // play a test sound, it should NOT change the role in the indicator
     EXPECT_TRUE(startTestSound("multimedia"));
