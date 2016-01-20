@@ -339,12 +339,13 @@ public class SoundMenu: Object
 
 	void update_player_section (MediaPlayer player, int index) {
 		var player_section = this.menu.get_item_link(index, Menu.LINK_SECTION) as Menu;
-		if (player_section.get_n_items () == 2) {
+		if (player_section.get_n_items () == 2 || player_section.get_n_items () == 3) {
 			// we have 2 items, the second one is the playback item
-			// remove it first
+			// if we have 3 items, it means we also have the playlist item.
+			// remove the playbak item first
 			player_section.remove (1);
 			MenuItem playback_item = create_playback_menu_item (player);
-			player_section.append_item (playback_item);
+			player_section.insert_item (1, playback_item);
 		}
 	}
 
