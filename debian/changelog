@@ -1,3 +1,13 @@
+indicator-sound (12.10.2+16.04.20160120-0ubuntu1) xenial; urgency=medium
+
+  [ Xavi Garcia Mena ]
+  * Fixing the playback controls when we have the playlist as the last
+    item in the player section. As number of items was 3 when having the
+    playlist section we were not updating the player controls and the
+    next/previous buttons were not working at all. (LP: #1245495)
+
+ -- Xavi Garcia <xavi.garcia.mena@canonical.com>  Wed, 20 Jan 2016 17:31:39 +0000
+
 indicator-sound (12.10.2+16.04.20160113.1-0ubuntu1) xenial; urgency=medium
 
   [ Charles Kerr ]
