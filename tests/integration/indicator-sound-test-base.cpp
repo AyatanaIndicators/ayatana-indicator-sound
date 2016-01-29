@@ -192,14 +192,51 @@ bool IndicatorSoundTestBase::runProcess(QProcess& proc)
 
 bool IndicatorSoundTestBase::startTestMprisPlayer(QString const& playerName)
 {
-    testPlayer1.terminate();
-    testPlayer1.start(MEDIA_PLAYER_MPRIS_BIN, QStringList()
-                                        << playerName);
-    if (!testPlayer1.waitForStarted())
+    if (!stopTestMprisPlayer(playerName))
+    {
         return false;
+    }
+    TestPlayer player;
+    player.name = playerName;
+    player.process.reset(new QProcess());
+    player.process->start(MEDIA_PLAYER_MPRIS_BIN, QStringList()
+                                        << playerName);
+    if (!player.process->waitForStarted())
+    {
+        qWarning() << "ERROR STARTING PLAYER " << playerName;
+        return false;
+    }
 
+    testPlayers.push_back(player);
 
     return true;
+}
+
+bool IndicatorSoundTestBase::stopTestMprisPlayer(QString const& playerName)
+{
+    bool terminateOK = true;
+    int index = findRunningTestMprisPlayer(playerName);
+    if (index != -1)
+    {
+        testPlayers[index].process->terminate();
+        if (!testPlayers[index].process->waitForFinished())
+            terminateOK = false;
+        testPlayers.remove(index);
+    }
+
+    return terminateOK;
+}
+
+int IndicatorSoundTestBase::findRunningTestMprisPlayer(QString const& playerName)
+{
+    for (int i = 0; i < testPlayers.size(); i++)
+    {
+        if (testPlayers.at(i).name == playerName)
+        {
+            return i;
+        }
+    }
+    return -1;
 }
 
 bool IndicatorSoundTestBase::setTestMprisPlayerProperty(QString const &testPlayer, QString const &property, bool value)

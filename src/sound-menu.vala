@@ -308,9 +308,6 @@ public class SoundMenu: Object
 	MenuItem create_playback_menu_item (MediaPlayer player) {
 		var playback_item = new MenuItem (null, null);
 		playback_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.playback-item");
-		playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id + ".disabled");
-		playback_item.set_attribute ("x-canonical-next-action", "s", "indicator.next." + player.id + ".disabled");
-		playback_item.set_attribute ("x-canonical-previous-action", "s", "indicator.previous." + player.id + ".disabled");
 		if (player.is_running) {
 			if (player.can_do_play) {
 				playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id);

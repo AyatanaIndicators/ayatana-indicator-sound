@@ -1,0 +1,21 @@
+[Desktop Entry]
+Name=TestPlayer3
+GenericName=Test Player 3
+X-GNOME-FullName=Test Player 3
+Comment=Play and organize your music collection
+Keywords=Audio;Song;MP3;CD;Podcast;MTP;iPod;Playlist;Last.fm;UPnP;DLNA;Radio;
+Exec=echo %U
+Terminal=false
+Type=Application
+Icon=testplayer
+X-GNOME-DocPath=testplayer/testplayer.xml
+Categories=GNOME;GTK;AudioVideo;Audio;Player;
+MimeType=application/x-ogg;application/ogg;audio/x-vorbis+ogg;audio/x-scpls;audio/x-mp3;audio/x-mpeg;audio/mpeg;audio/x-mpegurl;audio/x-flac;audio/mp4;x-scheme-handler/itms;x-scheme-handler/itmss;
+StartupNotify=true
+X-GNOME-Bugzilla-Bugzilla=GNOME
+X-GNOME-Bugzilla-Product=testplayer
+X-GNOME-Bugzilla-Component=general
+X-GNOME-Bugzilla-OtherBinaries=rhythmbox-client;rhythmbox-metadata;
+X-GNOME-Bugzilla-Version=3.1
+X-GNOME-UsesNotifications=true
+
