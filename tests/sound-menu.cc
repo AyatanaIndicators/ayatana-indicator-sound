@@ -183,21 +183,20 @@ TEST_F(SoundMenuTest, AddRemovePlayer) {
     return;
 }
 
-
 TEST_F(SoundMenuTest, AddRemovePlayerNoPlayNextPrev) {
-	check_player_control_buttons(false, false, false);
+    check_player_control_buttons(false, false, false);
 }
 
 TEST_F(SoundMenuTest, AddRemovePlayerNoNext) {
-	check_player_control_buttons(true, false, true);
+    check_player_control_buttons(true, false, true);
 }
 
 TEST_F(SoundMenuTest, AddRemovePlayerNoPrev) {
-	check_player_control_buttons(true, true, false);
+    check_player_control_buttons(true, true, false);
 }
 
 TEST_F(SoundMenuTest, AddRemovePlayerNoPlay) {
-	check_player_control_buttons(false, true, true);
+    check_player_control_buttons(false, true, true);
 }
 
 //
