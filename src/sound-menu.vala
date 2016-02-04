@@ -29,7 +29,7 @@ public class SoundMenu: Object
 		HIDE_INACTIVE_PLAYERS_PLAY_CONTROLS = 32
 	}
 
-	public enum PlayerSectionPosistion {
+	public enum PlayerSectionPosition {
 		LABEL = 0,
 		PLAYER_CONTROLS = 1,
 		PLAYLIST = 2
@@ -182,21 +182,12 @@ public class SoundMenu: Object
 				if (index == -1) {
 					this.insert_player_section (player);
 				}
-				else {
-					update_player_section (player, index);
-				}
 				number_of_running_players++;
 			}
 			else {
 				number_of_running_players--;
 				if (this.hide_inactive)
 					this.remove_player_section (player);
-				else {
-					if (index != -1) {
-						// just update to verify if we must hide the player controls
-						update_player_section (player, index);
-					}
-				}
 			}
 			this.update_playlists (player);
 
@@ -307,7 +298,7 @@ public class SoundMenu: Object
 
 	MenuItem create_playback_menu_item (MediaPlayer player) {
 		var playback_item = new MenuItem (null, null);
-		playback_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.playback-item");
+		playback_item.set_attribute ("x-canonical-type", "s", PLAYBACK_ITEM_TYPE);
 		if (player.is_running) {
 			if (player.can_do_play) {
 				playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id);
@@ -345,9 +336,9 @@ public class SoundMenu: Object
 			player_item.set_attribute_value ("icon", icon.serialize ());
 		section.append_item (player_item);
 
-		var playback_item = create_playback_menu_item (player);
 		if (player.is_running|| !this.hide_inactive_player_controls) {
-			section.insert_item (PlayerSectionPosistion.PLAYER_CONTROLS, playback_item);
+			var playback_item = create_playback_menu_item (player);
+			section.insert_item (PlayerSectionPosition.PLAYER_CONTROLS, playback_item);
 		}
 
 		/* Add new players to the end of the player sections, just before the settings */
@@ -374,14 +365,14 @@ public class SoundMenu: Object
 		if (player.is_running || !this.hide_inactive_player_controls) {
 			MenuItem playback_item = create_playback_menu_item (player);
 			if (play_control_index != -1) {
-				player_section.remove (PlayerSectionPosistion.PLAYER_CONTROLS);	
+				player_section.remove (PlayerSectionPosition.PLAYER_CONTROLS);	
 			}
-			player_section.insert_item (PlayerSectionPosistion.PLAYER_CONTROLS, playback_item);
+			player_section.insert_item (PlayerSectionPosition.PLAYER_CONTROLS, playback_item);
 		} else {
 			if (play_control_index != -1 && number_of_running_players >= 1) {
 				// remove both, playlist and play controls
-				player_section.remove (PlayerSectionPosistion.PLAYLIST);
-				player_section.remove (PlayerSectionPosistion.PLAYER_CONTROLS);	
+				player_section.remove (PlayerSectionPosition.PLAYLIST);
+				player_section.remove (PlayerSectionPosition.PLAYER_CONTROLS);	
 			}
 		}
 	}
