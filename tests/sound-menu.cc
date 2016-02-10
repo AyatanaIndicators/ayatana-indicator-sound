@@ -62,7 +62,7 @@ class SoundMenuTest : public ::testing::Test
 
         void check_player_control_buttons(bool canPlay, bool canNext, bool canPrev)
         {
-            SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE);
+            SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE, "");
 
             MediaPlayerTrack * track = media_player_track_new("Artist", "Title", "Album", "http://art.url");
 
@@ -96,9 +96,22 @@ class SoundMenuTest : public ::testing::Test
 
             /* Player control */
             verify_item_attribute(section, 1, "x-canonical-type", g_variant_new_string("com.canonical.unity.playback-item"));
-            verify_item_attribute(section, 1, "x-canonical-play-action", g_variant_new_string(canPlay ? "indicator.play.player-id" : "indicator.play.player-id.disabled"));
-            verify_item_attribute(section, 1, "x-canonical-next-action", g_variant_new_string(canNext ? "indicator.next.player-id" : "indicator.next.player-id.disabled"));
-            verify_item_attribute(section, 1, "x-canonical-previous-action", g_variant_new_string(canPrev ? "indicator.previous.player-id" : "indicator.previous.player-id.disabled"));
+	    //verify_item_attribute(section, 1, "x-canonical-play-action", g_variant_new_string(""));
+	    if (!canPlay) {
+                verify_item_attribute_is_not_set(section, 1, "x-canonical-play-action", G_VARIANT_TYPE_STRING);
+	    } else {
+	        verify_item_attribute(section, 1, "x-canonical-play-action", g_variant_new_string("indicator.play.player-id"));
+	    }
+	    if (!canNext) {
+                verify_item_attribute_is_not_set(section, 1, "x-canonical-next-action", G_VARIANT_TYPE_STRING);
+	    } else {
+	        verify_item_attribute(section, 1, "x-canonical-next-action", g_variant_new_string("indicator.next.player-id"));
+	    }
+	    if (!canPrev) {
+                verify_item_attribute_is_not_set(section, 1, "x-canonical-previous-action", G_VARIANT_TYPE_STRING);
+	    } else {
+	        verify_item_attribute(section, 1, "x-canonical-previous-action", g_variant_new_string("indicator.previous.player-id"));
+	    }
 
             g_clear_object(&section);
 
@@ -112,7 +125,7 @@ class SoundMenuTest : public ::testing::Test
 };
 
 TEST_F(SoundMenuTest, BasicObject) {
-    SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE);
+    SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE, "");
 
     ASSERT_NE(nullptr, menu);
 
@@ -121,7 +134,7 @@ TEST_F(SoundMenuTest, BasicObject) {
 }
 
 TEST_F(SoundMenuTest, AddRemovePlayer) {
-    SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE);
+    SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE, "");
 
     MediaPlayerTrack * track = media_player_track_new("Artist", "Title", "Album", "http://art.url");
 

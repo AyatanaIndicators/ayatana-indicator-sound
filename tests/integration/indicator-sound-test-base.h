@@ -81,6 +81,8 @@ protected:
     bool runProcess(QProcess&);
 
     bool startTestMprisPlayer(QString const& playerName);
+    bool stopTestMprisPlayer(QString const& playerName);
+    int findRunningTestMprisPlayer(QString const& playerName);
 
     bool setTestMprisPlayerProperty(QString const &testPlayer, QString const &property, bool value);
 
@@ -155,6 +157,13 @@ protected:
     QProcess testSoundProcess;
 
     QProcess testPlayer1;
+
+    struct TestPlayer
+    {
+        std::shared_ptr<QProcess> process;
+        QString name;
+    };
+    QVector<TestPlayer> testPlayers;
 
     std::unique_ptr<MenusInterface> menu_interface_;
 

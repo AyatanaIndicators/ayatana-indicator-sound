@@ -25,10 +25,20 @@ public class SoundMenu: Object
 		HIDE_INACTIVE_PLAYERS = 2,
 		HIDE_PLAYERS = 4,
 		GREETER_PLAYERS = 8,
-		SHOW_SILENT_MODE = 16
+		SHOW_SILENT_MODE = 16, 
+		HIDE_INACTIVE_PLAYERS_PLAY_CONTROLS = 32,
+		ADD_PLAY_CONTROL_INACTIVE_PLAYER = 64
 	}
 
-	public SoundMenu (string? settings_action, DisplayFlags flags) {
+	public enum PlayerSectionPosition {
+		LABEL = 0,
+		PLAYER_CONTROLS = 1,
+		PLAYLIST = 2
+	}
+
+	const string PLAYBACK_ITEM_TYPE = "com.canonical.unity.playback-item";
+
+	public SoundMenu (string? settings_action, DisplayFlags flags, string default_player_id) {
 		/* A sound menu always has at least two sections: the volume section (this.volume_section)
 		 * at the start of the menu, and the settings section at the end. Between those two,
 		 * it has a dynamic amount of player sections, one for each registered player.
@@ -68,9 +78,13 @@ public class SoundMenu: Object
 
 		this.hide_players = (flags & DisplayFlags.HIDE_PLAYERS) != 0;
 		this.hide_inactive = (flags & DisplayFlags.HIDE_INACTIVE_PLAYERS) != 0;
+		this.hide_inactive_player_controls = (flags & DisplayFlags.HIDE_INACTIVE_PLAYERS_PLAY_CONTROLS) != 0;
+		this.add_play_button_inactive_player = (flags & DisplayFlags.ADD_PLAY_CONTROL_INACTIVE_PLAYER) != 0;
 		this.notify_handlers = new HashTable<MediaPlayer, ulong> (direct_hash, direct_equal);
 
 		this.greeter_players = (flags & DisplayFlags.GREETER_PLAYERS) != 0;
+
+		this.default_player = default_player_id;
 
 	}
 
@@ -148,6 +162,15 @@ public class SoundMenu: Object
 		return -1;
 	}
 
+	public void update_all_players_play_section() {
+		foreach (var player_stored in notify_handlers.get_keys ()) {
+			int index = this.find_player_section(player_stored);
+			if (index != -1) {
+				// just update to verify if we must hide the player controls
+				update_player_section (player_stored, index);
+			}
+		}
+	}
 
 	public void add_player (MediaPlayer player) {
 		if (this.notify_handlers.contains (player))
@@ -158,21 +181,23 @@ public class SoundMenu: Object
 		this.update_playlists (player);
 
 		var handler_id = player.notify["is-running"].connect ( () => {
+			int index = this.find_player_section(player);
 			if (player.is_running) {
-				int index = this.find_player_section(player);
 				if (index == -1) {
 					this.insert_player_section (player);
 				}
-				else {
-					update_player_section (player, index);
-				}
+				number_of_running_players++;
 			}
 			else {
+				number_of_running_players--;
 				if (this.hide_inactive)
 					this.remove_player_section (player);
 			}
-
 			this.update_playlists (player);
+
+			// we need to update the rest of players, because we might have
+			// a non running player still showing the playback controls
+			update_all_players_play_section();
 		});
 		this.notify_handlers.insert (player, handler_id);
 
@@ -239,8 +264,12 @@ public class SoundMenu: Object
 	bool high_volume_warning_shown = false;
 	bool hide_inactive;
 	bool hide_players = false;
+	bool hide_inactive_player_controls = false;
+	bool add_play_button_inactive_player = false;
 	HashTable<MediaPlayer, ulong> notify_handlers;
 	bool greeter_players = false;
+	int number_of_running_players = 0;
+	string default_player = "";
 
 	/* returns the position in this.menu of the section that's associated with @player */
 	int find_player_section (MediaPlayer player) {
@@ -261,9 +290,21 @@ public class SoundMenu: Object
 		return -1;
 	}
 
+	int find_player_playback_controls_section (Menu player_menu) {
+		int n = player_menu.get_n_items ();
+		for (int i = 0; i < n; i++) {
+			string type;
+			player_menu.get_item_attribute (i, "x-canonical-type", "s", out type);
+			if (type == PLAYBACK_ITEM_TYPE)
+				return i;
+		}
+
+		return -1;
+	}
+
 	MenuItem create_playback_menu_item (MediaPlayer player) {
 		var playback_item = new MenuItem (null, null);
-		playback_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.playback-item");
+		playback_item.set_attribute ("x-canonical-type", "s", PLAYBACK_ITEM_TYPE);
 		if (player.is_running) {
 			if (player.can_do_play) {
 				playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id);
@@ -273,6 +314,10 @@ public class SoundMenu: Object
 			}
 			if (player.can_do_prev) {
 				playback_item.set_attribute ("x-canonical-previous-action", "s", "indicator.previous." + player.id);
+			}
+		} else {
+			if (this.add_play_button_inactive_player) {
+				playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id);
 			}
 		}
 		return playback_item;
@@ -301,24 +346,10 @@ public class SoundMenu: Object
 			player_item.set_attribute_value ("icon", icon.serialize ());
 		section.append_item (player_item);
 
-		var playback_item = new MenuItem (null, null);
-		playback_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.playback-item");
-		playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id + ".disabled");
-		playback_item.set_attribute ("x-canonical-next-action", "s", "indicator.next." + player.id + ".disabled");
-		playback_item.set_attribute ("x-canonical-previous-action", "s", "indicator.previous." + player.id + ".disabled");
-
-		if (player.is_running) {
-			if (player.can_do_play) {
-				playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id);
-			}
-			if (player.can_do_next) {
-				playback_item.set_attribute ("x-canonical-next-action", "s", "indicator.next." + player.id);
-			}
-			if (player.can_do_prev) {
-				playback_item.set_attribute ("x-canonical-previous-action", "s", "indicator.previous." + player.id);
-			}
+		if (player.is_running|| !this.hide_inactive_player_controls || player.id == this.default_player) {
+			var playback_item = create_playback_menu_item (player);
+			section.insert_item (PlayerSectionPosition.PLAYER_CONTROLS, playback_item);
 		}
-		section.append_item (playback_item);
 
 		/* Add new players to the end of the player sections, just before the settings */
 		if (settings_shown) {
@@ -339,13 +370,25 @@ public class SoundMenu: Object
 
 	void update_player_section (MediaPlayer player, int index) {
 		var player_section = this.menu.get_item_link(index, Menu.LINK_SECTION) as Menu;
-		if (player_section.get_n_items () == 2 || player_section.get_n_items () == 3) {
-			// we have 2 items, the second one is the playback item
-			// if we have 3 items, it means we also have the playlist item.
-			// remove the playbak item first
-			player_section.remove (1);
+
+		int play_control_index = find_player_playback_controls_section (player_section);
+		if (player.is_running && number_of_running_players == 1) {
+			// this is the first or the last player running...
+			// store its id
+			this.last_player_updated (player.id);
+		}
+		if (player.is_running || !this.hide_inactive_player_controls) {
 			MenuItem playback_item = create_playback_menu_item (player);
-			player_section.insert_item (1, playback_item);
+			if (play_control_index != -1) {
+				player_section.remove (PlayerSectionPosition.PLAYER_CONTROLS);	
+			}
+			player_section.insert_item (PlayerSectionPosition.PLAYER_CONTROLS, playback_item);
+		} else {
+			if (play_control_index != -1 && number_of_running_players >= 1) {
+				// remove both, playlist and play controls
+				player_section.remove (PlayerSectionPosition.PLAYLIST);
+				player_section.remove (PlayerSectionPosition.PLAYER_CONTROLS);	
+			}
 		}
 	}
 
@@ -404,4 +447,6 @@ public class SoundMenu: Object
 
 		return slider;
 	}
+
+	public signal void last_player_updated (string player_id);
 }
