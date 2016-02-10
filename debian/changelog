@@ -1,3 +1,12 @@
+indicator-sound (12.10.2+16.04.20160210-0ubuntu1) xenial; urgency=medium
+
+  [ Xavi Garcia Mena ]
+  * This branch modifies the sound indicator on the desktop to only show
+    the playback controls for those players that are active or (if any
+    is running) the last one being active. (LP: #1213907)
+
+ -- Xavi Garcia <xavi.garcia.mena@canonical.com>  Wed, 10 Feb 2016 13:22:08 +0000
+
 indicator-sound (12.10.2+16.04.20160120-0ubuntu1) xenial; urgency=medium
 
   [ Xavi Garcia Mena ]
