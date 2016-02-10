@@ -102,5 +102,16 @@
       </description>
     </key>
 
+    <key name="last-running-player" type="s">
+      <default>""</default>
+      <summary>Stores which was the last running music player.</summary>
+      <description>
+        To make the last running player persistent and be able to set its playback controls
+        we store which was the last player running id.
+
+        The default value ("") corresponds to no player.
+      </description>
+    </key>
+
   </schema>
 </schemalist>

@@ -62,7 +62,7 @@ class SoundMenuTest : public ::testing::Test
 
         void check_player_control_buttons(bool canPlay, bool canNext, bool canPrev)
         {
-            SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE);
+            SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE, "");
 
             MediaPlayerTrack * track = media_player_track_new("Artist", "Title", "Album", "http://art.url");
 
@@ -125,7 +125,7 @@ class SoundMenuTest : public ::testing::Test
 };
 
 TEST_F(SoundMenuTest, BasicObject) {
-    SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE);
+    SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE, "");
 
     ASSERT_NE(nullptr, menu);
 
@@ -134,7 +134,7 @@ TEST_F(SoundMenuTest, BasicObject) {
 }
 
 TEST_F(SoundMenuTest, AddRemovePlayer) {
-    SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE);
+    SoundMenu * menu = sound_menu_new (nullptr, SOUND_MENU_DISPLAY_FLAGS_NONE, "");
 
     MediaPlayerTrack * track = media_player_track_new("Artist", "Title", "Album", "http://art.url");
 

@@ -26,7 +26,8 @@ public class SoundMenu: Object
 		HIDE_PLAYERS = 4,
 		GREETER_PLAYERS = 8,
 		SHOW_SILENT_MODE = 16, 
-		HIDE_INACTIVE_PLAYERS_PLAY_CONTROLS = 32
+		HIDE_INACTIVE_PLAYERS_PLAY_CONTROLS = 32,
+		ADD_PLAY_CONTROL_INACTIVE_PLAYER = 64
 	}
 
 	public enum PlayerSectionPosition {
@@ -37,7 +38,7 @@ public class SoundMenu: Object
 
 	const string PLAYBACK_ITEM_TYPE = "com.canonical.unity.playback-item";
 
-	public SoundMenu (string? settings_action, DisplayFlags flags) {
+	public SoundMenu (string? settings_action, DisplayFlags flags, string default_player_id) {
 		/* A sound menu always has at least two sections: the volume section (this.volume_section)
 		 * at the start of the menu, and the settings section at the end. Between those two,
 		 * it has a dynamic amount of player sections, one for each registered player.
@@ -78,9 +79,12 @@ public class SoundMenu: Object
 		this.hide_players = (flags & DisplayFlags.HIDE_PLAYERS) != 0;
 		this.hide_inactive = (flags & DisplayFlags.HIDE_INACTIVE_PLAYERS) != 0;
 		this.hide_inactive_player_controls = (flags & DisplayFlags.HIDE_INACTIVE_PLAYERS_PLAY_CONTROLS) != 0;
+		this.add_play_button_inactive_player = (flags & DisplayFlags.ADD_PLAY_CONTROL_INACTIVE_PLAYER) != 0;
 		this.notify_handlers = new HashTable<MediaPlayer, ulong> (direct_hash, direct_equal);
 
 		this.greeter_players = (flags & DisplayFlags.GREETER_PLAYERS) != 0;
+
+		this.default_player = default_player_id;
 
 	}
 
@@ -261,9 +265,11 @@ public class SoundMenu: Object
 	bool hide_inactive;
 	bool hide_players = false;
 	bool hide_inactive_player_controls = false;
+	bool add_play_button_inactive_player = false;
 	HashTable<MediaPlayer, ulong> notify_handlers;
 	bool greeter_players = false;
 	int number_of_running_players = 0;
+	string default_player = "";
 
 	/* returns the position in this.menu of the section that's associated with @player */
 	int find_player_section (MediaPlayer player) {
@@ -309,6 +315,10 @@ public class SoundMenu: Object
 			if (player.can_do_prev) {
 				playback_item.set_attribute ("x-canonical-previous-action", "s", "indicator.previous." + player.id);
 			}
+		} else {
+			if (this.add_play_button_inactive_player) {
+				playback_item.set_attribute ("x-canonical-play-action", "s", "indicator.play." + player.id);
+			}
 		}
 		return playback_item;
 	}
@@ -336,7 +346,7 @@ public class SoundMenu: Object
 			player_item.set_attribute_value ("icon", icon.serialize ());
 		section.append_item (player_item);
 
-		if (player.is_running|| !this.hide_inactive_player_controls) {
+		if (player.is_running|| !this.hide_inactive_player_controls || player.id == this.default_player) {
 			var playback_item = create_playback_menu_item (player);
 			section.insert_item (PlayerSectionPosition.PLAYER_CONTROLS, playback_item);
 		}
@@ -362,6 +372,11 @@ public class SoundMenu: Object
 		var player_section = this.menu.get_item_link(index, Menu.LINK_SECTION) as Menu;
 
 		int play_control_index = find_player_playback_controls_section (player_section);
+		if (player.is_running && number_of_running_players == 1) {
+			// this is the first or the last player running...
+			// store its id
+			this.last_player_updated (player.id);
+		}
 		if (player.is_running || !this.hide_inactive_player_controls) {
 			MenuItem playback_item = create_playback_menu_item (player);
 			if (play_control_index != -1) {
@@ -432,4 +447,6 @@ public class SoundMenu: Object
 
 		return slider;
 	}
+
+	public signal void last_player_updated (string player_id);
 }

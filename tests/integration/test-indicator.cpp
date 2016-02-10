@@ -1385,7 +1385,6 @@ TEST_F(TestIndicator, DISABLED_PhoneNotificationWarningVolume)
     // try again...
     notificationsSpy.clear();
 
-    qWarning() << "-----------------------------------------------------------";
     // change volume to 1.0... warning should be emitted
     setActionValue("volume", QVariant::fromValue(1.0));
     EXPECT_TRUE(waitVolumeChangedInIndicator());
