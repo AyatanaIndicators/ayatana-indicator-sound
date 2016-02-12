@@ -39,7 +39,7 @@ include_directories(${PULSEAUDIO_INCLUDE_DIRS})
 
 pkg_check_modules(
   SOUNDSERVICE REQUIRED
-  gee-1.0
+  gee-0.8
   gio-2.0>=${GIO_2_0_REQUIRED_VERSION}
   gio-unix-2.0
   gthread-2.0
