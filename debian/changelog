@@ -1,3 +1,10 @@
+indicator-sound (12.10.2+16.04.20160216-0ubuntu1) xenial; urgency=medium
+
+  [ Matthias Klose ]
+  * Build using libgee-0.8-dev instead of libgee-dev (LP: #1502094)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Tue, 16 Feb 2016 15:44:36 +0000
+
 indicator-sound (12.10.2+16.04.20160210-0ubuntu1) xenial; urgency=medium
 
   [ Xavi Garcia Mena ]
