@@ -59,10 +59,10 @@
       <description>
         How long to remember a user's approval of the confirmation dialog discussed in the
         description of 'warning-volume-enabled'.
-        
+
         The default value (72,000 seconds) corresponds to the 20 hours suggested by
         EU standard EN 60950-1/Al2: “The acknowledgement does not need to be repeated
-        more than once every 20 h of cumulative listening time.”	
+        more than once every 20 h of cumulative listening time.”
       </description>
     </key>
     <key name="warning-volume-decibels" type="d">
@@ -99,17 +99,6 @@
         electric output to exceed 150 mV.
 
         The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX.
-      </description>
-    </key>
-
-    <key name="last-running-player" type="s">
-      <default>""</default>
-      <summary>Stores which was the last running music player.</summary>
-      <description>
-        To make the last running player persistent and be able to set its playback controls
-        we store which was the last player running id.
-
-        The default value ("") corresponds to no player.
       </description>
     </key>
 

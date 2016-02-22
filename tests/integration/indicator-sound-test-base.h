@@ -144,6 +144,10 @@ protected:
 
     float getVolumeValue(bool *isValid = nullptr);
 
+    QVariant waitPropertyChanged(QString property);
+
+    QVariant waitLastRunningPlayerChanged();
+
     QtDBusTest::DBusTestRunner dbusTestRunner;
 
     QtDBusMock::DBusMock dbusMock;

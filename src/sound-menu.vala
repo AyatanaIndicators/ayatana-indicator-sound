@@ -38,7 +38,7 @@ public class SoundMenu: Object
 
 	const string PLAYBACK_ITEM_TYPE = "com.canonical.unity.playback-item";
 
-	public SoundMenu (string? settings_action, DisplayFlags flags, string default_player_id) {
+	public SoundMenu (string? settings_action, DisplayFlags flags) {
 		/* A sound menu always has at least two sections: the volume section (this.volume_section)
 		 * at the start of the menu, and the settings section at the end. Between those two,
 		 * it has a dynamic amount of player sections, one for each registered player.
@@ -83,15 +83,22 @@ public class SoundMenu: Object
 		this.notify_handlers = new HashTable<MediaPlayer, ulong> (direct_hash, direct_equal);
 
 		this.greeter_players = (flags & DisplayFlags.GREETER_PLAYERS) != 0;
-
-		this.default_player = default_player_id;
-
 	}
 
 	~SoundMenu () {
 		if (export_id != 0) {
 			bus.unexport_menu_model(export_id);
 			export_id = 0;
+		}
+	}
+
+	public void set_default_player (string default_player_id) {
+		this.default_player = default_player_id;
+		foreach (var player_stored in notify_handlers.get_keys ()) {
+			int index = this.find_player_section(player_stored);
+			if (index != -1 && player_stored.id == this.default_player) {
+				add_player_playback_controls (player_stored, index, true);
+			}
 		}
 	}
 
@@ -368,16 +375,11 @@ public class SoundMenu: Object
 			this.menu.remove (index);
 	}
 
-	void update_player_section (MediaPlayer player, int index) {
+	void add_player_playback_controls (MediaPlayer player, int index, bool adding_default_player) {
 		var player_section = this.menu.get_item_link(index, Menu.LINK_SECTION) as Menu;
 
 		int play_control_index = find_player_playback_controls_section (player_section);
-		if (player.is_running && number_of_running_players == 1) {
-			// this is the first or the last player running...
-			// store its id
-			this.last_player_updated (player.id);
-		}
-		if (player.is_running || !this.hide_inactive_player_controls) {
+		if (player.is_running || !this.hide_inactive_player_controls || (number_of_running_players == 0 && adding_default_player) ) {
 			MenuItem playback_item = create_playback_menu_item (player);
 			if (play_control_index != -1) {
 				player_section.remove (PlayerSectionPosition.PLAYER_CONTROLS);	
@@ -389,7 +391,16 @@ public class SoundMenu: Object
 				player_section.remove (PlayerSectionPosition.PLAYLIST);
 				player_section.remove (PlayerSectionPosition.PLAYER_CONTROLS);	
 			}
+		}	
+	}
+
+	void update_player_section (MediaPlayer player, int index) {
+		if (player.is_running && number_of_running_players == 1) {
+			// this is the first or the last player running...
+			// store its id
+			this.last_player_updated (player.id);
 		}
+		add_player_playback_controls (player, index, false);
 	}
 
 	void update_playlists (MediaPlayer player) {

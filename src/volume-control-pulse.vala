@@ -59,14 +59,28 @@ public class VolumeControlPulse : VolumeControl
 	private GreeterListInterface _greeter_proxy;
 	private Cancellable _mute_cancellable;
 	private Cancellable _volume_cancellable;
+	private Cancellable _last_running_player_cancellable;
 	private uint _local_volume_timer = 0;
 	private uint _accountservice_volume_timer = 0;
 	private bool _send_next_local_volume = false;
 	private double _account_service_volume = 0.0;
 	private VolumeControl.ActiveOutput _active_output = VolumeControl.ActiveOutput.SPEAKERS;
+	private string _last_running_player = "";
 
 	/** true when a microphone is active **/
 	public override bool active_mic { get; private set; default = false; }
+
+	public override string last_running_player 
+	{ 
+		get 
+		{ 
+			return _last_running_player; 
+		} 
+		set 
+		{ 
+			sync_last_running_player_to_accountsservice.begin (value);
+		} 
+	}
 
 	public VolumeControlPulse (IndicatorSound.Options options, PulseAudio.GLibMainLoop loop)
 	{
@@ -79,6 +93,7 @@ public class VolumeControlPulse : VolumeControl
 
 		_mute_cancellable = new Cancellable ();
 		_volume_cancellable = new Cancellable ();
+		_last_running_player_cancellable = new Cancellable();
 
 		setup_accountsservice.begin ();
 
@@ -790,6 +805,13 @@ public class VolumeControlPulse : VolumeControl
 			var mute = mute_variant.get_boolean ();
 			set_mute_internal (mute);
 		}
+
+		Variant last_running_player_variant = changed_properties.lookup_value ("LastRunningPlayer", VariantType.STRING);
+		if (last_running_player_variant != null) {
+			var last_player = last_running_player_variant.get_string ();
+			_last_running_player = last_player;
+			this.notify_property("last-running-player");
+		}
 	}
 
 	private async void setup_user_proxy (string? username_in = null)
@@ -881,6 +903,22 @@ public class VolumeControlPulse : VolumeControl
 		}
 	}
 
+	private async void sync_last_running_player_to_accountsservice (string last_running_player)
+	{
+		if (_user_proxy == null)
+			return;
+
+		_last_running_player_cancellable.cancel ();
+		_last_running_player_cancellable.reset ();
+
+		try {
+			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "LastRunningPlayer", new Variant ("s", last_running_player)), null, DBusCallFlags.NONE, -1, _last_running_player_cancellable);
+		} catch (GLib.Error e) {
+			warning ("unable to sync last running player to AccountsService: %s", e.message);
+		}
+		_last_running_player = last_running_player;
+	}
+
 	private async void sync_volume_to_accountsservice (VolumeControl.Volume volume)
 	{
 		if (_user_proxy == null)
@@ -889,6 +927,7 @@ public class VolumeControlPulse : VolumeControl
 		_volume_cancellable.cancel ();
 		_volume_cancellable.reset ();
 
+		warning("Interface name: %s", _user_proxy.get_interface_name ());
 		try {
 			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Volume", new Variant ("d", volume.volume)), null, DBusCallFlags.NONE, -1, _volume_cancellable);
 		} catch (GLib.Error e) {
