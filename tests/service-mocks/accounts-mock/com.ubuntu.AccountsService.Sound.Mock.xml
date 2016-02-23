@@ -2,5 +2,6 @@
 <node>
   <interface name="com.ubuntu.AccountsService.Sound">
     <property name="Volume" type="d" access="readwrite"/>
+    <property name="LastRunningPlayer" type="s" access="readwrite"/>
   </interface>
 </node>

@@ -456,17 +456,14 @@ QVariant IndicatorSoundTestBase::waitPropertyChanged(QString property)
         signal_spy_volume_changed_->wait();
         if (signal_spy_volume_changed_->count())
         {
-            QList<QVariant> arguments = signal_spy_volume_changed_->takeFirst();
+            QList<QVariant> arguments = signal_spy_volume_changed_->takeLast();
             if (arguments.size() == 3 && static_cast<QMetaType::Type>(arguments.at(1).type()) == QMetaType::QVariantMap)
             {
-                QVariantMap map = arguments.at(1).toMap();
-                QMapIterator<QString, QVariant> iter(map);
-                while (iter.hasNext()) {
-                    iter.next();
-                    if (iter.key() == property)
-                    {
-                        return iter.value();
-                    }
+                QMap<QString, QVariant> map = arguments.at(1).toMap();
+                QMap<QString, QVariant>::iterator iter = map.find(property);
+                if (iter != map.end())
+                {
+                    return iter.value();
                 }
             }
         }

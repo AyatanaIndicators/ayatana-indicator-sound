@@ -925,9 +925,7 @@ TEST_F(TestIndicator, DesktopMprisPlayersPlaybackControls)
                         .string_attribute("x-canonical-type", "com.canonical.unity.media-player")
                     )
                     .item(mh::MenuItemMatcher()
-                        .string_attribute("x-canonical-previous-action","indicator.previous.testplayer3.desktop")
                         .string_attribute("x-canonical-play-action","indicator.play.testplayer3.desktop")
-                        .string_attribute("x-canonical-next-action","indicator.next.testplayer3.desktop")
                         .string_attribute("x-canonical-type","com.canonical.unity.playback-item")
                     )
                 )
@@ -935,6 +933,67 @@ TEST_F(TestIndicator, DesktopMprisPlayersPlaybackControls)
                             .label("Sound Settings…")
              )
         ).match());
+
+    // check that the last running player is the one we expect
+    QVariant lastPlayerRunning = waitLastRunningPlayerChanged();
+    EXPECT_TRUE(lastPlayerRunning.type() == QVariant::String);
+    EXPECT_EQ(lastPlayerRunning.toString(), "testplayer3.desktop");
+
+    // restart the indicator to simulate a new user session
+    ASSERT_NO_THROW(startIndicator());
+
+    // check that player 3 is the only one with playback controls
+    // as it was the last one being stopped
+    EXPECT_MATCHRESULT(mh::MenuMatcher(desktopParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .mode(mh::MenuItemMatcher::Mode::all)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(mh::MenuItemMatcher().checkbox()
+                    .label("Mute")
+                )
+                .item(volumeSlider(INITIAL_VOLUME, "Volume"))
+            )
+            .item(mh::MenuItemMatcher()
+                    .section()
+                    .item(mh::MenuItemMatcher()
+                        .action("indicator.testplayer3.desktop")
+                        .label("TestPlayer3")
+                        .themed_icon("icon", {"testplayer"})
+                        .string_attribute("x-canonical-type", "com.canonical.unity.media-player")
+                    )
+                    .item(mh::MenuItemMatcher()
+                        .string_attribute("x-canonical-play-action","indicator.play.testplayer3.desktop")
+                        .string_attribute("x-canonical-type","com.canonical.unity.playback-item")
+                    )
+                )
+            .item(mh::MenuItemMatcher()
+                    .section()
+                    .item(mh::MenuItemMatcher()
+                        .action("indicator.testplayer1.desktop")
+                        .label("TestPlayer1")
+                        .themed_icon("icon", {"testplayer"})
+                        .string_attribute("x-canonical-type", "com.canonical.unity.media-player")
+                    )
+            )
+            .item(mh::MenuItemMatcher()
+                    .section()
+                    .item(mh::MenuItemMatcher()
+                        .action("indicator.testplayer2.desktop")
+                        .label("TestPlayer2")
+                        .themed_icon("icon", {"testplayer"})
+                        .string_attribute("x-canonical-type", "com.canonical.unity.media-player")
+                    )
+                )
+            .item(mh::MenuItemMatcher()
+                            .label("Sound Settings…")
+             )
+        ).match());
+
 }
 
 TEST_F(TestIndicator, DesktopMprisPlayerButtonsState)

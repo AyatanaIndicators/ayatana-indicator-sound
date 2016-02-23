@@ -91,7 +91,6 @@ public class IndicatorSound.Service: Object {
 		this.actions.add_action (this.create_high_volume_action ());
 		this.actions.add_action (this.create_volume_sync_action ());
 
-		// OLD string last_player = this.settings.get_string ("last-running-player");
 		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
 		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.HIDE_PLAYERS | SoundMenu.DisplayFlags.GREETER_PLAYERS));
 		this.menus.insert ("phone_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_SILENT_MODE | SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS | SoundMenu.DisplayFlags.GREETER_PLAYERS));

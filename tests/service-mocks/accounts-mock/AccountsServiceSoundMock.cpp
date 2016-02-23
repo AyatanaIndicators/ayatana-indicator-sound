@@ -46,3 +46,18 @@ void AccountsServiceSoundMock::setVolume(double volume)
                                     "Volume",
                                     property("Volume"));
 }
+
+QString AccountsServiceSoundMock::lastRunningPlayer() const
+{
+    return lastRunningPlayer_;
+}
+
+void AccountsServiceSoundMock::setLastRunningPlayer(QString const & lastRunningPlayer)
+{
+    lastRunningPlayer_ = lastRunningPlayer;
+    notifier_.notifyPropertyChanged(QDBusConnection::systemBus(),
+                                    ACCOUNTS_SOUND_INTERFACE,
+                                    USER_PATH,
+                                    "LastRunningPlayer",
+                                    property("LastRunningPlayer"));
+}
