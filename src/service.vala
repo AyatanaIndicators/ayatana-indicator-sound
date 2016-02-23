@@ -20,7 +20,9 @@
 public class IndicatorSound.Service: Object {
 	DBusConnection bus;
 
-	public Service (MediaPlayerList playerlist, VolumeControl volume, AccountsServiceUser? accounts, Options options, VolumeWarning volume_warning) {
+	public Service (MediaPlayerList playerlist, VolumeControl volume, AccountsServiceUser? accounts, Options options, VolumeWarning volume_warning, AccountsServiceAccess? accounts_service_access) {
+
+		_accounts_service_access = accounts_service_access;
 
 		try {
 			bus = Bus.get_sync(GLib.BusType.SESSION);
@@ -111,13 +113,13 @@ public class IndicatorSound.Service: Object {
 
 		this.menus.@foreach ( (profile, menu) => {
 			menu.last_player_updated.connect ((player_id) => { 
-				this.volume_control.last_running_player = player_id;
+				this._accounts_service_access.last_running_player = player_id;
 			});
 		});
 
-		this.volume_control.notify["last-running-player"].connect(() => {
+		this._accounts_service_access.notify["last-running-player"].connect(() => {
 			this.menus.@foreach ( (profile, menu) => {
-				menu.set_default_player (this.volume_control.last_running_player);
+				menu.set_default_player (this._accounts_service_access.last_running_player);
 			});
 		});
 
@@ -204,6 +206,7 @@ public class IndicatorSound.Service: Object {
 	private Options _options;
 	private VolumeWarning _volume_warning;
 	private IndicatorSound.InfoNotification _info_notification = new IndicatorSound.InfoNotification();
+	private AccountsServiceAccess _accounts_service_access;
 
 	const double volume_step_percentage = 0.06;
 

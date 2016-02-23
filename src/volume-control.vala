@@ -84,6 +84,4 @@ public abstract class VolumeControl : Object
 
 	public abstract VolumeControl.ActiveOutput active_output();
 	public signal void active_output_changed (VolumeControl.ActiveOutput active_output);
-
-	public virtual string last_running_player { get { return ""; } set { } }
 }
