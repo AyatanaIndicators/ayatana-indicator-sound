@@ -214,7 +214,6 @@ public class AccountsServiceAccess : Object
 		_volume_cancellable.cancel ();
 		_volume_cancellable.reset ();
 
-		warning("Interface name: %s", _user_proxy.get_interface_name ());
 		try {
 			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Volume", new Variant ("d", volume)), null, DBusCallFlags.NONE, -1, _volume_cancellable);
 		} catch (GLib.Error e) {
