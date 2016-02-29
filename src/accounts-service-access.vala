@@ -95,7 +95,7 @@ public class AccountsServiceAccess : Object
 		Variant volume_variant = changed_properties.lookup_value ("Volume", VariantType.DOUBLE);
 		if (volume_variant != null) {
 			var volume = volume_variant.get_double ();
-			if (volume >= 0) {
+			if (volume >= 0 && _volume != volume) {
 				_volume = volume;
 				this.notify_property("volume");
 			}

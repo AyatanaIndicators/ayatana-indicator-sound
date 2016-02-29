@@ -69,7 +69,7 @@ public class VolumeControlPulse : VolumeControl
 
 		_accounts_service_access = accounts_service_access;
 		this._accounts_service_access.notify["volume"].connect(() => {
-			if (this._accounts_service_access.volume >= 0) {
+			if (this._accounts_service_access.volume >= 0 && _account_service_volume != this._accounts_service_access.volume) {
 				_account_service_volume = this._accounts_service_access.volume;
 				// we need to wait for this to settle.
 				start_account_service_volume_timer();
