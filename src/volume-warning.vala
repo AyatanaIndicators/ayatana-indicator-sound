@@ -116,7 +116,9 @@ public abstract class VolumeWarning : Object
 			&& multimedia_active
 			&& !approved
 			&& (multimedia_volume != PulseAudio.Volume.INVALID)
-			&& (multimedia_volume >= _options.loud_volume);
+			// from the sound specs:
+			// "Whenever you increase volume,..., such that acoustic output would be MORE than 85 dB
+			&& (multimedia_volume > _options.loud_volume);
 
 		if (high_volume != newval) {
 			debug ("changing high_volume from %d to %d", (int)high_volume, (int)newval);
@@ -198,8 +200,10 @@ public abstract class VolumeWarning : Object
 		_notification.show ();
 		this.active = true;
 
-		// lower the volume to just under the warning level
-		sound_system_set_multimedia_volume (_options.loud_volume-1);
+		// lower the volume to just the warning level
+		// from the sound specs:
+		// "Whenever you increase volume,..., such that acoustic output would be MORE than 85 dB
+		sound_system_set_multimedia_volume (_options.loud_volume);
 	}
 
 	private void on_user_response (IndicatorSound.WarnNotification.Response response) {

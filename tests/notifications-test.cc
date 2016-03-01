@@ -559,7 +559,7 @@ TEST_F(NotificationsTest, TriggerWarning) {
     } test_volumes[] = {
         { false,   50, 100 },
         { false,   99, 100 },
-        { true,   100, 100 },
+        { false,   100, 100 }, // Whenever you increase volume... such that acoustic output would be *MORE* than 85 dBA
         { true,   101, 100 }
     };
 
