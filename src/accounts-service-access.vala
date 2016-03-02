@@ -33,19 +33,12 @@ public class AccountsServiceAccess : Object
 {
 	private DBusProxy _user_proxy;
 	private GreeterListInterfaceAccess _greeter_proxy;
-	private Cancellable _mute_cancellable;
-	private Cancellable _volume_cancellable;
-	private Cancellable _last_running_player_cancellable;
 	private double _volume = 0.0;
 	private string _last_running_player = "";
 	private bool _mute = false;
 
 	public AccountsServiceAccess ()
 	{
-		_mute_cancellable = new Cancellable ();
-		_volume_cancellable = new Cancellable ();
-		_last_running_player_cancellable = new Cancellable();
-
 		setup_accountsservice.begin ();
 	}
 
@@ -103,15 +96,13 @@ public class AccountsServiceAccess : Object
 
 		Variant mute_variant = changed_properties.lookup_value ("Muted", VariantType.BOOLEAN);
 		if (mute_variant != null) {
-			var mute = mute_variant.get_boolean ();
-			_mute = mute;
+			_mute = mute_variant.get_boolean ();
 			this.notify_property("mute");
 		}
 
 		Variant last_running_player_variant = changed_properties.lookup_value ("LastRunningPlayer", VariantType.STRING);
 		if (last_running_player_variant != null) {
-			var last_player = last_running_player_variant.get_string ();
-			_last_running_player = last_player;
+			_last_running_player = last_running_player_variant.get_string ();
 			this.notify_property("last-running-player");
 		}
 	}
@@ -128,7 +119,7 @@ public class AccountsServiceAccess : Object
 				if (username == "" || username == null)
 					return;
 			} catch (GLib.Error e) {
-				warning ("unable to find Accounts path for user %s: %s", username, e.message);
+				warning ("unable to find Accounts path for user %s: %s", username == null ? "null" : username, e.message);
 				return;
 			}
 		}
@@ -146,8 +137,13 @@ public class AccountsServiceAccess : Object
 		try {
 			var user_path_variant = yield accounts_proxy.call ("FindUserByName", new Variant ("(s)", username), DBusCallFlags.NONE, -1);
 			string user_path;
-			user_path_variant.get ("(o)", out user_path);
-			_user_proxy = yield DBusProxy.create_for_bus (BusType.SYSTEM, DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, "org.freedesktop.Accounts", user_path, "com.ubuntu.AccountsService.Sound");
+			if (user_path_variant.check_format_string ("(o)", true)) {
+				user_path_variant.get ("(o)", out user_path);
+				_user_proxy = yield DBusProxy.create_for_bus (BusType.SYSTEM, DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, "org.freedesktop.Accounts", user_path, "com.ubuntu.AccountsService.Sound");
+			} else {
+				warning ("Unable to find user name after calling FindUserByName. Expected type: %s and obtained %s", "(o)", user_path_variant.get_type_string () );
+				return;
+			}
 		} catch (GLib.Error e) {
 			warning ("unable to find Accounts path for user %s: %s", username, e.message);
 			return;
@@ -157,9 +153,14 @@ public class AccountsServiceAccess : Object
 		_user_proxy.g_properties_changed.connect (accountsservice_props_changed_cb);
 		try {
 			var props_variant = yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "GetAll", new Variant ("(s)", _user_proxy.get_interface_name ()), null, DBusCallFlags.NONE, -1);
-			Variant props;
-			props_variant.get ("(@a{sv})", out props);
-			accountsservice_props_changed_cb(_user_proxy, props, null);
+			if (props_variant.check_format_string ("(@a{sv})", true)) {
+				Variant props;
+				props_variant.get ("(@a{sv})", out props);
+				accountsservice_props_changed_cb(_user_proxy, props, null);
+			} else {
+				warning ("Unable to get accounts service properties after calling GetAll. Expected type: %s and obtained %s", "(@a{sv})", props_variant.get_type_string () );
+				return;
+			}
 		} catch (GLib.Error e) {
 			debug("Unable to get properties for user %s at first try: %s", username, e.message);
 		}
@@ -184,7 +185,7 @@ public class AccountsServiceAccess : Object
 		} else {
 			// We are in a user session.  We just need our own proxy
 			unowned string username = Environment.get_variable ("USER");
-			if (username != "" && username != null) {
+			if (username != null && username != "") {
 				yield setup_user_proxy (username);
 			}
 		}
@@ -195,13 +196,10 @@ public class AccountsServiceAccess : Object
 		if (_user_proxy == null)
 			return;
 
-		_last_running_player_cancellable.cancel ();
-		_last_running_player_cancellable.reset ();
-
 		try {
-			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "LastRunningPlayer", new Variant ("s", last_running_player)), null, DBusCallFlags.NONE, -1, _last_running_player_cancellable);
+			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "LastRunningPlayer", new Variant ("s", last_running_player)), null, DBusCallFlags.NONE, -1);
 		} catch (GLib.Error e) {
-			warning ("unable to sync last running player to AccountsService: %s", e.message);
+			warning ("unable to sync last running player %s to AccountsService: %s",last_running_player, e.message);
 		}
 		_last_running_player = last_running_player;
 	}
@@ -211,13 +209,10 @@ public class AccountsServiceAccess : Object
 		if (_user_proxy == null)
 			return;
 
-		_volume_cancellable.cancel ();
-		_volume_cancellable.reset ();
-
 		try {
-			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Volume", new Variant ("d", volume)), null, DBusCallFlags.NONE, -1, _volume_cancellable);
+			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Volume", new Variant ("d", volume)), null, DBusCallFlags.NONE, -1);
 		} catch (GLib.Error e) {
-			warning ("unable to sync volume to AccountsService: %s", e.message);
+			warning ("unable to sync volume %f to AccountsService: %s", volume, e.message);
 		}
 	}
 
@@ -226,13 +221,10 @@ public class AccountsServiceAccess : Object
 		if (_user_proxy == null)
 			return;
 
-		_mute_cancellable.cancel ();
-		_mute_cancellable.reset ();
-
 		try {
-			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Muted", new Variant ("b", mute)), null, DBusCallFlags.NONE, -1, _mute_cancellable);
+			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Muted", new Variant ("b", mute)), null, DBusCallFlags.NONE, -1);
 		} catch (GLib.Error e) {
-			warning ("unable to sync mute to AccountsService: %s", e.message);
+			warning ("unable to sync mute %s to AccountsService: %s", mute ? "true" : "false", e.message);
 		}
 	}
 }

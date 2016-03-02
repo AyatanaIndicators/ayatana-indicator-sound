@@ -178,7 +178,17 @@ public class SoundMenu: Object
 			}
 		}
 	}
-
+ 
+	private void check_last_running_player () {
+		foreach (var player in notify_handlers.get_keys ()) {
+			if (player.is_running && number_of_running_players == 1) {
+				// this is the first or the last player running...
+				// store its id
+				this.last_player_updated (player.id);
+			}
+		}
+	}
+	
 	public void add_player (MediaPlayer player) {
 		if (this.notify_handlers.contains (player))
 			return;
@@ -205,11 +215,15 @@ public class SoundMenu: Object
 			// we need to update the rest of players, because we might have
 			// a non running player still showing the playback controls
 			update_all_players_play_section();
+
+			check_last_running_player ();
 		});
 		this.notify_handlers.insert (player, handler_id);
 
 		player.playlists_changed.connect (this.update_playlists);
 		player.playbackstatus_changed.connect (this.update_playbackstatus);
+
+		check_last_running_player ();
 	}
 
 	public void remove_player (MediaPlayer player) {
@@ -224,6 +238,8 @@ public class SoundMenu: Object
 
 		/* this'll drop our ref to it */
 		this.notify_handlers.remove (player);
+
+		check_last_running_player ();
 	}
 
 	public void update_volume_slider (VolumeControl.ActiveOutput active_output) {
@@ -395,11 +411,6 @@ public class SoundMenu: Object
 	}
 
 	void update_player_section (MediaPlayer player, int index) {
-		if (player.is_running && number_of_running_players == 1) {
-			// this is the first or the last player running...
-			// store its id
-			this.last_player_updated (player.id);
-		}
 		add_player_playback_controls (player, index, false);
 	}
 

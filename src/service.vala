@@ -62,7 +62,6 @@ public class IndicatorSound.Service: Object {
 					headphones = false;
 					break;
 			}
-			message("setting _volume_warning.headphones_active to %d", (int)headphones);
 			_volume_warning.headphones_active = headphones;
 
 			update_root_icon();

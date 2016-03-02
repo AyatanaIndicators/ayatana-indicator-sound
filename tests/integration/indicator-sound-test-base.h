@@ -144,7 +144,7 @@ protected:
 
     float getVolumeValue(bool *isValid = nullptr);
 
-    QVariant waitPropertyChanged(QString property);
+    static QVariant waitPropertyChanged(QSignalSpy * signalSpy, QString property);
 
     QVariant waitLastRunningPlayerChanged();
 
