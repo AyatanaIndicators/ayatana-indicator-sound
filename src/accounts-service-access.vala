@@ -36,14 +36,17 @@ public class AccountsServiceAccess : Object
 	private double _volume = 0.0;
 	private string _last_running_player = "";
 	private bool _mute = false;
+	private Cancellable _dbus_call_cancellable;
 
 	public AccountsServiceAccess ()
 	{
+		_dbus_call_cancellable = new Cancellable ();
 		setup_accountsservice.begin ();
 	}
 
 	~AccountsServiceAccess ()
 	{
+		_dbus_call_cancellable.cancel ();
 	}
 
 	public string last_running_player 
@@ -197,7 +200,7 @@ public class AccountsServiceAccess : Object
 			return;
 
 		try {
-			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "LastRunningPlayer", new Variant ("s", last_running_player)), null, DBusCallFlags.NONE, -1);
+			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "LastRunningPlayer", new Variant ("s", last_running_player)), null, DBusCallFlags.NONE, -1, _dbus_call_cancellable);
 		} catch (GLib.Error e) {
 			warning ("unable to sync last running player %s to AccountsService: %s",last_running_player, e.message);
 		}
@@ -210,7 +213,7 @@ public class AccountsServiceAccess : Object
 			return;
 
 		try {
-			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Volume", new Variant ("d", volume)), null, DBusCallFlags.NONE, -1);
+			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Volume", new Variant ("d", volume)), null, DBusCallFlags.NONE, -1, _dbus_call_cancellable);
 		} catch (GLib.Error e) {
 			warning ("unable to sync volume %f to AccountsService: %s", volume, e.message);
 		}
@@ -222,7 +225,7 @@ public class AccountsServiceAccess : Object
 			return;
 
 		try {
-			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Muted", new Variant ("b", mute)), null, DBusCallFlags.NONE, -1);
+			yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "Set", new Variant ("(ssv)", _user_proxy.get_interface_name (), "Muted", new Variant ("b", mute)), null, DBusCallFlags.NONE, -1, _dbus_call_cancellable);
 		} catch (GLib.Error e) {
 			warning ("unable to sync mute %s to AccountsService: %s", mute ? "true" : "false", e.message);
 		}
