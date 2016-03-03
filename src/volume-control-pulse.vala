@@ -141,6 +141,19 @@ public class VolumeControlPulse : VolumeControl
 		return ret_output;
 	}
 
+	private bool is_external_mic (SourceInfo? sink) {
+		if (sink.active_port != null && 
+				( (sink.active_port.name.contains ("headphone") || 
+				   sink.active_port.name.contains ("headset") ||
+				   sink.active_port.name.contains ("mic") ) &&
+				  (!sink.active_port.name.contains ("internal") &&
+				   !sink.active_port.name.contains ("builtin")) )) {
+			return true;
+		}
+		return false;
+	}
+
+
 	/* PulseAudio logic*/
 	private void context_events_cb (Context c, Context.SubscriptionEventType t, uint32 index)
 	{
@@ -232,12 +245,7 @@ public class VolumeControlPulse : VolumeControl
 		if (i == null)
 			return;
 
-		if (i.active_port != null && 
-				( (i.active_port.name.contains ("headphone") || 
-				   i.active_port.name.contains ("headset") ||
-				   i.active_port.name.contains ("mic") ) &&
-				  (!i.active_port.name.contains ("internal") &&
-				   !i.active_port.name.contains ("builtin")) )) {
+		if (is_external_mic (i)) {
 			this.active_mic = true;
 			_external_mic_detected = true;
 		} else {
