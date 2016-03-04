@@ -142,6 +142,9 @@ public class VolumeControlPulse : VolumeControl
 	}
 
 	private bool is_external_mic (SourceInfo? sink) {
+		if (sink.name.contains ("indicator_sound_test_mic")) {
+			return true;
+		}
 		if (sink.active_port != null && 
 				( (sink.active_port.name.contains ("headphone") || 
 				   sink.active_port.name.contains ("headset") ||

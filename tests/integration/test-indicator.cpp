@@ -32,6 +32,168 @@ class TestIndicator: public IndicatorSoundTestBase
 {
 };
 
+TEST_F(TestIndicator, PhoneTestExternalMicInOut)
+{
+    double INITIAL_VOLUME = 0.0;
+
+    ASSERT_NO_THROW(startAccountsService());
+    EXPECT_TRUE(clearGSettingsPlayers());
+    ASSERT_NO_THROW(startPulsePhone());
+
+    // initialize volumes in pulseaudio
+    EXPECT_TRUE(setStreamRestoreVolume("alert", INITIAL_VOLUME));
+
+    // start now the indicator, so it picks the new volumes
+    ASSERT_NO_THROW(startIndicator());
+
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-scroll-action", "indicator.scroll")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .string_attribute("submenu-action", "indicator.indicator-shown")
+            .mode(mh::MenuItemMatcher::Mode::all)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(silentModeSwitch(false))
+                .item(volumeSlider(INITIAL_VOLUME, "Volume"))
+            )
+            .item(mh::MenuItemMatcher()
+                .label("Sound Settings…")
+                .action("indicator.phone-settings")
+            )
+        ).match());
+
+    EXPECT_TRUE(plugExternalMic(true));
+
+    // check that we have the mic slider now.
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-scroll-action", "indicator.scroll")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .string_attribute("submenu-action", "indicator.indicator-shown")
+            .mode(mh::MenuItemMatcher::Mode::all)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(silentModeSwitch(false))
+                .item(volumeSlider(INITIAL_VOLUME, "Volume"))
+                .item(micSlider(1.0, "Microphone Volume"))
+            )
+            .item(mh::MenuItemMatcher()
+                .label("Sound Settings…")
+                .action("indicator.phone-settings")
+            )
+        ).match());
+
+
+    // unplug the external mic
+    EXPECT_TRUE(plugExternalMic(false));
+
+    // and check that there's no mic slider
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-scroll-action", "indicator.scroll")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .string_attribute("submenu-action", "indicator.indicator-shown")
+            .mode(mh::MenuItemMatcher::Mode::all)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(silentModeSwitch(false))
+                .item(volumeSlider(INITIAL_VOLUME, "Volume"))
+            )
+            .item(mh::MenuItemMatcher()
+                .label("Sound Settings…")
+                .action("indicator.phone-settings")
+            )
+        ).match());
+}
+
+TEST_F(TestIndicator, DesktopTestExternalMicInOut)
+{
+    double INITIAL_VOLUME = 0.0;
+
+    ASSERT_NO_THROW(startAccountsService());
+    EXPECT_TRUE(clearGSettingsPlayers());
+    ASSERT_NO_THROW(startPulseDesktop());
+
+    // initialize volumes in pulseaudio
+    EXPECT_FALSE(setStreamRestoreVolume("alert", INITIAL_VOLUME));
+    EXPECT_TRUE(setSinkVolume(INITIAL_VOLUME));
+
+    // start now the indicator, so it picks the new volumes
+    ASSERT_NO_THROW(startIndicator());
+
+    EXPECT_MATCHRESULT(mh::MenuMatcher(desktopParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .mode(mh::MenuItemMatcher::Mode::all)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(mh::MenuItemMatcher().checkbox()
+                    .label("Mute")
+                )
+                .item(volumeSlider(INITIAL_VOLUME, "Volume"))
+            )
+            .item(mh::MenuItemMatcher()
+                            .label("Sound Settings…")
+             )
+        ).match());
+
+    EXPECT_TRUE(plugExternalMic(true));
+
+    EXPECT_MATCHRESULT(mh::MenuMatcher(desktopParameters())
+        .item(mh::MenuItemMatcher()
+            .action("indicator.root")
+            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .mode(mh::MenuItemMatcher::Mode::all)
+            .submenu()
+            .item(mh::MenuItemMatcher()
+                .section()
+                .item(mh::MenuItemMatcher().checkbox()
+                    .label("Mute")
+                )
+                .item(volumeSlider(INITIAL_VOLUME, "Volume"))
+                .item(micSlider(1.0, "Microphone Volume"))
+            )
+            .item(mh::MenuItemMatcher()
+                            .label("Sound Settings…")
+             )
+        ).match());
+
+    EXPECT_TRUE(plugExternalMic(false));
+
+    EXPECT_MATCHRESULT(mh::MenuMatcher(desktopParameters())
+           .item(mh::MenuItemMatcher()
+               .action("indicator.root")
+               .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+               .string_attribute("x-canonical-secondary-action", "indicator.mute")
+               .mode(mh::MenuItemMatcher::Mode::all)
+               .submenu()
+               .item(mh::MenuItemMatcher()
+                   .section()
+                   .item(mh::MenuItemMatcher().checkbox()
+                       .label("Mute")
+                   )
+                   .item(volumeSlider(INITIAL_VOLUME, "Volume"))
+               )
+               .item(mh::MenuItemMatcher()
+                               .label("Sound Settings…")
+                )
+           ).match());
+}
+
 TEST_F(TestIndicator, DISABLED_PhoneChangeRoleVolume)
 {
     double INITIAL_VOLUME = 0.0;

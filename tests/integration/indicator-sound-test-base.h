@@ -102,6 +102,8 @@ protected:
 
     static unity::gmenuharness::MenuItemMatcher volumeSlider(double volume, QString const &label);
 
+    static unity::gmenuharness::MenuItemMatcher micSlider(double volume, QString const &label);
+
     static unity::gmenuharness::MenuItemMatcher silentModeSwitch(bool toggled);
 
     bool waitMenuChange();
@@ -131,6 +133,10 @@ protected:
     int getNotificationID(QVariantList call);
 
     bool activateHeadphones(bool headphonesActive);
+
+    bool plugExternalMic(bool activate);
+
+    bool setDefaultSinkOrSource(bool runForSinks, const QString & active, const QStringList & inactive);
 
     QString getDevicePortString(DevicePortType port);
 
