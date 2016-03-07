@@ -54,6 +54,8 @@ public class VolumeControlPulse : VolumeControl
 	private double _account_service_volume = 0.0;
 	private VolumeControl.ActiveOutput _active_output = VolumeControl.ActiveOutput.SPEAKERS;
 	private AccountsServiceAccess _accounts_service_access;
+	private bool _external_mic_detected = false;
+	private bool _source_sink_mic_activated = false;
 
 	/** true when a microphone is active **/
 	public override bool active_mic { get; private set; default = false; }
@@ -139,6 +141,22 @@ public class VolumeControlPulse : VolumeControl
 		return ret_output;
 	}
 
+	private bool is_external_mic (SourceInfo? sink) {
+		if (sink.name.contains ("indicator_sound_test_mic")) {
+			return true;
+		}
+		if (sink.active_port != null && 
+				( (sink.active_port.name.contains ("headphone") || 
+				   sink.active_port.name.contains ("headset") ||
+				   sink.active_port.name.contains ("mic") ) &&
+				  (!sink.active_port.name.contains ("internal") &&
+				   !sink.active_port.name.contains ("builtin")) )) {
+			return true;
+		}
+		return false;
+	}
+
+
 	/* PulseAudio logic*/
 	private void context_events_cb (Context c, Context.SubscriptionEventType t, uint32 index)
 	{
@@ -180,7 +198,8 @@ public class VolumeControlPulse : VolumeControl
 						break;
 
 					case Context.SubscriptionEventType.REMOVE:
-						this.active_mic = false;
+						this._source_sink_mic_activated = false;
+						this.active_mic = _external_mic_detected;
 						break;
 				}
 				break;
@@ -228,6 +247,14 @@ public class VolumeControlPulse : VolumeControl
 	{
 		if (i == null)
 			return;
+
+		if (is_external_mic (i)) {
+			this.active_mic = true;
+			_external_mic_detected = true;
+		} else {
+			this.active_mic = _source_sink_mic_activated;
+			_external_mic_detected = false;
+		}
 
 		if (_mic_volume != volume_to_double (i.volume.values[0]))
 		{
@@ -434,8 +461,10 @@ public class VolumeControlPulse : VolumeControl
 			return;
 
 		unowned string role = i.proplist.gets (PulseAudio.Proplist.PROP_MEDIA_ROLE);
-		if (role == "phone" || role == "production")
+		if (role == "phone" || role == "production") {
 			this.active_mic = true;
+			this._source_sink_mic_activated = true;
+		}
 	}
 
 	private void context_state_callback (Context c)

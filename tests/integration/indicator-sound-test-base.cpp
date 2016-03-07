@@ -296,6 +296,7 @@ void IndicatorSoundTestBase::startPulseDesktop(DevicePortType speakerPort, Devic
                                                       << "-n"
                                                       << QString("--load=module-null-sink sink_name=indicator_sound_test_speaker sink_properties=device.bus=%1").arg(getDevicePortString(speakerPort))
                                                       << QString("--load=module-null-sink sink_name=indicator_sound_test_headphones sink_properties=device.bus=%1").arg(getDevicePortString(headphonesPort))
+                                                      << QString("--load=module-null-sink sink_name=indicator_sound_test_mic")
                                                       << "--log-target=file:/tmp/pulse-daemon.log"
                                                       << "--load=module-dbus-protocol"
                                                       << "--load=module-native-protocol-tcp auth-ip-acl=127.0.0.1"
@@ -327,6 +328,7 @@ void IndicatorSoundTestBase::startPulsePhone(DevicePortType speakerPort, DeviceP
                                                       << "-n"
                                                       << QString("--load=module-null-sink sink_name=indicator_sound_test_speaker sink_properties=device.bus=%1").arg(getDevicePortString(speakerPort))
                                                       << QString("--load=module-null-sink sink_name=indicator_sound_test_headphones sink_properties=device.bus=%1").arg(getDevicePortString(headphonesPort))
+                                                      << QString("--load=module-null-sink sink_name=indicator_sound_test_mic")
                                                       << "--log-target=file:/tmp/pulse-daemon.log"
                                                       << QString("--load=module-stream-restore restore_device=false restore_muted=false fallback_table=%1").arg(STREAM_RESTORE_TABLE)
                                                       << "--load=module-dbus-protocol"
@@ -408,6 +410,20 @@ unity::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::volumeSlider(double
             .string_attribute("x-canonical-type", "com.canonical.unity.slider")
             .themed_icon("max-icon", {"audio-volume-high-panel", "audio-volume-high", "audio-volume", "audio"})
             .themed_icon("min-icon", {"audio-volume-low-zero-panel", "audio-volume-low-zero", "audio-volume-low", "audio-volume", "audio"})
+            .pass_through_double_attribute("action", volume);
+}
+
+unity::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::micSlider(double volume, QString const &label)
+{
+    return mh::MenuItemMatcher()
+            .label(label.toStdString())
+            .round_doubles(0.1)
+            .double_attribute("min-value", 0.0)
+            .double_attribute("max-value", 1.0)
+            .double_attribute("step", 0.01)
+            .string_attribute("x-canonical-type", "com.canonical.unity.slider")
+            .themed_icon("max-icon", {"audio-input-microphone-high-panel", "audio-input-microphone-high", "audio-input-microphone", "audio-input", "audio"})
+            .themed_icon("min-icon", {"audio-input-microphone-low-zero-panel", "audio-input-microphone-low-zero", "audio-input-microphone-low", "audio-input-microphone", "audio-input", "audio"})
             .pass_through_double_attribute("action", volume);
 }
 
@@ -673,51 +689,97 @@ int IndicatorSoundTestBase::getNotificationID(QVariantList call)
     return id;
 }
 
-bool IndicatorSoundTestBase::activateHeadphones(bool headphonesActive)
+bool IndicatorSoundTestBase::setDefaultSinkOrSource(bool runForSinks, const QString & active, const QStringList & inactive)
 {
+    QString setDefaultCommand = runForSinks ? "set-default-sink" : "set-default-source";
+    QString suspendCommand = "suspend-sink";
+
     QProcess pacltProcess;
 
-    QString defaultSinkName = "indicator_sound_test_speaker";
-    QString suspendedSinkName = "indicator_sound_test_headphones";
-    if (headphonesActive)
+    QString activeSinkOrSource = runForSinks ? active : active + ".monitor";
+
+    pacltProcess.start("pactl", QStringList() << "-s"
+                                              << "127.0.0.1"
+                                              << setDefaultCommand
+                                              << activeSinkOrSource);
+    if (!pacltProcess.waitForStarted())
     {
-        defaultSinkName = "indicator_sound_test_headphones";
-        suspendedSinkName = "indicator_sound_test_speaker";
+        return false;
+    }
+
+    if (!pacltProcess.waitForFinished())
+    {
+        return false;
     }
 
     pacltProcess.start("pactl", QStringList() << "-s"
                                               << "127.0.0.1"
-                                              << "set-default-sink"
-                                              << defaultSinkName);
-    if (!pacltProcess.waitForStarted())
-        return false;
-
-    if (!pacltProcess.waitForFinished())
-        return false;
-
-    pacltProcess.start("pactl", QStringList() << "-s"
-                                              << "127.0.0.1"
-                                              << "suspend-sink"
-                                              << defaultSinkName
+                                              << suspendCommand
+                                              << active
                                               << "0");
     if (!pacltProcess.waitForStarted())
+    {
         return false;
+    }
 
     if (!pacltProcess.waitForFinished())
+    {
         return false;
+    }
 
-    pacltProcess.start("pactl", QStringList() << "-s"
-                                              << "127.0.0.1"
-                                              << "suspend-sink"
-                                              << suspendedSinkName
-                                              << "1");
-    if (!pacltProcess.waitForStarted())
+    if (pacltProcess.exitCode() != 0)
+    {
         return false;
+    }
+    for (int i = 0; i < inactive.size(); ++i)
+    {
+        pacltProcess.start("pactl", QStringList() << "-s"
+                                                  << "127.0.0.1"
+                                                  << suspendCommand
+                                                  << inactive.at(i)
+                                                  << "1");
+        if (!pacltProcess.waitForStarted())
+        {
+            return false;
+        }
 
-    if (!pacltProcess.waitForFinished())
-        return false;
+        if (!pacltProcess.waitForFinished())
+        {
+            return false;
+        }
+        if (pacltProcess.exitCode() != 0)
+        {
+            return false;
+        }
+    }
 
     return pacltProcess.exitCode() == 0;
+}
+
+bool IndicatorSoundTestBase::activateHeadphones(bool headphonesActive)
+{
+    QString defaultSinkName = "indicator_sound_test_speaker";
+    QStringList suspendedSinks = { "indicator_sound_test_mic", "indicator_sound_test_headphones" };
+    if (headphonesActive)
+    {
+        defaultSinkName = "indicator_sound_test_headphones";
+        suspendedSinks = QStringList{ "indicator_sound_test_speaker", "indicator_sound_test_mic" };
+    }
+    return setDefaultSinkOrSource(true, defaultSinkName, suspendedSinks);
+}
+
+bool IndicatorSoundTestBase::plugExternalMic(bool activate)
+{
+    QString defaultSinkName = "indicator_sound_test_mic";
+    QStringList suspendedSinks = { "indicator_sound_test_speaker", "indicator_sound_test_headphones" };
+
+    if (!activate)
+    {
+        defaultSinkName = "indicator_sound_test_speaker";
+        suspendedSinks = QStringList{ "indicator_sound_test_mic", "indicator_sound_test_headphones" };
+    }
+
+    return setDefaultSinkOrSource(false, defaultSinkName, suspendedSinks);
 }
 
 QString IndicatorSoundTestBase::getDevicePortString(DevicePortType port)
