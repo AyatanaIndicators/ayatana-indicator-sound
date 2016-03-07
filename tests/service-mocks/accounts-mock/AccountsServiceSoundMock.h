@@ -37,10 +37,13 @@ class AccountsServiceSoundMock : public QObject, protected QDBusContext
 {
     Q_OBJECT
     Q_PROPERTY(double Volume READ volume WRITE setVolume)
+    Q_PROPERTY(QString LastRunningPlayer READ lastRunningPlayer WRITE setLastRunningPlayer)
 
 public Q_SLOTS:
     double volume() const;
     void setVolume(double volume);
+    QString lastRunningPlayer() const;
+    void setLastRunningPlayer(QString const & lastRunningPlayer);
 
 public:
     AccountsServiceSoundMock(QObject* parent = 0);
@@ -48,6 +51,7 @@ public:
 
 private:
     double volume_;
+    QString lastRunningPlayer_;
     DBusPropertiesNotifier notifier_;
 };
 

@@ -20,7 +20,9 @@
 public class IndicatorSound.Service: Object {
 	DBusConnection bus;
 
-	public Service (MediaPlayerList playerlist, VolumeControl volume, AccountsServiceUser? accounts, Options options, VolumeWarning volume_warning) {
+	public Service (MediaPlayerList playerlist, VolumeControl volume, AccountsServiceUser? accounts, Options options, VolumeWarning volume_warning, AccountsServiceAccess? accounts_service_access) {
+
+		_accounts_service_access = accounts_service_access;
 
 		try {
 			bus = Bus.get_sync(GLib.BusType.SESSION);
@@ -60,7 +62,6 @@ public class IndicatorSound.Service: Object {
 					headphones = false;
 					break;
 			}
-			message("setting _volume_warning.headphones_active to %d", (int)headphones);
 			_volume_warning.headphones_active = headphones;
 
 			update_root_icon();
@@ -91,12 +92,11 @@ public class IndicatorSound.Service: Object {
 		this.actions.add_action (this.create_high_volume_action ());
 		this.actions.add_action (this.create_volume_sync_action ());
 
-		string last_player = this.settings.get_string ("last-running-player");
 		this.menus = new HashTable<string, SoundMenu> (str_hash, str_equal);
-		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.HIDE_PLAYERS | SoundMenu.DisplayFlags.GREETER_PLAYERS, last_player));
-		this.menus.insert ("phone_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_SILENT_MODE | SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS | SoundMenu.DisplayFlags.GREETER_PLAYERS, last_player));
-		this.menus.insert ("desktop", new SoundMenu ("indicator.desktop-settings", SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS_PLAY_CONTROLS | SoundMenu.DisplayFlags.ADD_PLAY_CONTROL_INACTIVE_PLAYER, last_player));
-		this.menus.insert ("phone", new SoundMenu ("indicator.phone-settings", SoundMenu.DisplayFlags.SHOW_SILENT_MODE | SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS, last_player));
+		this.menus.insert ("desktop_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.HIDE_PLAYERS | SoundMenu.DisplayFlags.GREETER_PLAYERS));
+		this.menus.insert ("phone_greeter", new SoundMenu (null, SoundMenu.DisplayFlags.SHOW_SILENT_MODE | SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS | SoundMenu.DisplayFlags.GREETER_PLAYERS));
+		this.menus.insert ("desktop", new SoundMenu ("indicator.desktop-settings", SoundMenu.DisplayFlags.SHOW_MUTE | SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS_PLAY_CONTROLS | SoundMenu.DisplayFlags.ADD_PLAY_CONTROL_INACTIVE_PLAYER));
+		this.menus.insert ("phone", new SoundMenu ("indicator.phone-settings", SoundMenu.DisplayFlags.SHOW_SILENT_MODE | SoundMenu.DisplayFlags.HIDE_INACTIVE_PLAYERS));
 
 		this.menus.@foreach ( (profile, menu) => {
 			this.volume_control.bind_property ("active-mic", menu, "show-mic-volume", BindingFlags.SYNC_CREATE);
@@ -112,7 +112,13 @@ public class IndicatorSound.Service: Object {
 
 		this.menus.@foreach ( (profile, menu) => {
 			menu.last_player_updated.connect ((player_id) => { 
-				this.settings.set_value ("last-running-player", player_id);
+				this._accounts_service_access.last_running_player = player_id;
+			});
+		});
+
+		this._accounts_service_access.notify["last-running-player"].connect(() => {
+			this.menus.@foreach ( (profile, menu) => {
+				menu.set_default_player (this._accounts_service_access.last_running_player);
 			});
 		});
 
@@ -199,6 +205,7 @@ public class IndicatorSound.Service: Object {
 	private Options _options;
 	private VolumeWarning _volume_warning;
 	private IndicatorSound.InfoNotification _info_notification = new IndicatorSound.InfoNotification();
+	private AccountsServiceAccess _accounts_service_access;
 
 	const double volume_step_percentage = 0.06;
 

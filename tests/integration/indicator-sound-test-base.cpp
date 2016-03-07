@@ -448,13 +448,37 @@ bool IndicatorSoundTestBase::initializeMenuChangedSignal()
     return true;
 }
 
+QVariant IndicatorSoundTestBase::waitPropertyChanged(QSignalSpy *signalSpy, QString property)
+{
+    QVariant ret_val;
+    if (signalSpy)
+    {
+        signalSpy->wait();
+        if (signalSpy->count())
+        {
+            QList<QVariant> arguments = signalSpy->takeLast();
+            if (arguments.size() == 3 && static_cast<QMetaType::Type>(arguments.at(1).type()) == QMetaType::QVariantMap)
+            {
+                QMap<QString, QVariant> map = arguments.at(1).toMap();
+                QMap<QString, QVariant>::iterator iter = map.find(property);
+                if (iter != map.end())
+                {
+                    return iter.value();
+                }
+            }
+        }
+    }
+    return ret_val;
+}
 bool IndicatorSoundTestBase::waitVolumeChangedInIndicator()
 {
-    if (signal_spy_volume_changed_)
-    {
-        return signal_spy_volume_changed_->wait();
-    }
-    return false;
+    QVariant val = waitPropertyChanged(signal_spy_volume_changed_.get(), "Volume");
+    return !val.isNull();
+}
+
+QVariant IndicatorSoundTestBase::waitLastRunningPlayerChanged()
+{
+    return waitPropertyChanged(signal_spy_volume_changed_.get(), "LastRunningPlayer");
 }
 
 void IndicatorSoundTestBase::initializeAccountsInterface()
