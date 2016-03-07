@@ -1,3 +1,17 @@
+indicator-sound (12.10.2+16.04.20160307-0ubuntu1) xenial; urgency=medium
+
+  [ Xavi Garcia Mena ]
+  * Add changes to show up the microphone controls when an external
+    microphone is detected.
+  * This branch sets the last running player using accounts service
+    instead of gsettings. It also includes a new class
+    AccountsServiceAccess, to centralize all accesses to account service
+    properties.
+  * To avoid going too below the warning level we set the volume when
+    showing the warning dialog to the loud_volume level.
+
+ -- Xavi Garcia <xavi.garcia.mena@canonical.com>  Mon, 07 Mar 2016 10:13:55 +0000
+
 indicator-sound (12.10.2+16.04.20160216-0ubuntu1) xenial; urgency=medium
 
   [ Matthias Klose ]
