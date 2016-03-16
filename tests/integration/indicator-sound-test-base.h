@@ -148,6 +148,8 @@ protected:
 
     qlonglong getVolumeSyncValue(bool *isValid = nullptr);
 
+    QStringList getRootIconValue(bool *isValid = nullptr);
+
     float getVolumeValue(bool *isValid = nullptr);
 
     static QVariant waitPropertyChanged(QSignalSpy * signalSpy, QString property);
