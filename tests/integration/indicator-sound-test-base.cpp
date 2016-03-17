@@ -989,6 +989,49 @@ QVariantList IndicatorSoundTestBase::getActionValue(QString const &action)
     return QVariantList();
 }
 
+QStringList IndicatorSoundTestBase::getRootIconValue(bool *isValid)
+{
+    QString result = 0;
+
+    QVariantList varList = getActionValue("root");
+    if (isValid != nullptr)
+    {
+        *isValid = false;
+    }
+    if (varList.at(0).canConvert<QDBusArgument>())
+    {
+        const QDBusArgument dbusArg = qvariant_cast<QDBusArgument>(varList.at(0));
+        if (dbusArg.currentType() == QDBusArgument::MapType)
+        {
+            QVariantMap map;
+            dbusArg >> map;
+            QVariantMap::const_iterator iter = map.find("icon");
+            if (iter != map.end())
+            {
+                const QDBusArgument iconArg = qvariant_cast<QDBusArgument>((*iter));
+                if (iconArg.currentType() == QDBusArgument::StructureType)
+                {
+                    QString name;
+                    QVariant iconValue;
+                    iconArg.beginStructure();
+                    iconArg >> name;
+                    iconArg >> iconValue;
+                    if (name == "themed" && iconValue.type() == QVariant::StringList)
+                    {
+                        if (isValid != nullptr)
+                        {
+                            *isValid = true;
+                        }
+                    }
+                    iconArg.endStructure();
+                    return iconValue.toStringList();
+                }
+            }
+        }
+    }
+    return QStringList();
+}
+
 qlonglong IndicatorSoundTestBase::getVolumeSyncValue(bool *isValid)
 {
     qlonglong result = 0;

@@ -32,6 +32,68 @@ class TestIndicator: public IndicatorSoundTestBase
 {
 };
 
+TEST_F(TestIndicator, PhoneCheckRootIcon)
+{
+    double INITIAL_VOLUME = 0.0;
+
+    ASSERT_NO_THROW(startAccountsService());
+    EXPECT_TRUE(clearGSettingsPlayers());
+    ASSERT_NO_THROW(startPulsePhone());
+
+    // initialize volumes in pulseaudio
+    EXPECT_TRUE(setStreamRestoreVolume("alert", INITIAL_VOLUME));
+
+    // start now the indicator, so it picks the new volumes
+    ASSERT_NO_THROW(startIndicator());
+
+    // check that the volume is set and give
+    // time to the indicator to start
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
+            .item(mh::MenuItemMatcher()
+                .action("indicator.root")
+                .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+                .string_attribute("x-canonical-scroll-action", "indicator.scroll")
+                .string_attribute("x-canonical-secondary-action", "indicator.mute")
+                .string_attribute("submenu-action", "indicator.indicator-shown")
+                .mode(mh::MenuItemMatcher::Mode::all)
+                .submenu()
+                .item(mh::MenuItemMatcher()
+                    .section()
+                    .item(silentModeSwitch(false))
+                    .item(volumeSlider(INITIAL_VOLUME, "Volume"))
+                )
+                .item(mh::MenuItemMatcher()
+                    .label("Sound Settings…")
+                    .action("indicator.phone-settings")
+                )
+            ).match());
+
+    QStringList mutedIcon = {"audio-volume-muted-panel", "audio-volume-muted", "audio-volume", "audio"};
+    EXPECT_EQ(getRootIconValue(), mutedIcon);
+
+    QStringList lowVolumeIcon = {"audio-volume-low-panel", "audio-volume-low", "audio-volume", "audio"};
+    for( double volume = 0.1; volume <= 0.3; volume+=0.1)
+    {
+        EXPECT_TRUE(setStreamRestoreVolume("alert", volume));
+        EXPECT_EQ(getRootIconValue(), lowVolumeIcon);
+    }
+    EXPECT_TRUE(setStreamRestoreVolume("alert", 0.4));
+
+    QStringList mediumVolumeIcon = {"audio-volume-medium-panel", "audio-volume-medium", "audio-volume", "audio"};
+    for( double volume = 0.4; volume <= 0.7; volume+=0.1)
+    {
+        EXPECT_TRUE(setStreamRestoreVolume("alert", volume));
+        EXPECT_EQ(getRootIconValue(), mediumVolumeIcon);
+    }
+
+    QStringList highVolumeIcon = {"audio-volume-high-panel", "audio-volume-high", "audio-volume", "audio"};
+    for( double volume = 0.8; volume <= 1.0; volume+=0.1)
+    {
+        EXPECT_TRUE(setStreamRestoreVolume("alert", volume));
+        EXPECT_EQ(getRootIconValue(), highVolumeIcon);
+    }
+}
+
 TEST_F(TestIndicator, PhoneTestExternalMicInOut)
 {
     double INITIAL_VOLUME = 0.0;

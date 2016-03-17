@@ -290,48 +290,16 @@ public class IndicatorSound.Service: Object {
 
 	private bool block_info_notifications = false;
 
-	private static unowned string get_volume_root_icon_by_volume (double volume, VolumeControl.ActiveOutput active_output) {
-		switch (active_output) {
-			case VolumeControl.ActiveOutput.SPEAKERS:
-			case VolumeControl.ActiveOutput.HEADPHONES:
-			case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-			case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
-			case VolumeControl.ActiveOutput.USB_SPEAKER:
-			case VolumeControl.ActiveOutput.USB_HEADPHONES:
-			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
-			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
-				if (volume <= 0.0)
-					return "audio-volume-muted-panel";
-				if (volume <= 0.3)
-					return "audio-volume-low-panel";
-				if (volume <= 0.7)
-					return "audio-volume-medium-panel";
-				return "audio-volume-high-panel";
-
-			default:
-				return "";
-		}
-	}
-
 	private unowned string get_volume_root_icon (double volume, bool mute, VolumeControl.ActiveOutput active_output) {
-		switch (active_output) {
-			case VolumeControl.ActiveOutput.SPEAKERS:
-			case VolumeControl.ActiveOutput.HEADPHONES:
-			case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-			case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
-			case VolumeControl.ActiveOutput.USB_SPEAKER:
-			case VolumeControl.ActiveOutput.USB_HEADPHONES:
-			case VolumeControl.ActiveOutput.HDMI_SPEAKER:
-			case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
-				if (mute || volume <= 0.0)
-					return this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
-				if (this.accounts_service != null && this.accounts_service.silentMode)
-					return "audio-volume-muted-panel";
-				return get_volume_root_icon_by_volume (volume, active_output);
-
-			default:
-				return "";
-		}
+		if (mute || volume <= 0.0)
+			return this.mute_blocks_sound ? "audio-volume-muted-blocking-panel" : "audio-volume-muted-panel";
+		if (this.accounts_service != null && this.accounts_service.silentMode)
+			return "audio-volume-muted-panel";
+		if (volume <= 0.3)
+			return "audio-volume-low-panel";
+		if (volume <= 0.7)
+			return "audio-volume-medium-panel";
+		return "audio-volume-high-panel";
 	}
 
 	private void update_notification () {
