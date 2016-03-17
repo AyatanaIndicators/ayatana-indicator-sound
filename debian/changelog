@@ -1,3 +1,14 @@
+indicator-sound (12.10.2+16.04.20160317.1-0ubuntu1) xenial; urgency=medium
+
+  [ Xavi Garcia Mena ]
+  * Changed to code to get the root icon. Now it does not take into
+    account the source output, as in fact that code was not
+    differentiating between any particular case. The code was added in
+    the past in the case that we should differentiate between bluetooth,
+    headphones, etc... but it was never used. (LP: #1555831)
+
+ -- Xavi Garcia <xavi.garcia.mena@canonical.com>  Thu, 17 Mar 2016 10:06:26 +0000
+
 indicator-sound (12.10.2+16.04.20160307-0ubuntu1) xenial; urgency=medium
 
   [ Xavi Garcia Mena ]
