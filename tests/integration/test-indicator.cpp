@@ -46,6 +46,28 @@ TEST_F(TestIndicator, PhoneCheckRootIcon)
     // start now the indicator, so it picks the new volumes
     ASSERT_NO_THROW(startIndicator());
 
+    // check that the volume is set and give
+    // time to the indicator to start
+    EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
+            .item(mh::MenuItemMatcher()
+                .action("indicator.root")
+                .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+                .string_attribute("x-canonical-scroll-action", "indicator.scroll")
+                .string_attribute("x-canonical-secondary-action", "indicator.mute")
+                .string_attribute("submenu-action", "indicator.indicator-shown")
+                .mode(mh::MenuItemMatcher::Mode::all)
+                .submenu()
+                .item(mh::MenuItemMatcher()
+                    .section()
+                    .item(silentModeSwitch(false))
+                    .item(volumeSlider(INITIAL_VOLUME, "Volume"))
+                )
+                .item(mh::MenuItemMatcher()
+                    .label("Sound Settings…")
+                    .action("indicator.phone-settings")
+                )
+            ).match());
+
     QStringList mutedIcon = {"audio-volume-muted-panel", "audio-volume-muted", "audio-volume", "audio"};
     EXPECT_EQ(getRootIconValue(), mutedIcon);
 
