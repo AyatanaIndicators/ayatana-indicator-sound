@@ -226,6 +226,7 @@ public class IndicatorSound.Service: Object {
 
 	void activate_desktop_settings (SimpleAction action, Variant? param) {
 		unowned string env = Environment.get_variable ("DESKTOP_SESSION");
+		unowned string desktop = Environment.get_variable ("XDG_CURRENT_DESKTOP");
 		string cmd;
 
 		if (Environment.get_variable ("MIR_SOCKET") != null)
@@ -240,10 +241,13 @@ public class IndicatorSound.Service: Object {
 			cmd = "mate-volume-control";
 		else
 		{
-			if (Environment.get_variable ("XDG_CURRENT_DESKTOP") == "Unity" && Environment.find_program_in_path ("unity-control-center") != null)
-				cmd = "unity-control-center sound";
-			else
-				cmd = "gnome-control-center sound";
+			cmd = "gnome-control-center sound";
+			foreach (var name in desktop.split(":")) {
+				if (name == "Unity" && Environment.find_program_in_path ("unity-control-center") != null) {
+					cmd = "unity-control-center sound";
+					break;
+				}
+			}
 		}
 
 		try {
