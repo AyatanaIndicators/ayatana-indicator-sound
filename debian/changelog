@@ -1,3 +1,10 @@
+indicator-sound (12.10.2+16.04.20160406-0ubuntu1) xenial; urgency=medium
+
+  * Support multiple desktop names in $XDG_CURRENT_DESKTOP. (LP:
+    #1502480)
+
+ -- Dmitry Shachnev <mitya57@gmail.com>  Wed, 06 Apr 2016 19:05:13 +0000
+
 indicator-sound (12.10.2+16.04.20160317.1-0ubuntu1) xenial; urgency=medium
 
   [ Xavi Garcia Mena ]
