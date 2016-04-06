@@ -206,6 +206,7 @@ public class IndicatorSound.Service: Object {
 	private VolumeWarning _volume_warning;
 	private IndicatorSound.InfoNotification _info_notification = new IndicatorSound.InfoNotification();
 	private AccountsServiceAccess _accounts_service_access;
+	bool? is_unity = null;
 
 	const double volume_step_percentage = 0.06;
 
@@ -224,6 +225,24 @@ public class IndicatorSound.Service: Object {
 		}
 	}
 
+	private bool desktop_is_unity() {
+		if (is_unity != null) {
+			return is_unity;
+		}
+
+		is_unity = false;
+		unowned string desktop = Environment.get_variable ("XDG_CURRENT_DESKTOP");
+
+		foreach (var name in desktop.split(":")) {
+			if (name == "Unity") {
+				is_unity = true;
+				break;
+			}
+		}
+
+		return is_unity;
+	}
+
 	void activate_desktop_settings (SimpleAction action, Variant? param) {
 		unowned string env = Environment.get_variable ("DESKTOP_SESSION");
 		string cmd;
@@ -238,13 +257,10 @@ public class IndicatorSound.Service: Object {
 			cmd = "pavucontrol";
 		else if (env == "mate")
 			cmd = "mate-volume-control";
+		else if (desktop_is_unity() && Environment.find_program_in_path ("unity-control-center") != null)
+			cmd = "unity-control-center sound";
 		else
-		{
-			if (Environment.get_variable ("XDG_CURRENT_DESKTOP") == "Unity" && Environment.find_program_in_path ("unity-control-center") != null)
-				cmd = "unity-control-center sound";
-			else
-				cmd = "gnome-control-center sound";
-		}
+			cmd = "gnome-control-center sound";
 
 		try {
 			Process.spawn_command_line_async (cmd);
