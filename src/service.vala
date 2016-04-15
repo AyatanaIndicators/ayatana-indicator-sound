@@ -68,6 +68,10 @@ public class IndicatorSound.Service: Object {
 			update_notification();
 		});
 
+		this._volume_warning.cancel_pressed.connect( (cancel_volume) => {
+			volume_control.set_volume_clamp (cancel_volume, VolumeControl.VolumeReasons.USER_KEYPRESS);
+		});
+
 		this.accounts_service = accounts;
 		/* If we're on the greeter, don't export */
 		if (this.accounts_service != null) {
