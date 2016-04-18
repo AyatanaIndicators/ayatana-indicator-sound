@@ -213,8 +213,18 @@ public abstract class VolumeWarning : Object
 		if (response == IndicatorSound.WarnNotification.Response.OK) {
 			approve_high_volume ();
 			sound_system_set_multimedia_volume (_ok_volume);
+		} else {
+			this.cancel_pressed (this.volume_to_double(_options.loud_volume));
 		}
 
 		_ok_volume = PulseAudio.Volume.INVALID;
 	}
+
+	private static double volume_to_double (PulseAudio.Volume vol)
+	{
+		double tmp = (double)(vol - PulseAudio.Volume.MUTED);
+		return tmp / (double)(PulseAudio.Volume.NORM - PulseAudio.Volume.MUTED);
+	}
+
+	public signal void cancel_pressed (double cancel_volume);
 }
