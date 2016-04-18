@@ -1,3 +1,14 @@
+indicator-sound (12.10.2+16.04.20160418.1-0ubuntu1) xenial; urgency=medium
+
+  [ Xavi Garcia Mena ]
+  * This branch adds a new signal in volumeWarning to set the warning
+    level volume after pressing cancel. We are setting the warning level
+    before pressing cancel, which is alright, but sometimes we have
+    issues with the value set to the accounts service that steps on the
+    warning level. (LP: #1570779)
+
+ -- Xavi Garcia <xavi.garcia.mena@canonical.com>  Mon, 18 Apr 2016 09:18:16 +0000
+
 indicator-sound (12.10.2+16.04.20160406-0ubuntu1) xenial; urgency=medium
 
   * Support multiple desktop names in $XDG_CURRENT_DESKTOP. (LP:
