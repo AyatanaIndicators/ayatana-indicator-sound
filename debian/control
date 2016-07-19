@@ -36,6 +36,7 @@ Build-Depends: debhelper (>= 9.0),
                qtbase5-dev-tools,
                qtdeclarative5-dev,
                qtdeclarative5-dev-tools,
+               systemd,
 Standards-Version: 3.9.4
 Homepage: https://launchpad.net/indicator-sound
 # If you aren't a member of ~indicator-applet-developers but need to upload
@@ -50,6 +51,7 @@ Depends: ${shlibs:Depends},
          ${misc:Depends},
          pulseaudio,
          gsettings-ubuntu-schemas (>= 0.0.1+14.04.20140224),
+         indicator-common,
 Recommends: unity-control-center | gnome-control-center | ubuntu-system-settings | pavucontrol | mate-media,
             accountsservice,
 Suggests: unity-greeter-session-broadcast,
