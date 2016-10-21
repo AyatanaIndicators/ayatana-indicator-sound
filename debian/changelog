@@ -1,3 +1,10 @@
+indicator-sound (12.10.2+17.04.20161021-0ubuntu1) zesty; urgency=medium
+
+  [ Ted Gould ]
+  * Adding systemd user session unit
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 21 Oct 2016 10:16:33 +0000
+
 indicator-sound (12.10.2+16.04.20160418.1-0ubuntu1) xenial; urgency=medium
 
   [ Xavi Garcia Mena ]
