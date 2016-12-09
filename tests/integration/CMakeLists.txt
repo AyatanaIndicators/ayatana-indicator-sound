@@ -1,7 +1,7 @@
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-include(FindGMock)
+find_package(GMock)
 
 #pkg_check_modules(GMENUHARNESS REQUIRED libgmenuharness REQUIRED)
 #include_directories(${GMENUHARNESS_INCLUDE_DIRS})
