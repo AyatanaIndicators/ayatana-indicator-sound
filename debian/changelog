@@ -1,3 +1,9 @@
+indicator-sound (12.10.2+17.04.20170109-0ubuntu1) zesty; urgency=medium
+
+  * Compatibility with unversioned cmake-extras modules (LP: #1563573)
+
+ -- Pete Woods <pete.woods@canonical.com>  Mon, 09 Jan 2017 14:20:04 +0000
+
 indicator-sound (12.10.2+17.04.20161201-0ubuntu1) zesty; urgency=medium
 
   [ Michael Terry ]
