@@ -5,7 +5,7 @@ Maintainer: Ubuntu Desktop Team <ubuntu-desktop@lists.ubuntu.com>
 XSBC-Original-Maintainer: Conor Curran <conor.curran@canonical.com>
 Build-Depends: debhelper (>= 9.0),
                cmake,
-               cmake-extras (>= 0.4),
+               cmake-extras (>= 0.10),
                dbus,
                dbus-test-runner (>> 14.04.0+14.04.20150120.1),
                dh-translations,

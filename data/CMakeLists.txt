@@ -1,5 +1,5 @@
 
-include(UseGSettings)
+find_package(GSettings)
 
 ###########################
 # Indicator service
