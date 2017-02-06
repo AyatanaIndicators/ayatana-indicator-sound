@@ -69,47 +69,6 @@ install(
 )
 
 ###########################
-# XDG Autostart
-###########################
-
-set(
-  INDICATOR_SOUND_XDG_AUTOSTART
-  "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound.desktop"
-)
-
-configure_file(
-  "indicator-sound.desktop.in"
-  ${INDICATOR_SOUND_XDG_AUTOSTART}
-  @ONLY
-)
-
-install(
-  FILES "${INDICATOR_SOUND_XDG_AUTOSTART}"
-  DESTINATION "/etc/xdg/autostart"
-)
-
-###########################
-# Upstart XDG Autostart Override
-###########################
-
-set(
-  INDICATOR_SOUND_UPSTART_XDG_AUTOSTART
-  "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound.upstart.desktop"
-)
-
-configure_file(
-  "indicator-sound.upstart.desktop.in"
-  ${INDICATOR_SOUND_UPSTART_XDG_AUTOSTART}
-  @ONLY
-)
-
-install(
-  FILES "${INDICATOR_SOUND_UPSTART_XDG_AUTOSTART}"
-  DESTINATION "${CMAKE_INSTALL_DATADIR}/upstart/xdg/autostart"
-  RENAME "indicator-sound.desktop"
-)
-
-###########################
 # GSettings
 ###########################
 
