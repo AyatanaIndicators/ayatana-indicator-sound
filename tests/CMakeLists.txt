@@ -1,14 +1,5 @@
-
-###########################
-# Google Test
-###########################
-
-include_directories(${GTEST_INCLUDE_DIR})
-
-add_library (gtest-static STATIC
-             ${GTEST_SOURCE_DIR}/gtest-all.cc
-             ${GTEST_SOURCE_DIR}/gtest_main.cc)
-target_link_libraries(gtest-static ${GTEST_LIBS})
+find_package(GMock)
+include_directories(${GMOCK_INCLUDE_DIRS})
 
 ###########################
 # GSettings Schema
@@ -141,7 +132,7 @@ target_link_libraries (pulse-mock ${PULSEAUDIO_LIBRARIES})
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 add_executable (name-watch-test name-watch-test.cc ${CMAKE_SOURCE_DIR}/src/bus-watch-namespace.c)
-target_link_libraries (name-watch-test gtest-static ${SOUNDSERVICE_LIBRARIES})
+target_link_libraries (name-watch-test ${SOUNDSERVICE_LIBRARIES} ${GMOCK_LIBRARIES})
 add_test(name-watch-test name-watch-test)
 
 ###########################
@@ -154,9 +145,9 @@ target_link_libraries (
     accounts-service-user-test
     indicator-sound-service-lib
     vala-mocks-lib
-    gtest-static
     ${SOUNDSERVICE_LIBRARIES}
     ${TEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
 )
 
 # Split tests to work around libaccountservice sucking
@@ -179,8 +170,8 @@ target_link_libraries (
     indicator-sound-service-lib
     vala-mocks-lib
     pulse-mock
-    gtest-static
     ${TEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
 )
 
 add_test(volume-control-test volume-control-test)
@@ -195,9 +186,9 @@ target_link_libraries (
     sound-menu-test
     indicator-sound-service-lib
     vala-mocks-lib
-    gtest-static
     ${SOUNDSERVICE_LIBRARIES}
     ${TEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
 )
 
 add_test(sound-menu-test sound-menu-test)
@@ -213,9 +204,9 @@ target_link_libraries (
     indicator-sound-service-lib
     vala-mocks-lib
     pulse-mock
-    gtest-static
     ${SOUNDSERVICE_LIBRARIES}
     ${TEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
 )
 
 add_test(notifications-test notifications-test)
@@ -230,9 +221,9 @@ target_link_libraries (
     media-player-user-test
     indicator-sound-service-lib
     vala-mocks-lib
-    gtest-static
     ${SOUNDSERVICE_LIBRARIES}
     ${TEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
 )
 
 # Split tests to work around libaccountservice sucking
@@ -256,9 +247,9 @@ target_link_libraries (
     greeter-list-test
     indicator-sound-service-lib
     vala-mocks-lib
-    gtest-static
     ${SOUNDSERVICE_LIBRARIES}
     ${TEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
 )
 
 # Split tests to work around libaccountservice sucking
@@ -280,9 +271,9 @@ add_definitions(
 add_executable (indicator-test indicator-test.cc gschemas.compiled)
 target_link_libraries (
     indicator-test
-    gtest-static
     ${SOUNDSERVICE_LIBRARIES}
     ${TEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
 )
 
 # Split tests to work around libaccountservice sucking

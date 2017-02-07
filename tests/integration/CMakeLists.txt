@@ -1,8 +1,6 @@
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(GMock)
-
 #pkg_check_modules(GMENUHARNESS REQUIRED libgmenuharness REQUIRED)
 #include_directories(${GMENUHARNESS_INCLUDE_DIRS})
 include_directories("${CMAKE_SOURCE_DIR}/include")
@@ -21,7 +19,6 @@ include_directories(${Qt5DBus_INCLUDE_DIRS})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${GMOCK_INCLUDE_DIRS})
-include_directories(${GTEST_INCLUDE_DIRS})
 
 include_directories("${CMAKE_SOURCE_DIR}/tests/dbus-types")
 include_directories("${CMAKE_BINARY_DIR}/tests/dbus-types")
@@ -71,7 +68,6 @@ target_link_libraries(
     sound-indicator-dbus-interfaces
     ${QTDBUSMOCK_LDFLAGS}
     ${QTDBUSTEST_LDFLAGS}
-    ${GTEST_LIBRARIES}
     ${GMOCK_LIBRARIES}
 #    ${GMENUHARNESS_LDFLAGS}
     ${GLIB_LDFLAGS}
