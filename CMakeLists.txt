@@ -11,7 +11,6 @@ add_definitions( -DGETTEXT_PACKAGE="${GETTEXT_PACKAGE}" )
 
 find_package(PkgConfig REQUIRED)
 include(GNUInstallDirs)
-include(Coverage)
 include(UseVala)
 
 # Workaround for libexecdir on debian
@@ -79,4 +78,9 @@ add_subdirectory(src)
 
 enable_testing()
 add_subdirectory(tests)
-
+find_package(CoverageReport)
+ENABLE_COVERAGE_REPORT(
+  TARGETS ${COVERAGE_TARGETS}
+  TESTS ${COVERAGE_TEST_TARGETS}
+  FILTER /usr/include ${CMAKE_BINARY_DIR}/*
+)

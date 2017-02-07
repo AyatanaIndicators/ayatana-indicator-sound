@@ -284,3 +284,17 @@ add_test(indcator-test
 add_subdirectory(integration)
 add_subdirectory(dbus-types)
 add_subdirectory(service-mocks)
+
+# coverage reporting
+set(COVERAGE_TEST_TARGETS
+  ${COVERAGE_TEST_TARGETS}
+  name-watch-test
+  accounts-service-user-test
+  volume-control-test
+  sound-menu-test
+  notifications-test
+  media-player-user-test
+  greeter-list-test
+  indicator-test
+  PARENT_SCOPE
+)

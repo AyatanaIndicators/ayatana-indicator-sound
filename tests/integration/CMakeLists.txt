@@ -126,3 +126,10 @@ target_link_libraries(
 )
 
 #add_subdirectory(utils)
+
+# coverage reporting
+set(COVERAGE_TEST_TARGETS
+  ${COVERAGE_TEST_TARGETS}
+  integration-tests
+  PARENT_SCOPE
+)
