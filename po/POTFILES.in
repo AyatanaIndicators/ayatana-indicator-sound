@@ -1,7 +1,0 @@
-[encoding: UTF-8]
-src/info-notification.vala
-src/options-gsettings.vala
-src/service.vala
-src/sound-menu.vala
-src/warn-notification.vala
-

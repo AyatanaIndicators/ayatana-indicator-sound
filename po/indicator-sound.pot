@@ -1,0 +1,131 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Canonical Ltd.
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-02-07 17:03-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../src/info-notification.vala:25 ../src/info-notification.vala:42
+#: ../src/sound-menu.vala:57 ../src/sound-menu.vala:251
+#: ../src/warn-notification.vala:31 ../src/service.vala:296
+#: ../src/service.vala:299
+#, c-format
+msgid "Volume"
+msgstr ""
+
+#: ../src/info-notification.vala:55
+msgid "Speakers"
+msgstr ""
+
+#: ../src/info-notification.vala:57
+msgid "Headphones"
+msgstr ""
+
+#: ../src/info-notification.vala:59
+msgid "Bluetooth headphones"
+msgstr ""
+
+#: ../src/info-notification.vala:61
+msgid "Bluetooth speaker"
+msgstr ""
+
+#: ../src/info-notification.vala:63
+msgid "Usb speaker"
+msgstr ""
+
+#: ../src/info-notification.vala:65
+msgid "Usb headphones"
+msgstr ""
+
+#: ../src/info-notification.vala:67
+msgid "HDMI speaker"
+msgstr ""
+
+#: ../src/info-notification.vala:69
+msgid "HDMI headphones"
+msgstr ""
+
+#: ../src/sound-menu.vala:50
+msgid "Mute"
+msgstr ""
+
+#: ../src/sound-menu.vala:52
+msgid "Silent Mode"
+msgstr ""
+
+#: ../src/sound-menu.vala:66
+msgid "Sound Settings…"
+msgstr ""
+
+#: ../src/sound-menu.vala:123
+msgid "Microphone Volume"
+msgstr ""
+
+#. NOTE: Action doesn't really exist, just used to find below when removing
+#: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
+msgid "High volume can damage your hearing."
+msgstr ""
+
+#: ../src/sound-menu.vala:254
+msgid "Volume (Headphones)"
+msgstr ""
+
+#: ../src/sound-menu.vala:257
+msgid "Volume (Bluetooth)"
+msgstr ""
+
+#: ../src/sound-menu.vala:260
+msgid "Volume (Usb)"
+msgstr ""
+
+#: ../src/sound-menu.vala:263
+msgid "Volume (HDMI)"
+msgstr ""
+
+#: ../src/sound-menu.vala:266
+msgid "Volume (Bluetooth headphones)"
+msgstr ""
+
+#: ../src/sound-menu.vala:269
+msgid "Volume (Usb headphones)"
+msgstr ""
+
+#: ../src/sound-menu.vala:272
+msgid "Volume (HDMI headphones)"
+msgstr ""
+
+#: ../src/sound-menu.vala:445
+msgid "Choose Playlist"
+msgstr ""
+
+#: ../src/warn-notification.vala:49
+msgid "OK"
+msgstr ""
+
+#: ../src/warn-notification.vala:52
+msgid "Cancel"
+msgstr ""
+
+#: ../src/service.vala:293
+msgid "Volume (muted)"
+msgstr ""
+
+#: ../src/service.vala:296
+msgid "silent"
+msgstr ""
+
+#: ../src/service.vala:304
+msgid "Sound"
+msgstr ""
