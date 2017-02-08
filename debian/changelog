@@ -1,3 +1,13 @@
+indicator-sound (12.10.2+17.04.20170208-0ubuntu1) zesty; urgency=medium
+
+  * Remove old autostart files.
+  * Remove the local gsettings cmake module which we don't need/use.
+  * Use only the gmock module from cmake-extras.
+  * Use coverage support from cmake-extras.
+  * Use intltool support from cmake-extras.
+
+ -- Rodney Dawes <rodney.dawes@canonical.com>  Wed, 08 Feb 2017 04:38:44 +0000
+
 indicator-sound (12.10.2+17.04.20170109-0ubuntu1) zesty; urgency=medium
 
   * Compatibility with unversioned cmake-extras modules (LP: #1563573)
