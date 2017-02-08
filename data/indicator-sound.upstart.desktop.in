@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Indicator Sound
-Exec=@CMAKE_INSTALL_FULL_LIBEXECDIR@/indicator-sound/indicator-sound-service
-OnlyShowIn=Unity;Pantheon;
-NoDisplay=true
-StartupNotify=false
-Terminal=false
-Hidden=true
