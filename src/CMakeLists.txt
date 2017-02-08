@@ -278,3 +278,11 @@ install(
 )
 
 add_subdirectory(gmenuharness)
+
+# coverage reporting
+set(COVERAGE_TARGETS
+  ${COVERAGE_TARGETS}
+  indicator-sound-service-lib
+  indicator-sound-service-bin
+  PARENT_SCOPE
+)

@@ -15,3 +15,10 @@ target_link_libraries(
     gmenuharness-shared
     ${GLIB_LDFLAGS}
 )
+
+# coverage reporting
+set(COVERAGE_TARGETS
+  ${COVERAGE_TARGETS}
+  gmenuharness-shared
+  PARENT_SCOPE
+)
