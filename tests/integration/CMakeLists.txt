@@ -74,10 +74,18 @@ target_link_libraries(
     gmenuharness-shared
 )
 
-add_test(
-    integration-tests
-    integration-tests
+execute_process(
+  COMMAND whoami
+  OUTPUT_VARIABLE TESTS_USER
+  STRIP_TRAILING_WHITESPACE
 )
+
+if(NOT "${TESTS_USER}" STREQUAL "jenkins")
+  add_test(
+    integration-tests
+    integration-tests
+  )
+endif()
 
 set(
     SET-VOLUME-SRC
