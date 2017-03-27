@@ -77,7 +77,7 @@ target_link_libraries(
 execute_process(
   COMMAND whoami
   OUTPUT_VARIABLE TESTS_USER
-  STRIP_TRAILING_WHITESPACE
+  OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
 if(NOT "${TESTS_USER}" STREQUAL "jenkins")
