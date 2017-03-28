@@ -74,6 +74,13 @@ target_link_libraries(
     gmenuharness-shared
 )
 
+####
+## When building under jenkins, pulseuadio fails to start as there is no
+## /run/user tree, HOME directory is missing, and similar issues. So here
+## we check that we are the jenkins user, and avoid the integration tests,
+## until such time in future when we can run these tests in some different
+## manner to avoid needing to run pulseaudio in this way.
+####
 execute_process(
   COMMAND whoami
   OUTPUT_VARIABLE TESTS_USER
