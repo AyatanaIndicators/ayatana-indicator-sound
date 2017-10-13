@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-10-12 07:52+0200\n"
-"PO-Revision-Date: 2017-10-13 18:44+0000\n"
+"PO-Revision-Date: 2017-10-14 19:44+0000\n"
 "Last-Translator: Viktar Vauchkevich <victorenator@gmail.com>\n"
 "Language-Team: Belarusian <https://hosted.weblate.org/projects/ayatana-"
 "indicators/sound-applet/be/>\n"
@@ -51,12 +51,15 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
+"Кожны медыя-плэер, які прытрымліваецца MPRIS2-спецыфікацыі, аўтаматычна "
+"з'явіцца ў меню. Гэтае мноства павінна ўтрымліваць назвы desktop-файлаў "
+"прыкладанняў, якія не патрэбна ўключаць у меню гуку."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
-msgstr ""
+msgstr "Спіс прыкладанняў, якія калісьці рэгістраваліся ў меню гуку"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:4
 msgid ""
@@ -65,27 +68,33 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menU. This allows the menu remember and display offlined applications."
 msgstr ""
+"Кожны медыя-плэер, які прытрымліваецца MPRIS2-спецыфікацыі, аўтаматычна "
+"з'явіцца ў меню. Гэтае мноства павінна ўтрымліваць назвы desktop-файлаў "
+"прыкладанняў, якія калісьці рэгістраваліся ў меню. Гэта дазваляе меню "
+"запамінаць і адлюстроўваць незапушчаныя прыкладанні."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
 msgstr ""
+"Спіс прыкладанняў, якія будуць мець бачныя ўвесь час элементы кіравання "
+"плэерам"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:6
 msgid "Initial setting for global mute (mute all) on the menu"
-msgstr ""
+msgstr "Пачатковая налада глабальнага прыглушэння (прыглушыць усіх) ў меню"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:7
 msgid "On start up volume should not be muted."
-msgstr ""
+msgstr "На запуску гучнасць не павінна быць прыглушаная."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:8
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr ""
+msgstr "Паказваць ці не індыкатар гуку ў панэлі меню."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:9
 msgid "Whether or not to show high volume warnings."
-msgstr ""
+msgstr "Паказваць ці не папярэджанні аб высокай гучнасці."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:10
 msgid ""
