@@ -36,7 +36,7 @@ public class SoundMenu: Object
 		PLAYLIST = 2
 	}
 
-	const string PLAYBACK_ITEM_TYPE = "com.canonical.unity.playback-item";
+	const string PLAYBACK_ITEM_TYPE = "org.ayatana.unity.playback-item";
 
 	public SoundMenu (string? settings_action, DisplayFlags flags) {
 		/* A sound menu always has at least two sections: the volume section (this.volume_section)
@@ -50,7 +50,7 @@ public class SoundMenu: Object
 			volume_section.append (_("Mute"), "indicator.mute");
 		if ((flags & DisplayFlags.SHOW_SILENT_MODE) != 0) {
 			var item = new MenuItem(_("Silent Mode"), "indicator.silent-mode");
-			item.set_attribute("x-canonical-type", "s", "com.canonical.indicator.switch");
+			item.set_attribute("x-canonical-type", "s", "org.ayatana.indicator.switch");
 			volume_section.append_item(item);
 		}
 
@@ -67,7 +67,7 @@ public class SoundMenu: Object
 		}
 
 		var root_item = new MenuItem (null, "indicator.root");
-		root_item.set_attribute ("x-canonical-type", "s", "com.canonical.indicator.root");
+		root_item.set_attribute ("x-canonical-type", "s", "org.ayatana.indicator.root");
 		root_item.set_attribute ("x-canonical-scroll-action", "s", "indicator.scroll");
 		root_item.set_attribute ("x-canonical-secondary-action", "s", "indicator.mute");
 		root_item.set_attribute ("submenu-action", "s", "indicator.indicator-shown");
@@ -364,7 +364,7 @@ public class SoundMenu: Object
 			base_action += ".greeter";
 
 		var player_item = new MenuItem (player.name, base_action);
-		player_item.set_attribute ("x-canonical-type", "s", "com.canonical.unity.media-player");
+		player_item.set_attribute ("x-canonical-type", "s", "org.ayatana.unity.media-player");
 		if (icon != null)
 			player_item.set_attribute_value ("icon", icon.serialize ());
 		section.append_item (player_item);
@@ -457,7 +457,7 @@ public class SoundMenu: Object
 		var max_icon = new ThemedIcon.with_default_fallbacks (max_icon_name);
 
 		var slider = new MenuItem (label, action);
-		slider.set_attribute ("x-canonical-type", "s", "com.canonical.unity.slider");
+		slider.set_attribute ("x-canonical-type", "s", "org.ayatana.unity.slider");
 		slider.set_attribute_value ("min-icon", min_icon.serialize ());
 		slider.set_attribute_value ("max-icon", max_icon.serialize ());
 		slider.set_attribute ("min-value", "d", min);

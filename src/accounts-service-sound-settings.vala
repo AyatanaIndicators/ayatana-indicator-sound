@@ -17,7 +17,7 @@
  *      Ted Gould <ted@canonical.com>
  */
 
-[DBus (name = "com.canonical.indicator.sound.AccountsService")]
+[DBus (name = "org.ayatana.indicator.sound.AccountsService")]
 public interface AccountsServiceSoundSettings : Object {
 	// properties
 	public abstract uint64 timestamp {owned get; set;}
@@ -30,4 +30,3 @@ public interface AccountsServiceSoundSettings : Object {
 	public abstract string album {owned get; set;}
 	public abstract string art_url {owned get; set;}
 }
-

@@ -23,4 +23,3 @@ public interface AccountsServicePrivacySettings : Object {
 	public abstract bool stats_welcome_screen {owned get; set;}
 	public abstract bool messages_welcome_screen {owned get; set;}
 }
-

@@ -120,4 +120,3 @@ public class IndicatorSound.InfoNotification: Notification
 		}
 	}
 }
-

@@ -49,8 +49,8 @@ public class MediaPlayerUser : MediaPlayer {
 
 		Bus.get_proxy.begin<GreeterBroadcast> (
 			BusType.SYSTEM,
-			"com.canonical.Unity.Greeter.Broadcast",
-			"/com/canonical/Unity/Greeter/Broadcast",
+			"org.ayatana.Desktop.Greeter.Broadcast",
+			"/org/ayatana/Desktop/Greeter/Broadcast",
 			DBusProxyFlags.NONE,
 			null,
 			greeter_proxy_new);

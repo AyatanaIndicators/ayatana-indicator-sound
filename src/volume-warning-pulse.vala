@@ -195,6 +195,7 @@ public class VolumeWarningPulse : VolumeWarning
 	void pulse_reconnect () {
 		pulse_disconnect ();
 
+		/* FIXME: Unity Settings Daemon specifics */
 		var props = new Proplist ();
 		props.sets (Proplist.PROP_APPLICATION_NAME, "Ubuntu Audio Settings");
 		props.sets (Proplist.PROP_APPLICATION_ID, "com.canonical.settings.sound");

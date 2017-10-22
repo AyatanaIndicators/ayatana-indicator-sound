@@ -160,7 +160,7 @@ bool IndicatorSoundTestBase::clearGSettingsPlayers()
 
     clearPlayers.start("gsettings", QStringList()
                                         << "set"
-                                        << "com.canonical.indicator.sound"
+                                        << "org.ayatana.indicator.sound"
                                         << "interested-media-players"
                                         << "[]");
 
@@ -385,17 +385,17 @@ void IndicatorSoundTestBase::startIndicator()
 mh::MenuMatcher::Parameters IndicatorSoundTestBase::desktopParameters()
 {
     return mh::MenuMatcher::Parameters(
-            "com.canonical.indicator.sound",
-            { { "indicator", "/com/canonical/indicator/sound" } },
-            "/com/canonical/indicator/sound/desktop");
+            "org.ayatana.indicator.sound",
+            { { "indicator", "/org/ayatana/indicator/sound" } },
+            "/org/ayatana/indicator/sound/desktop");
 }
 
 mh::MenuMatcher::Parameters IndicatorSoundTestBase::phoneParameters()
 {
     return mh::MenuMatcher::Parameters(
-            "com.canonical.indicator.sound",
-            { { "indicator", "/com/canonical/indicator/sound" } },
-            "/com/canonical/indicator/sound/phone");
+            "org.ayatana.indicator.sound",
+            { { "indicator", "/org/ayatana/indicator/sound" } },
+            "/org/ayatana/indicator/sound/phone");
 }
 
 unity::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::volumeSlider(double volume, QString const &label)
@@ -407,7 +407,7 @@ unity::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::volumeSlider(double
             .double_attribute("min-value", 0.0)
             .double_attribute("max-value", 1.0)
             .double_attribute("step", 0.01)
-            .string_attribute("x-canonical-type", "com.canonical.unity.slider")
+            .string_attribute("x-canonical-type", "org.ayatana.unity.slider")
             .themed_icon("max-icon", {"audio-volume-high-panel", "audio-volume-high", "audio-volume", "audio"})
             .themed_icon("min-icon", {"audio-volume-low-zero-panel", "audio-volume-low-zero", "audio-volume-low", "audio-volume", "audio"})
             .pass_through_double_attribute("action", volume);
@@ -421,7 +421,7 @@ unity::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::micSlider(double vo
             .double_attribute("min-value", 0.0)
             .double_attribute("max-value", 1.0)
             .double_attribute("step", 0.01)
-            .string_attribute("x-canonical-type", "com.canonical.unity.slider")
+            .string_attribute("x-canonical-type", "org.ayatana.unity.slider")
             .themed_icon("max-icon", {"audio-input-microphone-high-panel", "audio-input-microphone-high", "audio-input-microphone", "audio-input", "audio"})
             .themed_icon("min-icon", {"audio-input-microphone-low-zero-panel", "audio-input-microphone-low-zero", "audio-input-microphone-low", "audio-input-microphone", "audio-input", "audio"})
             .pass_through_double_attribute("action", volume);
@@ -448,8 +448,8 @@ bool IndicatorSoundTestBase::initializeMenuChangedSignal()
 {
     if (!menu_interface_)
     {
-        menu_interface_.reset(new MenusInterface("com.canonical.indicator.sound",
-                                                 "/com/canonical/indicator/sound",
+        menu_interface_.reset(new MenusInterface("org.ayatana.indicator.sound",
+                                                 "/org/ayatana/indicator/sound",
                                                  dbusTestRunner.sessionConnection(), 0));
     }
     if (menu_interface_)
@@ -911,7 +911,7 @@ void IndicatorSoundTestBase::checkPortDevicesLabels(DevicePortType speakerPort, 
     EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
         .item(mh::MenuItemMatcher()
             .action("indicator.root")
-            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-type", "org.ayatana.indicator.root")
             .string_attribute("x-canonical-scroll-action", "indicator.scroll")
             .string_attribute("x-canonical-secondary-action", "indicator.mute")
             .string_attribute("submenu-action", "indicator.indicator-shown")
@@ -936,7 +936,7 @@ void IndicatorSoundTestBase::checkPortDevicesLabels(DevicePortType speakerPort, 
     EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
         .item(mh::MenuItemMatcher()
             .action("indicator.root")
-            .string_attribute("x-canonical-type", "com.canonical.indicator.root")
+            .string_attribute("x-canonical-type", "org.ayatana.indicator.root")
             .string_attribute("x-canonical-scroll-action", "indicator.scroll")
             .string_attribute("x-canonical-secondary-action", "indicator.mute")
             .string_attribute("submenu-action", "indicator.indicator-shown")
@@ -967,8 +967,8 @@ QVariantList IndicatorSoundTestBase::getActionValue(QString const &action)
 {
     if (!menu_interface_)
     {
-        menu_interface_.reset(new MenusInterface("com.canonical.indicator.sound",
-                                                 "/com/canonical/indicator/sound",
+        menu_interface_.reset(new MenusInterface("org.ayatana.indicator.sound",
+                                                 "/org/ayatana/indicator/sound",
                                                  dbusTestRunner.sessionConnection(), 0));
     }
     if (menu_interface_)

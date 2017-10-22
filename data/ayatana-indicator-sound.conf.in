@@ -1,0 +1,9 @@
+description "Ayatana Indicator Sound Service"
+
+start on ayatana-indicator-services-start
+stop on desktop-end or ayatana-indicator-services-end
+
+respawn
+respawn limit 30 10
+
+exec $SNAP@CMAKE_INSTALL_FULL_LIBEXECDIR@/ayatana-indicator-sound/ayatana-indicator-sound-service

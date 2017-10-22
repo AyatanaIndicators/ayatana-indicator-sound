@@ -16,9 +16,9 @@
  * Authored by: Pete Woods <pete.woods@canonical.com>
  */
 
-#include <unity/gmenuharness/MatchResult.h>
-#include <unity/gmenuharness/MatchUtils.h>
-#include <unity/gmenuharness/MenuItemMatcher.h>
+#include <desktop/gmenuharness/MatchResult.h>
+#include <desktop/gmenuharness/MatchUtils.h>
+#include <desktop/gmenuharness/MenuItemMatcher.h>
 
 #include <iostream>
 #include <vector>

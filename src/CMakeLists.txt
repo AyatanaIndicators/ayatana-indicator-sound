@@ -7,6 +7,10 @@ set(HEADER_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.h")
 set(SYMBOLS_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.def")
 set(VAPI_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.vapi")
 
+if(EXISTS "/usr/share/glib-2.0/schemas/com.ubuntu.sound.gschema.xml")
+  add_definisions( -DHAS_UBUNTU_SOUND_SCHEMA )
+endif() 
+
 vapi_gen(accounts-service
     LIBRARY
         accounts-service
@@ -16,7 +20,7 @@ vapi_gen(accounts-service
         /usr/share/gir-1.0/AccountsService-1.0.gir
 )
 
-vala_init(indicator-sound-service
+vala_init(ayatana-indicator-sound-service
   DEPENDS
     accounts-service
   PACKAGES
@@ -35,26 +39,25 @@ vala_init(indicator-sound-service
     --target-glib=${GLIB_2_0_REQUIRED_VERSION}
     --vapidir=${CMAKE_SOURCE_DIR}/vapi/
     --vapidir=.
-    --pkg=url-dispatcher
     --pkg=bus-watcher
 )
 
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   notification.vala
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   info-notification.vala
   DEPENDS
     notification
       volume-control
         options
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   warn-notification.vala
   DEPENDS
     notification
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   service.vala
   DEPENDS
     sound-menu
@@ -71,14 +74,14 @@ vala_add(indicator-sound-service
     accounts-service-user
     accounts-service-access
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   options.vala
   DEPENDS
     volume-control
     volume-control-pulse
     accounts-service-access
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   options-gsettings.vala
   DEPENDS
     options
@@ -86,24 +89,24 @@ vala_add(indicator-sound-service
     volume-control
     accounts-service-access
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   volume-control.vala
   DEPENDS
     options
     volume-control-pulse
     accounts-service-access
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   accounts-service-access.vala
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   volume-control-pulse.vala
   DEPENDS
     accounts-service-access
     options
     volume-control
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   volume-warning.vala
   DEPENDS
     options
@@ -113,7 +116,7 @@ vala_add(indicator-sound-service
     notification
     accounts-service-access
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   volume-warning-pulse.vala
   DEPENDS
     volume-warning
@@ -124,28 +127,40 @@ vala_add(indicator-sound-service
     notification
     accounts-service-access
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   media-player.vala
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   media-player-mpris.vala
   DEPENDS
     media-player
     mpris2-interfaces
 )
-vala_add(indicator-sound-service
-  media-player-user.vala
-  DEPENDS
-    media-player
-    accounts-service-sound-settings
-    greeter-broadcast
-)
-vala_add(indicator-sound-service
+if(URLDISPATCHER_FOUND)
+	vala_add(ayatana-indicator-sound-service
+	  media-player-user.vala
+	  DEPENDS
+	    media-player
+	    accounts-service-sound-settings
+	    greeter-broadcast
+	  OPTIONS
+	    --pkg=url-dispatcher
+	)
+else()
+	vala_add(ayatana-indicator-sound-service
+	  media-player-user.vala
+	  DEPENDS
+	    media-player
+	    accounts-service-sound-settings
+	    greeter-broadcast
+	)
+endif()
+vala_add(ayatana-indicator-sound-service
   media-player-list.vala
   DEPENDS
     media-player
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   media-player-list-mpris.vala
   DEPENDS
     media-player-list
@@ -153,20 +168,20 @@ vala_add(indicator-sound-service
     media-player-mpris
     mpris2-interfaces
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   media-player-list-greeter.vala
   DEPENDS
     media-player-list
     media-player-user
     media-player
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   mpris2-interfaces.vala
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   freedesktop-interfaces.vala
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   sound-menu.vala
   DEPENDS
     media-player
@@ -175,7 +190,7 @@ vala_add(indicator-sound-service
     volume-control-pulse
     accounts-service-access
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   accounts-service-user.vala
   DEPENDS
     media-player
@@ -185,20 +200,20 @@ vala_add(indicator-sound-service
     accounts-service-system-sound-settings
     greeter-broadcast
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   accounts-service-sound-settings.vala
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   accounts-service-privacy-settings.vala
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   accounts-service-system-sound-settings.vala
 )
-vala_add(indicator-sound-service
+vala_add(ayatana-indicator-sound-service
   greeter-broadcast.vala
 )
 
-vala_finish(indicator-sound-service
+vala_finish(ayatana-indicator-sound-service
   SOURCES
     project_VALA_SOURCES
   OUTPUTS
@@ -231,7 +246,7 @@ set(
 
 add_definitions(
   -w
-  -DG_LOG_DOMAIN="indicator-sound"
+  -DG_LOG_DOMAIN="ayatana-indicator-sound"
 )
 
 add_library(
@@ -259,7 +274,7 @@ add_executable(
 set_target_properties(
   indicator-sound-service-bin
   PROPERTIES
-  OUTPUT_NAME "indicator-sound-service"
+  OUTPUT_NAME "ayatana-indicator-sound-service"
 )
 
 target_link_libraries(
@@ -274,10 +289,12 @@ target_link_libraries(
 
 install(
   TARGETS indicator-sound-service-bin
-  RUNTIME DESTINATION ${CMAKE_INSTALL_LIBEXECDIR}/indicator-sound/
+  RUNTIME DESTINATION ${CMAKE_INSTALL_LIBEXECDIR}/ayatana-indicator-sound/
 )
 
+if(UNITY_API_FOUND)
 add_subdirectory(gmenuharness)
+endif()
 
 # coverage reporting
 set(COVERAGE_TARGETS

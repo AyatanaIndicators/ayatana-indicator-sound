@@ -22,7 +22,7 @@ using PulseAudio;
 using Notify;
 using Gee;
 
-[DBus (name="com.canonical.UnityGreeter.List")]
+[DBus (name="org.ayatana.Greeter.List")]
 interface GreeterListInterfaceAccess : Object
 {
 	public abstract async string get_active_entry () throws IOError;
@@ -178,7 +178,7 @@ public class AccountsServiceAccess : Object
 	{
 		if (Environment.get_variable ("XDG_SESSION_CLASS") == "greeter") {
 			try {
-				_greeter_proxy = yield Bus.get_proxy (BusType.SESSION, "com.canonical.UnityGreeter", "/list");
+				_greeter_proxy = yield Bus.get_proxy (BusType.SESSION, "org.ayatana.Greeter", "/list");
 			} catch (GLib.Error e) {
 				warning ("unable to get greeter proxy: %s", e.message);
 				return;
@@ -231,5 +231,3 @@ public class AccountsServiceAccess : Object
 		}
 	}
 }
-
-

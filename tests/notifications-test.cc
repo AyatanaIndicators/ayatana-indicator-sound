@@ -210,7 +210,7 @@ class NotificationsTest : public ::testing::Test
 
             g_dbus_connection_call(bus,
                 g_dbus_connection_get_unique_name(bus),
-                "/com/canonical/indicator/sound",
+                "/org/ayatana/indicator/sound",
                 "org.gtk.Actions",
                 "SetState",
                 g_variant_new("(sva{sv})", "indicator-shown", g_variant_new_boolean(shown), nullptr),

@@ -43,5 +43,3 @@ public errordomain XmlError {
 
 const string FREEDESKTOP_SERVICE = "org.freedesktop.DBus";
 const string FREEDESKTOP_OBJECT = "/org/freedesktop/DBus";
-
-

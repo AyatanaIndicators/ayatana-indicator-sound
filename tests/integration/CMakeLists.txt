@@ -23,7 +23,7 @@ include_directories(${GMOCK_INCLUDE_DIRS})
 include_directories("${CMAKE_SOURCE_DIR}/tests/dbus-types")
 include_directories("${CMAKE_BINARY_DIR}/tests/dbus-types")
 
-add_definitions(-DSOUND_SERVICE_BIN="${CMAKE_BINARY_DIR}/src/indicator-sound-service"
+add_definitions(-DSOUND_SERVICE_BIN="${CMAKE_BINARY_DIR}/src/ayatana-indicator-sound-service"
                 -DSTREAM_RESTORE_TABLE="${CMAKE_SOURCE_DIR}/tests/integration/touch-stream-restore.table"
                 -DVOLUME_SET_BIN="${CMAKE_BINARY_DIR}/tests/integration/set-volume"
                 -DACCOUNTS_SERVICE_BIN="${CMAKE_BINARY_DIR}/tests/service-mocks/accounts-mock/accounts-service-sound"

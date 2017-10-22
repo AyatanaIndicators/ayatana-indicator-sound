@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="ayatana-indicator-sound">
+    <schema path="/org/ayatana/sound/" id="org.ayatana.sound">
+    <key type="b" name="allow-amplified-volume">
+      <default>false</default>
+      <summary>Whether the volume slider allows setting the volume above 100%</summary>
+    </key>
+    </schema>
+</schemalist>

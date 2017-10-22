@@ -30,7 +30,7 @@ namespace DBusTypes
         DBusActionResult::registerMetaType();
     }
 
-    static constexpr char const* DBUS_NAME = "com.canonical.indicator.sound";
+    static constexpr char const* DBUS_NAME = "org.ayatana.indicator.sound";
 
     static constexpr char const* DBUS_PULSE = "org.PulseAudio1";
 
@@ -42,7 +42,7 @@ namespace DBusTypes
 
     static constexpr char const* STREAM_RESTORE_ENTRY_NAME = "org.PulseAudio.Ext.StreamRestore1.RestoreEntry";
 
-    static constexpr char const* MAIN_SERVICE_PATH = "/com/canonical/indicator/sound";
+    static constexpr char const* MAIN_SERVICE_PATH = "/org/ayatana/indicator/sound";
 
     static constexpr char const* ACTIONS_INTERFACE = "org.gtk.Actions";
 

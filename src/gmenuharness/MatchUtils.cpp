@@ -16,9 +16,9 @@
  * Authored by: Pete Woods <pete.woods@canonical.com>
  */
 
-#include <unity/gmenuharness/MatchUtils.h>
+#include <desktop/gmenuharness/MatchUtils.h>
 
-#include <unity/util/ResourcePtr.h>
+#include <desktop/util/ResourcePtr.h>
 
 using namespace std;
 namespace util = unity::util;

@@ -22,4 +22,3 @@ public interface AccountsServiceSystemSoundSettings : Object {
 	// properties 
 	public abstract bool silent_mode {owned get; set;}
 }
-

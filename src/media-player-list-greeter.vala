@@ -17,21 +17,21 @@
  *      Ted Gould <ted@canonical.com>
  */
 
-[DBus (name="com.canonical.UnityGreeter.List")]
-public interface UnityGreeterList : Object {
+[DBus (name="org.ayatana.Greeter.List")]
+public interface AyatanaGreeterList : Object {
 	public abstract async string get_active_entry () throws IOError;
 	public signal void entry_selected (string entry_name);
 }
 
 public class MediaPlayerListGreeter : MediaPlayerList {
 	string? selected_user = null;
-	UnityGreeterList? proxy = null;
+	AyatanaGreeterList? proxy = null;
 	HashTable<string, MediaPlayerUser> players = new HashTable<string, MediaPlayerUser>(str_hash, str_equal);
 
 	public MediaPlayerListGreeter () {
-		Bus.get_proxy.begin<UnityGreeterList> (
+		Bus.get_proxy.begin<AyatanaGreeterList> (
 			BusType.SESSION,
-			"com.canonical.UnityGreeter",
+			"org.ayatana.Greeter",
 			"/list",
 			DBusProxyFlags.NONE,
 			null,
@@ -45,7 +45,7 @@ public class MediaPlayerListGreeter : MediaPlayerList {
 			this.proxy.entry_selected.connect(active_user_changed);
 			this.proxy.get_active_entry.begin ((obj, res) => {
 				try {
-					var value = (obj as UnityGreeterList).get_active_entry.end(res);
+					var value = (obj as AyatanaGreeterList).get_active_entry.end(res);
 					active_user_changed(value);
 				} catch (Error e) {
 					warning("Unable to get active entry: %s", e.message);

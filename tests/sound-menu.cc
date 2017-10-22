@@ -92,10 +92,10 @@ class SoundMenuTest : public ::testing::Test
 
             /* Player display */
             verify_item_attribute(section, 0, "action", g_variant_new_string("indicator.player-id"));
-            verify_item_attribute(section, 0, "x-canonical-type", g_variant_new_string("com.canonical.unity.media-player"));
+            verify_item_attribute(section, 0, "x-canonical-type", g_variant_new_string("org.ayatana.unity.media-player"));
 
             /* Player control */
-            verify_item_attribute(section, 1, "x-canonical-type", g_variant_new_string("com.canonical.unity.playback-item"));
+            verify_item_attribute(section, 1, "x-canonical-type", g_variant_new_string("org.ayatana.unity.playback-item"));
         //verify_item_attribute(section, 1, "x-canonical-play-action", g_variant_new_string(""));
         if (!canPlay) {
                 verify_item_attribute_is_not_set(section, 1, "x-canonical-play-action", G_VARIANT_TYPE_STRING);
@@ -164,10 +164,10 @@ TEST_F(SoundMenuTest, AddRemovePlayer) {
 
     /* Player display */
     verify_item_attribute(section, 0, "action", g_variant_new_string("indicator.player-id"));
-    verify_item_attribute(section, 0, "x-canonical-type", g_variant_new_string("com.canonical.unity.media-player"));
+    verify_item_attribute(section, 0, "x-canonical-type", g_variant_new_string("org.ayatana.unity.media-player"));
 
     /* Player control */
-    verify_item_attribute(section, 1, "x-canonical-type", g_variant_new_string("com.canonical.unity.playback-item"));
+    verify_item_attribute(section, 1, "x-canonical-type", g_variant_new_string("org.ayatana.unity.playback-item"));
     verify_item_attribute(section, 1, "x-canonical-play-action", g_variant_new_string("indicator.play.player-id"));
     verify_item_attribute(section, 1, "x-canonical-next-action", g_variant_new_string("indicator.next.player-id"));
     verify_item_attribute(section, 1, "x-canonical-previous-action", g_variant_new_string("indicator.previous.player-id"));

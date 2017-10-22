@@ -1,16 +1,16 @@
 <node>
-  <interface name="com.canonical.indicator.sound.AccountsService">
+  <interface name="org.ayatana.indicator.sound.AccountsService">
 
     <annotation name="org.freedesktop.Accounts.VendorExtension" value="true"/>
 
     <annotation name="org.freedesktop.Accounts.Authentication.ChangeOwn"
-                value="com.canonical.indicator.sound.AccountsService.ModifyOwnUser"/>
+                value="org.ayatana.indicator.sound.AccountsService.ModifyOwnUser"/>
 
     <annotation name="org.freedesktop.Accounts.Authentication.ReadAny"
-                value="com.canonical.indicator.sound.AccountsService.ModifyAnyUser"/>
+                value="org.ayatana.indicator.sound.AccountsService.ModifyAnyUser"/>
 
     <annotation name="org.freedesktop.Accounts.Authentication.ChangeAny"
-                value="com.canonical.indicator.sound.AccountsService.ModifyAnyUser"/>
+                value="org.ayatana.indicator.sound.AccountsService.ModifyAnyUser"/>
 
     <property name="Timestamp" type="t" access="readwrite">
       <annotation name="org.freedesktop.Accounts.DefaultValue" value="0"/>

@@ -17,7 +17,7 @@
  *      Ted Gould <ted@canonical.com>
  */
 
-[DBus (name = "com.canonical.Unity.Greeter.Broadcast")]
+[DBus (name = "org.ayatana.Desktop.Greeter.Broadcast")]
 public interface GreeterBroadcast : Object {
   // methods
   // unused public abstract async void RequestApplicationStart(string name, string appid) throws IOError;

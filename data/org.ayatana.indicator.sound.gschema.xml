@@ -1,5 +1,5 @@
 <schemalist>
-  <schema id="com.canonical.indicator.sound" path="/com/canonical/indicator/sound/" gettext-domain="indicator-sound">
+  <schema id="org.ayatana.indicator.sound" path="/org/ayatana/indicator/sound/" gettext-domain="ayatana-indicator-sound">
     <key name="blacklisted-media-players" type="as">
       <summary>A list of applications blacklisted from the sound menu</summary>
       <default>[]</default>
@@ -31,6 +31,10 @@
       <description>
         On start up volume should not be muted.
       </description>
+    </key>
+    <key type="b" name="allow-amplified-volume">
+      <default>false</default>
+      <summary>Whether the volume slider allows setting the volume above 100%</summary>
     </key>
     <key name="visible" type="b">
       <default>true</default>

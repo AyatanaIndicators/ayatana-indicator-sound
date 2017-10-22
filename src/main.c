@@ -90,10 +90,10 @@ main (int argc, char ** argv)
     g_unix_signal_add(SIGTERM, sigterm_handler, loop);
 
     /* Initialize libnotify */
-    notify_init ("indicator-sound");
+    notify_init ("ayatana-indicator-sound");
 
     g_bus_own_name(G_BUS_TYPE_SESSION,
-        "com.canonical.indicator.sound",
+        "org.ayatana.indicator.sound",
         G_BUS_NAME_OWNER_FLAGS_NONE,
         on_bus_acquired,
         NULL, /* name acquired */
@@ -110,4 +110,3 @@ main (int argc, char ** argv)
 
     return 0;
 }
-

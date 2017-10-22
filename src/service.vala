@@ -42,7 +42,7 @@ public class IndicatorSound.Service: Object {
 			this.update_notification();
 		});
 
-		this.settings = new Settings ("com.canonical.indicator.sound");
+		this.settings = new Settings ("org.ayatana.indicator.sound");
 
 		this.settings.bind ("visible", this, "visible", SettingsBindFlags.GET);
 		this.notify["visible"].connect ( () => this.update_root_icon () );
@@ -145,12 +145,12 @@ public class IndicatorSound.Service: Object {
 
 		/* Everything is built, let's put it on the bus */
 		try {
-			export_actions = bus.export_action_group ("/com/canonical/indicator/sound", this.actions);
+			export_actions = bus.export_action_group ("/org/ayatana/indicator/sound", this.actions);
 		} catch (Error e) {
 			critical ("%s", e.message);
 		}
 
-		this.menus.@foreach ( (profile, menu) => menu.export (bus, @"/com/canonical/indicator/sound/$profile"));
+		this.menus.@foreach ( (profile, menu) => menu.export (bus, @"/org/ayatana/indicator/sound/$profile"));
 	}
 
 	~Service() {
@@ -191,7 +191,9 @@ public class IndicatorSound.Service: Object {
 		{ "root", null, null, "@a{sv} {}", null },
 		{ "scroll", activate_scroll_action, "i", null, null },
 		{ "desktop-settings", activate_desktop_settings, null, null, null },
+#if URLDISPATCHER_FOUND
 		{ "phone-settings", activate_phone_settings, null, null, null },
+#endif
 		{ "indicator-shown", null, null, "@b false", null },
 	};
 
@@ -251,13 +253,15 @@ public class IndicatorSound.Service: Object {
 		unowned string env = Environment.get_variable ("DESKTOP_SESSION");
 		string cmd;
 
+#if URLDISPATCHER_FOUND
 		if (Environment.get_variable ("MIR_SOCKET") != null)
 		{
 			UrlDispatch.send ("settings:///system/sound");
 			return;
 		}
+#endif
 
-		if (env == "xubuntu" || env == "ubuntustudio")
+		if (env == "xubuntu" || env == "xfce" || env == "ubuntustudio")
 			cmd = "pavucontrol";
 		else if (env == "mate")
 			cmd = "mate-volume-control";
@@ -273,9 +277,11 @@ public class IndicatorSound.Service: Object {
 		}
 	}
 
+#if URLDISPATCHER_FOUND
 	void activate_phone_settings (SimpleAction action, Variant? param) {
 		UrlDispatch.send ("settings:///system/sound");
 	}
+#endif
 
 	/* Returns a serialized version of @icon_name suited for the panel */
 	static Variant serialize_themed_icon (string icon_name)

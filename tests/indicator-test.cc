@@ -28,7 +28,7 @@ class IndicatorTest : public IndicatorFixture
 {
 protected:
 	IndicatorTest (void) :
-		IndicatorFixture(INDICATOR_SOUND_SERVICE_BINARY, "com.canonical.indicator.sound")
+		IndicatorFixture(INDICATOR_SOUND_SERVICE_BINARY, "org.ayatana.indicator.sound")
 	{
 	}
 
@@ -65,10 +65,10 @@ protected:
 
 
 TEST_F(IndicatorTest, PhoneMenu) {
-	setMenu("/com/canonical/indicator/sound/phone");
+	setMenu("/org/ayatana/indicator/sound/phone");
 
 	EXPECT_EVENTUALLY_MENU_ATTRIB(std::vector<int>({0}), "action", "indicator.root");
-	EXPECT_MENU_ATTRIB({0}, "x-canonical-type", "com.canonical.indicator.root");
+	EXPECT_MENU_ATTRIB({0}, "x-canonical-type", "org.ayatana.indicator.root");
 	EXPECT_MENU_ATTRIB({0}, "x-canonical-scroll-action", "indicator.scroll");
 	EXPECT_MENU_ATTRIB({0}, "x-canonical-secondary-action", "indicator.mute");
 
@@ -80,10 +80,10 @@ TEST_F(IndicatorTest, PhoneMenu) {
 }
 
 TEST_F(IndicatorTest, DesktopMenu) {
-	setMenu("/com/canonical/indicator/sound/desktop");
+	setMenu("/org/ayatana/indicator/sound/desktop");
 
 	EXPECT_MENU_ATTRIB({0}, "action", "indicator.root");
-	EXPECT_MENU_ATTRIB({0}, "x-canonical-type", "com.canonical.indicator.root");
+	EXPECT_MENU_ATTRIB({0}, "x-canonical-type", "org.ayatana.indicator.root");
 	EXPECT_MENU_ATTRIB({0}, "x-canonical-scroll-action", "indicator.scroll");
 	EXPECT_MENU_ATTRIB({0}, "x-canonical-secondary-action", "indicator.mute");
 
@@ -95,7 +95,7 @@ TEST_F(IndicatorTest, DesktopMenu) {
 }
 
 TEST_F(IndicatorTest, BaseActions) {
-	setActions("/com/canonical/indicator/sound");
+	setActions("/org/ayatana/indicator/sound");
 
 	ASSERT_ACTION_EXISTS("root");
 	ASSERT_ACTION_STATE_TYPE("root", G_VARIANT_TYPE("a{sv}"));

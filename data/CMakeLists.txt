@@ -7,12 +7,12 @@ find_package(GSettings)
 
 set(
   INDICATOR_DIR
-  "${CMAKE_INSTALL_DATADIR}/unity/indicators"
-  CACHE FILEPATH "Indicator directory"
+  "${CMAKE_INSTALL_DATADIR}/ayatana/indicators"
+  CACHE FILEPATH "Ayatana Indicators Directory"
 )
 
 install(
-  FILES "com.canonical.indicator.sound"
+  FILES "org.ayatana.indicator.sound"
   DESTINATION "${INDICATOR_DIR}"
 )
 
@@ -21,9 +21,7 @@ install(
 ###########################
 
 # where to install
-# Uncomment when we drop Vivid
-# pkg_get_variable(SYSTEMD_USER_DIR systemd systemduserunitdir)
-set (SYSTEMD_USER_DIR "/usr/lib/systemd/user")
+pkg_get_variable(SYSTEMD_USER_DIR systemd systemduserunitdir)
 message (STATUS "${SYSTEMD_USER_DIR} is the systemd user unit file install dir")
 
 set (SYSTEMD_USER_NAME "${CMAKE_PROJECT_NAME}.service")
@@ -54,11 +52,11 @@ install (FILES "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}.override"
 
 set(
   INDICATOR_SOUND_CONF
-  "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound.conf"
+  "${CMAKE_CURRENT_BINARY_DIR}/ayatana-indicator-sound.conf"
 )
 
 configure_file(
-  "indicator-sound.conf.in"
+  "ayatana-indicator-sound.conf.in"
   ${INDICATOR_SOUND_CONF}
   @ONLY
 )
@@ -72,7 +70,7 @@ install(
 # GSettings
 ###########################
 
-add_schema ("com.canonical.indicator.sound.gschema.xml")
+add_schema ("org.ayatana.indicator.sound.gschema.xml")
 
 ###########################
 # Accounts Service
@@ -84,24 +82,20 @@ set(POLKIT_DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/polkit-1")
 set(DBUS_IFACE_DIR "${CMAKE_INSTALL_PREFIX}/share/dbus-1/interfaces")
 set(ACCOUNTS_IFACE_DIR "${CMAKE_INSTALL_PREFIX}/share/accountsservice/interfaces")
 
-install(FILES com.canonical.indicator.sound.AccountsService.xml
+install(FILES org.ayatana.indicator.sound.AccountsService.xml
 	DESTINATION "${DBUS_IFACE_DIR}"
 )
 
 # Create accountsservice symlink for above dbus interface
 install(CODE "
 	execute_process(COMMAND mkdir -p \"\$ENV{DESTDIR}${ACCOUNTS_IFACE_DIR}\")
-	execute_process(COMMAND ln -sf ../../dbus-1/interfaces/com.canonical.indicator.sound.AccountsService.xml \"\$ENV{DESTDIR}${ACCOUNTS_IFACE_DIR}\")
+	execute_process(COMMAND ln -sf ../../dbus-1/interfaces/org.ayatana.indicator.sound.AccountsService.xml \"\$ENV{DESTDIR}${ACCOUNTS_IFACE_DIR}\")
 ")
 
-install(FILES com.canonical.indicator.sound.AccountsService.policy
+install(FILES org.ayatana.indicator.sound.AccountsService.policy
 DESTINATION "${POLKIT_DATA_DIR}/actions"
 )
 
-install(FILES 50-com.canonical.indicator.sound.AccountsService.pkla
+install(FILES 50-org.ayatana.indicator.sound.AccountsService.pkla
 DESTINATION "${POLKIT_LIB_DIR}/localauthority/10-vendor.d"
 )
-
-
-
-

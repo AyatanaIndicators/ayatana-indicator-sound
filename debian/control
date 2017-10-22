@@ -1,19 +1,19 @@
-Source: indicator-sound
+Source: ayatana-indicator-sound
 Section: sound
 Priority: extra
-Maintainer: Ubuntu Desktop Team <ubuntu-desktop@lists.ubuntu.com>
-XSBC-Original-Maintainer: Conor Curran <conor.curran@canonical.com>
+Maintainer: Mike Gabriel <mike.gabriel@das-netzwerkteam.de>
 Build-Depends: debhelper (>= 9.0),
                cmake,
                cmake-extras (>= 0.10),
                dbus,
                dbus-test-runner (>> 14.04.0+14.04.20150120.1),
-               dh-translations,
                gcovr,
                gir1.2-accountsservice-1.0,
-               gnome-common,
+               mate-common,
+               gsettings-ubuntu-schemas | mate-common,
+               liburl-dispatcher-dev | mate-common,
+               libunity-api-dev | mate-common,
                googletest | google-mock (>= 1.6.0+svn437),
-               gsettings-ubuntu-schemas,
                intltool,
                autotools-dev,
                valac (>= 0.20),
@@ -24,9 +24,7 @@ Build-Depends: debhelper (>= 9.0),
                libglib2.0-dev (>= 2.32.0),
                libqtdbusmock1-dev (>= 0.3),
                libqtdbustest1-dev,
-               libunity-api-dev,
-               liburl-dispatcher1-dev,
-               libpulse-dev (>= 1:4.0-0ubuntu21),
+               libpulse-dev (>= 5.0),
                libpulse-mainloop-glib0 (>= 0.9.18),
                libnotify-dev,
                libgee-0.8-dev,
@@ -39,25 +37,20 @@ Build-Depends: debhelper (>= 9.0),
                qtdeclarative5-dev,
                qtdeclarative5-dev-tools,
                systemd,
-Standards-Version: 3.9.4
-Homepage: https://launchpad.net/indicator-sound
-# If you aren't a member of ~indicator-applet-developers but need to upload
-# packaging changes, just go ahead.  ~indicator-applet-developers will notice
-# and sync up the code again.
-Vcs-Bzr: https://code.launchpad.net/~indicator-applet-developers/indicator-sound/trunk.13.04
-Vcs-Browser: https://bazaar.launchpad.net/~indicator-applet-developers/indicator-sound/trunk.13.04/files
+Standards-Version: 3.9.8
+Homepage: https://github.com/ArcticaProject/ayatana-indicator-sound
+Vcs-Git: git://cgit.arctica-project.org/ayatana/ayatana-indicator-sound.git
+Vcs-Browser: https://cgit.arctica-project.org/ayatana/ayatana-indicator-sound.git/
 
-Package: indicator-sound
+Package: ayatana-indicator-sound
 Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          pulseaudio,
-         gsettings-ubuntu-schemas (>= 0.0.1+14.04.20140224),
-         indicator-common,
+         ayatana-indicator-common,
 Recommends: unity-control-center | gnome-control-center | ubuntu-system-settings | pavucontrol | mate-media,
             accountsservice,
 Suggests: unity-greeter-session-broadcast,
-Description: System sound indicator.
- System sound indicator which provides easy control of the PulseAudio sound 
- daemon.
-
+Description: Ayatana Indicator for managing system sound
+ Ayatana Indicator Sound that provides easy control of the PulseAudio
+ sound daemon.

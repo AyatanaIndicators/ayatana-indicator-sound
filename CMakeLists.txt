@@ -1,10 +1,10 @@
-project(indicator-sound C CXX)
+project(ayatana-indicator-sound C CXX)
 cmake_minimum_required(VERSION 2.8.9)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" "${CMAKE_MODULE_PATH}")
 
 set(PACKAGE ${CMAKE_PROJECT_NAME})
-set(GETTEXT_PACKAGE indicator-sound)
+set(GETTEXT_PACKAGE "ayatana-indicator-sound")
 set(GNOMELOCALEDIR "${CMAKE_INSTALL_FULL_DATADIR}/locale")
 
 add_definitions( -DGETTEXT_PACKAGE="${GETTEXT_PACKAGE}" )
@@ -15,7 +15,7 @@ include(UseVala)
 
 # Workaround for libexecdir on debian
 if (EXISTS "/etc/debian_version") 
-  set(CMAKE_INSTALL_LIBEXECDIR ${CMAKE_INSTALL_LIBDIR})
+  set(CMAKE_INSTALL_LIBEXECDIR "${CMAKE_INSTALL_LIBDIR}")
   set(CMAKE_INSTALL_FULL_LIBEXECDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBEXECDIR}")
 endif()
 
@@ -25,16 +25,22 @@ set(SOURCE_BINARY_DIR "${CMAKE_BINARY_DIR}/src")
 set(PULSE_AUDIO_REQUIRED_VERSION 0.9.19)
 set(GLIB_2_0_REQUIRED_VERSION 2.32)
 set(GIO_2_0_REQUIRED_VERSION 2.25.13)
-set(URL_DISPATCHER_1_REQUIRED_VERSION 1)
 
 pkg_check_modules(
   PULSEAUDIO REQUIRED
   libpulse-mainloop-glib>=${PULSE_AUDIO_REQUIRED_VERSION}
   glib-2.0>=${GLIB_2_0_REQUIRED_VERSION}
   gio-unix-2.0>=${GIO_2_0_REQUIRED_VERSION}
-  url-dispatcher-1>=${URL_DISPATCHER_1_REQUIRED_VERSION}
 )
 include_directories(${PULSEAUDIO_INCLUDE_DIRS})
+
+set(URL_DISPATCHER_1_REQUIRED_VERSION 1)
+
+pkg_check_modules(
+  URLDISPATCHER
+  url-dispatcher-1>=${URL_DISPATCHER_1_REQUIRED_VERSION}
+)
+include_directories(${URLDISPATCHER_INCLUDE_DIRS})
 
 pkg_check_modules(
   SOUNDSERVICE REQUIRED
@@ -47,6 +53,8 @@ pkg_check_modules(
   accountsservice
 )
 include_directories(${SOUNDSERVICE_INCLUDE_DIRS})
+
+pkg_check_modules(UNITY_API libunity-api>=0.1.3)
 
 pkg_check_modules(
   TEST REQUIRED

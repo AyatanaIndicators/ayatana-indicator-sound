@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <policyconfig>
-        <action id="com.canonical.indicator.sound.AccountsService.ModifyOwnUser">
+        <action id="org.ayatana.indicator.sound.AccountsService.ModifyOwnUser">
                 <description>Set properties of own user</description>
                 <message>Authentication is required to set one's own indicator sound properties.</message>
                 <defaults>
@@ -11,7 +11,7 @@
                 </defaults>
         </action>
 
-        <action id="com.canonical.indicator.sound.AccountsService.ModifyAnyUser">
+        <action id="org.ayatana.indicator.sound.AccountsService.ModifyAnyUser">
                 <description>Set properties of any user</description>
                 <message>Authentication is required to set another user's indicator sound properties.</message>
                 <defaults>

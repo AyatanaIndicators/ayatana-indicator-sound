@@ -1,9 +1,0 @@
-description "Indicator Sound Service"
-
-start on indicator-services-start
-stop on desktop-end or indicator-services-end
-
-respawn
-respawn limit 30 10
-
-exec $SNAP@CMAKE_INSTALL_FULL_LIBEXECDIR@/indicator-sound/indicator-sound-service

@@ -112,7 +112,7 @@ class AccountsServiceUserTest : public ::testing::Test
 		const gchar * get_property_string (const gchar * name) {
 			GVariant * propval = g_dbus_proxy_call_sync(proxy,
 				"Get",
-				g_variant_new("(ss)", "com.canonical.indicator.sound.AccountsService", name),
+				g_variant_new("(ss)", "org.ayatana.indicator.sound.AccountsService", name),
 				G_DBUS_CALL_FLAGS_NONE,
 				-1, NULL, NULL
 				);
