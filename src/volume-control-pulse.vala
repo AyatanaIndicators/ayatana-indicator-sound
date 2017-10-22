@@ -58,7 +58,7 @@ public class VolumeControlPulse : VolumeControl
 	private bool _source_sink_mic_activated = false;
 
 	/** true when a microphone is active **/
-	public override bool active_mic { get; private set; default = false; }
+	public override bool active_mic { get; set; default = false; }
 
 	public VolumeControlPulse (IndicatorSound.Options options, PulseAudio.GLibMainLoop loop, AccountsServiceAccess? accounts_service_access)
 	{

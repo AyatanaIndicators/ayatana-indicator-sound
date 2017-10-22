@@ -66,7 +66,7 @@ public class MediaPlayerMpris: MediaPlayer {
 	}
 
 	public override string state {
-		get; private set; default = "Paused";
+		get; set; default = "Paused";
 	}
 
 	public override MediaPlayer.Track? current_track {
