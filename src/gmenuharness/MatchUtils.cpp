@@ -18,6 +18,8 @@
 
 #include <desktop/gmenuharness/MatchUtils.h>
 
+#include <functional>
+
 #include <desktop/util/ResourcePtr.h>
 
 using namespace std;
@@ -33,7 +35,7 @@ void waitForCore (GObject * obj, const string& signalName, unsigned int timeout)
     shared_ptr<GMainLoop> loop(g_main_loop_new(nullptr, false), &g_main_loop_unref);
 
     /* Our two exit criteria */
-    util::ResourcePtr<gulong, function<void(gulong)>> signal(
+    util::ResourcePtr<gulong, std::function<void(gulong)>> signal(
             g_signal_connect_swapped(obj, signalName.c_str(),
                                      G_CALLBACK(g_main_loop_quit), loop.get()),
             [obj](gulong s)
@@ -41,7 +43,7 @@ void waitForCore (GObject * obj, const string& signalName, unsigned int timeout)
                 g_signal_handler_disconnect(obj, s);
             });
 
-    util::ResourcePtr<guint, function<void(guint)>> timer(g_timeout_add(timeout,
+    util::ResourcePtr<guint, std::function<void(guint)>> timer(g_timeout_add(timeout,
             [](gpointer user_data) -> gboolean
             {
                 g_main_loop_quit((GMainLoop *)user_data);
