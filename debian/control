@@ -50,7 +50,7 @@ Depends: ${shlibs:Depends},
          ayatana-indicator-common,
 Recommends: unity-control-center | gnome-control-center | pavucontrol | mate-media,
             accountsservice,
-Suggests: unity-greeter-session-broadcast,
+Suggests: ayatana-greeter-session-broadcast,
 Description: Ayatana Indicator for managing system sound
  Ayatana Indicator Sound that provides easy control of the PulseAudio
  sound daemon.
