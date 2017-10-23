@@ -48,7 +48,7 @@ Depends: ${shlibs:Depends},
          ${misc:Depends},
          pulseaudio,
          ayatana-indicator-common,
-Recommends: unity-control-center | gnome-control-center | ubuntu-system-settings | pavucontrol | mate-media,
+Recommends: unity-control-center | gnome-control-center | pavucontrol | mate-media,
             accountsservice,
 Suggests: unity-greeter-session-broadcast,
 Description: Ayatana Indicator for managing system sound
