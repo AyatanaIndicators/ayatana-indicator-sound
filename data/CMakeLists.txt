@@ -76,11 +76,11 @@ install(
 
 set(
   INDICATOR_SOUND_XDG_AUTOSTART
-  "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound.desktop"
+  "${CMAKE_CURRENT_BINARY_DIR}/ayatana-indicator-sound.desktop"
 )
 
 configure_file(
-  "indicator-sound.desktop.in"
+  "ayatana-indicator-sound.desktop.in"
   ${INDICATOR_SOUND_XDG_AUTOSTART}
   @ONLY
 )
@@ -96,11 +96,11 @@ install(
 
 set(
   INDICATOR_SOUND_UPSTART_XDG_AUTOSTART
-  "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound.upstart.desktop"
+  "${CMAKE_CURRENT_BINARY_DIR}/ayatana-indicator-sound.upstart.desktop"
 )
 
 configure_file(
-  "indicator-sound.upstart.desktop.in"
+  "ayatana-indicator-sound.upstart.desktop.in"
   ${INDICATOR_SOUND_UPSTART_XDG_AUTOSTART}
   @ONLY
 )
@@ -108,7 +108,7 @@ configure_file(
 install(
   FILES "${INDICATOR_SOUND_UPSTART_XDG_AUTOSTART}"
   DESTINATION "${CMAKE_INSTALL_DATADIR}/upstart/xdg/autostart"
-  RENAME "indicator-sound.desktop"
+  RENAME "ayatana-indicator-sound.desktop"
 )
 
 ###########################
