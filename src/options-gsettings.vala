@@ -38,9 +38,9 @@ public class IndicatorSound.OptionsGSettings : Options
 #endif
         /** MAX VOLUME PROPERTY **/
 
-	private static const string AMP_dB_KEY = "amplified-volume-decibels";
-	private static const string NORMAL_dB_KEY = "normal-volume-decibels";
-	private static const string ALLOW_AMP_KEY = "allow-amplified-volume";
+	private const string AMP_dB_KEY = "amplified-volume-decibels";
+	private const string NORMAL_dB_KEY = "normal-volume-decibels";
+	private const string ALLOW_AMP_KEY = "allow-amplified-volume";
 
         private void init_max_volume() {
                 _settings.changed[NORMAL_dB_KEY].connect(() => update_max_volume());
@@ -69,8 +69,8 @@ public class IndicatorSound.OptionsGSettings : Options
 
 	/** LOUD VOLUME **/
 
-	private static const string LOUD_ENABLED_KEY = "warning-volume-enabled";
-	private static const string LOUD_DECIBEL_KEY = "warning-volume-decibels";
+	private const string LOUD_ENABLED_KEY = "warning-volume-enabled";
+	private const string LOUD_DECIBEL_KEY = "warning-volume-decibels";
 
         private void init_loud_volume() {
                 _settings.changed[LOUD_ENABLED_KEY].connect(() => update_loud_volume());
