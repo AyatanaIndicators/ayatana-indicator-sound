@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<policyconfig>
+    <!-- Same as org.freedesktop.accounts.user-administration, but we override
+         settings for the lightdm user in a pkla file. -->
+    <action id="org.ayatana.AccountsService.GreeterChangeAny">
+        <defaults>
+            <allow_any>no</allow_any>
+            <allow_inactive>no</allow_inactive>
+            <allow_active>auth_admin_keep</allow_active>
+        </defaults>
+    </action>
+
+    <!-- Normally anyone can read these, but for a little bit extra lock down,
+         disallow all access, but we'll let the lightdm user read them via the
+         pkla override. -->
+    <action id="org.ayatana.AccountsService.GreeterReadAny">
+        <defaults>
+            <allow_any>no</allow_any>
+            <allow_inactive>no</allow_inactive>
+            <allow_active>no</allow_active>
+        </defaults>
+    </action>
+</policyconfig>

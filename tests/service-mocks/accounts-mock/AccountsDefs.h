@@ -28,7 +28,7 @@ namespace testing
     constexpr const char ACCOUNTS_SERVICE[] = "org.freedesktop.Accounts";
     constexpr const char USER_PATH[] = "/org/freedesktop/Accounts/UserTest";
     constexpr const char ACCOUNTS_PATH[] = "/org/freedesktop/Accounts";
-    constexpr const char ACCOUNTS_SOUND_INTERFACE[] = "com.ubuntu.AccountsService.Sound";
+    constexpr const char ACCOUNTS_SOUND_INTERFACE[] = "org.ayatana.AccountsService.Sound";
 } // namespace testing
 
 } // namespace indicators

@@ -1,0 +1,13 @@
+[Allow greeter to set fields]
+Identity=unix-user:lightdm
+Action=org.ayatana.AccountsService.GreeterChangeAny
+ResultAny=no
+ResultInactive=yes
+ResultActive=yes
+
+[Allow greeter to read fields]
+Identity=unix-user:lightdm
+Action=org.ayatana.AccountsService.GreeterReadAny
+ResultAny=yes
+ResultInactive=yes
+ResultActive=yes

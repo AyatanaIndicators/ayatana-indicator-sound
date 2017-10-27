@@ -142,7 +142,7 @@ public class AccountsServiceAccess : Object
 			string user_path;
 			if (user_path_variant.check_format_string ("(o)", true)) {
 				user_path_variant.get ("(o)", out user_path);
-				_user_proxy = yield DBusProxy.create_for_bus (BusType.SYSTEM, DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, "org.freedesktop.Accounts", user_path, "com.ubuntu.AccountsService.Sound");
+				_user_proxy = yield DBusProxy.create_for_bus (BusType.SYSTEM, DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, "org.freedesktop.Accounts", user_path, "org.ayatana.AccountsService.Sound");
 			} else {
 				warning ("Unable to find user name after calling FindUserByName. Expected type: %s and obtained %s", "(o)", user_path_variant.get_type_string () );
 				return;

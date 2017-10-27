@@ -1,5 +1,5 @@
 <node>
-  <interface name="com.ubuntu.AccountsService.Sound">
+  <interface name="org.ayatana.AccountsService.Sound">
     <method name="Set">
       <arg direction="in" type="s" name="interface" />
       <arg direction="in" type="s" name="property" />

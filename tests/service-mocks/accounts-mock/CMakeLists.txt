@@ -7,14 +7,14 @@ include_directories(${Qt5DBus_INCLUDE_DIRS}
 
 add_definitions(-DQT_NO_KEYWORDS=1)
 
-set(dbusinterface_sound_xml "com.ubuntu.AccountsService.Sound.Mock.xml")
+set(dbusinterface_sound_xml "org.ayatana.AccountsService.Sound.Mock.xml")
 set_source_files_properties(${dbusinterface_sound_xml} PROPERTIES
   CLASSNAME AccountsServiceSoundMockInterface)
 
 qt5_add_dbus_interface(interface_files ${dbusinterface_sound_xml} accountsservice_sound_interface)
 
 qt5_add_dbus_adaptor(adaptor_files
-    com.ubuntu.AccountsService.Sound.Mock.xml
+    org.ayatana.AccountsService.Sound.Mock.xml
     AccountsServiceSoundMock.h
     ubuntu::indicators::testing::AccountsServiceSoundMock
     AccountsServiceSoundMockAdaptor)
