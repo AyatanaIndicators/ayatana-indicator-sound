@@ -27,9 +27,7 @@ tests/notifications-test.cc
 tests/sound-menu.cc
 tests/volume-control-test.cc
 src/accounts-service-access.vala
-src/accounts-service-privacy-settings.vala
 src/accounts-service-sound-settings.vala
-src/accounts-service-system-sound-settings.vala
 src/accounts-service-user.vala
 src/freedesktop-interfaces.vala
 src/greeter-broadcast.vala
