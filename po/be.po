@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-10-12 07:52+0200\n"
-"PO-Revision-Date: 2017-10-19 17:44+0000\n"
+"PO-Revision-Date: 2017-11-17 05:24+0000\n"
 "Last-Translator: Viktar Vauchkevich <victorenator@gmail.com>\n"
 "Language-Team: Belarusian <https://hosted.weblate.org/projects/ayatana-"
 "indicators/sound-applet/be/>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<="
 "4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 2.17\n"
+"X-Generator: Weblate 2.18-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
@@ -125,20 +125,28 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
+"Як доўга памятаць адабрэнне карыстальніка ў дыялогу пацверджання, які "
+"абмяркоўваецца ў апісанні «warning-volume-enabled».\n"
+"\n"
+"Агаданае значэнне (72 000 секунд) адпавядае 20 гадзінам, прапанаваным "
+"стандартам ЭЗ EN 60950-1/Al2: «Пацвярджэнне ня трэба паўтараць часцей, чым "
+"раз за кожныя 20 гадзін кумулятыўнага часу праслухоўвання.»"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:15
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "Узровень гучнасці, які пераключае папярэджанне аб высокай гучнасці."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:16
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
 msgstr ""
+"Узровень гучнасці, які пераключае папярэджанне аб высокай гучнасці. Глядзіце "
+"warning-volume-enabled."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:17
 msgid "Normal output volume."
-msgstr ""
+msgstr "Звычайная гучнасць выхаду."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:18
 msgid ""
@@ -151,12 +159,22 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
+"Максімальная гучнасць, калі налада com.ubuntu.sound «allow-amplified-volume» "
+"адключаная.\n"
+"\n"
+"Каб адпавядаць стандарту ЭЗ EN 60950-1/Al2, гэта значэнне ў дэцыбелах не "
+"павінна перавышаць узровень, што выклікае выхад гуку на навушнікі з гукавым "
+"ціскам ў 100 дБа ці электрычнай магутнасцю ў 150 мВ.\n"
+"\n"
+"Агаданае значэнне (0) адпавядае значэнню PA_VOLUME_NORM PulseAudio."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:23
 msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
+"Выхадная гучнасць для ўжывання, калі налада «allow-amplified-volume» "
+"com.ubuntu.sound уключаная."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:24
 msgid ""
@@ -169,49 +187,57 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
+"Максімальная гучнасць, калі налада com.ubuntu.sound «allow-amplified-volume» "
+"уключаная.\n"
+"\n"
+"Каб адпавядаць стандарту ЭЗ EN 60950-1/Al2, гэта значэнне ў дэцыбелах не "
+"павінна перавышаць узровень, што выклікае выхад гуку на навушнікі з гукавым "
+"ціскам ў 100 дБа ці электрычнай магутнасцю ў 150 мВ.\n"
+"\n"
+"Агаданае значэнне (11) адпавядае значэнню PA_VOLUME_UI_MAX PulseAudio."
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
 #: ../src/warn-notification.vala:31 ../src/sound-menu.vala:57
 #: ../src/sound-menu.vala:251 ../src/service.vala:296 ../src/service.vala:299
 msgid "Volume"
-msgstr ""
+msgstr "Гучнасць"
 
 #: ../src/info-notification.vala:55
 msgid "Speakers"
-msgstr ""
+msgstr "Дынамікі"
 
 #: ../src/info-notification.vala:57
 msgid "Headphones"
-msgstr ""
+msgstr "Навушнікі"
 
 #: ../src/info-notification.vala:59
 msgid "Bluetooth headphones"
-msgstr ""
+msgstr "Bluetooth-навушнікі"
 
 #: ../src/info-notification.vala:61
 msgid "Bluetooth speaker"
-msgstr ""
+msgstr "Bluetooth-дынамік"
 
 #: ../src/info-notification.vala:63
 msgid "Usb speaker"
-msgstr ""
+msgstr "USB-дынамік"
 
 #: ../src/info-notification.vala:65
 msgid "Usb headphones"
-msgstr ""
+msgstr "USB-навушнікі"
 
 #: ../src/info-notification.vala:67
 msgid "HDMI speaker"
-msgstr ""
+msgstr "HDMI-дынамік"
 
 #: ../src/info-notification.vala:69
 msgid "HDMI headphones"
-msgstr ""
+msgstr "HDMI-навушнікі"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: ../src/warn-notification.vala:32 ../src/sound-menu.vala:146
 msgid "High volume can damage your hearing."
-msgstr ""
+msgstr "Высокая гучнасць можа пашкодзіць слых."
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
@@ -223,60 +249,60 @@ msgstr "Скасаваць"
 
 #: ../src/sound-menu.vala:50
 msgid "Mute"
-msgstr ""
+msgstr "Прыглушыць"
 
 #: ../src/sound-menu.vala:52
 msgid "Silent Mode"
-msgstr ""
+msgstr "Бясшумны рэжым"
 
 #: ../src/sound-menu.vala:66
 msgid "Sound Settings…"
-msgstr ""
+msgstr "Налады гуку…"
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
-msgstr ""
+msgstr "Гучнасць мікрафона"
 
 #: ../src/sound-menu.vala:254
 msgid "Volume (Headphones)"
-msgstr ""
+msgstr "Гучнасць (навушнікі)"
 
 #: ../src/sound-menu.vala:257
 msgid "Volume (Bluetooth)"
-msgstr ""
+msgstr "Гучнасць (Bluetooth)"
 
 #: ../src/sound-menu.vala:260
 msgid "Volume (Usb)"
-msgstr ""
+msgstr "Гучнасць (USB)"
 
 #: ../src/sound-menu.vala:263
 msgid "Volume (HDMI)"
-msgstr ""
+msgstr "Гучнасць (HDMI)"
 
 #: ../src/sound-menu.vala:266
 msgid "Volume (Bluetooth headphones)"
-msgstr ""
+msgstr "Гучнасць (bluetooth-навушнікі)"
 
 #: ../src/sound-menu.vala:269
 msgid "Volume (Usb headphones)"
-msgstr ""
+msgstr "Гучнасць (USB-навушнікі)"
 
 #: ../src/sound-menu.vala:272
 msgid "Volume (HDMI headphones)"
-msgstr ""
+msgstr "Гучнасць (HDMI-навушнікі)"
 
 #: ../src/sound-menu.vala:445
 msgid "Choose Playlist"
-msgstr ""
+msgstr "Абраць плэйліст"
 
 #: ../src/service.vala:293
 msgid "Volume (muted)"
-msgstr ""
+msgstr "Гучнасць (прыглушаная)"
 
 #: ../src/service.vala:296
 msgid "silent"
-msgstr ""
+msgstr "бясшумны"
 
 #: ../src/service.vala:304
 msgid "Sound"
-msgstr ""
+msgstr "Гук"
