@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-10-12 07:52+0200\n"
-"PO-Revision-Date: 2017-11-12 21:48+0000\n"
+"PO-Revision-Date: 2017-11-20 01:47+0000\n"
 "Last-Translator: Allan Nordhøy <epost@anotheragency.no>\n"
 "Language-Team: Norwegian Bokmål <https://hosted.weblate.org/projects/ayatana-"
 "indicators/sound-applet/nb/>\n"
@@ -21,24 +21,26 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
-msgstr ""
+msgstr "Sett egenskaper for egen bruker"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:6
 msgid "Authentication is required to set one's own indicator sound properties."
 msgstr ""
+"Identitetsbekreftelse kreves for å sette egenskaper for egne lydindikatorer."
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:15
 msgid "Set properties of any user"
-msgstr ""
+msgstr "Sett egenskaper for vilkårlig bruker"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:16
 msgid ""
 "Authentication is required to set another user's indicator sound properties."
 msgstr ""
+"Identietsbekreftelse kreves for å sette egenskaper en brukers lydindikator."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:1
 msgid "A list of applications blacklisted from the sound menu"
-msgstr ""
+msgstr "En liste over programmer som er svartelistet fra lydmenyen"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:2
 msgid ""
@@ -47,12 +49,17 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
+"Hver mediaavspiller som følger MPRIS2-spesifikasjonene vil opptre automatisk "
+"i menyen. Denne tabellen burde inne holde skrivebordsfilnavnene (minus "
+".desktop-endelsen) til programmer som ikke skal inkluderes i lydmenyen."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
 msgstr ""
+"En liste over programmet som på noe tidspunkt har registrert seg med "
+"lydmenyen"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:4
 msgid ""
@@ -61,11 +68,16 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menU. This allows the menu remember and display offlined applications."
 msgstr ""
+"Hver mediaavspiller som følger MPRIS2-spesifikasjonene vil opptre automatisk "
+"i menyen. Denne tabellen burde inne holde skrivebordsfilnavnene (minus "
+".desktop-endelsen) til programmer på noe punkt har opptrådt i menyen. Dette "
+"tillater at menyen husker og viser programmer som ikke lenger er i vist."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
 msgstr ""
+"En liste over programmer som skal avspillerkontroller synlige hele tiden"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:6
 msgid "Initial setting for global mute (mute all) on the menu"
