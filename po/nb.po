@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-10-12 07:52+0200\n"
-"PO-Revision-Date: 2017-11-20 01:47+0000\n"
+"PO-Revision-Date: 2017-11-25 01:48+0000\n"
 "Last-Translator: Allan Nordhøy <epost@anotheragency.no>\n"
 "Language-Team: Norwegian Bokmål <https://hosted.weblate.org/projects/ayatana-"
 "indicators/sound-applet/nb/>\n"
@@ -208,7 +208,7 @@ msgstr ""
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: ../src/warn-notification.vala:52
 msgid "Cancel"
