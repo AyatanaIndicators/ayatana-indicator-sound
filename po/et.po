@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-10-12 07:52+0200\n"
-"PO-Revision-Date: 2017-11-06 19:46+0000\n"
+"PO-Revision-Date: 2017-11-26 09:46+0000\n"
 "Last-Translator: Kristjan Räts <kristjanrats@gmail.com>\n"
 "Language-Team: Estonian <https://hosted.weblate.org/projects/ayatana-"
 "indicators/sound-applet/et/>\n"
@@ -25,11 +25,11 @@ msgstr "Määra oma konto sätted"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:6
 msgid "Authentication is required to set one's own indicator sound properties."
-msgstr ""
+msgstr "Autentimine on vajalik oma indikaatori heli sätete määramiseks."
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:15
 msgid "Set properties of any user"
-msgstr ""
+msgstr "Määra kõigi kasutajate sätted"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:16
 msgid ""
