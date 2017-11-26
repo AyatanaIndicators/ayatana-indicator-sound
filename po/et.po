@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-10-12 07:52+0200\n"
-"PO-Revision-Date: 2017-11-26 09:46+0000\n"
+"PO-Revision-Date: 2017-11-27 13:18+0000\n"
 "Last-Translator: Kristjan Räts <kristjanrats@gmail.com>\n"
 "Language-Team: Estonian <https://hosted.weblate.org/projects/ayatana-"
 "indicators/sound-applet/et/>\n"
@@ -35,10 +35,11 @@ msgstr "Määra kõigi kasutajate sätted"
 msgid ""
 "Authentication is required to set another user's indicator sound properties."
 msgstr ""
+"Teise kasutaja indikaatorhelide sätete määramiseks on vajalik autentimine."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:1
 msgid "A list of applications blacklisted from the sound menu"
-msgstr ""
+msgstr "Loetelu rakendustest, mis on helide menüüs keelatud"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:2
 msgid ""
@@ -47,12 +48,15 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
+"Kõik meediapleierid, mis vastavad MPRIS2 spetsifikatsioonile ilmuvad "
+"automaatselt menüüs. Selles massiivis peaksid olema nende desktop-failide "
+"nimed (välja arvatud laiend .desktop), mis menüüsse ilmuda ei tohiks."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
-msgstr ""
+msgstr "Loetelu rakendustest, mis on mingil hetkel registreeritud heli menüüs"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:4
 msgid ""
@@ -61,6 +65,10 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menU. This allows the menu remember and display offlined applications."
 msgstr ""
+"Kõik meediapleierid, mis vastavad MPRIS2 spetsifikatsioonile ilmuvad "
+"automaatselt menüüs. Selles massiivis peaksid olema nende desktop-failide "
+"nimed (välja arvatud laiend .desktop), mis on mingil hetkel menüüs ilmunud. "
+"See lubab menüül pidada meeles ja kuvada ühenduseta rakendusi."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:5
 msgid ""
