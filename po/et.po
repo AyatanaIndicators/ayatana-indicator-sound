@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-10-12 07:52+0200\n"
-"PO-Revision-Date: 2017-11-27 13:18+0000\n"
+"PO-Revision-Date: 2017-11-28 12:55+0000\n"
 "Last-Translator: Kristjan Räts <kristjanrats@gmail.com>\n"
 "Language-Team: Estonian <https://hosted.weblate.org/projects/ayatana-"
 "indicators/sound-applet/et/>\n"
@@ -204,7 +204,7 @@ msgstr ""
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
-msgstr ""
+msgstr "ÕK"
 
 #: ../src/warn-notification.vala:52
 msgid "Cancel"
