@@ -59,7 +59,7 @@ msgid ""
 "Each media player which abides by the MPRIS2 spec will automatically appear "
 "in the menu. This array should contain the desktop file names (minus ."
 "desktop suffix) of applications which have at some point appeared in the "
-"menU. This allows the menu remember and display offlined applications."
+"menu. This allows the menu remember and display offlined applications."
 msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml.h:5
