@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-10-12 07:52+0200\n"
+"POT-Creation-Date: 2017-11-29 13:09+0100\n"
 "PO-Revision-Date: 2017-10-12 07:52+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -16,28 +16,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
-msgid "Set properties of own user"
-msgstr ""
-
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:6
-msgid "Authentication is required to set one's own indicator sound properties."
-msgstr ""
-
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:15
-msgid "Set properties of any user"
-msgstr ""
-
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:16
-msgid ""
-"Authentication is required to set another user's indicator sound properties."
-msgstr ""
-
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:1
+#: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
 msgstr ""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:2
+#: ../data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
 "Each media player which abides by the MPRIS2 spec will automatically appear "
 "in the menu. This array should contain the desktop file names (minus ."
@@ -45,13 +28,13 @@ msgid ""
 "sound menu."
 msgstr ""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:3
+#: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
 msgstr ""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:4
+#: ../data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
 "Each media player which abides by the MPRIS2 spec will automatically appear "
 "in the menu. This array should contain the desktop file names (minus ."
@@ -59,28 +42,33 @@ msgid ""
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:5
+#: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
 msgstr ""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:6
+#: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
 msgstr ""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:7
+#: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
 msgstr ""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:8
+#: ../data/org.ayatana.indicator.sound.gschema.xml:9
+#, no-c-format
+msgid "Whether the volume slider allows setting the volume above 100%"
+msgstr ""
+
+#: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
 msgstr ""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:9
+#: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
 msgstr ""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:10
+#: ../data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
 "If enabled on a device, a confirmation dialog will be presented to the user "
 "if (a) something is plugged into the headphone jack (ie, no warnings for "
@@ -90,11 +78,11 @@ msgid ""
 "warning-volume-approval-ttl seconds."
 msgstr ""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:11
+#: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:12
+#: ../data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
 "How long to remember a user's approval of the confirmation dialog discussed "
 "in the description of 'warning-volume-enabled'.\n"
@@ -104,21 +92,21 @@ msgid ""
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:15
+#: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
 msgstr ""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:16
+#: ../data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
 msgstr ""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:17
+#: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
 msgstr ""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:18
+#: ../data/org.ayatana.indicator.sound.gschema.xml:20
 msgid ""
 "The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
 "is disabled.\n"
@@ -130,13 +118,13 @@ msgid ""
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:23
+#: ../data/org.ayatana.indicator.sound.gschema.xml:25
 msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:24
+#: ../data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
 "The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
 "is enabled.\n"
@@ -149,8 +137,9 @@ msgid ""
 msgstr ""
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
-#: ../src/warn-notification.vala:31 ../src/sound-menu.vala:57
-#: ../src/sound-menu.vala:251 ../src/service.vala:296 ../src/service.vala:299
+#: ../src/service.vala:302 ../src/service.vala:305 ../src/sound-menu.vala:57
+#: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
+#, c-format
 msgid "Volume"
 msgstr ""
 
@@ -186,17 +175,16 @@ msgstr ""
 msgid "HDMI headphones"
 msgstr ""
 
-#. NOTE: Action doesn't really exist, just used to find below when removing
-#: ../src/warn-notification.vala:32 ../src/sound-menu.vala:146
-msgid "High volume can damage your hearing."
+#: ../src/service.vala:299
+msgid "Volume (muted)"
 msgstr ""
 
-#: ../src/warn-notification.vala:49
-msgid "OK"
+#: ../src/service.vala:302
+msgid "silent"
 msgstr ""
 
-#: ../src/warn-notification.vala:52
-msgid "Cancel"
+#: ../src/service.vala:310
+msgid "Sound"
 msgstr ""
 
 #: ../src/sound-menu.vala:50
@@ -213,6 +201,11 @@ msgstr ""
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
+msgstr ""
+
+#. NOTE: Action doesn't really exist, just used to find below when removing
+#: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
+msgid "High volume can damage your hearing."
 msgstr ""
 
 #: ../src/sound-menu.vala:254
@@ -247,14 +240,10 @@ msgstr ""
 msgid "Choose Playlist"
 msgstr ""
 
-#: ../src/service.vala:293
-msgid "Volume (muted)"
+#: ../src/warn-notification.vala:49
+msgid "OK"
 msgstr ""
 
-#: ../src/service.vala:296
-msgid "silent"
-msgstr ""
-
-#: ../src/service.vala:304
-msgid "Sound"
+#: ../src/warn-notification.vala:52
+msgid "Cancel"
 msgstr ""

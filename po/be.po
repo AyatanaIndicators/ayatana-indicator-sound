@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-10-12 07:52+0200\n"
+"POT-Creation-Date: 2017-11-29 13:08+0100\n"
 "PO-Revision-Date: 2017-11-17 05:24+0000\n"
 "Last-Translator: Viktar Vauchkevich <victorenator@gmail.com>\n"
 "Language-Team: Belarusian <https://hosted.weblate.org/projects/ayatana-"
@@ -16,35 +16,15 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<="
-"4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 2.18-dev\n"
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
-msgid "Set properties of own user"
-msgstr "Задаць уласцівасці ўласнага карыстальніка"
-
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:6
-msgid "Authentication is required to set one's own indicator sound properties."
-msgstr ""
-"Аўтэнтыфікацыя неабходная для задання ўласцівасцяў уласнага індыкатара гуку."
-
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:15
-msgid "Set properties of any user"
-msgstr "Задаць уласцівасці любога карыстальніка"
-
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:16
-msgid ""
-"Authentication is required to set another user's indicator sound properties."
-msgstr ""
-"Аўтэнтыфікацыя неабходная для задання ўласцівасцяў індыкатара гуку іншыга "
-"карыстальніка."
-
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:1
+#: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
 msgstr "Спіс прыкладанняў, што трапілі ў чорны спіс з меню гука"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:2
+#: ../data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
 "Each media player which abides by the MPRIS2 spec will automatically appear "
 "in the menu. This array should contain the desktop file names (minus ."
@@ -55,13 +35,13 @@ msgstr ""
 "з'явіцца ў меню. Гэтае мноства павінна ўтрымліваць назвы desktop-файлаў "
 "прыкладанняў, якія не патрэбна ўключаць у меню гуку."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:3
+#: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
 msgstr "Спіс прыкладанняў, якія калісьці рэгістраваліся ў меню гуку"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:4
+#: ../data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
 "Each media player which abides by the MPRIS2 spec will automatically appear "
 "in the menu. This array should contain the desktop file names (minus ."
@@ -73,30 +53,35 @@ msgstr ""
 "прыкладанняў, якія калісьці рэгістраваліся ў меню. Гэта дазваляе меню "
 "запамінаць і адлюстроўваць незапушчаныя прыкладанні."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:5
+#: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
 msgstr ""
 "Спіс прыкладанняў, якія будуць мець бачныя ўвесь час элементы кіравання "
 "плэерам"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:6
+#: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
 msgstr "Пачатковая налада глабальнага прыглушэння (прыглушыць усіх) ў меню"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:7
+#: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
 msgstr "На запуску гучнасць не павінна быць прыглушаная."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:8
+#: ../data/org.ayatana.indicator.sound.gschema.xml:9
+#, no-c-format
+msgid "Whether the volume slider allows setting the volume above 100%"
+msgstr ""
+
+#: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
 msgstr "Паказваць ці не індыкатар гуку ў панэлі меню."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:9
+#: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
 msgstr "Паказваць ці не папярэджанні аб высокай гучнасці."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:10
+#: ../data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
 "If enabled on a device, a confirmation dialog will be presented to the user "
 "if (a) something is plugged into the headphone jack (ie, no warnings for "
@@ -111,12 +96,12 @@ msgstr ""
 "карыстальнік спрабуе задаць гучнасць больш чым warning-volume-decibels; г) "
 "карыстальнік не даў адабрэнне ў апошнія warning-volume-approval-ttl секунд."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:11
+#: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
 "Колькі секунд варта памятаць адабрэнне карыстальнікам папярэджання гучнасці."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:12
+#: ../data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
 "How long to remember a user's approval of the confirmation dialog discussed "
 "in the description of 'warning-volume-enabled'.\n"
@@ -132,11 +117,11 @@ msgstr ""
 "стандартам ЭЗ EN 60950-1/Al2: «Пацвярджэнне ня трэба паўтараць часцей, чым "
 "раз за кожныя 20 гадзін кумулятыўнага часу праслухоўвання.»"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:15
+#: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
 msgstr "Узровень гучнасці, які пераключае папярэджанне аб высокай гучнасці."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:16
+#: ../data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
@@ -144,11 +129,11 @@ msgstr ""
 "Узровень гучнасці, які пераключае папярэджанне аб высокай гучнасці. Глядзіце "
 "warning-volume-enabled."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:17
+#: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
 msgstr "Звычайная гучнасць выхаду."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:18
+#: ../data/org.ayatana.indicator.sound.gschema.xml:20
 msgid ""
 "The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
 "is disabled.\n"
@@ -168,15 +153,15 @@ msgstr ""
 "\n"
 "Агаданае значэнне (0) адпавядае значэнню PA_VOLUME_NORM PulseAudio."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:23
+#: ../data/org.ayatana.indicator.sound.gschema.xml:25
 msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
-"Выхадная гучнасць для ўжывання, калі налада «allow-amplified-volume» "
-"com.ubuntu.sound уключаная."
+"Выхадная гучнасць для ўжывання, калі налада «allow-amplified-volume» com."
+"ubuntu.sound уключаная."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml.h:24
+#: ../data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
 "The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
 "is enabled.\n"
@@ -197,8 +182,9 @@ msgstr ""
 "Агаданае значэнне (11) адпавядае значэнню PA_VOLUME_UI_MAX PulseAudio."
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
-#: ../src/warn-notification.vala:31 ../src/sound-menu.vala:57
-#: ../src/sound-menu.vala:251 ../src/service.vala:296 ../src/service.vala:299
+#: ../src/service.vala:302 ../src/service.vala:305 ../src/sound-menu.vala:57
+#: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
+#, c-format
 msgid "Volume"
 msgstr "Гучнасць"
 
@@ -234,18 +220,17 @@ msgstr "HDMI-дынамік"
 msgid "HDMI headphones"
 msgstr "HDMI-навушнікі"
 
-#. NOTE: Action doesn't really exist, just used to find below when removing
-#: ../src/warn-notification.vala:32 ../src/sound-menu.vala:146
-msgid "High volume can damage your hearing."
-msgstr "Высокая гучнасць можа пашкодзіць слых."
+#: ../src/service.vala:299
+msgid "Volume (muted)"
+msgstr "Гучнасць (прыглушаная)"
 
-#: ../src/warn-notification.vala:49
-msgid "OK"
-msgstr "Добра"
+#: ../src/service.vala:302
+msgid "silent"
+msgstr "бясшумны"
 
-#: ../src/warn-notification.vala:52
-msgid "Cancel"
-msgstr "Скасаваць"
+#: ../src/service.vala:310
+msgid "Sound"
+msgstr "Гук"
 
 #: ../src/sound-menu.vala:50
 msgid "Mute"
@@ -262,6 +247,11 @@ msgstr "Налады гуку…"
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
 msgstr "Гучнасць мікрафона"
+
+#. NOTE: Action doesn't really exist, just used to find below when removing
+#: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
+msgid "High volume can damage your hearing."
+msgstr "Высокая гучнасць можа пашкодзіць слых."
 
 #: ../src/sound-menu.vala:254
 msgid "Volume (Headphones)"
@@ -295,14 +285,29 @@ msgstr "Гучнасць (HDMI-навушнікі)"
 msgid "Choose Playlist"
 msgstr "Абраць плэйліст"
 
-#: ../src/service.vala:293
-msgid "Volume (muted)"
-msgstr "Гучнасць (прыглушаная)"
+#: ../src/warn-notification.vala:49
+msgid "OK"
+msgstr "Добра"
 
-#: ../src/service.vala:296
-msgid "silent"
-msgstr "бясшумны"
+#: ../src/warn-notification.vala:52
+msgid "Cancel"
+msgstr "Скасаваць"
 
-#: ../src/service.vala:304
-msgid "Sound"
-msgstr "Гук"
+#~ msgid "Set properties of own user"
+#~ msgstr "Задаць уласцівасці ўласнага карыстальніка"
+
+#~ msgid ""
+#~ "Authentication is required to set one's own indicator sound properties."
+#~ msgstr ""
+#~ "Аўтэнтыфікацыя неабходная для задання ўласцівасцяў уласнага індыкатара "
+#~ "гуку."
+
+#~ msgid "Set properties of any user"
+#~ msgstr "Задаць уласцівасці любога карыстальніка"
+
+#~ msgid ""
+#~ "Authentication is required to set another user's indicator sound "
+#~ "properties."
+#~ msgstr ""
+#~ "Аўтэнтыфікацыя неабходная для задання ўласцівасцяў індыкатара гуку іншыга "
+#~ "карыстальніка."
