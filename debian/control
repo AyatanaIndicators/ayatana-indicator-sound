@@ -1,6 +1,6 @@
 Source: ayatana-indicator-sound
 Section: sound
-Priority: extra
+Priority: optional
 Maintainer: Mike Gabriel <mike.gabriel@das-netzwerkteam.de>
 Build-Depends: debhelper (>= 9.0),
                cmake,
