@@ -7,6 +7,10 @@ set(HEADER_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.h")
 set(SYMBOLS_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.def")
 set(VAPI_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.vapi")
 
+if(URLDISPATCHER_FOUND)
+    add_definitions( -DHAS_URLDISPATCHER )
+endif()
+
 if(EXISTS "/usr/share/glib-2.0/schemas/com.ubuntu.sound.gschema.xml")
   add_definitions( -DHAS_UBUNTU_SOUND_SCHEMA )
 endif() 
@@ -57,23 +61,46 @@ vala_add(ayatana-indicator-sound-service
   DEPENDS
     notification
 )
-vala_add(ayatana-indicator-sound-service
-  service.vala
-  DEPENDS
-    sound-menu
-    volume-control
-    volume-control-pulse
-    notification
-    info-notification
-    volume-warning
-    options
-    options-gsettings
-    media-player
-    media-player-list
-    mpris2-interfaces
-    accounts-service-user
-    accounts-service-access
-)
+if(URLDISPATCHER_FOUND)
+    vala_add(ayatana-indicator-sound-service
+      service.vala
+      DEPENDS
+        sound-menu
+        volume-control
+        volume-control-pulse
+        notification
+        info-notification
+        volume-warning
+        options
+        options-gsettings
+        media-player
+        media-player-list
+        mpris2-interfaces
+        accounts-service-user
+        accounts-service-access
+      OPTIONS
+        --pkg=url-dispatcher
+    )
+else()
+    vala_add(ayatana-indicator-sound-service
+      service.vala
+      DEPENDS
+        sound-menu
+        volume-control
+        volume-control-pulse
+        notification
+        info-notification
+        volume-warning
+        options
+        options-gsettings
+        media-player
+        media-player-list
+        mpris2-interfaces
+        accounts-service-user
+        accounts-service-access
+    )
+endif()
+
 vala_add(ayatana-indicator-sound-service
   options.vala
   DEPENDS
@@ -136,25 +163,13 @@ vala_add(ayatana-indicator-sound-service
     media-player
     mpris2-interfaces
 )
-if(URLDISPATCHER_FOUND)
-	vala_add(ayatana-indicator-sound-service
-	  media-player-user.vala
-	  DEPENDS
-	    media-player
-	    accounts-service-sound-settings
-	    greeter-broadcast
-	  OPTIONS
-	    --pkg=url-dispatcher
-	)
-else()
-	vala_add(ayatana-indicator-sound-service
-	  media-player-user.vala
-	  DEPENDS
-	    media-player
-	    accounts-service-sound-settings
-	    greeter-broadcast
-	)
-endif()
+vala_add(ayatana-indicator-sound-service
+  media-player-user.vala
+  DEPENDS
+    media-player
+    accounts-service-sound-settings
+    greeter-broadcast
+)
 vala_add(ayatana-indicator-sound-service
   media-player-list.vala
   DEPENDS

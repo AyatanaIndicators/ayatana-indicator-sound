@@ -191,7 +191,7 @@ public class IndicatorSound.Service: Object {
 		{ "root", null, null, "@a{sv} {}", null },
 		{ "scroll", activate_scroll_action, "i", null, null },
 		{ "desktop-settings", activate_desktop_settings, null, null, null },
-#if URLDISPATCHER_FOUND
+#if HAS_URLDISPATCHER
 		{ "phone-settings", activate_phone_settings, null, null, null },
 #endif
 		{ "indicator-shown", null, null, "@b false", null },
@@ -253,7 +253,7 @@ public class IndicatorSound.Service: Object {
 		unowned string env = Environment.get_variable ("DESKTOP_SESSION");
 		string cmd;
 
-#if URLDISPATCHER_FOUND
+#if HAS_URLDISPATCHER
 		if (Environment.get_variable ("MIR_SOCKET") != null)
 		{
 			UrlDispatch.send ("settings:///system/sound");
@@ -277,7 +277,7 @@ public class IndicatorSound.Service: Object {
 		}
 	}
 
-#if URLDISPATCHER_FOUND
+#if HAS_URLDISPATCHER
 	void activate_phone_settings (SimpleAction action, Variant? param) {
 		UrlDispatch.send ("settings:///system/sound");
 	}
