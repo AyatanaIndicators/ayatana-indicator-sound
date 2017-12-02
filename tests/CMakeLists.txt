@@ -282,7 +282,7 @@ target_link_libraries (
 )
 
 # Split tests to work around libaccountservice sucking
-add_test(indcator-test
+add_test(indicator-test
     indicator-test
 )
 
