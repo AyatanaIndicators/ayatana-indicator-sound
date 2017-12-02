@@ -628,7 +628,7 @@ TEST_F(TestIndicator, DesktopAddMprisPlayer)
             ).match());
 }
 
-TEST_F(TestIndicator, DesktopMprisPlayersPlaybackControls)
+TEST_F(TestIndicator, DISABLED_DesktopMprisPlayersPlaybackControls)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -1387,7 +1387,7 @@ TEST_F(TestIndicator, DesktopMprisPlayerButtonsState)
         ).match());
 }
 
-TEST_F(TestIndicator, DesktopChangeRoleVolume)
+TEST_F(TestIndicator, DISABLED_DesktopChangeRoleVolume)
 {
     double INITIAL_VOLUME = 0.0;
 
