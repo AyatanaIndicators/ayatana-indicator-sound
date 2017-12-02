@@ -74,7 +74,7 @@ class NotificationsTest : public ::testing::Test
             g_object_add_weak_pointer(G_OBJECT(session), (gpointer *)&session);
 
             /* This is done in main.c */
-            notify_init("indicator-sound");
+            notify_init("ayatana-indicator-sound");
         }
 
         virtual void TearDown() {
@@ -253,7 +253,7 @@ TEST_F(NotificationsTest, VolumeChanges) {
     loop(50);
     auto notev = notifications->getNotifications();
     ASSERT_EQ(1, notev.size());
-    EXPECT_EQ("indicator-sound", notev[0].app_name);
+    EXPECT_EQ("ayatana-indicator-sound", notev[0].app_name);
     EXPECT_EQ("Volume", notev[0].summary);
     EXPECT_EQ(0, notev[0].actions.size());
     EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-private-synchronous"]);
@@ -501,7 +501,7 @@ TEST_F(NotificationsTest, ExtendendVolumeNotification) {
     loop(50);
     auto notev = notifications->getNotifications();
     ASSERT_EQ(1, notev.size());
-    EXPECT_EQ("indicator-sound", notev[0].app_name);
+    EXPECT_EQ("ayatana-indicator-sound", notev[0].app_name);
     EXPECT_EQ("Volume", notev[0].summary);
     EXPECT_EQ(0, notev[0].actions.size());
     EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-private-synchronous"]);

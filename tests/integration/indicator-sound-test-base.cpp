@@ -620,7 +620,7 @@ void IndicatorSoundTestBase::checkVolumeNotification(double volume, QString cons
 
     QVariantList const& args(call.at(1).toList());
     ASSERT_EQ(8, args.size());
-    EXPECT_EQ("indicator-sound", args.at(0));
+    EXPECT_EQ("ayatana-indicator-sound", args.at(0));
     EXPECT_EQ(icon, args.at(2));
     EXPECT_EQ("Volume", args.at(3));
     EXPECT_EQ(label, args.at(4));
@@ -646,7 +646,7 @@ void IndicatorSoundTestBase::checkHighVolumeNotification(QVariantList call)
 
     QVariantList const& args(call.at(1).toList());
     ASSERT_EQ(8, args.size());
-    EXPECT_EQ("indicator-sound", args.at(0));
+    EXPECT_EQ("ayatana-indicator-sound", args.at(0));
     EXPECT_EQ("Volume", args.at(3));
 }
 
@@ -675,7 +675,7 @@ int IndicatorSoundTestBase::getNotificationID(QVariantList call)
     {
         return -1;
     }
-    if (args.at(0) != "indicator-sound")
+    if (args.at(0) != "ayatana-indicator-sound")
     {
         return -1;
     }
