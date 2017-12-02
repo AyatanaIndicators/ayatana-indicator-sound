@@ -16,11 +16,11 @@
  * Authored by: Pete Woods <pete.woods@canonical.com>
  */
 
-#include <desktop/gmenuharness/MatchUtils.h>
+#include <unity/gmenuharness/MatchUtils.h>
 
 #include <functional>
 
-#include <desktop/util/ResourcePtr.h>
+#include <unity/util/ResourcePtr.h>
 
 using namespace std;
 namespace util = unity::util;
