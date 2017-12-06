@@ -4,11 +4,6 @@ cmake_minimum_required(VERSION 2.8.9)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" "${CMAKE_MODULE_PATH}")
 
 set(PACKAGE ${CMAKE_PROJECT_NAME})
-set(GETTEXT_PACKAGE "ayatana-indicator-sound")
-set(GNOMELOCALEDIR "${CMAKE_INSTALL_FULL_DATADIR}/locale")
-
-add_definitions( -DGETTEXT_PACKAGE="${GETTEXT_PACKAGE}" )
-
 find_package(PkgConfig REQUIRED)
 include(GNUInstallDirs)
 include(UseVala)
@@ -18,6 +13,10 @@ if (EXISTS "/etc/debian_version")
   set(CMAKE_INSTALL_LIBEXECDIR "${CMAKE_INSTALL_LIBDIR}")
   set(CMAKE_INSTALL_FULL_LIBEXECDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBEXECDIR}")
 endif()
+
+set(GETTEXT_PACKAGE "ayatana-indicator-sound")
+set(GNOMELOCALEDIR "${CMAKE_INSTALL_FULL_DATADIR}/locale")
+add_definitions( -DGETTEXT_PACKAGE="${GETTEXT_PACKAGE}" )
 
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 set(SOURCE_BINARY_DIR "${CMAKE_BINARY_DIR}/src")
