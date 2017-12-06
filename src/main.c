@@ -82,7 +82,7 @@ main (int argc, char ** argv)
     GMainLoop * loop = NULL;
     bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
     setlocale (LC_ALL, "");
-    bindtextdomain (GETTEXT_PACKAGE, GNOMELOCALEDIR);
+    bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
     /* Build Mainloop */
     loop = g_main_loop_new(NULL, FALSE);

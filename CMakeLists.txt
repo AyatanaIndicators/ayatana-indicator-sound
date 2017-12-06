@@ -15,7 +15,7 @@ if (EXISTS "/etc/debian_version")
 endif()
 
 set(GETTEXT_PACKAGE "ayatana-indicator-sound")
-set(GNOMELOCALEDIR "${CMAKE_INSTALL_FULL_DATADIR}/locale")
+set(LOCALEDIR "${CMAKE_INSTALL_FULL_DATADIR}/locale")
 add_definitions( -DGETTEXT_PACKAGE="${GETTEXT_PACKAGE}" )
 
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
