@@ -21,8 +21,12 @@ public class AccountsServiceUser : Object {
 	Act.UserManager accounts_manager = Act.UserManager.get_default();
 	Act.User? user = null;
 	AccountsServiceSoundSettings? proxy = null;
+#if HAS_UT_ACCTSERVICE_PRIVACY_SETTINGS
 	AccountsServicePrivacySettings? privacyproxy = null;
+#endif
+#if HAS_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS
 	AccountsServiceSystemSoundSettings? syssoundproxy = null;
+#endif
 	uint timer = 0;
 	MediaPlayer? _player = null;
 	GreeterBroadcast? greeter = null;
@@ -36,8 +40,10 @@ public class AccountsServiceUser : Object {
 		}
 		set {
 			_silentMode = value;
+#if HAS_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS
 			if (syssoundproxy != null)
 				syssoundproxy.silent_mode = value;
+#endif
 		}
 	}
 
@@ -141,7 +147,7 @@ public class AccountsServiceUser : Object {
 				DBusProxyFlags.GET_INVALIDATED_PROPERTIES,
 				null,
 				new_sound_proxy);
-
+#if HAS_UT_ACCTSERVICE_PRIVACY_SETTINGS
 			Bus.get_proxy.begin<AccountsServicePrivacySettings> (
 				BusType.SYSTEM,
 				"org.freedesktop.Accounts",
@@ -149,7 +155,9 @@ public class AccountsServiceUser : Object {
 				DBusProxyFlags.GET_INVALIDATED_PROPERTIES,
 				null,
 				new_privacy_proxy);
+#endif
 
+#if HAS_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS
 			Bus.get_proxy.begin<AccountsServiceSystemSoundSettings> (
 				BusType.SYSTEM,
 				"org.freedesktop.Accounts",
@@ -157,6 +165,7 @@ public class AccountsServiceUser : Object {
 				DBusProxyFlags.GET_INVALIDATED_PROPERTIES,
 				null,
 				new_system_sound_proxy);
+#endif
 		}
 	}
 
@@ -180,6 +189,7 @@ public class AccountsServiceUser : Object {
 		}
 	}
 
+#if HAS_UT_ACCTSERVICE_PRIVACY_SETTINGS
 	void new_privacy_proxy (GLib.Object? obj, AsyncResult res) {
 		try {
 			this.privacyproxy = Bus.get_proxy.end (res);
@@ -198,7 +208,9 @@ public class AccountsServiceUser : Object {
 			warning("Unable to get proxy to user privacy settings: %s", e.message);
 		}
 	}
+#endif
 
+#if HAS_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS
 	void new_system_sound_proxy (GLib.Object? obj, AsyncResult res) {
 		try {
 			this.syssoundproxy = Bus.get_proxy.end (res);
@@ -219,6 +231,7 @@ public class AccountsServiceUser : Object {
 			warning("Unable to get proxy to system sound settings: %s", e.message);
 		}
 	}
+#endif
 
 	void greeter_proxy_new (GLib.Object? obj, AsyncResult res) {
 		try {

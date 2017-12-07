@@ -15,6 +15,18 @@ endif()
 if(EXISTS "/usr/share/glib-2.0/schemas/com.ubuntu.sound.gschema.xml")
   set (VALA_DEFINE_UBUNTU_SOUND_SCHEMA "--define=HAS_UBUNTU_SOUND_SCHEMA")
   add_definitions( -DHAS_UBUNTU_SOUND_SCHEMA )
+endif()
+
+if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.touch.AccountsService.SecurityPrivacy.xml")
+  set (HAVE_UT_ACCTSERVICE_PRIVACY_SETTINGS 1)
+  set (VALA_FILE_ACCTSERVICE_PRIVACY_SETTINGS "accounts-service-privacy-settings")
+  set (VALA_DEFINE_ACCTSERVICE_PRIVACY_SETTINGS "--define=HAS_UT_ACCTSERVICE_PRIVACY_SETTINGS")
+endif()
+
+if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.touch.AccountsService.Sound.xml")
+  set (HAVE_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS 1)
+  set (VALA_FILE_ACCTSERVICE_SYSTEMSOUND_SETTINGS "accounts-service-system-sound-settings")
+  set (VALA_DEFINE_ACCTSERVICE_SYSTEMSOUND_SETTINGS "--define=HAS_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS")
 endif() 
 
 vapi_gen(accounts-service
@@ -49,6 +61,8 @@ vala_init(ayatana-indicator-sound-service
     ${VALA_PKG_URLDISPATCHER}
     ${VALA_DEFINE_URLDISPATCHER}
     ${VALA_DEFINE_UBUNTU_SOUND_SCHEMA}
+    ${VALA_DEFINE_ACCTSERVICE_PRIVACY_SETTINGS}
+    ${VALA_DEFINE_ACCTSERVICE_SYSTEMSOUND_SETTINGS}
 )
 
 vala_add(ayatana-indicator-sound-service
@@ -214,19 +228,26 @@ vala_add(ayatana-indicator-sound-service
     media-player
     mpris2-interfaces
     accounts-service-sound-settings
-    accounts-service-privacy-settings
-    accounts-service-system-sound-settings
+    ${VALA_FILE_ACCTSERVICE_PRIVACY_SETTINGS}
+    ${VALA_FILE_ACCTSERVICE_SYSTEMSOUND_SETTINGS}
     greeter-broadcast
 )
 vala_add(ayatana-indicator-sound-service
   accounts-service-sound-settings.vala
 )
-vala_add(ayatana-indicator-sound-service
-  accounts-service-privacy-settings.vala
-)
-vala_add(ayatana-indicator-sound-service
-  accounts-service-system-sound-settings.vala
-)
+
+if(HAVE_UT_ACCTSERVICE_PRIVACY_SETTINGS)
+	vala_add(ayatana-indicator-sound-service
+          accounts-service-system-sound-settings.vala
+	)
+endif()
+
+if(HAVE_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS)
+	vala_add(ayatana-indicator-sound-service
+          accounts-service-privacy-settings.vala
+	)
+endif()
+
 vala_add(ayatana-indicator-sound-service
   greeter-broadcast.vala
 )

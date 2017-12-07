@@ -17,9 +17,11 @@
  *      Ted Gould <ted@canonical.com>
  */
 
+#if HAS_UT_ACCTSERVICE_PRIVACY_SETTINGS
 [DBus (name = "com.ubuntu.touch.AccountsService.SecurityPrivacy")]
 public interface AccountsServicePrivacySettings : Object {
-	// properties 
+	// properties
 	public abstract bool stats_welcome_screen {owned get; set;}
 	public abstract bool messages_welcome_screen {owned get; set;}
 }
+#endif
