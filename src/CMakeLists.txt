@@ -7,7 +7,7 @@ set(SYMBOLS_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.def")
 set(VAPI_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.vapi")
 
 if(URLDISPATCHER_FOUND)
-    set (VALA_DEFINE_URLDISPATCHER "--define=HAS_URL_DISPATCHER")
+    set (VALA_DEFINE_URLDISPATCHER "--define=HAS_URLDISPATCHER")
     set (VALA_PKG_URLDISPATCHER "--pkg=url-dispatcher")
     add_definitions( -DHAS_URLDISPATCHER )
 endif()
