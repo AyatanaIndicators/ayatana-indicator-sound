@@ -17,10 +17,8 @@
  *      Ted Gould <ted@canonical.com>
  */
 
-#if HAS_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS
 [DBus (name = "com.ubuntu.touch.AccountsService.Sound")]
 public interface AccountsServiceSystemSoundSettings : Object {
 	// properties
 	public abstract bool silent_mode {owned get; set;}
 }
-#endif
