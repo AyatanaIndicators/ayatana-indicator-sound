@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-11-29 13:08+0100\n"
-"PO-Revision-Date: 2017-11-28 12:55+0000\n"
+"PO-Revision-Date: 2017-12-11 09:46+0000\n"
 "Last-Translator: Kristjan Räts <kristjanrats@gmail.com>\n"
 "Language-Team: Estonian <https://hosted.weblate.org/projects/ayatana-"
 "indicators/sound-applet/et/>\n"
@@ -55,7 +55,7 @@ msgstr ""
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
-msgstr ""
+msgstr "Loetelu rakendustest, milles on mängija juhtelemendid alati nähtaval"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
@@ -63,20 +63,20 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
-msgstr ""
+msgstr "Heli ei tohiks käivitamisel olla summutatud."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
-msgstr ""
+msgstr "Kas helitugevuse liugur lubab seada tugevust üle 100%"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr ""
+msgstr "Kas kuvada või peita heli indikaator menüüribal."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
-msgstr ""
+msgstr "Kas kuvada või peita tugeva heli hoiatused."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
