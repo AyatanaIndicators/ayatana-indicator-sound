@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-11-29 13:08+0100\n"
-"PO-Revision-Date: 2017-12-24 09:44+0000\n"
+"PO-Revision-Date: 2018-01-12 23:53+0000\n"
 "Last-Translator: Kristjan Räts <kristjanrats@gmail.com>\n"
 "Language-Team: Estonian <https://hosted.weblate.org/projects/ayatana-"
 "indicators/sound-applet/et/>\n"
@@ -204,11 +204,11 @@ msgstr "Bluetooth kõlar"
 
 #: ../src/info-notification.vala:63
 msgid "Usb speaker"
-msgstr "Usb kõlar"
+msgstr "USB kõlar"
 
 #: ../src/info-notification.vala:65
 msgid "Usb headphones"
-msgstr "Usb kõrvaklapid"
+msgstr "USB kõrvaklapid"
 
 #: ../src/info-notification.vala:67
 msgid "HDMI speaker"
@@ -273,7 +273,7 @@ msgstr "Helitugevus (Bluetooth-kõrvaklapid)"
 
 #: ../src/sound-menu.vala:269
 msgid "Volume (Usb headphones)"
-msgstr "Helitugevus (USB-kõrvaklapid)"
+msgstr "Helitugevus (USB kõrvaklapid)"
 
 #: ../src/sound-menu.vala:272
 msgid "Volume (HDMI headphones)"
