@@ -29,7 +29,7 @@ public class IndicatorSound.WarnNotification: Notification
         protected override Notify.Notification create_notification () {
         var n = new Notify.Notification (
             _("Volume"),
-            _("High volume can damage your hearing."),
+            _("Allow volume above safe level? High volume can damage your hearing."),
             "audio-volume-high");
         n.set_hint ("x-canonical-non-shaped-icon", "true");
         n.set_hint ("x-canonical-snap-decisions", "true");
