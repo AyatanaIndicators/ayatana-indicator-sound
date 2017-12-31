@@ -8,18 +8,20 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-11-29 13:09+0100\n"
-"PO-Revision-Date: 2017-10-12 07:52+0200\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2017-12-31 15:43+0000\n"
+"Last-Translator: Sebastian Rasmussen <sebras@gmail.com>\n"
+"Language-Team: Swedish <https://hosted.weblate.org/projects/ayatana-"
+"indicators/sound-applet/sv/>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2.19-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
-msgstr ""
+msgstr "En lista över program som svartlistats från ljudmenyn"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
@@ -28,12 +30,17 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
+"Varje mediaspelare som följer MPRIS2-specifikationen kommer automatiskt att "
+"synas i menyn. Denna vektor bör innehålla skrivbordsfilnamnen (minus "
+".desktop-suffix) för program som inte vill inkluderas i ljudmenyn."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
 msgstr ""
+"En lista över program som vid någon tidpunkt har registrerat sig med "
+"ljudmenyn"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
@@ -42,32 +49,38 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
+"Varje media spelare som följer MPRIS2-specifikationen kommer automatiskt att "
+"synas i ljudmenyn. Denna vektor bör innehåller skrivbordsfilnamnen (minux "
+".desktop-suffixen) för programen som vid någon tidpunkt har visats i menyn. "
+"Detta tillåter att menyn kommer ihåg och visar program som är frånkopplade."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
 msgstr ""
+"En lista över program som får ha uppspelningskontroller synliga hela tiden"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
-msgstr ""
+msgstr "Inledande inställning för global tystnad (tysta alla) i menyn"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
-msgstr ""
+msgstr "Vid uppstart bör volymen inte vara tystad."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
 msgstr ""
+"Huruvida skjutreglaget för volym tillåter inställning av volym över 100%"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr ""
+msgstr "Huruvida ljudindikatorn syns i menyfältet."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
-msgstr ""
+msgstr "Huruvida varningar för hög volym ska visas."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
@@ -78,10 +91,17 @@ msgid ""
 "volume-decibels AND (d) the user has not indicated approval in the last "
 "warning-volume-approval-ttl seconds."
 msgstr ""
+"Om aktiverat på en enhet kommer en bekräftelsedialog att visas för "
+"användaren om A) någonting kopplas in i kontakten för hörlurar (d.v.s. ingen "
+"aning för högtalarvolym) OCH B) media spelar (d.v.s. inga varningar för "
+"ringsignalsvarningar) OCH C) användaren försöker att sätta volymen högre än "
+"varning-volym-decibel OCH D) användare inte har indikerat godkännande inom "
+"de senaste varning-volym-godkännande-ttl sekunderna."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
+"Hur många sekunder en användares varning-volym-godkännande ska kommas ihåg."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
@@ -92,20 +112,28 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
+"Hur änge en användares godkännande av bekräftelsedialogen som diskuteras i "
+"beskrivningen av ”varning-volym-aktiverad”.\n"
+"\n"
+"Standardvärdet (72000 sekunder) motsvarar de 20 timmar som föreslås av EU-"
+"standarden EN 60950-1/Al2: ”Bekräftelsen behöver inte repeteras mer än en "
+"gång var 20:e timme av kumulativ lyssningstid.”"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "Volymnivå som utlöser en varning för hög volym."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
 msgstr ""
+"Volymnivå som utlösen en varning för hög volym. Se varning-volym-aktiverad "
+"för vidare information."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
-msgstr ""
+msgstr "Normal utvolym."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
 msgid ""
@@ -118,12 +146,22 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
+"Maximal volum när com.ubuntu.sound's ”tillåt-förstärkt-volym”-inställning är "
+"inaktiverad.\n"
+"\n"
+"För att följa EU-standarden EN 60950-1/Al2 bör detta värde aldrig sättas "
+"till ett dB-värde som får ljudet ur hörlurar att överstiga 100 dBA, eller "
+"den elektriska spänningen att överstiga 150 mV.\n"
+"\n"
+"Standardvärdet (0) motsvarar PulseAudio's PA_VOLUME_NORM."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
 msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
+"Utvolym som används när com.ubuntu.sound's inställning ”tillåt-förstärkt-"
+"volym” är aktiverad."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
@@ -136,115 +174,123 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
+"Maximal volum när com.ubuntu.sound's inställning ”tillåt-förstärkt-volym” är "
+"aktiverad.\n"
+"\n"
+"För att följa EU-standarden EN 60950-1/Al2 bör detta värdet aldrig sättas "
+"till ett dB-värde som får ljudet ur hörlurar att överstiga 100 dBA, eller "
+"den elektriska spänningen att överstiga 150mV.\n"
+"\n"
+"Standardvärdet (11) motsvarar PulseAudio's PA_VOLYUME_UI_MAX."
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
 #: ../src/service.vala:302 ../src/service.vala:305 ../src/sound-menu.vala:57
 #: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
 #, c-format
 msgid "Volume"
-msgstr ""
+msgstr "Volym"
 
 #: ../src/info-notification.vala:55
 msgid "Speakers"
-msgstr ""
+msgstr "Högtalare"
 
 #: ../src/info-notification.vala:57
 msgid "Headphones"
-msgstr ""
+msgstr "Hörlurar"
 
 #: ../src/info-notification.vala:59
 msgid "Bluetooth headphones"
-msgstr ""
+msgstr "Bluetooth-hörlurar"
 
 #: ../src/info-notification.vala:61
 msgid "Bluetooth speaker"
-msgstr ""
+msgstr "Bluetooth-högtalare"
 
 #: ../src/info-notification.vala:63
 msgid "Usb speaker"
-msgstr ""
+msgstr "USB-högtalare"
 
 #: ../src/info-notification.vala:65
 msgid "Usb headphones"
-msgstr ""
+msgstr "USB-hörlurar"
 
 #: ../src/info-notification.vala:67
 msgid "HDMI speaker"
-msgstr ""
+msgstr "HDMI-högtalare"
 
 #: ../src/info-notification.vala:69
 msgid "HDMI headphones"
-msgstr ""
+msgstr "HDMI-hörlurar"
 
 #: ../src/service.vala:299
 msgid "Volume (muted)"
-msgstr ""
+msgstr "Volym (tystad)"
 
 #: ../src/service.vala:302
 msgid "silent"
-msgstr ""
+msgstr "tyst"
 
 #: ../src/service.vala:310
 msgid "Sound"
-msgstr ""
+msgstr "Ljud"
 
 #: ../src/sound-menu.vala:50
 msgid "Mute"
-msgstr ""
+msgstr "Tysta"
 
 #: ../src/sound-menu.vala:52
 msgid "Silent Mode"
-msgstr ""
+msgstr "Tyst läge"
 
 #: ../src/sound-menu.vala:66
 msgid "Sound Settings…"
-msgstr ""
+msgstr "Ljudinställningar…"
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
-msgstr ""
+msgstr "Mikrofonvolym"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
 msgid "High volume can damage your hearing."
-msgstr ""
+msgstr "Hög volym kan förstöra din hörsel."
 
 #: ../src/sound-menu.vala:254
 msgid "Volume (Headphones)"
-msgstr ""
+msgstr "Volym (hörlurar)"
 
 #: ../src/sound-menu.vala:257
 msgid "Volume (Bluetooth)"
-msgstr ""
+msgstr "Volym (Bluetooth)"
 
 #: ../src/sound-menu.vala:260
 msgid "Volume (Usb)"
-msgstr ""
+msgstr "Volym (USB)"
 
 #: ../src/sound-menu.vala:263
 msgid "Volume (HDMI)"
-msgstr ""
+msgstr "Volym (HDMI)"
 
 #: ../src/sound-menu.vala:266
 msgid "Volume (Bluetooth headphones)"
-msgstr ""
+msgstr "Volym (Bluetooth-hörlurar)"
 
 #: ../src/sound-menu.vala:269
 msgid "Volume (Usb headphones)"
-msgstr ""
+msgstr "Volym (USB-hörlurar)"
 
 #: ../src/sound-menu.vala:272
 msgid "Volume (HDMI headphones)"
-msgstr ""
+msgstr "Volym (HDMI-hörlurar)"
 
 #: ../src/sound-menu.vala:445
 msgid "Choose Playlist"
-msgstr ""
+msgstr "Välj spellista"
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: ../src/warn-notification.vala:52
 msgid "Cancel"
-msgstr ""
+msgstr "Avbryt"
