@@ -14,6 +14,7 @@ set_source_files_properties (gschemas.compiled GENERATED)
 # compile the indicator-sound schema into a gschemas.compiled file in this directory,
 # and help the tests to find that file by setting -DSCHEMA_DIR
 set (XDG_DATA_DIRS "${CMAKE_CURRENT_BINARY_DIR}/gsettings-schemas")
+set (FAKE_HOME "${CMAKE_CURRENT_BINARY_DIR}/fake-home")
 set (SCHEMA_DIR "${XDG_DATA_DIRS}/glib-2.0/schemas")
 if (EXISTS /usr/share/glib-2.0/schemas/com.ubuntu.sound.gschema.xml)
   set (SOUND_SCHEMA /usr/share/glib-2.0/schemas/com.ubuntu.sound.gschema.xml)
@@ -31,6 +32,8 @@ add_custom_command (OUTPUT gschemas.compiled
                     COMMAND cp -f ${CMAKE_SOURCE_DIR}/data/org.ayatana.indicator.sound.gschema.xml ${SCHEMA_DIR}
                     COMMAND cp -f ${SOUND_SCHEMA} ${SCHEMA_DIR}
                     COMMAND ${COMPILE_SCHEMA_EXECUTABLE} ${SCHEMA_DIR})
+add_custom_command (OUTPUT fake-home
+                    COMMAND mkdir -p $(FAKE_HOME))
 
 ###########################
 # Vala Mocks

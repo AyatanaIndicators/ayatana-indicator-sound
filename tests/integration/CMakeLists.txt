@@ -32,6 +32,7 @@ add_definitions(-DSOUND_SERVICE_BIN="${CMAKE_BINARY_DIR}/src/ayatana-indicator-s
                 -DTEST_SOUND="${CMAKE_SOURCE_DIR}/tests/integration/test-sound.wav"
                 -DQT_NO_KEYWORDS=1
                 -DXDG_DATA_DIRS="${XDG_DATA_DIRS}"
+                -DFAKE_HOME="${FAKE_HOME}"
 )
 
 set(GLIB_REQUIRED_VERSION 2.26)

@@ -54,6 +54,7 @@ IndicatorSoundTestBase::~IndicatorSoundTestBase()
 
 void IndicatorSoundTestBase::SetUp()
 {
+    setenv("HOME", FAKE_HOME, true);
     setenv("XDG_DATA_DIRS", XDG_DATA_DIRS, true);
     setenv("DBUS_SYSTEM_BUS_ADDRESS", dbusTestRunner.systemBus().toStdString().c_str(), true);
     setenv("DBUS_SESSION_BUS_ADDRESS", dbusTestRunner.sessionBus().toStdString().c_str(), true);
@@ -80,6 +81,7 @@ void IndicatorSoundTestBase::SetUp()
 void IndicatorSoundTestBase::TearDown()
 {
     unsetenv("XDG_DATA_DIRS");
+    unsetenv("HOME");
     unsetenv("PULSE_SERVER");
     unsetenv("DBUS_SYSTEM_BUS_ADDRESS");
 }
