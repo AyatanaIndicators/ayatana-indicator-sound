@@ -175,7 +175,11 @@ bool IndicatorSoundTestBase::resetAllowAmplifiedVolume()
 
     proc.start("gsettings", QStringList()
                                 << "reset"
+#ifdef HAS_UBUNTU_SOUND_SCHEMA
                                 << "com.ubuntu.sound"
+#else
+                                << "org.ayatana.sound"
+#endif
                                 << "allow-amplified-volume");
 
     return runProcess(proc);
