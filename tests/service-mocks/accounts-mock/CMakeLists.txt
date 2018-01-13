@@ -7,7 +7,7 @@ include_directories(${Qt5DBus_INCLUDE_DIRS}
 
 add_definitions(-DQT_NO_KEYWORDS=1)
 
-if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.AccountsService.SecurityPrivacy.xml")
+if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.AccountsService.Sound.xml")
     add_definitions(-DHAS_UT_ACCTSERVICE_SOUND_SETTINGS)
     set(dbusinterface_sound_xml "com.ubuntu.AccountsService.Sound.Mock.xml")
 else()
