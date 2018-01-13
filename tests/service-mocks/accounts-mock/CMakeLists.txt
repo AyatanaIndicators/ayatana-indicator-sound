@@ -5,6 +5,10 @@ find_package(Qt5DBus REQUIRED)
 include_directories(${Qt5DBus_INCLUDE_DIRS}
                     "${CMAKE_SOURCE_DIR}/tests/service-mocks")
 
+if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.AccountsService.SecurityPrivacy.xml")
+    add_definitions(-DHAS_UT_ACCTSERVICE_SOUND_SETTINGS)
+endif()
+
 add_definitions(-DQT_NO_KEYWORDS=1)
 
 set(dbusinterface_sound_xml "org.ayatana.AccountsService.Sound.Mock.xml")
