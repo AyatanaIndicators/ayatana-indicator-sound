@@ -14,9 +14,15 @@ set(dbusinterface_accounts_xml "org.freedesktop.Accounts.xml")
 set_source_files_properties(${dbusinterface_accounts_xml} PROPERTIES
   CLASSNAME AccountsInterface)
 
-set(dbusinterface_accountssound_xml "org.ayatana.AccountsService.Sound.xml")
-set_source_files_properties(${dbusinterface_accountssound_xml} PROPERTIES
-  CLASSNAME AccountsSoundInterface)
+if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.AccountsService.Sound.xml")
+    set(dbusinterface_accountssound_xml "com.canonical.AccountsService.Sound.xml")
+    set_source_files_properties(${dbusinterface_accountssound_xml} PROPERTIES
+      CLASSNAME AccountsSoundInterface)
+else()
+    set(dbusinterface_accountssound_xml "org.ayatana.AccountsService.Sound.xml")
+    set_source_files_properties(${dbusinterface_accountssound_xml} PROPERTIES
+      CLASSNAME AccountsSoundInterface)
+endif()
 
 set(dbusinterface_properties_xml "org.freedesktop.DBus.Properties.xml")
 set_source_files_properties(${dbusinterface_properties_xml} PROPERTIES
