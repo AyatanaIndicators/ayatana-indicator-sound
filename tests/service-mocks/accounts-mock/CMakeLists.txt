@@ -19,11 +19,19 @@ set_source_files_properties(${dbusinterface_sound_xml} PROPERTIES
 
 qt5_add_dbus_interface(interface_files ${dbusinterface_sound_xml} accountsservice_sound_interface)
 
-qt5_add_dbus_adaptor(adaptor_files
-    org.ayatana.AccountsService.Sound.Mock.xml
-    AccountsServiceSoundMock.h
-    ubuntu::indicators::testing::AccountsServiceSoundMock
-    AccountsServiceSoundMockAdaptor)
+if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.AccountsService.Sound.xml")
+    qt5_add_dbus_adaptor(adaptor_files
+        com.ubuntu.AccountsService.Sound.Mock.xml
+        AccountsServiceSoundMock.h
+        ubuntu::indicators::testing::AccountsServiceSoundMock
+        AccountsServiceSoundMockAdaptor)
+else()
+    qt5_add_dbus_adaptor(adaptor_files
+        org.ayatana.AccountsService.Sound.Mock.xml
+        AccountsServiceSoundMock.h
+        ubuntu::indicators::testing::AccountsServiceSoundMock
+        AccountsServiceSoundMockAdaptor)
+endif()
 
 qt5_add_dbus_adaptor(adaptor_files
     ${CMAKE_SOURCE_DIR}/tests/dbus-types/org.freedesktop.Accounts.xml

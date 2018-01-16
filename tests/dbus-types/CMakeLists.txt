@@ -15,7 +15,7 @@ set_source_files_properties(${dbusinterface_accounts_xml} PROPERTIES
   CLASSNAME AccountsInterface)
 
 if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.AccountsService.Sound.xml")
-    set(dbusinterface_accountssound_xml "com.canonical.AccountsService.Sound.xml")
+    set(dbusinterface_accountssound_xml "com.ubuntu.AccountsService.Sound.xml")
     set_source_files_properties(${dbusinterface_accountssound_xml} PROPERTIES
       CLASSNAME AccountsSoundInterface)
 else()

@@ -29,7 +29,7 @@ namespace testing
     constexpr const char USER_PATH[] = "/org/freedesktop/Accounts/UserTest";
     constexpr const char ACCOUNTS_PATH[] = "/org/freedesktop/Accounts";
 #ifdef HAS_UT_ACCTSERVICE_SOUND_SETTINGS
-    constexpr const char ACCOUNTS_SOUND_INTERFACE[] = "com.canonical.AccountsService.Sound";
+    constexpr const char ACCOUNTS_SOUND_INTERFACE[] = "com.ubuntu.AccountsService.Sound";
 #else
     constexpr const char ACCOUNTS_SOUND_INTERFACE[] = "org.ayatana.AccountsService.Sound";
 #endif
