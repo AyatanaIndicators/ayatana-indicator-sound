@@ -35,6 +35,10 @@ add_definitions(-DSOUND_SERVICE_BIN="${CMAKE_BINARY_DIR}/src/ayatana-indicator-s
                 -DFAKE_HOME="${FAKE_HOME}"
 )
 
+if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.AccountsService.Sound.xml")
+    add_definitions(-DHAS_UT_ACCTSERVICE_SOUND_SETTINGS)
+endif()
+
 set(GLIB_REQUIRED_VERSION 2.26)
 
 pkg_check_modules(
