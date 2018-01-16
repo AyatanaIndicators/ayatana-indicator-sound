@@ -31,6 +31,13 @@ else()
   set (HAVE_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS OFF)
 endif() 
 
+if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.AccountsService.Sound.xml")
+  set (HAVE_UT_ACCTSERVICE_SOUND_SETTINGS ON)
+  set (VALA_DEFINE_ACCTSERVICE_SOUND_SETTINGS "--define=HAS_UT_ACCTSERVICE_SOUND_SETTINGS")
+else()
+  set (HAVE_UT_ACCTSERVICE_SOUND_SETTINGS OFF)
+endif()
+
 vapi_gen(accounts-service
     LIBRARY
         accounts-service
@@ -64,6 +71,7 @@ vala_init(ayatana-indicator-sound-service
     ${VALA_DEFINE_URLDISPATCHER}
     ${VALA_DEFINE_UBUNTU_SOUND_SCHEMA}
     ${VALA_DEFINE_ACCTSERVICE_PRIVACY_SETTINGS}
+    ${VALA_DEFINE_ACCTSERVICE_SOUND_SETTINGS}
     ${VALA_DEFINE_ACCTSERVICE_SYSTEMSOUND_SETTINGS}
 )
 
