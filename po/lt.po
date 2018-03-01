@@ -8,19 +8,22 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-11-29 13:09+0100\n"
-"PO-Revision-Date: 2017-10-12 07:52+0200\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2018-03-02 21:37+0000\n"
+"Last-Translator: Moo <hazap@hotmail.com>\n"
+"Language-Team: Lithuanian <https://hosted.weblate.org/projects/ayatana-"
+"indicators/sound-applet/lt/>\n"
 "Language: lt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && (n"
-"%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n % 10 == 1 && (n % 100 < 11 || n % 100 > "
+"19)) ? 0 : ((n % 10 >= 2 && n % 10 <= 9 && (n % 100 < 11 || n % 100 > 19)) ? "
+"1 : 2);\n"
+"X-Generator: Weblate 2.20-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
-msgstr ""
+msgstr "Sąrašas programų, kurios yra įtrauktos į juodąjį sąrašą iš garso meniu"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
@@ -29,12 +32,17 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
+"Kiekviena medijos leistuvė, kuri laikosi MPRIS2 specifikacijų, automatiškai "
+"atsiras meniu. Šiame masyve turėtų būti programų, kurios nenori būti "
+"įtrauktos į garso meniu, darbalaukio failų pavadinimai (be .desktop "
+"priesagos)."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
 msgstr ""
+"Sąrašas programų, kurios tam tikru būdu buvo registruotos su garso meniu"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
@@ -43,32 +51,37 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
+"Kiekviena medijos leistuvė, kuri laikosi MPRIS2 specifikacijų, automatiškai "
+"atsiras meniu. Šiame masyve turėtų būti programų, kurios tam tikru būdu buvo "
+"atsiradusios garso meniu, darbalaukio failų pavadinimai (be .desktop "
+"priesagos). Tai leidžia meniu prisiminti ir rodyti autonomines programas."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
-msgstr ""
+msgstr "Sąrašas programų, kurios visą laiką turės matomus grotuvo valdiklius"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
 msgstr ""
+"Pradinis nustatymas, skirtas visuotiniam nutildymui (nutildyti viską) meniu"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
-msgstr ""
+msgstr "Paleidimo metu garsis neturėtų būti nutildytas."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
-msgstr ""
+msgstr "Ar garsio slinktukas leidžia nustatyti garsį virš 100%"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr ""
+msgstr "Rodyti ar nerodyti garso indikatorių meniu juostoje."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
-msgstr ""
+msgstr "Rodyti ar nerodyti didelio garsio įspėjimus."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
@@ -248,4 +261,4 @@ msgstr ""
 
 #: ../src/warn-notification.vala:52
 msgid "Cancel"
-msgstr ""
+msgstr "Atsisakyti"
