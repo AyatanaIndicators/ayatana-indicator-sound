@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-11-29 13:09+0100\n"
-"PO-Revision-Date: 2018-03-02 21:37+0000\n"
+"PO-Revision-Date: 2018-03-04 22:39+0000\n"
 "Last-Translator: Moo <hazap@hotmail.com>\n"
 "Language-Team: Lithuanian <https://hosted.weblate.org/projects/ayatana-"
 "indicators/sound-applet/lt/>\n"
@@ -92,10 +92,18 @@ msgid ""
 "volume-decibels AND (d) the user has not indicated approval in the last "
 "warning-volume-approval-ttl seconds."
 msgstr ""
+"Jeigu įjungta įrenginyje, naudotojui bus pateikiamas patvirtinimo dialogas "
+"tuo atveju, jeigu (a) kažkas yra įjungiama į ausinių lizdą (t.y., jokių "
+"garsiakalbio garsio įspėjimų) IR (b) yra atkuriama medija (t.y., jokių "
+"skambučio melodijos garsio įspėjimų) IR (c) naudotojas bando nustatyti "
+"garsį, kuris didesnis nei warning-volume-decibels IR (d) naudotojas nenurodė "
+"patvirtinimo per paskutines warning-volume-approval-ttl sekundes."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
+"Kelioms sekundėms turėtų būti prisimintas naudotojo garsio įspėjimo "
+"patvirtinimas."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
@@ -106,20 +114,28 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
+"Kaip ilgai prisiminti naudotojo sutikimą, skirtą patvirtinimo dialogui, "
+"aptariamam 'warning-volume-enabled' apraše.\n"
+"\n"
+"Numatytoji reikšmė (72,000 sekundžių) atitinka 20 valandų, kaip yra "
+"pasiūlyta pagal ES standartą EN 60950-1/Al2: “Patvirtinimas neturi būti "
+"kartojamas daugiau nei kartą per kas 20 val. visuminio klausymosi laiko.”"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "Garsio lygis, kuris iššaukia didelio garsio įspėjimą."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
 msgstr ""
+"Garsio lygis, kuris iššaukia didelio garsio įspėjimą.  Išsamesnei "
+"informacijai, žiūrėkite warning-volume-enabled."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
-msgstr ""
+msgstr "Normalios išvesties garsis."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
 msgid ""
@@ -132,12 +148,22 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
+"Didžiausias garsis, kai com.ubuntu.sound 'allow-amplified-volume' nustatymas "
+"yra išjungtas.\n"
+"\n"
+"Tam, kad atitiktų ES standartą EN 60950-1/Al2, ši reikšmė niekada neturėtų "
+"būti nustatyta į dB, kas priverčia ausinių garso išvestį viršyti 100 dBA, ar "
+"elektros išvestį viršyti 150 mV.\n"
+"\n"
+"Numatytoji reikšmė (0) atitinka PulseAudio PA_VOLUME_NORM reikšmę."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
 msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
+"Išvesties garsis, kurį naudoti, kai com.ubuntu.sound's 'allow-amplified-"
+"volume' nustatymas yra įjungtas."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
@@ -150,114 +176,122 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
+"Didžiausias garsis, kai com.ubuntu.sound 'allow-amplified-volume' nustatymas "
+"yra įjungtas.\n"
+"\n"
+"Tam, kad atitiktų ES standartą EN 60950-1/Al2, ši reikšmė niekada neturėtų "
+"būti nustatyta į dB, kas priverčia ausinių garso išvestį viršyti 100 dBA, ar "
+"elektros išvestį viršyti 150 mV.\n"
+"\n"
+"Numatytoji reikšmė (11) atitinka PulseAudio's PA_VOLUME_UI_MAX reikšmę."
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
 #: ../src/service.vala:302 ../src/service.vala:305 ../src/sound-menu.vala:57
 #: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
 #, c-format
 msgid "Volume"
-msgstr ""
+msgstr "Garsis"
 
 #: ../src/info-notification.vala:55
 msgid "Speakers"
-msgstr ""
+msgstr "Garsiakalbiai"
 
 #: ../src/info-notification.vala:57
 msgid "Headphones"
-msgstr ""
+msgstr "Ausinės"
 
 #: ../src/info-notification.vala:59
 msgid "Bluetooth headphones"
-msgstr ""
+msgstr "Bluetooth ausinės"
 
 #: ../src/info-notification.vala:61
 msgid "Bluetooth speaker"
-msgstr ""
+msgstr "Bluetooth garsiakalbis"
 
 #: ../src/info-notification.vala:63
 msgid "Usb speaker"
-msgstr ""
+msgstr "USB garsiakalbis"
 
 #: ../src/info-notification.vala:65
 msgid "Usb headphones"
-msgstr ""
+msgstr "USB ausinės"
 
 #: ../src/info-notification.vala:67
 msgid "HDMI speaker"
-msgstr ""
+msgstr "HDMI garsiakalbis"
 
 #: ../src/info-notification.vala:69
 msgid "HDMI headphones"
-msgstr ""
+msgstr "HDMI ausinės"
 
 #: ../src/service.vala:299
 msgid "Volume (muted)"
-msgstr ""
+msgstr "Garsis (nutildytas)"
 
 #: ../src/service.vala:302
 msgid "silent"
-msgstr ""
+msgstr "tylus"
 
 #: ../src/service.vala:310
 msgid "Sound"
-msgstr ""
+msgstr "Garsas"
 
 #: ../src/sound-menu.vala:50
 msgid "Mute"
-msgstr ""
+msgstr "Nutildyti"
 
 #: ../src/sound-menu.vala:52
 msgid "Silent Mode"
-msgstr ""
+msgstr "Tyli veiksena"
 
 #: ../src/sound-menu.vala:66
 msgid "Sound Settings…"
-msgstr ""
+msgstr "Garso nustatymai…"
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
-msgstr ""
+msgstr "Mikrofono garsis"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
 msgid "High volume can damage your hearing."
-msgstr ""
+msgstr "Didelis garsis gali pažeisti jūsų klausą."
 
 #: ../src/sound-menu.vala:254
 msgid "Volume (Headphones)"
-msgstr ""
+msgstr "Garsis (Ausinės)"
 
 #: ../src/sound-menu.vala:257
 msgid "Volume (Bluetooth)"
-msgstr ""
+msgstr "Garsis (Bluetooth)"
 
 #: ../src/sound-menu.vala:260
 msgid "Volume (Usb)"
-msgstr ""
+msgstr "Garsis (USB)"
 
 #: ../src/sound-menu.vala:263
 msgid "Volume (HDMI)"
-msgstr ""
+msgstr "Garsis (HDMI)"
 
 #: ../src/sound-menu.vala:266
 msgid "Volume (Bluetooth headphones)"
-msgstr ""
+msgstr "Garsis (Bluetooth ausinės)"
 
 #: ../src/sound-menu.vala:269
 msgid "Volume (Usb headphones)"
-msgstr ""
+msgstr "Garsis (USB ausinės)"
 
 #: ../src/sound-menu.vala:272
 msgid "Volume (HDMI headphones)"
-msgstr ""
+msgstr "Garsis (HDMI ausinės)"
 
 #: ../src/sound-menu.vala:445
 msgid "Choose Playlist"
-msgstr ""
+msgstr "Pasirinkti grojaraštį"
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
-msgstr ""
+msgstr "Gerai"
 
 #: ../src/warn-notification.vala:52
 msgid "Cancel"
