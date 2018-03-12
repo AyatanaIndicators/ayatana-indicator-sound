@@ -88,6 +88,7 @@ void IndicatorSoundTestBase::TearDown()
     unsetenv("HOME");
     unsetenv("PULSE_SERVER");
     unsetenv("DBUS_SYSTEM_BUS_ADDRESS");
+    unsetenv("DBUS_SESSION_BUS_ADDRESS");
 }
 
 void gvariant_deleter(GVariant* varptr)
