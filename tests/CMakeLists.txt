@@ -35,6 +35,10 @@ add_custom_command (OUTPUT gschemas.compiled
 add_custom_command (OUTPUT test-home
                     COMMAND mkdir -p $(TEST_HOME))
 
+add_custom_target (
+             gschemas-compiled ALL DEPENDS gschemas.compiled
+)
+
 ###########################
 # Vala Mocks
 ###########################
@@ -173,7 +177,8 @@ add_test(accounts-service-user-test-player
 ###########################
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
-add_executable (volume-control-test volume-control-test.cc gschemas.compiled)
+add_executable (volume-control-test volume-control-test.cc)
+add_dependencies (volume-control-test gschemas-compiled)
 target_link_libraries (
     volume-control-test
     indicator-sound-service-lib
@@ -277,7 +282,8 @@ add_definitions(
     -DINDICATOR_SOUND_SERVICE_BINARY="${CMAKE_BINARY_DIR}/src/ayatana-indicator-sound-service"
     -DPA_MOCK_LIB="${CMAKE_CURRENT_BINARY_DIR}/libpulse-mock.so"
 )
-add_executable (indicator-test indicator-test.cc gschemas.compiled)
+add_executable (indicator-test indicator-test.cc)
+add_dependencies (indicator-test gschemas-compiled)
 target_link_libraries (
     indicator-test
     ${SOUNDSERVICE_LIBRARIES}
