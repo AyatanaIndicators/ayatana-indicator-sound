@@ -140,7 +140,7 @@ bool DBusPulseVolume::setVolume(QString const & role, double volume)
         {
             QDBusVariant dbusVar(QVariant::fromValue(volume));
             QDBusReply<void> set_vol = accounts_interface_->call(QLatin1String("Set"),
-#if HAS_UT_ACCTSERVICE_SOUND_SETTINGS
+#ifdef HAS_UT_ACCTSERVICE_SOUND_SETTINGS
                                             QVariant::fromValue(QString("com.ubuntu.AccountsService.Sound")),
 #else
                                             QVariant::fromValue(QString("org.ayatana.AccountsService.Sound")),
