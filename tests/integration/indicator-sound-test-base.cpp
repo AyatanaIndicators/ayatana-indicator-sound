@@ -341,7 +341,7 @@ void IndicatorSoundTestBase::startPulsePhone(DevicePortType speakerPort, DeviceP
                                                       << QString("--load=module-null-sink sink_name=indicator_sound_test_headphones sink_properties=device.bus=%1").arg(getDevicePortString(headphonesPort))
                                                       << QString("--load=module-null-sink sink_name=indicator_sound_test_mic")
                                                       << "--log-target=file:/tmp/pulse-daemon.log"
-                                                      << QString("--load=module-stream-restore restore_device=false restore_muted=false fallback_table=%1").arg(STREAM_RESTORE_TABLE)
+                                                      << QString("--load=module-stream-restore restore_device=false restore_muted=false fallback_table=\"%1\"").arg(STREAM_RESTORE_TABLE)
                                                       << "--load=module-dbus-protocol"
                                                       << "--load=module-native-protocol-tcp auth-ip-acl=127.0.0.1"
                 ));
