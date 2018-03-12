@@ -153,20 +153,28 @@ DESTINATION "${POLKIT_LIB_DIR}/localauthority/10-vendor.d"
 # Accounts Service Iface: Greeter Sound
 #######################################
 
-install(FILES org.ayatana.AccountsService.Sound.xml
-    DESTINATION "${DBUS_IFACE_DIR}"
-)
+if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.AccountsService.Sound.xml")
 
-# Create accountsservice symlink for above dbus interface
-install(CODE "
-    execute_process(COMMAND mkdir -p \"\$ENV{DESTDIR}${ACCOUNTS_IFACE_DIR}\")
-    execute_process(COMMAND ln -sf ../../dbus-1/interfaces/org.ayatana.AccountsService.Sound.xml \"\$ENV{DESTDIR}${ACCOUNTS_IFACE_DIR}\")
-")
+  # Nothing to do here...
+  # Using files from Ubuntu specific package 'accountsservice-ubuntu-schemas'.
 
-install(FILES org.ayatana.AccountsService.Sound.policy
-DESTINATION "${POLKIT_DATA_DIR}/actions"
-)
+else()
 
-install(FILES 50-org.ayatana.AccountsService.Sound.pkla
-DESTINATION "${POLKIT_LIB_DIR}/localauthority/10-vendor.d"
-)
+  install(FILES org.ayatana.AccountsService.Sound.xml
+      DESTINATION "${DBUS_IFACE_DIR}"
+  )
+
+  # Create accountsservice symlink for above dbus interface
+  install(CODE "
+      execute_process(COMMAND mkdir -p \"\$ENV{DESTDIR}${ACCOUNTS_IFACE_DIR}\")
+      execute_process(COMMAND ln -sf ../../dbus-1/interfaces/org.ayatana.AccountsService.Sound.xml \"\$ENV{DESTDIR}${ACCOUNTS_IFACE_DIR}\")
+  ")
+
+  install(FILES org.ayatana.AccountsService.Sound.policy
+  DESTINATION "${POLKIT_DATA_DIR}/actions"
+  )
+
+  install(FILES 50-org.ayatana.AccountsService.Sound.pkla
+  DESTINATION "${POLKIT_LIB_DIR}/localauthority/10-vendor.d"
+  )
+endif()
