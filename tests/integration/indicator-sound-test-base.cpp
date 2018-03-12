@@ -57,6 +57,7 @@ void IndicatorSoundTestBase::SetUp()
     setenv("HOME", TEST_HOME, true);
     setenv("XDG_DATA_DIRS", XDG_DATA_DIRS, true);
     setenv("XDG_RUNTIME_DIR", XDG_RUNTIME_DIR, true);
+    setenv("XDG_CONFIG_HOME", XDG_CONFIG_HOME, true);
     setenv("DBUS_SYSTEM_BUS_ADDRESS", dbusTestRunner.systemBus().toStdString().c_str(), true);
     setenv("DBUS_SESSION_BUS_ADDRESS", dbusTestRunner.sessionBus().toStdString().c_str(), true);
     dbusMock.registerNotificationDaemon();
@@ -82,6 +83,8 @@ void IndicatorSoundTestBase::SetUp()
 void IndicatorSoundTestBase::TearDown()
 {
     unsetenv("XDG_DATA_DIRS");
+    unsetenv("XDG_RUNTIME_DIR");
+    unsetenv("XDG_CONFIG_HOME");
     unsetenv("HOME");
     unsetenv("PULSE_SERVER");
     unsetenv("DBUS_SYSTEM_BUS_ADDRESS");

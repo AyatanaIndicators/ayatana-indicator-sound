@@ -10,12 +10,27 @@ set_directory_properties (PROPERTIES
                           ADDITIONAL_MAKE_CLEAN_FILES gschemas.compiled)
 set_source_files_properties (gschemas.compiled GENERATED)
 
+# the home path needs to be severely below 108 characters of length, as pulseaudio
+# will try to place a unix domain socket file in there... (i.e. in XDG_RUNTIME_DIR).
+# In previous versions, the test-home was in the build directory somewhere, which failed
+# when the source tree was stored in some deep sub/sub/sub/folders structure.
+set (TEST_HOME "/tmp/build-home")
+set (XDG_CONFIG_HOME "${TEST_HOME}/.config")
+set (XDG_RUNTIME_DIR "${TEST_HOME}/.run")
+
+add_custom_command (OUTPUT home.created
+                    COMMAND mkdir -p ${TEST_HOME}
+                    COMMAND mkdir -p ${XDG_RUNTIME_DIR}
+                    COMMAND mkdir -p ${XDG_CONFIG_HOME}
+)
+add_custom_target (
+             test-home ALL DEPENDS home.created
+)
+
 # GSettings:
 # compile the indicator-sound schema into a gschemas.compiled file in this directory,
 # and help the tests to find that file by setting -DSCHEMA_DIR
 set (XDG_DATA_DIRS "${CMAKE_CURRENT_BINARY_DIR}/gsettings-schemas")
-set (TEST_HOME "${CMAKE_CURRENT_BINARY_DIR}/test-home")
-set (XDG_RUNTIME_DIR "${TEST_HOME}/.config")
 set (SCHEMA_DIR "${XDG_DATA_DIRS}/glib-2.0/schemas")
 if (EXISTS /usr/share/glib-2.0/schemas/com.ubuntu.sound.gschema.xml)
   set (SOUND_SCHEMA /usr/share/glib-2.0/schemas/com.ubuntu.sound.gschema.xml)
@@ -33,8 +48,6 @@ add_custom_command (OUTPUT gschemas.compiled
                     COMMAND cp -f ${CMAKE_SOURCE_DIR}/data/org.ayatana.indicator.sound.gschema.xml ${SCHEMA_DIR}
                     COMMAND cp -f ${SOUND_SCHEMA} ${SCHEMA_DIR}
                     COMMAND ${COMPILE_SCHEMA_EXECUTABLE} ${SCHEMA_DIR})
-add_custom_command (OUTPUT test-home
-                    COMMAND mkdir -p $(TEST_HOME)/.config/dconf)
 
 add_custom_target (
              gschemas-compiled ALL DEPENDS gschemas.compiled

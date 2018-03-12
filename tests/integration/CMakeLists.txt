@@ -32,6 +32,7 @@ add_definitions(-DSOUND_SERVICE_BIN="${CMAKE_BINARY_DIR}/src/ayatana-indicator-s
                 -DTEST_SOUND="${CMAKE_SOURCE_DIR}/tests/integration/test-sound.wav"
                 -DQT_NO_KEYWORDS=1
                 -DXDG_DATA_DIRS="${XDG_DATA_DIRS}"
+                -DXDG_CONFIG_HOME="${XDG_CONFIG_HOME}"
                 -DXDG_RUNTIME_DIR="${XDG_RUNTIME_DIR}"
                 -DTEST_HOME="${TEST_HOME}"
 )
@@ -60,6 +61,11 @@ set(
 add_executable(
     integration-tests
     ${INTEGRATION_TESTS_SRC}
+)
+
+add_dependencies(
+    integration-tests
+    test-home
 )
 
 qt5_use_modules(
@@ -117,9 +123,19 @@ add_executable(
     ${SET-VOLUME-SRC}
 )
 
+add_dependencies(
+    set-volume
+    test-home
+)
+
 add_executable(
     get-volume
     ${GET-VOLUME-SRC}
+)
+
+add_dependencies(
+    get-volume
+    test-home
 )
 
 qt5_use_modules(
