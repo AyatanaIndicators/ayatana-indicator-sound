@@ -99,12 +99,10 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-if(NOT "${TESTS_USER}" STREQUAL "jenkins")
-  add_test(
+add_test(
     integration-tests
     integration-tests
-  )
-endif()
+)
 
 set(
     SET-VOLUME-SRC
