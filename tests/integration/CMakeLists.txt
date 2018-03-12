@@ -160,8 +160,6 @@ target_link_libraries(
     sound-indicator-dbus-interfaces
 )
 
-#add_subdirectory(utils)
-
 # coverage reporting
 set(COVERAGE_TEST_TARGETS
   ${COVERAGE_TEST_TARGETS}
