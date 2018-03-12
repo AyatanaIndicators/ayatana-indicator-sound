@@ -15,6 +15,7 @@ set_source_files_properties (gschemas.compiled GENERATED)
 # and help the tests to find that file by setting -DSCHEMA_DIR
 set (XDG_DATA_DIRS "${CMAKE_CURRENT_BINARY_DIR}/gsettings-schemas")
 set (TEST_HOME "${CMAKE_CURRENT_BINARY_DIR}/test-home")
+set (XDG_RUNTIME_DIR "${TEST_HOME}/.config")
 set (SCHEMA_DIR "${XDG_DATA_DIRS}/glib-2.0/schemas")
 if (EXISTS /usr/share/glib-2.0/schemas/com.ubuntu.sound.gschema.xml)
   set (SOUND_SCHEMA /usr/share/glib-2.0/schemas/com.ubuntu.sound.gschema.xml)
@@ -33,7 +34,7 @@ add_custom_command (OUTPUT gschemas.compiled
                     COMMAND cp -f ${SOUND_SCHEMA} ${SCHEMA_DIR}
                     COMMAND ${COMPILE_SCHEMA_EXECUTABLE} ${SCHEMA_DIR})
 add_custom_command (OUTPUT test-home
-                    COMMAND mkdir -p $(TEST_HOME))
+                    COMMAND mkdir -p $(TEST_HOME)/.config/dconf)
 
 add_custom_target (
              gschemas-compiled ALL DEPENDS gschemas.compiled
