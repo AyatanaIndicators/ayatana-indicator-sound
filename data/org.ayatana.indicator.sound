@@ -1,5 +1,5 @@
 [Indicator Service]
-Name=indicator-sound
+Name=ayatana-indicator-sound
 ObjectPath=/org/ayatana/indicator/sound
 Position=30
 
