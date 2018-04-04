@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-11-29 13:08+0100\n"
-"PO-Revision-Date: 2018-04-04 04:20+0000\n"
+"PO-Revision-Date: 2018-04-05 04:35+0000\n"
 "Last-Translator: Pavel Borecki <pavel.borecki@gmail.com>\n"
 "Language-Team: Czech <https://hosted.weblate.org/projects/ayatana-indicators/"
 "sound-applet/cs/>\n"
@@ -50,34 +50,34 @@ msgid ""
 msgstr ""
 "Každý přehrávač médií který dodržuje specifikace MPRIS2 se automaticky "
 "objeví v této nabídce. Toto pole by mělo obsahovat názvy desktop souborů ("
-"bez přípony .desktop) aplikací, které nechcete aby byly zahrnuty v nabídce "
-"zvuku."
+"bez přípony .desktop) aplikací, které se někdy objevily v nabídce zvuku. To "
+"nabídce umožní si zapamatovat a zobrazit aplikace, které jsou offline."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
-msgstr ""
+msgstr "Seznam aplikací které budou mít trvale viditelné ovládání přehrávání"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
-msgstr ""
+msgstr "Úvodní nastavení pro globální ztlumení (ztlumit vše) na nabídce"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
-msgstr ""
+msgstr "Hlasitost při spuštění by neměla být ztlumena."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
-msgstr ""
+msgstr "Zda posuvník hlasitosti umožní nastavení nad 100%"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr ""
+msgstr "Zda v liště nabídek zobrazovat nebo ne indikátor zvuku."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
-msgstr ""
+msgstr "Zda zobrazovat nebo ne varování o vysoké hlasitosti."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
@@ -152,109 +152,109 @@ msgstr ""
 #: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
 #, c-format
 msgid "Volume"
-msgstr ""
+msgstr "Hlasitost"
 
 #: ../src/info-notification.vala:55
 msgid "Speakers"
-msgstr ""
+msgstr "Reproduktory"
 
 #: ../src/info-notification.vala:57
 msgid "Headphones"
-msgstr ""
+msgstr "Sluchátka"
 
 #: ../src/info-notification.vala:59
 msgid "Bluetooth headphones"
-msgstr ""
+msgstr "Bluetooth sluchátka"
 
 #: ../src/info-notification.vala:61
 msgid "Bluetooth speaker"
-msgstr ""
+msgstr "Bluetooth reproduktor"
 
 #: ../src/info-notification.vala:63
 msgid "Usb speaker"
-msgstr ""
+msgstr "USB reproduktor"
 
 #: ../src/info-notification.vala:65
 msgid "Usb headphones"
-msgstr ""
+msgstr "USB sluchátka"
 
 #: ../src/info-notification.vala:67
 msgid "HDMI speaker"
-msgstr ""
+msgstr "HDMI reproduktor"
 
 #: ../src/info-notification.vala:69
 msgid "HDMI headphones"
-msgstr ""
+msgstr "HDMI sluchátka"
 
 #: ../src/service.vala:299
 msgid "Volume (muted)"
-msgstr ""
+msgstr "Hlasitost (ztlumeno)"
 
 #: ../src/service.vala:302
 msgid "silent"
-msgstr ""
+msgstr "ticho"
 
 #: ../src/service.vala:310
 msgid "Sound"
-msgstr ""
+msgstr "Zvuk"
 
 #: ../src/sound-menu.vala:50
 msgid "Mute"
-msgstr ""
+msgstr "Ztlumit"
 
 #: ../src/sound-menu.vala:52
 msgid "Silent Mode"
-msgstr ""
+msgstr "Tichý režim"
 
 #: ../src/sound-menu.vala:66
 msgid "Sound Settings…"
-msgstr ""
+msgstr "Nastavení zvuku…"
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
-msgstr ""
+msgstr "Hlasitost mikrofonu"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
 msgid "High volume can damage your hearing."
-msgstr ""
+msgstr "Vysoká hlasitost může poškodit váš sluch."
 
 #: ../src/sound-menu.vala:254
 msgid "Volume (Headphones)"
-msgstr ""
+msgstr "Hlasitost (sluchátka)"
 
 #: ../src/sound-menu.vala:257
 msgid "Volume (Bluetooth)"
-msgstr ""
+msgstr "Hlasitost (Bluetooth)"
 
 #: ../src/sound-menu.vala:260
 msgid "Volume (Usb)"
-msgstr ""
+msgstr "Hlasitost (USB)"
 
 #: ../src/sound-menu.vala:263
 msgid "Volume (HDMI)"
-msgstr ""
+msgstr "Hlasitost (HDMI)"
 
 #: ../src/sound-menu.vala:266
 msgid "Volume (Bluetooth headphones)"
-msgstr ""
+msgstr "Hlasitost (Bluetooth sluchátka)"
 
 #: ../src/sound-menu.vala:269
 msgid "Volume (Usb headphones)"
-msgstr ""
+msgstr "Hlasitost (USB sluchátka)"
 
 #: ../src/sound-menu.vala:272
 msgid "Volume (HDMI headphones)"
-msgstr ""
+msgstr "Hlasitost (HDMI sluchátka)"
 
 #: ../src/sound-menu.vala:445
 msgid "Choose Playlist"
-msgstr ""
+msgstr "Zvolte seznam skladeb k přehrávání"
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: ../src/warn-notification.vala:52
 msgid "Cancel"
-msgstr ""
+msgstr "Storno"
