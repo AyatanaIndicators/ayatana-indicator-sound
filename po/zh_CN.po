@@ -8,17 +8,20 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-11-29 13:09+0100\n"
-"PO-Revision-Date: 2017-10-12 07:52+0200\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2018-05-05 06:35+0000\n"
+"Last-Translator: huzhanrong <480298199@qq.com>\n"
+"Language-Team: Chinese (Simplified) <https://hosted.weblate.org/projects/"
+"ayatana-indicators/sound-applet/zh_Hans/>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 3.0-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
-msgstr ""
+msgstr "从声音菜单中列入黑名单的应用程序列表"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
@@ -26,13 +29,13 @@ msgid ""
 "in the menu. This array should contain the desktop file names (minus ."
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
-msgstr ""
+msgstr "遵守 MPRIS2 规范的每个媒体播放器将自动出现在菜单中。此数组应包含不希望包含在声音菜单中的应用程序的桌面文件名 (减号. 桌面后缀)。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
-msgstr ""
+msgstr "在某一时刻已在 \"声音\" 菜单中注册的应用程序列表"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
@@ -41,19 +44,21 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
+"遵守 MPRIS2 规范的每个媒体播放器将自动出现在菜单中。此数组应包含在菜单中出现某个点的应用程序的桌面文件名 (减号. "
+"桌面后缀)。这允许菜单记住并显示脱机应用程序。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
-msgstr ""
+msgstr "所有时间都可以看到播放器控件的应用程序列表"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
-msgstr ""
+msgstr "菜单上的全局静音 (静音所有) 的初始设置"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
-msgstr ""
+msgstr "启动卷时不应静音。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
