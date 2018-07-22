@@ -8,17 +8,17 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-11-29 13:09+0100\n"
-"PO-Revision-Date: 2018-02-28 18:02+0000\n"
-"Last-Translator: Мира Странная <miraityan2004@gmail.com>\n"
-"Language-Team: Russian <https://hosted.weblate.org/projects/ayatana-"
-"indicators/sound-applet/ru/>\n"
+"PO-Revision-Date: 2018-07-23 14:45+0000\n"
+"Last-Translator: Eugen Wesseloh <auscoder@gmail.com>\n"
+"Language-Team: Russian <https://hosted.weblate.org/projects/"
+"ayatana-indicators/sound-applet/ru/>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<="
 "4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 2.20-dev\n"
+"X-Generator: Weblate 3.1-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -31,12 +31,17 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
+"Любой медиаплеер, который будет соответствовать спецификации MPRIS2, "
+"автоматически появится в меню. Этот массив должен содержать имена файлов "
+"приложений на рабочем столе (без окончания .desktop), которые не будут "
+"включены в звуковое меню."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
 msgstr ""
+"Список приложений, которые уже были раз зарегистрированы в звуковом меню"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
@@ -45,32 +50,40 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
+"Любой медиаплеер, который будет соответствовать спецификации MPRIS2, "
+"автоматически появится в меню. Этот массив должен содержать имена файлов "
+"приложений на рабочем столе (без окончания .desktop), которые уже попадали в "
+"звуковое меню. Это позволяет меню запоминать и отображать приложения в "
+"режиме офлайн."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
 msgstr ""
+"Список приложений, в которых элементы управления медиаплеером будут видны "
+"всегда"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
 msgstr ""
+"Исходная настройка для глобального отключения звука (отключить все) в меню"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
-msgstr ""
+msgstr "При запуске громкость не должна быть отключена."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
-msgstr ""
+msgstr "позволительно ли настраивать громкость выше 100%"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr ""
+msgstr "Отображать ли индикатор звука в панели меню."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
-msgstr ""
+msgstr "Отображать ли предупреждения высокой громкости."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
@@ -85,6 +98,8 @@ msgstr ""
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
+"На сколько секунд следует запоминать подтверждение пользователя о "
+"максимальной громкости."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
@@ -98,7 +113,7 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "Уровень громкости, вызывающий предупреждение повышенной громкости."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
@@ -108,7 +123,7 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
-msgstr ""
+msgstr "Нормальный уровень громкости."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
 msgid ""
@@ -145,108 +160,108 @@ msgstr ""
 #: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
 #, c-format
 msgid "Volume"
-msgstr ""
+msgstr "Громкость"
 
 #: ../src/info-notification.vala:55
 msgid "Speakers"
-msgstr ""
+msgstr "Колонки"
 
 #: ../src/info-notification.vala:57
 msgid "Headphones"
-msgstr ""
+msgstr "Наушники"
 
 #: ../src/info-notification.vala:59
 msgid "Bluetooth headphones"
-msgstr ""
+msgstr "Наушники с блютуз"
 
 #: ../src/info-notification.vala:61
 msgid "Bluetooth speaker"
-msgstr ""
+msgstr "Колонки с блютуз"
 
 #: ../src/info-notification.vala:63
 msgid "Usb speaker"
-msgstr ""
+msgstr "USB колонки"
 
 #: ../src/info-notification.vala:65
 msgid "Usb headphones"
-msgstr ""
+msgstr "USB наушники"
 
 #: ../src/info-notification.vala:67
 msgid "HDMI speaker"
-msgstr ""
+msgstr "HDMI колонки"
 
 #: ../src/info-notification.vala:69
 msgid "HDMI headphones"
-msgstr ""
+msgstr "HDMI наушники"
 
 #: ../src/service.vala:299
 msgid "Volume (muted)"
-msgstr ""
+msgstr "Громкость (отключена)"
 
 #: ../src/service.vala:302
 msgid "silent"
-msgstr ""
+msgstr "тишина"
 
 #: ../src/service.vala:310
 msgid "Sound"
-msgstr ""
+msgstr "Звук"
 
 #: ../src/sound-menu.vala:50
 msgid "Mute"
-msgstr ""
+msgstr "Отключить"
 
 #: ../src/sound-menu.vala:52
 msgid "Silent Mode"
-msgstr ""
+msgstr "Тихий режим"
 
 #: ../src/sound-menu.vala:66
 msgid "Sound Settings…"
-msgstr ""
+msgstr "Настройки звука…"
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
-msgstr ""
+msgstr "Громкость мокрофона"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
 msgid "High volume can damage your hearing."
-msgstr ""
+msgstr "Высокая громкость может повредить ваш слух."
 
 #: ../src/sound-menu.vala:254
 msgid "Volume (Headphones)"
-msgstr ""
+msgstr "Громкость (наушники)"
 
 #: ../src/sound-menu.vala:257
 msgid "Volume (Bluetooth)"
-msgstr ""
+msgstr "Громкость (блютуз)"
 
 #: ../src/sound-menu.vala:260
 msgid "Volume (Usb)"
-msgstr ""
+msgstr "Громкость (USB)"
 
 #: ../src/sound-menu.vala:263
 msgid "Volume (HDMI)"
-msgstr ""
+msgstr "Громкость (HDMI)"
 
 #: ../src/sound-menu.vala:266
 msgid "Volume (Bluetooth headphones)"
-msgstr ""
+msgstr "Громкость (наушники блютуз)"
 
 #: ../src/sound-menu.vala:269
 msgid "Volume (Usb headphones)"
-msgstr ""
+msgstr "Громкость (USB наушники)"
 
 #: ../src/sound-menu.vala:272
 msgid "Volume (HDMI headphones)"
-msgstr ""
+msgstr "Громкость (HDMI наушники)"
 
 #: ../src/sound-menu.vala:445
 msgid "Choose Playlist"
-msgstr ""
+msgstr "Выберете плейлист"
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
-msgstr "OK"
+msgstr "О.К."
 
 #: ../src/warn-notification.vala:52
 msgid "Cancel"
