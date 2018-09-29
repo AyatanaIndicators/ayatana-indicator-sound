@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-11-29 13:09+0100\n"
-"PO-Revision-Date: 2018-09-28 19:37+0000\n"
+"PO-Revision-Date: 2018-10-01 08:37+0000\n"
 "Last-Translator: Володимир Бриняк <bardvv@gmail.com>\n"
 "Language-Team: Ukrainian <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/uk/>\n"
@@ -22,7 +22,7 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
-msgstr ""
+msgstr "Список застосунків в чорному списку звукового меню"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
@@ -31,12 +31,16 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
+"Кожен мультимедійний плеєр, який дотримується специфікації MPRIS2, "
+"автоматично з'явиться в меню. Цей масив повинен містити назви файлів "
+"робочого столу (мінус суфікс .desktop) застосунків, які не хочуть бути "
+"включеними в меню звуку."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
-msgstr ""
+msgstr "Список застосунків, які в якийсь момент зареєстровані в звуковому меню"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
@@ -45,32 +49,42 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
+"Кожен мультимедійний плеєр, який дотримується специфікації MPRIS2, "
+"автоматично з'явиться в меню. Цей масив повинен містити назви файлів на "
+"робочому столі (за винятком .desktop-суфікса) застосунків, які в певний "
+"момент з'являються в меню. Це дозволяє в меню запам'ятовувати і відображати "
+"окремі застосунки."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
 msgstr ""
+"Список застосунків, у яких будуть постійно відображатись елементи керування "
+"програвачами"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
 msgstr ""
+"Початкове налаштування для глобального вимкнення (вимкнення звуку) у меню"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
-msgstr ""
+msgstr "Під час запуску не слід вимикати звук."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
 msgstr ""
+"Незалежно від того, що повзунок гучності дозволяє встановлювати гучність "
+"вище 100%"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr ""
+msgstr "Показувати чи ні індикатор звуку на панелі меню."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
-msgstr ""
+msgstr "Показувати чи ні попередження про високу гучності."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
@@ -81,10 +95,17 @@ msgid ""
 "volume-decibels AND (d) the user has not indicated approval in the last "
 "warning-volume-approval-ttl seconds."
 msgstr ""
+"Якщо ввімкнено на пристрої, діалог підтвердження буде представлений "
+"користувачеві, якщо а) щось підключено до роз'єму для навушників(тобто немає "
+"попереджень щодо гучності динаміків); б) грає медіа (тобто немає жодних "
+"застережень щодо гучності ринг-тону); в) користувач намагається встановити "
+"гучність, більшу, ніж warning-volume-decibels; г) користувач не вказав "
+"схвалення в останньому warning-volume-approval-ttl секунд."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
+"Скільки секунд слід пам'ятати схвалення користувачам попередження гучності."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
@@ -95,20 +116,28 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
+"Як довго пам'ятати про схвалення користувача діалогового вікна "
+"підтвердження, описаного в описі 'warning-volume-enabled'.\n"
+"\n"
+"Значення за замовчуванням (72 000 секунд) відповідає 20 годин, "
+"запропонованим стандартом ЄС EN 60950-1/Al2: “Підтвердження не потрібно "
+"повторювати більше, ніж раз на 20 годин акумулятивного часу прослуховування.”"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "Рівень гучності, який викликає попередження про високу гучність."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
 msgstr ""
+"Рівень гучності, який викликає попередження про високу гучність. Докладніше "
+"дивись warning-volume-enabled."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
-msgstr ""
+msgstr "Нормальний рівень гучності."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
 msgid ""
@@ -121,12 +150,22 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
+"Максимальна гучність, коли параметр  com.ubuntu.sound's 'allow-amplified-"
+"volume' відключений.\n"
+"\n"
+"Щоб відповідати стандарту ЄС EN 60950-1 / Al2, це значення ніколи не повинно "
+"бути встановлено в дБ, що призводить до того, що вихідна потужність "
+"навушників перевищує 100 дБА, а електрична потужність не перевищує 150 мВ.\n"
+"\n"
+"Значення за замовчуванням (0) відповідає PulseAudio's PA_VOLUME_NORM."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
 msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
+"Вихідна гучність для використання коли com.ubuntu.sound's 'allow-amplified-"
+"volume' параметр увімкнуто."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
@@ -139,98 +178,106 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
+"Максимальний гучність, коли параметр com.ubuntu.sound's 'allow-amplified-"
+"volume' увімкнено.\n"
+"\n"
+"Щоб відповідати стандарту EN 60950-1/Al2, це значення ніколи не повинно бути "
+"встановлено в дБ, що призводить до виходу звуку з навушників, що перевищує "
+"100 дБА, а електрична потужність не перевищує 150 мВ.\n"
+"\n"
+"Значення за замовчуванням (11) відповідає  PulseAudio's PA_VOLUME_UI_MAX."
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
 #: ../src/service.vala:302 ../src/service.vala:305 ../src/sound-menu.vala:57
 #: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
 #, c-format
 msgid "Volume"
-msgstr ""
+msgstr "Гучність"
 
 #: ../src/info-notification.vala:55
 msgid "Speakers"
-msgstr ""
+msgstr "Колонки"
 
 #: ../src/info-notification.vala:57
 msgid "Headphones"
-msgstr ""
+msgstr "Навушники"
 
 #: ../src/info-notification.vala:59
 msgid "Bluetooth headphones"
-msgstr ""
+msgstr "Bluetooth навушники"
 
 #: ../src/info-notification.vala:61
 msgid "Bluetooth speaker"
-msgstr ""
+msgstr "Колонки Bluetooth"
 
 #: ../src/info-notification.vala:63
 msgid "Usb speaker"
-msgstr ""
+msgstr "USB динамік"
 
 #: ../src/info-notification.vala:65
 msgid "Usb headphones"
-msgstr ""
+msgstr "USB-навушники"
 
 #: ../src/info-notification.vala:67
 msgid "HDMI speaker"
-msgstr ""
+msgstr "Динамік HDMI"
 
 #: ../src/info-notification.vala:69
 msgid "HDMI headphones"
-msgstr ""
+msgstr "Навушники HDMI"
 
 #: ../src/service.vala:299
 msgid "Volume (muted)"
-msgstr ""
+msgstr "Гучність (приглушена)"
 
 #: ../src/service.vala:302
 msgid "silent"
-msgstr ""
+msgstr "тиша"
 
 #: ../src/service.vala:310
 msgid "Sound"
-msgstr ""
+msgstr "Звук"
 
 #: ../src/sound-menu.vala:50
 msgid "Mute"
-msgstr ""
+msgstr "Вимкнути звук"
 
 #: ../src/sound-menu.vala:52
 msgid "Silent Mode"
-msgstr ""
+msgstr "Режим тиші"
 
 #: ../src/sound-menu.vala:66
 msgid "Sound Settings…"
-msgstr ""
+msgstr "Налаштування звуку…"
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
-msgstr ""
+msgstr "Гучність мікрофона"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
 msgid "High volume can damage your hearing."
-msgstr ""
+msgstr "Висока гучність може пошкодити слух."
 
 #: ../src/sound-menu.vala:254
 msgid "Volume (Headphones)"
-msgstr ""
+msgstr "Гучність (навушники)"
 
 #: ../src/sound-menu.vala:257
 msgid "Volume (Bluetooth)"
-msgstr ""
+msgstr "Гучність (Bluetooth)"
 
 #: ../src/sound-menu.vala:260
 msgid "Volume (Usb)"
-msgstr ""
+msgstr "Гучність (usb)"
 
 #: ../src/sound-menu.vala:263
 msgid "Volume (HDMI)"
-msgstr ""
+msgstr "Гучність (HDMI)"
 
 #: ../src/sound-menu.vala:266
 msgid "Volume (Bluetooth headphones)"
-msgstr ""
+msgstr "Гучність (Bluetooth навушники)"
 
 #: ../src/sound-menu.vala:269
 msgid "Volume (Usb headphones)"
@@ -238,7 +285,7 @@ msgstr "Гучність (USB-навушники)"
 
 #: ../src/sound-menu.vala:272
 msgid "Volume (HDMI headphones)"
-msgstr ""
+msgstr "Гучність (навушники HDMI)"
 
 #: ../src/sound-menu.vala:445
 msgid "Choose Playlist"
