@@ -82,13 +82,14 @@ public class IndicatorSound.InfoNotification: Notification
         switch (active_output) {
             case VolumeControl.ActiveOutput.SPEAKERS:
             case VolumeControl.ActiveOutput.HEADPHONES:
-            case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
-            case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
             case VolumeControl.ActiveOutput.USB_SPEAKER:
             case VolumeControl.ActiveOutput.USB_HEADPHONES:
             case VolumeControl.ActiveOutput.HDMI_SPEAKER:
             case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
                 return "audio-volume-high";
+            case VolumeControl.ActiveOutput.BLUETOOTH_HEADPHONES:
+            case VolumeControl.ActiveOutput.BLUETOOTH_SPEAKER:
+                return "audio-speakers-bluetooth-symbolic";
 
             default:
                 return "";
