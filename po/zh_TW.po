@@ -8,17 +8,20 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-11-29 13:09+0100\n"
-"PO-Revision-Date: 2017-10-12 07:52+0200\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2019-01-12 18:06+0000\n"
+"Last-Translator: Louies <louies0623@gmail.com>\n"
+"Language-Team: Chinese (Traditional) <https://hosted.weblate.org/projects/"
+"ayatana-indicators/sound-applet/zh_Hant/>\n"
 "Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 3.4-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
-msgstr ""
+msgstr "從聲音功能表中列入黑名單的應用程式清單"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
@@ -26,13 +29,13 @@ msgid ""
 "in the menu. This array should contain the desktop file names (minus ."
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
-msgstr ""
+msgstr "遵守 MPRIS2 規範的每個媒體播放機將自動出現在功能表中。此陣列應包含不希望包含在聲音功能表中的應用程式的桌面檔名。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
-msgstr ""
+msgstr "在某個時刻已在聲音功能表中註冊的應用程式清單"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
@@ -41,32 +44,34 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
+"遵守MPRIS2規範的每個媒體播放器將自動出現在菜單中。 "
+"此數組應包含應用程序的桌面文件名（減去.desktop後綴），這些應用程序在某些位置出現在菜單中。 這允目錄單記住並顯示脫線應用程式。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
-msgstr ""
+msgstr "一直顯示播放器控件的應用程序列表"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
-msgstr ""
+msgstr "目錄上全局靜音（全部靜音）的初始設置"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
-msgstr ""
+msgstr "在啟動時，音量不應該靜音。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
-msgstr ""
+msgstr "音量滑塊是否允許將音量設置為100％以上"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr ""
+msgstr "是否在菜單欄中顯示聲音指示器。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
-msgstr ""
+msgstr "是否顯示高音量警告。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
@@ -77,10 +82,12 @@ msgid ""
 "volume-decibels AND (d) the user has not indicated approval in the last "
 "warning-volume-approval-ttl seconds."
 msgstr ""
+"如果在設備上啟用，則會在以下情況下向用戶顯示確認對話框（a）插入耳機插孔（即沒有揚聲器音量警告）和（b）正在播放媒體（即，沒有警告鈴聲音量） ）和（c）"
+"用戶嘗試將音量設置為高於警告音量 - 分貝和（d）用戶未在最後一次警告 - 音量 - 批准 -  ttl秒中指示批准。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
-msgstr ""
+msgstr "應記住用戶的警告量批准的秒數。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
@@ -91,20 +98,23 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
+"多長時間記住用戶對“啟用警告音量”說明中討論的確認對話框的批准。\n"
+"\n"
+"預設值（72,000秒）對應於歐盟標準EN 60950-1 / Al2建議的20小時：“確認不需要每20小時累計監聽時間重複一次。”"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "觸發高音量警告的音量級別。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
-msgstr ""
+msgstr "觸發高音量警告的音量級別。 有關詳細信息，請參閱warning-volume-enabled。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
-msgstr ""
+msgstr "正常輸出量。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
 msgid ""
@@ -117,12 +127,17 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
+"禁用com.ubuntu.sound的“允許放大音量”設置時的最大音量。\n"
+"\n"
+"為符合歐盟標準EN 60950-1 / Al2，此值不應設置為dB，導致耳機聲音輸出超過100 dBA，電輸出不超過150 mV。\n"
+"\n"
+"預設值（0）對應於PulseAudio的PA_VOLUME_NORM。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
 msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
-msgstr ""
+msgstr "啟用 com.ubuntu.sound 的“允許放大音量”設置時要使用的輸出音量。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
@@ -135,115 +150,120 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
+"啟用com.ubuntu.sound的“允許放大音量”設置時的最大音量。\n"
+"\n"
+"為符合歐盟標準EN 60950-1 / Al2，此值不應設置為dB，導致耳機聲音輸出超過100 dBA，電輸出不超過150 mV。\n"
+"\n"
+"預設值（11）對應於PulseAudio的PA_VOLUME_UI_MAX。"
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
 #: ../src/service.vala:302 ../src/service.vala:305 ../src/sound-menu.vala:57
 #: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
 #, c-format
 msgid "Volume"
-msgstr ""
+msgstr "音量"
 
 #: ../src/info-notification.vala:55
 msgid "Speakers"
-msgstr ""
+msgstr "喇叭"
 
 #: ../src/info-notification.vala:57
 msgid "Headphones"
-msgstr ""
+msgstr "耳機"
 
 #: ../src/info-notification.vala:59
 msgid "Bluetooth headphones"
-msgstr ""
+msgstr "藍牙耳機"
 
 #: ../src/info-notification.vala:61
 msgid "Bluetooth speaker"
-msgstr ""
+msgstr "藍牙喇叭"
 
 #: ../src/info-notification.vala:63
 msgid "Usb speaker"
-msgstr ""
+msgstr "USB 喇叭"
 
 #: ../src/info-notification.vala:65
 msgid "Usb headphones"
-msgstr ""
+msgstr "USB 耳機"
 
 #: ../src/info-notification.vala:67
 msgid "HDMI speaker"
-msgstr ""
+msgstr "HDMI 喇叭"
 
 #: ../src/info-notification.vala:69
 msgid "HDMI headphones"
-msgstr ""
+msgstr "HDMI 耳機"
 
 #: ../src/service.vala:299
 msgid "Volume (muted)"
-msgstr ""
+msgstr "音量 (靜音)"
 
 #: ../src/service.vala:302
 msgid "silent"
-msgstr ""
+msgstr "無聲"
 
 #: ../src/service.vala:310
 msgid "Sound"
-msgstr ""
+msgstr "聲音"
 
 #: ../src/sound-menu.vala:50
 msgid "Mute"
-msgstr ""
+msgstr "靜音"
 
 #: ../src/sound-menu.vala:52
 msgid "Silent Mode"
-msgstr ""
+msgstr "靜音模式"
 
 #: ../src/sound-menu.vala:66
 msgid "Sound Settings…"
-msgstr ""
+msgstr "聲音設置…"
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
-msgstr ""
+msgstr "麥克風音量"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
 msgid "High volume can damage your hearing."
-msgstr ""
+msgstr "音量過大會損害您的聽力。"
 
 #: ../src/sound-menu.vala:254
 msgid "Volume (Headphones)"
-msgstr ""
+msgstr "音量 (耳機)"
 
 #: ../src/sound-menu.vala:257
 msgid "Volume (Bluetooth)"
-msgstr ""
+msgstr "音量 (藍牙)"
 
 #: ../src/sound-menu.vala:260
 msgid "Volume (Usb)"
-msgstr ""
+msgstr "音量 (USB)"
 
 #: ../src/sound-menu.vala:263
 msgid "Volume (HDMI)"
-msgstr ""
+msgstr "音量 (HDMI)"
 
 #: ../src/sound-menu.vala:266
 msgid "Volume (Bluetooth headphones)"
-msgstr ""
+msgstr "音量 (藍牙耳機)"
 
 #: ../src/sound-menu.vala:269
 msgid "Volume (Usb headphones)"
-msgstr ""
+msgstr "音量 (USB 耳機)"
 
 #: ../src/sound-menu.vala:272
 msgid "Volume (HDMI headphones)"
-msgstr ""
+msgstr "音量 (HDMI 耳機)"
 
 #: ../src/sound-menu.vala:445
 msgid "Choose Playlist"
-msgstr ""
+msgstr "選擇播放清單"
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
-msgstr ""
+msgstr "確定"
 
 #: ../src/warn-notification.vala:52
 msgid "Cancel"
-msgstr ""
+msgstr "取消"
