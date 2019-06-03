@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-11-29 13:09+0100\n"
-"PO-Revision-Date: 2019-05-06 09:47+0000\n"
+"PO-Revision-Date: 2019-06-18 19:04+0000\n"
 "Last-Translator: ssantos <ssantos@web.de>\n"
 "Language-Team: Portuguese <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/pt/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 3.7-dev\n"
+"X-Generator: Weblate 3.7\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -30,6 +30,10 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
+"Cada reprodutor de mídia que obedeça à especificação MPRIS2 aparecerá "
+"automaticamente no menu. Este array deve conter os nomes dos ficheiros do "
+"desktop (menos o sufixo .desktop) de aplicações que não querem ser incluídas "
+"no menu de som."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
@@ -46,15 +50,21 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
+"Cada reprodutor de mídia que obedeça à especificação MPRIS2 aparecerá "
+"automaticamente no menu. Este array deve conter os nomes dos ficheiros do "
+"desktop (menos o sufixo .desktop) de aplicações que não querem ser incluídas "
+"no menu de som. Isso permite que o menu lembre e exiba aplicativos "
+"offlineados."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
 msgstr ""
+"Uma lista de aplicativos que terão controles do jogador visíveis todo o tempo"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
-msgstr ""
+msgstr "Configuração inicial para silenciar global (silenciar tudo) no menu"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
@@ -64,14 +74,15 @@ msgstr "Ao iniciar o volume não deve ser mutado."
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
 msgstr ""
+"Se o controle deslizante de volume permite ajustar o volume acima de 100%"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr ""
+msgstr "Se deve mostrar o indicador sonoro na barra de menu ou não."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
-msgstr ""
+msgstr "Se deve mostrar avisos de alto volume ou não."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
@@ -82,10 +93,18 @@ msgid ""
 "volume-decibels AND (d) the user has not indicated approval in the last "
 "warning-volume-approval-ttl seconds."
 msgstr ""
+"Se estiver ativado num aparelho, uma caixa de diálogo de confirmação será "
+"apresentada ao utilizador se (a) algo estiver ligado à tomada de "
+"auscultadores (ou seja, sem avisos para volumes de colunas) E (b) mídia "
+"estiver a ser reproduzido (ou seja, sem avisos para volumes de toques) E (c) "
+"o utilizador tentar definir o volume superior aos volumes de decibéis de "
+"volume de aviso E (d) o utilizador não tiver indicado aprovação nos últimos "
+"segundos de aviso-volume-aprovação-ttl."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
+"Quantos segundos a aprovação do volume de aviso do usuário deve ser lembrada."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
@@ -96,20 +115,28 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
+"Quanto tempo para lembrar a aprovação de um usuário da caixa de diálogo de "
+"confirmação na descrição de 'warning-volume-enabled'.\n"
+"\n"
+"O valor predefinido (72.000 segundos) corresponde às 20 horas sugeridas pela "
+"norma europeia EN 60950-1/Al2: \"O reconhecimento não precisa ser repetido "
+"mais de uma vez a cada 20 horas de tempo cumulativo de escuta.\""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "Nível de volume que aciona um aviso de volume alto."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
 msgstr ""
+"Nível de volume que aciona um aviso de volume alto. Consulte o volume de "
+"aviso ativado para mais detalhes."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
-msgstr ""
+msgstr "Volume de saída normal."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
 msgid ""
