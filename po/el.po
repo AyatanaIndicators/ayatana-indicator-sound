@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-11-29 13:08+0100\n"
-"PO-Revision-Date: 2019-05-21 12:43+0000\n"
+"PO-Revision-Date: 2019-06-18 19:04+0000\n"
 "Last-Translator: THANOS SIOURDAKIS <siourdakisthanos@gmail.com>\n"
 "Language-Team: Greek <https://hosted.weblate.org/projects/ayatana-indicators/"
 "sound-applet/el/>\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.7-dev\n"
+"X-Generator: Weblate 3.7\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
-msgstr ""
+msgstr "Μια λίστα εφαρμογών που βρίσκονται στη μαύρη λίστα του μενού ήχου"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
@@ -30,12 +30,18 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
+"Κάθε πρόγραμμα αναπαραγωγής πολυμέσων που συμμορφώνεται με τις προδιαγραφές "
+"MPRIS2 θα εμφανίζεται αυτόματα στο μενού. Αυτός ο πίνακας πρέπει να περιέχει "
+"τα ονόματα αρχείων της επιφάνειας εργασίας (μείον το επίθημα επιφάνειας "
+"εργασίας) των εφαρμογών που δεν θέλουν να συμπεριληφθούν στο μενού ήχου."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
 msgstr ""
+"Μια λίστα των εφαρμογών που σε κάποιο σημείο έχουν καταχωρηθεί με το μενού "
+"ήχου"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
@@ -44,11 +50,18 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
+"Κάθε πρόγραμμα αναπαραγωγής πολυμέσων που συμμορφώνεται με τις προδιαγραφές "
+"MPRIS2 θα εμφανίζεται αυτόματα στο μενού. Αυτός ο πίνακας πρέπει να περιέχει "
+"τα ονόματα αρχείων της επιφάνειας εργασίας (μείον το επίθημα επιφάνειας "
+"εργασίας) των εφαρμογών που έχουν εμφανιστεί σε κάποιο σημείο στο μενού. "
+"Αυτό επιτρέπει στο μενού να θυμάται και να εμφανίζει εφαρμογές που "
+"λειτουργούν εκτός δικτύου."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
 msgstr ""
+"Μια λίστα εφαρμογών που θα έχουν ορατές ρυθμίσεις αναπαραγωγής όλη την ώρα"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
