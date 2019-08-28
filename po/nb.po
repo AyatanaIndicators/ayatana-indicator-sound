@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-11-29 13:09+0100\n"
+"POT-Creation-Date: 2019-08-28 20:28+0200\n"
 "PO-Revision-Date: 2017-12-13 20:48+0000\n"
 "Last-Translator: Allan Nordhøy <epost@anotheragency.no>\n"
 "Language-Team: Norwegian Bokmål <https://hosted.weblate.org/projects/ayatana-"
@@ -103,7 +103,8 @@ msgstr ""
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 #, fuzzy
 msgid "How many seconds a user's warning-volume approval should be remembered."
-msgstr "Hvor mange sekunder en brukers samtykke til warning-volume skal huskes."
+msgstr ""
+"Hvor mange sekunder en brukers samtykke til warning-volume skal huskes."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:14
 #, fuzzy
@@ -165,8 +166,8 @@ msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
-"Utgangslydstyrkenivå brukt når com.ubuntu.sound sin \"allow-amplified-"
-"volume\"-innstilling er påslått."
+"Utgangslydstyrkenivå brukt når com.ubuntu.sound sin \"allow-amplified-volume"
+"\"-innstilling er påslått."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""

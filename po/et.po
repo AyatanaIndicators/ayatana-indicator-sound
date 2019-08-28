@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-11-29 13:08+0100\n"
+"POT-Creation-Date: 2019-08-28 20:28+0200\n"
 "PO-Revision-Date: 2018-01-12 23:53+0000\n"
 "Last-Translator: Kristjan Räts <kristjanrats@gmail.com>\n"
 "Language-Team: Estonian <https://hosted.weblate.org/projects/ayatana-"
@@ -97,7 +97,8 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
-msgstr "Kui pikaks ajaks jätta meelde kasutaja hoiatushelitugevus (sekundites)."
+msgstr ""
+"Kui pikaks ajaks jätta meelde kasutaja hoiatushelitugevus (sekundites)."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
@@ -156,8 +157,8 @@ msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
-"Väljundtugevus, mida kasutatakse juhul, kui on lubatud rakenduse "
-"com.ubuntu.sound säte 'allow-amplified-volume'."
+"Väljundtugevus, mida kasutatakse juhul, kui on lubatud rakenduse com.ubuntu."
+"sound säte 'allow-amplified-volume'."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
