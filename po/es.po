@@ -8,16 +8,16 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:28+0200\n"
-"PO-Revision-Date: 2019-08-20 14:24+0000\n"
-"Last-Translator: Adolfo Jayme Barrientos <fitojb@ubuntu.com>\n"
-"Language-Team: Spanish <https://hosted.weblate.org/projects/ayatana-"
-"indicators/sound-applet/es/>\n"
+"PO-Revision-Date: 2019-09-08 18:24+0000\n"
+"Last-Translator: Abraham Roman <abrahiv666@gmail.com>\n"
+"Language-Team: Spanish <https://hosted.weblate.org/projects/"
+"ayatana-indicators/sound-applet/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.8\n"
+"X-Generator: Weblate 3.9-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -93,10 +93,20 @@ msgid ""
 "volume-decibels AND (d) the user has not indicated approval in the last "
 "warning-volume-approval-ttl seconds."
 msgstr ""
+"Si está habilitado en un dispositivo, se presentará un diálogo de "
+"confirmación al usuario si (a) algo está conectado a la toma de auriculares ("
+"es decir, no hay advertencias para los volúmenes de los altavoces) Y (b) los "
+"medios se están reproduciendo (es decir, no hay advertencias para los "
+"volúmenes de tonos de llamada ) Y (c) el usuario intenta establecer el "
+"volumen más alto que advertencia-volumen-decibelios Y (d) el usuario no ha "
+"indicado aprobación en los últimos segundos de advertencia-volumen-"
+"aprobación-ttl."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
+"Cuántos segundos se debe recordar la aprobación del volumen de advertencia "
+"de un usuario."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
@@ -107,16 +117,25 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
+"Cuánto tiempo recordar la aprobación de un usuario del diálogo de "
+"confirmación discutido en la descripción de 'cuidado-volume-activado'.\n"
+"\n"
+"El valor predeterminado (72,000 segundos) corresponde a las 20 horas "
+"sugeridas por la norma EN 60950-1 / Al2 de la UE: \"No es necesario repetir "
+"el reconocimiento más de una vez cada 20 h de tiempo de escucha acumulativo\""
+"."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "Nivel de volumen que activa una advertencia de alto volumen."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
 msgstr ""
+"Nivel de volumen que activa una advertencia de alto volumen. Ver advertencia-"
+"volumen habilitado para más detalles."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
@@ -133,12 +152,21 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
+"El volumen máximo cuando la configuración 'allow-amplified-volume' de "
+"com.ubuntu.sound está desactivada.\n"
+"Para cumplir con el estándar de la UE EN 60950-1 / Al2, este valor nunca "
+"debe establecerse en dB que provoque que la salida de sonido de los "
+"auriculares supere los 100 dBA, ni que la salida eléctrica supere los 150 mV."
+"\n"
+"El valor predeterminado (0) corresponde a PA_VOLUME_NORM de PulseAudio."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
 msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
+"Volumen de salida para usar cuando la configuración 'permitir-amplificado-"
+"volumen' de com.ubuntu.sound está habilitada."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
@@ -151,110 +179,119 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
+"El volumen máximo cuando la configuración 'permitir-amplificado-volumen' de "
+"com.ubuntu.sound está habilitada.\n"
+"\n"
+"Para cumplir con el estándar de la UE EN 60950-1 / Al2, este valor nunca "
+"debe establecerse en dB que provoque que la salida de sonido de los "
+"auriculares supere los 100 dBA, ni que la salida eléctrica supere los 150 mV."
+"\n"
+"\n"
+"El valor predeterminado (11) corresponde a PA_VOLUME_UI_MAX de PulseAudio."
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
 #: ../src/service.vala:302 ../src/service.vala:305 ../src/sound-menu.vala:57
 #: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
 #, c-format
 msgid "Volume"
-msgstr ""
+msgstr "Volumen"
 
 #: ../src/info-notification.vala:55
 msgid "Speakers"
-msgstr ""
+msgstr "Bocinas"
 
 #: ../src/info-notification.vala:57
 msgid "Headphones"
-msgstr ""
+msgstr "Audifonos"
 
 #: ../src/info-notification.vala:59
 msgid "Bluetooth headphones"
-msgstr ""
+msgstr "Audifonos Bluetooth"
 
 #: ../src/info-notification.vala:61
 msgid "Bluetooth speaker"
-msgstr ""
+msgstr "Bocinas Bluetooth"
 
 #: ../src/info-notification.vala:63
 msgid "Usb speaker"
-msgstr ""
+msgstr "Altavoz USB"
 
 #: ../src/info-notification.vala:65
 msgid "Usb headphones"
-msgstr ""
+msgstr "Audifonos USB"
 
 #: ../src/info-notification.vala:67
 msgid "HDMI speaker"
-msgstr ""
+msgstr "Bocinas HDMI"
 
 #: ../src/info-notification.vala:69
 msgid "HDMI headphones"
-msgstr ""
+msgstr "Audifonos HDMI"
 
 #: ../src/service.vala:299
 msgid "Volume (muted)"
-msgstr ""
+msgstr "Volumen (SIlencio)"
 
 #: ../src/service.vala:302
 msgid "silent"
-msgstr ""
+msgstr "Silencio"
 
 #: ../src/service.vala:310
 msgid "Sound"
-msgstr ""
+msgstr "Sonido"
 
 #: ../src/sound-menu.vala:50
 msgid "Mute"
-msgstr ""
+msgstr "Silenciar"
 
 #: ../src/sound-menu.vala:52
 msgid "Silent Mode"
-msgstr ""
+msgstr "Modo Silencioso"
 
 #: ../src/sound-menu.vala:66
 msgid "Sound Settings…"
-msgstr ""
+msgstr "Opciones de Sonido…"
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
-msgstr ""
+msgstr "Volumen de Microfono"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
 msgid "High volume can damage your hearing."
-msgstr ""
+msgstr "El volumen alto puede dañar sus oidos."
 
 #: ../src/sound-menu.vala:254
 msgid "Volume (Headphones)"
-msgstr ""
+msgstr "Volumen (Audifonos)"
 
 #: ../src/sound-menu.vala:257
 msgid "Volume (Bluetooth)"
-msgstr ""
+msgstr "Volumen (Bluetooth)"
 
 #: ../src/sound-menu.vala:260
 msgid "Volume (Usb)"
-msgstr ""
+msgstr "Volumen (USB)"
 
 #: ../src/sound-menu.vala:263
 msgid "Volume (HDMI)"
-msgstr ""
+msgstr "Volumen (HDMI)"
 
 #: ../src/sound-menu.vala:266
 msgid "Volume (Bluetooth headphones)"
-msgstr ""
+msgstr "Volumen (Audifonos Bluetooth)"
 
 #: ../src/sound-menu.vala:269
 msgid "Volume (Usb headphones)"
-msgstr ""
+msgstr "Volumen (Audifonos USB)"
 
 #: ../src/sound-menu.vala:272
 msgid "Volume (HDMI headphones)"
-msgstr ""
+msgstr "Volumen(Audifonos HDMI)"
 
 #: ../src/sound-menu.vala:445
 msgid "Choose Playlist"
-msgstr ""
+msgstr "Escoger Lista"
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
