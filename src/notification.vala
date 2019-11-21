@@ -19,7 +19,7 @@
 
 public abstract class IndicatorSound.Notification: Object
 {
-	public Notification () {
+	internal Notification () {
 		BusWatcher.watch_namespace (
 			GLib.BusType.SESSION,
 			"org.freedesktop.Notifications",
