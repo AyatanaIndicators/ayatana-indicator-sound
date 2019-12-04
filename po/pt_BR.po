@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:28+0200\n"
-"PO-Revision-Date: 2019-04-17 12:03+0000\n"
-"Last-Translator: Marcus Vinicius Santos <m.vinicius@zoho.com>\n"
+"PO-Revision-Date: 2019-12-05 04:05+0000\n"
+"Last-Translator: Wellington Terumi Uemura <wellingtonuemura@gmail.com>\n"
 "Language-Team: Portuguese (Brazil) <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/pt_BR/>\n"
 "Language: pt_BR\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 3.6-dev\n"
+"X-Generator: Weblate 3.10-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -30,6 +30,10 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
+"Cada media player que obedeça à especificação do MPRIS2 aparecerá "
+"automaticamente no menu. Este array deve conter os nomes dos arquivos de "
+"desktop (menos o sufixo .desktop) dos aplicativos que não queiram ser "
+"incluídas no menu de som."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
@@ -46,32 +50,40 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
+"Cada media player que obedeça à especificação do MPRIS2 aparecerá "
+"automaticamente no menu. Este array deve conter os nomes dos arquivos de "
+"desktop (menos o sufixo .desktop) dos aplicativos que em algum momento "
+"tenham aparecido no menu. Isso permite que o menu lembre e exibam os "
+"aplicativos offlined."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
 msgstr ""
+"Uma lista de aplicativos que terão os controles do jogador visíveis o tempo "
+"todo"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
-msgstr ""
+msgstr "Configuração inicial para mute global (mute all) no menu"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
-msgstr "Ao iniciar o volume não deve ser mutado."
+msgstr "O volume não deve ser silenciado ao iniciar."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
 msgstr ""
+"Se o controle deslizante de volume permite ajustar o volume acima de 100%"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr ""
+msgstr "Se deve ou não mostrar o indicador sonoro na barra de menu."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
-msgstr ""
+msgstr "Se deve ou não mostrar avisos com o volume alto."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
@@ -82,10 +94,19 @@ msgid ""
 "volume-decibels AND (d) the user has not indicated approval in the last "
 "warning-volume-approval-ttl seconds."
 msgstr ""
+"Se ativado num dispositivo, será apresentada uma caixa de diálogo de "
+"confirmação ao usuário se (a) algo estiver conectado à tomada de fone de "
+"ouvidos (ou seja, sem avisos nos alto-falantes) E (b) se uma mídia estiver "
+"tocando (ou seja, sem avisos sonoros de toques) E (c) se o usuário tentar "
+"definir o volume do áudio acima dos avisos de alerta E (d) se o usuário não "
+"tiver concordado com o último alerta de volume alto nos últimos segundos de "
+"aviso."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
+"Em quanto tempo, em segundos, o alerta de aprovação de volume alto do "
+"usuário deve ser lembrada."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
