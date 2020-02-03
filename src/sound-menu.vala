@@ -123,8 +123,8 @@ public class SoundMenu: Object
         set {
             if (value && !this.mic_volume_shown) {
                 var slider = this.create_slider_menu_item (_("Microphone Volume"), "indicator.mic-volume", 0.0, 1.0, 0.01,
-                                                           "audio-input-microphone-low-zero-panel",
-                                                           "audio-input-microphone-high-panel", false);
+                                                           "audio-input-microphone-symbolic",
+                                                           "audio-input-microphone-muted-symbolic", false);
                 volume_section.append_item (slider);
                 this.mic_volume_shown = true;
             }
