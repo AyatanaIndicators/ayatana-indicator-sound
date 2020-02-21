@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:28+0200\n"
-"PO-Revision-Date: 2020-02-07 14:50+0000\n"
-"Last-Translator: Laércio Cordeiro <efs.laee@gmail.com>\n"
+"PO-Revision-Date: 2020-02-22 19:33+0000\n"
+"Last-Translator: Djakson Cleber Gonçalves Filho <djakson.filho@gmail.com>\n"
 "Language-Team: Portuguese (Brazil) <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/pt_BR/>\n"
 "Language: pt_BR\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 3.11-dev\n"
+"X-Generator: Weblate 4.0-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -120,7 +120,7 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "Nível de volume que ativa um aviso de volume alto."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
@@ -130,7 +130,7 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
-msgstr ""
+msgstr "Volume de saída normal."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
 msgid ""
