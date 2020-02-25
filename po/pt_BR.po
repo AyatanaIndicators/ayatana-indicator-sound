@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:28+0200\n"
-"PO-Revision-Date: 2020-02-22 19:33+0000\n"
-"Last-Translator: Djakson Cleber Gonçalves Filho <djakson.filho@gmail.com>\n"
+"PO-Revision-Date: 2020-02-26 17:33+0000\n"
+"Last-Translator: Wellington Terumi Uemura <wellingtonuemura@gmail.com>\n"
 "Language-Team: Portuguese (Brazil) <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/pt_BR/>\n"
 "Language: pt_BR\n"
@@ -117,6 +117,12 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
+"Quanto tempo para lembrar a aprovação do diálogo de confirmação pelo usuário "
+"discutido na descrição do \"aviso-ativado-pelo-volume\".\n"
+"\n"
+"O valor padrão (72.000 segundos) corresponde à 20 horas sugeridas pelo en "
+"60950-1/Al2 padrão da UE: \"O reconhecimento não precisa ser repetido mais "
+"de uma vez a cada 20 h de tempo de escuta cumulativo.\""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
@@ -127,6 +133,8 @@ msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
 msgstr ""
+"Nível de volume que ativa um aviso de volume alto. Ver aviso-volume "
+"disponível para detalhes."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
@@ -143,12 +151,22 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
+"O volume máximo quando a configuração \"permitir-volume amplificado\" do "
+"com.ubuntu.sound é desativado.\n"
+"\n"
+"Para se adequar ao EN 60950-1/Al2 padrão da UE, este valor nunca deve ser "
+"definido para um dB que faça com que a saída de som do fone de ouvido exceda "
+"os 100 dBA ou a saída elétrica exceda 150 mV.\n"
+"\n"
+"O valor predefinido (0) corresponde ao PA_VOLUME_NORM do PulseAudio."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
 msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
+"O volume de saída para usar quando a configuração \"permitir-amplificado-"
+"volume\" do com.ubuntu.sound está ativada."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
@@ -161,115 +179,123 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
+"O volume máximo quando a configuração \"permitir-volume-amplificado\" do "
+"com.ubuntu.sound está ativado.\n"
+"\n"
+"Para se adequar ao EN 60950-1/Al2 padrão da UE, este valor nunca deve ser "
+"definido para um dB que faça com que a saída do som do fone de ouvido exceda "
+"os 100 dBA ou a saída elétrica exceda 150 mV.\n"
+"\n"
+"O valor predefinido (11) corresponde ao PA_VOLUME_UI_MAX do PulseAudio."
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
 #: ../src/service.vala:302 ../src/service.vala:305 ../src/sound-menu.vala:57
 #: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
 #, c-format
 msgid "Volume"
-msgstr ""
+msgstr "Volume"
 
 #: ../src/info-notification.vala:55
 msgid "Speakers"
-msgstr ""
+msgstr "Alto-falantes"
 
 #: ../src/info-notification.vala:57
 msgid "Headphones"
-msgstr ""
+msgstr "Fones de ouvido"
 
 #: ../src/info-notification.vala:59
 msgid "Bluetooth headphones"
-msgstr ""
+msgstr "Fones de ouvido Bluetooth"
 
 #: ../src/info-notification.vala:61
 msgid "Bluetooth speaker"
-msgstr ""
+msgstr "Alto-falante Bluetooth"
 
 #: ../src/info-notification.vala:63
 msgid "Usb speaker"
-msgstr ""
+msgstr "Alto-falante USB"
 
 #: ../src/info-notification.vala:65
 msgid "Usb headphones"
-msgstr ""
+msgstr "Fones de ouvido Usb"
 
 #: ../src/info-notification.vala:67
 msgid "HDMI speaker"
-msgstr ""
+msgstr "Alto-falante HDMI"
 
 #: ../src/info-notification.vala:69
 msgid "HDMI headphones"
-msgstr ""
+msgstr "Fones de ouvido HDMI"
 
 #: ../src/service.vala:299
 msgid "Volume (muted)"
-msgstr ""
+msgstr "Volume (silenciado)"
 
 #: ../src/service.vala:302
 msgid "silent"
-msgstr ""
+msgstr "Silencioso"
 
 #: ../src/service.vala:310
 msgid "Sound"
-msgstr ""
+msgstr "Som"
 
 #: ../src/sound-menu.vala:50
 msgid "Mute"
-msgstr ""
+msgstr "Mudo"
 
 #: ../src/sound-menu.vala:52
 msgid "Silent Mode"
-msgstr ""
+msgstr "Modo Silencioso"
 
 #: ../src/sound-menu.vala:66
 msgid "Sound Settings…"
-msgstr ""
+msgstr "Configurações de Som…"
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
-msgstr ""
+msgstr "Volume do Microfone"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
 msgid "High volume can damage your hearing."
-msgstr ""
+msgstr "Um volume alto pode prejudicar a sua audição."
 
 #: ../src/sound-menu.vala:254
 msgid "Volume (Headphones)"
-msgstr ""
+msgstr "Volume (Fones de Ouvido)"
 
 #: ../src/sound-menu.vala:257
 msgid "Volume (Bluetooth)"
-msgstr ""
+msgstr "Volume (Bluetooth)"
 
 #: ../src/sound-menu.vala:260
 msgid "Volume (Usb)"
-msgstr ""
+msgstr "Volume (Usb)"
 
 #: ../src/sound-menu.vala:263
 msgid "Volume (HDMI)"
-msgstr ""
+msgstr "Volume (HDMI)"
 
 #: ../src/sound-menu.vala:266
 msgid "Volume (Bluetooth headphones)"
-msgstr ""
+msgstr "Volume (fones de ouvido Bluetooth)"
 
 #: ../src/sound-menu.vala:269
 msgid "Volume (Usb headphones)"
-msgstr ""
+msgstr "Volume (fones de ouvido USB)"
 
 #: ../src/sound-menu.vala:272
 msgid "Volume (HDMI headphones)"
-msgstr ""
+msgstr "Volume (fones de ouvido HDMI)"
 
 #: ../src/sound-menu.vala:445
 msgid "Choose Playlist"
-msgstr ""
+msgstr "Escolha uma Lista de Reprodução"
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
-msgstr "Correto"
+msgstr "OK"
 
 #: ../src/warn-notification.vala:52
 msgid "Cancel"
-msgstr ""
+msgstr "Cancelar"
