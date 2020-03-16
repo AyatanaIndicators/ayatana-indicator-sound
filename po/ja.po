@@ -8,18 +8,20 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:28+0200\n"
-"PO-Revision-Date: 2017-10-12 07:52+0200\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2020-03-17 10:36+0000\n"
+"Last-Translator: Grace Guo <grace@appest.com>\n"
+"Language-Team: Japanese <https://hosted.weblate.org/projects/"
+"ayatana-indicators/sound-applet/ja/>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 4.0-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
-msgstr ""
+msgstr "音声メニューからブラックリストに登録されたアプリのリスト"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
@@ -28,12 +30,14 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
+"MPRIS2仕様に準拠する各メディアプレーヤーは、メニューに自動的に表示されます。この配列には、サウンドメニューに含めることを望まないアプリケーションのデ"
+"スクトップファイル名（マイナス.デスクトップサフィックス）を含める必要があります。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
-msgstr ""
+msgstr "ある時点でサウンドメニューにすでに登録したアプリケーションのリスト"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
@@ -42,32 +46,34 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
+"MPRIS2仕様に準拠する各メディアプレーヤーは、メニューに自動的に表示されます。この配列には、ある時点でメニューに表示されたアプリケーションのデスクトッ"
+"プファイル名（マイナス.デスクトップサフィックス）が含まれている必要があります。これにより、メニューはオフラインのアプリケーションを記憶して表示できます。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
-msgstr ""
+msgstr "プレーヤーコントロールを常に表示するアプリケーションのリスト"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
-msgstr ""
+msgstr "メニューにおける全部ミュート（すべてミュート）の初期設定"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
-msgstr ""
+msgstr "起動する時にミュートをしないでください。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
-msgstr ""
+msgstr "ボリュームスライダーでボリュームを100％以上に設定できるようにしますか。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr ""
+msgstr "音声インジケーターをメニューバーに表示しますか。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
-msgstr ""
+msgstr "大音量の警告を表示しますか。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
@@ -78,10 +84,13 @@ msgid ""
 "volume-decibels AND (d) the user has not indicated approval in the last "
 "warning-volume-approval-ttl seconds."
 msgstr ""
+"デバイスで有効になっている場合、次の場合に確認ダイアログがユーザーに表示されます：（a）ヘッドフォンジャックに何かが差し込まられているの場合（つまり、スピ"
+"ーカーの音量に関する警告がない）および（b）メディアが再生されている場合（つまり、着信音の音量に関する警告がない）、（c）ユーザーが警告音量よりも大きい音"
+"量をデシベル単位で設定しようとしました場合、（d）ユーザーが最後の警告音量の承認秒数以内に承認を示していない場合。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
-msgstr ""
+msgstr "ユーザーの警告ボリュームの承認にかかる秒数を覚えておく必要があります。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
@@ -92,22 +101,30 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
+"警告ボリュームが有効」の説明で説明されている確認ダイアログのユーザーの承認を記憶する期間。 \n"
+"\n"
+"デフォルト値（72,000秒）は、EU標準EN 60950-1 / "
+"Al2で提案されている20時間に対応します。「確認は、累積受信時間の20時間ごとに複数回繰り返す必要はありません。」"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
+#, fuzzy
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "大音量の警告をトリガーする音量レベル。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:18
+#, fuzzy
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
-msgstr ""
+msgstr "大量の警告をトリガーするボリューム レベル。詳細については、警告ボリューム対応を参照してください。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
+#, fuzzy
 msgid "Normal output volume."
-msgstr ""
+msgstr "通常の出力音量。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
+#, fuzzy
 msgid ""
 "The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
 "is disabled.\n"
@@ -118,14 +135,22 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
+"com.ubuntu.soundの「allow-amplified-volume」設定が無効になっているときの最大音量。\n"
+"\n"
+"EU規格EN 60950-1 / Al2に準拠するために、ヘッドフォンのサウンド出力が100 dBAを超えたり、電気出力が150 "
+"mVを超えたりするdBにこの値を設定しないでください。\n"
+"\n"
+"デフォルト値（0）は、PulseAudioのPA_VOLUME_NORMに対応しています。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
+#, fuzzy
 msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
-msgstr ""
+msgstr "com.ubuntu.soundの「allow-amplified-volume」設定が有効な場合に使用する出力ボリューム。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
+#, fuzzy
 msgid ""
 "The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
 "is enabled.\n"
@@ -136,115 +161,140 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
+"com.ubuntu.soundの「allow-amplified-volume」設定が有効な場合の最大音量。\n"
+"\n"
+"EU規格EN 60950-1 / Al2に準拠するために、ヘッドフォンのサウンド出力が100 dBAを超えたり、電気出力が150 "
+"mVを超えたりするdBにこの値を設定しないでください。\n"
+"\n"
+"デフォルト値（11）は、PulseAudioのPA_VOLUME_UI_MAXに対応しています。"
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
 #: ../src/service.vala:302 ../src/service.vala:305 ../src/sound-menu.vala:57
 #: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
-#, c-format
+#, c-format, fuzzy
 msgid "Volume"
-msgstr ""
+msgstr "ボリューム"
 
 #: ../src/info-notification.vala:55
+#, fuzzy
 msgid "Speakers"
-msgstr ""
+msgstr "スピーカー"
 
 #: ../src/info-notification.vala:57
 msgid "Headphones"
-msgstr ""
+msgstr "エアホーン"
 
 #: ../src/info-notification.vala:59
+#, fuzzy
 msgid "Bluetooth headphones"
-msgstr ""
+msgstr "ブルートゥースヘッドフォン"
 
 #: ../src/info-notification.vala:61
+#, fuzzy
 msgid "Bluetooth speaker"
-msgstr ""
+msgstr "ブルートゥーススピーカー"
 
 #: ../src/info-notification.vala:63
+#, fuzzy
 msgid "Usb speaker"
-msgstr ""
+msgstr "USBスピーカー"
 
 #: ../src/info-notification.vala:65
+#, fuzzy
 msgid "Usb headphones"
-msgstr ""
+msgstr "USBヘッドフォン"
 
 #: ../src/info-notification.vala:67
+#, fuzzy
 msgid "HDMI speaker"
-msgstr ""
+msgstr "HDMIスピーカー"
 
 #: ../src/info-notification.vala:69
+#, fuzzy
 msgid "HDMI headphones"
-msgstr ""
+msgstr "HDMIヘッドフォン"
 
 #: ../src/service.vala:299
+#, fuzzy
 msgid "Volume (muted)"
-msgstr ""
+msgstr "ボリューム (ミュート)"
 
 #: ../src/service.vala:302
+#, fuzzy
 msgid "silent"
-msgstr ""
+msgstr "サイレント"
 
 #: ../src/service.vala:310
 msgid "Sound"
-msgstr ""
+msgstr "音声"
 
 #: ../src/sound-menu.vala:50
+#, fuzzy
 msgid "Mute"
-msgstr ""
+msgstr "ミュート"
 
 #: ../src/sound-menu.vala:52
+#, fuzzy
 msgid "Silent Mode"
-msgstr ""
+msgstr "サイレントモード"
 
 #: ../src/sound-menu.vala:66
 msgid "Sound Settings…"
-msgstr ""
+msgstr "音声設定…"
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
-msgstr ""
+msgstr "マイクの音量"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
 msgid "High volume can damage your hearing."
-msgstr ""
+msgstr "音量が大きくと聴覚が損なわれる可能性があります。"
 
 #: ../src/sound-menu.vala:254
+#, fuzzy
 msgid "Volume (Headphones)"
-msgstr ""
+msgstr "音量(ヘッドフォン)"
 
 #: ../src/sound-menu.vala:257
+#, fuzzy
 msgid "Volume (Bluetooth)"
-msgstr ""
+msgstr "ボリューム(ブルートゥース)"
 
 #: ../src/sound-menu.vala:260
+#, fuzzy
 msgid "Volume (Usb)"
-msgstr ""
+msgstr "ボリューム (Usb)"
 
 #: ../src/sound-menu.vala:263
+#, fuzzy
 msgid "Volume (HDMI)"
-msgstr ""
+msgstr "ボリューム (HDMI)"
 
 #: ../src/sound-menu.vala:266
+#, fuzzy
 msgid "Volume (Bluetooth headphones)"
-msgstr ""
+msgstr "ボリューム(ブルートゥースヘッドフォン)"
 
 #: ../src/sound-menu.vala:269
+#, fuzzy
 msgid "Volume (Usb headphones)"
-msgstr ""
+msgstr "ボリューム（Usbヘッドフォン）"
 
 #: ../src/sound-menu.vala:272
+#, fuzzy
 msgid "Volume (HDMI headphones)"
-msgstr ""
+msgstr "音量(HDMIヘッドフォン)"
 
 #: ../src/sound-menu.vala:445
 msgid "Choose Playlist"
-msgstr ""
+msgstr "プレイリストを選択する"
 
 #: ../src/warn-notification.vala:49
+#, fuzzy
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: ../src/warn-notification.vala:52
 msgid "Cancel"
-msgstr ""
+msgstr "キャンセルする"
