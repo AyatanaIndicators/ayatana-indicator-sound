@@ -8,17 +8,20 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:27+0200\n"
-"PO-Revision-Date: 2017-10-12 07:52+0200\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2020-05-10 10:12+0000\n"
+"Last-Translator: iNetRoos <inetroos@gmail.com>\n"
+"Language-Team: Afrikaans <https://hosted.weblate.org/projects/"
+"ayatana-indicators/sound-applet/af/>\n"
 "Language: af\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.1-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
-msgstr ""
+msgstr "'n Lys van toepassings geswartlys vanuit die audio keuselys"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
@@ -27,12 +30,17 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
+"Elke mediaspeler wat aan die MPRIS2-spesifikasie voldoen, sal outomaties "
+"verskyn in die kieslys. Toepassings wat nie by die audio kieslys opgeneem "
+"wil word nie, se lêername (minus. rekenaar agtervoegsel) behoort in hierdie "
+"skikking te wees."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
 msgstr ""
+"'n Lys van toepassings wat op 'n tydstip geregistreer is op die audio kieslys"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
@@ -41,32 +49,37 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
+"Elke mediaspeler wat aan die MPRIS2-spesifikasie voldoen, sal outomaties "
+"verskyn in die kieslys. Toepassings wat by die kieslys op 'n tydstip "
+"opgeneem was, se lêername (minus. rekenaar agtervoegsel) behoort in hierdie "
+"skikking te wees. Dit laat die kieslys toe om die aflynige toepassings te "
+"onthou en te vertoon."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
-msgstr ""
+msgstr "'n Lys van toepassings wat altyd speler kontroles sal bevat"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
-msgstr ""
+msgstr "Aanvanklike instelling vir die globale demp (demp alles) op die kieslys"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
-msgstr ""
+msgstr "Met die aanvang, behoort die volume nie gedemp word nie."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
-msgstr ""
+msgstr "Of die volume-skuifbalk, die volume tot bo 100% stel"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr ""
+msgstr "Om die klankaanwyser in die kieslys te wil vertoon of nie."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
-msgstr ""
+msgstr "Om die harde volume waarskuwing te wil vertoon of nie."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
@@ -77,10 +90,18 @@ msgid ""
 "volume-decibels AND (d) the user has not indicated approval in the last "
 "warning-volume-approval-ttl seconds."
 msgstr ""
+"As dit op 'n toestel aangeskakel is, sal 'n dialoog vir bevestiging aan die "
+"gebruiker vertoon word (a) as iets in die koptelefoonaansluiting ingeprop is "
+"(dws. geen waarskuwings vir luidspreker-volumes nie) EN (b) die media speel ("
+"dit wil sê, geen waarskuwings vir luitoon-volumes nie) ) EN (c) die "
+"gebruiker poog om die volume hoër in te stel as waarskuwingsvolume-desibel "
+"EN (d) die gebruiker het nie goedkeuring gegee vir die laaste waarskuwings-"
+"ttl-volume, sekondes."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
+"Aantal sekondes wat 'n gebruiker se waarskuwingsvolume geldend sal wees."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
@@ -91,20 +112,28 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
+"Tydsduur wat die gebruikersgoedkeuring vir die bevestiging, soos beskryf in "
+"die 'waarskuwing-volume aktief'-dialoog , moet geld.\n"
+"\n"
+"Die verstek waarde (72,000 sekondes) stem ooreen met die 20 ure voorgestel "
+"in die EU standaard, EN 60950-1/Al2: \"Die bevestiging is nie nodig om "
+"herhaal te word, na 20 uur se kummulatiewe luistertyd nie.\""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "Klankvolume wat die hoë volume waarskuwingsdrempel aktiveer."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
 msgstr ""
+"Klankvolume wat die hoë volume waarskuwingsdrempel aktiveer. Sien "
+"waarskuwingsvolume aktivering vir besonderhede."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
-msgstr ""
+msgstr "Normale volume uitset."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
 msgid ""
@@ -117,12 +146,22 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
+"Die maksimum klankvolume wanneer com.ubuntu.sound se 'toegelate-versterker-"
+"volume' instelling gedeaktiveer word.\n"
+"\n"
+"Om aan die EU-standaard EN 60950-1 / Al2 te voldoen, moet hierdie waarde "
+"nooit op 'n dB gestel word wat die klankuitset van die kop-oorfone van 100 "
+"dBA oorskry nie, of die elektriese uitset van 150 mV nie oorskry nie.\n"
+"\n"
+"Die verstek volume waarde (0) stem ooreen met PulseAudio se PA_VOLUME_NORM."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
 msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
+"Volume uitset wanneer com.ubuntu.sound se 'toegelate-versterker-volume' "
+"instelling aktief is."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
@@ -135,115 +174,123 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
+"Die maksimum klankvolume wanneer com.ubuntu.sound se 'toegelate-versterker-"
+"volume' instelling geaktiveer word.\n"
+"\n"
+"Om aan die EU-standaard EN 60950-1 / Al2 te voldoen, moet hierdie waarde "
+"nooit op 'n dB gestel word wat die klankuitset van die kop-oorfone, 100 dBA "
+"oorskry nie, of die elektriese uitset van 150 mV nie oorskry nie.\n"
+"\n"
+"Die verstek volume waarde (11) stem ooreen met PulseAudio' se PA_VOLUME_MAX."
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
 #: ../src/service.vala:302 ../src/service.vala:305 ../src/sound-menu.vala:57
 #: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
 #, c-format
 msgid "Volume"
-msgstr ""
+msgstr "Volume"
 
 #: ../src/info-notification.vala:55
 msgid "Speakers"
-msgstr ""
+msgstr "Luidsprekers"
 
 #: ../src/info-notification.vala:57
 msgid "Headphones"
-msgstr ""
+msgstr "Oorfone"
 
 #: ../src/info-notification.vala:59
 msgid "Bluetooth headphones"
-msgstr ""
+msgstr "Bluetooth oorfone"
 
 #: ../src/info-notification.vala:61
 msgid "Bluetooth speaker"
-msgstr ""
+msgstr "Bluetooth luidspreker"
 
 #: ../src/info-notification.vala:63
 msgid "Usb speaker"
-msgstr ""
+msgstr "USB luidspreker"
 
 #: ../src/info-notification.vala:65
 msgid "Usb headphones"
-msgstr ""
+msgstr "USB oorfone"
 
 #: ../src/info-notification.vala:67
 msgid "HDMI speaker"
-msgstr ""
+msgstr "HDMI luidspreker"
 
 #: ../src/info-notification.vala:69
 msgid "HDMI headphones"
-msgstr ""
+msgstr "HDMI oorfone"
 
 #: ../src/service.vala:299
 msgid "Volume (muted)"
-msgstr ""
+msgstr "Volume (gedoof)"
 
 #: ../src/service.vala:302
 msgid "silent"
-msgstr ""
+msgstr "klankstil"
 
 #: ../src/service.vala:310
 msgid "Sound"
-msgstr ""
+msgstr "Klank"
 
 #: ../src/sound-menu.vala:50
 msgid "Mute"
-msgstr ""
+msgstr "Gedoof"
 
 #: ../src/sound-menu.vala:52
 msgid "Silent Mode"
-msgstr ""
+msgstr "Klankstil modus"
 
 #: ../src/sound-menu.vala:66
 msgid "Sound Settings…"
-msgstr ""
+msgstr "Klank Instellings…"
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
-msgstr ""
+msgstr "Mikrofoon Volume"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
 msgid "High volume can damage your hearing."
-msgstr ""
+msgstr "Hoë volume kan jou gehoor permanent beskadig."
 
 #: ../src/sound-menu.vala:254
 msgid "Volume (Headphones)"
-msgstr ""
+msgstr "Volume (Oorfone)"
 
 #: ../src/sound-menu.vala:257
 msgid "Volume (Bluetooth)"
-msgstr ""
+msgstr "Volume (Bluetooth)"
 
 #: ../src/sound-menu.vala:260
 msgid "Volume (Usb)"
-msgstr ""
+msgstr "Volume (USB)"
 
 #: ../src/sound-menu.vala:263
 msgid "Volume (HDMI)"
-msgstr ""
+msgstr "Volume (HDMI)"
 
 #: ../src/sound-menu.vala:266
 msgid "Volume (Bluetooth headphones)"
-msgstr ""
+msgstr "Volume (Bluetooth oorfone)"
 
 #: ../src/sound-menu.vala:269
 msgid "Volume (Usb headphones)"
-msgstr ""
+msgstr "Volume (USB oorfone)"
 
 #: ../src/sound-menu.vala:272
 msgid "Volume (HDMI headphones)"
-msgstr ""
+msgstr "Volume (HDMI oorfone)"
 
 #: ../src/sound-menu.vala:445
 msgid "Choose Playlist"
-msgstr ""
+msgstr "Kies Speellys"
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: ../src/warn-notification.vala:52
 msgid "Cancel"
-msgstr ""
+msgstr "Kanselleer"
