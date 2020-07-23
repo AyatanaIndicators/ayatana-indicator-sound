@@ -8,6 +8,8 @@ find_package(PkgConfig REQUIRED)
 include(GNUInstallDirs)
 include(UseVala)
 
+option (enable_tests "Build the package's automatic tests." ON)
+
 # Workaround for libexecdir on debian
 if (EXISTS "/etc/debian_version") 
   set(CMAKE_INSTALL_LIBEXECDIR "${CMAKE_INSTALL_LIBDIR}")
@@ -55,10 +57,6 @@ include_directories(${SOUNDSERVICE_INCLUDE_DIRS})
 
 pkg_check_modules(UNITY_API libunity-api>=0.1.3)
 
-pkg_check_modules(
-  TEST REQUIRED
-  dbustest-1>=15.04.0
-)
 include_directories(${TEST_INCLUDE_DIRS})
 
 find_package(Vala 0.20)
@@ -84,11 +82,14 @@ add_subdirectory(data)
 add_subdirectory(src)
 add_subdirectory(po)
 
-enable_testing()
-add_subdirectory(tests)
-find_package(CoverageReport)
-ENABLE_COVERAGE_REPORT(
-  TARGETS ${COVERAGE_TARGETS}
-  TESTS ${COVERAGE_TEST_TARGETS}
-  FILTER /usr/include ${CMAKE_BINARY_DIR}/*
-)
+if (${enable_tests})
+    pkg_check_modules(TEST REQUIRED dbustest-1>=15.04.0)
+    enable_testing()
+    add_subdirectory(tests)
+    find_package(CoverageReport)
+    ENABLE_COVERAGE_REPORT(
+        TARGETS ${COVERAGE_TARGETS}
+        TESTS ${COVERAGE_TEST_TARGETS}
+        FILTER /usr/include ${CMAKE_BINARY_DIR}/*
+ )
+endif ()
