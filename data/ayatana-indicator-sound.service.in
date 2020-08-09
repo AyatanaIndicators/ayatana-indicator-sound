@@ -1,8 +1,11 @@
 [Unit]
 Description=Ayatana Indicator Sound Service
 PartOf=graphical-session.target
-After=ayatana-indicators-pre.target
+PartOf=ayatana-indicators.target
 
 [Service]
 ExecStart=@CMAKE_INSTALL_FULL_LIBEXECDIR@/ayatana-indicator-sound/ayatana-indicator-sound-service
 Restart=on-failure
+
+[Install]
+WantedBy=ayatana-indicators.target
