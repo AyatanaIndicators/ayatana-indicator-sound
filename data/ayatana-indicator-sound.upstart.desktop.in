@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Ayatana Indicator Sound
-Exec=@CMAKE_INSTALL_FULL_LIBEXECDIR@/ayatana-indicator-sound/ayatana-indicator-sound-service
-OnlyShowIn=MATE;
-NoDisplay=true
-StartupNotify=false
-Terminal=false
-Hidden=true
