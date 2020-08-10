@@ -38,37 +38,7 @@ if (${SYSTEMD_FOUND})
   # install it
   install (FILES "${SYSTEMD_USER_FILE}"
            DESTINATION "${SYSTEMD_USER_DIR}")
-
-  ###########################
-  #  Upstart systemd override Job File
-  ###########################
-
-  set (UPSTART_SYSTEMD_OVERRIDE_DIR "${CMAKE_INSTALL_FULL_DATADIR}/upstart/systemd-session/upstart")
-  message (STATUS "${UPSTART_SYSTEMD_OVERRIDE_DIR} is the Upstart override Job File for systemd dir")
-
-  install (FILES "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}.override"
-           DESTINATION "${UPSTART_SYSTEMD_OVERRIDE_DIR}")
 endif()
-
-###########################
-# Upstart Job
-###########################
-
-set(
-  INDICATOR_SOUND_CONF
-  "${CMAKE_CURRENT_BINARY_DIR}/ayatana-indicator-sound.conf"
-)
-
-configure_file(
-  "ayatana-indicator-sound.conf.in"
-  ${INDICATOR_SOUND_CONF}
-  @ONLY
-)
-
-install(
-  FILES "${INDICATOR_SOUND_CONF}"
-  DESTINATION "${CMAKE_INSTALL_DATADIR}/upstart/sessions/"
-)
 
 ###########################
 # XDG Autostart
