@@ -61,27 +61,6 @@ install(
 )
 
 ###########################
-# Upstart XDG Autostart Override
-###########################
-
-set(
-  INDICATOR_SOUND_UPSTART_XDG_AUTOSTART
-  "${CMAKE_CURRENT_BINARY_DIR}/ayatana-indicator-sound.upstart.desktop"
-)
-
-configure_file(
-  "ayatana-indicator-sound.upstart.desktop.in"
-  ${INDICATOR_SOUND_UPSTART_XDG_AUTOSTART}
-  @ONLY
-)
-
-install(
-  FILES "${INDICATOR_SOUND_UPSTART_XDG_AUTOSTART}"
-  DESTINATION "${CMAKE_INSTALL_DATADIR}/upstart/xdg/autostart"
-  RENAME "ayatana-indicator-sound.desktop"
-)
-
-###########################
 # GSettings
 ###########################
 
