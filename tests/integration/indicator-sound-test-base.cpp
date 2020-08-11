@@ -69,7 +69,7 @@ void IndicatorSoundTestBase::SetUp()
                             "GetCapabilities",
                             "",
                             "as",
-                            "ret = ['actions', 'body', 'body-markup', 'icon-static', 'image/svg+xml', 'x-canonical-private-synchronous', 'x-canonical-append', 'x-canonical-private-icon-only', 'x-canonical-truncation', 'private-synchronous', 'append', 'private-icon-only', 'truncation']"
+                            "ret = ['actions', 'body', 'body-markup', 'icon-static', 'image/svg+xml', 'x-ayatana-private-synchronous', 'x-ayatana-append', 'x-ayatana-private-icon-only', 'x-ayatana-truncation', 'private-synchronous', 'append', 'private-icon-only', 'truncation']"
                          ).waitForFinished();
 
     int waitedTime = 0;
@@ -419,7 +419,7 @@ unity::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::volumeSlider(double
             .double_attribute("min-value", 0.0)
             .double_attribute("max-value", 1.0)
             .double_attribute("step", 0.01)
-            .string_attribute("x-canonical-type", "org.ayatana.unity.slider")
+            .string_attribute("x-ayatana-type", "org.ayatana.unity.slider")
             .themed_icon("max-icon", {"audio-volume-high-panel", "audio-volume-high", "audio-volume", "audio"})
             .themed_icon("min-icon", {"audio-volume-low-zero-panel", "audio-volume-low-zero", "audio-volume-low", "audio-volume", "audio"})
             .pass_through_double_attribute("action", volume);
@@ -433,7 +433,7 @@ unity::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::micSlider(double vo
             .double_attribute("min-value", 0.0)
             .double_attribute("max-value", 1.0)
             .double_attribute("step", 0.01)
-            .string_attribute("x-canonical-type", "org.ayatana.unity.slider")
+            .string_attribute("x-ayatana-type", "org.ayatana.unity.slider")
             .themed_icon("max-icon", {"audio-input-microphone-high-panel", "audio-input-microphone-high", "audio-input-microphone", "audio-input", "audio"})
             .themed_icon("min-icon", {"audio-input-microphone-low-zero-panel", "audio-input-microphone-low-zero", "audio-input-microphone-low", "audio-input-microphone", "audio-input", "audio"})
             .pass_through_double_attribute("action", volume);
@@ -641,14 +641,14 @@ void IndicatorSoundTestBase::checkVolumeNotification(double volume, QString cons
     QVariantMap hints;
     ASSERT_TRUE(qDBusArgumentToMap(args.at(6), hints));
     ASSERT_TRUE(hints.contains("value"));
-    ASSERT_TRUE(hints.contains("x-canonical-non-shaped-icon"));
-    ASSERT_TRUE(hints.contains("x-canonical-value-bar-tint"));
-    ASSERT_TRUE(hints.contains("x-canonical-private-synchronous"));
+    ASSERT_TRUE(hints.contains("x-ayatana-non-shaped-icon"));
+    ASSERT_TRUE(hints.contains("x-ayatana-value-bar-tint"));
+    ASSERT_TRUE(hints.contains("x-ayatana-private-synchronous"));
 
     EXPECT_EQ(volume*100, hints["value"]);
-    EXPECT_EQ(true, hints["x-canonical-non-shaped-icon"]);
-    EXPECT_EQ(isLoud, hints["x-canonical-value-bar-tint"]);
-    EXPECT_EQ(true, hints["x-canonical-private-synchronous"]);
+    EXPECT_EQ(true, hints["x-ayatana-non-shaped-icon"]);
+    EXPECT_EQ(isLoud, hints["x-ayatana-value-bar-tint"]);
+    EXPECT_EQ(true, hints["x-ayatana-private-synchronous"]);
 }
 
 void IndicatorSoundTestBase::checkHighVolumeNotification(QVariantList call)
@@ -923,9 +923,9 @@ void IndicatorSoundTestBase::checkPortDevicesLabels(DevicePortType speakerPort, 
     EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
         .item(mh::MenuItemMatcher()
             .action("indicator.root")
-            .string_attribute("x-canonical-type", "org.ayatana.indicator.root")
-            .string_attribute("x-canonical-scroll-action", "indicator.scroll")
-            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .string_attribute("x-ayatana-type", "org.ayatana.indicator.root")
+            .string_attribute("x-ayatana-scroll-action", "indicator.scroll")
+            .string_attribute("x-ayatana-secondary-action", "indicator.mute")
             .string_attribute("submenu-action", "indicator.indicator-shown")
             .mode(mh::MenuItemMatcher::Mode::starts_with)
             .submenu()
@@ -948,9 +948,9 @@ void IndicatorSoundTestBase::checkPortDevicesLabels(DevicePortType speakerPort, 
     EXPECT_MATCHRESULT(mh::MenuMatcher(phoneParameters())
         .item(mh::MenuItemMatcher()
             .action("indicator.root")
-            .string_attribute("x-canonical-type", "org.ayatana.indicator.root")
-            .string_attribute("x-canonical-scroll-action", "indicator.scroll")
-            .string_attribute("x-canonical-secondary-action", "indicator.mute")
+            .string_attribute("x-ayatana-type", "org.ayatana.indicator.root")
+            .string_attribute("x-ayatana-scroll-action", "indicator.scroll")
+            .string_attribute("x-ayatana-secondary-action", "indicator.mute")
             .string_attribute("submenu-action", "indicator.indicator-shown")
             .mode(mh::MenuItemMatcher::Mode::starts_with)
             .submenu()

@@ -27,92 +27,92 @@
 class IndicatorTest : public IndicatorFixture
 {
 protected:
-	IndicatorTest (void) :
-		IndicatorFixture(INDICATOR_SOUND_SERVICE_BINARY, "org.ayatana.indicator.sound")
-	{
-	}
+    IndicatorTest (void) :
+        IndicatorFixture(INDICATOR_SOUND_SERVICE_BINARY, "org.ayatana.indicator.sound")
+    {
+    }
 
-	std::shared_ptr<AccountsServiceMock> as;
-	std::shared_ptr<NotificationsMock> notification;
+    std::shared_ptr<AccountsServiceMock> as;
+    std::shared_ptr<NotificationsMock> notification;
 
-	virtual void SetUp() override
-	{
-		//addMock(buildBustleMock("indicator-test-session.bustle", DBUS_TEST_SERVICE_BUS_SESSION));
-		//addMock(buildBustleMock("indicator-test-system.bustle", DBUS_TEST_SERVICE_BUS_SYSTEM));
-		g_setenv("LD_PRELOAD", PA_MOCK_LIB, TRUE);
+    virtual void SetUp() override
+    {
+        //addMock(buildBustleMock("indicator-test-session.bustle", DBUS_TEST_SERVICE_BUS_SESSION));
+        //addMock(buildBustleMock("indicator-test-system.bustle", DBUS_TEST_SERVICE_BUS_SYSTEM));
+        g_setenv("LD_PRELOAD", PA_MOCK_LIB, TRUE);
 
-		g_setenv("GSETTINGS_SCHEMA_DIR", SCHEMA_DIR, TRUE);
-		g_setenv("GSETTINGS_BACKEND", "memory", TRUE);
+        g_setenv("GSETTINGS_SCHEMA_DIR", SCHEMA_DIR, TRUE);
+        g_setenv("GSETTINGS_BACKEND", "memory", TRUE);
 
-		as = std::make_shared<AccountsServiceMock>();
-		addMock(*as);
+        as = std::make_shared<AccountsServiceMock>();
+        addMock(*as);
 
-		notification = std::make_shared<NotificationsMock>();
-		addMock(*notification);
+        notification = std::make_shared<NotificationsMock>();
+        addMock(*notification);
 
-		IndicatorFixture::SetUp();
-	}
+        IndicatorFixture::SetUp();
+    }
 
-	virtual void TearDown() override
-	{
-		as.reset();
-		notification.reset();
+    virtual void TearDown() override
+    {
+        as.reset();
+        notification.reset();
 
-		IndicatorFixture::TearDown();
-	}
+        IndicatorFixture::TearDown();
+    }
 
 };
 
 
 TEST_F(IndicatorTest, PhoneMenu) {
-	setMenu("/org/ayatana/indicator/sound/phone");
+    setMenu("/org/ayatana/indicator/sound/phone");
 
-	EXPECT_EVENTUALLY_MENU_ATTRIB(std::vector<int>({0}), "action", "indicator.root");
-	EXPECT_MENU_ATTRIB({0}, "x-canonical-type", "org.ayatana.indicator.root");
-	EXPECT_MENU_ATTRIB({0}, "x-canonical-scroll-action", "indicator.scroll");
-	EXPECT_MENU_ATTRIB({0}, "x-canonical-secondary-action", "indicator.mute");
+    EXPECT_EVENTUALLY_MENU_ATTRIB(std::vector<int>({0}), "action", "indicator.root");
+    EXPECT_MENU_ATTRIB({0}, "x-ayatana-type", "org.ayatana.indicator.root");
+    EXPECT_MENU_ATTRIB({0}, "x-ayatana-scroll-action", "indicator.scroll");
+    EXPECT_MENU_ATTRIB({0}, "x-ayatana-secondary-action", "indicator.mute");
 
-	EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "action", "indicator.silent-mode");
-	EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "label", "Silent Mode");
+    EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "action", "indicator.silent-mode");
+    EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "label", "Silent Mode");
 
-	EXPECT_MENU_ATTRIB(std::vector<int>({0, 1}), "action", "indicator.phone-settings");
-	EXPECT_MENU_ATTRIB(std::vector<int>({0, 1}), "label", "Sound Settings…");
+    EXPECT_MENU_ATTRIB(std::vector<int>({0, 1}), "action", "indicator.phone-settings");
+    EXPECT_MENU_ATTRIB(std::vector<int>({0, 1}), "label", "Sound Settings…");
 }
 
 TEST_F(IndicatorTest, DesktopMenu) {
-	setMenu("/org/ayatana/indicator/sound/desktop");
+    setMenu("/org/ayatana/indicator/sound/desktop");
 
-	EXPECT_MENU_ATTRIB({0}, "action", "indicator.root");
-	EXPECT_MENU_ATTRIB({0}, "x-canonical-type", "org.ayatana.indicator.root");
-	EXPECT_MENU_ATTRIB({0}, "x-canonical-scroll-action", "indicator.scroll");
-	EXPECT_MENU_ATTRIB({0}, "x-canonical-secondary-action", "indicator.mute");
+    EXPECT_MENU_ATTRIB({0}, "action", "indicator.root");
+    EXPECT_MENU_ATTRIB({0}, "x-ayatana-type", "org.ayatana.indicator.root");
+    EXPECT_MENU_ATTRIB({0}, "x-ayatana-scroll-action", "indicator.scroll");
+    EXPECT_MENU_ATTRIB({0}, "x-ayatana-secondary-action", "indicator.mute");
 
-	EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "action", "indicator.mute");
-	EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "label", "Mute");
+    EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "action", "indicator.mute");
+    EXPECT_MENU_ATTRIB(std::vector<int>({0, 0, 0}), "label", "Mute");
 
-	EXPECT_MENU_ATTRIB(std::vector<int>({0, 1}), "action", "indicator.desktop-settings");
-	EXPECT_MENU_ATTRIB(std::vector<int>({0, 1}), "label", "Sound Settings…");
+    EXPECT_MENU_ATTRIB(std::vector<int>({0, 1}), "action", "indicator.desktop-settings");
+    EXPECT_MENU_ATTRIB(std::vector<int>({0, 1}), "label", "Sound Settings…");
 }
 
 TEST_F(IndicatorTest, BaseActions) {
-	setActions("/org/ayatana/indicator/sound");
+    setActions("/org/ayatana/indicator/sound");
 
-	ASSERT_ACTION_EXISTS("root");
-	ASSERT_ACTION_STATE_TYPE("root", G_VARIANT_TYPE("a{sv}"));
+    ASSERT_ACTION_EXISTS("root");
+    ASSERT_ACTION_STATE_TYPE("root", G_VARIANT_TYPE("a{sv}"));
 
-	ASSERT_ACTION_EXISTS("scroll");
+    ASSERT_ACTION_EXISTS("scroll");
 
-	ASSERT_ACTION_EXISTS("silent-mode");
-	ASSERT_ACTION_STATE_TYPE("silent-mode", G_VARIANT_TYPE_BOOLEAN);
-	EXPECT_ACTION_STATE("silent-mode", false);
+    ASSERT_ACTION_EXISTS("silent-mode");
+    ASSERT_ACTION_STATE_TYPE("silent-mode", G_VARIANT_TYPE_BOOLEAN);
+    EXPECT_ACTION_STATE("silent-mode", false);
 
-	ASSERT_ACTION_EXISTS("mute");
-	ASSERT_ACTION_STATE_TYPE("mute", G_VARIANT_TYPE_BOOLEAN);
+    ASSERT_ACTION_EXISTS("mute");
+    ASSERT_ACTION_STATE_TYPE("mute", G_VARIANT_TYPE_BOOLEAN);
 
-	ASSERT_ACTION_EXISTS("mic-volume");
-	ASSERT_ACTION_STATE_TYPE("mic-volume", G_VARIANT_TYPE_DOUBLE);
+    ASSERT_ACTION_EXISTS("mic-volume");
+    ASSERT_ACTION_STATE_TYPE("mic-volume", G_VARIANT_TYPE_DOUBLE);
 
-	ASSERT_ACTION_EXISTS("volume");
-	ASSERT_ACTION_STATE_TYPE("volume", G_VARIANT_TYPE_DOUBLE);
+    ASSERT_ACTION_EXISTS("volume");
+    ASSERT_ACTION_STATE_TYPE("volume", G_VARIANT_TYPE_DOUBLE);
 }
 

@@ -306,7 +306,7 @@ MenuItemMatcher& MenuItemMatcher::themed_icon(const std::string& iconName, const
 
 MenuItemMatcher& MenuItemMatcher::widget(const string& widget)
 {
-    return string_attribute("x-canonical-type", widget);
+    return string_attribute("x-ayatana-type", widget);
 }
 
 MenuItemMatcher& MenuItemMatcher::pass_through_attribute(const string& actionName, const shared_ptr<GVariant>& value)
