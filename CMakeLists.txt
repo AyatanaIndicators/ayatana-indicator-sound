@@ -10,12 +10,6 @@ include(UseVala)
 
 option (enable_tests "Build the package's automatic tests." ON)
 
-# Workaround for libexecdir on debian
-if (EXISTS "/etc/debian_version") 
-  set(CMAKE_INSTALL_LIBEXECDIR "${CMAKE_INSTALL_LIBDIR}")
-  set(CMAKE_INSTALL_FULL_LIBEXECDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBEXECDIR}")
-endif()
-
 set(GETTEXT_PACKAGE "ayatana-indicator-sound")
 set(LOCALEDIR "${CMAKE_INSTALL_FULL_DATADIR}/locale")
 add_definitions( -DGETTEXT_PACKAGE="${GETTEXT_PACKAGE}" )
