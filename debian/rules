@@ -1,5 +1,7 @@
 #!/usr/bin/make -f
 
+NULL =
+
 export DPKG_GENSYMBOLS_CHECK_LEVEL=4
 
 %:
@@ -8,7 +10,9 @@ export DPKG_GENSYMBOLS_CHECK_LEVEL=4
 override_dh_auto_configure:
 	# Debian defines CMAKE_INSTALL_LOCALSTATEDIR as /usr/var, which is wrong.
 	# So until Debian bug 719148 is fixed, do it ourselves.
-	dh_auto_configure -- -DCMAKE_INSTALL_LOCALSTATEDIR="/var"
+	dh_auto_configure -- -DCMAKE_INSTALL_LOCALSTATEDIR="/var" \
+	                     -Denable_tests=off \
+	                     $(NULL)
 
 override_dh_install:
 	dh_install --fail-missing
