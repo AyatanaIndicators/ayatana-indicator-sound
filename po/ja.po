@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:28+0200\n"
-"PO-Revision-Date: 2020-03-17 10:36+0000\n"
-"Last-Translator: Grace Guo <grace@appest.com>\n"
+"PO-Revision-Date: 2020-09-06 12:17+0000\n"
+"Last-Translator: Baka Gaijin <lewdwarrior@waifu.club>\n"
 "Language-Team: Japanese <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/ja/>\n"
 "Language: ja\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 4.0-dev\n"
+"X-Generator: Weblate 4.3-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -291,9 +291,8 @@ msgid "Choose Playlist"
 msgstr "プレイリストを選択する"
 
 #: ../src/warn-notification.vala:49
-#, fuzzy
 msgid "OK"
-msgstr "OK"
+msgstr "了解"
 
 #: ../src/warn-notification.vala:52
 msgid "Cancel"
