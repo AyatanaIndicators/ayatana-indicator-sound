@@ -1,4 +1,11 @@
-ayatana-indicator-sound (0.8.0-0) UNRELEASED; urgency=medium
+ayatana-indicator-sound (0.8.1-0) unstable; urgency=medium
+
+  * Upstream-provided Debian package for ayatana-indicator-notifications.
+    See upstream ChangeLog for recent changes.
+
+ -- Mike Gabriel <mike.gabriel@das-netzwerkteam.de>  Thu, 10 Sep 2020 21:44:51 +0200
+
+ayatana-indicator-sound (0.8.0-0) unstable; urgency=medium
 
   * Fork from Ubuntu's indicator-sound.
 
