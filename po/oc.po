@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:28+0200\n"
-"PO-Revision-Date: 2020-10-19 17:26+0000\n"
+"PO-Revision-Date: 2020-10-24 16:26+0000\n"
 "Last-Translator: Quentin PAGÈS <quentinantonin@free.fr>\n"
 "Language-Team: Occitan <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/oc/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 4.3.1-dev\n"
+"X-Generator: Weblate 4.3.2-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -36,6 +36,7 @@ msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
 msgstr ""
+"Una lista de las aplicacions que se son marcada a un moment al menú de son"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
@@ -49,19 +50,21 @@ msgstr ""
 msgid ""
 "A list of applications that will have player controls visible all the time"
 msgstr ""
+"Una lista de las aplicacions per las qualas los contraròtles son visible en "
+"permanéncia"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
-msgstr ""
+msgstr "Valor per defaut pel mòde mut general (tot mut) al menú"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
-msgstr ""
+msgstr "A l’aviada lo volum deu pas èsser mut."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
-msgstr ""
+msgstr "Se lo contraròtle de volum permet d’anar al delà de 100%"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
@@ -97,7 +100,7 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "Nivèl sonòr qu’activa un avertiment de volum naut."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
@@ -126,6 +129,8 @@ msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
+"Volum de sortida d’utilizar quand lo paramètres « allow-amplified-volume » "
+"es activat."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
@@ -209,7 +214,7 @@ msgstr "Volum del microfòn"
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
 msgid "High volume can damage your hearing."
-msgstr ""
+msgstr "Un volum naut pòt damatjar vòstra audicion."
 
 #: ../src/sound-menu.vala:254
 msgid "Volume (Headphones)"
