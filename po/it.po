@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:28+0200\n"
-"PO-Revision-Date: 2019-10-16 11:52+0000\n"
-"Last-Translator: giorgio.saragnese <giorgio.saragnese@hotmail.it>\n"
+"PO-Revision-Date: 2020-10-26 13:13+0000\n"
+"Last-Translator: Michele <miguel2000@livecom.it>\n"
 "Language-Team: Italian <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/it/>\n"
 "Language: it\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.9\n"
+"X-Generator: Weblate 4.3.2-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -102,6 +102,12 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
+"Per quanto tempo ricordare l'approvazione dell'utente del dialogo di "
+"conferma discusso nella descrizione dell'«avviso-volume-abilitato».\n"
+"\n"
+"Il valore di default (72 000 secondi) corrisponde alle 20 ore suggerite "
+"dalla norma EN 60950-1/Al2 dell'UE: «La conferma non ha bisogno di essere "
+"ripetuta più di una volta ogni 20 ore di tempo d'ascolto cumulativo.»"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
@@ -212,7 +218,7 @@ msgstr "Modalità silenziosa"
 
 #: ../src/sound-menu.vala:66
 msgid "Sound Settings…"
-msgstr "Impostazioni Volume…"
+msgstr "Impostazioni volume…"
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
