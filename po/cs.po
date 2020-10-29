@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:28+0200\n"
-"PO-Revision-Date: 2019-01-16 06:19+0000\n"
-"Last-Translator: Pavel Borecki <pavel.borecki@gmail.com>\n"
+"PO-Revision-Date: 2020-10-30 01:26+0000\n"
+"Last-Translator: Milan Korecky <milan.korecky@gmail.com>\n"
 "Language-Team: Czech <https://hosted.weblate.org/projects/ayatana-indicators/"
 "sound-applet/cs/>\n"
 "Language: cs\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Weblate 3.4-dev\n"
+"X-Generator: Weblate 4.3.2-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -31,15 +31,15 @@ msgid ""
 "sound menu."
 msgstr ""
 "Každý přehrávač médií který dodržuje specifikace MPRIS2 se automaticky "
-"objeví v této nabídce. Toto pole by mělo obsahovat názvy desktop souborů "
-"(bez přípony .desktop) aplikací, které nechcete aby byly zahrnuty v nabídce "
+"objeví v této nabídce. Toto pole by mělo obsahovat názvy desktop souborů ("
+"bez přípony .desktop) aplikací, které nechcete, aby byly zahrnuty v nabídce "
 "zvuku."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
-msgstr "Seznam aplikací které se někdy registrovaly do nabídky zvuku"
+msgstr "Seznam aplikací, které se někdy registrovaly do nabídky zvuku"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
@@ -48,19 +48,19 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
-"Každý přehrávač médií který dodržuje specifikace MPRIS2 se automaticky "
-"objeví v této nabídce. Toto pole by mělo obsahovat názvy desktop souborů "
-"(bez přípony .desktop) aplikací, které se někdy objevily v nabídce zvuku. To "
+"Každý přehrávač médií, který dodržuje specifikace MPRIS2 se automaticky "
+"objeví v této nabídce. Toto pole by mělo obsahovat názvy desktop souborů ("
+"bez přípony .desktop) aplikací, které se někdy objevily v nabídce zvuku. To "
 "nabídce umožní si zapamatovat a zobrazit aplikace, které jsou offline."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
-msgstr "Seznam aplikací které budou mít trvale viditelné ovládání přehrávání"
+msgstr "Seznam aplikací, které budou mít trvale viditelné ovládání přehrávání"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
-msgstr "Úvodní nastavení pro globální ztlumení (ztlumit vše) na nabídce"
+msgstr "Úvodní nastavení pro globální ztlumení (ztlumit vše) v nabídce"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
@@ -88,10 +88,18 @@ msgid ""
 "volume-decibels AND (d) the user has not indicated approval in the last "
 "warning-volume-approval-ttl seconds."
 msgstr ""
+"Pokud je na zařízení povoleno, uživateli se zobrazí potvrzovací dialog, "
+"pokud (a) je něco zapojeno do konektoru pro sluchátka (tj. bez upozornění na "
+"hlasitost reproduktorů) A (b) přehrávání média (tj. bez upozornění na "
+"hlasitost vyzvánění) ) A (c) uživatel se pokusí nastavit hlasitost vyšší než "
+"varování-objem-decibely A (d) uživatel neudělil souhlas v posledních "
+"sekundách varování-objemu-schválení-ttl."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
+"Kolik sekund by se mělo uchovat uživatelem schválené varování hlasitosti "
+"zvuku."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
@@ -102,16 +110,24 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
+"Jak dlouho se uchová souhlas uživatele s potvrzovacím dialogovým oknem "
+"uvedeným v popisu „varování-hlasitosti-povoleno“.\n"
+"\n"
+"Výchozí hodnota (72 000 sekund) odpovídá 20 hodinám doporučeným normou EU EN "
+"60950-1 / Al2: „Není nutné opakovat oznámení častěji než jednou za 20 hodin "
+"nepřetržitého poslechu“."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "Úroveň hlasitosti, která spustí upozornění na vysokou hlasitost."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
 msgstr ""
+"Úroveň hlasitosti, která spustí varování o vysoké hlasitosti. Podrobnosti "
+"najdete v části s povoleným varováním."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
@@ -128,12 +144,22 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
+"Maximální hlasitost, když je deaktivováno nastavení „allow-amplified-volume“ "
+"com.ubuntu.sound.\n"
+"\n"
+"V souladu s normou EU EN 60950-1 / Al2 by tato hodnota neměla být nastavena "
+"na decibelové číslo, aby způsobila, že zvukový výstup ze sluchátek překročí "
+"100 dBA nebo elektrický výstup překročí 150 mV.\n"
+"\n"
+"Výchozí hodnota (0) odpovídá PA_VOLUME_NORM v PulseAudio."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
 msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
+"Výstupní hlasitost, která se má použít, když je povoleno nastavení „allow-"
+"amplified-volume“ com.ubuntu.sound."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
@@ -146,6 +172,14 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
+"Maximální hlasitost, když je povoleno nastavení „allow-amplified-volume“ com."
+"ubuntu.sound.\n"
+"\n"
+"Aby byla v souladu s normou EU EN 60950-1 / Al2, neměla by být tato hodnota "
+"nikdy nastavena na dB, což způsobí, že zvukový výstup sluchátek překročí 100 "
+"dBA, ani elektrický výkon nepřekročí 150 mV.\n"
+"\n"
+"Výchozí hodnota (11) odpovídá PA_VOLUME_UI_MAX společnosti PulseAudio."
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
 #: ../src/service.vala:302 ../src/service.vala:305 ../src/sound-menu.vala:57
@@ -208,7 +242,7 @@ msgstr "Tichý režim"
 
 #: ../src/sound-menu.vala:66
 msgid "Sound Settings…"
-msgstr "Nastavení zvuku…"
+msgstr "Nastavení zvuku …"
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
