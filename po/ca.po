@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:28+0200\n"
-"PO-Revision-Date: 2020-11-01 04:26+0000\n"
+"PO-Revision-Date: 2020-11-03 01:26+0000\n"
 "Last-Translator: Joan CiberSheep <cibersheep@gmail.com>\n"
 "Language-Team: Catalan <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/ca/>\n"
@@ -21,7 +21,7 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
-msgstr ""
+msgstr "Llista d'aplicacions no permeses al menú de so"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
@@ -30,12 +30,16 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
+"Cada reproductor multimèdia que compleixi les especificacions MPRIS2 "
+"apareixerà automàticament al menú. Aquesta matriu ha de contenir els noms de "
+"fitxer d'escriptori (menys el sufix .desktop) de les aplicacions que no "
+"s'han d'incloure al menú de so."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
-msgstr ""
+msgstr "Llista d'aplicacions que en algun moment s'ha registrat al menú de so"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
@@ -44,32 +48,37 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
+"Cada reproductor multimèdia que compleixi les especificacions MPRIS2 "
+"apareixerà automàticament al menú. Aquesta matriu ha de contenir els noms de "
+"fitxer d'escriptori (menys el sufix .desktop) de les aplicacions que en "
+"algun moment han aparegut al menú i que permet que es recordin i mostrin "
+"aplicacions fora de línia."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
-msgstr ""
+msgstr "Llista d'aplicacions amb els controls de reproducció sempre visibles"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
-msgstr ""
+msgstr "Configuració inicial del silenci general (silenciar-ho tot) al menú"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
-msgstr ""
+msgstr "No s'ha de silenciar el volum a l'inici."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
-msgstr ""
+msgstr "Si el control lliscant permet configurar el volum per sobre del 100%"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr ""
+msgstr "Si es mostra o no l'indicador de so a la barra de menú."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
-msgstr ""
+msgstr "Si es mostren o no avisos d’alt volum."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
@@ -80,10 +89,19 @@ msgid ""
 "volume-decibels AND (d) the user has not indicated approval in the last "
 "warning-volume-approval-ttl seconds."
 msgstr ""
+"Si està activat en un dispositiu, es mostrarà un diàleg de confirmació a "
+"l'usuari si: a) hi ha res connectat a l'entrada d'auriculars (és a dir, no "
+"hi ha avisos per als volums dels altaveus) i b) s'està reproduint àudio (és "
+"a dir, no hi ha avisos per als volums de to de trucada) ) i c) l’usuari "
+"intenta establir un volum superior a warning-volume-decibels i d) l’usuari "
+"no ha indicat l’aprovació en els darrers segons del warning-volume-approval-"
+"ttl."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
+"Quants segons s’ha de recordar l’aprovació de l'advertència de volum "
+"(warning-volume ) d’un usuari."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
@@ -94,20 +112,28 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
+"Quant de temps ha de recordar l’aprovació d’un diàleg de confirmació d’un "
+"usuari mostrada a la descripció de «warning-volume-enabled».\n"
+"\n"
+"El valor per defecte (72.000 segons) correspon a les 20 hores suggerides per "
+"la norma EN 60950-1/Al2 de l'UE: «No cal repetir l'acceptació fins a 20 "
+"hores acumulades d'escolta»."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "El nivell que activa l'advertència de volum elevat."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
 msgstr ""
+"Nivell que activa l'advertència de volum elevat. Consulteu el warning-volume-"
+"enabled per més informació."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
-msgstr ""
+msgstr "Volum normal de sortida."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
 msgid ""
@@ -120,12 +146,22 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
+"Volum màxim quan es desactiva el paràmetre «allow-amplified-volume» de com."
+"ubuntu.sound.\n"
+"\n"
+"Per cumplir amb la normativa EN 60950-1/Al2 de l'UE, aquest valor no s’ha d’"
+"establir mai a un dB que faci que la sortida de so dels auriculars superi "
+"els 100 dBA ni que la sortida elèctrica superi els 150 mV.\n"
+"\n"
+"El valor per defecte (0) correspon a PA_VOLUME_NORM del PulseAudio."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
 msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
+"Volum de sortida a utilitzar quan està habilitat el paràmetre «allow-"
+"amplified-volume» de com.ubuntu.sound."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
@@ -138,65 +174,73 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
+"El volum màxim quan està habilitat el paràmetre «allow-amplified-volume» de "
+"com.ubuntu.sound.\n"
+"\n"
+"Per cumplir amb la normativa EN 60950-1/Al2 de l'UE, aquest valor no s’ha d’"
+"establir mai a un dB que faci que la sortida de so dels auriculars superi "
+"els 100 dBA ni que la sortida elèctrica superi els 150 mV.\n"
+"\n"
+"El valor per defecte (11) correspon a PA_VOLUME_UI_MAX del PulseAudio."
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
 #: ../src/service.vala:302 ../src/service.vala:305 ../src/sound-menu.vala:57
 #: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
 #, c-format
 msgid "Volume"
-msgstr ""
+msgstr "Volum"
 
 #: ../src/info-notification.vala:55
 msgid "Speakers"
-msgstr ""
+msgstr "Altaveus"
 
 #: ../src/info-notification.vala:57
 msgid "Headphones"
-msgstr ""
+msgstr "Auriculars"
 
 #: ../src/info-notification.vala:59
 msgid "Bluetooth headphones"
-msgstr ""
+msgstr "Auriculars Bluetooth"
 
 #: ../src/info-notification.vala:61
 msgid "Bluetooth speaker"
-msgstr ""
+msgstr "Altaveus Bluetooth"
 
 #: ../src/info-notification.vala:63
 msgid "Usb speaker"
-msgstr ""
+msgstr "Altaveus USB"
 
 #: ../src/info-notification.vala:65
 msgid "Usb headphones"
-msgstr ""
+msgstr "Auriculars USB"
 
 #: ../src/info-notification.vala:67
 msgid "HDMI speaker"
-msgstr ""
+msgstr "Altaveus HDMI"
 
 #: ../src/info-notification.vala:69
 msgid "HDMI headphones"
-msgstr ""
+msgstr "Auriculars HDMI"
 
 #: ../src/service.vala:299
 msgid "Volume (muted)"
-msgstr ""
+msgstr "Volum (silenciat)"
 
 #: ../src/service.vala:302
 msgid "silent"
-msgstr ""
+msgstr "en silenci"
 
 #: ../src/service.vala:310
 msgid "Sound"
-msgstr ""
+msgstr "So"
 
 #: ../src/sound-menu.vala:50
 msgid "Mute"
-msgstr ""
+msgstr "Silencia"
 
 #: ../src/sound-menu.vala:52
 msgid "Silent Mode"
-msgstr ""
+msgstr "Mode silenciós"
 
 #: ../src/sound-menu.vala:66
 msgid "Sound Settings…"
@@ -204,48 +248,48 @@ msgstr "Paràmetres de so…"
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
-msgstr ""
+msgstr "Volum del micròfon"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
 msgid "High volume can damage your hearing."
-msgstr ""
+msgstr "Un volum elevat pot danyar-vos l’audició."
 
 #: ../src/sound-menu.vala:254
 msgid "Volume (Headphones)"
-msgstr ""
+msgstr "Volum (auriculars)"
 
 #: ../src/sound-menu.vala:257
 msgid "Volume (Bluetooth)"
-msgstr ""
+msgstr "Volum (Bluetooth)"
 
 #: ../src/sound-menu.vala:260
 msgid "Volume (Usb)"
-msgstr ""
+msgstr "Volum (USB)"
 
 #: ../src/sound-menu.vala:263
 msgid "Volume (HDMI)"
-msgstr ""
+msgstr "Volum (HDMI)"
 
 #: ../src/sound-menu.vala:266
 msgid "Volume (Bluetooth headphones)"
-msgstr ""
+msgstr "Volum (auriculars Bluetooth)"
 
 #: ../src/sound-menu.vala:269
 msgid "Volume (Usb headphones)"
-msgstr ""
+msgstr "Volum (auriculars USB)"
 
 #: ../src/sound-menu.vala:272
 msgid "Volume (HDMI headphones)"
-msgstr ""
+msgstr "Volum (auriculars HDMI)"
 
 #: ../src/sound-menu.vala:445
 msgid "Choose Playlist"
-msgstr ""
+msgstr "Trieu una llista de reproducció"
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
-msgstr ""
+msgstr "D'acord"
 
 #: ../src/warn-notification.vala:52
 msgid "Cancel"
