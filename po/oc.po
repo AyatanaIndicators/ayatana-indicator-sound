@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:28+0200\n"
-"PO-Revision-Date: 2020-10-24 16:26+0000\n"
+"PO-Revision-Date: 2020-11-08 21:26+0000\n"
 "Last-Translator: Quentin PAGÈS <quentinantonin@free.fr>\n"
 "Language-Team: Occitan <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/oc/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 4.3.2-dev\n"
+"X-Generator: Weblate 4.3.2\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -205,7 +205,7 @@ msgstr "Mòde silenciós"
 
 #: ../src/sound-menu.vala:66
 msgid "Sound Settings…"
-msgstr "Paramètres de son…"
+msgstr "Paramètres son…"
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
