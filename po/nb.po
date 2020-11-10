@@ -8,16 +8,16 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:28+0200\n"
-"PO-Revision-Date: 2017-12-13 20:48+0000\n"
+"PO-Revision-Date: 2020-11-12 17:28+0000\n"
 "Last-Translator: Allan Nordhøy <epost@anotheragency.no>\n"
-"Language-Team: Norwegian Bokmål <https://hosted.weblate.org/projects/ayatana-"
-"indicators/sound-applet/nb/>\n"
+"Language-Team: Norwegian Bokmål <https://hosted.weblate.org/projects/"
+"ayatana-indicators/sound-applet/nb_NO/>\n"
 "Language: nb\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2.18-dev\n"
+"X-Generator: Weblate 4.4-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -252,7 +252,7 @@ msgstr "Stille-modus"
 
 #: ../src/sound-menu.vala:66
 msgid "Sound Settings…"
-msgstr "Lydinnstillinger…"
+msgstr "Lydinnstillinger …"
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
