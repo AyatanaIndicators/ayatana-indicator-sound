@@ -264,7 +264,7 @@ public class IndicatorSound.Service: Object {
 
 		if (env == "xubuntu" || env == "xfce" || env == "ubuntustudio")
 			cmd = "pavucontrol";
-		else if (env == "mate" || xdg_desktop == "MATE")
+		else if ((env == "mate" || xdg_desktop == "MATE") && Environment.find_program_in_path ("mate-volume-control") != null)
 			cmd = "mate-volume-control";
 		else if (desktop_is_unity() && Environment.find_program_in_path ("unity-control-center") != null)
 			cmd = "unity-control-center sound";
