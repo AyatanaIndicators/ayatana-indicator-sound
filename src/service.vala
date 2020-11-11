@@ -251,7 +251,10 @@ public class IndicatorSound.Service: Object {
 
 	void activate_desktop_settings (SimpleAction action, Variant? param) {
 		unowned string env = Environment.get_variable ("DESKTOP_SESSION");
+		unowned string xdg_desktop = Environment.get_variable ("XDG_CURRENT_DESKTOP");
 		string cmd;
+
+		/* FIXME: the below code needs to be moved into libayatana-common!!! */
 
 #if HAS_URLDISPATCHER
 		if (Environment.get_variable ("MIR_SOCKET") != null)
@@ -263,7 +266,7 @@ public class IndicatorSound.Service: Object {
 
 		if (env == "xubuntu" || env == "xfce" || env == "ubuntustudio")
 			cmd = "pavucontrol";
-		else if (env == "mate")
+		else if ((env == "mate" || xdg_desktop == "MATE") && Environment.find_program_in_path ("mate-volume-control") != null)
 			cmd = "mate-volume-control";
 		else if (desktop_is_unity() && Environment.find_program_in_path ("unity-control-center") != null)
 			cmd = "unity-control-center sound";
