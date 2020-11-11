@@ -254,6 +254,8 @@ public class IndicatorSound.Service: Object {
 		unowned string xdg_desktop = Environment.get_variable ("XDG_CURRENT_DESKTOP");
 		string cmd;
 
+		/* FIXME: the below code needs to be moved into libayatana-common!!! */
+
 #if HAS_URLDISPATCHER
 		if (Environment.get_variable ("MIR_SOCKET") != null)
 		{
