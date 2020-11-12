@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:28+0200\n"
-"PO-Revision-Date: 2020-11-12 17:28+0000\n"
+"PO-Revision-Date: 2020-11-13 18:28+0000\n"
 "Last-Translator: Oğuz Ersen <oguzersen@protonmail.com>\n"
 "Language-Team: Turkish <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/tr/>\n"
@@ -189,7 +189,7 @@ msgstr ""
 
 #: ../src/service.vala:310
 msgid "Sound"
-msgstr ""
+msgstr "Ses"
 
 #: ../src/sound-menu.vala:50
 msgid "Mute"
