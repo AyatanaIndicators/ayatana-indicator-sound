@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:28+0200\n"
-"PO-Revision-Date: 2020-11-08 21:26+0000\n"
+"PO-Revision-Date: 2020-11-18 21:28+0000\n"
 "Last-Translator: Quentin PAGÈS <quentinantonin@free.fr>\n"
 "Language-Team: Occitan <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/oc/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 4.3.2\n"
+"X-Generator: Weblate 4.4-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -30,6 +30,9 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
+"Totes los lectors multimèdia que respèctan l’estandard MPRIS2 apreissaràn al "
+"menú. Aqueste tablèu deu conténer los noms des fichièrs (sens extension ."
+"desktop) de las aplicacions que deven pas èsser inclusas al menú son."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
@@ -87,6 +90,8 @@ msgstr ""
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
+"Quantas de segondas l’aprovacion de l’avertiment respècte al volum deu èsser "
+"memorizat."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
@@ -107,6 +112,8 @@ msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
 msgstr ""
+"Volum sonòr qu’activa un avertiment de volum elevat. Consultatz warning-"
+"volume-enabled per mai d’informacions."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
