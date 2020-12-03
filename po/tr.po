@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:28+0200\n"
-"PO-Revision-Date: 2020-11-29 21:17+0000\n"
+"PO-Revision-Date: 2020-12-04 18:29+0000\n"
 "Last-Translator: Oğuz Ersen <oguzersen@protonmail.com>\n"
 "Language-Team: Turkish <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/tr/>\n"
@@ -30,12 +30,15 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
+"MPRIS2 tanımlamasına uyan her medya oynatıcı otomatik olarak menüde "
+"görünecektir. Bu dizi, ses menüsüne dahil edilmesini istemeyen uygulamaların "
+"masaüstü dosya adlarını (.desktop son eki olmadan) içermelidir."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
-msgstr ""
+msgstr "Bir noktada ses menüsüne kaydedilen uygulamaların listesi"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
@@ -44,32 +47,38 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
+"MPRIS2 tanımlamasına uyan her medya oynatıcı otomatik olarak menüde "
+"görünecektir. Bu dizi, bir noktada menüde görünen uygulamaların masaüstü "
+"dosya adlarını (.desktop son eki olmadan) içermelidir. Bu, menünün çevrim "
+"dışı uygulamaları hatırlamasını ve göstermesini sağlar."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
-msgstr ""
+msgstr "Oynatıcı denetimlerinin her zaman görünür olacağı uygulamaların listesi"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
-msgstr ""
+msgstr "Menüdeki genel ses kapatma (tümünün sesini kapat) için ilk ayar"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
-msgstr ""
+msgstr "Başlangıçta ses kapatılmamalıdır."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
 msgstr ""
+"Ses kaydırma çubuğunun ses düzeyini %100'ün üzerinde ayarlamaya izin verip "
+"vermediği"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr ""
+msgstr "Ses göstergesinin menü çubuğunda gösterilip gösterilmeyeceği."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
-msgstr ""
+msgstr "Yüksek ses uyarıların gösterilip gösterilmeyeceği."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
@@ -80,10 +89,18 @@ msgid ""
 "volume-decibels AND (d) the user has not indicated approval in the last "
 "warning-volume-approval-ttl seconds."
 msgstr ""
+"Bir aygıt için etkinleştirilirse, (a) kulaklık girişine bir şey takılıysa ("
+"yani hoparlör ses seviyeleri için uyarı yok) VE (b) medya oynatılıyorsa ("
+"yani zil sesi seviyeleri için uyarı yok) VE (c) kullanıcı ses seviyesini "
+"warning-volume-decibels değerinden daha yükseğe ayarlamaya çalışırsa VE (d) "
+"kullanıcı son warning-volume-approval-ttl saniye içinde onaylama yapmamışsa "
+"kullanıcıya bir doğrulama iletişim kutusu sunulacaktır."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
+"Bir kullanıcının warning-volume (ses seviyesi uyarısı) onayının kaç saniye "
+"hatırlanacağı."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
@@ -94,20 +111,28 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
+"'warning-volume-enabled' açıklamasında belirtilen doğrulama iletişim "
+"kutusunu kullanıcının onaylamasının ne kadar hatırlanacağı .\n"
+"\n"
+"Öntanımlı değer (72.000 saniye) Avrupa standardı EN 60950-1/Al2 tarafından "
+"önerilen 20 saate karşılık gelmektedir: “Onaylamanın, toplam dinleme "
+"süresinin her 20 saatinde bir defadan fazla tekrarlanması gerekmez.”"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "Yüksek ses uyarısını tetikleyen ses seviyesi."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
 msgstr ""
+"Yüksek ses uyarısını tetikleyen ses seviyesi. Ayrıntılar için warning-volume-"
+"enabled bölümüne bakın."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
-msgstr ""
+msgstr "Normal çıkış ses seviyesi."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
 msgid ""
@@ -120,12 +145,23 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
+"com.ubuntu.sound'un 'allow-amplified-volume' ayarı devre dışı bırakıldığında "
+"en yüksek ses seviyesi.\n"
+"\n"
+"Avrupa standardı EN 60950-1/Al2 ile uyumlu olmak için, bu değer hiçbir zaman "
+"kulaklık ses çıkışının 100 dBA'yı veya elektrik çıkışının 150 mV'yi aşmasına "
+"neden olacak bir dB değerine ayarlanmamalıdır.\n"
+"\n"
+"Öntanımlı değer (0) PulseAudio'nun PA_VOLUME_NORM değerine karşılık "
+"gelmektedir."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
 msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
+"com.ubuntu.sound'un 'allow-amplified-volume' ayarı etkinleştirildiğinde "
+"kullanılacak çıkış ses seviyesi."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
@@ -138,53 +174,62 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
+"com.ubuntu.sound'un 'allow-amplified-volume' ayarı etkinleştirildiğinde en "
+"yüksek ses seviyesi.\n"
+"\n"
+"Avrupa standardı EN 60950-1/Al2 ile uyumlu olmak için, bu değer hiçbir zaman "
+"kulaklık ses çıkışının 100 dBA'yı veya elektrik çıkışının 150 mV'yi aşmasına "
+"neden olacak bir dB değerine ayarlanmamalıdır.\n"
+"\n"
+"Öntanımlı değer (11) PulseAudio'nun PA_VOLUME_UI_MAX değerine karşılık "
+"gelmektedir."
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
 #: ../src/service.vala:302 ../src/service.vala:305 ../src/sound-menu.vala:57
 #: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
 #, c-format
 msgid "Volume"
-msgstr ""
+msgstr "Ses seviyesi"
 
 #: ../src/info-notification.vala:55
 msgid "Speakers"
-msgstr ""
+msgstr "Hoparlör"
 
 #: ../src/info-notification.vala:57
 msgid "Headphones"
-msgstr ""
+msgstr "Kulaklık"
 
 #: ../src/info-notification.vala:59
 msgid "Bluetooth headphones"
-msgstr ""
+msgstr "Bluetooth kulaklık"
 
 #: ../src/info-notification.vala:61
 msgid "Bluetooth speaker"
-msgstr ""
+msgstr "Bluetooth hoparlör"
 
 #: ../src/info-notification.vala:63
 msgid "Usb speaker"
-msgstr ""
+msgstr "USB hoparlör"
 
 #: ../src/info-notification.vala:65
 msgid "Usb headphones"
-msgstr ""
+msgstr "USB kulaklık"
 
 #: ../src/info-notification.vala:67
 msgid "HDMI speaker"
-msgstr ""
+msgstr "HDMI hoparlör"
 
 #: ../src/info-notification.vala:69
 msgid "HDMI headphones"
-msgstr ""
+msgstr "HDMI kulaklık"
 
 #: ../src/service.vala:299
 msgid "Volume (muted)"
-msgstr ""
+msgstr "Ses seviyesi (kapalı)"
 
 #: ../src/service.vala:302
 msgid "silent"
-msgstr ""
+msgstr "sessiz"
 
 #: ../src/service.vala:310
 msgid "Sound"
@@ -192,11 +237,11 @@ msgstr "Ses"
 
 #: ../src/sound-menu.vala:50
 msgid "Mute"
-msgstr ""
+msgstr "Sesi kapat"
 
 #: ../src/sound-menu.vala:52
 msgid "Silent Mode"
-msgstr ""
+msgstr "Sessiz Mod"
 
 #: ../src/sound-menu.vala:66
 msgid "Sound Settings…"
@@ -204,44 +249,44 @@ msgstr "Ses Ayarları…"
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
-msgstr ""
+msgstr "Mikrofon Ses Seviyesi"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
 msgid "High volume can damage your hearing."
-msgstr ""
+msgstr "Yüksek ses seviyesi işitme duyunuza zarar verebilir."
 
 #: ../src/sound-menu.vala:254
 msgid "Volume (Headphones)"
-msgstr ""
+msgstr "Ses Seviyesi (Kulaklık)"
 
 #: ../src/sound-menu.vala:257
 msgid "Volume (Bluetooth)"
-msgstr ""
+msgstr "Ses Seviyesi (Bluetooth)"
 
 #: ../src/sound-menu.vala:260
 msgid "Volume (Usb)"
-msgstr ""
+msgstr "Ses Seviyesi (USB)"
 
 #: ../src/sound-menu.vala:263
 msgid "Volume (HDMI)"
-msgstr ""
+msgstr "Ses Seviyesi (HDMI)"
 
 #: ../src/sound-menu.vala:266
 msgid "Volume (Bluetooth headphones)"
-msgstr ""
+msgstr "Ses Seviyesi (Bluetooth kulaklık)"
 
 #: ../src/sound-menu.vala:269
 msgid "Volume (Usb headphones)"
-msgstr ""
+msgstr "Ses Seviyesi (USB kulaklık)"
 
 #: ../src/sound-menu.vala:272
 msgid "Volume (HDMI headphones)"
-msgstr ""
+msgstr "Ses Seviyesi (HDMI kulaklık)"
 
 #: ../src/sound-menu.vala:445
 msgid "Choose Playlist"
-msgstr ""
+msgstr "Oynatma Listesi Seç"
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
