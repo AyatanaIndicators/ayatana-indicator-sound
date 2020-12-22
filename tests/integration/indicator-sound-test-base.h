@@ -22,8 +22,8 @@
 #include <libqtdbustest/QProcessDBusService.h>
 #include <libqtdbusmock/DBusMock.h>
 
-#include <unity/gmenuharness/MatchUtils.h>
-#include <unity/gmenuharness/MenuMatcher.h>
+#include <lomiri/gmenuharness/MatchUtils.h>
+#include <lomiri/gmenuharness/MenuMatcher.h>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -96,15 +96,15 @@ protected:
 
     static std::shared_ptr<GVariant> volume_variant(double volume);
 
-    static unity::gmenuharness::MenuMatcher::Parameters desktopParameters();
+    static lomiri::gmenuharness::MenuMatcher::Parameters desktopParameters();
 
-    static unity::gmenuharness::MenuMatcher::Parameters phoneParameters();
+    static lomiri::gmenuharness::MenuMatcher::Parameters phoneParameters();
 
-    static unity::gmenuharness::MenuItemMatcher volumeSlider(double volume, QString const &label);
+    static lomiri::gmenuharness::MenuItemMatcher volumeSlider(double volume, QString const &label);
 
-    static unity::gmenuharness::MenuItemMatcher micSlider(double volume, QString const &label);
+    static lomiri::gmenuharness::MenuItemMatcher micSlider(double volume, QString const &label);
 
-    static unity::gmenuharness::MenuItemMatcher silentModeSwitch(bool toggled);
+    static lomiri::gmenuharness::MenuItemMatcher silentModeSwitch(bool toggled);
 
     bool waitMenuChange();
 

@@ -16,9 +16,9 @@
  * Authored by: Pete Woods <pete.woods@canonical.com>
  */
 
-#include <unity/gmenuharness/MatchResult.h>
-#include <unity/gmenuharness/MatchUtils.h>
-#include <unity/gmenuharness/MenuItemMatcher.h>
+#include <lomiri/gmenuharness/MatchResult.h>
+#include <lomiri/gmenuharness/MatchUtils.h>
+#include <lomiri/gmenuharness/MenuItemMatcher.h>
 
 #include <iostream>
 #include <vector>
@@ -26,7 +26,7 @@
 
 using namespace std;
 
-namespace unity
+namespace lomiri
 {
 
 namespace gmenuharness
@@ -1005,4 +1005,4 @@ void MenuItemMatcher::match(
 
 }   // namepsace gmenuharness
 
-}   // namespace unity
+}   // namespace lomiri
