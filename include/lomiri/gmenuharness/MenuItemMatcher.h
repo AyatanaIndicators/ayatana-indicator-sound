@@ -24,7 +24,7 @@
 
 #include <gio/gio.h>
 
-namespace unity
+namespace lomiri
 {
 
 namespace gmenuharness
@@ -140,4 +140,4 @@ protected:
 
 }   // namespace gmenuharness
 
-}   // namespace unity
+}   // namespace lomiri

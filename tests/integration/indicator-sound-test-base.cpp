@@ -36,7 +36,7 @@ using namespace QtDBusTest;
 using namespace QtDBusMock;
 using namespace std;
 using namespace testing;
-namespace mh = unity::gmenuharness;
+namespace mh = lomiri::gmenuharness;
 
 namespace
 {
@@ -410,7 +410,7 @@ mh::MenuMatcher::Parameters IndicatorSoundTestBase::phoneParameters()
             "/org/ayatana/indicator/sound/phone");
 }
 
-unity::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::volumeSlider(double volume, QString const &label)
+lomiri::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::volumeSlider(double volume, QString const &label)
 {
     return mh::MenuItemMatcher().radio()
             .label(label.toStdString())
@@ -425,7 +425,7 @@ unity::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::volumeSlider(double
             .pass_through_double_attribute("action", volume);
 }
 
-unity::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::micSlider(double volume, QString const &label)
+lomiri::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::micSlider(double volume, QString const &label)
 {
     return mh::MenuItemMatcher()
             .label(label.toStdString())
@@ -439,7 +439,7 @@ unity::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::micSlider(double vo
             .pass_through_double_attribute("action", volume);
 }
 
-unity::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::silentModeSwitch(bool toggled)
+lomiri::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::silentModeSwitch(bool toggled)
 {
     return mh::MenuItemMatcher::checkbox()
         .label("Silent Mode")

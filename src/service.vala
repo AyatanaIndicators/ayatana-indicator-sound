@@ -259,7 +259,7 @@ public class IndicatorSound.Service: Object {
 #if HAS_URLDISPATCHER
 		if (Environment.get_variable ("MIR_SOCKET") != null)
 		{
-			UrlDispatch.send ("settings:///system/sound");
+			LomiriURLDispatch.send ("settings:///system/sound");
 			return;
 		}
 #endif
@@ -282,7 +282,7 @@ public class IndicatorSound.Service: Object {
 
 #if HAS_URLDISPATCHER
 	void activate_phone_settings (SimpleAction action, Variant? param) {
-		UrlDispatch.send ("settings:///system/sound");
+		LomiriURLDispatch.send ("settings:///system/sound");
 	}
 #endif
 

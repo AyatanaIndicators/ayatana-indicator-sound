@@ -18,25 +18,49 @@
 
 #pragma once
 
+#include <vector>
 #include <memory>
 #include <string>
 
-#include <gio/gio.h>
-
-namespace unity
+namespace lomiri
 {
 
 namespace gmenuharness
 {
 
-void waitForCore(GObject* obj, const std::string& signalName, unsigned int timeout = 10);
+class MatchResult
+{
+public:
+    MatchResult();
 
-void menuWaitForItems(const std::shared_ptr<GMenuModel>& menu, unsigned int timeout = 10);
+    MatchResult(MatchResult&& other);
 
-void g_object_deleter(gpointer object);
+    MatchResult(const MatchResult& other);
 
-void gvariant_deleter(GVariant* varptr);
+    MatchResult& operator=(const MatchResult& other);
 
-}  //namespace gmenuharness
+    MatchResult& operator=(MatchResult&& other);
 
-}  // namespace unity
+    ~MatchResult() = default;
+
+    MatchResult createChild() const;
+
+    void failure(const std::vector<unsigned int>& location, const std::string& message);
+
+    void merge(const MatchResult& other);
+
+    bool success() const;
+
+    bool hasTimedOut() const;
+
+    std::string concat_failures() const;
+
+protected:
+    struct Priv;
+
+    std::shared_ptr<Priv> p;
+};
+
+}   // namespace gmenuharness
+
+}   // namespace lomiri

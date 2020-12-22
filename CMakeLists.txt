@@ -30,11 +30,11 @@ pkg_check_modules(
 )
 include_directories(${PULSEAUDIO_INCLUDE_DIRS})
 
-set(URL_DISPATCHER_1_REQUIRED_VERSION 1)
+set(URL_DISPATCHER_REQUIRED_VERSION 0)
 
 pkg_check_modules(
   URLDISPATCHER
-  url-dispatcher-1>=${URL_DISPATCHER_1_REQUIRED_VERSION}
+  lomiri-url-dispatcher>=${URL_DISPATCHER_REQUIRED_VERSION}
 )
 include_directories(${URLDISPATCHER_INCLUDE_DIRS})
 
@@ -50,7 +50,7 @@ pkg_check_modules(
 )
 include_directories(${SOUNDSERVICE_INCLUDE_DIRS})
 
-pkg_check_modules(UNITY_API libunity-api>=0.1.3)
+pkg_check_modules(UNITY_API liblomiri-api>=0.1.1)
 
 include_directories(${TEST_INCLUDE_DIRS})
 

@@ -16,7 +16,7 @@
  * Authored by: Pete Woods <pete.woods@canonical.com>
  */
 
-#include <unity/gmenuharness/MatchResult.h>
+#include <lomiri/gmenuharness/MatchResult.h>
 
 #include <chrono>
 #include <map>
@@ -25,7 +25,7 @@
 
 using namespace std;
 
-namespace unity
+namespace lomiri
 {
 
 namespace gmenuharness
@@ -184,4 +184,4 @@ string MatchResult::concat_failures() const
 
 }   // namespace gmenuharness
 
-}   // namespace unity
+}   // namespace lomiri
