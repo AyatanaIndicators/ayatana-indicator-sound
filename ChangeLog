@@ -1,6 +1,373 @@
-2020-09-10 21:45:59 +0200 Mike Gabriel
+2021-01-28 16:55:41 +0100 Mike Gabriel
 
-	* release 0.8.1 (HEAD -> master, tag: 0.8.1)
+	* release 0.8.2 (HEAD -> master, tag: 0.8.2)
+
+2021-01-28 16:38:51 +0100 Mike Gabriel (7b249fc)
+
+	* debian/control: Make B-D on dh-systemd optional (fixes FTBFS in
+          Debian bullseye).
+
+2021-01-12 14:23:14 +0100 Robert Tari (14b00b7)
+
+	* Merge branch 'sunweaver-pr/switch-to-lomiri'
+
+2020-12-22 13:13:03 +0000 Mike Gabriel (1b2da32)
+
+	* debian/control: Build against lomiri-api and lomiri-url-dispatcher
+          (if available).
+
+2020-12-22 13:11:32 +0000 Mike Gabriel (d0a3860)
+
+	* Port from Unity8 to Lomiri (URL Dispatcher and API).
+
+2020-12-30 09:56:31 +0000 J. Lavoie (2607318)
+
+	* Translated using Weblate (French (Canada))
+
+2020-12-30 03:12:29 +0000 J. Lavoie (85746ab)
+
+	* Translated using Weblate (English (United Kingdom))
+
+2020-12-30 03:16:34 +0000 J. Lavoie (3976840)
+
+	* Translated using Weblate (English (Canada))
+
+2020-12-30 03:01:03 +0000 J. Lavoie (09d46d3)
+
+	* Translated using Weblate (German)
+
+2020-12-22 13:13:03 +0000 Mike Gabriel (c03982a)
+
+	* debian/control: Build against lomiri-api and lomiri-url-dispatcher
+          (if available).
+
+2020-12-22 13:11:32 +0000 Mike Gabriel (3c1c6e2)
+
+	* Port from Unity8 to Lomiri (URL Dispatcher and API).
+
+2020-12-22 12:58:27 +0000 Mike Gabriel (5d23457)
+
+	* NEWS.Canonical: Add old NEWS file from Canonical times.
+
+2020-12-03 17:47:58 +0000 Oğuz Ersen (3240d7b)
+
+	* Translated using Weblate (Turkish)
+
+2020-11-29 16:15:05 +0000 Oğuz Ersen (de3704e)
+
+	* Translated using Weblate (Turkish)
+
+2020-11-26 13:33:58 +0000 Ács Zoltán (ee3c9f4)
+
+	* Translated using Weblate (Hungarian)
+
+2020-11-24 20:07:51 +0000 Quentin PAGÈS (7672c05)
+
+	* Translated using Weblate (Occitan)
+
+2020-11-20 08:24:25 +0000 Ács Zoltán (fec13eb)
+
+	* Translated using Weblate (Hungarian)
+
+2020-11-17 21:08:04 +0000 Quentin PAGÈS (26b3106)
+
+	* Translated using Weblate (Occitan)
+
+2020-11-12 18:13:37 +0000 Oğuz Ersen (cacecc1)
+
+	* Translated using Weblate (Turkish)
+
+2020-11-11 16:42:42 +0000 Oğuz Ersen (86154c6)
+
+	* Translated using Weblate (Turkish)
+
+2020-11-10 23:45:09 +0000 Allan Nordhøy (ec1f940)
+
+	* Translated using Weblate (Norwegian Bokmål)
+
+2020-11-11 08:27:43 +0000 Milan Korecky (a327b59)
+
+	* Translated using Weblate (Czech)
+
+2020-11-11 12:08:17 +0100 Robert Tari (5c96b63)
+
+	* Merge branch 'sunweaver-pr/fix-mate-desktop-detection'
+
+2020-11-07 20:56:09 +0000 Quentin PAGÈS (bfa42c2)
+
+	* Translated using Weblate (Occitan)
+
+2020-11-06 14:13:20 +0000 Ács Zoltán (da5b597)
+
+	* Translated using Weblate (Hungarian)
+
+2020-11-02 00:33:47 +0000 Joan CiberSheep (c5b1d4c)
+
+	* Translated using Weblate (Catalan)
+
+2020-11-01 12:26:36 +0100 Hosted Weblate (5766f16)
+
+	* Update translation files
+
+2020-10-31 03:48:10 +0000 Joan CiberSheep (c3f1b3c)
+
+	* Translated using Weblate (Catalan)
+
+2020-10-31 12:28:30 +0100 Weblate (789db9e)
+
+	* Added translation using Weblate (Italian)
+
+2020-10-31 12:28:25 +0100 Weblate (4927334)
+
+	* Added translation using Weblate (Tamil (Sri Lanka))
+
+2020-10-31 12:28:17 +0100 Weblate (f063b8e)
+
+	* Added translation using Weblate (Dhivehi)
+
+2020-10-31 12:28:11 +0100 Weblate (93e2c77)
+
+	* Added translation using Weblate (Venetian)
+
+2020-10-31 12:28:05 +0100 Weblate (c5dcd7a)
+
+	* Added translation using Weblate (Kashubian)
+
+2020-10-31 12:28:02 +0100 Weblate (efdf894)
+
+	* Added translation using Weblate (Macedonian)
+
+2020-10-31 12:27:54 +0100 Weblate (ed1254c)
+
+	* Added translation using Weblate (Friulian)
+
+2020-10-31 12:27:53 +0100 Weblate (86fcb73)
+
+	* Added translation using Weblate (Tatar)
+
+2020-10-29 00:28:42 +0000 Milan Korecky (71512c0)
+
+	* Translated using Weblate (Czech)
+
+2020-10-28 21:38:49 +0000 Joan CiberSheep (12f3939)
+
+	* Translated using Weblate (Catalan)
+
+2020-10-26 21:40:39 +0000 Adrià Martín (abaa822)
+
+	* Translated using Weblate (Sardinian)
+
+2020-10-27 12:26:36 +0100 Hosted Weblate (38ef562)
+
+	* Update translation files
+
+2020-10-26 12:21:11 +0000 Michele (dca6647)
+
+	* Translated using Weblate (Italian)
+
+2020-10-26 11:39:26 +0000 Mike Gabriel (b37c500)
+
+	* Translated using Weblate (German)
+
+2020-10-26 12:45:06 +0100 Weblate (9e45184)
+
+	* Added translation using Weblate (Manx)
+
+2020-10-26 12:44:53 +0100 Weblate (2ffd5c6)
+
+	* Added translation using Weblate (Afar)
+
+2020-10-26 12:44:52 +0100 Weblate (7ddf4f2)
+
+	* Added translation using Weblate (Nyanja)
+
+2020-10-26 12:44:48 +0100 Weblate (b0a5be3)
+
+	* Added translation using Weblate (Assamese)
+
+2020-10-26 12:44:46 +0100 Weblate (165aae7)
+
+	* Added translation using Weblate (Wolof)
+
+2020-10-23 15:45:23 +0000 Quentin PAGÈS (c2e5656)
+
+	* Translated using Weblate (Occitan)
+
+2020-10-18 17:00:06 +0000 Quentin PAGÈS (a964a6d)
+
+	* Translated using Weblate (Occitan)
+
+2020-10-01 21:12:35 +0000 ssantos (e9ec911)
+
+	* Translated using Weblate (Portuguese)
+
+2020-09-29 11:38:05 +0000 Yaron Shahrabani (600c3dd)
+
+	* Translated using Weblate (Hebrew)
+
+2020-09-28 05:53:45 +0000 Adolfo Jayme Barrientos (5564a41)
+
+	* Translated using Weblate (Spanish)
+
+2020-09-25 14:31:04 +0000 Talking Panda (093d82a)
+
+	* Translated using Weblate (Turkish)
+
+2020-09-25 17:39:36 +0000 Quentin PAGÈS (42ecf2a)
+
+	* Translated using Weblate (Occitan)
+
+2020-11-11 08:59:48 +0100 Mike Gabriel (0ae4bef)
+
+	* src/service.vala: Add FIXME to remind us that the -sound indicator
+          also uses code that needs to be moved into
+          libayatana-common (new shared lib).
+
+2020-11-11 08:59:10 +0100 Mike Gabriel (7fe2596)
+
+	* src/service.vala: Check if mate-volume-control exists before
+          executing it.
+
+2020-11-10 08:55:16 +0100 Mike Gabriel (29180e8)
+
+	* src/service.vala: Properly recognize a MATE desktop session when
+          launched via LightDM's default lighdm-xsession.
+
+2020-11-07 20:56:09 +0000 Quentin PAGÈS (20a2e67)
+
+	* Translated using Weblate (Occitan)
+
+2020-11-06 14:13:20 +0000 Ács Zoltán (45605dc)
+
+	* Translated using Weblate (Hungarian)
+
+2020-11-02 00:33:47 +0000 Joan CiberSheep (dffa0be)
+
+	* Translated using Weblate (Catalan)
+
+2020-11-01 12:26:36 +0100 Hosted Weblate (b490f7a)
+
+	* Update translation files
+
+2020-10-31 03:48:10 +0000 Joan CiberSheep (66f480e)
+
+	* Translated using Weblate (Catalan)
+
+2020-10-31 12:28:30 +0100 Weblate (e6932a0)
+
+	* Added translation using Weblate (Italian)
+
+2020-10-31 12:28:25 +0100 Weblate (8cbf50c)
+
+	* Added translation using Weblate (Tamil (Sri Lanka))
+
+2020-10-31 12:28:17 +0100 Weblate (6f150ea)
+
+	* Added translation using Weblate (Dhivehi)
+
+2020-10-31 12:28:11 +0100 Weblate (3afc8f8)
+
+	* Added translation using Weblate (Venetian)
+
+2020-10-31 12:28:05 +0100 Weblate (9c7c3a1)
+
+	* Added translation using Weblate (Kashubian)
+
+2020-10-31 12:28:02 +0100 Weblate (78c069a)
+
+	* Added translation using Weblate (Macedonian)
+
+2020-10-31 12:27:54 +0100 Weblate (c70cf0e)
+
+	* Added translation using Weblate (Friulian)
+
+2020-10-31 12:27:53 +0100 Weblate (9b37a5c)
+
+	* Added translation using Weblate (Tatar)
+
+2020-10-29 00:28:42 +0000 Milan Korecky (f8b9114)
+
+	* Translated using Weblate (Czech)
+
+2020-10-28 21:38:49 +0000 Joan CiberSheep (84aaca3)
+
+	* Translated using Weblate (Catalan)
+
+2020-10-26 21:40:39 +0000 Adrià Martín (3d9f18e)
+
+	* Translated using Weblate (Sardinian)
+
+2020-10-27 12:26:36 +0100 Hosted Weblate (6c256e1)
+
+	* Update translation files
+
+2020-10-26 12:21:11 +0000 Michele (160777a)
+
+	* Translated using Weblate (Italian)
+
+2020-10-26 11:39:26 +0000 Mike Gabriel (88ce046)
+
+	* Translated using Weblate (German)
+
+2020-10-26 12:45:06 +0100 Weblate (102b5e2)
+
+	* Added translation using Weblate (Manx)
+
+2020-10-26 12:44:53 +0100 Weblate (2f15d7b)
+
+	* Added translation using Weblate (Afar)
+
+2020-10-26 12:44:52 +0100 Weblate (7a506bb)
+
+	* Added translation using Weblate (Nyanja)
+
+2020-10-26 12:44:48 +0100 Weblate (9295f27)
+
+	* Added translation using Weblate (Assamese)
+
+2020-10-26 12:44:46 +0100 Weblate (4b9ddf0)
+
+	* Added translation using Weblate (Wolof)
+
+2020-10-23 15:45:23 +0000 Quentin PAGÈS (92dce8a)
+
+	* Translated using Weblate (Occitan)
+
+2020-10-18 17:00:06 +0000 Quentin PAGÈS (6ab96d9)
+
+	* Translated using Weblate (Occitan)
+
+2020-10-01 21:12:35 +0000 ssantos (948d5f8)
+
+	* Translated using Weblate (Portuguese)
+
+2020-09-29 11:38:05 +0000 Yaron Shahrabani (65b2bce)
+
+	* Translated using Weblate (Hebrew)
+
+2020-09-28 05:53:45 +0000 Adolfo Jayme Barrientos (27a8257)
+
+	* Translated using Weblate (Spanish)
+
+2020-09-25 14:31:04 +0000 Talking Panda (98b3926)
+
+	* Translated using Weblate (Turkish)
+
+2020-09-25 17:39:36 +0000 Quentin PAGÈS (18bafcb)
+
+	* Translated using Weblate (Occitan)
+
+2020-09-10 22:01:44 +0200 Mike Gabriel (7cc8dae)
+
+	* NEWS: Format fix (no colon after release numbers).
+
+2020-09-10 21:48:50 +0200 Mike Gabriel (1231f45)
+
+	* debian/changelog: Fix project name in previous stanza.
+
+2020-09-10 21:45:59 +0200 Mike Gabriel (a083b2b)
+
+	* release 0.8.1 (tag: 0.8.1)
 
 2020-09-08 01:10:17 +0000 Milo Ivir (de8a375)
 
