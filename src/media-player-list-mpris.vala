@@ -94,7 +94,7 @@ public class MediaPlayerListMpris : MediaPlayerList {
     public override void sync (string[] desktop_ids) {
 
         /* hash desktop_ids for faster lookup */
-        var hash = new HashTable<string, unowned string> (str_hash, str_equal);
+        var hash = new GenericSet<string> (str_hash, str_equal);
         foreach (var id in desktop_ids)
             hash.add (id);
 
