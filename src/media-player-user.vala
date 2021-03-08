@@ -238,7 +238,12 @@ public class MediaPlayerUser : MediaPlayer {
         if (this.greeter != null) {
             this.greeter.RequestSoundPlayPause.begin(this.username, (obj, res) => {
                 try {
-                    (obj as GreeterBroadcast).RequestSoundPlayPause.end(res);
+                    var broadcasts = (obj as GreeterBroadcast);
+
+                    if (broadcasts != null)
+                    {
+                        broadcasts.RequestSoundPlayPause.end(res);
+                    }
                 } catch (Error e) {
                     warning("Unable to send play pause: %s", e.message);
                 }
@@ -253,7 +258,12 @@ public class MediaPlayerUser : MediaPlayer {
         if (this.greeter != null) {
             this.greeter.RequestSoundNext.begin(this.username, (obj, res) => {
                 try {
-                    (obj as GreeterBroadcast).RequestSoundNext.end(res);
+                    var broadcasts = (obj as GreeterBroadcast);
+
+                    if (broadcasts != null)
+                    {
+                        broadcasts.RequestSoundNext.end(res);
+                    }
                 } catch (Error e) {
                     warning("Unable to send next: %s", e.message);
                 }
@@ -268,7 +278,12 @@ public class MediaPlayerUser : MediaPlayer {
         if (this.greeter != null) {
             this.greeter.RequestSoundPrev.begin(this.username, (obj, res) => {
                 try {
-                    (obj as GreeterBroadcast).RequestSoundPrev.end(res);
+                    var broadcasts = (obj as GreeterBroadcast);
+
+                    if (broadcasts != null)
+                    {
+                        broadcasts.RequestSoundPrev.end(res);
+                    }
                 } catch (Error e) {
                     warning("Unable to send previous: %s", e.message);
                 }

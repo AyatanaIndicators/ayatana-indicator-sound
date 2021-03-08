@@ -45,8 +45,13 @@ public class MediaPlayerListGreeter : MediaPlayerList {
             this.proxy.entry_selected.connect(active_user_changed);
             this.proxy.get_active_entry.begin ((obj, res) => {
                 try {
-                    var value = (obj as AyatanaGreeterList).get_active_entry.end(res);
-                    active_user_changed(value);
+                    var list = (obj as AyatanaGreeterList);
+
+                    if (list != null)
+                    {
+                        var value = list.get_active_entry.end(res);
+                        active_user_changed(value);
+                    }
                 } catch (Error e) {
                     warning("Unable to get active entry: %s", e.message);
                 }
