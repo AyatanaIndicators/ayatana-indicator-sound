@@ -133,7 +133,7 @@ public abstract class VolumeWarning : Object
     **/
 
     private Settings _settings = new Settings ("org.ayatana.indicator.sound");
-    private static const string TTL_KEY = "warning-volume-confirmation-ttl";
+    private const string TTL_KEY = "warning-volume-confirmation-ttl";
     private uint _approved_timer = 0;
     private int64 _approved_at = 0;
     private int64 _approved_ttl_usec = 0;
