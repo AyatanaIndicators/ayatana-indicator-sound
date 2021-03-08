@@ -22,9 +22,9 @@ public interface GreeterBroadcast : Object {
   // methods
   // unused public abstract async void RequestApplicationStart(string name, string appid) throws IOError;
   // unused public abstract async void RequestHomeShown(string name) throws IOError;
-  public abstract async void RequestSoundPlayPause(string name) throws IOError;
-  public abstract async void RequestSoundNext(string name) throws IOError;
-  public abstract async void RequestSoundPrev(string name) throws IOError;
+  public abstract async void RequestSoundPlayPause(string name) throws GLib.DBusError, GLib.IOError;
+  public abstract async void RequestSoundNext(string name) throws GLib.DBusError, GLib.IOError;
+  public abstract async void RequestSoundPrev(string name) throws GLib.DBusError, GLib.IOError;
   // signals
   // unused public signal void StartApplication(string username, string appid);
   // unused public signal void ShowHome(string username);

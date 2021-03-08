@@ -19,7 +19,7 @@
 
 [DBus (name="org.ayatana.Greeter.List")]
 public interface AyatanaGreeterList : Object {
-    public abstract async string get_active_entry () throws IOError;
+    public abstract async string get_active_entry () throws GLib.DBusError, GLib.IOError;
     public signal void entry_selected (string entry_name);
 }
 
