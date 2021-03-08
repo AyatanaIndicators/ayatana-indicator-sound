@@ -69,7 +69,7 @@ public interface MprisPlaylists : Object {
   public abstract string[] Orderings{owned get; set;}
   public abstract uint32 PlaylistCount{owned get; set;}
   public abstract ActivePlaylistContainer? ActivePlaylist {owned get; set;}
-  
+
   //methods
   public abstract async void ActivatePlaylist(ObjectPath playlist_id) throws IOError;
   public abstract async PlaylistDetails[]? GetPlaylists ( uint32 index,
@@ -78,5 +78,5 @@ public interface MprisPlaylists : Object {
                                                           bool reverse_order ) throws IOError;
   //signals
   public signal void PlaylistChanged (PlaylistDetails details);
-  
+
 }
