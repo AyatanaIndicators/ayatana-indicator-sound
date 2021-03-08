@@ -63,7 +63,6 @@ vala_init(ayatana-indicator-sound-service
     ${VALA_PKG_URLDISPATCHER}
   OPTIONS
     --ccode
-    --thread
     --target-glib=${GLIB_2_0_REQUIRED_VERSION}
     --vapidir=${CMAKE_SOURCE_DIR}/vapi/
     --vapidir=.

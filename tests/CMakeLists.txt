@@ -75,7 +75,6 @@ vala_init(vala-mocks
         indicator-sound-service
     OPTIONS
         --ccode
-        --thread
         --vapidir=${CMAKE_BINARY_DIR}/src/
         --vapidir=${CMAKE_SOURCE_DIR}/vapi/
         --vapidir=.
