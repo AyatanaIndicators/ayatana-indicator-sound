@@ -201,7 +201,12 @@ public class VolumeControlPulse : VolumeControl
                         this._source_sink_mic_activated = false;
                         this.active_mic = _external_mic_detected;
                         break;
+                    default:
+                        break;
                 }
+                break;
+
+            default:
                 break;
         }
     }

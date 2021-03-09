@@ -271,6 +271,8 @@ public class SoundMenu: Object
                 case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
                     label = _("Volume (HDMI headphones)");
                     break;
+                case VolumeControl.ActiveOutput.CALL_MODE:
+                    break;
             }
             this.volume_section.remove (index);
             this.volume_section.insert_item (index, this.create_slider_menu_item (_(label), "indicator.volume(0)", 0.0, 1.0, 0.01,
