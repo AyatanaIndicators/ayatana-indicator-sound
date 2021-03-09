@@ -80,6 +80,8 @@ vala_init(vala-mocks
         --vapidir=.
 )
 
+set_source_files_properties(media-player-mock.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-discarded-qualifiers")
+
 vala_add(vala-mocks
     media-player-mock.vala
 )
