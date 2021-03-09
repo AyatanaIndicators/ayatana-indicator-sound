@@ -146,7 +146,7 @@ public class MediaPlayerMpris: MediaPlayer {
                 this.state = "Launching";
             }
             else if (this.root != null && this.root.CanRaise) {
-                this.root.Raise ();
+                this.root.Raise.begin ();
             }
         }
         catch (Error e) {
