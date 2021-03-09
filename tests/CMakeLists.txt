@@ -1,5 +1,6 @@
 find_package(GMock)
 include_directories(${GMOCK_INCLUDE_DIRS})
+include_directories("${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/libdbustest-1")
 
 ###########################
 # GSettings Schema
