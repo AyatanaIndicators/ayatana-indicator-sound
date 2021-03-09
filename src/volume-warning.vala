@@ -214,7 +214,7 @@ public abstract class VolumeWarning : Object
             approve_high_volume ();
             sound_system_set_multimedia_volume (_ok_volume);
         } else {
-            this.cancel_pressed (this.volume_to_double(_options.loud_volume));
+            this.cancel_pressed (VolumeWarning.volume_to_double(_options.loud_volume));
         }
 
         _ok_volume = PulseAudio.Volume.INVALID;
