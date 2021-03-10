@@ -1,6 +1,7 @@
 /*
  * -*- Mode:Vala; indent-tabs-mode:t; tab-width:4; encoding:utf8 -*-
  * Copyright 2016 Canonical Ltd.
+ * Copyright 2021 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +17,7 @@
  *
  * Authors:
  *      Xavi Garcia <xavi.garcia.mena@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 
 using PulseAudio;

@@ -1,8 +1,10 @@
 /*
 Copyright 2010 Canonical Ltd.
+Copyright 2021 Robert Tari
 
 Authors:
     Conor Curran <conor.curran@canonical.com>
+    Robert Tari <robert@tari.in>
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License version 3, as published
