@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:28+0200\n"
-"PO-Revision-Date: 2020-05-28 23:41+0000\n"
-"Last-Translator: wdggg <wdggg7@gmail.com>\n"
+"PO-Revision-Date: 2021-03-12 06:02+0000\n"
+"Last-Translator: Boyuan Yang <073plan@gmail.com>\n"
 "Language-Team: Chinese (Simplified) <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/zh_Hans/>\n"
 "Language: zh_CN\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 4.1-dev\n"
+"X-Generator: Weblate 4.5.2-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -212,7 +212,7 @@ msgstr ""
 
 #: ../src/sound-menu.vala:123
 msgid "Microphone Volume"
-msgstr ""
+msgstr "麦克风音量"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
@@ -221,35 +221,35 @@ msgstr ""
 
 #: ../src/sound-menu.vala:254
 msgid "Volume (Headphones)"
-msgstr ""
+msgstr "音量（耳机）"
 
 #: ../src/sound-menu.vala:257
 msgid "Volume (Bluetooth)"
-msgstr ""
+msgstr "音量（蓝牙）"
 
 #: ../src/sound-menu.vala:260
 msgid "Volume (Usb)"
-msgstr ""
+msgstr "音量（USB）"
 
 #: ../src/sound-menu.vala:263
 msgid "Volume (HDMI)"
-msgstr ""
+msgstr "音量（HDMI）"
 
 #: ../src/sound-menu.vala:266
 msgid "Volume (Bluetooth headphones)"
-msgstr ""
+msgstr "音量（蓝牙耳机）"
 
 #: ../src/sound-menu.vala:269
 msgid "Volume (Usb headphones)"
-msgstr ""
+msgstr "音量（USB 耳机）"
 
 #: ../src/sound-menu.vala:272
 msgid "Volume (HDMI headphones)"
-msgstr ""
+msgstr "音量（HDMI 耳机）"
 
 #: ../src/sound-menu.vala:445
 msgid "Choose Playlist"
-msgstr ""
+msgstr "选择播放列表"
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
@@ -257,4 +257,4 @@ msgstr "好的"
 
 #: ../src/warn-notification.vala:52
 msgid "Cancel"
-msgstr ""
+msgstr "取消"
