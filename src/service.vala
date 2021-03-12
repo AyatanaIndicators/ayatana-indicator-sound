@@ -255,6 +255,7 @@ public class IndicatorSound.Service: Object {
         unowned string env = Environment.get_variable ("DESKTOP_SESSION");
         unowned string xdg_desktop = Environment.get_variable ("XDG_CURRENT_DESKTOP");
         string cmd;
+        string arg;
 
         /* FIXME: the below code needs to be moved into libayatana-common!!! */
 
@@ -267,18 +268,41 @@ public class IndicatorSound.Service: Object {
 #endif
 
         if (env == "xubuntu" || env == "xfce" || env == "ubuntustudio")
+        {
             cmd = "pavucontrol";
-        else if ((env == "mate" || xdg_desktop == "MATE") && Environment.find_program_in_path ("mate-volume-control") != null)
+            arg = "";
+        }
+        else if ((env == "mate" || xdg_desktop == "MATE"))
+        {
             cmd = "mate-volume-control";
-        else if (desktop_is_unity() && Environment.find_program_in_path ("unity-control-center") != null)
-            cmd = "unity-control-center sound";
+            arg = "";
+        }
+        else if (desktop_is_unity())
+        {
+            cmd = "unity-control-center";
+            arg = "sound";
+        }
         else
-            cmd = "gnome-control-center sound";
+        {
+            cmd = "gnome-control-center";
+            arg = "sound";
+        }
 
-        try {
-            Process.spawn_command_line_async (cmd);
-        } catch (Error e) {
-            warning ("unable to launch sound settings: %s", e.message);
+        try
+        {
+            if (Environment.find_program_in_path(cmd) == null)
+            {
+                string command_line = "zenity  --warning  --icon-name=\"dialog-warning\"  --title=\"%s\"  --text=\"%s\"  --no-wrap".printf(_("Missing application"), _("Could not find the '%s' application - please make sure it is installed.").printf(cmd));
+                Process.spawn_command_line_async(command_line);
+            }
+            else
+            {
+                Process.spawn_command_line_async(cmd + " " + arg);
+            }
+        }
+        catch (Error e)
+        {
+            warning("unable to launch sound settings: %s", e.message);
         }
     }
 
