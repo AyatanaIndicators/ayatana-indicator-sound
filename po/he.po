@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 20:28+0200\n"
-"PO-Revision-Date: 2020-09-30 11:41+0000\n"
+"PO-Revision-Date: 2021-07-17 14:32+0000\n"
 "Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>\n"
 "Language-Team: Hebrew <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/he/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Weblate 4.3-dev\n"
+"X-Generator: Weblate 4.7.2-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -30,12 +30,15 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
+"כל נגן מדיה שתומך במפרט של MPRIS2 יופיע אוטומטית בתפריט. מערך זה אמור להכיל "
+"את שמות קובצי ה־desktop (ללא הסיומת ‎.desktop) של היישומים שאין לכלול בתפריט "
+"השמע."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
-msgstr ""
+msgstr "רשימה של יישומים שבשלב כלשהו נרשמו לתפריט השמע"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
@@ -44,32 +47,35 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
+"כל נגן מדיה שתומך במפרט של MPRIS2 יופיע אוטומטית בתפריט. מערך זה אמור להכיל "
+"את שמות קובצי ה־desktop (ללא הסיומת ‎.desktop) של היישומים שבשלב כלשהו "
+"הופיעו בתפריט. יכולת זאת מאפשרת לתפריט לזכור ולהציג יישומים בלתי מקוונים."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
-msgstr ""
+msgstr "רשימה של יישומים שתמיד יופיעו בהם פקדי הנגינה"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
-msgstr ""
+msgstr "הגדרה ראשונית להשתקה כוללת (להשתיק את הכול) בתפריט"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
-msgstr ""
+msgstr "עם ההפעלה יש להפעיל את השמע."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
-msgstr ""
+msgstr "האם מחוון עצמת השמע מאפשר להגדיר את עצמת השמע מעל 100%"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr ""
+msgstr "האם להציג את מחוון השמע בסרגל התפריטים."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
-msgstr ""
+msgstr "האם להציג אזהרות עצמת שמע גבוהה."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
