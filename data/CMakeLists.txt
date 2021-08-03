@@ -81,13 +81,13 @@ set(DBUS_IFACE_DIR "${CMAKE_INSTALL_PREFIX}/share/dbus-1/interfaces")
 set(ACCOUNTS_IFACE_DIR "${CMAKE_INSTALL_PREFIX}/share/accountsservice/interfaces")
 
 install(FILES org.ayatana.indicator.sound.AccountsService.xml
-	DESTINATION "${DBUS_IFACE_DIR}"
+    DESTINATION "${DBUS_IFACE_DIR}"
 )
 
 # Create accountsservice symlink for above dbus interface
 install(CODE "
-	execute_process(COMMAND mkdir -p \"\$ENV{DESTDIR}${ACCOUNTS_IFACE_DIR}\")
-	execute_process(COMMAND ln -sf ../../dbus-1/interfaces/org.ayatana.indicator.sound.AccountsService.xml \"\$ENV{DESTDIR}${ACCOUNTS_IFACE_DIR}\")
+    execute_process(COMMAND mkdir -p \"\$ENV{DESTDIR}${ACCOUNTS_IFACE_DIR}\")
+    execute_process(COMMAND ln -sf ../../dbus-1/interfaces/org.ayatana.indicator.sound.AccountsService.xml \"\$ENV{DESTDIR}${ACCOUNTS_IFACE_DIR}\")
 ")
 
 install(FILES org.ayatana.indicator.sound.AccountsService.policy
