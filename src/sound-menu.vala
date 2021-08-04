@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Canonical Ltd.
+ * Copyright 2021 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,7 @@
  *
  * Authors:
  *      Lars Uebernickel <lars.uebernickel@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 
 public class SoundMenu: Object
@@ -270,6 +272,8 @@ public class SoundMenu: Object
                     break;
                 case VolumeControl.ActiveOutput.HDMI_HEADPHONES:
                     label = _("Volume (HDMI headphones)");
+                    break;
+                case VolumeControl.ActiveOutput.CALL_MODE:
                     break;
             }
             this.volume_section.remove (index);

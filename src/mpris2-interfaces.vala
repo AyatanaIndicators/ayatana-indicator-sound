@@ -1,7 +1,10 @@
 /*
 Copyright 2010-2015 Canonical Ltd.
+Copyright 2021 Robert Tari
+
 Authors:
     Conor Curran <conor.curran@canonical.com>
+    Robert Tari <robert@tari.in>
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License version 3, as published
@@ -28,8 +31,8 @@ public interface MprisRoot : Object {
   public abstract string Identity{owned get; set;}
   public abstract string DesktopEntry{owned get; set;}
   // methods
-  public abstract async void Quit() throws IOError;
-  public abstract async void Raise() throws IOError;
+  public abstract async void Quit() throws GLib.DBusError, GLib.IOError;
+  public abstract async void Raise() throws GLib.DBusError, GLib.IOError;
 }
 
 [DBus (name = "org.mpris.MediaPlayer2.Player")]
@@ -42,10 +45,10 @@ public interface MprisPlayer : Object {
   public abstract bool CanGoNext{owned get; set;}
   public abstract bool CanGoPrevious{owned get; set;}
   // methods
-  public abstract async void PlayPause() throws IOError;
-  public abstract async void Next() throws IOError;
-  public abstract async void Previous() throws IOError;
-  public abstract async void Seek(int64 offset) throws IOError;
+  public abstract async void PlayPause() throws GLib.DBusError, GLib.IOError;
+  public abstract async void Next() throws GLib.DBusError, GLib.IOError;
+  public abstract async void Previous() throws GLib.DBusError, GLib.IOError;
+  public abstract async void Seek(int64 offset) throws GLib.DBusError, GLib.IOError;
   // signals
   public signal void Seeked(int64 new_position);
 }
@@ -69,14 +72,14 @@ public interface MprisPlaylists : Object {
   public abstract string[] Orderings{owned get; set;}
   public abstract uint32 PlaylistCount{owned get; set;}
   public abstract ActivePlaylistContainer? ActivePlaylist {owned get; set;}
-  
+
   //methods
-  public abstract async void ActivatePlaylist(ObjectPath playlist_id) throws IOError;
+  public abstract async void ActivatePlaylist(ObjectPath playlist_id) throws GLib.DBusError, GLib.IOError;
   public abstract async PlaylistDetails[]? GetPlaylists ( uint32 index,
                                                           uint32 max_count,
                                                           string order,
-                                                          bool reverse_order ) throws IOError;
+                                                          bool reverse_order ) throws GLib.DBusError, GLib.IOError;
   //signals
   public signal void PlaylistChanged (PlaylistDetails details);
-  
+
 }

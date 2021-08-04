@@ -29,7 +29,7 @@ if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.touch.AccountsServic
   set (VALA_DEFINE_ACCTSERVICE_SYSTEMSOUND_SETTINGS "--define=HAS_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS")
 else()
   set (HAVE_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS OFF)
-endif() 
+endif()
 
 if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.AccountsService.Sound.xml")
   set (HAVE_UT_ACCTSERVICE_SOUND_SETTINGS ON)
@@ -63,7 +63,6 @@ vala_init(ayatana-indicator-sound-service
     ${VALA_PKG_URLDISPATCHER}
   OPTIONS
     --ccode
-    --thread
     --target-glib=${GLIB_2_0_REQUIRED_VERSION}
     --vapidir=${CMAKE_SOURCE_DIR}/vapi/
     --vapidir=.
@@ -247,15 +246,15 @@ vala_add(ayatana-indicator-sound-service
 )
 
 if(${HAVE_UT_ACCTSERVICE_PRIVACY_SETTINGS})
-	vala_add(ayatana-indicator-sound-service
+    vala_add(ayatana-indicator-sound-service
           accounts-service-system-sound-settings.vala
-	)
+    )
 endif()
 
 if(${HAVE_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS})
-	vala_add(ayatana-indicator-sound-service
+    vala_add(ayatana-indicator-sound-service
           accounts-service-privacy-settings.vala
-	)
+    )
 endif()
 
 vala_add(ayatana-indicator-sound-service

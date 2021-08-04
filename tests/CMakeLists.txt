@@ -1,5 +1,6 @@
 find_package(GMock)
 include_directories(${GMOCK_INCLUDE_DIRS})
+include_directories("${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/libdbustest-1")
 
 ###########################
 # GSettings Schema
@@ -75,11 +76,12 @@ vala_init(vala-mocks
         indicator-sound-service
     OPTIONS
         --ccode
-        --thread
         --vapidir=${CMAKE_BINARY_DIR}/src/
         --vapidir=${CMAKE_SOURCE_DIR}/vapi/
         --vapidir=.
 )
+
+set_source_files_properties(media-player-mock.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-discarded-qualifiers")
 
 vala_add(vala-mocks
     media-player-mock.vala
