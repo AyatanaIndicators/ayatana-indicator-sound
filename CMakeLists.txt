@@ -12,7 +12,7 @@ include(UseVala)
 option (enable_tests "Build the package's automatic tests." ON)
 
 set(GETTEXT_PACKAGE "ayatana-indicator-sound")
-set(LOCALEDIR "${CMAKE_INSTALL_FULL_DATADIR}/locale")
+set(LOCALEDIR "${CMAKE_INSTALL_FULL_LOCALEDIR}")
 add_definitions( -DGETTEXT_PACKAGE="${GETTEXT_PACKAGE}" )
 
 set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")

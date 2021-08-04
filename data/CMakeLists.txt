@@ -7,7 +7,7 @@ find_package(GSettings)
 
 set(
   INDICATOR_DIR
-  "${CMAKE_INSTALL_DATADIR}/ayatana/indicators"
+  "${CMAKE_INSTALL_FULL_DATADIR}/ayatana/indicators"
   CACHE FILEPATH "Ayatana Indicators Directory"
 )
 
@@ -75,10 +75,10 @@ endif()
 #########################################
 
 
-set(POLKIT_LIB_DIR "${CMAKE_INSTALL_LOCALSTATEDIR}/lib/polkit-1")
-set(POLKIT_DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/polkit-1")
-set(DBUS_IFACE_DIR "${CMAKE_INSTALL_PREFIX}/share/dbus-1/interfaces")
-set(ACCOUNTS_IFACE_DIR "${CMAKE_INSTALL_PREFIX}/share/accountsservice/interfaces")
+set(POLKIT_LIB_DIR "${CMAKE_INSTALL_FULL_LOCALSTATEDIR}/lib/polkit-1")
+set(POLKIT_DATA_DIR "${CMAKE_INSTALL_FULL_DATADIR}/polkit-1")
+set(DBUS_IFACE_DIR "${CMAKE_INSTALL_FULL_DATADIR}/dbus-1/interfaces")
+set(ACCOUNTS_IFACE_DIR "${CMAKE_INSTALL_FULL_DATADIR}/accountsservice/interfaces")
 
 install(FILES org.ayatana.indicator.sound.AccountsService.xml
     DESTINATION "${DBUS_IFACE_DIR}"
