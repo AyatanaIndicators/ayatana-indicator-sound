@@ -338,7 +338,7 @@ target_link_libraries(
 
 install(
   TARGETS indicator-sound-service-bin
-  RUNTIME DESTINATION ${CMAKE_INSTALL_LIBEXECDIR}/ayatana-indicator-sound/
+  RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_LIBEXECDIR}/ayatana-indicator-sound/
 )
 
 if(UNITY_API_FOUND)
