@@ -1,5 +1,9 @@
 project(ayatana-indicator-sound C CXX)
-cmake_minimum_required(VERSION 2.8.9)
+cmake_minimum_required(VERSION 3.13)
+
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    SET(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "..." FORCE)
+endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" "${CMAKE_MODULE_PATH}")
 
@@ -9,7 +13,22 @@ find_package(PkgConfig REQUIRED)
 include(GNUInstallDirs)
 include(UseVala)
 
-option (enable_tests "Build the package's automatic tests." ON)
+# Options
+option(ENABLE_TESTS "Enable all tests and checks" OFF)
+option(ENABLE_COVERAGE "Enable coverage reports (includes enabling all tests and checks)" OFF)
+option(ENABLE_WERROR "Treat all build warnings as errors" OFF)
+
+if(ENABLE_COVERAGE)
+    set(ENABLE_TESTS ON)
+    set(CMAKE_BUILD_TYPE "Coverage")
+else()
+    set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+if(ENABLE_WERROR)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+endif()
 
 set(GETTEXT_PACKAGE "ayatana-indicator-sound")
 set(LOCALEDIR "${CMAKE_INSTALL_FULL_LOCALEDIR}")
@@ -77,14 +96,22 @@ add_subdirectory(data)
 add_subdirectory(src)
 add_subdirectory(po)
 
-if (${enable_tests})
+if (ENABLE_TESTS)
     pkg_check_modules(TEST REQUIRED dbustest-1>=15.04.0)
     enable_testing()
     add_subdirectory(tests)
-    find_package(CoverageReport)
-    ENABLE_COVERAGE_REPORT(
-        TARGETS ${COVERAGE_TARGETS}
-        TESTS ${COVERAGE_TEST_TARGETS}
-        FILTER /usr/include ${CMAKE_BINARY_DIR}/*
- )
+    if (ENABLE_COVERAGE)
+        find_package(CoverageReport)
+        ENABLE_COVERAGE_REPORT(
+            TARGETS ${COVERAGE_TARGETS}
+            TESTS ${COVERAGE_TEST_TARGETS}
+            FILTER /usr/include ${CMAKE_BINARY_DIR}/*
+        )
+    endif()
 endif ()
+
+# Display config info
+
+message(STATUS "Install prefix: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "Unit tests: ${ENABLE_TESTS}")
+message(STATUS "Build with -Werror: ${ENABLE_WERROR}")
