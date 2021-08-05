@@ -75,6 +75,7 @@ qt5_use_modules(
     Test
 )
 
+target_link_options (integration-tests PRIVATE -no-pie)
 target_link_libraries(
     integration-tests
     sound-indicator-dbus-interfaces
