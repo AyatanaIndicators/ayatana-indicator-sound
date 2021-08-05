@@ -165,6 +165,7 @@ target_link_libraries (pulse-mock ${PULSEAUDIO_LIBRARIES})
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 add_executable (name-watch-test name-watch-test.cc ${CMAKE_SOURCE_DIR}/src/bus-watch-namespace.c)
+target_link_options (name-watch-test PRIVATE -no-pie)
 target_link_libraries (name-watch-test ${SOUNDSERVICE_LIBRARIES} ${GMOCK_LIBRARIES})
 add_test(name-watch-test name-watch-test)
 
@@ -174,6 +175,7 @@ add_test(name-watch-test name-watch-test)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 add_executable (accounts-service-user-test accounts-service-user.cc)
+target_link_options (accounts-service-user-test PRIVATE -no-pie)
 target_link_libraries (
     accounts-service-user-test
     indicator-sound-service-lib
@@ -199,6 +201,7 @@ add_test(accounts-service-user-test-player
 include_directories(${CMAKE_SOURCE_DIR}/src)
 add_executable (volume-control-test volume-control-test.cc)
 add_dependencies (volume-control-test gschemas-compiled)
+target_link_options (volume-control-test PRIVATE -no-pie)
 target_link_libraries (
     volume-control-test
     indicator-sound-service-lib
@@ -216,6 +219,7 @@ add_test(volume-control-test volume-control-test)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 add_executable (sound-menu-test sound-menu.cc)
+target_link_options (sound-menu-test PRIVATE -no-pie)
 target_link_libraries (
     sound-menu-test
     indicator-sound-service-lib
@@ -233,6 +237,7 @@ add_test(sound-menu-test sound-menu-test)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 add_executable (notifications-test notifications-test.cc)
+target_link_options (notifications-test PRIVATE -no-pie)
 target_link_libraries (
     notifications-test
     indicator-sound-service-lib
@@ -251,6 +256,7 @@ add_test(notifications-test notifications-test)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 add_executable (media-player-user-test media-player-user.cc)
+target_link_options (media-player-user-test PRIVATE -no-pie)
 target_link_libraries (
     media-player-user-test
     indicator-sound-service-lib
@@ -277,6 +283,7 @@ add_test(media-player-user-test-timeout
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 add_executable (greeter-list-test greeter-list.cc)
+target_link_options (greeter-list-test PRIVATE -no-pie)
 target_link_libraries (
     greeter-list-test
     indicator-sound-service-lib
@@ -304,6 +311,7 @@ add_definitions(
 )
 add_executable (indicator-test indicator-test.cc)
 add_dependencies (indicator-test gschemas-compiled)
+target_link_options (indicator-test PRIVATE -no-pie)
 target_link_libraries (
     indicator-test
     ${SOUNDSERVICE_LIBRARIES}
