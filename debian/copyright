@@ -1,16 +1,268 @@
-Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
-Name: indicator-sound
-Maintainer: Indicator Applet Developers <indicator-applet-developers@launchpad.net>
-Source: https://launchpad.net/indicator-sound
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: ayatana-indicator-sound
+Upstream-Contact: Mike Gabriel <mike.gabriel@das-netzwerkteam.de>
+Source: https://github.com/AyatanaIndicators/ayatana-indicator-sound/
 
-Files: *
-Copyright: 2010-2013, Canonical Ltd.
+Files: config.h.in
+ src/accounts-service-access.vala
+ src/bus-watch-namespace.c
+ src/bus-watch-namespace.h
+ src/freedesktop-interfaces.vala
+ src/info-notification.vala
+ src/main.c
+ src/media-player-list-greeter.vala
+ src/media-player-list-mpris.vala
+ src/media-player-list.vala
+ src/media-player-mpris.vala
+ src/media-player-user.vala
+ src/media-player.vala
+ src/mpris2-interfaces.vala
+ src/notification.vala
+ src/options-gsettings.vala
+ src/options.vala
+ src/service.vala
+ src/sound-menu.vala
+ src/voip-input-menu-item.h
+ src/volume-control-pulse.vala
+ src/volume-control.vala
+ src/volume-warning-pulse.vala
+ src/volume-warning.vala
+ src/warn-notification.vala
+ tests/accounts-service-mock.h
+ tests/accounts-service-user.cc
+ tests/greeter-list.cc
+ tests/gtest-gvariant.h
+ tests/indicator-fixture.h
+ tests/indicator-test.cc
+ tests/media-player-list-mock.vala
+ tests/media-player-mock.vala
+ tests/media-player-user.cc
+ tests/name-watch-test.cc
+ tests/notifications-mock.h
+ tests/notifications-test.cc
+ tests/options-mock.vala
+ tests/pa-mock.cpp
+ tests/sound-menu.cc
+ tests/volume-control-mock.vala
+ tests/volume-control-test.cc
+ tests/volume-warning-mock.vala
+ vapi/bus-watcher.vapi
+Copyright: 2010, Canonical Ltd.
+  2010-2015, Canonical Ltd.
+  2011, Canonical Ltd.
+  2013, Canonical Ltd.
+  2014, Canonical Ltd.
+  2015, Canonical Ltd.
+  2015-2016, Canonical Ltd.
+  2016, Canonical Ltd.
 License: GPL-3
+
+Files: tests/dbus-types/dbus-action-result.cpp
+ tests/dbus-types/dbus-action-result.h
+ tests/dbus-types/dbus-types.h
+ tests/dbus-types/pulseaudio-volume.cpp
+ tests/dbus-types/pulseaudio-volume.h
+ tests/integration/indicator-sound-test-base.cpp
+ tests/integration/indicator-sound-test-base.h
+ tests/integration/test-indicator.cpp
+ tests/integration/utils/dbus-pulse-volume.cpp
+ tests/integration/utils/dbus-pulse-volume.h
+ tests/integration/utils/get-volume.cpp
+ tests/integration/utils/set-volume.cpp
+ tests/service-mocks/DBusPropertiesNotifier.cpp
+ tests/service-mocks/DBusPropertiesNotifier.h
+ tests/service-mocks/accounts-mock/AccountsDefs.h
+ tests/service-mocks/accounts-mock/AccountsMock.cpp
+ tests/service-mocks/accounts-mock/AccountsMock.h
+ tests/service-mocks/accounts-mock/AccountsServiceSoundMock.cpp
+ tests/service-mocks/accounts-mock/AccountsServiceSoundMock.h
+ tests/service-mocks/accounts-mock/main.cpp
+ tests/service-mocks/media-player-mpris-mock/MediaPlayerMprisDefs.h
+ tests/service-mocks/media-player-mpris-mock/MediaPlayerMprisMock.cpp
+ tests/service-mocks/media-player-mpris-mock/MediaPlayerMprisMock.h
+ tests/service-mocks/media-player-mpris-mock/main.cpp
+ tests/service-mocks/media-player-mpris-mock/player-update.cpp
+Copyright: 2015, Canonical, Ltd.
+License: GPL-3
+
+Files: include/unity/gmenuharness/MatchResult.h
+ include/unity/gmenuharness/MatchUtils.h
+ include/unity/gmenuharness/MenuItemMatcher.h
+ include/unity/gmenuharness/MenuMatcher.h
+ src/gmenuharness/MatchResult.cpp
+ src/gmenuharness/MatchUtils.cpp
+ src/gmenuharness/MenuItemMatcher.cpp
+ src/gmenuharness/MenuMatcher.cpp
+ tests/integration/main.cpp
+Copyright: 2014, Canonical Ltd.
+License: LGPL-3
+
+Files: src/accounts-service-privacy-settings.vala
+ src/accounts-service-sound-settings.vala
+ src/accounts-service-system-sound-settings.vala
+ src/accounts-service-user.vala
+ src/greeter-broadcast.vala
+Copyright: 2014, Canonical Ltd.
+License: GPL-3
+
+Files: cmake/FindGObjectIntrospection.cmake
+ cmake/UseGObjectIntrospection.cmake
+Copyright: 2010, Pino Toscano, <pino@kde.org>
+License: BSD-3-clause
+
+Files:cmake/FindVala.cmake
+      cmake/UseVala.cmake
+Copyright: 2011, Přemysl Janouch
+License: BSD-2-clause
+
+Files: update-po.sh
+       update-pot.sh
+Copyright: 2017, Mike Gabriel <mike.gabriel@das-netzwerkteam.de>
+License: GPL-3
+
+Files: po/ayatana-indicator-sound.pot
+       po/*.po
+Copyright: 2017, THE PACKAGE'S COPYRIGHT HOLDER
+License: GPL-3
+
+Files: AUTHORS
+ CMakeLists.txt
+ ChangeLog
+ MERGE-REVIEW
+ NEWS
+ README
+ data/50-org.ayatana.AccountsService.Sound.pkla
+ data/50-org.ayatana.indicator.sound.AccountsService.pkla
+ data/CMakeLists.txt
+ data/ayatana-indicator-sound.desktop.in
+ data/ayatana-indicator-sound.service.in
+ data/org.ayatana.AccountsService.Sound.policy
+ data/org.ayatana.AccountsService.Sound.xml
+ data/org.ayatana.indicator.sound
+ data/org.ayatana.indicator.sound.AccountsService.policy
+ data/org.ayatana.indicator.sound.AccountsService.xml
+ data/org.ayatana.indicator.sound.gschema.xml
+ data/org.ayatana.sound.gschema.xml
+ include/CMakeLists.txt
+ include/unity/CMakeLists.txt
+ po/CMakeLists.txt
+ po/LINGUAS
+ po/POTFILES.in
+ po/POTFILES.skip
+ src/CMakeLists.txt
+ src/gmenuharness/CMakeLists.txt
+ tests/CMakeLists.txt
+ tests/dbus-types/CMakeLists.txt
+ tests/dbus-types/com.ubuntu.AccountsService.Sound.xml
+ tests/dbus-types/org.PulseAudio.Ext.StreamRestore1.xml
+ tests/dbus-types/org.ayatana.AccountsService.Sound.xml
+ tests/dbus-types/org.freedesktop.Accounts.xml
+ tests/dbus-types/org.freedesktop.DBus.Properties.xml
+ tests/dbus-types/org.freedesktop.Notifications.xml
+ tests/dbus-types/org.gtk.Actions.xml
+ tests/integration/CMakeLists.txt
+ tests/integration/test-sound.wav
+ tests/integration/Copy*of*test-sound.wav
+ tests/integration/touch-stream-restore.table
+ tests/manual
+ tests/service-mocks/CMakeLists.txt
+ tests/service-mocks/accounts-mock/CMakeLists.txt
+ tests/service-mocks/accounts-mock/com.ubuntu.AccountsService.Sound.Mock.xml
+ tests/service-mocks/accounts-mock/org.ayatana.AccountsService.Sound.Mock.xml
+ tests/service-mocks/accounts-mock/org.freedesktop.Accounts.Mock.xml
+ tests/service-mocks/media-player-mpris-mock/CMakeLists.txt
+ tests/service-mocks/media-player-mpris-mock/applications/testplayer1.desktop
+ tests/service-mocks/media-player-mpris-mock/applications/testplayer2.desktop
+ tests/service-mocks/media-player-mpris-mock/applications/testplayer3.desktop
+ tests/service-mocks/media-player-mpris-mock/org.mpris.MediaPlayer2.Player.xml
+ tests/service-mocks/media-player-mpris-mock/org.mpris.MediaPlayer2.xml
+ vapi/config.vapi
+ vapi/url-dispatcher.vapi
+Copyright: 2010-2016, Canonical Ltd.
+License: GPL-3
+Comment:
+ Assuming copyright holdership and license from the other code files.
 
 Files: debian/*
-Copyright: 2010 Conor Curran <conor.curran@canonical.com>, Canonical Ltd.
-License: GPL-3
+Copyright: 2010-2013, Canonical Ltd.
+           2020, Mike Gabriel <mike.gabriel@das-netzwerkteam.de>
+License: GPL-3 or LGPL-3 or BSD-2-clause or BSD-3-clause
 
 License: GPL-3
+ This package is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; version 3 of the License.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <http://www.gnu.org/licenses/>
+ .
  On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in `/usr/share/common-licenses/GPL-3'.
+ Public License version 3 can be found in "/usr/share/common-licenses/GPL-3".
+
+License: LGPL-3
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Library General Public
+ License as published by the Free Software Foundation; version 3
+ of the License.
+ .
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Library General Public License for more details.
+ .
+ You should have received a copy of the GNU Library General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ .
+ See /usr/share/common-licenses/LGPL-3 for the full license text.
+
+License: BSD-2-clause
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+ .
+     * Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+     * Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
+ .
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS''
+ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE
+ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ OF SUCH DAMAGE.
+
+License: BSD-3-clause
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ .
+ 1. Redistributions of source code must retain the copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. The name of the author may not be used to endorse or promote products
+    derived from this software without specific prior written permission.
+ .
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
