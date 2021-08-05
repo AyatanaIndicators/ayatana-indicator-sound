@@ -85,10 +85,10 @@ Files: tests/dbus-types/dbus-action-result.cpp
 Copyright: 2015, Canonical, Ltd.
 License: GPL-3
 
-Files: include/unity/gmenuharness/MatchResult.h
- include/unity/gmenuharness/MatchUtils.h
- include/unity/gmenuharness/MenuItemMatcher.h
- include/unity/gmenuharness/MenuMatcher.h
+Files: include/lomiri/gmenuharness/MatchResult.h
+ include/lomiri/gmenuharness/MatchUtils.h
+ include/lomiri/gmenuharness/MenuItemMatcher.h
+ include/lomiri/gmenuharness/MenuMatcher.h
  src/gmenuharness/MatchResult.cpp
  src/gmenuharness/MatchUtils.cpp
  src/gmenuharness/MenuItemMatcher.cpp
@@ -144,7 +144,7 @@ Files: AUTHORS
  data/org.ayatana.indicator.sound.gschema.xml
  data/org.ayatana.sound.gschema.xml
  include/CMakeLists.txt
- include/unity/CMakeLists.txt
+ include/lomiri/CMakeLists.txt
  po/CMakeLists.txt
  po/LINGUAS
  po/POTFILES.in
