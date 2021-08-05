@@ -1,10 +1,10 @@
 data/org.ayatana.indicator.sound.AccountsService.policy
 data/org.ayatana.indicator.sound.AccountsService.xml
 data/org.ayatana.indicator.sound.gschema.xml
-include/unity/gmenuharness/MatchResult.h
-include/unity/gmenuharness/MatchUtils.h
-include/unity/gmenuharness/MenuItemMatcher.h
-include/unity/gmenuharness/MenuMatcher.h
+include/lomiri/gmenuharness/MatchResult.h
+include/lomiri/gmenuharness/MatchUtils.h
+include/lomiri/gmenuharness/MenuItemMatcher.h
+include/lomiri/gmenuharness/MenuMatcher.h
 src/accounts-service-access.vala
 src/accounts-service-privacy-settings.vala
 src/accounts-service-sound-settings.vala

@@ -1,5 +1,4 @@
 /*
- * -*- Mode:Vala; indent-tabs-mode:t; tab-width:4; encoding:utf8 -*-
  * Copyright 2013 Canonical Ltd.
  * Copyright 2021 Robert Tari
  *
