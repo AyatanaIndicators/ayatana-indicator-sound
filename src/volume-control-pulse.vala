@@ -796,7 +796,7 @@ public class VolumeControlPulse : VolumeControl
             iter.next ("o", &objp);
             debug ("Found obj path %s for restore data named %s\n", objp, name);
         } catch (GLib.Error e) {
-            warning ("unable to find stream restore data for: %s. Error: %s", name, e.message);
+            debug ("unable to find stream restore data for: %s. Error: %s", name, e.message);
         }
         return objp;
     }
