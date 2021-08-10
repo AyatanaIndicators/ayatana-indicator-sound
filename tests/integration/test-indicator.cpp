@@ -32,7 +32,7 @@ class TestIndicator: public IndicatorSoundTestBase
 {
 };
 
-TEST_F(TestIndicator, PhoneCheckRootIcon)
+TEST_F(TestIndicator, DISABLED_PhoneCheckRootIcon)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -94,7 +94,7 @@ TEST_F(TestIndicator, PhoneCheckRootIcon)
     }
 }
 
-TEST_F(TestIndicator, PhoneTestExternalMicInOut)
+TEST_F(TestIndicator, DISABLED_PhoneTestExternalMicInOut)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -178,7 +178,7 @@ TEST_F(TestIndicator, PhoneTestExternalMicInOut)
         ).match());
 }
 
-TEST_F(TestIndicator, DesktopTestExternalMicInOut)
+TEST_F(TestIndicator, DISABLED_DesktopTestExternalMicInOut)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -256,7 +256,7 @@ TEST_F(TestIndicator, DesktopTestExternalMicInOut)
            ).match());
 }
 
-TEST_F(TestIndicator, PhoneChangeRoleVolume)
+TEST_F(TestIndicator, DISABLED_PhoneChangeRoleVolume)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -371,7 +371,7 @@ TEST_F(TestIndicator, PhoneChangeRoleVolume)
         ).match());
 }
 
-TEST_F(TestIndicator, PhoneBasicInitialVolume)
+TEST_F(TestIndicator, DISABLED_PhoneBasicInitialVolume)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -406,7 +406,7 @@ TEST_F(TestIndicator, PhoneBasicInitialVolume)
         ).match());
 }
 
-TEST_F(TestIndicator, PhoneAddMprisPlayer)
+TEST_F(TestIndicator, DISABLED_PhoneAddMprisPlayer)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -486,7 +486,7 @@ TEST_F(TestIndicator, PhoneAddMprisPlayer)
         ).match());
 }
 
-TEST_F(TestIndicator, DesktopBasicInitialVolume)
+TEST_F(TestIndicator, DISABLED_DesktopBasicInitialVolume)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -539,7 +539,7 @@ TEST_F(TestIndicator, DesktopBasicInitialVolume)
         ).match());
 }
 
-TEST_F(TestIndicator, DesktopAddMprisPlayer)
+TEST_F(TestIndicator, DISABLED_DesktopAddMprisPlayer)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -628,7 +628,7 @@ TEST_F(TestIndicator, DesktopAddMprisPlayer)
             ).match());
 }
 
-TEST_F(TestIndicator, DesktopMprisPlayersPlaybackControls)
+TEST_F(TestIndicator, DISABLED_DesktopMprisPlayersPlaybackControls)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -1218,7 +1218,7 @@ TEST_F(TestIndicator, DesktopMprisPlayersPlaybackControls)
 
 }
 
-TEST_F(TestIndicator, DesktopMprisPlayerButtonsState)
+TEST_F(TestIndicator, DISABLED_DesktopMprisPlayerButtonsState)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -1387,7 +1387,7 @@ TEST_F(TestIndicator, DesktopMprisPlayerButtonsState)
         ).match());
 }
 
-TEST_F(TestIndicator, DesktopChangeRoleVolume)
+TEST_F(TestIndicator, DISABLED_DesktopChangeRoleVolume)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -1493,7 +1493,7 @@ TEST_F(TestIndicator, DesktopChangeRoleVolume)
         ).match());
 }
 
-TEST_F(TestIndicator, PhoneNotificationVolume)
+TEST_F(TestIndicator, DISABLED_PhoneNotificationVolume)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -1559,7 +1559,7 @@ TEST_F(TestIndicator, PhoneNotificationVolume)
     checkVolumeNotification(0.5, "Speakers", false, notificationsSpy.at(1));
 }
 
-TEST_F(TestIndicator, PhoneNotificationWarningVolume)
+TEST_F(TestIndicator, DISABLED_PhoneNotificationWarningVolume)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -1757,7 +1757,7 @@ TEST_F(TestIndicator, PhoneNotificationWarningVolume)
     checkVolumeNotification(1.0, "Headphones", true, notificationsSpy.at(3));
 }
 
-TEST_F(TestIndicator, PhoneNotificationWarningVolumeAlertMode)
+TEST_F(TestIndicator, DISABLED_PhoneNotificationWarningVolumeAlertMode)
 {
     double INITIAL_VOLUME = 0.0;
 
@@ -1814,22 +1814,22 @@ TEST_F(TestIndicator, PhoneNotificationWarningVolumeAlertMode)
     notificationsSpy.clear();
 }
 
-TEST_F(TestIndicator, PhoneNotificationHeadphoneSpeakerWiredLabels)
+TEST_F(TestIndicator, DISABLED_PhoneNotificationHeadphoneSpeakerWiredLabels)
 {
     checkPortDevicesLabels(WIRED, WIRED);
 }
 
-TEST_F(TestIndicator, PhoneNotificationHeadphoneSpeakerBluetoothLabels)
+TEST_F(TestIndicator, DISABLED_PhoneNotificationHeadphoneSpeakerBluetoothLabels)
 {
     checkPortDevicesLabels(BLUETOOTH, BLUETOOTH);
 }
 
-TEST_F(TestIndicator, PhoneNotificationHeadphoneSpeakerUSBLabels)
+TEST_F(TestIndicator, DISABLED_PhoneNotificationHeadphoneSpeakerUSBLabels)
 {
     checkPortDevicesLabels(USB, USB);
 }
 
-TEST_F(TestIndicator, PhoneNotificationHeadphoneSpeakerHDMILabels)
+TEST_F(TestIndicator, DISABLED_PhoneNotificationHeadphoneSpeakerHDMILabels)
 {
     checkPortDevicesLabels(HDMI, HDMI);
 }

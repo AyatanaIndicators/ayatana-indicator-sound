@@ -64,7 +64,7 @@ protected:
 };
 
 
-TEST_F(IndicatorTest, PhoneMenu) {
+TEST_F(IndicatorTest, DISABLED_PhoneMenu) {
     setMenu("/org/ayatana/indicator/sound/phone");
 
     EXPECT_EVENTUALLY_MENU_ATTRIB(std::vector<int>({0}), "action", "indicator.root");
@@ -79,7 +79,7 @@ TEST_F(IndicatorTest, PhoneMenu) {
     EXPECT_MENU_ATTRIB(std::vector<int>({0, 1}), "label", "Sound Settings…");
 }
 
-TEST_F(IndicatorTest, DesktopMenu) {
+TEST_F(IndicatorTest, DISABLED_DesktopMenu) {
     setMenu("/org/ayatana/indicator/sound/desktop");
 
     EXPECT_MENU_ATTRIB({0}, "action", "indicator.root");
@@ -94,7 +94,7 @@ TEST_F(IndicatorTest, DesktopMenu) {
     EXPECT_MENU_ATTRIB(std::vector<int>({0, 1}), "label", "Sound Settings…");
 }
 
-TEST_F(IndicatorTest, BaseActions) {
+TEST_F(IndicatorTest, DISABLED_BaseActions) {
     setActions("/org/ayatana/indicator/sound");
 
     ASSERT_ACTION_EXISTS("root");
