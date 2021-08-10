@@ -75,7 +75,7 @@ class VolumeControlTest : public ::testing::Test
         }
 };
 
-TEST_F(VolumeControlTest, BasicObject) {
+TEST_F(VolumeControlTest, DISABLED_BasicObject) {
     auto options = options_mock_new();
     auto pgloop = pa_glib_mainloop_new(NULL);
     auto accounts_service_access = accounts_service_access_new();

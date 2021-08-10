@@ -282,7 +282,7 @@ TEST_F(NotificationsTest, VolumeChanges) {
     ASSERT_EQ(0, notev.size());
 }
 
-TEST_F(NotificationsTest, StreamChanges) {
+TEST_F(NotificationsTest, DISABLED_StreamChanges) {
     auto options = optionsMock();
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
@@ -323,7 +323,7 @@ TEST_F(NotificationsTest, StreamChanges) {
     EXPECT_GVARIANT_EQ("@i 65", notev[0].hints["value"]);
 }
 
-TEST_F(NotificationsTest, IconTesting) {
+TEST_F(NotificationsTest, DISABLED_IconTesting) {
     auto options = optionsMock();
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
@@ -360,7 +360,7 @@ TEST_F(NotificationsTest, IconTesting) {
     EXPECT_EQ("audio-volume-high",   notev[10].app_icon);
 }
 
-TEST_F(NotificationsTest, ServerRestart) {
+TEST_F(NotificationsTest, DISABLED_ServerRestart) {
     auto options = optionsMock();
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
@@ -410,7 +410,7 @@ TEST_F(NotificationsTest, ServerRestart) {
     ASSERT_EQ(1, notev.size());
 }
 
-TEST_F(NotificationsTest, HighVolume) {
+TEST_F(NotificationsTest, DISABLED_HighVolume) {
     auto options = optionsMock();
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
@@ -455,7 +455,7 @@ TEST_F(NotificationsTest, HighVolume) {
     EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-value-bar-tint"]);
 }
 
-TEST_F(NotificationsTest, MenuHide) {
+TEST_F(NotificationsTest, DISABLED_MenuHide) {
     auto options = optionsMock();
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
@@ -488,7 +488,7 @@ TEST_F(NotificationsTest, MenuHide) {
     EXPECT_EQ(1, notev.size());
 }
 
-TEST_F(NotificationsTest, ExtendendVolumeNotification) {
+TEST_F(NotificationsTest, DISABLED_ExtendendVolumeNotification) {
     auto options = optionsMock();
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
@@ -533,7 +533,7 @@ TEST_F(NotificationsTest, ExtendendVolumeNotification) {
     EXPECT_GVARIANT_EQ("@i 100", notev[0].hints["value"]);
 }
 
-TEST_F(NotificationsTest, TriggerWarning) {
+TEST_F(NotificationsTest, DISABLED_TriggerWarning) {
 
     // Tests all the conditions needed to trigger a volume warning.
     // There are many possible combinations, so this test is slow. :P
