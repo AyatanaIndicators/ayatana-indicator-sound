@@ -20,6 +20,7 @@
 //#include <config.h>
 
 #include <QCoreApplication>
+#include <QTemporaryDir>
 #include <QTimer>
 #include <gtest/gtest.h>
 
@@ -43,6 +44,22 @@ int main(int argc, char **argv)
 {
     qputenv("LANG", "C.UTF-8");
     unsetenv("LC_ALL");
+
+    /*
+     * A couple of things rely on having a HOME directory:
+     *   - The indicator itself relies on having a writable gsettings/dconf
+     *     database, and the test relies on the functionality it provides.
+     *   - The test starts Pulseaudio, which requires both a runtime and a
+     *     state directory, both of which has a failback to the HOME.
+     * Provide a temporary HOME for the test and its child, which both prevents
+     * polluting the building user's HOME and allow the test to run where
+     * HOME=/nonexistent (i.e. autobuilder).
+     */
+    QTemporaryDir tmpHome;
+    if (!tmpHome.isValid())
+        qFatal("Cannot create a temporary HOME for the test.");
+
+    setenv("HOME", tmpHome.path().toLocal8Bit().constData(), true);
 
     QCoreApplication application(argc, argv);
     DBusMock::registerMetaTypes();
