@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-12 11:46+0100\n"
+"POT-Creation-Date: 2021-08-12 07:21+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -155,7 +155,7 @@ msgid ""
 msgstr ""
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
-#: ../src/service.vala:329 ../src/service.vala:332 ../src/sound-menu.vala:59
+#: ../src/service.vala:331 ../src/service.vala:334 ../src/sound-menu.vala:59
 #: ../src/sound-menu.vala:253 ../src/warn-notification.vala:31
 msgid "Volume"
 msgstr ""
@@ -192,24 +192,24 @@ msgstr ""
 msgid "HDMI headphones"
 msgstr ""
 
-#: ../src/service.vala:293
+#: ../src/service.vala:295
 msgid "Missing application"
 msgstr ""
 
-#: ../src/service.vala:293
+#: ../src/service.vala:295
 #, c-format
 msgid "Could not find the '%s' application - please make sure it is installed."
 msgstr ""
 
-#: ../src/service.vala:326
+#: ../src/service.vala:328
 msgid "Volume (muted)"
 msgstr ""
 
-#: ../src/service.vala:329
+#: ../src/service.vala:331
 msgid "silent"
 msgstr ""
 
-#: ../src/service.vala:337
+#: ../src/service.vala:339
 msgid "Sound"
 msgstr ""
 
@@ -230,7 +230,7 @@ msgid "Microphone Volume"
 msgstr ""
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
-#: ../src/sound-menu.vala:148 ../src/warn-notification.vala:32
+#: ../src/sound-menu.vala:148
 msgid "High volume can damage your hearing."
 msgstr ""
 
@@ -264,6 +264,12 @@ msgstr ""
 
 #: ../src/sound-menu.vala:449
 msgid "Choose Playlist"
+msgstr ""
+
+#: ../src/warn-notification.vala:32
+msgid ""
+"Allow volume above safe level?\n"
+"High volume can damage your hearing."
 msgstr ""
 
 #: ../src/warn-notification.vala:49

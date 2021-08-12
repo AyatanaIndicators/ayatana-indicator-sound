@@ -7,17 +7,35 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-28 20:28+0200\n"
+"POT-Creation-Date: 2021-08-12 07:21+0200\n"
 "PO-Revision-Date: 2020-07-29 08:41+0000\n"
 "Last-Translator: Kristjan Räts <kristjanrats@gmail.com>\n"
-"Language-Team: Estonian <https://hosted.weblate.org/projects/"
-"ayatana-indicators/sound-applet/et/>\n"
+"Language-Team: Estonian <https://hosted.weblate.org/projects/ayatana-"
+"indicators/sound-applet/et/>\n"
 "Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 4.2-dev\n"
+
+#: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
+msgid "Set properties of own user"
+msgstr "Määra oma konto sätted"
+
+#: ../data/org.ayatana.indicator.sound.AccountsService.policy:6
+msgid "Authentication is required to set one's own indicator sound properties."
+msgstr "Autentimine on vajalik oma indikaatori heli sätete määramiseks."
+
+#: ../data/org.ayatana.indicator.sound.AccountsService.policy:15
+msgid "Set properties of any user"
+msgstr "Määra kõigi kasutajate sätted"
+
+#: ../data/org.ayatana.indicator.sound.AccountsService.policy:16
+msgid ""
+"Authentication is required to set another user's indicator sound properties."
+msgstr ""
+"Teise kasutaja indikaatorhelide sätete määramiseks on vajalik autentimine."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -90,10 +108,10 @@ msgid ""
 msgstr ""
 "Kui see on seadmes lubatud, siis kuvatakse kasutajale kinnitusdialoog, kui "
 "(a) midagi ühendatakse kõrvaklapipessa (st. puudub kõlarite helitugevuse "
-"hoiatus) JA (b) meedia mängib (st. puudub helina helitugevuse hoiatus) JA (c)"
-" kasutaja proovib seada helitugevuse kõrgemaks kui warning-volume-decibels "
-"JA (d) kasutaja ei ole andnud nõusolekut viimasele warning-volume-approval-"
-"ttl sekundile."
+"hoiatus) JA (b) meedia mängib (st. puudub helina helitugevuse hoiatus) JA "
+"(c) kasutaja proovib seada helitugevuse kõrgemaks kui warning-volume-"
+"decibels JA (d) kasutaja ei ole andnud nõusolekut viimasele warning-volume-"
+"approval-ttl sekundile."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
@@ -181,9 +199,8 @@ msgstr ""
 "Vaikimisi väärtus (11) vastab PulseAudio sättele PA_VOLUME_UI_MAX."
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
-#: ../src/service.vala:302 ../src/service.vala:305 ../src/sound-menu.vala:57
-#: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
-#, c-format
+#: ../src/service.vala:331 ../src/service.vala:334 ../src/sound-menu.vala:59
+#: ../src/sound-menu.vala:253 ../src/warn-notification.vala:31
 msgid "Volume"
 msgstr "Helitugevus"
 
@@ -219,70 +236,86 @@ msgstr "HDMI kõlar"
 msgid "HDMI headphones"
 msgstr "HDMI kõrvaklapid"
 
-#: ../src/service.vala:299
+#: ../src/service.vala:295
+msgid "Missing application"
+msgstr ""
+
+#: ../src/service.vala:295
+#, c-format
+msgid "Could not find the '%s' application - please make sure it is installed."
+msgstr ""
+
+#: ../src/service.vala:328
 msgid "Volume (muted)"
 msgstr "Helitugevus (summutatud)"
 
-#: ../src/service.vala:302
+#: ../src/service.vala:331
 msgid "silent"
 msgstr "hääletu"
 
-#: ../src/service.vala:310
+#: ../src/service.vala:339
 msgid "Sound"
 msgstr "Heli"
 
-#: ../src/sound-menu.vala:50
+#: ../src/sound-menu.vala:52
 msgid "Mute"
 msgstr "Summuta"
 
-#: ../src/sound-menu.vala:52
+#: ../src/sound-menu.vala:54
 msgid "Silent Mode"
 msgstr "Vaikne režiim"
 
-#: ../src/sound-menu.vala:66
+#: ../src/sound-menu.vala:68
 msgid "Sound Settings…"
 msgstr "Heli seaded…"
 
-#: ../src/sound-menu.vala:123
+#: ../src/sound-menu.vala:125
 msgid "Microphone Volume"
 msgstr "Mikrofoni helitugevus"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
-#: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
+#: ../src/sound-menu.vala:148
 msgid "High volume can damage your hearing."
 msgstr "Kõrge helutugevus võib kahjustada kuulmist."
 
-#: ../src/sound-menu.vala:254
+#: ../src/sound-menu.vala:256
 msgid "Volume (Headphones)"
 msgstr "Helitugevus (kõrvaklapid)"
 
-#: ../src/sound-menu.vala:257
+#: ../src/sound-menu.vala:259
 msgid "Volume (Bluetooth)"
 msgstr "Helitugevus (Bluetooth)"
 
-#: ../src/sound-menu.vala:260
+#: ../src/sound-menu.vala:262
 msgid "Volume (Usb)"
 msgstr "Helitugevus (USB)"
 
-#: ../src/sound-menu.vala:263
+#: ../src/sound-menu.vala:265
 msgid "Volume (HDMI)"
 msgstr "Helitugevus (HDMI)"
 
-#: ../src/sound-menu.vala:266
+#: ../src/sound-menu.vala:268
 msgid "Volume (Bluetooth headphones)"
 msgstr "Helitugevus (Bluetooth-kõrvaklapid)"
 
-#: ../src/sound-menu.vala:269
+#: ../src/sound-menu.vala:271
 msgid "Volume (Usb headphones)"
 msgstr "Helitugevus (USB kõrvaklapid)"
 
-#: ../src/sound-menu.vala:272
+#: ../src/sound-menu.vala:274
 msgid "Volume (HDMI headphones)"
 msgstr "Helitugevus (HDMI-kõrvaklapid)"
 
-#: ../src/sound-menu.vala:445
+#: ../src/sound-menu.vala:449
 msgid "Choose Playlist"
 msgstr "Vali esitusloend"
+
+#: ../src/warn-notification.vala:32
+#, fuzzy
+msgid ""
+"Allow volume above safe level?\n"
+"High volume can damage your hearing."
+msgstr "Kõrge helutugevus võib kahjustada kuulmist."
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
@@ -291,19 +324,3 @@ msgstr "ÕK"
 #: ../src/warn-notification.vala:52
 msgid "Cancel"
 msgstr "Loobu"
-
-#~ msgid "Set properties of own user"
-#~ msgstr "Määra oma konto sätted"
-
-#~ msgid ""
-#~ "Authentication is required to set one's own indicator sound properties."
-#~ msgstr "Autentimine on vajalik oma indikaatori heli sätete määramiseks."
-
-#~ msgid "Set properties of any user"
-#~ msgstr "Määra kõigi kasutajate sätted"
-
-#~ msgid ""
-#~ "Authentication is required to set another user's indicator sound "
-#~ "properties."
-#~ msgstr ""
-#~ "Teise kasutaja indikaatorhelide sätete määramiseks on vajalik autentimine."

@@ -7,17 +7,34 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-28 20:28+0200\n"
+"POT-Creation-Date: 2021-08-12 07:22+0200\n"
 "PO-Revision-Date: 2020-06-15 06:41+0000\n"
 "Last-Translator: MarongHappy <daemul72@gmail.com>\n"
-"Language-Team: Korean <https://hosted.weblate.org/projects/"
-"ayatana-indicators/sound-applet/ko/>\n"
+"Language-Team: Korean <https://hosted.weblate.org/projects/ayatana-"
+"indicators/sound-applet/ko/>\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Weblate 4.1-dev\n"
+
+#: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
+msgid "Set properties of own user"
+msgstr ""
+
+#: ../data/org.ayatana.indicator.sound.AccountsService.policy:6
+msgid "Authentication is required to set one's own indicator sound properties."
+msgstr ""
+
+#: ../data/org.ayatana.indicator.sound.AccountsService.policy:15
+msgid "Set properties of any user"
+msgstr ""
+
+#: ../data/org.ayatana.indicator.sound.AccountsService.policy:16
+msgid ""
+"Authentication is required to set another user's indicator sound properties."
+msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -30,8 +47,9 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
-"MPRIS2 규격을 준수하는 각 미디어 재생기가 메뉴에 자동으로 나타납니다. 이 배열에는 사운드 메뉴에 포함하지 않을 응용 프로그램의 "
-"데스크톱 파일 이름(최소 .desktop 접미사)이 포함되어야 합니다."
+"MPRIS2 규격을 준수하는 각 미디어 재생기가 메뉴에 자동으로 나타납니다. 이 배열"
+"에는 사운드 메뉴에 포함하지 않을 응용 프로그램의 데스크톱 파일 이름(최소 ."
+"desktop 접미사)이 포함되어야 합니다."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
@@ -46,8 +64,10 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
-"MPRIS2 규격을 준수하는 각 미디어 재생기가 메뉴에 자동으로 나타납니다. 이 배열에는 메뉴에 나타나는 응용프로그램의 데스크톱 파일 "
-"이름(최소 .데스크톱 접미사)이 포함되어야 합니다. 이렇게 하면 메뉴가 오프라인 응용프로그램을 기억하고 표시할 수 있습니다."
+"MPRIS2 규격을 준수하는 각 미디어 재생기가 메뉴에 자동으로 나타납니다. 이 배열"
+"에는 메뉴에 나타나는 응용프로그램의 데스크톱 파일 이름(최소 .데스크톱 접미사)"
+"이 포함되어야 합니다. 이렇게 하면 메뉴가 오프라인 응용프로그램을 기억하고 표"
+"시할 수 있습니다."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
@@ -84,9 +104,11 @@ msgid ""
 "volume-decibels AND (d) the user has not indicated approval in the last "
 "warning-volume-approval-ttl seconds."
 msgstr ""
-"장치에서 활성화된 경우 (a) 헤드폰 잭에 연결된 상태(스피커 음량에 대한 경고 없음) 및 (b) 미디어가 재생 중(즉, 벨소리 음량에 "
-"대한 경고 없음) 및 (c) 사용자가 승인 여부를 지정하지 않은 경고 음량 데시벨(d)보다 높게 음량을 설정하려고 하면 확인 대화 상자가 "
-"사용자에게 표시됩니다.마지막 경고-음량-승인-ttl초 내에 완료됩니다."
+"장치에서 활성화된 경우 (a) 헤드폰 잭에 연결된 상태(스피커 음량에 대한 경고 없"
+"음) 및 (b) 미디어가 재생 중(즉, 벨소리 음량에 대한 경고 없음) 및 (c) 사용자"
+"가 승인 여부를 지정하지 않은 경고 음량 데시벨(d)보다 높게 음량을 설정하려고 "
+"하면 확인 대화 상자가 사용자에게 표시됩니다.마지막 경고-음량-승인-ttl초 내에 "
+"완료됩니다."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
@@ -101,10 +123,11 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
-"'경고-음량-사용가능' 설명에서 논의된 확인 대화 상자에 대한 사용자의 승인을 기억하는 기간.\n"
+"'경고-음량-사용가능' 설명에서 논의된 확인 대화 상자에 대한 사용자의 승인을 기"
+"억하는 기간.\n"
 "\n"
-"기본값(72,000초)은 EU 표준 EN 60950-1/Al2에서 제시한 20시간에 해당합니다: \"인정확인은 누적 청취시간 20시간마다 "
-"한 번 이상 반복할 필요가 없습니다.\""
+"기본값(72,000초)은 EU 표준 EN 60950-1/Al2에서 제시한 20시간에 해당합니다: "
+"\"인정확인은 누적 청취시간 20시간마다 한 번 이상 반복할 필요가 없습니다.\""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
@@ -114,7 +137,9 @@ msgstr "높은 음량 경고를 유발하는 음량 수준."
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
-msgstr "높은 음량 경고를 유발하는 음량 수준. 자세한 내용은 경고 음량 사용 가능을 참조하십시오."
+msgstr ""
+"높은 음량 경고를 유발하는 음량 수준. 자세한 내용은 경고 음량 사용 가능을 참조"
+"하십시오."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
@@ -131,10 +156,11 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
-"com.ubuntu.sound의 '허용-증폭-음량' 설정이 비활성화되었을 때의 최대 음량입니다.\n"
+"com.ubuntu.sound의 '허용-증폭-음량' 설정이 비활성화되었을 때의 최대 음량입니"
+"다.\n"
 "\n"
-"EU 표준 EN 60950-1/Al2를 준수하려면 이 값을 헤드폰 사운드 출력이 100dBA를 초과하거나 전기 출력이 150mV를 "
-"초과하는 dB로 설정해서는 안 됩니다.\n"
+"EU 표준 EN 60950-1/Al2를 준수하려면 이 값을 헤드폰 사운드 출력이 100dBA를 초"
+"과하거나 전기 출력이 150mV를 초과하는 dB로 설정해서는 안 됩니다.\n"
 "\n"
 "기본값(0)은 PulseAudio의 PA_VOLUM_NORM에 해당합니다."
 
@@ -142,7 +168,9 @@ msgstr ""
 msgid ""
 "Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
 "setting is enabled."
-msgstr "com.ubuntu.sound의 '허용-증폭-음량' 설정이 활성화된 경우 사용할 출력 음량입니다."
+msgstr ""
+"com.ubuntu.sound의 '허용-증폭-음량' 설정이 활성화된 경우 사용할 출력 음량입니"
+"다."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
@@ -157,15 +185,14 @@ msgid ""
 msgstr ""
 "com.ubuntu.sound의 '허용-증폭-음량' 설정이 활성화된 경우의 최대 음량입니다.\n"
 "\n"
-"EU 표준 EN 60950-1/Al2를 준수하려면 이 값을 헤드폰 사운드 출력이 100dBA를 초과하거나 전기 출력이 150mV를 "
-"초과하는 dB로 설정해서는 안 됩니다.\n"
+"EU 표준 EN 60950-1/Al2를 준수하려면 이 값을 헤드폰 사운드 출력이 100dBA를 초"
+"과하거나 전기 출력이 150mV를 초과하는 dB로 설정해서는 안 됩니다.\n"
 "\n"
 "기본값(11)은 PulseAudio의 PA_VOLUIL_UI_MAX에 해당합니다."
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
-#: ../src/service.vala:302 ../src/service.vala:305 ../src/sound-menu.vala:57
-#: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
-#, c-format
+#: ../src/service.vala:331 ../src/service.vala:334 ../src/sound-menu.vala:59
+#: ../src/sound-menu.vala:253 ../src/warn-notification.vala:31
 msgid "Volume"
 msgstr "음량"
 
@@ -201,70 +228,86 @@ msgstr "HDMI 스피커"
 msgid "HDMI headphones"
 msgstr "HDMI 헤드폰"
 
-#: ../src/service.vala:299
+#: ../src/service.vala:295
+msgid "Missing application"
+msgstr ""
+
+#: ../src/service.vala:295
+#, c-format
+msgid "Could not find the '%s' application - please make sure it is installed."
+msgstr ""
+
+#: ../src/service.vala:328
 msgid "Volume (muted)"
 msgstr "음량 (음소거됨)"
 
-#: ../src/service.vala:302
+#: ../src/service.vala:331
 msgid "silent"
 msgstr "무음"
 
-#: ../src/service.vala:310
+#: ../src/service.vala:339
 msgid "Sound"
 msgstr "사운드"
 
-#: ../src/sound-menu.vala:50
+#: ../src/sound-menu.vala:52
 msgid "Mute"
 msgstr "음소거"
 
-#: ../src/sound-menu.vala:52
+#: ../src/sound-menu.vala:54
 msgid "Silent Mode"
 msgstr "무음 모드"
 
-#: ../src/sound-menu.vala:66
+#: ../src/sound-menu.vala:68
 msgid "Sound Settings…"
 msgstr "사운드 설정…"
 
-#: ../src/sound-menu.vala:123
+#: ../src/sound-menu.vala:125
 msgid "Microphone Volume"
 msgstr "마이크 음량"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
-#: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
+#: ../src/sound-menu.vala:148
 msgid "High volume can damage your hearing."
 msgstr "음량이 높으면 청력이 손상될 수 있습니다."
 
-#: ../src/sound-menu.vala:254
+#: ../src/sound-menu.vala:256
 msgid "Volume (Headphones)"
 msgstr "음량 (헤드폰)"
 
-#: ../src/sound-menu.vala:257
+#: ../src/sound-menu.vala:259
 msgid "Volume (Bluetooth)"
 msgstr "음량 (블루투스)"
 
-#: ../src/sound-menu.vala:260
+#: ../src/sound-menu.vala:262
 msgid "Volume (Usb)"
 msgstr "음량 (Usb)"
 
-#: ../src/sound-menu.vala:263
+#: ../src/sound-menu.vala:265
 msgid "Volume (HDMI)"
 msgstr "음량 (HDMI)"
 
-#: ../src/sound-menu.vala:266
+#: ../src/sound-menu.vala:268
 msgid "Volume (Bluetooth headphones)"
 msgstr "음량 (블루투스 헤드폰)"
 
-#: ../src/sound-menu.vala:269
+#: ../src/sound-menu.vala:271
 msgid "Volume (Usb headphones)"
 msgstr "음량 (Usb 헤드폰)"
 
-#: ../src/sound-menu.vala:272
+#: ../src/sound-menu.vala:274
 msgid "Volume (HDMI headphones)"
 msgstr "음량 (HDMI 헤드폰)"
 
-#: ../src/sound-menu.vala:445
+#: ../src/sound-menu.vala:449
 msgid "Choose Playlist"
 msgstr "재생목록 선택하기"
+
+#: ../src/warn-notification.vala:32
+#, fuzzy
+msgid ""
+"Allow volume above safe level?\n"
+"High volume can damage your hearing."
+msgstr "음량이 높으면 청력이 손상될 수 있습니다."
 
 #: ../src/warn-notification.vala:49
 msgid "OK"

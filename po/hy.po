@@ -7,17 +7,34 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-28 20:28+0200\n"
+"POT-Creation-Date: 2021-08-12 07:21+0200\n"
 "PO-Revision-Date: 2020-04-02 21:09+0000\n"
 "Last-Translator: Davit Mayilyan <davit.mayilyan@protonmail.ch>\n"
-"Language-Team: Armenian <https://hosted.weblate.org/projects/"
-"ayatana-indicators/sound-applet/hy/>\n"
+"Language-Team: Armenian <https://hosted.weblate.org/projects/ayatana-"
+"indicators/sound-applet/hy/>\n"
 "Language: hy\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
 "X-Generator: Weblate 4.0-dev\n"
+
+#: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
+msgid "Set properties of own user"
+msgstr ""
+
+#: ../data/org.ayatana.indicator.sound.AccountsService.policy:6
+msgid "Authentication is required to set one's own indicator sound properties."
+msgstr ""
+
+#: ../data/org.ayatana.indicator.sound.AccountsService.policy:15
+msgid "Set properties of any user"
+msgstr ""
+
+#: ../data/org.ayatana.indicator.sound.AccountsService.policy:16
+msgid ""
+"Authentication is required to set another user's indicator sound properties."
+msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -140,9 +157,8 @@ msgid ""
 msgstr ""
 
 #: ../src/info-notification.vala:25 ../src/info-notification.vala:42
-#: ../src/service.vala:302 ../src/service.vala:305 ../src/sound-menu.vala:57
-#: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
-#, c-format
+#: ../src/service.vala:331 ../src/service.vala:334 ../src/sound-menu.vala:59
+#: ../src/sound-menu.vala:253 ../src/warn-notification.vala:31
 msgid "Volume"
 msgstr "Բարձրություն"
 
@@ -178,69 +194,84 @@ msgstr ""
 msgid "HDMI headphones"
 msgstr ""
 
-#: ../src/service.vala:299
+#: ../src/service.vala:295
+msgid "Missing application"
+msgstr ""
+
+#: ../src/service.vala:295
+#, c-format
+msgid "Could not find the '%s' application - please make sure it is installed."
+msgstr ""
+
+#: ../src/service.vala:328
 msgid "Volume (muted)"
 msgstr ""
 
-#: ../src/service.vala:302
+#: ../src/service.vala:331
 msgid "silent"
 msgstr "լուռ"
 
-#: ../src/service.vala:310
+#: ../src/service.vala:339
 msgid "Sound"
 msgstr "Ձայն"
 
-#: ../src/sound-menu.vala:50
+#: ../src/sound-menu.vala:52
 msgid "Mute"
 msgstr "Լռեցնել"
 
-#: ../src/sound-menu.vala:52
+#: ../src/sound-menu.vala:54
 msgid "Silent Mode"
 msgstr ""
 
-#: ../src/sound-menu.vala:66
+#: ../src/sound-menu.vala:68
 msgid "Sound Settings…"
 msgstr ""
 
-#: ../src/sound-menu.vala:123
+#: ../src/sound-menu.vala:125
 msgid "Microphone Volume"
 msgstr ""
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
-#: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
+#: ../src/sound-menu.vala:148
 msgid "High volume can damage your hearing."
 msgstr ""
 
-#: ../src/sound-menu.vala:254
+#: ../src/sound-menu.vala:256
 msgid "Volume (Headphones)"
 msgstr ""
 
-#: ../src/sound-menu.vala:257
+#: ../src/sound-menu.vala:259
 msgid "Volume (Bluetooth)"
 msgstr ""
 
-#: ../src/sound-menu.vala:260
+#: ../src/sound-menu.vala:262
 msgid "Volume (Usb)"
 msgstr ""
 
-#: ../src/sound-menu.vala:263
+#: ../src/sound-menu.vala:265
 msgid "Volume (HDMI)"
 msgstr ""
 
-#: ../src/sound-menu.vala:266
+#: ../src/sound-menu.vala:268
 msgid "Volume (Bluetooth headphones)"
 msgstr ""
 
-#: ../src/sound-menu.vala:269
+#: ../src/sound-menu.vala:271
 msgid "Volume (Usb headphones)"
 msgstr ""
 
-#: ../src/sound-menu.vala:272
+#: ../src/sound-menu.vala:274
 msgid "Volume (HDMI headphones)"
 msgstr ""
 
-#: ../src/sound-menu.vala:445
+#: ../src/sound-menu.vala:449
 msgid "Choose Playlist"
+msgstr ""
+
+#: ../src/warn-notification.vala:32
+msgid ""
+"Allow volume above safe level?\n"
+"High volume can damage your hearing."
 msgstr ""
 
 #: ../src/warn-notification.vala:49
