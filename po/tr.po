@@ -8,33 +8,37 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-08-12 07:22+0200\n"
-"PO-Revision-Date: 2020-12-04 18:29+0000\n"
+"PO-Revision-Date: 2021-08-13 13:34+0000\n"
 "Last-Translator: Oğuz Ersen <oguzersen@protonmail.com>\n"
-"Language-Team: Turkish <https://hosted.weblate.org/projects/ayatana-"
-"indicators/sound-applet/tr/>\n"
+"Language-Team: Turkish <https://hosted.weblate.org/projects/"
+"ayatana-indicators/sound-applet/tr/>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 4.4-dev\n"
+"X-Generator: Weblate 4.8-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
-msgstr ""
+msgstr "Kendi kullanıcının özelliklerini ayarla"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:6
 msgid "Authentication is required to set one's own indicator sound properties."
 msgstr ""
+"Kişinin kendi gösterge ses özelliklerini ayarlaması için kimlik doğrulaması "
+"gereklidir."
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:15
 msgid "Set properties of any user"
-msgstr ""
+msgstr "Herhangi bir kullanıcının özelliklerini ayarla"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:16
 msgid ""
 "Authentication is required to set another user's indicator sound properties."
 msgstr ""
+"Başka bir kullanıcının gösterge ses özelliklerini ayarlamak için kimlik "
+"doğrulama gereklidir."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -242,12 +246,12 @@ msgstr "HDMI kulaklık"
 
 #: ../src/service.vala:295
 msgid "Missing application"
-msgstr ""
+msgstr "Eksik uygulama"
 
 #: ../src/service.vala:295
 #, c-format
 msgid "Could not find the '%s' application - please make sure it is installed."
-msgstr ""
+msgstr "'%s' uygulaması bulunamadı - lütfen kurulu olduğundan emin olun."
 
 #: ../src/service.vala:328
 msgid "Volume (muted)"
@@ -315,11 +319,12 @@ msgid "Choose Playlist"
 msgstr "Oynatma Listesi Seç"
 
 #: ../src/warn-notification.vala:32
-#, fuzzy
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
-msgstr "Yüksek ses seviyesi işitme duyunuza zarar verebilir."
+msgstr ""
+"Sesin güvenli seviyenin üzerinde olmasına izin verilsin mi?\n"
+"Yüksek ses seviyesi işitme duyunuza zarar verebilir."
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
