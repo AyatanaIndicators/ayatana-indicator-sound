@@ -1,5 +1,6 @@
 /*
  * Copyright © 2015-2016 Canonical Ltd.
+ * Copyright 2021 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +17,7 @@
  * Authors:
  *      Ted Gould <ted@canonical.com>
  *      Charles Kerr <charles.kerr@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 
 #include <algorithm>
@@ -33,6 +35,7 @@
 extern "C" {
 #include "indicator-sound-service.h"
 #include "vala-mocks.h"
+#include <ayatana/common/utils.h>
 }
 
 class NotificationsTest : public ::testing::Test
@@ -282,7 +285,13 @@ TEST_F(NotificationsTest, VolumeChanges) {
     ASSERT_EQ(0, notev.size());
 }
 
-TEST_F(NotificationsTest, DISABLED_StreamChanges) {
+TEST_F(NotificationsTest, StreamChanges) {
+
+    if (!ayatana_common_utils_is_lomiri())
+    {
+        return;
+    }
+
     auto options = optionsMock();
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
@@ -323,7 +332,13 @@ TEST_F(NotificationsTest, DISABLED_StreamChanges) {
     EXPECT_GVARIANT_EQ("@i 65", notev[0].hints["value"]);
 }
 
-TEST_F(NotificationsTest, DISABLED_IconTesting) {
+TEST_F(NotificationsTest, IconTesting) {
+
+    if (!ayatana_common_utils_is_lomiri())
+    {
+        return;
+    }
+
     auto options = optionsMock();
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
@@ -360,7 +375,13 @@ TEST_F(NotificationsTest, DISABLED_IconTesting) {
     EXPECT_EQ("audio-volume-high",   notev[10].app_icon);
 }
 
-TEST_F(NotificationsTest, DISABLED_ServerRestart) {
+TEST_F(NotificationsTest, ServerRestart) {
+
+    if (!ayatana_common_utils_is_lomiri())
+    {
+        return;
+    }
+
     auto options = optionsMock();
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
@@ -410,7 +431,13 @@ TEST_F(NotificationsTest, DISABLED_ServerRestart) {
     ASSERT_EQ(1, notev.size());
 }
 
-TEST_F(NotificationsTest, DISABLED_HighVolume) {
+TEST_F(NotificationsTest, HighVolume) {
+
+    if (!ayatana_common_utils_is_lomiri())
+    {
+        return;
+    }
+
     auto options = optionsMock();
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
@@ -455,7 +482,13 @@ TEST_F(NotificationsTest, DISABLED_HighVolume) {
     EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-value-bar-tint"]);
 }
 
-TEST_F(NotificationsTest, DISABLED_MenuHide) {
+TEST_F(NotificationsTest, MenuHide) {
+
+    if (!ayatana_common_utils_is_lomiri())
+    {
+        return;
+    }
+
     auto options = optionsMock();
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
@@ -488,7 +521,13 @@ TEST_F(NotificationsTest, DISABLED_MenuHide) {
     EXPECT_EQ(1, notev.size());
 }
 
-TEST_F(NotificationsTest, DISABLED_ExtendendVolumeNotification) {
+TEST_F(NotificationsTest, ExtendendVolumeNotification) {
+
+    if (!ayatana_common_utils_is_lomiri())
+    {
+        return;
+    }
+
     auto options = optionsMock();
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
@@ -533,7 +572,12 @@ TEST_F(NotificationsTest, DISABLED_ExtendendVolumeNotification) {
     EXPECT_GVARIANT_EQ("@i 100", notev[0].hints["value"]);
 }
 
-TEST_F(NotificationsTest, DISABLED_TriggerWarning) {
+TEST_F(NotificationsTest, TriggerWarning) {
+
+    if (!ayatana_common_utils_is_lomiri())
+    {
+        return;
+    }
 
     // Tests all the conditions needed to trigger a volume warning.
     // There are many possible combinations, so this test is slow. :P

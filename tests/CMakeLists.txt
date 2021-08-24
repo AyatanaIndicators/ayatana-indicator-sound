@@ -243,6 +243,7 @@ target_link_libraries (
     indicator-sound-service-lib
     vala-mocks-lib
     pulse-mock
+    ayatana-common
     ${SOUNDSERVICE_LIBRARIES}
     ${TEST_LIBRARIES}
     ${GMOCK_LIBRARIES}
