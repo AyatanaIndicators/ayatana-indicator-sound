@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Canonical Ltd.
- * Copyright 2021 AyatanaIndicators
+ * Copyright 2021 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -214,7 +214,6 @@ public class IndicatorSound.Service: Object {
     private VolumeWarning _volume_warning;
     private IndicatorSound.InfoNotification _info_notification = new IndicatorSound.InfoNotification();
     private AccountsServiceAccess _accounts_service_access;
-    bool? is_unity = null;
 
     const double volume_step_percentage = 0.06;
 
@@ -233,51 +232,27 @@ public class IndicatorSound.Service: Object {
         }
     }
 
-    private bool desktop_is_unity() {
-        if (is_unity != null) {
-            return is_unity;
-        }
-
-        is_unity = false;
-        unowned string desktop = Environment.get_variable ("XDG_CURRENT_DESKTOP");
-
-        foreach (var name in desktop.split(":")) {
-            if (name == "Unity") {
-                is_unity = true;
-                break;
-            }
-        }
-
-        return is_unity;
-    }
-
     void activate_desktop_settings (SimpleAction action, Variant? param) {
-        unowned string env = Environment.get_variable ("DESKTOP_SESSION");
-        unowned string xdg_desktop = Environment.get_variable ("XDG_CURRENT_DESKTOP");
         string cmd;
         string arg;
 
-        /* FIXME: the below code needs to be moved into libayatana-common!!! */
-
-#if HAS_URLDISPATCHER
-        if (Environment.get_variable ("MIR_SOCKET") != null)
+        if (AyatanaCommon.utils_is_lomiri())
         {
-            LomiriURLDispatch.send ("settings:///system/sound");
+            AyatanaCommon.utils_open_url("settings:///system/sound");
             return;
         }
-#endif
 
-        if (env == "xubuntu" || env == "xfce" || env == "ubuntustudio")
+        if (AyatanaCommon.utils_is_xfce())
         {
             cmd = "pavucontrol";
             arg = "";
         }
-        else if ((env == "mate" || xdg_desktop == "MATE"))
+        else if (AyatanaCommon.utils_is_mate())
         {
             cmd = "mate-volume-control";
             arg = "";
         }
-        else if (desktop_is_unity())
+        else if (AyatanaCommon.utils_is_unity())
         {
             cmd = "unity-control-center";
             arg = "sound";
@@ -288,27 +263,19 @@ public class IndicatorSound.Service: Object {
             arg = "sound";
         }
 
-        try
+        if (AyatanaCommon.utils_have_program(cmd) == false)
         {
-            if (Environment.find_program_in_path(cmd) == null)
-            {
-                string command_line = "zenity  --warning  --icon-name=\"dialog-warning\"  --title=\"%s\"  --text=\"%s\"  --no-wrap".printf(_("Missing application"), _("Could not find the '%s' application - please make sure it is installed.").printf(cmd));
-                Process.spawn_command_line_async(command_line);
-            }
-            else
-            {
-                Process.spawn_command_line_async(cmd + " " + arg);
-            }
+            AyatanaCommon.utils_zenity_warning("dialog-warning", _("Missing application"), _("Could not find the '%s' application - please make sure it is installed.").printf(cmd));
         }
-        catch (Error e)
+        else
         {
-            warning("unable to launch sound settings: %s", e.message);
+            AyatanaCommon.utils_execute_command(cmd + " " + arg);
         }
     }
 
 #if HAS_URLDISPATCHER
     void activate_phone_settings (SimpleAction action, Variant? param) {
-        LomiriURLDispatch.send ("settings:///system/sound");
+        AyatanaCommon.utils_open_url("settings:///system/sound");
     }
 #endif
 
