@@ -193,9 +193,7 @@ public class IndicatorSound.Service: Object {
         { "root", null, null, "@a{sv} {}", null },
         { "scroll", activate_scroll_action, "i", null, null },
         { "desktop-settings", activate_desktop_settings, null, null, null },
-#if HAS_URLDISPATCHER
         { "phone-settings", activate_phone_settings, null, null, null },
-#endif
         { "indicator-shown", null, null, "@b false", null },
     };
 
@@ -273,11 +271,9 @@ public class IndicatorSound.Service: Object {
         }
     }
 
-#if HAS_URLDISPATCHER
     void activate_phone_settings (SimpleAction action, Variant? param) {
         AyatanaCommon.utils_open_url("settings:///system/sound");
     }
-#endif
 
     /* Returns a serialized version of @icon_name suited for the panel */
     static Variant serialize_themed_icon (string icon_name)
