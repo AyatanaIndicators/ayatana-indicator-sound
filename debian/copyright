@@ -177,7 +177,6 @@ Files: AUTHORS
  tests/service-mocks/media-player-mpris-mock/org.mpris.MediaPlayer2.Player.xml
  tests/service-mocks/media-player-mpris-mock/org.mpris.MediaPlayer2.xml
  vapi/config.vapi
- vapi/url-dispatcher.vapi
 Copyright: 2010-2016, Canonical Ltd.
 License: GPL-3
 Comment:
