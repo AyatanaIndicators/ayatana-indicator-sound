@@ -66,6 +66,7 @@ pkg_check_modules(
   libxml-2.0
   libnotify
   accountsservice
+  libayatana-common
 )
 include_directories(${SOUNDSERVICE_INCLUDE_DIRS})
 

@@ -60,7 +60,7 @@ vala_init(ayatana-indicator-sound-service
     libpulse-mainloop-glib
     libnotify
     accounts-service
-    ${VALA_PKG_URLDISPATCHER}
+    AyatanaCommon
   OPTIONS
     --ccode
     --target-glib=${GLIB_2_0_REQUIRED_VERSION}
