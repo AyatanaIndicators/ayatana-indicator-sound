@@ -193,14 +193,18 @@ public class AccountsServiceUser : Object {
     void new_privacy_proxy (GLib.Object? obj, AsyncResult res) {
         try {
             this.privacyproxy = Bus.get_proxy.end (res);
+            var pDBusProxy = this.privacyproxy as DBusProxy;
 
-            (this.privacyproxy as DBusProxy).g_properties_changed.connect((proxy, changed, invalid) => {
-                var welcomeval = changed.lookup_value("MessagesWelcomeScreen", VariantType.BOOLEAN);
-                if (welcomeval != null) {
-                    debug("Messages on welcome screen changed");
-                    this.showDataOnGreeter = welcomeval.get_boolean();
-                }
-            });
+            if (pDBusProxy != null)
+            {
+                pDBusProxy.g_properties_changed.connect((proxy, changed, invalid) => {
+                    var welcomeval = changed.lookup_value("MessagesWelcomeScreen", VariantType.BOOLEAN);
+                    if (welcomeval != null) {
+                        debug("Messages on welcome screen changed");
+                        this.showDataOnGreeter = welcomeval.get_boolean();
+                    }
+                });
+            }
 
             this.showDataOnGreeter = this.privacyproxy.messages_welcome_screen;
         } catch (Error e) {
@@ -214,15 +218,19 @@ public class AccountsServiceUser : Object {
     void new_system_sound_proxy (GLib.Object? obj, AsyncResult res) {
         try {
             this.syssoundproxy = Bus.get_proxy.end (res);
+            var pDBusProxy = this.syssoundproxy as DBusProxy;
 
-            (this.syssoundproxy as DBusProxy).g_properties_changed.connect((proxy, changed, invalid) => {
-                var silentvar = changed.lookup_value("SilentMode", VariantType.BOOLEAN);
-                if (silentvar != null) {
-                    debug("Silent Mode changed");
-                    this._silentMode = silentvar.get_boolean();
-                    this.notify_property("silentMode");
-                }
-            });
+            if (pDBusProxy != null)
+            {
+                pDBusProxy.g_properties_changed.connect((proxy, changed, invalid) => {
+                    var silentvar = changed.lookup_value("SilentMode", VariantType.BOOLEAN);
+                    if (silentvar != null) {
+                        debug("Silent Mode changed");
+                        this._silentMode = silentvar.get_boolean();
+                        this.notify_property("silentMode");
+                    }
+                });
+            }
 
             this._silentMode = this.syssoundproxy.silent_mode;
             this.notify_property("silentMode");
