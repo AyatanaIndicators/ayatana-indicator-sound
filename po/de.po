@@ -8,16 +8,16 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-08-12 07:21+0200\n"
-"PO-Revision-Date: 2020-12-31 10:29+0000\n"
-"Last-Translator: J. Lavoie <j.lavoie@net-c.ca>\n"
-"Language-Team: German <https://hosted.weblate.org/projects/ayatana-"
-"indicators/sound-applet/de/>\n"
+"PO-Revision-Date: 2021-08-29 21:32+0000\n"
+"Last-Translator: Mike Gabriel <mike.gabriel@das-netzwerkteam.de>\n"
+"Language-Team: German <https://hosted.weblate.org/projects/"
+"ayatana-indicators/sound-applet/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.4.1-dev\n"
+"X-Generator: Weblate 4.8.1-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
@@ -253,12 +253,14 @@ msgstr "HDMI-Kopfhörer"
 
 #: ../src/service.vala:295
 msgid "Missing application"
-msgstr ""
+msgstr "Fehlende Anwendung"
 
 #: ../src/service.vala:295
 #, c-format
 msgid "Could not find the '%s' application - please make sure it is installed."
 msgstr ""
+"Die Anwendung '%s' konnte nicht gefunden werden - Bitte sicherstellen, dass "
+"sie installiert ist."
 
 #: ../src/service.vala:328
 msgid "Volume (muted)"
@@ -326,11 +328,12 @@ msgid "Choose Playlist"
 msgstr "Wiedegabeliste auswählen"
 
 #: ../src/warn-notification.vala:32
-#, fuzzy
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
-msgstr "Zu hohe Lautstärke kann Ihrem Gehör Schaden zufügen."
+msgstr ""
+"Läuftstärken über sicherem Pegel erlauben ? \n"
+"Zu hohe Lautstärke kann Ihrem Gehör Schaden zufügen."
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
