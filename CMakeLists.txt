@@ -49,14 +49,6 @@ pkg_check_modules(
 )
 include_directories(${PULSEAUDIO_INCLUDE_DIRS})
 
-set(URL_DISPATCHER_REQUIRED_VERSION 0)
-
-pkg_check_modules(
-  URLDISPATCHER
-  lomiri-url-dispatcher>=${URL_DISPATCHER_REQUIRED_VERSION}
-)
-include_directories(${URLDISPATCHER_INCLUDE_DIRS})
-
 pkg_check_modules(
   SOUNDSERVICE REQUIRED
   gee-0.8

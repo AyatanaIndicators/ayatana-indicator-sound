@@ -6,11 +6,6 @@ set(HEADER_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.h")
 set(SYMBOLS_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.def")
 set(VAPI_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.vapi")
 
-if(URLDISPATCHER_FOUND)
-    set (VALA_DEFINE_URLDISPATCHER "--define=HAS_URLDISPATCHER")
-    set (VALA_PKG_URLDISPATCHER "lomiri-url-dispatcher")
-endif()
-
 if(EXISTS "/usr/share/glib-2.0/schemas/com.ubuntu.sound.gschema.xml")
   set (VALA_DEFINE_UBUNTU_SOUND_SCHEMA "--define=HAS_UBUNTU_SOUND_SCHEMA")
 endif()
@@ -67,7 +62,6 @@ vala_init(ayatana-indicator-sound-service
     --vapidir=${CMAKE_SOURCE_DIR}/vapi/
     --vapidir=.
     --pkg=bus-watcher
-    ${VALA_DEFINE_URLDISPATCHER}
     ${VALA_DEFINE_UBUNTU_SOUND_SCHEMA}
     ${VALA_DEFINE_ACCTSERVICE_PRIVACY_SETTINGS}
     ${VALA_DEFINE_ACCTSERVICE_SOUND_SETTINGS}
@@ -89,43 +83,24 @@ vala_add(ayatana-indicator-sound-service
   DEPENDS
     notification
 )
-if(URLDISPATCHER_FOUND)
-    vala_add(ayatana-indicator-sound-service
-      service.vala
-      DEPENDS
-        sound-menu
-        volume-control
-        volume-control-pulse
-        notification
-        info-notification
-        volume-warning
-        options
-        options-gsettings
-        media-player
-        media-player-list
-        mpris2-interfaces
-        accounts-service-user
-        accounts-service-access
-    )
-else()
-    vala_add(ayatana-indicator-sound-service
-      service.vala
-      DEPENDS
-        sound-menu
-        volume-control
-        volume-control-pulse
-        notification
-        info-notification
-        volume-warning
-        options
-        options-gsettings
-        media-player
-        media-player-list
-        mpris2-interfaces
-        accounts-service-user
-        accounts-service-access
-    )
-endif()
+
+vala_add(ayatana-indicator-sound-service
+  service.vala
+  DEPENDS
+    sound-menu
+    volume-control
+    volume-control-pulse
+    notification
+    info-notification
+    volume-warning
+    options
+    options-gsettings
+    media-player
+    media-player-list
+    mpris2-interfaces
+    accounts-service-user
+    accounts-service-access
+)
 
 vala_add(ayatana-indicator-sound-service
   options.vala
@@ -305,7 +280,6 @@ add_library(
 target_link_libraries(
   indicator-sound-service-lib
   ${SOUNDSERVICE_LIBRARIES}
-  ${URLDISPATCHER_LIBRARIES}
   -lm
 )
 
