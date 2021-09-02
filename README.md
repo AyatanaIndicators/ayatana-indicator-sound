@@ -1,4 +1,4 @@
-# Ayatana System Indicator &mdash; Sound [![Build Status](https://travis-ci.com/AyatanaIndicators/ayatana-indicator-sound.svg)](https://travis-ci.com/AyatanaIndicators/ayatana-indicator-sound)
+# Ayatana System Indicator &mdash; Sound [![Build Status](https://api.travis-ci.com/AyatanaIndicators/ayatana-indicator-sound.svg)](https://travis-ci.com/github/AyatanaIndicators/ayatana-indicator-sound)
 
 ## About Ayatana Indicators
 
