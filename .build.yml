@@ -76,6 +76,7 @@ requires:
     - clang
     - clang-tools
     - g++
+    - cppcheck
     - git
     - cmake
     - cmake-extras
@@ -102,12 +103,19 @@ requires:
     - qtdeclarative5-dev
     - qtdeclarative5-dev-tools
     - systemd
+    - dbus-test-runner
+    - libgtest-dev
+    - libdbustest1-dev
+    - libqtdbusmock1-dev
+    - libqtdbustest1-dev
+    - python3-dbusmock
 
   ubuntu:focal:
     - autopoint
     - clang
     - clang-tools
     - g++
+    - cppcheck
     - git
     - cmake
     - cmake-extras
@@ -133,6 +141,12 @@ requires:
     - qtdeclarative5-dev
     - qtdeclarative5-dev-tools
     - systemd
+    - dbus-test-runner
+    - libgtest-dev
+    - libdbustest1-dev
+    - libqtdbusmock1-dev
+    - libqtdbustest1-dev
+    - python3-dbusmock
 
 variables:
   - 'CHECKERS="
