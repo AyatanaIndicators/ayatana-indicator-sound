@@ -419,7 +419,7 @@ lomiri::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::volumeSlider(doubl
             .double_attribute("min-value", 0.0)
             .double_attribute("max-value", 1.0)
             .double_attribute("step", 0.01)
-            .string_attribute("x-ayatana-type", "org.ayatana.unity.slider")
+            .string_attribute("x-ayatana-type", "org.ayatana.indicator.slider")
             .themed_icon("max-icon", {"audio-volume-high-panel", "audio-volume-high", "audio-volume", "audio"})
             .themed_icon("min-icon", {"audio-volume-low-zero-panel", "audio-volume-low-zero", "audio-volume-low", "audio-volume", "audio"})
             .pass_through_double_attribute("action", volume);
@@ -433,7 +433,7 @@ lomiri::gmenuharness::MenuItemMatcher IndicatorSoundTestBase::micSlider(double v
             .double_attribute("min-value", 0.0)
             .double_attribute("max-value", 1.0)
             .double_attribute("step", 0.01)
-            .string_attribute("x-ayatana-type", "org.ayatana.unity.slider")
+            .string_attribute("x-ayatana-type", "org.ayatana.indicator.slider")
             .themed_icon("max-icon", {"audio-input-microphone-high-panel", "audio-input-microphone-high", "audio-input-microphone", "audio-input", "audio"})
             .themed_icon("min-icon", {"audio-input-microphone-low-zero-panel", "audio-input-microphone-low-zero", "audio-input-microphone-low", "audio-input-microphone", "audio-input", "audio"})
             .pass_through_double_attribute("action", volume);
