@@ -81,7 +81,7 @@ vala_init(vala-mocks
         --vapidir=.
 )
 
-set_source_files_properties(media-player-mock.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-pointer-types")
+set_source_files_properties(media-player-mock.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-pointer-types -Wno-discarded-qualifiers")
 set_source_files_properties(media-player-list-mock.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-pointer-types -Wno-unused-variable")
 set_source_files_properties(options-mock.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-pointer-types -Wno-unused-variable")
 set_source_files_properties(volume-control-mock.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-pointer-types -Wno-int-to-pointer-cast -Wno-implicit-function-declaration")
