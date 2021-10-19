@@ -133,6 +133,7 @@ set(
 
 add_definitions(
     -Wno-unused-but-set-variable
+    -DVALA_EXTERN=extern
 )
 
 add_library(

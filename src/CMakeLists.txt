@@ -270,6 +270,7 @@ set(
 add_definitions(
   -w
   -DG_LOG_DOMAIN="ayatana-indicator-sound"
+  -DVALA_EXTERN=extern
 )
 
 add_library(
