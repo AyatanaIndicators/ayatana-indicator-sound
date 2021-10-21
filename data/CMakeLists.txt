@@ -64,6 +64,7 @@ install(
 # GSettings
 ###########################
 
+set(GSETTINGS_COMPILE ON)
 add_schema ("org.ayatana.indicator.sound.gschema.xml")
 
 if(NOT EXISTS /usr/share/glib-2.0/schemas/com.ubuntu.sound.gschema.xml)
