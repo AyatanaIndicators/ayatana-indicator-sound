@@ -619,13 +619,13 @@ TEST_F(NotificationsTest, DISABLED_TriggerWarning) {
         if (warning_expected) {
             EXPECT_TRUE(volume_warning_get_active(volumeWarning.get()));
             ASSERT_EQ(1, notev.size());
-            EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-snap-decisions"]);
+            EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-ayatana-snap-decisions"]);
             EXPECT_GVARIANT_EQ(nullptr, notev[0].hints["x-canonical-private-synchronous"]);
         }
         else {
             EXPECT_FALSE(volume_warning_get_active(volumeWarning.get()));
             ASSERT_EQ(1, notev.size());
-            EXPECT_GVARIANT_EQ(nullptr, notev[0].hints["x-canonical-snap-decisions"]);
+            EXPECT_GVARIANT_EQ(nullptr, notev[0].hints["x-ayatana-snap-decisions"]);
             EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-private-synchronous"]);
         }
 
