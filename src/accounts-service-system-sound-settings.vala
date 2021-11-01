@@ -19,6 +19,6 @@
 
 [DBus (name = "com.ubuntu.touch.AccountsService.Sound")]
 public interface AccountsServiceSystemSoundSettings : Object {
-	// properties
-	public abstract bool silent_mode {owned get; set;}
+    // properties
+    public abstract bool silent_mode {owned get; set;}
 }
