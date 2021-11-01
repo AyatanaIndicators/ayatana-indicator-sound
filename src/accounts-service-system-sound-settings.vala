@@ -1,5 +1,6 @@
 /*
  * Copyright 2014 © Canonical Ltd.
+ * Copyright 2021 © Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,9 +16,10 @@
  *
  * Authors:
  *      Ted Gould <ted@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 
-[DBus (name = "com.ubuntu.touch.AccountsService.Sound")]
+[DBus (name = "com.lomiri.touch.AccountsService.Sound")]
 public interface AccountsServiceSystemSoundSettings : Object {
     // properties
     public abstract bool silent_mode {owned get; set;}

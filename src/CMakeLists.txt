@@ -18,7 +18,7 @@ else()
   set (HAVE_UT_ACCTSERVICE_PRIVACY_SETTINGS OFF)
 endif()
 
-if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.touch.AccountsService.Sound.xml")
+if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.touch.AccountsService.Sound.xml")
   set (HAVE_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS ON)
   set (VALA_FILE_ACCTSERVICE_SYSTEMSOUND_SETTINGS "accounts-service-system-sound-settings")
   set (VALA_DEFINE_ACCTSERVICE_SYSTEMSOUND_SETTINGS "--define=HAS_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS")

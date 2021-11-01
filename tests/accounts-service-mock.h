@@ -1,5 +1,6 @@
 /*
  * Copyright © 2014 Canonical Ltd.
+ * Copyright © 2021 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,7 @@
  *
  * Authors:
  *      Ted Gould <ted@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 
 #include <memory>
@@ -85,7 +87,7 @@ class AccountsServiceMock
                 "ArtUrl", G_VARIANT_TYPE_STRING,
                 g_variant_new_string(""), NULL);
 
-            syssoundobj = dbus_test_dbus_mock_get_object(mock, "/user", "com.ubuntu.touch.AccountsService.Sound", NULL);
+            syssoundobj = dbus_test_dbus_mock_get_object(mock, "/user", "com.lomiri.touch.AccountsService.Sound", NULL);
             dbus_test_dbus_mock_object_add_property(mock, syssoundobj,
                 "SilentMode", G_VARIANT_TYPE_BOOLEAN,
                 g_variant_new_boolean(FALSE), NULL);
