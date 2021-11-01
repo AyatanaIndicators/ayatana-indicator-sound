@@ -1,5 +1,6 @@
 /*
  * Copyright 2014 © Canonical Ltd.
+ * Copyright 2021 © Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,7 @@
  *
  * Authors:
  *      Ted Gould <ted@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 
 public class AccountsServiceUser : Object {
@@ -24,7 +26,7 @@ public class AccountsServiceUser : Object {
 #if HAS_UT_ACCTSERVICE_PRIVACY_SETTINGS
     AccountsServicePrivacySettings? privacyproxy = null;
 #endif
-#if HAS_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS
+#if HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS
     AccountsServiceSystemSoundSettings? syssoundproxy = null;
 #endif
     uint timer = 0;
@@ -40,7 +42,7 @@ public class AccountsServiceUser : Object {
         }
         set {
             _silentMode = value;
-#if HAS_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS
+#if HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS
             if (syssoundproxy != null)
                 syssoundproxy.silent_mode = value;
 #endif
@@ -157,7 +159,7 @@ public class AccountsServiceUser : Object {
                 new_privacy_proxy);
 #endif
 
-#if HAS_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS
+#if HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS
             Bus.get_proxy.begin<AccountsServiceSystemSoundSettings> (
                 BusType.SYSTEM,
                 "org.freedesktop.Accounts",
@@ -214,7 +216,7 @@ public class AccountsServiceUser : Object {
     }
 #endif
 
-#if HAS_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS
+#if HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS
     void new_system_sound_proxy (GLib.Object? obj, AsyncResult res) {
         try {
             this.syssoundproxy = Bus.get_proxy.end (res);
