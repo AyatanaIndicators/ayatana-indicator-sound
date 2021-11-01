@@ -18,12 +18,12 @@ else()
   set (HAVE_UT_ACCTSERVICE_PRIVACY_SETTINGS OFF)
 endif()
 
-if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.touch.AccountsService.Sound.xml")
-  set (HAVE_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS ON)
+if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.touch.AccountsService.Sound.xml")
+  set (HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS ON)
   set (VALA_FILE_ACCTSERVICE_SYSTEMSOUND_SETTINGS "accounts-service-system-sound-settings")
-  set (VALA_DEFINE_ACCTSERVICE_SYSTEMSOUND_SETTINGS "--define=HAS_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS")
+  set (VALA_DEFINE_ACCTSERVICE_SYSTEMSOUND_SETTINGS "--define=HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS")
 else()
-  set (HAVE_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS OFF)
+  set (HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS OFF)
 endif()
 
 if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.AccountsService.Sound.xml")
@@ -226,7 +226,7 @@ if(${HAVE_UT_ACCTSERVICE_PRIVACY_SETTINGS})
     )
 endif()
 
-if(${HAVE_UT_ACCTSERVICE_SYSTEMSOUND_SETTINGS})
+if(${HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS})
     vala_add(ayatana-indicator-sound-service
           accounts-service-privacy-settings.vala
     )
