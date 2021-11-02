@@ -10,7 +10,7 @@ if(EXISTS "/usr/share/glib-2.0/schemas/com.ubuntu.sound.gschema.xml")
   set (VALA_DEFINE_UBUNTU_SOUND_SCHEMA "--define=HAS_UBUNTU_SOUND_SCHEMA")
 endif()
 
-if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.touch.AccountsService.SecurityPrivacy.xml")
+if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.touch.AccountsService.SecurityPrivacy.xml")
   set (HAVE_UT_ACCTSERVICE_PRIVACY_SETTINGS ON)
   set (VALA_FILE_ACCTSERVICE_PRIVACY_SETTINGS "accounts-service-privacy-settings")
   set (VALA_DEFINE_ACCTSERVICE_PRIVACY_SETTINGS "--define=HAS_UT_ACCTSERVICE_PRIVACY_SETTINGS")

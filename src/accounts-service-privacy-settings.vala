@@ -17,9 +17,9 @@
  *      Ted Gould <ted@canonical.com>
  */
 
-[DBus (name = "com.ubuntu.touch.AccountsService.SecurityPrivacy")]
+[DBus (name = "com.lomiri.touch.AccountsService.SecurityPrivacy")]
 public interface AccountsServicePrivacySettings : Object {
-	// properties
-	public abstract bool stats_welcome_screen {owned get; set;}
-	public abstract bool messages_welcome_screen {owned get; set;}
+    // properties
+    public abstract bool stats_welcome_screen {owned get; set;}
+    public abstract bool messages_welcome_screen {owned get; set;}
 }
