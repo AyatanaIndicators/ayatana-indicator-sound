@@ -11,11 +11,8 @@ if(EXISTS "/usr/share/glib-2.0/schemas/com.ubuntu.sound.gschema.xml")
 endif()
 
 if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.touch.AccountsService.SecurityPrivacy.xml")
-  set (HAVE_UT_ACCTSERVICE_PRIVACY_SETTINGS ON)
   set (VALA_FILE_ACCTSERVICE_PRIVACY_SETTINGS "accounts-service-privacy-settings")
   set (VALA_DEFINE_ACCTSERVICE_PRIVACY_SETTINGS "--define=HAS_UT_ACCTSERVICE_PRIVACY_SETTINGS")
-else()
-  set (HAVE_UT_ACCTSERVICE_PRIVACY_SETTINGS OFF)
 endif()
 
 if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.touch.AccountsService.Sound.xml")
