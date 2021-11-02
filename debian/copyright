@@ -128,7 +128,6 @@ License: GPL-3
 Files: AUTHORS
  CMakeLists.txt
  ChangeLog
- MERGE-REVIEW
  NEWS
  README
  data/50-org.ayatana.AccountsService.Sound.pkla
