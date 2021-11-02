@@ -23,7 +23,7 @@ public class AccountsServiceUser : Object {
     Act.UserManager accounts_manager = Act.UserManager.get_default();
     Act.User? user = null;
     AccountsServiceSoundSettings? proxy = null;
-#if HAS_UT_ACCTSERVICE_PRIVACY_SETTINGS
+#if HAS_LOMIRI_ACCTSERVICE_PRIVACY_SETTINGS
     AccountsServicePrivacySettings? privacyproxy = null;
 #endif
 #if HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS
@@ -149,7 +149,7 @@ public class AccountsServiceUser : Object {
                 DBusProxyFlags.GET_INVALIDATED_PROPERTIES,
                 null,
                 new_sound_proxy);
-#if HAS_UT_ACCTSERVICE_PRIVACY_SETTINGS
+#if HAS_LOMIRI_ACCTSERVICE_PRIVACY_SETTINGS
             Bus.get_proxy.begin<AccountsServicePrivacySettings> (
                 BusType.SYSTEM,
                 "org.freedesktop.Accounts",
@@ -191,7 +191,7 @@ public class AccountsServiceUser : Object {
         }
     }
 
-#if HAS_UT_ACCTSERVICE_PRIVACY_SETTINGS
+#if HAS_LOMIRI_ACCTSERVICE_PRIVACY_SETTINGS
     void new_privacy_proxy (GLib.Object? obj, AsyncResult res) {
         try {
             this.privacyproxy = Bus.get_proxy.end (res);

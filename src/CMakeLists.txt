@@ -12,7 +12,7 @@ endif()
 
 if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.touch.AccountsService.SecurityPrivacy.xml")
   set (VALA_FILE_ACCTSERVICE_PRIVACY_SETTINGS "accounts-service-privacy-settings")
-  set (VALA_DEFINE_ACCTSERVICE_PRIVACY_SETTINGS "--define=HAS_UT_ACCTSERVICE_PRIVACY_SETTINGS")
+  set (VALA_DEFINE_ACCTSERVICE_PRIVACY_SETTINGS "--define=HAS_LOMIRI_ACCTSERVICE_PRIVACY_SETTINGS")
 endif()
 
 if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.touch.AccountsService.Sound.xml")
