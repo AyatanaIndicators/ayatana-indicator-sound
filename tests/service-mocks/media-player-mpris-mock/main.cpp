@@ -25,7 +25,7 @@
 #include "MediaPlayerMprisMockAdaptor.h"
 #include "MediaPlayer2MockAdaptor.h"
 
-using namespace ubuntu::indicators::testing;
+using namespace ayatana::indicators::testing;
 
 int main(int argc, char *argv[])
 {

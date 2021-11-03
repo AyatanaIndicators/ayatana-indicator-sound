@@ -23,13 +23,13 @@ qt5_add_dbus_interface(interface_files ${dbusinterface_mediaplayermpris_xml} Med
 qt5_add_dbus_adaptor(adaptor_files
     org.mpris.MediaPlayer2.Player.xml
     MediaPlayerMprisMock.h
-    ubuntu::indicators::testing::MediaPlayerMprisMock
+    ayatana::indicators::testing::MediaPlayerMprisMock
     MediaPlayerMprisMockAdaptor)
 
 qt5_add_dbus_adaptor(adaptor_files
     org.mpris.MediaPlayer2.xml
     MediaPlayerMprisMock.h
-    ubuntu::indicators::testing::MediaPlayerMprisMock
+    ayatana::indicators::testing::MediaPlayerMprisMock
     MediaPlayer2MockAdaptor)
 
 add_executable(
