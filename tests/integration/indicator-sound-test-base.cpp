@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2015 Canonical, Ltd.
+ * Copyright (C) 2021 Robert Tari
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -13,7 +14,9 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Author: Xavi Garcia <xavi.garcia.mena@canonical.com>
+ * Authors:
+ *         Xavi Garcia <xavi.garcia.mena@canonical.com>
+ *         Robert Tari <robert@tari.in>
  */
 
 #include "indicator-sound-test-base.h"
@@ -642,12 +645,12 @@ void IndicatorSoundTestBase::checkVolumeNotification(double volume, QString cons
     ASSERT_TRUE(qDBusArgumentToMap(args.at(6), hints));
     ASSERT_TRUE(hints.contains("value"));
     ASSERT_TRUE(hints.contains("x-ayatana-non-shaped-icon"));
-    ASSERT_TRUE(hints.contains("x-canonical-value-bar-tint"));
+    ASSERT_TRUE(hints.contains("x-ayatana-value-bar-tint"));
     ASSERT_TRUE(hints.contains("x-canonical-private-synchronous"));
 
     EXPECT_EQ(volume*100, hints["value"]);
     EXPECT_EQ(true, hints["x-ayatana-non-shaped-icon"]);
-    EXPECT_EQ(isLoud, hints["x-canonical-value-bar-tint"]);
+    EXPECT_EQ(isLoud, hints["x-ayatana-value-bar-tint"]);
     EXPECT_EQ(true, hints["x-canonical-private-synchronous"]);
 }
 
