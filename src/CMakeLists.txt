@@ -7,7 +7,7 @@ set(SYMBOLS_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.def")
 set(VAPI_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.vapi")
 
 if(EXISTS "/usr/share/glib-2.0/schemas/com.lomiri.sound.gschema.xml")
-  set (VALA_DEFINE_LOMIRI_SOUND_SCHEMA "--define=HAS_UBUNTU_SOUND_SCHEMA")
+  set (VALA_DEFINE_LOMIRI_SOUND_SCHEMA "--define=HAS_LOMIRI_SOUND_SCHEMA")
 endif()
 
 if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.touch.AccountsService.SecurityPrivacy.xml")

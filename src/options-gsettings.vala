@@ -31,7 +31,7 @@ public class IndicatorSound.OptionsGSettings : Options
     }
 
         private Settings _settings = new Settings ("org.ayatana.indicator.sound");
-#if HAS_UBUNTU_SOUND_SCHEMA
+#if HAS_LOMIRI_SOUND_SCHEMA
         private Settings _shared_settings = new Settings ("com.lomiri.sound");
 #else
         private Settings _shared_settings = new Settings ("org.ayatana.sound");

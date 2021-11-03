@@ -183,7 +183,7 @@ bool IndicatorSoundTestBase::resetAllowAmplifiedVolume()
 
     proc.start("gsettings", QStringList()
                                 << "reset"
-#ifdef HAS_UBUNTU_SOUND_SCHEMA
+#ifdef HAS_LOMIRI_SOUND_SCHEMA
                                 << "com.lomiri.sound"
 #else
                                 << "org.ayatana.sound"
