@@ -28,7 +28,7 @@ namespace testing
     constexpr const char MEDIA_PLAYER_MPRIS_SERVICE[] = "org.freedesktop.Accounts";
     constexpr const char USER_PATH[] = "/org/freedesktop/Accounts/UserTest";
     constexpr const char ACCOUNTS_PATH[] = "/org/freedesktop/Accounts";
-#ifdef HAS_UT_ACCTSERVICE_SOUND_SETTINGS
+#ifdef HAS_LOMIRI_ACCTSERVICE_SOUND_SETTINGS
     constexpr const char ACCOUNTS_SOUND_INTERFACE[] = "com.lomiri.AccountsService.Sound";
 #else
     constexpr const char ACCOUNTS_SOUND_INTERFACE[] = "org.ayatana.AccountsService.Sound";

@@ -8,7 +8,7 @@ include_directories(${Qt5DBus_INCLUDE_DIRS}
 add_definitions(-DQT_NO_KEYWORDS=1)
 
 if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.AccountsService.Sound.xml")
-    add_definitions(-DHAS_UT_ACCTSERVICE_SOUND_SETTINGS)
+    add_definitions(-DHAS_LOMIRI_ACCTSERVICE_SOUND_SETTINGS)
     set(dbusinterface_sound_xml "com.lomiri.AccountsService.Sound.Mock.xml")
 else()
     set(dbusinterface_sound_xml "org.ayatana.AccountsService.Sound.Mock.xml")
