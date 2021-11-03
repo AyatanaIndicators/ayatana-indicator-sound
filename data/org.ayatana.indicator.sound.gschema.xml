@@ -82,7 +82,7 @@
       <default>0</default>
       <summary>Normal output volume.</summary>
       <description>
-        The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting is disabled.
+        The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting is disabled.
 
         To conform with EU standard EN 60950-1/Al2, this value should never be
         set to a dB that causes headphone sound output to exceed 100 dBA, nor
@@ -94,9 +94,9 @@
 
     <key name="amplified-volume-decibels" type="d">
       <default>11</default>
-      <summary>Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' setting is enabled.</summary>
+      <summary>Output volume to use when com.lomiri.sound's 'allow-amplified-volume' setting is enabled.</summary>
       <description>
-        The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting is enabled.
+        The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting is enabled.
 
         To conform with EU standard EN 60950-1/Al2, this value should never be
         set to a dB that causes headphone sound output to exceed 100 dBA, nor
