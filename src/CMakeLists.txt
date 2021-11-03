@@ -6,7 +6,7 @@ set(HEADER_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.h")
 set(SYMBOLS_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.def")
 set(VAPI_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.vapi")
 
-if(EXISTS "/usr/share/glib-2.0/schemas/com.ubuntu.sound.gschema.xml")
+if(EXISTS "/usr/share/glib-2.0/schemas/com.lomiri.sound.gschema.xml")
   set (VALA_DEFINE_UBUNTU_SOUND_SCHEMA "--define=HAS_UBUNTU_SOUND_SCHEMA")
 endif()
 
