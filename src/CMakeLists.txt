@@ -11,8 +11,11 @@ if(EXISTS "/usr/share/glib-2.0/schemas/com.lomiri.sound.gschema.xml")
 endif()
 
 if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.touch.AccountsService.SecurityPrivacy.xml")
+  set (HAS_LOMIRI_ACCTSERVICE_PRIVACY_SETTINGS ON)
   set (VALA_FILE_ACCTSERVICE_PRIVACY_SETTINGS "accounts-service-privacy-settings")
   set (VALA_DEFINE_ACCTSERVICE_PRIVACY_SETTINGS "--define=HAS_LOMIRI_ACCTSERVICE_PRIVACY_SETTINGS")
+else()
+  set (HAS_LOMIRI_ACCTSERVICE_PRIVACY_SETTINGS OFF)
 endif()
 
 if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.touch.AccountsService.Sound.xml")
@@ -214,7 +217,7 @@ vala_add(ayatana-indicator-sound-service
   accounts-service-sound-settings.vala
 )
 
-if(${HAVE_UT_ACCTSERVICE_PRIVACY_SETTINGS})
+if(${HAS_LOMIRI_ACCTSERVICE_PRIVACY_SETTINGS})
     vala_add(ayatana-indicator-sound-service
           accounts-service-system-sound-settings.vala
     )
