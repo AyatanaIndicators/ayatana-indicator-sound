@@ -230,7 +230,7 @@ public class MediaPlayerUser : MediaPlayer {
         }
     }
 
-    /* Control functions through unity-greeter-session-broadcast */
+    /* Control functions through ayatana-greeter-session-broadcast */
     public override void activate () {
         /* TODO: */
     }
@@ -251,7 +251,7 @@ public class MediaPlayerUser : MediaPlayer {
                 }
             });
         } else {
-            warning("No unity-greeter-session-broadcast to send play-pause");
+            warning("No ayatana-greeter-session-broadcast to send play-pause");
         }
     }
     public override void next () {
@@ -271,7 +271,7 @@ public class MediaPlayerUser : MediaPlayer {
                 }
             });
         } else {
-            warning("No unity-greeter-session-broadcast to send next");
+            warning("No ayatana-greeter-session-broadcast to send next");
         }
     }
     public override void previous () {
@@ -291,7 +291,7 @@ public class MediaPlayerUser : MediaPlayer {
                 }
             });
         } else {
-            warning("No unity-greeter-session-broadcast to send previous");
+            warning("No ayatana-greeter-session-broadcast to send previous");
         }
     }
 
