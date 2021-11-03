@@ -24,7 +24,7 @@ else()
 endif()
 
 if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.AccountsService.Sound.xml")
-  set (VALA_DEFINE_ACCTSERVICE_SOUND_SETTINGS "--define=HAS_UT_ACCTSERVICE_SOUND_SETTINGS")
+  set (VALA_DEFINE_ACCTSERVICE_SOUND_SETTINGS "--define=HAS_LOMIRI_ACCTSERVICE_SOUND_SETTINGS")
 endif()
 
 vapi_gen(accounts-service
