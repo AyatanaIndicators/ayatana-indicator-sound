@@ -17,7 +17,7 @@
  */
 #pragma once
 
-namespace ubuntu
+namespace ayatana
 {
 
 namespace indicators
@@ -37,5 +37,5 @@ namespace testing
 
 } // namespace indicators
 
-} // namespace ubuntu
+} // namespace ayatana
 

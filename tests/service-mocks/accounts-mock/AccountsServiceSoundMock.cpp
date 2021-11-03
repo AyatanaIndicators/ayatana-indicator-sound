@@ -22,7 +22,7 @@
 #include "AccountsServiceSoundMock.h"
 #include "AccountsDefs.h"
 
-using namespace ubuntu::indicators::testing;
+using namespace ayatana::indicators::testing;
 
 AccountsServiceSoundMock::AccountsServiceSoundMock(QObject* parent)
     : QObject(parent)

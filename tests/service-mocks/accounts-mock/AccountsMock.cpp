@@ -20,7 +20,7 @@
 #include "AccountsMock.h"
 #include "AccountsDefs.h"
 
-using namespace ubuntu::indicators::testing;
+using namespace ayatana::indicators::testing;
 
 AccountsMock::AccountsMock(QObject* parent)
     : QObject(parent)

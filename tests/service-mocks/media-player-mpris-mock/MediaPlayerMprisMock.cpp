@@ -19,7 +19,7 @@
 
 #include "MediaPlayerMprisMock.h"
 
-using namespace ubuntu::indicators::testing;
+using namespace ayatana::indicators::testing;
 
 MediaPlayerMprisMock::MediaPlayerMprisMock(QString const &playerName, QObject* parent)
     : QObject(parent)

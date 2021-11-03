@@ -20,7 +20,7 @@
 
 #include <QDBusMessage>
 
-using namespace ubuntu::indicators::testing;
+using namespace ayatana::indicators::testing;
 
 void DBusPropertiesNotifier::notifyPropertyChanged(QDBusConnection const & connection,
                                                    QString const & interface,

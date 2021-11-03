@@ -22,13 +22,13 @@ qt5_add_dbus_interface(interface_files ${dbusinterface_sound_xml} accountsservic
 qt5_add_dbus_adaptor(adaptor_files
     ${dbusinterface_sound_xml}
     AccountsServiceSoundMock.h
-    ubuntu::indicators::testing::AccountsServiceSoundMock
+    ayatana::indicators::testing::AccountsServiceSoundMock
     AccountsServiceSoundMockAdaptor)
 
 qt5_add_dbus_adaptor(adaptor_files
     ${CMAKE_SOURCE_DIR}/tests/dbus-types/org.freedesktop.Accounts.xml
     AccountsMock.h
-    ubuntu::indicators::testing::AccountsMock
+    ayatana::indicators::testing::AccountsMock
     AccountsMockAdaptor)
 
 add_executable(
