@@ -313,7 +313,7 @@ install(
   RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_LIBEXECDIR}/ayatana-indicator-sound/
 )
 
-if(UNITY_API_FOUND)
+if(LOMIRI_API_FOUND)
 add_subdirectory(gmenuharness)
 endif()
 
