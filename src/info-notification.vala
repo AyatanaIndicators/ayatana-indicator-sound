@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Canonical Ltd.
+ * Copyright 2021 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,7 @@
  *
  * Authors:
  *      Charles Kerr <charles.kerr@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 
 using Notify;
@@ -43,7 +45,7 @@ public class IndicatorSound.InfoNotification: Notification
         n.clear_hints();
         n.set_hint ("x-ayatana-non-shaped-icon", "true");
         n.set_hint ("x-canonical-private-synchronous", "true");
-        n.set_hint ("x-canonical-value-bar-tint", is_high_volume ? "true" : "false");
+        n.set_hint ("x-ayatana-value-bar-tint", is_high_volume ? "true" : "false");
         n.set_hint ("value", ((int32)((volume * 100.0) + 0.5)).clamp(0, 100));
         show_notification ();
     }
