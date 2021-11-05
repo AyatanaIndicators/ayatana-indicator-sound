@@ -520,12 +520,16 @@ public class VolumeControlPulse : VolumeControl
             this.ready = false;
         }
 
-                /* FIXME: Ubuntu Settings Daemon specifics */
+        /* Ubuntu Settings Daemon specifics */
         var props = new Proplist ();
-        props.sets (Proplist.PROP_APPLICATION_NAME, "Ubuntu Audio Settings");
-        props.sets (Proplist.PROP_APPLICATION_ID, "com.canonical.settings.sound");
-        props.sets (Proplist.PROP_APPLICATION_ICON_NAME, "multimedia-volume-control");
-        props.sets (Proplist.PROP_APPLICATION_VERSION, "0.1");
+
+        if (AyatanaCommon.utils_is_unity())
+        {
+            props.sets (Proplist.PROP_APPLICATION_NAME, "Ubuntu Audio Settings");
+            props.sets (Proplist.PROP_APPLICATION_ID, "com.canonical.settings.sound");
+            props.sets (Proplist.PROP_APPLICATION_ICON_NAME, "multimedia-volume-control");
+            props.sets (Proplist.PROP_APPLICATION_VERSION, "0.1");
+        }
 
         reconnect_pulse_dbus ();
 

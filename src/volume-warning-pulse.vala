@@ -2,6 +2,7 @@
  * -*- Mode:Vala; indent-tabs-mode:t; tab-width:4; encoding:utf8 -*-
  *
  * Copyright 2015 Canonical Ltd.
+ * Copyright 2021 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +18,7 @@
  *
  * Authors:
  *      Charles Kerr <charles.kerr@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 
 using PulseAudio;
@@ -195,12 +197,16 @@ public class VolumeWarningPulse : VolumeWarning
     void pulse_reconnect () {
         pulse_disconnect ();
 
-        /* FIXME: Unity Settings Daemon specifics */
+        /* Unity Settings Daemon specifics */
         var props = new Proplist ();
-        props.sets (Proplist.PROP_APPLICATION_NAME, "Ubuntu Audio Settings");
-        props.sets (Proplist.PROP_APPLICATION_ID, "com.canonical.settings.sound");
-        props.sets (Proplist.PROP_APPLICATION_ICON_NAME, "multimedia-volume-control");
-        props.sets (Proplist.PROP_APPLICATION_VERSION, "0.1");
+
+        if (AyatanaCommon.utils_is_unity())
+        {
+            props.sets (Proplist.PROP_APPLICATION_NAME, "Ubuntu Audio Settings");
+            props.sets (Proplist.PROP_APPLICATION_ID, "com.canonical.settings.sound");
+            props.sets (Proplist.PROP_APPLICATION_ICON_NAME, "multimedia-volume-control");
+            props.sets (Proplist.PROP_APPLICATION_VERSION, "0.1");
+        }
 
         _pulse_context = new PulseAudio.Context (_pgloop.get_api(), null, props);
         _pulse_context.set_state_callback (pulse_context_state_callback);
