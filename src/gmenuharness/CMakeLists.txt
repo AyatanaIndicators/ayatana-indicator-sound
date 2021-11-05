@@ -1,4 +1,4 @@
-include_directories(${UNITY_API_INCLUDE_DIRS})
+include_directories(${LOMIRI_API_INCLUDE_DIRS})
 
 include_directories("${CMAKE_SOURCE_DIR}/include")
 

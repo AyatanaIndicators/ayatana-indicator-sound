@@ -325,7 +325,7 @@ add_test(indicator-test
     indicator-test
 )
 
-if(UNITY_API_FOUND)
+if(LOMIRI_API_FOUND)
 add_subdirectory(integration)
 endif()
 add_subdirectory(dbus-types)
