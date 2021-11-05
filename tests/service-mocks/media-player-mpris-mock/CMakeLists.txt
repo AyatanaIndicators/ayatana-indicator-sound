@@ -8,7 +8,7 @@ find_package(Qt5DBus REQUIRED)
 include_directories(${Qt5DBus_INCLUDE_DIRS}
                     "${CMAKE_SOURCE_DIR}/tests/service-mocks")
 
-if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.AccountsService.SecurityPrivacy.xml")
+if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.AccountsService.SecurityPrivacy.xml")
     add_definitions(-DHAS_LOMIRI_ACCTSERVICE_SOUND_SETTINGS)
 endif()
 
