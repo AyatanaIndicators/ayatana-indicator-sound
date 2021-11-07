@@ -45,6 +45,7 @@ requires:
     - valac
     - libaccountsservice-dev
 #    - libayatana-common-dev
+#    - libgmenuharness-dev
     - gobject-introspection
     - libgirepository1.0-dev
     - liblomiri-url-dispatcher-dev
@@ -82,6 +83,7 @@ requires:
     - valac
     - libaccountsservice-dev
 #    - libayatana-common-dev
+#    - libgmenuharness-dev
     - gobject-introspection
     - libgirepository1.0-dev
     - liblomiri-url-dispatcher-dev
@@ -119,6 +121,7 @@ requires:
     - valac
     - libaccountsservice-dev
 #    - libayatana-common-dev
+#    - libgmenuharness-dev
     - gobject-introspection
     - libgirepository1.0-dev
 #    - liblomiri-url-dispatcher-dev
@@ -170,6 +173,16 @@ before_scripts:
   - make install
   - cd -
   - rm -Rf libayatana-common-build/
+  - cd ${START_DIR}
+  - if [ ! -d gmenuharness-build ]; then
+  -     git clone --depth 1  https://gitlab.com/ubports/core/gmenuharness.git gmenuharness-build
+  - fi
+  - cd gmenuharness-build
+  - cmake . -DCMAKE_INSTALL_PREFIX=/usr
+  - make
+  - make install
+  - cd -
+  - rm -Rf gmenuharness-build/
 
 build_scripts:
   - if [ ${DISTRO_NAME} == "debian" ];then
