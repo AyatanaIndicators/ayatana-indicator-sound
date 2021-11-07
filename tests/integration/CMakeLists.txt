@@ -1,9 +1,10 @@
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-#pkg_check_modules(GMENUHARNESS REQUIRED libgmenuharness REQUIRED)
-#include_directories(${GMENUHARNESS_INCLUDE_DIRS})
-include_directories("${CMAKE_SOURCE_DIR}/include")
+if(LOMIRI_API_FOUND)
+    pkg_check_modules(GMENUHARNESS REQUIRED libgmenuharness REQUIRED)
+    include_directories(${GMENUHARNESS_INCLUDE_DIRS})
+endif()
 
 pkg_check_modules(QTDBUSTEST REQUIRED libqtdbustest-1 REQUIRED)
 include_directories(${QTDBUSTEST_INCLUDE_DIRS})
@@ -82,9 +83,8 @@ target_link_libraries(
     ${QTDBUSMOCK_LDFLAGS}
     ${QTDBUSTEST_LDFLAGS}
     ${GMOCK_LIBRARIES}
-#    ${GMENUHARNESS_LDFLAGS}
+    ${GMENUHARNESS_LDFLAGS}
     ${GLIB_LDFLAGS}
-    gmenuharness-shared
 )
 
 add_test(
