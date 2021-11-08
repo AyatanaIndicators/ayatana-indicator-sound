@@ -23,7 +23,7 @@
 
 #include "DBusPropertiesNotifier.h"
 
-namespace ubuntu
+namespace ayatana
 {
 
 namespace indicators
@@ -74,4 +74,4 @@ private:
 
 } // namespace indicators
 
-} // namespace ubuntu
+} // namespace ayatana

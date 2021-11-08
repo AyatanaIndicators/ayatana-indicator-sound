@@ -7,9 +7,9 @@ include_directories(${Qt5DBus_INCLUDE_DIRS}
 
 add_definitions(-DQT_NO_KEYWORDS=1)
 
-if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.AccountsService.Sound.xml")
-    add_definitions(-DHAS_UT_ACCTSERVICE_SOUND_SETTINGS)
-    set(dbusinterface_sound_xml "com.ubuntu.AccountsService.Sound.Mock.xml")
+if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.AccountsService.Sound.xml")
+    add_definitions(-DHAS_LOMIRI_ACCTSERVICE_SOUND_SETTINGS)
+    set(dbusinterface_sound_xml "com.lomiri.AccountsService.Sound.Mock.xml")
 else()
     set(dbusinterface_sound_xml "org.ayatana.AccountsService.Sound.Mock.xml")
 endif()
@@ -22,13 +22,13 @@ qt5_add_dbus_interface(interface_files ${dbusinterface_sound_xml} accountsservic
 qt5_add_dbus_adaptor(adaptor_files
     ${dbusinterface_sound_xml}
     AccountsServiceSoundMock.h
-    ubuntu::indicators::testing::AccountsServiceSoundMock
+    ayatana::indicators::testing::AccountsServiceSoundMock
     AccountsServiceSoundMockAdaptor)
 
 qt5_add_dbus_adaptor(adaptor_files
     ${CMAKE_SOURCE_DIR}/tests/dbus-types/org.freedesktop.Accounts.xml
     AccountsMock.h
-    ubuntu::indicators::testing::AccountsMock
+    ayatana::indicators::testing::AccountsMock
     AccountsMockAdaptor)
 
 add_executable(

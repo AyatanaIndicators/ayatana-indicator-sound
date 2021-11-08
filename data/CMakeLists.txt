@@ -102,7 +102,7 @@ DESTINATION "${POLKIT_LIB_DIR}/localauthority/10-vendor.d"
 # Accounts Service Iface: Greeter Sound
 #######################################
 
-if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.AccountsService.Sound.xml")
+if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.AccountsService.Sound.xml")
 
   # Nothing to do here...
   # Using files from Ubuntu specific package 'accountsservice-ubuntu-schemas'.

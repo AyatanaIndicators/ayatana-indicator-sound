@@ -152,7 +152,7 @@ Files: AUTHORS
  src/gmenuharness/CMakeLists.txt
  tests/CMakeLists.txt
  tests/dbus-types/CMakeLists.txt
- tests/dbus-types/com.ubuntu.AccountsService.Sound.xml
+ tests/dbus-types/com.lomiri.AccountsService.Sound.xml
  tests/dbus-types/org.PulseAudio.Ext.StreamRestore1.xml
  tests/dbus-types/org.ayatana.AccountsService.Sound.xml
  tests/dbus-types/org.freedesktop.Accounts.xml
@@ -166,7 +166,7 @@ Files: AUTHORS
  tests/manual
  tests/service-mocks/CMakeLists.txt
  tests/service-mocks/accounts-mock/CMakeLists.txt
- tests/service-mocks/accounts-mock/com.ubuntu.AccountsService.Sound.Mock.xml
+ tests/service-mocks/accounts-mock/com.lomiri.AccountsService.Sound.Mock.xml
  tests/service-mocks/accounts-mock/org.ayatana.AccountsService.Sound.Mock.xml
  tests/service-mocks/accounts-mock/org.freedesktop.Accounts.Mock.xml
  tests/service-mocks/media-player-mpris-mock/CMakeLists.txt

@@ -26,7 +26,7 @@
 #include "AccountsMock.h"
 #include "AccountsMockAdaptor.h"
 
-using namespace ubuntu::indicators::testing;
+using namespace ayatana::indicators::testing;
 
 int main(int argc, char *argv[])
 {

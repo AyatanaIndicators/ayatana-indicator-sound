@@ -9,7 +9,7 @@ include_directories(${Qt5DBus_INCLUDE_DIRS}
                     "${CMAKE_SOURCE_DIR}/tests/service-mocks")
 
 if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.AccountsService.SecurityPrivacy.xml")
-    add_definitions(-DHAS_UT_ACCTSERVICE_SOUND_SETTINGS)
+    add_definitions(-DHAS_LOMIRI_ACCTSERVICE_SOUND_SETTINGS)
 endif()
 
 add_definitions(-DQT_NO_KEYWORDS=1)
@@ -23,13 +23,13 @@ qt5_add_dbus_interface(interface_files ${dbusinterface_mediaplayermpris_xml} Med
 qt5_add_dbus_adaptor(adaptor_files
     org.mpris.MediaPlayer2.Player.xml
     MediaPlayerMprisMock.h
-    ubuntu::indicators::testing::MediaPlayerMprisMock
+    ayatana::indicators::testing::MediaPlayerMprisMock
     MediaPlayerMprisMockAdaptor)
 
 qt5_add_dbus_adaptor(adaptor_files
     org.mpris.MediaPlayer2.xml
     MediaPlayerMprisMock.h
-    ubuntu::indicators::testing::MediaPlayerMprisMock
+    ayatana::indicators::testing::MediaPlayerMprisMock
     MediaPlayer2MockAdaptor)
 
 add_executable(
