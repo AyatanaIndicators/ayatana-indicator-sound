@@ -122,7 +122,7 @@ requires:
     - valac
     - libaccountsservice-dev
 #    - libayatana-common-dev
-#    - libgmenuharness-dev
+    - libgmenuharness-dev
     - gobject-introspection
     - libgirepository1.0-dev
     - liblomiri-url-dispatcher-dev
@@ -165,6 +165,7 @@ requires:
     - libgirepository1.0-dev
 #    - liblomiri-url-dispatcher-dev
     - libglib2.0-dev
+#    - liblomiri-api-dev
     - libpulse-dev
     - libpulse-mainloop-glib0
     - libnotify-dev
@@ -212,16 +213,38 @@ before_scripts:
   - make install
   - cd -
   - rm -Rf libayatana-common-build/
-  - cd ${START_DIR}
-  - if [ ! -d gmenuharness-build ]; then
-  -     git clone --depth 1  https://gitlab.com/ubports/core/gmenuharness.git gmenuharness-build
+  -
+  - # Ubuntu focal needs lomiri-api, all others have it
+  - if [ ${DISTRO_NAME} == "ubuntu" ] && [ ${DISTRO_VERSION} == "focal"  ]; then
+  -     cd ${START_DIR}
+  -     if [ ! -d lomiri-api-build ]; then
+  -         git clone --depth 1  https://gitlab.com/ubports/core/lomiri-api.git lomiri-api-build
+  -     fi
+  -     cd lomiri-api-build
+  -     mkdir build/
+  -     cd build/
+  -     cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+  -     make
+  -     make install
+  -     cd -
+  -     rm -Rf lomiri-api-build/
   - fi
-  - cd gmenuharness-build
-  - cmake . -DCMAKE_INSTALL_PREFIX=/usr
-  - make
-  - make install
-  - cd -
-  - rm -Rf gmenuharness-build/
+  -
+  - # Debian bookworm (testing) and Ubuntu jammy have lomiri-api and gmenuharness by default
+  - # Debian bullseye (stable) has lomiri-api, but needs gmenuharness
+  - if ([ ${DISTRO_NAME} == "debian" ] && [ ${DISTRO_VERSION} == "stable" ]) ||
+  -    ([ ${DISTRO_NAME} == "ubuntu" ] && [ ${DISTRO_VERSION} == "focal"  ]); then
+  -     cd ${START_DIR}
+  -     if [ ! -d gmenuharness-build ]; then
+  -         git clone --depth 1  https://gitlab.com/ubports/core/gmenuharness.git gmenuharness-build
+  -     fi
+  -     cd gmenuharness-build
+  -     cmake . -DCMAKE_INSTALL_PREFIX=/usr
+  -     make
+  -     make install
+  -     cd -
+  -     rm -Rf gmenuharness-build/
+  - fi
 
 build_scripts:
   - if [ ${DISTRO_NAME} == "debian" ];then
