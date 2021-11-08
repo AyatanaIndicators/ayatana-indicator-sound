@@ -23,7 +23,7 @@ else()
   set (HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS OFF)
 endif()
 
-if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.AccountsService.Sound.xml")
+if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.AccountsService.Sound.xml")
   set (HAVE_UT_ACCTSERVICE_SOUND_SETTINGS ON)
   set (VALA_DEFINE_ACCTSERVICE_SOUND_SETTINGS "--define=HAS_UT_ACCTSERVICE_SOUND_SETTINGS")
 else()
