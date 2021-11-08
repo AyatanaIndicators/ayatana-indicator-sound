@@ -45,7 +45,7 @@ requires:
     - valac
     - libaccountsservice-dev
 #    - libayatana-common-dev
-    - libgmenuharness-dev
+#    - libgmenuharness-dev
     - gobject-introspection
     - libgirepository1.0-dev
     - liblomiri-url-dispatcher-dev
@@ -230,9 +230,9 @@ before_scripts:
   -     rm -Rf lomiri-api-build/
   - fi
   -
-  - # Debian bookworm (testing) and Ubuntu jammy have lomiri-api and gmenuharness by default
-  - # Debian bullseye (stable) has lomiri-api, but needs gmenuharness
-  - if ([ ${DISTRO_NAME} == "debian" ] && [ ${DISTRO_VERSION} == "stable" ]) ||
+  - # Debian unstable and Ubuntu jammy have lomiri-api and gmenuharness by default
+  - # Debian bullseye (stable) and bookworm (testing) have lomiri-api, but need gmenuharness
+  - if ([ ${DISTRO_NAME} == "debian" ]) ||
   -    ([ ${DISTRO_NAME} == "ubuntu" ] && [ ${DISTRO_VERSION} == "focal"  ]); then
   -     cd ${START_DIR}
   -     if [ ! -d gmenuharness-build ]; then
