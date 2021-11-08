@@ -132,7 +132,6 @@ Files: AUTHORS
  data/org.ayatana.indicator.sound
  data/org.ayatana.indicator.sound.AccountsService.policy
  data/org.ayatana.indicator.sound.AccountsService.xml
- data/org.ayatana.indicator.sound.gschema.xml
  data/org.ayatana.sound.gschema.xml
  include/CMakeLists.txt
  include/lomiri/CMakeLists.txt
