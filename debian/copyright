@@ -85,15 +85,7 @@ Files: tests/dbus-types/dbus-action-result.cpp
 Copyright: 2015, Canonical, Ltd.
 License: GPL-3
 
-Files: include/lomiri/gmenuharness/MatchResult.h
- include/lomiri/gmenuharness/MatchUtils.h
- include/lomiri/gmenuharness/MenuItemMatcher.h
- include/lomiri/gmenuharness/MenuMatcher.h
- src/gmenuharness/MatchResult.cpp
- src/gmenuharness/MatchUtils.cpp
- src/gmenuharness/MenuItemMatcher.cpp
- src/gmenuharness/MenuMatcher.cpp
- tests/integration/main.cpp
+Files: tests/integration/main.cpp
 Copyright: 2014, Canonical Ltd.
 License: LGPL-3
 
@@ -149,7 +141,6 @@ Files: AUTHORS
  po/POTFILES.in
  po/POTFILES.skip
  src/CMakeLists.txt
- src/gmenuharness/CMakeLists.txt
  tests/CMakeLists.txt
  tests/dbus-types/CMakeLists.txt
  tests/dbus-types/com.lomiri.AccountsService.Sound.xml
