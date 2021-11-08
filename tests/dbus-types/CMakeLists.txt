@@ -14,8 +14,8 @@ set(dbusinterface_accounts_xml "org.freedesktop.Accounts.xml")
 set_source_files_properties(${dbusinterface_accounts_xml} PROPERTIES
   CLASSNAME AccountsInterface)
 
-if(EXISTS "/usr/share/accountsservice/interfaces/com.ubuntu.AccountsService.Sound.xml")
-    set(dbusinterface_accountssound_xml "com.ubuntu.AccountsService.Sound.xml")
+if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.AccountsService.Sound.xml")
+    set(dbusinterface_accountssound_xml "com.lomiri.AccountsService.Sound.xml")
 else()
     set(dbusinterface_accountssound_xml "org.ayatana.AccountsService.Sound.xml")
 endif()
