@@ -219,13 +219,13 @@ vala_add(ayatana-indicator-sound-service
 
 if(${HAS_LOMIRI_ACCTSERVICE_PRIVACY_SETTINGS})
     vala_add(ayatana-indicator-sound-service
-          accounts-service-system-sound-settings.vala
+          accounts-service-privacy-settings.vala
     )
 endif()
 
 if(${HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS})
     vala_add(ayatana-indicator-sound-service
-          accounts-service-privacy-settings.vala
+          accounts-service-system-sound-settings.vala
     )
 endif()
 
