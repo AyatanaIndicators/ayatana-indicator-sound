@@ -105,7 +105,7 @@ DESTINATION "${POLKIT_LIB_DIR}/localauthority/10-vendor.d"
 if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.AccountsService.Sound.xml")
 
   # Nothing to do here...
-  # Using files from Ubuntu specific package 'accountsservice-ubuntu-schemas'.
+  # Using files from Lomiri specific package 'lomiri-schemas'.
 
 else()
 
