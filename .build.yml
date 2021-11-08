@@ -45,6 +45,45 @@ requires:
     - valac
     - libaccountsservice-dev
 #    - libayatana-common-dev
+    - libgmenuharness-dev
+    - gobject-introspection
+    - libgirepository1.0-dev
+    - liblomiri-url-dispatcher-dev
+    - libglib2.0-dev
+    - liblomiri-api-dev
+    - libpulse-dev
+    - libpulse-mainloop-glib0
+    - libnotify-dev
+    - libgee-0.8-dev
+    - libxml2-dev
+    - pulseaudio
+    - qtbase5-dev
+    - qtbase5-dev-tools
+    - qtdeclarative5-dev
+    - qtdeclarative5-dev-tools
+    - systemd
+    - dbus-test-runner
+    - libgtest-dev
+    - libdbustest1-dev
+    - libqtdbusmock1-dev
+    - libqtdbustest1-dev
+    - python3-dbusmock
+
+  debian:stable:
+    # Useful URL: https://salsa.debian.org/debian-ayatana-team/ayatana-indicator-sound
+    - clang
+    - clang-tools
+    - g++
+    - cppcheck
+    - git
+    - cmake
+    - cmake-extras
+    - dbus
+    - gir1.2-accountsservice-1.0
+    - intltool
+    - valac
+    - libaccountsservice-dev
+#    - libayatana-common-dev
 #    - libgmenuharness-dev
     - gobject-introspection
     - libgirepository1.0-dev
