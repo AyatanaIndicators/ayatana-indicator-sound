@@ -44,7 +44,7 @@ public class IndicatorSound.Service: Object {
             this.update_notification();
         });
 
-        this.settings = new Settings ("org.ayatana.indicator.sound");
+        this.settings = new Settings ("com.lomiri.indicator.sound");
 
         this.settings.bind ("visible", this, "visible", SettingsBindFlags.GET);
         this.notify["visible"].connect ( () => this.update_root_icon () );

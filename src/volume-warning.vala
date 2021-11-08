@@ -132,7 +132,7 @@ public abstract class VolumeWarning : Object
     *** HIGH VOLUME APPROVED PROPERTY
     **/
 
-    private Settings _settings = new Settings ("org.ayatana.indicator.sound");
+    private Settings _settings = new Settings ("com.lomiri.indicator.sound");
     private const string TTL_KEY = "warning-volume-confirmation-ttl";
     private uint _approved_timer = 0;
     private int64 _approved_at = 0;

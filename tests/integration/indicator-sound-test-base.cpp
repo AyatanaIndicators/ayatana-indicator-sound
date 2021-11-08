@@ -170,7 +170,7 @@ bool IndicatorSoundTestBase::clearGSettingsPlayers()
 
     clearPlayers.start("gsettings", QStringList()
                                         << "set"
-                                        << "org.ayatana.indicator.sound"
+                                        << "com.lomiri.indicator.sound"
                                         << "interested-media-players"
                                         << "[]");
 

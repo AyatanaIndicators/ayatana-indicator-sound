@@ -30,7 +30,7 @@ public class IndicatorSound.OptionsGSettings : Options
     ~OptionsGSettings() {
     }
 
-        private Settings _settings = new Settings ("org.ayatana.indicator.sound");
+        private Settings _settings = new Settings ("com.lomiri.indicator.sound");
 #if HAS_LOMIRI_SOUND_SCHEMA
         private Settings _shared_settings = new Settings ("com.lomiri.sound");
 #else
