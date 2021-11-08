@@ -33,9 +33,9 @@ add_custom_target (
 # and help the tests to find that file by setting -DSCHEMA_DIR
 set (XDG_DATA_DIRS "${CMAKE_CURRENT_BINARY_DIR}/gsettings-schemas")
 set (SCHEMA_DIR "${XDG_DATA_DIRS}/glib-2.0/schemas")
-if (EXISTS /usr/share/glib-2.0/schemas/com.ubuntu.sound.gschema.xml)
-  set (SOUND_SCHEMA /usr/share/glib-2.0/schemas/com.ubuntu.sound.gschema.xml)
-  add_definitions ( -DHAS_UBUNTU_SOUND_SCHEMA )
+if (EXISTS /usr/share/glib-2.0/schemas/com.lomiri.sound.gschema.xml)
+  set (SOUND_SCHEMA /usr/share/glib-2.0/schemas/com.lomiri.sound.gschema.xml)
+  add_definitions ( -DHAS_LOMIRI_SOUND_SCHEMA )
 else()
   set (SOUND_SCHEMA  ${CMAKE_SOURCE_DIR}/data/org.ayatana.sound.gschema.xml)
 endif()

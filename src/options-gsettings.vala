@@ -22,25 +22,25 @@ using PulseAudio;
 
 public class IndicatorSound.OptionsGSettings : Options
 {
-	public OptionsGSettings() {
-        	init_max_volume();
-        	init_loud_volume();
-	}
+    public OptionsGSettings() {
+            init_max_volume();
+            init_loud_volume();
+    }
 
-	~OptionsGSettings() {
-	}
+    ~OptionsGSettings() {
+    }
 
         private Settings _settings = new Settings ("org.ayatana.indicator.sound");
-#if HAS_UBUNTU_SOUND_SCHEMA
-        private Settings _shared_settings = new Settings ("com.ubuntu.sound");
+#if HAS_LOMIRI_SOUND_SCHEMA
+        private Settings _shared_settings = new Settings ("com.lomiri.sound");
 #else
         private Settings _shared_settings = new Settings ("org.ayatana.sound");
 #endif
         /** MAX VOLUME PROPERTY **/
 
-	private const string AMP_dB_KEY = "amplified-volume-decibels";
-	private const string NORMAL_dB_KEY = "normal-volume-decibels";
-	private const string ALLOW_AMP_KEY = "allow-amplified-volume";
+    private const string AMP_dB_KEY = "amplified-volume-decibels";
+    private const string NORMAL_dB_KEY = "normal-volume-decibels";
+    private const string ALLOW_AMP_KEY = "allow-amplified-volume";
 
         private void init_max_volume() {
                 _settings.changed[NORMAL_dB_KEY].connect(() => update_max_volume());
@@ -67,24 +67,24 @@ public class IndicatorSound.OptionsGSettings : Options
         }
 
 
-	/** LOUD VOLUME **/
+    /** LOUD VOLUME **/
 
-	private const string LOUD_ENABLED_KEY = "warning-volume-enabled";
-	private const string LOUD_DECIBEL_KEY = "warning-volume-decibels";
+    private const string LOUD_ENABLED_KEY = "warning-volume-enabled";
+    private const string LOUD_DECIBEL_KEY = "warning-volume-decibels";
 
         private void init_loud_volume() {
                 _settings.changed[LOUD_ENABLED_KEY].connect(() => update_loud_volume());
                 _settings.changed[LOUD_DECIBEL_KEY].connect(() => update_loud_volume());
-		update_loud_volume();
-	}
-	private void update_loud_volume() {
+        update_loud_volume();
+    }
+    private void update_loud_volume() {
 
-		var vol = PulseAudio.Volume.sw_from_dB (_settings.get_double (LOUD_DECIBEL_KEY));
-		if (loud_volume != vol)
-			loud_volume = vol;
+        var vol = PulseAudio.Volume.sw_from_dB (_settings.get_double (LOUD_DECIBEL_KEY));
+        if (loud_volume != vol)
+            loud_volume = vol;
 
-		var enabled = _settings.get_boolean(LOUD_ENABLED_KEY);
-		if (loud_warning_enabled != enabled)
-			loud_warning_enabled = enabled;
+        var enabled = _settings.get_boolean(LOUD_ENABLED_KEY);
+        if (loud_warning_enabled != enabled)
+            loud_warning_enabled = enabled;
         }
 }
