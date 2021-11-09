@@ -43,9 +43,9 @@ public class IndicatorSound.InfoNotification: Notification
         var n = _notification;
         n.update (_("Volume"), volume_label, icon);
         n.clear_hints();
-        n.set_hint ("x-ayatana-non-shaped-icon", "true");
+        n.set_hint ("x-lomiri-non-shaped-icon", "true");
         n.set_hint ("x-canonical-private-synchronous", "true");
-        n.set_hint ("x-ayatana-value-bar-tint", is_high_volume ? "true" : "false");
+        n.set_hint ("x-lomiri-value-bar-tint", is_high_volume ? "true" : "false");
         n.set_hint ("value", ((int32)((volume * 100.0) + 0.5)).clamp(0, 100));
         show_notification ();
     }

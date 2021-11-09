@@ -644,13 +644,13 @@ void IndicatorSoundTestBase::checkVolumeNotification(double volume, QString cons
     QVariantMap hints;
     ASSERT_TRUE(qDBusArgumentToMap(args.at(6), hints));
     ASSERT_TRUE(hints.contains("value"));
-    ASSERT_TRUE(hints.contains("x-ayatana-non-shaped-icon"));
-    ASSERT_TRUE(hints.contains("x-ayatana-value-bar-tint"));
+    ASSERT_TRUE(hints.contains("x-lomiri-non-shaped-icon"));
+    ASSERT_TRUE(hints.contains("x-lomiri-value-bar-tint"));
     ASSERT_TRUE(hints.contains("x-canonical-private-synchronous"));
 
     EXPECT_EQ(volume*100, hints["value"]);
-    EXPECT_EQ(true, hints["x-ayatana-non-shaped-icon"]);
-    EXPECT_EQ(isLoud, hints["x-ayatana-value-bar-tint"]);
+    EXPECT_EQ(true, hints["x-lomiri-non-shaped-icon"]);
+    EXPECT_EQ(isLoud, hints["x-lomiri-value-bar-tint"]);
     EXPECT_EQ(true, hints["x-canonical-private-synchronous"]);
 }
 

@@ -427,7 +427,7 @@ TEST_F(NotificationsTest, DISABLED_HighVolume) {
     ASSERT_EQ(1, notev.size());
     EXPECT_EQ("Volume", notev[0].summary);
     EXPECT_EQ("Speakers", notev[0].body);
-    EXPECT_GVARIANT_EQ("@s 'false'", notev[0].hints["x-ayatana-value-bar-tint"]);
+    EXPECT_GVARIANT_EQ("@s 'false'", notev[0].hints["x-lomiri-value-bar-tint"]);
 
     /* Set high volume with volume change */
     notifications->clearNotifications();
@@ -438,7 +438,7 @@ TEST_F(NotificationsTest, DISABLED_HighVolume) {
     ASSERT_LT(0, notev.size()); /* This passes with one or two since it would just be an update to the first if a second was sent */
     EXPECT_EQ("Volume", notev[0].summary);
     EXPECT_EQ("Speakers", notev[0].body);
-    EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-ayatana-value-bar-tint"]);
+    EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-lomiri-value-bar-tint"]);
 
     /* Move it back */
     volume_warning_mock_set_high_volume(VOLUME_WARNING_MOCK(volumeWarning.get()), false);
@@ -454,7 +454,7 @@ TEST_F(NotificationsTest, DISABLED_HighVolume) {
     ASSERT_EQ(1, notev.size());
     EXPECT_EQ("Volume", notev[0].summary);
     EXPECT_EQ("Speakers", notev[0].body);
-    EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-ayatana-value-bar-tint"]);
+    EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-lomiri-value-bar-tint"]);
 }
 
 TEST_F(NotificationsTest, DISABLED_MenuHide) {
@@ -621,13 +621,13 @@ TEST_F(NotificationsTest, DISABLED_TriggerWarning) {
         if (warning_expected) {
             EXPECT_TRUE(volume_warning_get_active(volumeWarning.get()));
             ASSERT_EQ(1, notev.size());
-            EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-ayatana-snap-decisions"]);
+            EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-lomiri-snap-decisions"]);
             EXPECT_GVARIANT_EQ(nullptr, notev[0].hints["x-canonical-private-synchronous"]);
         }
         else {
             EXPECT_FALSE(volume_warning_get_active(volumeWarning.get()));
             ASSERT_EQ(1, notev.size());
-            EXPECT_GVARIANT_EQ(nullptr, notev[0].hints["x-ayatana-snap-decisions"]);
+            EXPECT_GVARIANT_EQ(nullptr, notev[0].hints["x-lomiri-snap-decisions"]);
             EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-private-synchronous"]);
         }
 
