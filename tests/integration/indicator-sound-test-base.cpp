@@ -179,18 +179,20 @@ bool IndicatorSoundTestBase::clearGSettingsPlayers()
 
 bool IndicatorSoundTestBase::resetAllowAmplifiedVolume()
 {
+#if HAS_LOMIRI_SOUND_SCHEMA
     QProcess proc;
 
     proc.start("gsettings", QStringList()
                                 << "reset"
-#ifdef HAS_LOMIRI_SOUND_SCHEMA
+
                                 << "com.lomiri.sound"
-#else
-                                << "org.ayatana.sound"
-#endif
+
                                 << "allow-amplified-volume");
 
     return runProcess(proc);
+#else
+    return TRUE;
+#endif
 }
 
 bool IndicatorSoundTestBase::runProcess(QProcess& proc)
