@@ -122,13 +122,10 @@ Files: AUTHORS
  ChangeLog
  NEWS
  README
- data/50-org.ayatana.AccountsService.Sound.pkla
  data/50-org.ayatana.indicator.sound.AccountsService.pkla
  data/CMakeLists.txt
  data/ayatana-indicator-sound.desktop.in
  data/ayatana-indicator-sound.service.in
- data/org.ayatana.AccountsService.Sound.policy
- data/org.ayatana.AccountsService.Sound.xml
  data/org.ayatana.indicator.sound
  data/org.ayatana.indicator.sound.AccountsService.policy
  data/org.ayatana.indicator.sound.AccountsService.xml
@@ -144,7 +141,6 @@ Files: AUTHORS
  tests/dbus-types/CMakeLists.txt
  tests/dbus-types/com.lomiri.AccountsService.Sound.xml
  tests/dbus-types/org.PulseAudio.Ext.StreamRestore1.xml
- tests/dbus-types/org.ayatana.AccountsService.Sound.xml
  tests/dbus-types/org.freedesktop.Accounts.xml
  tests/dbus-types/org.freedesktop.DBus.Properties.xml
  tests/dbus-types/org.freedesktop.Notifications.xml
@@ -157,7 +153,6 @@ Files: AUTHORS
  tests/service-mocks/CMakeLists.txt
  tests/service-mocks/accounts-mock/CMakeLists.txt
  tests/service-mocks/accounts-mock/com.lomiri.AccountsService.Sound.Mock.xml
- tests/service-mocks/accounts-mock/org.ayatana.AccountsService.Sound.Mock.xml
  tests/service-mocks/accounts-mock/org.freedesktop.Accounts.Mock.xml
  tests/service-mocks/media-player-mpris-mock/CMakeLists.txt
  tests/service-mocks/media-player-mpris-mock/applications/testplayer1.desktop
