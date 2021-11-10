@@ -63,6 +63,12 @@ pkg_check_modules(
 include_directories(${SOUNDSERVICE_INCLUDE_DIRS})
 
 pkg_check_modules(LOMIRI_API liblomiri-api>=0.1.1)
+pkg_check_modules(LOMIRI_SCHEMAS lomiri-schemas)
+
+# FIXME: Drop this block once lomiri-schemas has all the schemas: https://gitlab.com/ubports/core/lomiri-schemas/-/merge_requests/1
+if(LOMIRI_SCHEMAS_FOUND AND NOT EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.AccountsService.Sound.xml")
+    set(LOMIRI_SCHEMAS_FOUND FALSE)
+endif()
 
 include_directories(${TEST_INCLUDE_DIRS})
 

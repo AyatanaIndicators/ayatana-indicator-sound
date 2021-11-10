@@ -6,24 +6,10 @@ set(HEADER_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.h")
 set(SYMBOLS_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.def")
 set(VAPI_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.vapi")
 
-if(EXISTS "/usr/share/glib-2.0/schemas/com.lomiri.sound.gschema.xml")
-  set (VALA_DEFINE_LOMIRI_SOUND_SCHEMA "--define=HAS_LOMIRI_SOUND_SCHEMA")
-endif()
-
-if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.touch.AccountsService.SecurityPrivacy.xml")
-  set (HAS_LOMIRI_ACCTSERVICE_PRIVACY_SETTINGS ON)
+if(LOMIRI_SCHEMAS_FOUND)
+  set (VALA_DEFINE_HAS_LOMIRI_SCHEMAS "--define=HAS_LOMIRI_SCHEMAS")
   set (VALA_FILE_ACCTSERVICE_PRIVACY_SETTINGS "accounts-service-privacy-settings")
-  set (VALA_DEFINE_ACCTSERVICE_PRIVACY_SETTINGS "--define=HAS_LOMIRI_ACCTSERVICE_PRIVACY_SETTINGS")
-else()
-  set (HAS_LOMIRI_ACCTSERVICE_PRIVACY_SETTINGS OFF)
-endif()
-
-if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.touch.AccountsService.Sound.xml")
-  set (HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS ON)
   set (VALA_FILE_ACCTSERVICE_SYSTEMSOUND_SETTINGS "accounts-service-system-sound-settings")
-  set (VALA_DEFINE_ACCTSERVICE_SYSTEMSOUND_SETTINGS "--define=HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS")
-else()
-  set (HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS OFF)
 endif()
 
 vapi_gen(accounts-service
@@ -55,9 +41,7 @@ vala_init(ayatana-indicator-sound-service
     --vapidir=${CMAKE_SOURCE_DIR}/vapi/
     --vapidir=.
     --pkg=bus-watcher
-    ${VALA_DEFINE_LOMIRI_SOUND_SCHEMA}
-    ${VALA_DEFINE_ACCTSERVICE_PRIVACY_SETTINGS}
-    ${VALA_DEFINE_ACCTSERVICE_SYSTEMSOUND_SETTINGS}
+    ${VALA_DEFINE_HAS_LOMIRI_SCHEMAS}
 )
 
 vala_add(ayatana-indicator-sound-service
@@ -212,13 +196,11 @@ vala_add(ayatana-indicator-sound-service
   accounts-service-sound-settings.vala
 )
 
-if(${HAS_LOMIRI_ACCTSERVICE_PRIVACY_SETTINGS})
+if(LOMIRI_SCHEMAS_FOUND)
     vala_add(ayatana-indicator-sound-service
           accounts-service-privacy-settings.vala
     )
-endif()
 
-if(${HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS})
     vala_add(ayatana-indicator-sound-service
           accounts-service-system-sound-settings.vala
     )

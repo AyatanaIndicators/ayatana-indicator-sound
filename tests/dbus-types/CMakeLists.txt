@@ -14,7 +14,7 @@ set(dbusinterface_accounts_xml "org.freedesktop.Accounts.xml")
 set_source_files_properties(${dbusinterface_accounts_xml} PROPERTIES
   CLASSNAME AccountsInterface)
 
-if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.AccountsService.Sound.xml")
+if(LOMIRI_SCHEMAS_FOUND)
     set_source_files_properties("com.lomiri.AccountsService.Sound.xml" PROPERTIES
       CLASSNAME AccountsSoundInterface)
 endif()
@@ -38,7 +38,7 @@ qt5_add_dbus_interface(interface_files ${dbusinterface_streamrestore_xml} stream
 qt5_add_dbus_interface(interface_files ${dbusinterface_properties_xml} dbus_properties_interface)
 qt5_add_dbus_interface(interface_files ${dbusinterface_accounts_xml} dbus_accounts_interface)
 
-if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.AccountsService.Sound.xml")
+if(LOMIRI_SCHEMAS_FOUND)
     qt5_add_dbus_interface("com.lomiri.AccountsService.Sound.xml" dbus_accountssound_interface)
 endif()
 

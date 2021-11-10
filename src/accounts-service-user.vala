@@ -23,10 +23,8 @@ public class AccountsServiceUser : Object {
     Act.UserManager accounts_manager = Act.UserManager.get_default();
     Act.User? user = null;
     AccountsServiceSoundSettings? proxy = null;
-#if HAS_LOMIRI_ACCTSERVICE_PRIVACY_SETTINGS
+#if HAS_LOMIRI_SCHEMAS
     AccountsServicePrivacySettings? privacyproxy = null;
-#endif
-#if HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS
     AccountsServiceSystemSoundSettings? syssoundproxy = null;
 #endif
     uint timer = 0;
@@ -42,7 +40,7 @@ public class AccountsServiceUser : Object {
         }
         set {
             _silentMode = value;
-#if HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS
+#if HAS_LOMIRI_SCHEMAS
             if (syssoundproxy != null)
                 syssoundproxy.silent_mode = value;
 #endif
@@ -149,7 +147,7 @@ public class AccountsServiceUser : Object {
                 DBusProxyFlags.GET_INVALIDATED_PROPERTIES,
                 null,
                 new_sound_proxy);
-#if HAS_LOMIRI_ACCTSERVICE_PRIVACY_SETTINGS
+#if HAS_LOMIRI_SCHEMAS
             Bus.get_proxy.begin<AccountsServicePrivacySettings> (
                 BusType.SYSTEM,
                 "org.freedesktop.Accounts",
@@ -159,7 +157,7 @@ public class AccountsServiceUser : Object {
                 new_privacy_proxy);
 #endif
 
-#if HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS
+#if HAS_LOMIRI_SCHEMAS
             Bus.get_proxy.begin<AccountsServiceSystemSoundSettings> (
                 BusType.SYSTEM,
                 "org.freedesktop.Accounts",
@@ -191,7 +189,7 @@ public class AccountsServiceUser : Object {
         }
     }
 
-#if HAS_LOMIRI_ACCTSERVICE_PRIVACY_SETTINGS
+#if HAS_LOMIRI_SCHEMAS
     void new_privacy_proxy (GLib.Object? obj, AsyncResult res) {
         try {
             this.privacyproxy = Bus.get_proxy.end (res);
@@ -216,7 +214,7 @@ public class AccountsServiceUser : Object {
     }
 #endif
 
-#if HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS
+#if HAS_LOMIRI_SCHEMAS
     void new_system_sound_proxy (GLib.Object? obj, AsyncResult res) {
         try {
             this.syssoundproxy = Bus.get_proxy.end (res);

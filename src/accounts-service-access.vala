@@ -143,7 +143,7 @@ public class AccountsServiceAccess : Object
             string user_path;
             if (user_path_variant.check_format_string ("(o)", true)) {
                 user_path_variant.get ("(o)", out user_path);
-#if HAS_LOMIRI_SOUND_SCHEMA
+#if HAS_LOMIRI_SCHEMAS
                 _user_proxy = yield new DBusProxy.for_bus (BusType.SYSTEM, DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, "org.freedesktop.Accounts", user_path, "com.lomiri.AccountsService.Sound");
 #endif
             } else {
