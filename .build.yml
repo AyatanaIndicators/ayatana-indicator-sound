@@ -46,6 +46,7 @@ requires:
     - libaccountsservice-dev
 #    - libayatana-common-dev
 #    - libgmenuharness-dev
+#    - lomiri-schemas
     - gobject-introspection
     - libgirepository1.0-dev
     - liblomiri-url-dispatcher-dev
@@ -85,6 +86,7 @@ requires:
     - libaccountsservice-dev
 #    - libayatana-common-dev
 #    - libgmenuharness-dev
+#    - lomiri-schemas
     - gobject-introspection
     - libgirepository1.0-dev
     - liblomiri-url-dispatcher-dev
@@ -122,6 +124,7 @@ requires:
     - valac
     - libaccountsservice-dev
 #    - libayatana-common-dev
+#    - lomiri-schemas
     - libgmenuharness-dev
     - gobject-introspection
     - libgirepository1.0-dev
@@ -161,6 +164,7 @@ requires:
     - libaccountsservice-dev
 #    - libayatana-common-dev
 #    - libgmenuharness-dev
+#    - lomiri-schemas
     - gobject-introspection
     - libgirepository1.0-dev
 #    - liblomiri-url-dispatcher-dev
@@ -213,6 +217,17 @@ before_scripts:
   - make install
   - cd -
   - rm -Rf libayatana-common-build/
+  -
+  - cd ${START_DIR}
+  - if [ ! -d lomiri-schemas-build ]; then
+  -     git clone --depth 1  https://gitlab.com/ubports/core/lomiri-schemas.git lomiri-schemas-build
+  - fi
+  - cd lomiri-schemas-build
+  - cmake . -DCMAKE_INSTALL_PREFIX=/usr
+  - make
+  - make install
+  - cd -
+  - rm -Rf lomiri-schemas-build/
   -
   - # Ubuntu focal needs lomiri-api, all others have it
   - if [ ${DISTRO_NAME} == "ubuntu" ] && [ ${DISTRO_VERSION} == "focal"  ]; then

@@ -66,10 +66,6 @@ install(
 
 add_schema ("org.ayatana.indicator.sound.gschema.xml")
 
-if(NOT EXISTS /usr/share/glib-2.0/schemas/com.lomiri.sound.gschema.xml)
-  add_schema ("org.ayatana.sound.gschema.xml")
-endif()
-
 #########################################
 # Accounts Service Iface: Sound Indicator
 #########################################

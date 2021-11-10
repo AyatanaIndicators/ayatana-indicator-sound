@@ -1,6 +1,7 @@
 /*
  * -*- Mode:Vala; indent-tabs-mode:t; tab-width:4; encoding:utf8 -*-
  * Copyright 2015 Canonical Ltd.
+ * Copyright 2021 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +17,7 @@
  *
  * Authors:
  *      Charles Kerr <charles.kerr@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 
 using PulseAudio;
@@ -33,8 +35,6 @@ public class IndicatorSound.OptionsGSettings : Options
         private Settings _settings = new Settings ("org.ayatana.indicator.sound");
 #if HAS_LOMIRI_SOUND_SCHEMA
         private Settings _shared_settings = new Settings ("com.lomiri.sound");
-#else
-        private Settings _shared_settings = new Settings ("org.ayatana.sound");
 #endif
         /** MAX VOLUME PROPERTY **/
 
@@ -45,7 +45,9 @@ public class IndicatorSound.OptionsGSettings : Options
         private void init_max_volume() {
                 _settings.changed[NORMAL_dB_KEY].connect(() => update_max_volume());
                 _settings.changed[AMP_dB_KEY].connect(() => update_max_volume());
+#if HAS_LOMIRI_SOUND_SCHEMA
                 _shared_settings.changed[ALLOW_AMP_KEY].connect(() => update_max_volume());
+#endif
                 update_max_volume();
         }
         private void update_max_volume () {
@@ -58,9 +60,13 @@ public class IndicatorSound.OptionsGSettings : Options
                 }
         }
         private double calculate_max_volume () {
+#if HAS_LOMIRI_SOUND_SCHEMA
                 unowned string decibel_key = _shared_settings.get_boolean(ALLOW_AMP_KEY)
                         ? AMP_dB_KEY
                         : NORMAL_dB_KEY;
+#else
+                unowned string decibel_key = NORMAL_dB_KEY;
+#endif
                 var volume_dB = _settings.get_double(decibel_key);
                 var volume_sw = PulseAudio.Volume.sw_from_dB (volume_dB);
                 return VolumeControlPulse.volume_to_double (volume_sw);
