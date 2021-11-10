@@ -26,10 +26,6 @@ else()
   set (HAS_LOMIRI_ACCTSERVICE_SYSTEMSOUND_SETTINGS OFF)
 endif()
 
-if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.AccountsService.Sound.xml")
-  set (VALA_DEFINE_ACCTSERVICE_SOUND_SETTINGS "--define=HAS_LOMIRI_ACCTSERVICE_SOUND_SETTINGS")
-endif()
-
 vapi_gen(accounts-service
     LIBRARY
         accounts-service
@@ -61,7 +57,6 @@ vala_init(ayatana-indicator-sound-service
     --pkg=bus-watcher
     ${VALA_DEFINE_LOMIRI_SOUND_SCHEMA}
     ${VALA_DEFINE_ACCTSERVICE_PRIVACY_SETTINGS}
-    ${VALA_DEFINE_ACCTSERVICE_SOUND_SETTINGS}
     ${VALA_DEFINE_ACCTSERVICE_SYSTEMSOUND_SETTINGS}
 )
 

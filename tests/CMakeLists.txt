@@ -322,7 +322,7 @@ add_test(indicator-test
     indicator-test
 )
 
-if(LOMIRI_API_FOUND)
+if (LOMIRI_API_FOUND AND EXISTS "/usr/share/glib-2.0/schemas/com.lomiri.sound.gschema.xml")
 add_subdirectory(integration)
 endif()
 add_subdirectory(dbus-types)

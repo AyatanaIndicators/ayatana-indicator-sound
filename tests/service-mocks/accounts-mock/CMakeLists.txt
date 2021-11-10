@@ -6,13 +6,7 @@ include_directories(${Qt5DBus_INCLUDE_DIRS}
                     "${CMAKE_SOURCE_DIR}/tests/service-mocks")
 
 add_definitions(-DQT_NO_KEYWORDS=1)
-
-if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.AccountsService.Sound.xml")
-    add_definitions(-DHAS_LOMIRI_ACCTSERVICE_SOUND_SETTINGS)
-    set(dbusinterface_sound_xml "com.lomiri.AccountsService.Sound.Mock.xml")
-else()
-    set(dbusinterface_sound_xml "org.ayatana.AccountsService.Sound.Mock.xml")
-endif()
+set(dbusinterface_sound_xml "com.lomiri.AccountsService.Sound.Mock.xml")
 
 set_source_files_properties(${dbusinterface_sound_xml} PROPERTIES
   CLASSNAME AccountsServiceSoundMockInterface)

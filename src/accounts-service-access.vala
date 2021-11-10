@@ -143,10 +143,8 @@ public class AccountsServiceAccess : Object
             string user_path;
             if (user_path_variant.check_format_string ("(o)", true)) {
                 user_path_variant.get ("(o)", out user_path);
-#if HAS_LOMIRI_ACCTSERVICE_SOUND_SETTINGS
+#if HAS_LOMIRI_SOUND_SCHEMA
                 _user_proxy = yield new DBusProxy.for_bus (BusType.SYSTEM, DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, "org.freedesktop.Accounts", user_path, "com.lomiri.AccountsService.Sound");
-#else
-                _user_proxy = yield new DBusProxy.for_bus (BusType.SYSTEM, DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, "org.freedesktop.Accounts", user_path, "org.ayatana.AccountsService.Sound");
 #endif
             } else {
                 warning ("Unable to find user name after calling FindUserByName. Expected type: %s and obtained %s", "(o)", user_path_variant.get_type_string () );
@@ -157,20 +155,23 @@ public class AccountsServiceAccess : Object
             return;
         }
 
-        // Get current values and listen for changes
-        _user_proxy.g_properties_changed.connect (accountsservice_props_changed_cb);
-        try {
-            var props_variant = yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "GetAll", new Variant ("(s)", _user_proxy.get_interface_name ()), null, DBusCallFlags.NONE, -1);
-            if (props_variant.check_format_string ("(@a{sv})", true)) {
-                Variant props;
-                props_variant.get ("(@a{sv})", out props);
-                accountsservice_props_changed_cb(_user_proxy, props, null);
-            } else {
-                warning ("Unable to get accounts service properties after calling GetAll. Expected type: %s and obtained %s", "(@a{sv})", props_variant.get_type_string () );
-                return;
+        if (_user_proxy != null)
+        {
+            // Get current values and listen for changes
+            _user_proxy.g_properties_changed.connect (accountsservice_props_changed_cb);
+            try {
+                var props_variant = yield _user_proxy.get_connection ().call (_user_proxy.get_name (), _user_proxy.get_object_path (), "org.freedesktop.DBus.Properties", "GetAll", new Variant ("(s)", _user_proxy.get_interface_name ()), null, DBusCallFlags.NONE, -1);
+                if (props_variant.check_format_string ("(@a{sv})", true)) {
+                    Variant props;
+                    props_variant.get ("(@a{sv})", out props);
+                    accountsservice_props_changed_cb(_user_proxy, props, null);
+                } else {
+                    warning ("Unable to get accounts service properties after calling GetAll. Expected type: %s and obtained %s", "(@a{sv})", props_variant.get_type_string () );
+                    return;
+                }
+            } catch (GLib.Error e) {
+                debug("Unable to get properties for user %s at first try: %s", username, e.message);
             }
-        } catch (GLib.Error e) {
-            debug("Unable to get properties for user %s at first try: %s", username, e.message);
         }
     }
 

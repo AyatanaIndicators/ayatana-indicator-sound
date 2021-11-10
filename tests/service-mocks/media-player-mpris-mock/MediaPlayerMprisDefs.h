@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2015 Canonical, Ltd.
+ * Copyright (C) 2021 Robert Tari
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -13,7 +14,9 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Author: Xavi Garcia <xavi.garcia.mena@canonical.com>
+ * Authors:
+ *      Xavi Garcia <xavi.garcia.mena@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 #pragma once
 
@@ -28,11 +31,8 @@ namespace testing
     constexpr const char MEDIA_PLAYER_MPRIS_SERVICE[] = "org.freedesktop.Accounts";
     constexpr const char USER_PATH[] = "/org/freedesktop/Accounts/UserTest";
     constexpr const char ACCOUNTS_PATH[] = "/org/freedesktop/Accounts";
-#ifdef HAS_LOMIRI_ACCTSERVICE_SOUND_SETTINGS
     constexpr const char ACCOUNTS_SOUND_INTERFACE[] = "com.lomiri.AccountsService.Sound";
-#else
-    constexpr const char ACCOUNTS_SOUND_INTERFACE[] = "org.ayatana.AccountsService.Sound";
-#endif
+
 } // namespace testing
 
 } // namespace indicators

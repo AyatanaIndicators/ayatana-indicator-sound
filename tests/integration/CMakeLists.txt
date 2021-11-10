@@ -38,10 +38,6 @@ add_definitions(-DSOUND_SERVICE_BIN="${CMAKE_BINARY_DIR}/src/ayatana-indicator-s
                 -DTEST_HOME="${TEST_HOME}"
 )
 
-if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.AccountsService.Sound.xml")
-    add_definitions(-DHAS_LOMIRI_ACCTSERVICE_SOUND_SETTINGS)
-endif()
-
 set(GLIB_REQUIRED_VERSION 2.26)
 
 pkg_check_modules(

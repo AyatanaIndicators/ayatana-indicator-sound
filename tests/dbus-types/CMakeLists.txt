@@ -15,13 +15,9 @@ set_source_files_properties(${dbusinterface_accounts_xml} PROPERTIES
   CLASSNAME AccountsInterface)
 
 if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.AccountsService.Sound.xml")
-    set(dbusinterface_accountssound_xml "com.lomiri.AccountsService.Sound.xml")
-else()
-    set(dbusinterface_accountssound_xml "org.ayatana.AccountsService.Sound.xml")
+    set_source_files_properties("com.lomiri.AccountsService.Sound.xml" PROPERTIES
+      CLASSNAME AccountsSoundInterface)
 endif()
-
-set_source_files_properties(${dbusinterface_accountssound_xml} PROPERTIES
-  CLASSNAME AccountsSoundInterface)
 
 set(dbusinterface_properties_xml "org.freedesktop.DBus.Properties.xml")
 set_source_files_properties(${dbusinterface_properties_xml} PROPERTIES
@@ -41,7 +37,11 @@ set_source_files_properties(${dbusinterface_notifications_xml} PROPERTIES
 qt5_add_dbus_interface(interface_files ${dbusinterface_streamrestore_xml} stream_restore_interface)
 qt5_add_dbus_interface(interface_files ${dbusinterface_properties_xml} dbus_properties_interface)
 qt5_add_dbus_interface(interface_files ${dbusinterface_accounts_xml} dbus_accounts_interface)
-qt5_add_dbus_interface(interface_files ${dbusinterface_accountssound_xml} dbus_accountssound_interface)
+
+if(EXISTS "/usr/share/accountsservice/interfaces/com.lomiri.AccountsService.Sound.xml")
+    qt5_add_dbus_interface("com.lomiri.AccountsService.Sound.xml" dbus_accountssound_interface)
+endif()
+
 qt5_add_dbus_interface(interface_files ${dbusinterface_actions_xml} dbus_menus_interface)
 qt5_add_dbus_interface(interface_files ${dbusinterface_notifications_xml} dbus_notifications_interface)
 
