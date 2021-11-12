@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2015 Canonical, Ltd.
+ * Copyright (C) 2021 Robert Tari
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -13,7 +14,9 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Author: Xavi Garcia <xavi.garcia.mena@canonical.com>
+ * Authors:
+ *      Xavi Garcia <xavi.garcia.mena@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 
 #include "dbus-pulse-volume.h"
@@ -140,11 +143,7 @@ bool DBusPulseVolume::setVolume(QString const & role, double volume)
         {
             QDBusVariant dbusVar(QVariant::fromValue(volume));
             QDBusReply<void> set_vol = accounts_interface_->call(QLatin1String("Set"),
-#ifdef HAS_LOMIRI_ACCTSERVICE_SOUND_SETTINGS
                                             QVariant::fromValue(QString("com.lomiri.AccountsService.Sound")),
-#else
-                                            QVariant::fromValue(QString("org.ayatana.AccountsService.Sound")),
-#endif
                                             QVariant::fromValue(QString("Volume")),
                                             QVariant::fromValue(dbusVar));
             if (!set_vol.isValid())
