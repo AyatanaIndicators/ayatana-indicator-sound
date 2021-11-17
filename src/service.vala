@@ -217,7 +217,7 @@ public class IndicatorSound.Service: Object {
 
     private void activate_scroll_action (SimpleAction action, Variant? param) {
         int direction = param.get_int32(); // positive for up, negative for down
-        message("scroll: %d", direction);
+        debug("scroll: %d", direction);
 
         if (_volume_warning.active) {
             _volume_warning.user_keypress(direction>0
