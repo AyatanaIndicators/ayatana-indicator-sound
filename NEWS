@@ -1,3 +1,40 @@
+Overview of changes in ayatana-indicator-session 0.9.0
+
+  - Clean up GSetings and AccountsService schema detection and conditional
+    code.
+  - Drop fallback org.ayatana.AccountsService.Sound AccountsService
+    configuration.
+  - Drop data/org.ayatana.sound.gschema.xml fallback GSettings schema.
+  - Rename Lomiri-specific properties to x-lomiri.
+  - Drop local gmenuharness, use it from the system.
+  - data/CMakeLists.txt: Rename accountsservice-ubuntu-schemas to Lomiri
+    namespace.
+  - Restrict com.canonical.settings.sound code to Unity7.
+  - Rename com.ubuntu.AccountsService.SecurityPrivacy to
+    com.lomiri.AccountsSerivce.SecurityPrivacy.
+  - Rename com.ubuntu.AccountsService.Sound to com.lomiri.AccountsSerivce.Sound.
+  - Rename com.ubuntu.sound GSettings schema to com.lomiri.sound.
+  - Rename UNITY_API* to LOMIRI_API*.
+  - src/media-player-user.vala: Rename unity-greeter-session-broadcast to
+    ayatana-greeter-session-broadcast.
+  - Rename x-canonical-value-bar-tint.
+  - Fix undefined VALA_EXTERN.
+  - Update Ayatana IDO names.
+  - Drop lomiri-url-dispatcher dependency.
+  - Replace code with libayatana-common functions.
+  - src/accounts-service-user.vala: Fix possibly null access.
+  - Merge in all improvements from ubuntu-indicator-sound as has been shipped
+    with Ubuntu Touch.
+  - src/service.vala: Display a zenity warning if the audio settings application
+    is not found.
+  - Drop deprecated DBusProxy.create_for_bus.
+  - Fix various comiler warnings.
+  - src/media-player-list-greeter.vala: Avoid possible null value.
+  - Update/add documentation.
+  - Port to CMake.
+  - Add Travis CI configuration.
+  - Translation updates.
+
 Overview of changes in ayatana-indicator-session 0.8.2
 
   - Switch to building against Lomiri (rather than deprecated
