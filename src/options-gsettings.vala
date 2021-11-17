@@ -33,7 +33,7 @@ public class IndicatorSound.OptionsGSettings : Options
     }
 
         private Settings _settings = new Settings ("org.ayatana.indicator.sound");
-#if HAS_LOMIRI_SOUND_SCHEMA
+#if HAS_LOMIRI_SCHEMAS
         private Settings _shared_settings = new Settings ("com.lomiri.sound");
 #endif
         /** MAX VOLUME PROPERTY **/
@@ -45,7 +45,7 @@ public class IndicatorSound.OptionsGSettings : Options
         private void init_max_volume() {
                 _settings.changed[NORMAL_dB_KEY].connect(() => update_max_volume());
                 _settings.changed[AMP_dB_KEY].connect(() => update_max_volume());
-#if HAS_LOMIRI_SOUND_SCHEMA
+#if HAS_LOMIRI_SCHEMAS
                 _shared_settings.changed[ALLOW_AMP_KEY].connect(() => update_max_volume());
 #endif
                 update_max_volume();
@@ -60,7 +60,7 @@ public class IndicatorSound.OptionsGSettings : Options
                 }
         }
         private double calculate_max_volume () {
-#if HAS_LOMIRI_SOUND_SCHEMA
+#if HAS_LOMIRI_SCHEMAS
                 unowned string decibel_key = _shared_settings.get_boolean(ALLOW_AMP_KEY)
                         ? AMP_dB_KEY
                         : NORMAL_dB_KEY;

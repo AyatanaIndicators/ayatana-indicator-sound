@@ -33,9 +33,11 @@ add_custom_target (
 # and help the tests to find that file by setting -DSCHEMA_DIR
 set (XDG_DATA_DIRS "${CMAKE_CURRENT_BINARY_DIR}/gsettings-schemas")
 set (SCHEMA_DIR "${XDG_DATA_DIRS}/glib-2.0/schemas")
-if (EXISTS /usr/share/glib-2.0/schemas/com.lomiri.sound.gschema.xml)
-  add_definitions ( -DHAS_LOMIRI_SOUND_SCHEMA )
+
+if(LOMIRI_SCHEMAS_FOUND)
+  add_definitions ( -DHAS_LOMIRI_SCHEMAS )
 endif()
+
 add_definitions(-DSCHEMA_DIR="${SCHEMA_DIR}")
 execute_process (COMMAND ${PKG_CONFIG_EXECUTABLE} gio-2.0 --variable glib_compile_schemas
                  OUTPUT_VARIABLE COMPILE_SCHEMA_EXECUTABLE
@@ -322,7 +324,7 @@ add_test(indicator-test
     indicator-test
 )
 
-if (LOMIRI_API_FOUND AND EXISTS "/usr/share/glib-2.0/schemas/com.lomiri.sound.gschema.xml")
+if (LOMIRI_API_FOUND AND LOMIRI_SCHEMAS_FOUND)
 add_subdirectory(integration)
 endif()
 add_subdirectory(dbus-types)
