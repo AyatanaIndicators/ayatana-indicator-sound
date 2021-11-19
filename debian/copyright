@@ -82,7 +82,7 @@ Files: tests/dbus-types/dbus-action-result.cpp
  tests/service-mocks/media-player-mpris-mock/MediaPlayerMprisMock.h
  tests/service-mocks/media-player-mpris-mock/main.cpp
  tests/service-mocks/media-player-mpris-mock/player-update.cpp
-Copyright: 2015, Canonical, Ltd.
+Copyright: 2015, Canonical Ltd.
 License: GPL-3
 
 Files: tests/integration/main.cpp
