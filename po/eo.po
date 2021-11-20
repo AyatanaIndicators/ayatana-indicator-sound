@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-08-12 07:21+0200\n"
-"PO-Revision-Date: 2021-11-20 00:49+0000\n"
+"PO-Revision-Date: 2021-11-21 02:52+0000\n"
 "Last-Translator: phlostically <phlostically@mailinator.com>\n"
 "Language-Team: Esperanto <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/eo/>\n"
@@ -21,7 +21,7 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
-msgstr ""
+msgstr "Agordi la atributojn de sia uzanto"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:6
 msgid "Authentication is required to set one's own indicator sound properties."
@@ -29,7 +29,7 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:15
 msgid "Set properties of any user"
-msgstr ""
+msgstr "Agordi la atributojn de ajna uzanto"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:16
 msgid ""
@@ -38,7 +38,7 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
-msgstr ""
+msgstr "Listo de programoj ne montrataj en la sonmenuo"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
@@ -86,7 +86,7 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
-msgstr ""
+msgstr "Ĉu montri avertojn pri troa laŭteco."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
@@ -266,13 +266,15 @@ msgstr "Laŭto (HDMI-kapaŭskultiloj)"
 
 #: ../src/sound-menu.vala:449
 msgid "Choose Playlist"
-msgstr ""
+msgstr "Elekti ludliston"
 
 #: ../src/warn-notification.vala:32
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
 msgstr ""
+"Ĉu permesi troan laŭtecon preter sekura nivelo?\n"
+"Troa laŭteco povas difekti vian kapablon aŭdi."
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
