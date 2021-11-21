@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-08-12 07:21+0200\n"
-"PO-Revision-Date: 2021-11-21 02:52+0000\n"
+"PO-Revision-Date: 2021-11-22 22:35+0000\n"
 "Last-Translator: phlostically <phlostically@mailinator.com>\n"
 "Language-Team: Esperanto <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/eo/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.9.1\n"
+"X-Generator: Weblate 4.10-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
@@ -82,7 +82,7 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr ""
+msgstr "Ĉu montri la sonindikilon en la menubreto."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
@@ -114,13 +114,15 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "Laŭto, kiu kaŭzas averton pri troa laŭteco."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
 msgstr ""
+"Laŭto, kiu kaŭzas averton pri troa laŭteco. Vidu «warning-volume-enabled» "
+"por detaloj."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
@@ -202,6 +204,7 @@ msgstr "Mankanta programo"
 #, c-format
 msgid "Could not find the '%s' application - please make sure it is installed."
 msgstr ""
+"Ne eblis trovi la programon «%s» — bonvolu certigi, ke ĝi estas instalita."
 
 #: ../src/service.vala:328
 msgid "Volume (muted)"
@@ -229,7 +232,7 @@ msgstr "Agordoj pri sono…"
 
 #: ../src/sound-menu.vala:125
 msgid "Microphone Volume"
-msgstr ""
+msgstr "Sentivo de mikrofono"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: ../src/sound-menu.vala:148
