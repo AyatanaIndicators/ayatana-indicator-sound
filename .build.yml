@@ -264,7 +264,7 @@ before_scripts:
 build_scripts:
   - if [ ${DISTRO_NAME} == "debian" ];then
   -     export CFLAGS+=" -Wsign-compare -Wunused-parameter"
-  -     cppcheck --enable=warning,style,performance,portability,information,missingInclude .
+  -     cppcheck --enable=warning,style,performance,portability,information,missingInclude --inline-suppr --library=qt --suppress=missingInclude .
   - fi
   -
   - if [ -e ./CMakeLists.txt ]; then
