@@ -65,11 +65,11 @@ add_dependencies(
     test-home
 )
 
-qt5_use_modules(
+target_link_libraries(
     integration-tests
-    Core
-    DBus
-    Test
+    Qt5::Core
+    Qt5::DBus
+    Qt5::Test
 )
 
 target_link_options (integration-tests PRIVATE -no-pie)
@@ -120,18 +120,18 @@ add_dependencies(
     test-home
 )
 
-qt5_use_modules(
+target_link_libraries(
     set-volume
-    Core
-    DBus
-    Test
+    Qt5::Core
+    Qt5::DBus
+    Qt5::Test
 )
 
-qt5_use_modules(
+target_link_libraries(
     get-volume
-    Core
-    DBus
-    Test
+    Qt5::Core
+    Qt5::DBus
+    Qt5::Test
 )
 
 target_link_libraries(

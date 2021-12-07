@@ -44,16 +44,16 @@ add_executable(
   testplayers
 )
 
-qt5_use_modules(
+target_link_libraries(
     media-player-mpris-mock
-    Core
-    DBus
+    Qt5::Core
+    Qt5::DBus
 )
 
-qt5_use_modules(
+target_link_libraries(
     media-player-mpris-mock-update
-    Core
-    DBus
+    Qt5::Core
+    Qt5::DBus
 )
 
 # test players desktop files
