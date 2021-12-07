@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-08-12 07:21+0200\n"
-"PO-Revision-Date: 2021-11-24 14:54+0000\n"
+"PO-Revision-Date: 2021-12-08 11:53+0000\n"
 "Last-Translator: phlostically <phlostically@mailinator.com>\n"
 "Language-Team: Esperanto <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/eo/>\n"
@@ -73,12 +73,12 @@ msgstr "Komenca agordo pri tutsistema silentigiteco en la menuo"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
-msgstr ""
+msgstr "Ĉe starto, la laŭto devas esti ne silenta."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
-msgstr ""
+msgstr "Ĉu la laŭtagordilo permesas laŭtojn preter 100%"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
