@@ -53,8 +53,8 @@ add_library(
   dbus-action-result.cpp
 )
 
-qt5_use_modules(
+target_link_libraries(
     sound-indicator-dbus-interfaces
-    Core
-    DBus
+    Qt5::Core
+    Qt5::DBus
 )

@@ -35,8 +35,8 @@ add_executable(
   main.cpp
 )
 
-qt5_use_modules(
+target_link_libraries(
     accounts-service-sound
-    Core
-    DBus
+    Qt5::Core
+    Qt5::DBus
 )
