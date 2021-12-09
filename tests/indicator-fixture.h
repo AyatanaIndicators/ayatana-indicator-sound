@@ -1,5 +1,6 @@
 /*
  * Copyright 2014 Canonical Ltd.
+ * Copyright 2021 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,7 @@
  *
  * Authors:
  *      Ted Gould <ted@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 
 #include <memory>
@@ -422,7 +424,7 @@ class IndicatorFixture : public ::testing::Test
         }
 
     protected:
-        testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const char * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, GVariant * value) {
+        testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const char * attributeStr, const char * valueStr, const std::vector<int>& menuLocation, const std::string& attribute, GVariant * value) {
             auto varref = std::shared_ptr<GVariant>(g_variant_ref_sink(value), [](GVariant * varptr) {
                 if (varptr != nullptr)
                     g_variant_unref(varptr);
@@ -460,17 +462,17 @@ class IndicatorFixture : public ::testing::Test
             }
         }
 
-        testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const char * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, bool value) {
+        testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const char * attributeStr, const char * valueStr, const std::vector<int>& menuLocation, const std::string& attribute, bool value) {
             GVariant * var = g_variant_new_boolean(value);
             return expectMenuAttribute(menuLocationStr, attributeStr, valueStr, menuLocation, attribute, var);
         }
 
-        testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const char * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, std::string value) {
+        testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const char * attributeStr, const char * valueStr, const std::vector<int>& menuLocation, const std::string& attribute, std::string value) {
             GVariant * var = g_variant_new_string(value.c_str());
             return expectMenuAttribute(menuLocationStr, attributeStr, valueStr, menuLocation, attribute, var);
         }
 
-        testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const char * attributeStr, const char * valueStr, const std::vector<int> menuLocation, const std::string& attribute, const char * value) {
+        testing::AssertionResult expectMenuAttribute (const char * menuLocationStr, const char * attributeStr, const char * valueStr, const std::vector<int>& menuLocation, const std::string& attribute, const char * value) {
             GVariant * var = g_variant_new_string(value);
             return expectMenuAttribute(menuLocationStr, attributeStr, valueStr, menuLocation, attribute, var);
         }

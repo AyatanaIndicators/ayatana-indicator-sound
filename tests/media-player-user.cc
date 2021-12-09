@@ -1,5 +1,6 @@
 /*
  * Copyright 2014 Canonical Ltd.
+ * Copyright 2021 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,7 @@
  *
  * Authors:
  *      Ted Gould <ted@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 
 #include <chrono>
@@ -119,16 +121,16 @@ class MediaPlayerUserTest : public ::testing::Test
         }
 
         static gboolean timeout_cb (gpointer user_data) {
-            GMainLoop * loop = static_cast<GMainLoop *>(user_data);
-            g_main_loop_quit(loop);
+            GMainLoop * pLoop = static_cast<GMainLoop *>(user_data);
+            g_main_loop_quit(pLoop);
             return G_SOURCE_REMOVE;
         }
 
         void loop (unsigned int ms) {
-            GMainLoop * loop = g_main_loop_new(NULL, FALSE);
-            g_timeout_add(ms, timeout_cb, loop);
-            g_main_loop_run(loop);
-            g_main_loop_unref(loop);
+            GMainLoop * pLoop = g_main_loop_new(NULL, FALSE);
+            g_timeout_add(ms, timeout_cb, pLoop);
+            g_main_loop_run(pLoop);
+            g_main_loop_unref(pLoop);
         }
 
         void set_property (const gchar * name, GVariant * value) {
@@ -136,7 +138,7 @@ class MediaPlayerUserTest : public ::testing::Test
         }
 
         testing::AssertionResult expectEventually (std::function<testing::AssertionResult(void)> &testfunc) {
-            auto loop = std::shared_ptr<GMainLoop>(g_main_loop_new(nullptr, FALSE), [](GMainLoop * loop) { if (loop != nullptr) g_main_loop_unref(loop); });
+            auto pLoop = std::shared_ptr<GMainLoop>(g_main_loop_new(nullptr, FALSE), [](GMainLoop * pLoop) { if (pLoop != nullptr) g_main_loop_unref(pLoop); });
 
             std::promise<testing::AssertionResult> retpromise;
             auto retfuture = retpromise.get_future();
@@ -144,7 +146,7 @@ class MediaPlayerUserTest : public ::testing::Test
 
             /* The core of the idle function as an object so we can use the C++-isms
                of attaching the variables and make this code reasonably readable */
-            std::function<void(void)> idlefunc = [&loop, &retpromise, &testfunc, &start, this]() -> void {
+            std::function<void(void)> idlefunc = [&pLoop, &retpromise, &testfunc, &start, this]() -> void {
                 auto result = testfunc();
 
                 if (result == false && _eventuallyTime > (std::chrono::steady_clock::now() - start)) {
@@ -152,7 +154,7 @@ class MediaPlayerUserTest : public ::testing::Test
                 }
 
                 retpromise.set_value(result);
-                g_main_loop_quit(loop.get());
+                g_main_loop_quit(pLoop.get());
             };
 
             auto idlesrc = g_idle_add([](gpointer data) -> gboolean {
@@ -161,7 +163,7 @@ class MediaPlayerUserTest : public ::testing::Test
                 return G_SOURCE_CONTINUE;
             }, &idlefunc);
 
-            g_main_loop_run(loop.get());
+            g_main_loop_run(pLoop.get());
             g_source_remove(idlesrc);
 
             return retfuture.get();

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015 Canonical Ltd.
- * Copyright (C) 2021 Robert Tari
+ * Copyright 2015 Canonical Ltd.
+ * Copyright 2021 Robert Tari
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -141,14 +141,14 @@ bool DBusPulseVolume::setVolume(QString const & role, double volume)
 
         if (accounts_interface_)
         {
-            QDBusVariant dbusVar(QVariant::fromValue(volume));
-            QDBusReply<void> set_vol = accounts_interface_->call(QLatin1String("Set"),
+            QDBusVariant pDbusVar(QVariant::fromValue(volume));
+            QDBusReply<void> pSetVol = accounts_interface_->call(QLatin1String("Set"),
                                             QVariant::fromValue(QString("com.lomiri.AccountsService.Sound")),
                                             QVariant::fromValue(QString("Volume")),
-                                            QVariant::fromValue(dbusVar));
+                                            QVariant::fromValue(pDbusVar));
             if (!set_vol.isValid())
             {
-                qWarning() << "SetVolume::setVolume(): D-Bus error: " << set_vol.error().message();
+                qWarning() << "SetVolume::setVolume(): D-Bus error: " << pSetVol.error().message();
                 return false;
             }
         }

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015 Canonical Ltd.
- * Copyright (C) 2021 Robert Tari
+ * Copyright 2015 Canonical Ltd.
+ * Copyright 2021 Robert Tari
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -534,9 +534,10 @@ void IndicatorSoundTestBase::initializeAccountsInterface()
         auto userPath = userResp.value().path();
         if (userPath != "")
         {
-            std::unique_ptr<AccountsSoundInterface> soundInterface(new AccountsSoundInterface("org.freedesktop.Accounts",
+            // This silences cppcheck, but let's leave it here in case we actually need it
+            /*std::unique_ptr<AccountsSoundInterface> soundInterface(new AccountsSoundInterface("org.freedesktop.Accounts",
                                                                     userPath,
-                                                                    dbusTestRunner.systemConnection(), 0));
+                                                                    dbusTestRunner.systemConnection(), 0));*/
 
             accounts_interface_.reset(new DBusPropertiesInterface("org.freedesktop.Accounts",
                                                                 userPath,
@@ -1008,8 +1009,6 @@ QVariantList IndicatorSoundTestBase::getActionValue(QString const &action)
 
 QStringList IndicatorSoundTestBase::getRootIconValue(bool *isValid)
 {
-    QString result = 0;
-
     QVariantList varList = getActionValue("root");
     if (isValid != nullptr)
     {
