@@ -1,5 +1,6 @@
 /*
  * Copyright 2014 Canonical Ltd.
+ * Copyright 2021 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,7 @@
  *
  * Authors:
  *      Ted Gould <ted@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 
 #include <gtest/gtest.h>
@@ -62,8 +64,8 @@ class VolumeControlTest : public ::testing::Test
         }
 
         static gboolean timeout_cb (gpointer user_data) {
-            GMainLoop * loop = static_cast<GMainLoop *>(user_data);
-            g_main_loop_quit(loop);
+            GMainLoop * pLoop = static_cast<GMainLoop *>(user_data);
+            g_main_loop_quit(pLoop);
             return G_SOURCE_REMOVE;
         }
 

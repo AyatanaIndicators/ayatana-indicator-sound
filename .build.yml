@@ -212,7 +212,11 @@ before_scripts:
   -     git clone --depth 1  https://github.com/AyatanaIndicators/libayatana-common.git libayatana-common-build
   - fi
   - cd libayatana-common-build
-  - cmake . -DCMAKE_INSTALL_PREFIX=/usr
+  - if [ ${DISTRO_NAME} == "debian" ]; then
+  -     cmake . -DCMAKE_INSTALL_PREFIX=/usr -DENABLE_LOMIRI_FEATURES=ON
+  - else
+  -     cmake . -DCMAKE_INSTALL_PREFIX=/usr
+  - fi
   - make
   - make install
   - cd -
@@ -264,7 +268,7 @@ before_scripts:
 build_scripts:
   - if [ ${DISTRO_NAME} == "debian" ];then
   -     export CFLAGS+=" -Wsign-compare -Wunused-parameter"
-  -     cppcheck --enable=warning,style,performance,portability,information,missingInclude .
+  -     cppcheck --enable=warning,style,performance,portability,information,missingInclude --inline-suppr --library=qt --suppress=missingInclude .
   - fi
   -
   - if [ -e ./CMakeLists.txt ]; then

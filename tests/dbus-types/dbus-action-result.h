@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2015 Canonical Ltd.
+ * Copyright 2015 Canonical Ltd.
+ * Copyright 2021 Robert Tari
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -13,7 +14,9 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Author: Xavi Garcia <xavi.garcia.mena@canonical.com>
+ * Authors:
+ *      Xavi Garcia <xavi.garcia.mena@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 #pragma once
 

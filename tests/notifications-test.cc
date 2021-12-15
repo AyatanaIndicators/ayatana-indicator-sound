@@ -98,8 +98,8 @@ class NotificationsTest : public ::testing::Test
         }
 
         static gboolean timeout_cb (gpointer user_data) {
-            GMainLoop * loop = static_cast<GMainLoop *>(user_data);
-            g_main_loop_quit(loop);
+            GMainLoop * pLoop = static_cast<GMainLoop *>(user_data);
+            g_main_loop_quit(pLoop);
             return G_SOURCE_REMOVE;
         }
 
@@ -234,7 +234,7 @@ TEST_F(NotificationsTest, BasicObject) {
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
     auto accountsService = std::make_shared<AccountsServiceAccess>();
-    auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning, accountsService);
+    standardService(volumeControl, playerListMock(), options, volumeWarning, accountsService);
 
     /* Give some time settle */
     loop(50);
@@ -247,6 +247,7 @@ TEST_F(NotificationsTest, VolumeChanges) {
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
     auto accountsService = std::make_shared<AccountsServiceAccess>();
+    // cppcheck-suppress unreadVariable
     auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning, accountsService);
 
     /* Set a volume */
@@ -289,6 +290,7 @@ TEST_F(NotificationsTest, DISABLED_StreamChanges) {
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
     auto accountsService = std::make_shared<AccountsServiceAccess>();
+    // cppcheck-suppress unreadVariable
     auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning, accountsService);
 
     /* Set a volume */
@@ -330,6 +332,7 @@ TEST_F(NotificationsTest, DISABLED_IconTesting) {
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
     auto accountsService = std::make_shared<AccountsServiceAccess>();
+    // cppcheck-suppress unreadVariable
     auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning, accountsService);
 
     /* Set an initial volume */
@@ -367,6 +370,7 @@ TEST_F(NotificationsTest, DISABLED_ServerRestart) {
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
     auto accountsService = std::make_shared<AccountsServiceAccess>();
+    // cppcheck-suppress unreadVariable
     auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning, accountsService);
 
     /* Set a volume */
@@ -417,6 +421,7 @@ TEST_F(NotificationsTest, DISABLED_HighVolume) {
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
     auto accountsService = std::make_shared<AccountsServiceAccess>();
+    // cppcheck-suppress unreadVariable
     auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning, accountsService);
 
     /* Set a volume */
@@ -462,6 +467,7 @@ TEST_F(NotificationsTest, DISABLED_MenuHide) {
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
     auto accountsService = std::make_shared<AccountsServiceAccess>();
+    // cppcheck-suppress unreadVariable
     auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning, accountsService);
 
     /* Set a volume */
@@ -495,6 +501,7 @@ TEST_F(NotificationsTest, DISABLED_ExtendendVolumeNotification) {
     auto volumeControl = volumeControlMock(options);
     auto volumeWarning = volumeWarningMock(options);
     auto accountsService = std::make_shared<AccountsServiceAccess>();
+    // cppcheck-suppress unreadVariable
     auto soundService = standardService(volumeControl, playerListMock(), options, volumeWarning, accountsService);
 
     /* Set a volume */
