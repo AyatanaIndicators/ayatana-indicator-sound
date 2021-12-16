@@ -17,6 +17,7 @@ include(UseVala)
 option(ENABLE_TESTS "Enable all tests and checks" OFF)
 option(ENABLE_COVERAGE "Enable coverage reports (includes enabling all tests and checks)" OFF)
 option(ENABLE_WERROR "Treat all build warnings as errors" OFF)
+option(ENABLE_LOMIRI_FEATURES "Build with Lomiri-specific libraries, schemas and media" OFF)
 
 if(ENABLE_COVERAGE)
     set(ENABLE_TESTS ON)
@@ -49,8 +50,8 @@ pkg_check_modules(
 )
 include_directories(${PULSEAUDIO_INCLUDE_DIRS})
 
-pkg_check_modules(
-  SOUNDSERVICE REQUIRED
+set(
+  SOUNDSERVICE
   gee-0.8
   gio-2.0>=${GIO_2_0_REQUIRED_VERSION}
   gio-unix-2.0
@@ -60,15 +61,22 @@ pkg_check_modules(
   accountsservice
   libayatana-common
 )
+
+if (ENABLE_LOMIRI_FEATURES)
+    list (
+        APPEND
+        SOUNDSERVICE
+        liblomiri-api>=0.1.1
+        lomiri-schemas
+    )
+endif ()
+
+pkg_check_modules (SOUNDSERVICE REQUIRED ${SOUNDSERVICE})
+
 include_directories(${SOUNDSERVICE_INCLUDE_DIRS})
-
-pkg_check_modules(LOMIRI_API liblomiri-api>=0.1.1)
-pkg_check_modules(LOMIRI_SCHEMAS lomiri-schemas)
-
 include_directories(${TEST_INCLUDE_DIRS})
 
 find_package(Vala 0.20)
-
 find_package(GObjectIntrospection 0.9.12)
 
 include_directories(${SOURCE_DIR})
@@ -109,3 +117,4 @@ endif ()
 message(STATUS "Install prefix: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "Unit tests: ${ENABLE_TESTS}")
 message(STATUS "Build with -Werror: ${ENABLE_WERROR}")
+message(STATUS "Build with Lomiri features: ${ENABLE_LOMIRI_FEATURES}")
