@@ -6,8 +6,8 @@ set(HEADER_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.h")
 set(SYMBOLS_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.def")
 set(VAPI_PATH "${CMAKE_CURRENT_BINARY_DIR}/indicator-sound-service.vapi")
 
-if(LOMIRI_SCHEMAS_FOUND)
-  set (VALA_DEFINE_HAS_LOMIRI_SCHEMAS "--define=HAS_LOMIRI_SCHEMAS")
+if(ENABLE_LOMIRI_FEATURES)
+  set (VALA_DEFINE_LOMIRI_FEATURES_ENABLED "--define=LOMIRI_FEATURES_ENABLED")
   set (VALA_FILE_ACCTSERVICE_PRIVACY_SETTINGS "accounts-service-privacy-settings")
   set (VALA_FILE_ACCTSERVICE_SYSTEMSOUND_SETTINGS "accounts-service-system-sound-settings")
 endif()
@@ -41,7 +41,7 @@ vala_init(ayatana-indicator-sound-service
     --vapidir=${CMAKE_SOURCE_DIR}/vapi/
     --vapidir=.
     --pkg=bus-watcher
-    ${VALA_DEFINE_HAS_LOMIRI_SCHEMAS}
+    ${VALA_DEFINE_LOMIRI_FEATURES_ENABLED}
 )
 
 vala_add(ayatana-indicator-sound-service
@@ -196,7 +196,7 @@ vala_add(ayatana-indicator-sound-service
   accounts-service-sound-settings.vala
 )
 
-if(LOMIRI_SCHEMAS_FOUND)
+if(ENABLE_LOMIRI_FEATURES)
     vala_add(ayatana-indicator-sound-service
           accounts-service-privacy-settings.vala
     )

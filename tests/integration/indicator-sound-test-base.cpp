@@ -179,7 +179,7 @@ bool IndicatorSoundTestBase::clearGSettingsPlayers()
 
 bool IndicatorSoundTestBase::resetAllowAmplifiedVolume()
 {
-#if HAS_LOMIRI_SCHEMAS
+#if LOMIRI_FEATURES_ENABLED
     QProcess proc;
 
     proc.start("gsettings", QStringList()

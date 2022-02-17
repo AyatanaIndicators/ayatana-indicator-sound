@@ -34,8 +34,8 @@ add_custom_target (
 set (XDG_DATA_DIRS "${CMAKE_CURRENT_BINARY_DIR}/gsettings-schemas")
 set (SCHEMA_DIR "${XDG_DATA_DIRS}/glib-2.0/schemas")
 
-if(LOMIRI_SCHEMAS_FOUND)
-  add_definitions ( -DHAS_LOMIRI_SCHEMAS )
+if(ENABLE_LOMIRI_FEATURES)
+  add_definitions ( -DLOMIRI_FEATURES_ENABLED )
 endif()
 
 add_definitions(-DSCHEMA_DIR="${SCHEMA_DIR}")
@@ -324,7 +324,7 @@ add_test(indicator-test
     indicator-test
 )
 
-if (LOMIRI_API_FOUND AND LOMIRI_SCHEMAS_FOUND)
+if (ENABLE_LOMIRI_FEATURES)
 add_subdirectory(integration)
 endif()
 add_subdirectory(dbus-types)
