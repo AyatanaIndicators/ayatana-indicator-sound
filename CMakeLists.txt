@@ -36,6 +36,8 @@ else()
     add_definitions("-Wall")
 endif()
 
+add_definitions("-Wno-sign-compare") # Needed for GTest on Ubuntu
+
 set(GETTEXT_PACKAGE "ayatana-indicator-sound")
 set(LOCALEDIR "${CMAKE_INSTALL_FULL_LOCALEDIR}")
 add_definitions( -DGETTEXT_PACKAGE="${GETTEXT_PACKAGE}" )

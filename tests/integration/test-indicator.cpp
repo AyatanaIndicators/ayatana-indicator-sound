@@ -1,6 +1,6 @@
 /*
  * Copyright 2015 Canonical Ltd.
- * Copyright 2021 Robert Tari
+ * Copyright 2021-2022 Robert Tari
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3, as published
@@ -276,8 +276,8 @@ TEST_F(TestIndicator, DISABLED_PhoneChangeRoleVolume)
 
     // Generate a random volume in the range [0...0.33]
     QTime now = QTime::currentTime();
-    qsrand(now.msec());
-    int randInt = qrand() % 33;
+    QRandomGenerator::global()->bounded(now.msec());
+    int randInt = QRandomGenerator::global()->generate() % 33;
     const double randomVolume = randInt / 100.0;
 
     QSignalSpy &userAccountsSpy = *signal_spy_volume_changed_;
@@ -1412,8 +1412,8 @@ TEST_F(TestIndicator, DISABLED_DesktopChangeRoleVolume)
 
     // Generate a random volume in the range [0...0.33]
     QTime now = QTime::currentTime();
-    qsrand(now.msec());
-    int randInt = qrand() % 33;
+    QRandomGenerator::global()->bounded(now.msec());
+    int randInt = QRandomGenerator::global()->generate() % 33;
     const double randomVolume = randInt / 100.0;
 
     // play a test sound, it should NOT change the role in the indicator

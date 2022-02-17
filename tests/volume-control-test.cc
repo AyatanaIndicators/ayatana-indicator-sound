@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 Canonical Ltd.
- * Copyright 2021 Robert Tari
+ * Copyright 2021-2022 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ class VolumeControlTest : public ::testing::Test
             g_object_add_weak_pointer(G_OBJECT(session), (gpointer *)&session);
         }
 
-        virtual void TearDown() {
+        virtual void TearDown() override {
             g_clear_object(&service);
 
             g_object_unref(session);

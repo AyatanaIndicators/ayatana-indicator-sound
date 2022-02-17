@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Canonical Ltd.
+ * Copyright 2022 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,7 @@
  *
  * Authors:
  *      Ted Gould <ted@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 
 #include <atomic>
@@ -237,7 +239,7 @@ pa_operation*
 pa_context_get_sink_info_by_name (pa_context *c, const gchar * name, pa_sink_info_cb_t cb, void *userdata)
 {
     reinterpret_cast<PAMockContext*>(c)->idleOnce(
-    [c, name, cb, userdata]() {
+    [c, cb, userdata]() {
         if (cb == nullptr)
             return;
 
@@ -268,7 +270,7 @@ pa_operation *
 pa_context_get_sink_input_info (pa_context *c, uint32_t idx, pa_sink_input_info_cb_t cb, void * userdata)
 {
     reinterpret_cast<PAMockContext*>(c)->idleOnce(
-    [c, idx, cb, userdata]() {
+    [c, cb, userdata]() {
         if (cb == nullptr)
             return;
 
@@ -284,7 +286,7 @@ pa_operation*
 pa_context_get_source_info_by_name (pa_context *c, const char * name, pa_source_info_cb_t cb, void *userdata)
 {
     reinterpret_cast<PAMockContext*>(c)->idleOnce(
-    [c, name, cb, userdata]() {
+    [c, cb, userdata]() {
         if (cb == nullptr)
             return;
 
@@ -302,7 +304,7 @@ pa_operation*
 pa_context_get_source_output_info (pa_context *c, uint32_t idx, pa_source_output_info_cb_t cb, void *userdata)
 {
     reinterpret_cast<PAMockContext*>(c)->idleOnce(
-    [c, idx, cb, userdata]() {
+    [c, cb, userdata]() {
         if (cb == nullptr)
             return;
 
@@ -319,7 +321,7 @@ pa_operation*
 pa_context_set_sink_mute_by_index (pa_context *c, uint32_t idx, int mute, pa_context_success_cb_t cb, void *userdata)
 {
     reinterpret_cast<PAMockContext*>(c)->idleOnce(
-    [c, idx, mute, cb, userdata]() {
+    [c, cb, userdata]() {
         if (cb != nullptr)
             cb(c, 1, userdata);
     });
@@ -331,7 +333,7 @@ pa_operation*
 pa_context_set_sink_volume_by_index (pa_context *c, uint32_t idx, const pa_cvolume * cvol, pa_context_success_cb_t cb, void *userdata)
 {
     reinterpret_cast<PAMockContext*>(c)->idleOnce(
-    [c, idx, cvol, cb, userdata]() {
+    [c, cb, userdata]() {
         if (cb != nullptr)
             cb(c, 1, userdata);
     });
@@ -343,7 +345,7 @@ pa_operation*
 pa_context_set_source_volume_by_name (pa_context *c, const char * name, const pa_cvolume * cvol, pa_context_success_cb_t cb, void *userdata)
 {
     reinterpret_cast<PAMockContext*>(c)->idleOnce(
-    [c, name, cvol, cb, userdata]() {
+    [c, cb, userdata]() {
         if (cb != nullptr)
             cb(c, 1, userdata);
     });
