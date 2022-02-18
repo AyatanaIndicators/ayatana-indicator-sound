@@ -1,4 +1,20 @@
-Overview of changes in ayatana-indicator-session 0.9.0
+Overview of changes in ayatana-indicator-sound 22.2.0
+
+  - Upstream version bump to new release versioning scheme:
+    <year>.<month>.<revision>, where <year>.<month> will be
+    bumped in Ayatana Indicators bundle releases and <revision>
+    gets incremented with minor changeset releases.
+  - Fix build warnings.
+  - Clean up compilation flags.
+  - data/CMakeLists.txt: Drop unused pkglibexecdir definition.
+  - Make Lomiri features configurable at build time.
+  - Fix cppcheck warnings.
+  - Fix qt5_use_modules warning.
+  - CMakeLists.txt: Drop unneeded com.lomiri.AccountsService.Sound.xml check.
+  - tests/integration/Copy of test-sound.wav: Drop superfluous file.
+  - Translation updates.
+
+Overview of changes in ayatana-indicator-sound 0.9.0
 
   - Clean up GSetings and AccountsService schema detection and conditional
     code.
@@ -35,17 +51,17 @@ Overview of changes in ayatana-indicator-session 0.9.0
   - Add Travis CI configuration.
   - Translation updates.
 
-Overview of changes in ayatana-indicator-session 0.8.2
+Overview of changes in ayatana-indicator-sound 0.8.2
 
   - Switch to building against Lomiri (rather than deprecated
     Unity).
   - Translation updates.
 
-Overview of changes in ayatana-indicator-session 0.8.1
+Overview of changes in ayatana-indicator-sound 0.8.1
 
   - Translation updates.
 
-Overview of changes in ayatana-indicator-session 0.8.0
+Overview of changes in ayatana-indicator-sound 0.8.0
 
   - Fork from Ubuntu's sound indicator.
   - Translation updates.

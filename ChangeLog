@@ -1,6 +1,172 @@
+2022-02-18 Mike Gabriel
+
+        * release 22.2.0 (HEAD -> main, tag: 22.2.0)
+        * Merge branch 'tari01-pr/build-with-werror' (e3049a5)
+
+2022-02-17 Robert Tari
+
+        * .build.yml: Build with -Werror (d61f835)
+
+2022-02-18 Robert Tari
+
+        * Fix build warnings (e112ae9)
+        * Whitespace fix (412bb6e)
+
+2022-02-18 Mike Gabriel
+
+        * Merge branch 'tari01-pr/cleanup-compile-flags' (4d32459)
+
+2022-02-17 Robert Tari
+
+        * .build.yml: Drop extra compilation flags (f12504a)
+        * Clean up compilation flags (901192f)
+
+2022-02-17 Mike Gabriel
+
+        * Merge branch 'tari01-pr/drop-pkglibexecdir' (be9c06c)
+
+2022-02-16 Robert Tari
+
+        * data/CMakeLists.txt: Drop unused pkglibexecdir definition (863342c)
+
+2022-02-17 Mike Gabriel
+
+        * Merge branch 'tari01-pr/add-lomiri-features-flag' (7312089)
+
+2021-12-16 Robert Tari
+
+        * .build.yml: Add ENABLE_LOMIRI_FEATURES flag and adapt build flow
+          (672e4c4)
+        * Make Lomiri features configurable at build time (61d803b)
+
+2022-02-08 Robert Tari
+
+        * .travis.yml: Run CI builds on Travis CI's Ubuntu focal base system
+          (111165e)
+
+2022-01-29 MonsieurBibo
+
+        * Translated using Weblate (French) (4651e97)
+
+2022-01-22 Anders Jonsson
+
+        * Translated using Weblate (Swedish) (a843c1b)
+
+2022-01-07 wigy
+
+        * Translated using Weblate (Hungarian) (4d140a1)
+
+2022-01-02 ssantos
+
+        * Translated using Weblate (Portuguese) (431e56d)
+
+2021-12-15 Mike Gabriel
+
+        * Merge branch
+          'tari01-pr/build-libayatana-common-with-enable-lomiri-features'
+          (a5ba89a)
+
+2021-12-06 Robert Tari
+
+        * .build.yml: Build libayatana-common with ENABLE_LOMIRI_FEATURES
+          (ef79258)
+        * .build.yml: Some cppcheck tweaks (d0d1975)
+
+2021-12-09 Robert Tari
+
+        * Fix cppcheck warnings (f696e54)
+        * Whitespace fix (09dde52)
+
+2021-12-08 Mike Gabriel
+
+        * Merge branch 'tari01-pr/fix-qt5-use-modules-warning' (1a36cae)
+
+2021-12-07 Robert Tari
+
+        * Fix qt5_use_modules warning (c5eee42)
+
+2021-12-08 Mike Gabriel
+
+        * Merge branch 'tari01-pr/drop-accountsservice-file-check' (92df05b)
+
+2021-11-24 Robert Tari
+
+        * CMakeLists.txt: Drop unneeded com.lomiri.AccountsService.Sound.xml
+          check (e974127)
+
+2021-12-07 phlostically
+
+        * Translated using Weblate (Esperanto) (c6bc3c8)
+
+2021-11-23 phlostically
+
+        * Translated using Weblate (Esperanto) (823b75f)
+
+2021-11-21 phlostically
+
+        * Translated using Weblate (Esperanto) (1c30e0b)
+
+2021-11-22 Robert Tari
+
+        * Merge branch 'sunweaver-pr/drop-copy-of-test-sound-file' (b6cf63d)
+
+2021-11-19 Mike Gabriel
+
+        * license headers: Stop using the '©' character. (f64efb1)
+        * tests/*: Use one spelling for "Canonical Ltd." in copyright
+          headers. (2c16abc)
+
+2021-11-20 phlostically
+
+        * Translated using Weblate (Esperanto) (d271071)
+
+2021-11-18 phlostically
+
+        * Translated using Weblate (Esperanto) (57a0ff0)
+
+2021-11-16 Phil Clifford
+
+        * Translated using Weblate (Gaelic) (27e6a7a)
+
+2021-11-22 Robert Tari
+
+        * Merge branch 'sunweaver-pr/copyright-punctuation-fix' (fef40c1)
+
+2021-11-20 phlostically
+
+        * Translated using Weblate (Esperanto) (4796bb9)
+
+2021-11-18 phlostically
+
+        * Translated using Weblate (Esperanto) (1f57a01)
+
+2021-11-16 Phil Clifford
+
+        * Translated using Weblate (Gaelic) (a016f48)
+
+2021-11-20 phlostically
+
+        * Translated using Weblate (Esperanto) (571abe5)
+
+2021-11-18 phlostically
+
+        * Translated using Weblate (Esperanto) (e52e627)
+
+2021-11-19 Mike Gabriel
+
+        * tests/integration/Copy of test-sound.wav: Drop superfluous file.
+          (4b5ec61)
+        * license headers: Stop using the '©' character. (8f2a1d4)
+        * tests/*: Use one spelling for "Canonical Ltd." in copyright
+          headers. (ba6a8e3)
+
+2021-11-16 Phil Clifford
+
+        * Translated using Weblate (Gaelic) (f34d980)
+
 2021-11-17 Mike Gabriel
 
-        * release 0.9.0 (HEAD -> main, tag: 0.9.0)
+        * release 0.9.0 (454a7c0) (tag: 0.9.0)
         * Merge branch 'tari01-pr/scroll-message' (a6b0676)
 
 2021-11-15 Robert Tari
@@ -1017,7 +1183,7 @@
 
 2020-07-24 Robert Tari
 
-        * Added option to disable Tests/Coverage (628f1d4) (tag: v0.1)
+        * Added option to disable Tests/Coverage (628f1d4)
 
 2020-07-19 ssantos
 
