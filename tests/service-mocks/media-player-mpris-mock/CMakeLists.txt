@@ -1,8 +1,7 @@
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -fPIC -pthread")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -fno-strict-aliasing -Wextra -fPIC -pthread")
+add_definitions("-fPIC")
 
 find_package(Qt5DBus REQUIRED)
 include_directories(${Qt5DBus_INCLUDE_DIRS}
