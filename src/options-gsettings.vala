@@ -1,7 +1,7 @@
 /*
  * -*- Mode:Vala; indent-tabs-mode:t; tab-width:4; encoding:utf8 -*-
  * Copyright 2015 Canonical Ltd.
- * Copyright 2021 Robert Tari
+ * Copyright 2021-2022 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ public class IndicatorSound.OptionsGSettings : Options
 
         private Settings _settings = new Settings ("org.ayatana.indicator.sound");
 #if LOMIRI_FEATURES_ENABLED
-        private Settings _shared_settings = new Settings ("com.lomiri.sound");
+        private Settings _shared_settings = null;
 #endif
         /** MAX VOLUME PROPERTY **/
 
@@ -46,7 +46,11 @@ public class IndicatorSound.OptionsGSettings : Options
                 _settings.changed[NORMAL_dB_KEY].connect(() => update_max_volume());
                 _settings.changed[AMP_dB_KEY].connect(() => update_max_volume());
 #if LOMIRI_FEATURES_ENABLED
-                _shared_settings.changed[ALLOW_AMP_KEY].connect(() => update_max_volume());
+                if (AyatanaCommon.utils_is_lomiri())
+                {
+                    _shared_settings = new Settings ("com.lomiri.sound");
+                    _shared_settings.changed[ALLOW_AMP_KEY].connect(() => update_max_volume());
+                }
 #endif
                 update_max_volume();
         }
@@ -60,18 +64,20 @@ public class IndicatorSound.OptionsGSettings : Options
                 }
         }
         private double calculate_max_volume () {
+
+                unowned string decibel_key = NORMAL_dB_KEY;
 #if LOMIRI_FEATURES_ENABLED
-                unowned string decibel_key = _shared_settings.get_boolean(ALLOW_AMP_KEY)
+                if (AyatanaCommon.utils_is_lomiri())
+                {
+                    decibel_key = _shared_settings.get_boolean(ALLOW_AMP_KEY)
                         ? AMP_dB_KEY
                         : NORMAL_dB_KEY;
-#else
-                unowned string decibel_key = NORMAL_dB_KEY;
+                }
 #endif
                 var volume_dB = _settings.get_double(decibel_key);
                 var volume_sw = PulseAudio.Volume.sw_from_dB (volume_dB);
                 return VolumeControlPulse.volume_to_double (volume_sw);
         }
-
 
     /** LOUD VOLUME **/
 
