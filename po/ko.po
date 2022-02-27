@@ -8,37 +8,37 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-08-12 07:22+0200\n"
-"PO-Revision-Date: 2020-06-15 06:41+0000\n"
-"Last-Translator: MarongHappy <daemul72@gmail.com>\n"
-"Language-Team: Korean <https://hosted.weblate.org/projects/ayatana-"
-"indicators/sound-applet/ko/>\n"
+"PO-Revision-Date: 2022-02-28 14:54+0000\n"
+"Last-Translator: 이정희 <daemul72@gmail.com>\n"
+"Language-Team: Korean <https://hosted.weblate.org/projects/"
+"ayatana-indicators/sound-applet/ko/>\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 4.1-dev\n"
+"X-Generator: Weblate 4.11.1-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
-msgstr ""
+msgstr "사용자 고유의 속성 설정"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:6
 msgid "Authentication is required to set one's own indicator sound properties."
-msgstr ""
+msgstr "자체 표시기 사운드 속성을 설정하려면 인증이 필요합니다."
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:15
 msgid "Set properties of any user"
-msgstr ""
+msgstr "모든 사용자의 속성 설정"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:16
 msgid ""
 "Authentication is required to set another user's indicator sound properties."
-msgstr ""
+msgstr "다른 사용자의 표시기 사운드 속성을 설정하려면 인증이 필요합니다."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
-msgstr "사운드 메뉴에서 블랙리스트에 있는 응용프로그램 목록"
+msgstr "사운드 메뉴에서 차단된 응용프로그램 목록"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
@@ -47,15 +47,15 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
-"MPRIS2 규격을 준수하는 각 미디어 재생기가 메뉴에 자동으로 나타납니다. 이 배열"
-"에는 사운드 메뉴에 포함하지 않을 응용 프로그램의 데스크톱 파일 이름(최소 ."
-"desktop 접미사)이 포함되어야 합니다."
+"MPRIS2 규격을 준수하는 각 미디어 재생기가 메뉴에 자동으로 나타납니다. 이 "
+"배열은 사운드 메뉴에 포함되기를 원하지 않는 응용프로그램의 데스크톱 파일 "
+"이름(최소 .desktop 접미사)을 포함해야 합니다."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
-msgstr "사운드 메뉴에 등록된 응용프로그램 목록"
+msgstr "특정 시점에서 사운드 메뉴에 등록된 응용프로그램 목록"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
@@ -64,10 +64,10 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
-"MPRIS2 규격을 준수하는 각 미디어 재생기가 메뉴에 자동으로 나타납니다. 이 배열"
-"에는 메뉴에 나타나는 응용프로그램의 데스크톱 파일 이름(최소 .데스크톱 접미사)"
-"이 포함되어야 합니다. 이렇게 하면 메뉴가 오프라인 응용프로그램을 기억하고 표"
-"시할 수 있습니다."
+"MPRIS2 사양을 준수하는 각 미디어 재생기가 메뉴에 자동으로 나타납니다. 이 "
+"배열에는 메뉴에 표시된 적이 있는 응용프로그램의 데스크탑 파일 이름(최소 ."
+"desktop 접미사)이 포함되어야 합니다. 이렇게 하면 메뉴에서 오프라인 "
+"응용프로그램을 기억하고 표시할 수 있습니다."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
@@ -230,12 +230,12 @@ msgstr "HDMI 헤드폰"
 
 #: ../src/service.vala:295
 msgid "Missing application"
-msgstr ""
+msgstr "누락된 응용프로그램"
 
 #: ../src/service.vala:295
 #, c-format
 msgid "Could not find the '%s' application - please make sure it is installed."
-msgstr ""
+msgstr "'%s' 응용프로그램을 찾을 수 없습니다. 설치되어 있는지 확인하십시오."
 
 #: ../src/service.vala:328
 msgid "Volume (muted)"
@@ -303,11 +303,12 @@ msgid "Choose Playlist"
 msgstr "재생목록 선택하기"
 
 #: ../src/warn-notification.vala:32
-#, fuzzy
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
-msgstr "음량이 높으면 청력이 손상될 수 있습니다."
+msgstr ""
+"안전 수준 이상의 볼륨을 허용하시겠습니까?\n"
+"높은 볼륨은 청력을 손상시킬 수 있습니다."
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
