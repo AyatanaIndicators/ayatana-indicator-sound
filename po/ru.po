@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-08-12 07:22+0200\n"
-"PO-Revision-Date: 2022-04-23 12:18+0000\n"
+"PO-Revision-Date: 2022-04-23 13:36+0000\n"
 "Last-Translator: Sergii Horichenko <m@sgg.im>\n"
 "Language-Team: Russian <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/ru/>\n"
@@ -37,6 +37,8 @@ msgstr "Установка свойств любого пользователя"
 msgid ""
 "Authentication is required to set another user's indicator sound properties."
 msgstr ""
+"Для установки свойств звука индикатора другого пользователя требуется "
+"аутентификация."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -249,12 +251,14 @@ msgstr "HDMI наушники"
 
 #: ../src/service.vala:295
 msgid "Missing application"
-msgstr ""
+msgstr "Отсутствует приложение"
 
 #: ../src/service.vala:295
 #, c-format
 msgid "Could not find the '%s' application - please make sure it is installed."
 msgstr ""
+"Не удалось найти приложение '%s' - пожалуйста, убедитесь, что оно "
+"установлено."
 
 #: ../src/service.vala:328
 msgid "Volume (muted)"
@@ -322,11 +326,12 @@ msgid "Choose Playlist"
 msgstr "Выберете плейлист"
 
 #: ../src/warn-notification.vala:32
-#, fuzzy
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
-msgstr "Высокая громкость может повредить ваш слух."
+msgstr ""
+"Разрешить громкость выше безопасного уровня?\n"
+"Высокая громкость может повредить слух."
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
