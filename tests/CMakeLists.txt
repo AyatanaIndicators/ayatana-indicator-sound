@@ -147,6 +147,7 @@ target_link_libraries(
 )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${TEST_INCLUDE_DIRS})
 
 ###########################
 # Pulse Mock
