@@ -51,7 +51,7 @@ public class SoundMenu: Object
         if ((flags & DisplayFlags.SHOW_MUTE) != 0)
             volume_section.append (_("Mute"), "indicator.mute");
         if ((flags & DisplayFlags.SHOW_SILENT_MODE) != 0) {
-            var item = new MenuItem(_("Silent Mode"), "indicator.silent-mode");
+            var item = new MenuItem(_("Silent Mode"), "indicator.silent-mode(true)");
             item.set_attribute("x-ayatana-type", "s", "org.ayatana.indicator.switch");
             volume_section.append_item(item);
         }

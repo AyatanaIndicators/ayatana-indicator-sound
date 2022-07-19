@@ -335,7 +335,7 @@ public class IndicatorSound.Service: Object {
             silentNow = this.accounts_service.silentMode;
         }
 
-        silent_action = new SimpleAction.stateful ("silent-mode", null, new Variant.boolean (silentNow));
+        silent_action = new SimpleAction.stateful ("silent-mode", VariantType.BOOLEAN, new Variant.boolean (silentNow));
 
         /* If we're not dealing with accounts service, we'll just always be out
            of silent mode and that's cool. */
@@ -349,7 +349,7 @@ public class IndicatorSound.Service: Object {
         });
 
         silent_action.activate.connect ((action, param) => {
-            action.change_state (new Variant.boolean (!action.get_state().get_boolean()));
+            action.change_state (param);
         });
 
         silent_action.change_state.connect ((action, val) => {
