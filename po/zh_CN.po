@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-08-12 07:22+0200\n"
-"PO-Revision-Date: 2021-07-17 14:32+0000\n"
+"PO-Revision-Date: 2022-07-23 17:25+0000\n"
 "Last-Translator: Boyuan Yang <073plan@gmail.com>\n"
 "Language-Team: Chinese (Simplified) <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/zh_Hans/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 4.7.2-dev\n"
+"X-Generator: Weblate 4.14-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
@@ -169,11 +169,11 @@ msgstr ""
 #: ../src/service.vala:331 ../src/service.vala:334 ../src/sound-menu.vala:59
 #: ../src/sound-menu.vala:253 ../src/warn-notification.vala:31
 msgid "Volume"
-msgstr ""
+msgstr "音量"
 
 #: ../src/info-notification.vala:55
 msgid "Speakers"
-msgstr ""
+msgstr "扬声器"
 
 #: ../src/info-notification.vala:57
 msgid "Headphones"
@@ -185,23 +185,23 @@ msgstr "蓝牙耳机"
 
 #: ../src/info-notification.vala:61
 msgid "Bluetooth speaker"
-msgstr ""
+msgstr "蓝牙扬声器"
 
 #: ../src/info-notification.vala:63
 msgid "Usb speaker"
-msgstr ""
+msgstr "USB 扬声器"
 
 #: ../src/info-notification.vala:65
 msgid "Usb headphones"
-msgstr ""
+msgstr "USB 耳机"
 
 #: ../src/info-notification.vala:67
 msgid "HDMI speaker"
-msgstr ""
+msgstr "HDMI 扬声器"
 
 #: ../src/info-notification.vala:69
 msgid "HDMI headphones"
-msgstr ""
+msgstr "HDMI 耳机"
 
 #: ../src/service.vala:295
 msgid "Missing application"
@@ -226,11 +226,11 @@ msgstr "声音"
 
 #: ../src/sound-menu.vala:52
 msgid "Mute"
-msgstr ""
+msgstr "静音"
 
 #: ../src/sound-menu.vala:54
 msgid "Silent Mode"
-msgstr ""
+msgstr "静音模式"
 
 #: ../src/sound-menu.vala:68
 msgid "Sound Settings…"
@@ -243,7 +243,7 @@ msgstr "麦克风音量"
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: ../src/sound-menu.vala:148
 msgid "High volume can damage your hearing."
-msgstr ""
+msgstr "过高的音量可能会损伤听力。"
 
 #: ../src/sound-menu.vala:256
 msgid "Volume (Headphones)"
@@ -282,6 +282,8 @@ msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
 msgstr ""
+"要允许使用高于安全等级的音量吗？\n"
+"过高的音量可能会损伤听力。"
 
 #: ../src/warn-notification.vala:49
 msgid "OK"
