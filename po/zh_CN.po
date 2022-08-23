@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-08-12 07:22+0200\n"
-"PO-Revision-Date: 2022-07-23 17:25+0000\n"
-"Last-Translator: Boyuan Yang <073plan@gmail.com>\n"
+"PO-Revision-Date: 2022-08-24 06:16+0000\n"
+"Last-Translator: Hugel <qihu@nfschina.com>\n"
 "Language-Team: Chinese (Simplified) <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/zh_Hans/>\n"
 "Language: zh_CN\n"
@@ -21,20 +21,20 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
-msgstr ""
+msgstr "设置自己用户的属性"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:6
 msgid "Authentication is required to set one's own indicator sound properties."
-msgstr ""
+msgstr "设置自己的指示器的声音属性，需要身份验证。"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:15
 msgid "Set properties of any user"
-msgstr ""
+msgstr "设置任意用户的属性"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:16
 msgid ""
 "Authentication is required to set another user's indicator sound properties."
-msgstr ""
+msgstr "设置其他用户的指示器的声音属性，需要身份验证。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -133,7 +133,7 @@ msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
-msgstr ""
+msgstr "正常的输出音量。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
 msgid ""
@@ -205,20 +205,20 @@ msgstr "HDMI 耳机"
 
 #: ../src/service.vala:295
 msgid "Missing application"
-msgstr ""
+msgstr "缺少应用程序"
 
 #: ../src/service.vala:295
 #, c-format
 msgid "Could not find the '%s' application - please make sure it is installed."
-msgstr ""
+msgstr "无法找到'%s'应用程序-请确保它已安装。"
 
 #: ../src/service.vala:328
 msgid "Volume (muted)"
-msgstr ""
+msgstr "音量（静音的）"
 
 #: ../src/service.vala:331
 msgid "silent"
-msgstr ""
+msgstr "安静的"
 
 #: ../src/service.vala:339
 msgid "Sound"
