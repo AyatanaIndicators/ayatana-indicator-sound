@@ -2,6 +2,7 @@
 Description=Ayatana Indicator Sound Service
 PartOf=graphical-session.target
 PartOf=ayatana-indicators.target
+After=pulseaudio.service
 
 [Service]
 ExecStart=@CMAKE_INSTALL_FULL_LIBEXECDIR@/ayatana-indicator-sound/ayatana-indicator-sound-service
