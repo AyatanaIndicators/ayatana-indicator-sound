@@ -8,16 +8,16 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-09-05 13:46+0200\n"
-"PO-Revision-Date: 2021-08-13 13:34+0000\n"
+"PO-Revision-Date: 2022-09-05 19:42+0000\n"
 "Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>\n"
-"Language-Team: Hebrew <https://hosted.weblate.org/projects/ayatana-"
-"indicators/sound-applet/he/>\n"
+"Language-Team: Hebrew <https://hosted.weblate.org/projects/"
+"ayatana-indicators/sound-applet/he/>\n"
 "Language: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Weblate 4.8-dev\n"
+"X-Generator: Weblate 4.14.1-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
@@ -103,6 +103,12 @@ msgid ""
 "volume-decibels AND (d) the user has not indicated approval in the last "
 "warning-volume-approval-ttl seconds."
 msgstr ""
+"אם הופעל במכשיר, תופיע חלונית אישור למשתמש אם: א. משהו מחובר לשקע האוזניות ("
+"כלומר, אין אזהרות לעוצמות שמע של רמקולים) וגם ב. מתנגנת מדיה (כלומר, אין "
+"אזהרות על עוצמות שמע של צלצולים) וגם ג. המשתמש מנסה להגדיר את עוצמת השמע "
+"מעבר ל־warning-volume-decibels (דציבלים לאזהרת עוצמת שמע) וגם ד. המשתמש לא "
+"ציין את אישורו במשך warning-volume-approval-ttl (זמן השהיה לאישור אזהרת עצמת "
+"שמע) שניות."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
@@ -117,6 +123,12 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
+"למשך כמה זמן לשמור את הסכמת המשתמש לחלונית האישור שנדונה בתיאור של ‚warning-"
+"volume-enabled’ (אזהרת שמע מופעלת).\n"
+"\n"
+"ערך ברירת המחדל (72,000 שניות) תואם ל־20 שעות כפי שהוצע על ידי התקן האירופי "
+"EN 60950-1/Al2: „אין צורך לחזור על אישור יותר מפעם אחת בכל 20 שעות של זמן "
+"שמע מצטבר.”"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
@@ -135,7 +147,6 @@ msgid "Normal output volume."
 msgstr "פלט עצמת שמע רגיל."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
-#, fuzzy
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is disabled.\n"
@@ -146,26 +157,24 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
-"פלט עצמת השמע לשימוש כאשר ההגדרה ‚allow-amplified-volume’ (לאפשר שמע מוגבר) "
-"ב־com.ubuntu.sound מושבתת.\n"
+"פלט עצמת השמע המרבית לשימוש כאשר ההגדרה ‚allow-amplified-volume’ (לאפשר שמע "
+"מוגבר) ב־com.lomiri.sound מושבתת.\n"
 "\n"
 "כדי לעמוד בתקן האירופי EN 60950-1/Al2 לא ניתן להגדיר את הערך הזה לדציבל "
 "שעשוי לגרום לאוזניות להשמיע בעצמה של מעל ל־‎100 dBA, או להגיע לפלט חשמלי "
 "שעולה על 150 mV (מיקרו-וולט).\n"
 "\n"
-"ערך בררך המחדל (0) תואם ל־PA_VOLUME_NORM של PulseAudio."
+"ערך ברירת המחדל (0) תואם ל־PA_VOLUME_NORM של PulseAudio."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
-#, fuzzy
 msgid ""
 "Output volume to use when com.lomiri.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
 "פלט עצמת השמע לשימוש כאשר ההגדרה ‚allow-amplified-volume’ (לאפשר שמע מוגבר) "
-"ב־com.ubuntu.sound פעילה."
+"ב־com.lomiri.sound פעילה."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
-#, fuzzy
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is enabled.\n"
@@ -176,14 +185,14 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
-"פלט עצמת השמע לשימוש כאשר ההגדרה ‚allow-amplified-volume’ (לאפשר שמע מוגבר) "
-"ב־com.ubuntu.sound מופעלת.\n"
+"פלט עצמת השמע המרבית לשימוש כאשר ההגדרה ‚allow-amplified-volume’ (לאפשר שמע "
+"מוגבר) ב־com.lomiri.sound מופעלת.\n"
 "\n"
 "כדי לעמוד בתקן האירופי EN 60950-1/Al2 לא ניתן להגדיר את הערך הזה לדציבל "
 "שעשוי לגרום לאוזניות להשמיע בעצמה של מעל ל־‎100 dBA, או להגיע לפלט חשמלי "
 "שעולה על 150 mV (מיקרו-וולט).\n"
 "\n"
-"ערך בררך המחדל (11) תואם ל־PA_VOLUME_UI_MAX של PulseAudio."
+"ערך ברירת המחדל (11) תואם ל־PA_VOLUME_UI_MAX של PulseAudio."
 
 #: ../src/info-notification.vala:27 ../src/info-notification.vala:44
 #: ../src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:59
@@ -246,7 +255,7 @@ msgstr "צליל"
 
 #: ../src/service.vala:303
 msgid "Sound settings & media player controls"
-msgstr ""
+msgstr "הגדרות שמע ופקדי נגינת מדיה"
 
 #: ../src/sound-menu.vala:52
 msgid "Mute"
