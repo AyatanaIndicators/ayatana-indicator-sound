@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-12 07:22+0200\n"
+"POT-Creation-Date: 2022-09-05 13:46+0200\n"
 "PO-Revision-Date: 2020-11-12 17:28+0000\n"
 "Last-Translator: Allan Nordhøy <epost@anotheragency.no>\n"
 "Language-Team: Norwegian Bokmål <https://hosted.weblate.org/projects/ayatana-"
@@ -161,7 +161,7 @@ msgstr "Normalt utgangslydstyrkenivå."
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
 #, fuzzy
 msgid ""
-"The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
+"The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is disabled.\n"
 "\n"
 "To conform with EU standard EN 60950-1/Al2, this value should never be set "
@@ -182,15 +182,16 @@ msgstr ""
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
 #, fuzzy
 msgid ""
-"Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
+"Output volume to use when com.lomiri.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
 "Utgangslydstyrkenivå brukt når com.ubuntu.sound sin \"allow-amplified-volume"
 "\"-innstilling er påslått."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
+#, fuzzy
 msgid ""
-"The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
+"The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is enabled.\n"
 "\n"
 "To conform with EU standard EN 60950-1/Al2, this value should never be set "
@@ -208,66 +209,70 @@ msgstr ""
 "\n"
 "Forvalgt verdi (11) samsvarer med PulseAudio sin PA_VOLUME_UI_MAX."
 
-#: ../src/info-notification.vala:25 ../src/info-notification.vala:42
-#: ../src/service.vala:331 ../src/service.vala:334 ../src/sound-menu.vala:59
+#: ../src/info-notification.vala:27 ../src/info-notification.vala:44
+#: ../src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:59
 #: ../src/sound-menu.vala:253 ../src/warn-notification.vala:31
 msgid "Volume"
 msgstr "Lydstyrke"
 
-#: ../src/info-notification.vala:55
+#: ../src/info-notification.vala:57
 msgid "Speakers"
 msgstr "Høyttalere"
 
-#: ../src/info-notification.vala:57
+#: ../src/info-notification.vala:59
 msgid "Headphones"
 msgstr "Hodetelefoner"
 
-#: ../src/info-notification.vala:59
+#: ../src/info-notification.vala:61
 msgid "Bluetooth headphones"
 msgstr "Blåtannshodetelefoner"
 
-#: ../src/info-notification.vala:61
+#: ../src/info-notification.vala:63
 msgid "Bluetooth speaker"
 msgstr "Blåtannshøyttaler"
 
-#: ../src/info-notification.vala:63
+#: ../src/info-notification.vala:65
 #, fuzzy
 msgid "Usb speaker"
 msgstr "USB-høyttaler"
 
-#: ../src/info-notification.vala:65
+#: ../src/info-notification.vala:67
 #, fuzzy
 msgid "Usb headphones"
 msgstr "USB-hodetelefoner"
 
-#: ../src/info-notification.vala:67
+#: ../src/info-notification.vala:69
 msgid "HDMI speaker"
 msgstr "HDMI-høyttaler"
 
-#: ../src/info-notification.vala:69
+#: ../src/info-notification.vala:71
 msgid "HDMI headphones"
 msgstr "HDMI-hodetelefoner"
 
-#: ../src/service.vala:295
+#: ../src/service.vala:266
 msgid "Missing application"
 msgstr ""
 
-#: ../src/service.vala:295
+#: ../src/service.vala:266
 #, c-format
 msgid "Could not find the '%s' application - please make sure it is installed."
 msgstr ""
 
-#: ../src/service.vala:328
+#: ../src/service.vala:291
 msgid "Volume (muted)"
 msgstr "Lydstyrke (forstummet)"
 
-#: ../src/service.vala:331
+#: ../src/service.vala:294
 msgid "silent"
 msgstr "stille"
 
-#: ../src/service.vala:339
+#: ../src/service.vala:302
 msgid "Sound"
 msgstr "Lyd"
+
+#: ../src/service.vala:303
+msgid "Sound settings & media player controls"
+msgstr ""
 
 #: ../src/sound-menu.vala:52
 msgid "Mute"

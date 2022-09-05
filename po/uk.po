@@ -7,11 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-12 07:22+0200\n"
+"POT-Creation-Date: 2022-09-05 13:46+0200\n"
 "PO-Revision-Date: 2022-06-21 17:19+0000\n"
 "Last-Translator: Artem <artem@molotov.work>\n"
-"Language-Team: Ukrainian <https://hosted.weblate.org/projects/"
-"ayatana-indicators/sound-applet/uk/>\n"
+"Language-Team: Ukrainian <https://hosted.weblate.org/projects/ayatana-"
+"indicators/sound-applet/uk/>\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -161,8 +161,9 @@ msgid "Normal output volume."
 msgstr "Нормальний рівень гучності."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
+#, fuzzy
 msgid ""
-"The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
+"The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is disabled.\n"
 "\n"
 "To conform with EU standard EN 60950-1/Al2, this value should never be set "
@@ -181,16 +182,18 @@ msgstr ""
 "Типове значення (0) відповідає PulseAudio's PA_VOLUME_NORM."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
+#, fuzzy
 msgid ""
-"Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
+"Output volume to use when com.lomiri.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
 "Вихідна гучність для використання коли com.ubuntu.sound's 'allow-amplified-"
 "volume' параметр увімкнуто."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
+#, fuzzy
 msgid ""
-"The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
+"The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is enabled.\n"
 "\n"
 "To conform with EU standard EN 60950-1/Al2, this value should never be set "
@@ -208,64 +211,69 @@ msgstr ""
 "\n"
 "Типове значення (11) відповідає PulseAudio's PA_VOLUME_UI_MAX."
 
-#: ../src/info-notification.vala:25 ../src/info-notification.vala:42
-#: ../src/service.vala:331 ../src/service.vala:334 ../src/sound-menu.vala:59
+#: ../src/info-notification.vala:27 ../src/info-notification.vala:44
+#: ../src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:59
 #: ../src/sound-menu.vala:253 ../src/warn-notification.vala:31
 msgid "Volume"
 msgstr "Гучність"
 
-#: ../src/info-notification.vala:55
+#: ../src/info-notification.vala:57
 msgid "Speakers"
 msgstr "Колонки"
 
-#: ../src/info-notification.vala:57
+#: ../src/info-notification.vala:59
 msgid "Headphones"
 msgstr "Навушники"
 
-#: ../src/info-notification.vala:59
+#: ../src/info-notification.vala:61
 msgid "Bluetooth headphones"
 msgstr "Bluetooth навушники"
 
-#: ../src/info-notification.vala:61
+#: ../src/info-notification.vala:63
 msgid "Bluetooth speaker"
 msgstr "Колонки Bluetooth"
 
-#: ../src/info-notification.vala:63
+#: ../src/info-notification.vala:65
 msgid "Usb speaker"
 msgstr "USB динамік"
 
-#: ../src/info-notification.vala:65
+#: ../src/info-notification.vala:67
 msgid "Usb headphones"
 msgstr "USB-навушники"
 
-#: ../src/info-notification.vala:67
+#: ../src/info-notification.vala:69
 msgid "HDMI speaker"
 msgstr "Динамік HDMI"
 
-#: ../src/info-notification.vala:69
+#: ../src/info-notification.vala:71
 msgid "HDMI headphones"
 msgstr "Навушники HDMI"
 
-#: ../src/service.vala:295
+#: ../src/service.vala:266
 msgid "Missing application"
 msgstr "Відсутня програма"
 
-#: ../src/service.vala:295
+#: ../src/service.vala:266
 #, c-format
 msgid "Could not find the '%s' application - please make sure it is installed."
-msgstr "Не вдалося знайти програму \"%s\" - переконайтеся, що вона встановлена."
+msgstr ""
+"Не вдалося знайти програму \"%s\" - переконайтеся, що вона встановлена."
 
-#: ../src/service.vala:328
+#: ../src/service.vala:291
 msgid "Volume (muted)"
 msgstr "Гучність (приглушена)"
 
-#: ../src/service.vala:331
+#: ../src/service.vala:294
 msgid "silent"
 msgstr "тиша"
 
-#: ../src/service.vala:339
+#: ../src/service.vala:302
 msgid "Sound"
 msgstr "Звук"
+
+#: ../src/service.vala:303
+msgid "Sound settings & media player controls"
+msgstr ""
 
 #: ../src/sound-menu.vala:52
 msgid "Mute"

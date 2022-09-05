@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-28 20:28+0200\n"
+"POT-Creation-Date: 2022-09-05 13:46+0200\n"
 "PO-Revision-Date: 2019-01-12 18:06+0000\n"
 "Last-Translator: Louies <louies0623@gmail.com>\n"
 "Language-Team: Chinese (Traditional) <https://hosted.weblate.org/projects/"
@@ -18,6 +18,23 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Weblate 3.4-dev\n"
+
+#: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
+msgid "Set properties of own user"
+msgstr ""
+
+#: ../data/org.ayatana.indicator.sound.AccountsService.policy:6
+msgid "Authentication is required to set one's own indicator sound properties."
+msgstr ""
+
+#: ../data/org.ayatana.indicator.sound.AccountsService.policy:15
+msgid "Set properties of any user"
+msgstr ""
+
+#: ../data/org.ayatana.indicator.sound.AccountsService.policy:16
+msgid ""
+"Authentication is required to set another user's indicator sound properties."
+msgstr ""
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
@@ -124,8 +141,9 @@ msgid "Normal output volume."
 msgstr "正常輸出量。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
+#, fuzzy
 msgid ""
-"The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
+"The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is disabled.\n"
 "\n"
 "To conform with EU standard EN 60950-1/Al2, this value should never be set "
@@ -142,14 +160,16 @@ msgstr ""
 "預設值（0）對應於PulseAudio的PA_VOLUME_NORM。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
+#, fuzzy
 msgid ""
-"Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
+"Output volume to use when com.lomiri.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr "啟用 com.ubuntu.sound 的“允許放大音量”設置時要使用的輸出音量。"
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
+#, fuzzy
 msgid ""
-"The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
+"The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is enabled.\n"
 "\n"
 "To conform with EU standard EN 60950-1/Al2, this value should never be set "
@@ -165,109 +185,128 @@ msgstr ""
 "\n"
 "預設值（11）對應於PulseAudio的PA_VOLUME_UI_MAX。"
 
-#: ../src/info-notification.vala:25 ../src/info-notification.vala:42
-#: ../src/service.vala:302 ../src/service.vala:305 ../src/sound-menu.vala:57
-#: ../src/sound-menu.vala:251 ../src/warn-notification.vala:31
-#, c-format
+#: ../src/info-notification.vala:27 ../src/info-notification.vala:44
+#: ../src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:59
+#: ../src/sound-menu.vala:253 ../src/warn-notification.vala:31
 msgid "Volume"
 msgstr "音量"
 
-#: ../src/info-notification.vala:55
+#: ../src/info-notification.vala:57
 msgid "Speakers"
 msgstr "喇叭"
 
-#: ../src/info-notification.vala:57
+#: ../src/info-notification.vala:59
 msgid "Headphones"
 msgstr "耳機"
 
-#: ../src/info-notification.vala:59
+#: ../src/info-notification.vala:61
 msgid "Bluetooth headphones"
 msgstr "藍牙耳機"
 
-#: ../src/info-notification.vala:61
+#: ../src/info-notification.vala:63
 msgid "Bluetooth speaker"
 msgstr "藍牙喇叭"
 
-#: ../src/info-notification.vala:63
+#: ../src/info-notification.vala:65
 msgid "Usb speaker"
 msgstr "USB 喇叭"
 
-#: ../src/info-notification.vala:65
+#: ../src/info-notification.vala:67
 msgid "Usb headphones"
 msgstr "USB 耳機"
 
-#: ../src/info-notification.vala:67
+#: ../src/info-notification.vala:69
 msgid "HDMI speaker"
 msgstr "HDMI 喇叭"
 
-#: ../src/info-notification.vala:69
+#: ../src/info-notification.vala:71
 msgid "HDMI headphones"
 msgstr "HDMI 耳機"
 
-#: ../src/service.vala:299
+#: ../src/service.vala:266
+msgid "Missing application"
+msgstr ""
+
+#: ../src/service.vala:266
+#, c-format
+msgid "Could not find the '%s' application - please make sure it is installed."
+msgstr ""
+
+#: ../src/service.vala:291
 msgid "Volume (muted)"
 msgstr "音量 (靜音)"
 
-#: ../src/service.vala:302
+#: ../src/service.vala:294
 msgid "silent"
 msgstr "無聲"
 
-#: ../src/service.vala:310
+#: ../src/service.vala:302
 msgid "Sound"
 msgstr "聲音"
 
-#: ../src/sound-menu.vala:50
+#: ../src/service.vala:303
+msgid "Sound settings & media player controls"
+msgstr ""
+
+#: ../src/sound-menu.vala:52
 msgid "Mute"
 msgstr "靜音"
 
-#: ../src/sound-menu.vala:52
+#: ../src/sound-menu.vala:54
 msgid "Silent Mode"
 msgstr "靜音模式"
 
-#: ../src/sound-menu.vala:66
+#: ../src/sound-menu.vala:68
 msgid "Sound Settings…"
 msgstr "聲音設置…"
 
-#: ../src/sound-menu.vala:123
+#: ../src/sound-menu.vala:125
 msgid "Microphone Volume"
 msgstr "麥克風音量"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
-#: ../src/sound-menu.vala:146 ../src/warn-notification.vala:32
+#: ../src/sound-menu.vala:148
 msgid "High volume can damage your hearing."
 msgstr "音量過大會損害您的聽力。"
 
-#: ../src/sound-menu.vala:254
+#: ../src/sound-menu.vala:256
 msgid "Volume (Headphones)"
 msgstr "音量 (耳機)"
 
-#: ../src/sound-menu.vala:257
+#: ../src/sound-menu.vala:259
 msgid "Volume (Bluetooth)"
 msgstr "音量 (藍牙)"
 
-#: ../src/sound-menu.vala:260
+#: ../src/sound-menu.vala:262
 msgid "Volume (Usb)"
 msgstr "音量 (USB)"
 
-#: ../src/sound-menu.vala:263
+#: ../src/sound-menu.vala:265
 msgid "Volume (HDMI)"
 msgstr "音量 (HDMI)"
 
-#: ../src/sound-menu.vala:266
+#: ../src/sound-menu.vala:268
 msgid "Volume (Bluetooth headphones)"
 msgstr "音量 (藍牙耳機)"
 
-#: ../src/sound-menu.vala:269
+#: ../src/sound-menu.vala:271
 msgid "Volume (Usb headphones)"
 msgstr "音量 (USB 耳機)"
 
-#: ../src/sound-menu.vala:272
+#: ../src/sound-menu.vala:274
 msgid "Volume (HDMI headphones)"
 msgstr "音量 (HDMI 耳機)"
 
-#: ../src/sound-menu.vala:445
+#: ../src/sound-menu.vala:449
 msgid "Choose Playlist"
 msgstr "選擇播放清單"
+
+#: ../src/warn-notification.vala:32
+#, fuzzy
+msgid ""
+"Allow volume above safe level?\n"
+"High volume can damage your hearing."
+msgstr "音量過大會損害您的聽力。"
 
 #: ../src/warn-notification.vala:49
 msgid "OK"

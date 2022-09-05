@@ -7,11 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-12 07:22+0200\n"
+"POT-Creation-Date: 2022-09-05 13:46+0200\n"
 "PO-Revision-Date: 2022-02-28 14:54+0000\n"
 "Last-Translator: 이정희 <daemul72@gmail.com>\n"
-"Language-Team: Korean <https://hosted.weblate.org/projects/"
-"ayatana-indicators/sound-applet/ko/>\n"
+"Language-Team: Korean <https://hosted.weblate.org/projects/ayatana-"
+"indicators/sound-applet/ko/>\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -47,9 +47,9 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
-"MPRIS2 규격을 준수하는 각 미디어 재생기가 메뉴에 자동으로 나타납니다. 이 "
-"배열은 사운드 메뉴에 포함되기를 원하지 않는 응용프로그램의 데스크톱 파일 "
-"이름(최소 .desktop 접미사)을 포함해야 합니다."
+"MPRIS2 규격을 준수하는 각 미디어 재생기가 메뉴에 자동으로 나타납니다. 이 배열"
+"은 사운드 메뉴에 포함되기를 원하지 않는 응용프로그램의 데스크톱 파일 이름(최"
+"소 .desktop 접미사)을 포함해야 합니다."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
@@ -64,10 +64,10 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
-"MPRIS2 사양을 준수하는 각 미디어 재생기가 메뉴에 자동으로 나타납니다. 이 "
-"배열에는 메뉴에 표시된 적이 있는 응용프로그램의 데스크탑 파일 이름(최소 ."
-"desktop 접미사)이 포함되어야 합니다. 이렇게 하면 메뉴에서 오프라인 "
-"응용프로그램을 기억하고 표시할 수 있습니다."
+"MPRIS2 사양을 준수하는 각 미디어 재생기가 메뉴에 자동으로 나타납니다. 이 배열"
+"에는 메뉴에 표시된 적이 있는 응용프로그램의 데스크탑 파일 이름(최소 .desktop "
+"접미사)이 포함되어야 합니다. 이렇게 하면 메뉴에서 오프라인 응용프로그램을 기"
+"억하고 표시할 수 있습니다."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
@@ -146,8 +146,9 @@ msgid "Normal output volume."
 msgstr "일반 출력 음량."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
+#, fuzzy
 msgid ""
-"The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
+"The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is disabled.\n"
 "\n"
 "To conform with EU standard EN 60950-1/Al2, this value should never be set "
@@ -165,16 +166,18 @@ msgstr ""
 "기본값(0)은 PulseAudio의 PA_VOLUM_NORM에 해당합니다."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
+#, fuzzy
 msgid ""
-"Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
+"Output volume to use when com.lomiri.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
 "com.ubuntu.sound의 '허용-증폭-음량' 설정이 활성화된 경우 사용할 출력 음량입니"
 "다."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
+#, fuzzy
 msgid ""
-"The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
+"The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is enabled.\n"
 "\n"
 "To conform with EU standard EN 60950-1/Al2, this value should never be set "
@@ -190,64 +193,68 @@ msgstr ""
 "\n"
 "기본값(11)은 PulseAudio의 PA_VOLUIL_UI_MAX에 해당합니다."
 
-#: ../src/info-notification.vala:25 ../src/info-notification.vala:42
-#: ../src/service.vala:331 ../src/service.vala:334 ../src/sound-menu.vala:59
+#: ../src/info-notification.vala:27 ../src/info-notification.vala:44
+#: ../src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:59
 #: ../src/sound-menu.vala:253 ../src/warn-notification.vala:31
 msgid "Volume"
 msgstr "음량"
 
-#: ../src/info-notification.vala:55
+#: ../src/info-notification.vala:57
 msgid "Speakers"
 msgstr "스피커"
 
-#: ../src/info-notification.vala:57
+#: ../src/info-notification.vala:59
 msgid "Headphones"
 msgstr "헤드폰"
 
-#: ../src/info-notification.vala:59
+#: ../src/info-notification.vala:61
 msgid "Bluetooth headphones"
 msgstr "블루투스 헤드폰"
 
-#: ../src/info-notification.vala:61
+#: ../src/info-notification.vala:63
 msgid "Bluetooth speaker"
 msgstr "블루투스 스피커"
 
-#: ../src/info-notification.vala:63
+#: ../src/info-notification.vala:65
 msgid "Usb speaker"
 msgstr "Usb 스피커"
 
-#: ../src/info-notification.vala:65
+#: ../src/info-notification.vala:67
 msgid "Usb headphones"
 msgstr "Usb 헤드폰"
 
-#: ../src/info-notification.vala:67
+#: ../src/info-notification.vala:69
 msgid "HDMI speaker"
 msgstr "HDMI 스피커"
 
-#: ../src/info-notification.vala:69
+#: ../src/info-notification.vala:71
 msgid "HDMI headphones"
 msgstr "HDMI 헤드폰"
 
-#: ../src/service.vala:295
+#: ../src/service.vala:266
 msgid "Missing application"
 msgstr "누락된 응용프로그램"
 
-#: ../src/service.vala:295
+#: ../src/service.vala:266
 #, c-format
 msgid "Could not find the '%s' application - please make sure it is installed."
 msgstr "'%s' 응용프로그램을 찾을 수 없습니다. 설치되어 있는지 확인하십시오."
 
-#: ../src/service.vala:328
+#: ../src/service.vala:291
 msgid "Volume (muted)"
 msgstr "음량 (음소거됨)"
 
-#: ../src/service.vala:331
+#: ../src/service.vala:294
 msgid "silent"
 msgstr "무음"
 
-#: ../src/service.vala:339
+#: ../src/service.vala:302
 msgid "Sound"
 msgstr "사운드"
+
+#: ../src/service.vala:303
+msgid "Sound settings & media player controls"
+msgstr ""
 
 #: ../src/sound-menu.vala:52
 msgid "Mute"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-12 07:21+0200\n"
+"POT-Creation-Date: 2022-09-05 13:46+0200\n"
 "PO-Revision-Date: 2020-09-06 12:17+0000\n"
 "Last-Translator: Baka Gaijin <lewdwarrior@waifu.club>\n"
 "Language-Team: Japanese <https://hosted.weblate.org/projects/ayatana-"
@@ -154,7 +154,7 @@ msgstr "通常の出力音量。"
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
 #, fuzzy
 msgid ""
-"The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
+"The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is disabled.\n"
 "\n"
 "To conform with EU standard EN 60950-1/Al2, this value should never be set "
@@ -174,7 +174,7 @@ msgstr ""
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
 #, fuzzy
 msgid ""
-"Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
+"Output volume to use when com.lomiri.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
 "com.ubuntu.soundの「allow-amplified-volume」設定が有効な場合に使用する出力ボ"
@@ -183,7 +183,7 @@ msgstr ""
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
 #, fuzzy
 msgid ""
-"The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
+"The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is enabled.\n"
 "\n"
 "To conform with EU standard EN 60950-1/Al2, this value should never be set "
@@ -199,74 +199,78 @@ msgstr ""
 "\n"
 "デフォルト値（11）は、PulseAudioのPA_VOLUME_UI_MAXに対応しています。"
 
-#: ../src/info-notification.vala:25 ../src/info-notification.vala:42
-#: ../src/service.vala:331 ../src/service.vala:334 ../src/sound-menu.vala:59
+#: ../src/info-notification.vala:27 ../src/info-notification.vala:44
+#: ../src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:59
 #: ../src/sound-menu.vala:253 ../src/warn-notification.vala:31
 #, fuzzy
 msgid "Volume"
 msgstr "ボリューム"
 
-#: ../src/info-notification.vala:55
+#: ../src/info-notification.vala:57
 #, fuzzy
 msgid "Speakers"
 msgstr "スピーカー"
 
-#: ../src/info-notification.vala:57
+#: ../src/info-notification.vala:59
 msgid "Headphones"
 msgstr "エアホーン"
 
-#: ../src/info-notification.vala:59
+#: ../src/info-notification.vala:61
 #, fuzzy
 msgid "Bluetooth headphones"
 msgstr "ブルートゥースヘッドフォン"
 
-#: ../src/info-notification.vala:61
+#: ../src/info-notification.vala:63
 #, fuzzy
 msgid "Bluetooth speaker"
 msgstr "ブルートゥーススピーカー"
 
-#: ../src/info-notification.vala:63
+#: ../src/info-notification.vala:65
 #, fuzzy
 msgid "Usb speaker"
 msgstr "USBスピーカー"
 
-#: ../src/info-notification.vala:65
+#: ../src/info-notification.vala:67
 #, fuzzy
 msgid "Usb headphones"
 msgstr "USBヘッドフォン"
 
-#: ../src/info-notification.vala:67
+#: ../src/info-notification.vala:69
 #, fuzzy
 msgid "HDMI speaker"
 msgstr "HDMIスピーカー"
 
-#: ../src/info-notification.vala:69
+#: ../src/info-notification.vala:71
 #, fuzzy
 msgid "HDMI headphones"
 msgstr "HDMIヘッドフォン"
 
-#: ../src/service.vala:295
+#: ../src/service.vala:266
 msgid "Missing application"
 msgstr ""
 
-#: ../src/service.vala:295
+#: ../src/service.vala:266
 #, c-format
 msgid "Could not find the '%s' application - please make sure it is installed."
 msgstr ""
 
-#: ../src/service.vala:328
+#: ../src/service.vala:291
 #, fuzzy
 msgid "Volume (muted)"
 msgstr "ボリューム (ミュート)"
 
-#: ../src/service.vala:331
+#: ../src/service.vala:294
 #, fuzzy
 msgid "silent"
 msgstr "サイレント"
 
-#: ../src/service.vala:339
+#: ../src/service.vala:302
 msgid "Sound"
 msgstr "音声"
+
+#: ../src/service.vala:303
+msgid "Sound settings & media player controls"
+msgstr ""
 
 #: ../src/sound-menu.vala:52
 #, fuzzy
