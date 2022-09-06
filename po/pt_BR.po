@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-09-05 13:46+0200\n"
-"PO-Revision-Date: 2021-09-24 14:34+0000\n"
+"PO-Revision-Date: 2022-09-07 03:22+0000\n"
 "Last-Translator: Wellington Terumi Uemura <wellingtonuemura@gmail.com>\n"
 "Language-Team: Portuguese (Brazil) <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/pt_BR/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 4.9-dev\n"
+"X-Generator: Weblate 4.14.1-dev\n"
 
 #: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
@@ -162,7 +162,6 @@ msgid "Normal output volume."
 msgstr "Volume de saída normal."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:20
-#, fuzzy
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is disabled.\n"
@@ -173,26 +172,24 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
-"O volume máximo quando a configuração \"permitir-volume amplificado\" do com."
-"ubuntu.sound é desativado.\n"
+"O volume máximo quando a configuração 'permitir volume amplificado' do "
+"com.lomiri.sound estiver desativada.\n"
 "\n"
-"Para se adequar ao EN 60950-1/Al2 padrão da UE, este valor nunca deve ser "
-"definido para um dB que faça com que a saída de som do fone de ouvido exceda "
-"os 100 dBA ou a saída elétrica exceda 150 mV.\n"
+"Para estar em conformidade com a norma EU EN 60950-1/Al2, este valor nunca "
+"deve ser definido para um dB que faça com que a saída do áudio do fone de "
+"ouvido exceda 100 dBA e nem exceda a saída elétrica de 150 mV.\n"
 "\n"
-"O valor predefinido (0) corresponde ao PA_VOLUME_NORM do PulseAudio."
+"O valor padrão (0) corresponde ao PA_VOLUME_NORM do PulseAudio."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:25
-#, fuzzy
 msgid ""
 "Output volume to use when com.lomiri.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
-"O volume de saída para usar quando a configuração \"permitir-amplificado-"
-"volume\" do com.ubuntu.sound está ativada."
+"Volume da saída que será usado quando a configuração 'allow-amplified-"
+"volume' do com.lomiri.sound estiver ativada."
 
 #: ../data/org.ayatana.indicator.sound.gschema.xml:26
-#, fuzzy
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is enabled.\n"
@@ -203,14 +200,14 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
-"O volume máximo quando a configuração \"permitir-volume-amplificado\" do com."
-"ubuntu.sound está ativado.\n"
+"O volume máximo quando a configuração 'permitir-amplificação de volume' do "
+"com.lomiri.sound está ativada.\n"
 "\n"
-"Para se adequar ao EN 60950-1/Al2 padrão da UE, este valor nunca deve ser "
-"definido para um dB que faça com que a saída do som do fone de ouvido exceda "
-"os 100 dBA ou a saída elétrica exceda 150 mV.\n"
+"Para estar em conformidade com o padrão da UE EN 60950-1/Al2, este valor "
+"nunca deve ser definido como um dB que faça com que a saída de áudio do fone "
+"de ouvido exceda 100 dBA e exceda a saída elétrica de 150 mV.\n"
 "\n"
-"O valor predefinido (11) corresponde ao PA_VOLUME_UI_MAX do PulseAudio."
+"O valor padrão (11) corresponde ao PA_VOLUME_UI_MAX do PulseAudio."
 
 #: ../src/info-notification.vala:27 ../src/info-notification.vala:44
 #: ../src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:59
@@ -275,7 +272,7 @@ msgstr "Som"
 
 #: ../src/service.vala:303
 msgid "Sound settings & media player controls"
-msgstr ""
+msgstr "Configurações de áudio e os controles do media player"
 
 #: ../src/sound-menu.vala:52
 msgid "Mute"
