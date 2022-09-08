@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Canonical Ltd.
- * Copyright 2021 Robert Tari
+ * Copyright 2021-2022 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,18 @@ public class SoundMenu: Object
         this.volume_section = new Menu ();
 
         if ((flags & DisplayFlags.SHOW_MUTE) != 0)
-            volume_section.append (_("Mute"), "indicator.mute");
+        {
+            if (AyatanaCommon.utils_is_lomiri())
+            {
+                volume_section.append (_("Mute"), "indicator.mute");
+            }
+            else
+            {
+                var item = new MenuItem (_("Mute"), "indicator.mute(true)");
+                item.set_attribute ("x-ayatana-type", "s", "org.ayatana.indicator.switch");
+                volume_section.append_item (item);
+            }
+        }
         if ((flags & DisplayFlags.SHOW_SILENT_MODE) != 0) {
             var item = new MenuItem(_("Silent Mode"), "indicator.silent-mode(true)");
             item.set_attribute("x-ayatana-type", "s", "org.ayatana.indicator.switch");

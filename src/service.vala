@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Canonical Ltd.
- * Copyright 2021 Robert Tari
+ * Copyright 2021-2022 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -362,11 +362,23 @@ public class IndicatorSound.Service: Object {
 
     SimpleAction mute_action;
     Action create_mute_action () {
-        mute_action = new SimpleAction.stateful ("mute", null, new Variant.boolean (this.volume_control.mute));
 
-        mute_action.activate.connect ( (action, param) => {
-            action.change_state (new Variant.boolean (!action.get_state ().get_boolean ()));
-        });
+        if (AyatanaCommon.utils_is_lomiri())
+        {
+            mute_action = new SimpleAction.stateful ("mute", null, new Variant.boolean (this.volume_control.mute));
+
+            mute_action.activate.connect ( (action, param) => {
+                action.change_state (new Variant.boolean (!action.get_state ().get_boolean ()));
+            });
+        }
+        else
+        {
+            mute_action = new SimpleAction.stateful ("mute", VariantType.BOOLEAN, new Variant.boolean (this.volume_control.mute));
+
+            mute_action.activate.connect ((action, param) => {
+                action.change_state (param);
+            });
+        }
 
         mute_action.change_state.connect ( (action, val) => {
             volume_control.set_mute (val.get_boolean ());
