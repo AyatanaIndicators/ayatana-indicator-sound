@@ -1,3 +1,13 @@
+Overview of changes in ayatana-indicator-sound 22.9.0
+
+  - Add tooltip support.
+  - Make 'silent mode' switch item/action QMenuModel compatible.
+  - On desktops, convert mute menu item to switch item.
+  - Ensure that sound indicator always starts up after pulseaudio.
+  - Fix header including in unit tests.
+  - com.lomiri.sound: Use shared settings on Lomiri only.
+  - Translation updates.
+
 Overview of changes in ayatana-indicator-sound 22.2.0
 
   - Upstream version bump to new release versioning scheme:

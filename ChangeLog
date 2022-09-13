@@ -1,6 +1,125 @@
+2022-09-13 Mike Gabriel
+
+        * release 22.9.0 (HEAD -> main, tag: 22.9.0)
+
+2022-09-08 Mike Gabriel
+
+        * Merge branch 'tari01-pr/mute-toggle-switch' (c4f5392)
+
+2022-09-03 Robert Tari
+
+        * Convert Mute menuitem to switch (6d68d25)
+
+2022-09-07 Quentin PAGÈS
+
+        * Translated using Weblate (Occitan) (23d48f5)
+
+2022-09-07 Moo
+
+        * Translated using Weblate (Lithuanian) (9f3651e)
+
+2022-09-06 Wellington Terumi Uemura
+
+        * Translated using Weblate (Portuguese (Brazil)) (8bb66b5)
+
+2022-09-05 Yaron Shahrabani
+
+        * Translated using Weblate (Hebrew) (402cec0)
+
+2022-09-05 Mike Gabriel
+
+        * Translated using Weblate (German) (1ab02e4)
+        * po/*.po{,t}: Translation strings update. (d92b443)
+
+2022-09-01 Mike Gabriel
+
+        * Merge branch 'gber-main' (35e9e4e)
+
+2022-08-15 Guido Berhoerster
+
+        * Ensure ayatana-indicator-sound is started after Pulseaudio
+          (c3704ea)
+
+2022-09-01 Mike Gabriel
+
+        * Merge branch 'sunweaver-pr/tooltip-support' (5262add)
+
+2022-08-23 Hugel
+
+        * Translated using Weblate (Chinese (Simplified)) (9aaf318)
+
+2022-08-03 Robert Tari
+
+        * Merge branch 'sunweaver-pr/make-switch-item-qmenumodel-compatible'
+          (e873ed9)
+
+2022-07-22 Boyuan Yang
+
+        * Translated using Weblate (Chinese (Simplified)) (c1fba3d)
+
+2022-07-14 Teitei
+
+        * Translated using Weblate (Burmese) (fb9c484)
+
+2022-06-21 Artem
+
+        * Translated using Weblate (Ukrainian) (0e8d121)
+
+2022-07-22 Boyuan Yang
+
+        * Translated using Weblate (Chinese (Simplified)) (efc7cc7)
+
+2022-07-22 Mike Gabriel
+
+        * src/service.c: Add tooltip support. (2791f04)
+
+2022-07-19 Mike Gabriel
+
+        * src/*.vala: make the 'silent mode' switch item & action QMenuModel
+          compatible (264b421)
+
+2022-07-14 Teitei
+
+        * Translated using Weblate (Burmese) (0a1cf13)
+
+2022-06-21 Artem
+
+        * Translated using Weblate (Ukrainian) (93716b8)
+
+2022-06-13 Mike Gabriel
+
+        * Merge branch 'neochapay-fix_80' (a7f70e8)
+
+2022-06-08 Sergey Chupligin
+
+        * tests/CMakeLists.txt Add TEST_INCLUDE_DIRS to include-directories
+          (6f81698)
+          Fixes:
+          https://github.com/AyatanaIndicators/ayatana-indicator-sound/issues/80
+
+2022-04-23 Sergii Horichenko
+
+        * Translated using Weblate (Russian) (6642ace)
+        * Translated using Weblate (Ukrainian) (2841b41)
+        * Translated using Weblate (Russian) (33c4226)
+        * Translated using Weblate (Ukrainian) (f6372b2)
+
+2022-02-27 이정희
+
+        * Translated using Weblate (Korean) (70b4979)
+
+2022-02-25 Mike Gabriel
+
+        * Merge branch 'tari01-pr/drop-lomiri-runtime-dependency' (a094923)
+
+2022-02-24 Robert Tari
+
+        * src/options-gsettings.vala: Use shared settings on Lomiri only
+          (b7cd72a)
+
 2022-02-18 Mike Gabriel
 
-        * release 22.2.0 (HEAD -> main, tag: 22.2.0)
+        * release 22.2.0 (cf2029c) (tag: 22.2.0)
         * Merge branch 'tari01-pr/build-with-werror' (e3049a5)
 
 2022-02-17 Robert Tari
