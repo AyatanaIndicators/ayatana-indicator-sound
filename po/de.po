@@ -7,11 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-05 13:46+0200\n"
+"POT-Creation-Date: 2022-09-14 08:05+0200\n"
 "PO-Revision-Date: 2022-09-05 19:42+0000\n"
 "Last-Translator: Mike Gabriel <mike.gabriel@das-netzwerkteam.de>\n"
-"Language-Team: German <https://hosted.weblate.org/projects/"
-"ayatana-indicators/sound-applet/de/>\n"
+"Language-Team: German <https://hosted.weblate.org/projects/ayatana-"
+"indicators/sound-applet/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,32 +19,32 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 4.14.1-dev\n"
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
+#: data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
 msgstr "Einstellungen für das eigene Benutzerkonto setzen"
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:6
+#: data/org.ayatana.indicator.sound.AccountsService.policy:6
 msgid "Authentication is required to set one's own indicator sound properties."
 msgstr ""
 "Sie müssen angemeldet sein, um die eigenen Sound Indicator Einstellungen "
 "vorzunehmen."
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:15
+#: data/org.ayatana.indicator.sound.AccountsService.policy:15
 msgid "Set properties of any user"
 msgstr "Einstellungen für alle Benutzer"
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:16
+#: data/org.ayatana.indicator.sound.AccountsService.policy:16
 msgid ""
 "Authentication is required to set another user's indicator sound properties."
 msgstr ""
 "Sie müssen angemeldet sein, um Sound Indicator Einstellungen anderer "
 "Benutzer vornehmen zu können."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:1
+#: data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
 msgstr "List von Anwendungen, die nicht im Sound-Menü angezeigt werden dürfen"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:2
+#: data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
 "Each media player which abides by the MPRIS2 spec will automatically appear "
 "in the menu. This array should contain the desktop file names (minus ."
@@ -56,7 +56,7 @@ msgstr ""
 "desktop-Suffix) von Anwendungen enthalten, die nicht in das Soundmenü "
 "aufgenommen werden sollen."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:3
+#: data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
@@ -64,7 +64,7 @@ msgstr ""
 "Eine Liste von Anwendungen, die sich irgendwann einmal beim Sound-Menü "
 "registriert haben"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:4
+#: data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
 "Each media player which abides by the MPRIS2 spec will automatically appear "
 "in the menu. This array should contain the desktop file names (minus ."
@@ -77,37 +77,37 @@ msgstr ""
 "sind. Dies ermöglicht es dem Menü, sich Offline-Anwendungen zu merken und "
 "anzuzeigen."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:5
+#: data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
 msgstr ""
 "Eine Liste von Anwendungen, deren Steuerelemente für Medienwiedergabe stets "
 "sichtbar sein werden"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:6
+#: data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
 msgstr "Initiale Einstellung für globales Stummschalten (alles stumm) im Menü"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:7
+#: data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
 msgstr "Beim Start sollte die Lautstärke nicht stumm geschaltet sein."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:9
+#: data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
 msgstr "Ob die Lautstärke höherer als 100 % sein darf"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:10
+#: data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
 msgstr ""
 "Ob (oder ob nicht) der Sound-Indicator in der Menüleiste angezeigt werden "
 "soll."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:11
+#: data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
 msgstr "Ob (oder ob nicht) vor zu hoher Lautstärke gewarnt werden soll."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:12
+#: data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
 "If enabled on a device, a confirmation dialog will be presented to the user "
 "if (a) something is plugged into the headphone jack (ie, no warnings for "
@@ -124,13 +124,13 @@ msgstr ""
 "UND (d) der Benutzer hat die Genehmigung der letzten Sekunden von warning-"
 "volume-approval-ttl nicht erteilt."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:13
+#: data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
 "Wie viele Sekunden die Zustimmung des Benutzer bei Lautstärke-zu-hoch-"
 "Warnungen erinnert werden soll."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:14
+#: data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
 "How long to remember a user's approval of the confirmation dialog discussed "
 "in the description of 'warning-volume-enabled'.\n"
@@ -147,13 +147,13 @@ msgstr ""
 "Al2 vorgeschlagenen 20 Stunden: „Die Bestätigung muss nicht mehr als einmal "
 "alle 20 Stunden der zusammengezählten Hörzeit wiederholt werden.“"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:17
+#: data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
 msgstr ""
 "Lautstärkepegel, bei dem die Lautstärke-zu-hoch-Warnung ausgelöst werden "
 "soll."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:18
+#: data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
@@ -161,11 +161,11 @@ msgstr ""
 "Lautstärkepegel der eine Lautstärke-zu-hoch Warnung auslöst. Für Details, "
 "siehe „warnung-lautstärke-aktiviert“."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:19
+#: data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
 msgstr "Normale Wiedergabelautstärke."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:20
+#: data/org.ayatana.indicator.sound.gschema.xml:20
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is disabled.\n"
@@ -185,7 +185,7 @@ msgstr ""
 "\n"
 "Der Standardwert (0) entspricht der PA_VOLUME_NORM von PulseAudio."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:25
+#: data/org.ayatana.indicator.sound.gschema.xml:25
 msgid ""
 "Output volume to use when com.lomiri.sound's 'allow-amplified-volume' "
 "setting is enabled."
@@ -193,7 +193,7 @@ msgstr ""
 "Ausgangslautstärke, die verwendet werden soll, wenn die Einstellung 'allow-"
 "amplified-volume' von com.lomiri.sound aktiviert ist."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:26
+#: data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is enabled.\n"
@@ -213,125 +213,125 @@ msgstr ""
 "\n"
 "Der Standardwert (11) entspricht dem PA_VOLUME_UI_MAX von PulseAudio."
 
-#: ../src/info-notification.vala:27 ../src/info-notification.vala:44
-#: ../src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:59
-#: ../src/sound-menu.vala:253 ../src/warn-notification.vala:31
+#: src/info-notification.vala:27 ../src/info-notification.vala:44
+#: src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:70
+#: src/sound-menu.vala:264 ../src/warn-notification.vala:31
 msgid "Volume"
 msgstr "Lautstärke"
 
-#: ../src/info-notification.vala:57
+#: src/info-notification.vala:57
 msgid "Speakers"
 msgstr "Lautsprecher"
 
-#: ../src/info-notification.vala:59
+#: src/info-notification.vala:59
 msgid "Headphones"
 msgstr "Kopfhörer"
 
-#: ../src/info-notification.vala:61
+#: src/info-notification.vala:61
 msgid "Bluetooth headphones"
 msgstr "Bluetooth-Kopfhörer"
 
-#: ../src/info-notification.vala:63
+#: src/info-notification.vala:63
 msgid "Bluetooth speaker"
 msgstr "Bluetooth-Lautsprecher"
 
-#: ../src/info-notification.vala:65
+#: src/info-notification.vala:65
 msgid "Usb speaker"
 msgstr "USB-Lautsprecher"
 
-#: ../src/info-notification.vala:67
+#: src/info-notification.vala:67
 msgid "Usb headphones"
 msgstr "USB-Kopfhörer"
 
-#: ../src/info-notification.vala:69
+#: src/info-notification.vala:69
 msgid "HDMI speaker"
 msgstr "HDMI-Lautsprecher"
 
-#: ../src/info-notification.vala:71
+#: src/info-notification.vala:71
 msgid "HDMI headphones"
 msgstr "HDMI-Kopfhörer"
 
-#: ../src/service.vala:266
+#: src/service.vala:266
 msgid "Missing application"
 msgstr "Fehlende Anwendung"
 
-#: ../src/service.vala:266
+#: src/service.vala:266
 #, c-format
 msgid "Could not find the '%s' application - please make sure it is installed."
 msgstr ""
 "Die Anwendung '%s' konnte nicht gefunden werden - Bitte sicherstellen, dass "
 "sie installiert ist."
 
-#: ../src/service.vala:291
+#: src/service.vala:291
 msgid "Volume (muted)"
 msgstr "Lautstärke (stumm)"
 
-#: ../src/service.vala:294
+#: src/service.vala:294
 msgid "silent"
 msgstr "still"
 
-#: ../src/service.vala:302
+#: src/service.vala:302
 msgid "Sound"
 msgstr "Klang"
 
-#: ../src/service.vala:303
+#: src/service.vala:303
 msgid "Sound settings & media player controls"
 msgstr "Klangeinstellungen & Mediaplayer-Steuerung"
 
-#: ../src/sound-menu.vala:52
+#: src/sound-menu.vala:55 ../src/sound-menu.vala:59
 msgid "Mute"
 msgstr "Stumm"
 
-#: ../src/sound-menu.vala:54
+#: src/sound-menu.vala:65
 msgid "Silent Mode"
 msgstr "Stiller Modus"
 
-#: ../src/sound-menu.vala:68
+#: src/sound-menu.vala:79
 msgid "Sound Settings…"
 msgstr "Klangeinstellungen …"
 
-#: ../src/sound-menu.vala:125
+#: src/sound-menu.vala:136
 msgid "Microphone Volume"
 msgstr "Mikrofonlautstärke"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
-#: ../src/sound-menu.vala:148
+#: src/sound-menu.vala:159
 msgid "High volume can damage your hearing."
 msgstr "Zu hohe Lautstärke kann Ihrem Gehör Schaden zufügen."
 
-#: ../src/sound-menu.vala:256
+#: src/sound-menu.vala:267
 msgid "Volume (Headphones)"
 msgstr "Lautstärke (Kopfhörer)"
 
-#: ../src/sound-menu.vala:259
+#: src/sound-menu.vala:270
 msgid "Volume (Bluetooth)"
 msgstr "Lautstärke (Bluetooth)"
 
-#: ../src/sound-menu.vala:262
+#: src/sound-menu.vala:273
 msgid "Volume (Usb)"
 msgstr "Lautstärke (USB)"
 
-#: ../src/sound-menu.vala:265
+#: src/sound-menu.vala:276
 msgid "Volume (HDMI)"
 msgstr "Lautstärke (HDMI)"
 
-#: ../src/sound-menu.vala:268
+#: src/sound-menu.vala:279
 msgid "Volume (Bluetooth headphones)"
 msgstr "Lautstärke (Bluetooth-Kopfhörer)"
 
-#: ../src/sound-menu.vala:271
+#: src/sound-menu.vala:282
 msgid "Volume (Usb headphones)"
 msgstr "Lautstärke (USB-Kopfhörer)"
 
-#: ../src/sound-menu.vala:274
+#: src/sound-menu.vala:285
 msgid "Volume (HDMI headphones)"
 msgstr "Lautstärke (HDMI-Kopfhörer)"
 
-#: ../src/sound-menu.vala:449
+#: src/sound-menu.vala:460
 msgid "Choose Playlist"
 msgstr "Wiedegabeliste auswählen"
 
-#: ../src/warn-notification.vala:32
+#: src/warn-notification.vala:32
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
@@ -339,10 +339,10 @@ msgstr ""
 "Läuftstärken über sicherem Pegel erlauben ? \n"
 "Zu hohe Lautstärke kann Ihrem Gehör Schaden zufügen."
 
-#: ../src/warn-notification.vala:49
+#: src/warn-notification.vala:49
 msgid "OK"
 msgstr "OK"
 
-#: ../src/warn-notification.vala:52
+#: src/warn-notification.vala:52
 msgid "Cancel"
 msgstr "Abbrechen"

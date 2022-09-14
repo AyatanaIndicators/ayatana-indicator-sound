@@ -7,11 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-05 13:46+0200\n"
+"POT-Creation-Date: 2022-09-14 08:05+0200\n"
 "PO-Revision-Date: 2022-09-08 18:17+0000\n"
 "Last-Translator: Moo <hazap@hotmail.com>\n"
-"Language-Team: Lithuanian <https://hosted.weblate.org/projects/"
-"ayatana-indicators/sound-applet/lt/>\n"
+"Language-Team: Lithuanian <https://hosted.weblate.org/projects/ayatana-"
+"indicators/sound-applet/lt/>\n"
 "Language: lt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -21,32 +21,32 @@ msgstr ""
 "1 : 2);\n"
 "X-Generator: Weblate 4.14.1-dev\n"
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
+#: data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
 msgstr "Nustatyti savo naudotojo savybes"
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:6
+#: data/org.ayatana.indicator.sound.AccountsService.policy:6
 msgid "Authentication is required to set one's own indicator sound properties."
 msgstr ""
 "Norint nustatyti savo indikatoriaus garso savybes, reikalingas "
 "autentifikavimas."
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:15
+#: data/org.ayatana.indicator.sound.AccountsService.policy:15
 msgid "Set properties of any user"
 msgstr "Nustatyti bet kurio naudotojo savybes"
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:16
+#: data/org.ayatana.indicator.sound.AccountsService.policy:16
 msgid ""
 "Authentication is required to set another user's indicator sound properties."
 msgstr ""
 "Norint nustatyti kito vartotojo indikatoriaus garso savybes, reikalingas "
 "autentifikavimas."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:1
+#: data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
 msgstr "Sąrašas programų, kurios yra įtrauktos į juodąjį sąrašą iš garso meniu"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:2
+#: data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
 "Each media player which abides by the MPRIS2 spec will automatically appear "
 "in the menu. This array should contain the desktop file names (minus ."
@@ -58,14 +58,14 @@ msgstr ""
 "įtrauktos į garso meniu, darbalaukio failų pavadinimai (be .desktop "
 "priesagos)."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:3
+#: data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
 msgstr ""
 "Sąrašas programų, kurios tam tikru būdu buvo registruotos su garso meniu"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:4
+#: data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
 "Each media player which abides by the MPRIS2 spec will automatically appear "
 "in the menu. This array should contain the desktop file names (minus ."
@@ -77,34 +77,34 @@ msgstr ""
 "atsiradusios garso meniu, darbalaukio failų pavadinimai (be .desktop "
 "priesagos). Tai leidžia meniu prisiminti ir rodyti autonomines programas."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:5
+#: data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
 msgstr "Sąrašas programų, kurios visą laiką turės matomus grotuvo valdiklius"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:6
+#: data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
 msgstr ""
 "Pradinis nustatymas, skirtas visuotiniam nutildymui (nutildyti viską) meniu"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:7
+#: data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
 msgstr "Paleidimo metu garsis neturėtų būti nutildytas."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:9
+#: data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
 msgstr "Ar garsio slinktukas leidžia nustatyti garsį virš 100%"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:10
+#: data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
 msgstr "Rodyti ar nerodyti garso indikatorių meniu juostoje."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:11
+#: data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
 msgstr "Rodyti ar nerodyti didelio garsio įspėjimus."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:12
+#: data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
 "If enabled on a device, a confirmation dialog will be presented to the user "
 "if (a) something is plugged into the headphone jack (ie, no warnings for "
@@ -120,13 +120,13 @@ msgstr ""
 "garsį, kuris didesnis nei warning-volume-decibels IR (d) naudotojas nenurodė "
 "patvirtinimo per paskutines warning-volume-approval-ttl sekundes."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:13
+#: data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
 "Kelioms sekundėms turėtų būti prisimintas naudotojo garsio įspėjimo "
 "patvirtinimas."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:14
+#: data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
 "How long to remember a user's approval of the confirmation dialog discussed "
 "in the description of 'warning-volume-enabled'.\n"
@@ -142,11 +142,11 @@ msgstr ""
 "pasiūlyta pagal ES standartą EN 60950-1/Al2: “Patvirtinimas neturi būti "
 "kartojamas daugiau nei kartą per kas 20 val. visuminio klausymosi laiko.”"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:17
+#: data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
 msgstr "Garsio lygis, kuris iššaukia didelio garsio įspėjimą."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:18
+#: data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
@@ -154,11 +154,11 @@ msgstr ""
 "Garsio lygis, kuris iššaukia didelio garsio įspėjimą. Išsamesnei "
 "informacijai, žiūrėkite warning-volume-enabled."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:19
+#: data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
 msgstr "Normalios išvesties garsis."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:20
+#: data/org.ayatana.indicator.sound.gschema.xml:20
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is disabled.\n"
@@ -178,7 +178,7 @@ msgstr ""
 " \n"
 "Numatytoji reikšmė (0) atitinka PulseAudio PA_VOLUME_NORM reikšmę."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:25
+#: data/org.ayatana.indicator.sound.gschema.xml:25
 msgid ""
 "Output volume to use when com.lomiri.sound's 'allow-amplified-volume' "
 "setting is enabled."
@@ -186,7 +186,7 @@ msgstr ""
 "Išvesties garsis, kurį naudoti, kai com.lomiri.sound 'allow-amplified-"
 "volume' nustatymas yra įjungtas."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:26
+#: data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is enabled.\n"
@@ -206,123 +206,123 @@ msgstr ""
 " \n"
 "Numatytoji reikšmė (11) atitinka PulseAudio's PA_VOLUME_UI_MAX reikšmę."
 
-#: ../src/info-notification.vala:27 ../src/info-notification.vala:44
-#: ../src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:59
-#: ../src/sound-menu.vala:253 ../src/warn-notification.vala:31
+#: src/info-notification.vala:27 ../src/info-notification.vala:44
+#: src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:70
+#: src/sound-menu.vala:264 ../src/warn-notification.vala:31
 msgid "Volume"
 msgstr "Garsis"
 
-#: ../src/info-notification.vala:57
+#: src/info-notification.vala:57
 msgid "Speakers"
 msgstr "Garsiakalbiai"
 
-#: ../src/info-notification.vala:59
+#: src/info-notification.vala:59
 msgid "Headphones"
 msgstr "Ausinės"
 
-#: ../src/info-notification.vala:61
+#: src/info-notification.vala:61
 msgid "Bluetooth headphones"
 msgstr "Bluetooth ausinės"
 
-#: ../src/info-notification.vala:63
+#: src/info-notification.vala:63
 msgid "Bluetooth speaker"
 msgstr "Bluetooth garsiakalbis"
 
-#: ../src/info-notification.vala:65
+#: src/info-notification.vala:65
 msgid "Usb speaker"
 msgstr "USB garsiakalbis"
 
-#: ../src/info-notification.vala:67
+#: src/info-notification.vala:67
 msgid "Usb headphones"
 msgstr "USB ausinės"
 
-#: ../src/info-notification.vala:69
+#: src/info-notification.vala:69
 msgid "HDMI speaker"
 msgstr "HDMI garsiakalbis"
 
-#: ../src/info-notification.vala:71
+#: src/info-notification.vala:71
 msgid "HDMI headphones"
 msgstr "HDMI ausinės"
 
-#: ../src/service.vala:266
+#: src/service.vala:266
 msgid "Missing application"
 msgstr "Trūksta programėlės"
 
-#: ../src/service.vala:266
+#: src/service.vala:266
 #, c-format
 msgid "Could not find the '%s' application - please make sure it is installed."
 msgstr "Nepavyko rasti programėlės „%s“ - įsitikinkite, kad ji įdiegta."
 
-#: ../src/service.vala:291
+#: src/service.vala:291
 msgid "Volume (muted)"
 msgstr "Garsis (nutildytas)"
 
-#: ../src/service.vala:294
+#: src/service.vala:294
 msgid "silent"
 msgstr "tylus"
 
-#: ../src/service.vala:302
+#: src/service.vala:302
 msgid "Sound"
 msgstr "Garsas"
 
-#: ../src/service.vala:303
+#: src/service.vala:303
 msgid "Sound settings & media player controls"
 msgstr "Garso nustatymai ir medijos grotuvo valdikliai"
 
-#: ../src/sound-menu.vala:52
+#: src/sound-menu.vala:55 ../src/sound-menu.vala:59
 msgid "Mute"
 msgstr "Nutildyti"
 
-#: ../src/sound-menu.vala:54
+#: src/sound-menu.vala:65
 msgid "Silent Mode"
 msgstr "Tyli veiksena"
 
-#: ../src/sound-menu.vala:68
+#: src/sound-menu.vala:79
 msgid "Sound Settings…"
 msgstr "Garso nustatymai…"
 
-#: ../src/sound-menu.vala:125
+#: src/sound-menu.vala:136
 msgid "Microphone Volume"
 msgstr "Mikrofono garsis"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
-#: ../src/sound-menu.vala:148
+#: src/sound-menu.vala:159
 msgid "High volume can damage your hearing."
 msgstr "Didelis garsis gali pažeisti jūsų klausą."
 
-#: ../src/sound-menu.vala:256
+#: src/sound-menu.vala:267
 msgid "Volume (Headphones)"
 msgstr "Garsis (Ausinės)"
 
-#: ../src/sound-menu.vala:259
+#: src/sound-menu.vala:270
 msgid "Volume (Bluetooth)"
 msgstr "Garsis (Bluetooth)"
 
-#: ../src/sound-menu.vala:262
+#: src/sound-menu.vala:273
 msgid "Volume (Usb)"
 msgstr "Garsis (USB)"
 
-#: ../src/sound-menu.vala:265
+#: src/sound-menu.vala:276
 msgid "Volume (HDMI)"
 msgstr "Garsis (HDMI)"
 
-#: ../src/sound-menu.vala:268
+#: src/sound-menu.vala:279
 msgid "Volume (Bluetooth headphones)"
 msgstr "Garsis (Bluetooth ausinės)"
 
-#: ../src/sound-menu.vala:271
+#: src/sound-menu.vala:282
 msgid "Volume (Usb headphones)"
 msgstr "Garsis (USB ausinės)"
 
-#: ../src/sound-menu.vala:274
+#: src/sound-menu.vala:285
 msgid "Volume (HDMI headphones)"
 msgstr "Garsis (HDMI ausinės)"
 
-#: ../src/sound-menu.vala:449
+#: src/sound-menu.vala:460
 msgid "Choose Playlist"
 msgstr "Pasirinkti grojaraštį"
 
-#: ../src/warn-notification.vala:32
+#: src/warn-notification.vala:32
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
@@ -330,10 +330,10 @@ msgstr ""
 "Leisti garsą virš saugaus lygio?\n"
 "Didelis garsas gali pakenkti jūsų klausai."
 
-#: ../src/warn-notification.vala:49
+#: src/warn-notification.vala:49
 msgid "OK"
 msgstr "Gerai"
 
-#: ../src/warn-notification.vala:52
+#: src/warn-notification.vala:52
 msgid "Cancel"
 msgstr "Atsisakyti"

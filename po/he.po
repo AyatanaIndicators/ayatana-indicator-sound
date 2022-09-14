@@ -7,11 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-05 13:46+0200\n"
+"POT-Creation-Date: 2022-09-14 08:05+0200\n"
 "PO-Revision-Date: 2022-09-05 19:42+0000\n"
 "Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>\n"
-"Language-Team: Hebrew <https://hosted.weblate.org/projects/"
-"ayatana-indicators/sound-applet/he/>\n"
+"Language-Team: Hebrew <https://hosted.weblate.org/projects/ayatana-"
+"indicators/sound-applet/he/>\n"
 "Language: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,28 +19,28 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Weblate 4.14.1-dev\n"
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
+#: data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
 msgstr "הגדרת מאפיינים של בעלים"
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:6
+#: data/org.ayatana.indicator.sound.AccountsService.policy:6
 msgid "Authentication is required to set one's own indicator sound properties."
 msgstr "נדרש אימות כדי להגדיר את מאפייני מחוון השמע של עצמך."
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:15
+#: data/org.ayatana.indicator.sound.AccountsService.policy:15
 msgid "Set properties of any user"
 msgstr "הגדרת מאפיינים של כל משתמש שהוא"
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:16
+#: data/org.ayatana.indicator.sound.AccountsService.policy:16
 msgid ""
 "Authentication is required to set another user's indicator sound properties."
 msgstr "נדרש אימות כדי להגדיר את מאפייני מחוון השמע של משתמש אחר."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:1
+#: data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
 msgstr "רשימה של יישומים שנחסמו מתפריט השמע"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:2
+#: data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
 "Each media player which abides by the MPRIS2 spec will automatically appear "
 "in the menu. This array should contain the desktop file names (minus ."
@@ -51,13 +51,13 @@ msgstr ""
 "את שמות קובצי ה־desktop (ללא הסיומת ‎.desktop) של היישומים שאין לכלול בתפריט "
 "השמע."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:3
+#: data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
 msgstr "רשימה של יישומים שבשלב כלשהו נרשמו לתפריט השמע"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:4
+#: data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
 "Each media player which abides by the MPRIS2 spec will automatically appear "
 "in the menu. This array should contain the desktop file names (minus ."
@@ -68,33 +68,33 @@ msgstr ""
 "את שמות קובצי ה־desktop (ללא הסיומת ‎.desktop) של היישומים שבשלב כלשהו הופיעו "
 "בתפריט. יכולת זאת מאפשרת לתפריט לזכור ולהציג יישומים בלתי מקוונים."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:5
+#: data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
 msgstr "רשימה של יישומים שתמיד יופיעו בהם פקדי הנגינה"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:6
+#: data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
 msgstr "הגדרה ראשונית להשתקה כוללת (להשתיק את הכול) בתפריט"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:7
+#: data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
 msgstr "עם ההפעלה יש להפעיל את השמע."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:9
+#: data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
 msgstr "האם מחוון עצמת השמע מאפשר להגדיר את עצמת השמע מעל 100%"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:10
+#: data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
 msgstr "האם להציג את מחוון השמע בסרגל התפריטים."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:11
+#: data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
 msgstr "האם להציג אזהרות עצמת שמע גבוהה."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:12
+#: data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
 "If enabled on a device, a confirmation dialog will be presented to the user "
 "if (a) something is plugged into the headphone jack (ie, no warnings for "
@@ -103,18 +103,18 @@ msgid ""
 "volume-decibels AND (d) the user has not indicated approval in the last "
 "warning-volume-approval-ttl seconds."
 msgstr ""
-"אם הופעל במכשיר, תופיע חלונית אישור למשתמש אם: א. משהו מחובר לשקע האוזניות ("
-"כלומר, אין אזהרות לעוצמות שמע של רמקולים) וגם ב. מתנגנת מדיה (כלומר, אין "
+"אם הופעל במכשיר, תופיע חלונית אישור למשתמש אם: א. משהו מחובר לשקע האוזניות "
+"(כלומר, אין אזהרות לעוצמות שמע של רמקולים) וגם ב. מתנגנת מדיה (כלומר, אין "
 "אזהרות על עוצמות שמע של צלצולים) וגם ג. המשתמש מנסה להגדיר את עוצמת השמע "
 "מעבר ל־warning-volume-decibels (דציבלים לאזהרת עוצמת שמע) וגם ד. המשתמש לא "
 "ציין את אישורו במשך warning-volume-approval-ttl (זמן השהיה לאישור אזהרת עצמת "
 "שמע) שניות."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:13
+#: data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr "כמה שניות אישור אזהרת עצמת השמע של המשתמש אמורה להישמר."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:14
+#: data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
 "How long to remember a user's approval of the confirmation dialog discussed "
 "in the description of 'warning-volume-enabled'.\n"
@@ -130,11 +130,11 @@ msgstr ""
 "EN 60950-1/Al2: „אין צורך לחזור על אישור יותר מפעם אחת בכל 20 שעות של זמן "
 "שמע מצטבר.”"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:17
+#: data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
 msgstr "עצמת שמע שמזניקה אזהרת עצמת שמע גבוהה."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:18
+#: data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
@@ -142,11 +142,11 @@ msgstr ""
 "עצמת שמע שמזניקה אזהרת עצמת שמע גבוהה. יש לעיין ב־warning-volume-enabled "
 "(אזהרת עצמת שמע פעילה) לפרטים."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:19
+#: data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
 msgstr "פלט עצמת שמע רגיל."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:20
+#: data/org.ayatana.indicator.sound.gschema.xml:20
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is disabled.\n"
@@ -166,7 +166,7 @@ msgstr ""
 "\n"
 "ערך ברירת המחדל (0) תואם ל־PA_VOLUME_NORM של PulseAudio."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:25
+#: data/org.ayatana.indicator.sound.gschema.xml:25
 msgid ""
 "Output volume to use when com.lomiri.sound's 'allow-amplified-volume' "
 "setting is enabled."
@@ -174,7 +174,7 @@ msgstr ""
 "פלט עצמת השמע לשימוש כאשר ההגדרה ‚allow-amplified-volume’ (לאפשר שמע מוגבר) "
 "ב־com.lomiri.sound פעילה."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:26
+#: data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is enabled.\n"
@@ -194,123 +194,123 @@ msgstr ""
 "\n"
 "ערך ברירת המחדל (11) תואם ל־PA_VOLUME_UI_MAX של PulseAudio."
 
-#: ../src/info-notification.vala:27 ../src/info-notification.vala:44
-#: ../src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:59
-#: ../src/sound-menu.vala:253 ../src/warn-notification.vala:31
+#: src/info-notification.vala:27 ../src/info-notification.vala:44
+#: src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:70
+#: src/sound-menu.vala:264 ../src/warn-notification.vala:31
 msgid "Volume"
 msgstr "עצמת שמע"
 
-#: ../src/info-notification.vala:57
+#: src/info-notification.vala:57
 msgid "Speakers"
 msgstr "רמקולים"
 
-#: ../src/info-notification.vala:59
+#: src/info-notification.vala:59
 msgid "Headphones"
 msgstr "אזניות"
 
-#: ../src/info-notification.vala:61
+#: src/info-notification.vala:61
 msgid "Bluetooth headphones"
 msgstr "אזניות Bluetooth"
 
-#: ../src/info-notification.vala:63
+#: src/info-notification.vala:63
 msgid "Bluetooth speaker"
 msgstr "רמקול Bluetooth"
 
-#: ../src/info-notification.vala:65
+#: src/info-notification.vala:65
 msgid "Usb speaker"
 msgstr "רמקול USB"
 
-#: ../src/info-notification.vala:67
+#: src/info-notification.vala:67
 msgid "Usb headphones"
 msgstr "אזניות USB"
 
-#: ../src/info-notification.vala:69
+#: src/info-notification.vala:69
 msgid "HDMI speaker"
 msgstr "רמקול HDMI"
 
-#: ../src/info-notification.vala:71
+#: src/info-notification.vala:71
 msgid "HDMI headphones"
 msgstr "אזניות HDMI"
 
-#: ../src/service.vala:266
+#: src/service.vala:266
 msgid "Missing application"
 msgstr "יישום חסר"
 
-#: ../src/service.vala:266
+#: src/service.vala:266
 #, c-format
 msgid "Could not find the '%s' application - please make sure it is installed."
 msgstr "לא ניתן למצוא את היישום ‚%s’ - נא לוודא שהוא מותקן."
 
-#: ../src/service.vala:291
+#: src/service.vala:291
 msgid "Volume (muted)"
 msgstr "עצמת שמע (מושתקת)"
 
-#: ../src/service.vala:294
+#: src/service.vala:294
 msgid "silent"
 msgstr "שקט"
 
-#: ../src/service.vala:302
+#: src/service.vala:302
 msgid "Sound"
 msgstr "צליל"
 
-#: ../src/service.vala:303
+#: src/service.vala:303
 msgid "Sound settings & media player controls"
 msgstr "הגדרות שמע ופקדי נגינת מדיה"
 
-#: ../src/sound-menu.vala:52
+#: src/sound-menu.vala:55 ../src/sound-menu.vala:59
 msgid "Mute"
 msgstr "השתקה"
 
-#: ../src/sound-menu.vala:54
+#: src/sound-menu.vala:65
 msgid "Silent Mode"
 msgstr "מצב שקט"
 
-#: ../src/sound-menu.vala:68
+#: src/sound-menu.vala:79
 msgid "Sound Settings…"
 msgstr "הגדרות שמע…"
 
-#: ../src/sound-menu.vala:125
+#: src/sound-menu.vala:136
 msgid "Microphone Volume"
 msgstr "עצמת מיקרופון"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
-#: ../src/sound-menu.vala:148
+#: src/sound-menu.vala:159
 msgid "High volume can damage your hearing."
 msgstr "עצמת שמע גבוהה עלולה לפגוע בשמיעה שלך."
 
-#: ../src/sound-menu.vala:256
+#: src/sound-menu.vala:267
 msgid "Volume (Headphones)"
 msgstr "עצמת שמע (אזניות)"
 
-#: ../src/sound-menu.vala:259
+#: src/sound-menu.vala:270
 msgid "Volume (Bluetooth)"
 msgstr "עצמת שמע (Bluetooth)"
 
-#: ../src/sound-menu.vala:262
+#: src/sound-menu.vala:273
 msgid "Volume (Usb)"
 msgstr "עצמת שמע (USB)"
 
-#: ../src/sound-menu.vala:265
+#: src/sound-menu.vala:276
 msgid "Volume (HDMI)"
 msgstr "עצמת שמע (HDMI)"
 
-#: ../src/sound-menu.vala:268
+#: src/sound-menu.vala:279
 msgid "Volume (Bluetooth headphones)"
 msgstr "עצמת שמע (אזניות Bluetooth)"
 
-#: ../src/sound-menu.vala:271
+#: src/sound-menu.vala:282
 msgid "Volume (Usb headphones)"
 msgstr "עצמת שמע (אזניות USB)"
 
-#: ../src/sound-menu.vala:274
+#: src/sound-menu.vala:285
 msgid "Volume (HDMI headphones)"
 msgstr "עצמת שמע (אזניות HDMI)"
 
-#: ../src/sound-menu.vala:449
+#: src/sound-menu.vala:460
 msgid "Choose Playlist"
 msgstr "נא לבחור רשימת נגינה"
 
-#: ../src/warn-notification.vala:32
+#: src/warn-notification.vala:32
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
@@ -318,10 +318,10 @@ msgstr ""
 "לאפשר להגביר מעבר לרמה הבטוחה?\n"
 "עצמת שמע גבוהה עלולה לפגוע בשמיעה שלך."
 
-#: ../src/warn-notification.vala:49
+#: src/warn-notification.vala:49
 msgid "OK"
 msgstr "אישור"
 
-#: ../src/warn-notification.vala:52
+#: src/warn-notification.vala:52
 msgid "Cancel"
 msgstr "ביטול"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-05 13:46+0200\n"
+"POT-Creation-Date: 2022-09-14 08:05+0200\n"
 "PO-Revision-Date: 2020-11-12 17:28+0000\n"
 "Last-Translator: Allan Nordhøy <epost@anotheragency.no>\n"
 "Language-Team: Norwegian Bokmål <https://hosted.weblate.org/projects/ayatana-"
@@ -19,30 +19,30 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 4.4-dev\n"
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:5
+#: data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
 msgstr "Sett egenskaper for egen bruker"
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:6
+#: data/org.ayatana.indicator.sound.AccountsService.policy:6
 msgid "Authentication is required to set one's own indicator sound properties."
 msgstr ""
 "Identitetsbekreftelse kreves for å sette egenskaper for egne lydindikatorer."
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:15
+#: data/org.ayatana.indicator.sound.AccountsService.policy:15
 msgid "Set properties of any user"
 msgstr "Sett egenskaper for vilkårlig bruker"
 
-#: ../data/org.ayatana.indicator.sound.AccountsService.policy:16
+#: data/org.ayatana.indicator.sound.AccountsService.policy:16
 msgid ""
 "Authentication is required to set another user's indicator sound properties."
 msgstr ""
 "Identietsbekreftelse kreves for å sette egenskaper en brukers lydindikator."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:1
+#: data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
 msgstr "En liste over programmer som er svartelistet fra lydmenyen"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:2
+#: data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
 "Each media player which abides by the MPRIS2 spec will automatically appear "
 "in the menu. This array should contain the desktop file names (minus ."
@@ -53,7 +53,7 @@ msgstr ""
 "i menyen. Denne tabellen burde inne holde skrivebordsfilnavnene (minus ."
 "desktop-endelsen) til programmer som ikke skal inkluderes i lydmenyen."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:3
+#: data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
@@ -61,7 +61,7 @@ msgstr ""
 "En liste over programmet som på noe tidspunkt har registrert seg med "
 "lydmenyen"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:4
+#: data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
 "Each media player which abides by the MPRIS2 spec will automatically appear "
 "in the menu. This array should contain the desktop file names (minus ."
@@ -73,36 +73,36 @@ msgstr ""
 "desktop-endelsen) til programmer på noe punkt har opptrådt i menyen. Dette "
 "tillater at menyen husker og viser programmer som ikke lenger er i vist."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:5
+#: data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
 msgstr ""
 "En liste over programmer som skal avspillerkontroller synlige hele tiden"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:6
+#: data/org.ayatana.indicator.sound.gschema.xml:6
 #, fuzzy
 msgid "Initial setting for global mute (mute all) on the menu"
 msgstr "Første innstilling for global forstumming (forstum alt) i menyen"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:7
+#: data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
 msgstr "Ved oppstart skal ikke lydstyrken forstummes."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:9
+#: data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
 msgstr "Hvorvidt lydglidebryteren skal tillate å sette lydstyrken over 100%"
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:10
+#: data/org.ayatana.indicator.sound.gschema.xml:10
 #, fuzzy
 msgid "Whether or not to show the sound indicator in the menu bar."
 msgstr "Hvorvidt lydindikatoren skal vises i menylinjen."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:11
+#: data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
 msgstr "Hvorvidt det skal vises advarsler om høy lydstyrke."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:12
+#: data/org.ayatana.indicator.sound.gschema.xml:12
 #, fuzzy
 msgid ""
 "If enabled on a device, a confirmation dialog will be presented to the user "
@@ -119,13 +119,13 @@ msgstr ""
 "volumet høyere enn warning-volume-decibels OG (d) brukeren har ikke indikert "
 "samtykke i forrige warning-volume-approval-ttl sekunder."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:13
+#: data/org.ayatana.indicator.sound.gschema.xml:13
 #, fuzzy
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
 "Hvor mange sekunder en brukers samtykke til warning-volume skal huskes."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:14
+#: data/org.ayatana.indicator.sound.gschema.xml:14
 #, fuzzy
 msgid ""
 "How long to remember a user's approval of the confirmation dialog discussed "
@@ -142,11 +142,11 @@ msgstr ""
 "standarden EN 60950-1/Al2: \"Samtykke trenger ikke å repeteres mer enn én "
 "gang hver 20ende time med samlet lyttetid.\""
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:17
+#: data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
 msgstr "Lydstyrkenivå som utløser advarsel om høy lydstyrke."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:18
+#: data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
@@ -154,11 +154,11 @@ msgstr ""
 "Lydstyrkenivå som utløser advarsel om høy lydstyrke. Se warning-volume-"
 "enabled for detaljer."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:19
+#: data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
 msgstr "Normalt utgangslydstyrkenivå."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:20
+#: data/org.ayatana.indicator.sound.gschema.xml:20
 #, fuzzy
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
@@ -179,7 +179,7 @@ msgstr ""
 "\n"
 "Forvalgt verdi (0) samsvarer med PulseAudio sin PA_VOLUME_NORM."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:25
+#: data/org.ayatana.indicator.sound.gschema.xml:25
 #, fuzzy
 msgid ""
 "Output volume to use when com.lomiri.sound's 'allow-amplified-volume' "
@@ -188,7 +188,7 @@ msgstr ""
 "Utgangslydstyrkenivå brukt når com.ubuntu.sound sin \"allow-amplified-volume"
 "\"-innstilling er påslått."
 
-#: ../data/org.ayatana.indicator.sound.gschema.xml:26
+#: data/org.ayatana.indicator.sound.gschema.xml:26
 #, fuzzy
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
@@ -209,137 +209,137 @@ msgstr ""
 "\n"
 "Forvalgt verdi (11) samsvarer med PulseAudio sin PA_VOLUME_UI_MAX."
 
-#: ../src/info-notification.vala:27 ../src/info-notification.vala:44
-#: ../src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:59
-#: ../src/sound-menu.vala:253 ../src/warn-notification.vala:31
+#: src/info-notification.vala:27 ../src/info-notification.vala:44
+#: src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:70
+#: src/sound-menu.vala:264 ../src/warn-notification.vala:31
 msgid "Volume"
 msgstr "Lydstyrke"
 
-#: ../src/info-notification.vala:57
+#: src/info-notification.vala:57
 msgid "Speakers"
 msgstr "Høyttalere"
 
-#: ../src/info-notification.vala:59
+#: src/info-notification.vala:59
 msgid "Headphones"
 msgstr "Hodetelefoner"
 
-#: ../src/info-notification.vala:61
+#: src/info-notification.vala:61
 msgid "Bluetooth headphones"
 msgstr "Blåtannshodetelefoner"
 
-#: ../src/info-notification.vala:63
+#: src/info-notification.vala:63
 msgid "Bluetooth speaker"
 msgstr "Blåtannshøyttaler"
 
-#: ../src/info-notification.vala:65
+#: src/info-notification.vala:65
 #, fuzzy
 msgid "Usb speaker"
 msgstr "USB-høyttaler"
 
-#: ../src/info-notification.vala:67
+#: src/info-notification.vala:67
 #, fuzzy
 msgid "Usb headphones"
 msgstr "USB-hodetelefoner"
 
-#: ../src/info-notification.vala:69
+#: src/info-notification.vala:69
 msgid "HDMI speaker"
 msgstr "HDMI-høyttaler"
 
-#: ../src/info-notification.vala:71
+#: src/info-notification.vala:71
 msgid "HDMI headphones"
 msgstr "HDMI-hodetelefoner"
 
-#: ../src/service.vala:266
+#: src/service.vala:266
 msgid "Missing application"
 msgstr ""
 
-#: ../src/service.vala:266
+#: src/service.vala:266
 #, c-format
 msgid "Could not find the '%s' application - please make sure it is installed."
 msgstr ""
 
-#: ../src/service.vala:291
+#: src/service.vala:291
 msgid "Volume (muted)"
 msgstr "Lydstyrke (forstummet)"
 
-#: ../src/service.vala:294
+#: src/service.vala:294
 msgid "silent"
 msgstr "stille"
 
-#: ../src/service.vala:302
+#: src/service.vala:302
 msgid "Sound"
 msgstr "Lyd"
 
-#: ../src/service.vala:303
+#: src/service.vala:303
 msgid "Sound settings & media player controls"
 msgstr ""
 
-#: ../src/sound-menu.vala:52
+#: src/sound-menu.vala:55 ../src/sound-menu.vala:59
 msgid "Mute"
 msgstr "Forstum"
 
-#: ../src/sound-menu.vala:54
+#: src/sound-menu.vala:65
 msgid "Silent Mode"
 msgstr "Stille-modus"
 
-#: ../src/sound-menu.vala:68
+#: src/sound-menu.vala:79
 msgid "Sound Settings…"
 msgstr "Lydinnstillinger …"
 
-#: ../src/sound-menu.vala:125
+#: src/sound-menu.vala:136
 msgid "Microphone Volume"
 msgstr "Mikrofonlydstyrke"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
-#: ../src/sound-menu.vala:148
+#: src/sound-menu.vala:159
 msgid "High volume can damage your hearing."
 msgstr "Høyt lydstyrkenivå kan skade hørselen din."
 
-#: ../src/sound-menu.vala:256
+#: src/sound-menu.vala:267
 msgid "Volume (Headphones)"
 msgstr "Lydstyrke (hodetelefoner)"
 
-#: ../src/sound-menu.vala:259
+#: src/sound-menu.vala:270
 msgid "Volume (Bluetooth)"
 msgstr "Lydstyrke (Blåtann)"
 
-#: ../src/sound-menu.vala:262
+#: src/sound-menu.vala:273
 #, fuzzy
 msgid "Volume (Usb)"
 msgstr "Lydstyrke (USB)"
 
-#: ../src/sound-menu.vala:265
+#: src/sound-menu.vala:276
 msgid "Volume (HDMI)"
 msgstr "Lydstyrke (HDMI)"
 
-#: ../src/sound-menu.vala:268
+#: src/sound-menu.vala:279
 msgid "Volume (Bluetooth headphones)"
 msgstr "Lydstyrke (Blåtannshodetelefoner)"
 
-#: ../src/sound-menu.vala:271
+#: src/sound-menu.vala:282
 #, fuzzy
 msgid "Volume (Usb headphones)"
 msgstr "Lydstyrke (USB-hodetelefoner)"
 
-#: ../src/sound-menu.vala:274
+#: src/sound-menu.vala:285
 msgid "Volume (HDMI headphones)"
 msgstr "Lydstyrke (HDMI-hodetelefoner)"
 
-#: ../src/sound-menu.vala:449
+#: src/sound-menu.vala:460
 msgid "Choose Playlist"
 msgstr "Velg spilleliste"
 
-#: ../src/warn-notification.vala:32
+#: src/warn-notification.vala:32
 #, fuzzy
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
 msgstr "Høyt lydstyrkenivå kan skade hørselen din."
 
-#: ../src/warn-notification.vala:49
+#: src/warn-notification.vala:49
 msgid "OK"
 msgstr "OK"
 
-#: ../src/warn-notification.vala:52
+#: src/warn-notification.vala:52
 msgid "Cancel"
 msgstr "Avbryt"
