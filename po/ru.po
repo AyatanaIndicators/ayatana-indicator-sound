@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-14 08:05+0200\n"
+"POT-Creation-Date: 2022-09-14 08:55+0200\n"
 "PO-Revision-Date: 2022-04-23 13:36+0000\n"
 "Last-Translator: Sergii Horichenko <m@sgg.im>\n"
 "Language-Team: Russian <https://hosted.weblate.org/projects/ayatana-"
@@ -214,9 +214,9 @@ msgstr ""
 "Значение по умолчанию (0) соответствует константе PA_VOLUME_UI_MAX "
 "PulseAudio."
 
-#: src/info-notification.vala:27 ../src/info-notification.vala:44
-#: src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:70
-#: src/sound-menu.vala:264 ../src/warn-notification.vala:31
+#: src/info-notification.vala:27 src/info-notification.vala:44
+#: src/service.vala:294 src/service.vala:297 src/sound-menu.vala:70
+#: src/sound-menu.vala:264 src/warn-notification.vala:31
 msgid "Volume"
 msgstr "Громкость"
 
@@ -279,7 +279,7 @@ msgstr "Звук"
 msgid "Sound settings & media player controls"
 msgstr ""
 
-#: src/sound-menu.vala:55 ../src/sound-menu.vala:59
+#: src/sound-menu.vala:55 src/sound-menu.vala:59
 msgid "Mute"
 msgstr "Отключить"
 

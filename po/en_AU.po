@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-14 08:05+0200\n"
+"POT-Creation-Date: 2022-09-14 08:55+0200\n"
 "PO-Revision-Date: 2020-04-28 11:11+0000\n"
 "Last-Translator: Jeannette L <j.lavoie@net-c.ca>\n"
 "Language-Team: English (Australia) <https://hosted.weblate.org/projects/"
@@ -205,9 +205,9 @@ msgstr ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 
-#: src/info-notification.vala:27 ../src/info-notification.vala:44
-#: src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:70
-#: src/sound-menu.vala:264 ../src/warn-notification.vala:31
+#: src/info-notification.vala:27 src/info-notification.vala:44
+#: src/service.vala:294 src/service.vala:297 src/sound-menu.vala:70
+#: src/sound-menu.vala:264 src/warn-notification.vala:31
 msgid "Volume"
 msgstr "Volume"
 
@@ -268,7 +268,7 @@ msgstr "Sound"
 msgid "Sound settings & media player controls"
 msgstr ""
 
-#: src/sound-menu.vala:55 ../src/sound-menu.vala:59
+#: src/sound-menu.vala:55 src/sound-menu.vala:59
 msgid "Mute"
 msgstr "Mute"
 

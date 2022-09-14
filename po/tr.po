@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-14 08:06+0200\n"
+"POT-Creation-Date: 2022-09-14 08:55+0200\n"
 "PO-Revision-Date: 2021-08-13 13:34+0000\n"
 "Last-Translator: Oğuz Ersen <oguzersen@protonmail.com>\n"
 "Language-Team: Turkish <https://hosted.weblate.org/projects/ayatana-"
@@ -209,9 +209,9 @@ msgstr ""
 "Öntanımlı değer (11) PulseAudio'nun PA_VOLUME_UI_MAX değerine karşılık "
 "gelmektedir."
 
-#: src/info-notification.vala:27 ../src/info-notification.vala:44
-#: src/service.vala:294 ../src/service.vala:297 ../src/sound-menu.vala:70
-#: src/sound-menu.vala:264 ../src/warn-notification.vala:31
+#: src/info-notification.vala:27 src/info-notification.vala:44
+#: src/service.vala:294 src/service.vala:297 src/sound-menu.vala:70
+#: src/sound-menu.vala:264 src/warn-notification.vala:31
 msgid "Volume"
 msgstr "Ses seviyesi"
 
@@ -272,7 +272,7 @@ msgstr "Ses"
 msgid "Sound settings & media player controls"
 msgstr ""
 
-#: src/sound-menu.vala:55 ../src/sound-menu.vala:59
+#: src/sound-menu.vala:55 src/sound-menu.vala:59
 msgid "Mute"
 msgstr "Sesi kapat"
 
