@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-09-14 08:55+0200\n"
-"PO-Revision-Date: 2021-08-13 13:34+0000\n"
+"PO-Revision-Date: 2022-09-14 11:47+0000\n"
 "Last-Translator: Milan Korecky <milan.korecky@gmail.com>\n"
 "Language-Team: Czech <https://hosted.weblate.org/projects/ayatana-indicators/"
 "sound-applet/cs/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Weblate 4.8-dev\n"
+"X-Generator: Weblate 4.14.1-dev\n"
 
 #: data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
@@ -153,7 +153,6 @@ msgid "Normal output volume."
 msgstr "Normální výstupní hlasitost."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:20
-#, fuzzy
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is disabled.\n"
@@ -165,25 +164,23 @@ msgid ""
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
 "Maximální hlasitost, když je deaktivováno nastavení „allow-amplified-volume“ "
-"com.ubuntu.sound.\n"
+"com.lomiri.sound.\n"
 "\n"
-"V souladu s normou EU EN 60950-1 / Al2 by tato hodnota neměla být nastavena "
-"na decibelové číslo, aby způsobila, že zvukový výstup ze sluchátek překročí "
-"100 dBA nebo elektrický výstup překročí 150 mV.\n"
+"V souladu s normou EU EN 60950-1/Al2 by tato hodnota neměla být nikdy "
+"nastavena na dB, která způsobí, že výstup zvuku sluchátek překročí 100 dBA, "
+"anebo elektrický výstup, který překročí 150 mV.\n"
 "\n"
-"Výchozí hodnota (0) odpovídá PA_VOLUME_NORM v PulseAudio."
+"Výchozí hodnota (0) odpovídá PA_VOLUME_NORM společnosti PulseAudio."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:25
-#, fuzzy
 msgid ""
 "Output volume to use when com.lomiri.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
-"Výstupní hlasitost, která se má použít, když je povoleno nastavení „allow-"
-"amplified-volume“ com.ubuntu.sound."
+"Výstupní hlasitost, která se použije, když je povoleno nastavení „allow-"
+"amplified-volume“ com.lomiri.sound."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:26
-#, fuzzy
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is enabled.\n"
@@ -195,13 +192,13 @@ msgid ""
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
 "Maximální hlasitost, když je povoleno nastavení „allow-amplified-volume“ com."
-"ubuntu.sound.\n"
+"lomiri.sound.\n"
 "\n"
-"Aby byla v souladu s normou EU EN 60950-1 / Al2, neměla by být tato hodnota "
-"nikdy nastavena na dB, což způsobí, že zvukový výstup sluchátek překročí 100 "
-"dBA, ani elektrický výkon nepřekročí 150 mV.\n"
+"V souladu s normou EU EN 60950-1/Al2 by tato hodnota neměla být nikdy "
+"nastavena na dB, která způsobí, že výstup zvuku sluchátek překročí 100 dBA, "
+"anebo elektrický výstup, který překročí 150 mV.\n"
 "\n"
-"Výchozí hodnota (11) odpovídá PA_VOLUME_UI_MAX společnosti PulseAudio."
+"Výchozí hodnota (11) odpovídá PA_VOLUME_UI_MAX PulseAudio."
 
 #: src/info-notification.vala:27 src/info-notification.vala:44
 #: src/service.vala:294 src/service.vala:297 src/sound-menu.vala:70
@@ -264,7 +261,7 @@ msgstr "Zvuk"
 
 #: src/service.vala:303
 msgid "Sound settings & media player controls"
-msgstr ""
+msgstr "Nastavení zvuku a ovládání přehrávače médií"
 
 #: src/sound-menu.vala:55 src/sound-menu.vala:59
 msgid "Mute"
