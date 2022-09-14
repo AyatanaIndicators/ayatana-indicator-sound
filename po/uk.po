@@ -8,17 +8,17 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-09-14 08:55+0200\n"
-"PO-Revision-Date: 2022-06-21 17:19+0000\n"
-"Last-Translator: Artem <artem@molotov.work>\n"
-"Language-Team: Ukrainian <https://hosted.weblate.org/projects/ayatana-"
-"indicators/sound-applet/uk/>\n"
+"PO-Revision-Date: 2022-09-15 23:17+0000\n"
+"Last-Translator: Sergii Horichenko <m@sgg.im>\n"
+"Language-Team: Ukrainian <https://hosted.weblate.org/projects/"
+"ayatana-indicators/sound-applet/uk/>\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 4.13.1-dev\n"
+"X-Generator: Weblate 4.14.1-dev\n"
 
 #: data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
@@ -101,7 +101,7 @@ msgstr ""
 
 #: data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr "Показувати чи ні індикатор звуку на панелі меню."
+msgstr "Показувати чи ні індикатор звуку у рядку меню."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
@@ -126,7 +126,8 @@ msgstr ""
 #: data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
-"Скільки секунд слід пам'ятати схвалення користувачам попередження гучності."
+"Скільки секунд потрібно пам'ятати схвалення користувачем попередження щодо "
+"гучності."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
@@ -137,31 +138,30 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
-"Як довго пам'ятати про схвалення користувача діалогового вікна "
-"підтвердження, описаного в описі 'warning-volume-enabled'.\n"
+"Як довго пам'ятати схвалення користувачем підтвердження, описаного в описі "
+"'warning-volume-enabled'.\n"
 "\n"
-"Значення за замовчуванням (72 000 секунд) відповідає 20 годин, "
-"запропонованим стандартом ЄС EN 60950-1/Al2: “Підтвердження не потрібно "
-"повторювати більше, ніж раз на 20 годин акумулятивного часу прослуховування.”"
+"Типове значення (72 000 секунд) відповідає 20 годинам, запропонованим "
+"стандартом ЄС EN 60950-1/Al2: “Підтвердження не потрібно повторювати більше, "
+"ніж раз на 20 годин загального часу прослуховування.”"
 
 #: data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
-msgstr "Рівень гучності, який викликає попередження про високу гучність."
+msgstr "Рівень гучності, який активує попередження про високу гучність."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
 msgstr ""
-"Рівень гучності, який викликає попередження про високу гучність. Докладніше "
-"дивись warning-volume-enabled."
+"Рівень гучності, який активує попередження про високу гучність. Докладніше "
+"див. warning-volume-enabled."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
 msgstr "Нормальний рівень гучності."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:20
-#, fuzzy
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is disabled.\n"
@@ -172,26 +172,24 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
-"Максимальна гучність, коли параметр com.ubuntu.sound 'allow-amplified-"
-"volume' вимкнений.\n"
+"Максимальна гучність, коли параметр \"allow-amplified-volume\" у "
+"com.lomiri.sound вимкнений.\n"
 "\n"
-"Щоб відповідати стандарту ЄС EN 60950-1/Al2, це значення у дБ ніколи не "
-"повинно бути встановлено так, що призведе до збільшення потужністі "
-"навушників у 100 дБА, або електричної потужністі у 150 мВ.\n"
+"Щоб відповідати стандарту ЄС EN 60950-1/Al2, це значення у дБ повинно бути "
+"таким, що ніколи не перевищувати потужність навушників у 100 дБА, або "
+"електричну потужність у 150 мВ.\n"
 "\n"
 "Типове значення (0) відповідає PulseAudio's PA_VOLUME_NORM."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:25
-#, fuzzy
 msgid ""
 "Output volume to use when com.lomiri.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
-"Вихідна гучність для використання коли com.ubuntu.sound's 'allow-amplified-"
-"volume' параметр увімкнуто."
+"Вихідна гучність коли в com.lomiri.sound увімкнений параметр 'allow-"
+"amplified-volume'."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:26
-#, fuzzy
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is enabled.\n"
@@ -202,12 +200,12 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
-"Максимальна гучність, коли параметр com.ubuntu.sound 'allow-amplified-"
-"volume' увімкнений.\n"
+"Максимальна гучність, коли у com.lomiri.sound увімкнений параметр \"allow"
+"-amplified-volume\".\n"
 "\n"
-"Щоб відповідати стандарту ЄС EN 60950-1/Al2, це значення у дБ ніколи не "
-"повинно бути встановлено так, що призведе до збільшення потужністі "
-"навушників у 100 дБА, або електричної потужністі у 150 мВ.\n"
+"Щоб відповідати стандарту ЄС EN 60950-1/Al2, це значення у дБ повинно бути "
+"таким, щоб ніколи не перевищувати потужність навушників у 100 дБА, або "
+"електричну потужністі у 150 мВ.\n"
 "\n"
 "Типове значення (11) відповідає PulseAudio's PA_VOLUME_UI_MAX."
 
@@ -273,7 +271,7 @@ msgstr "Звук"
 
 #: src/service.vala:303
 msgid "Sound settings & media player controls"
-msgstr ""
+msgstr "Налаштування звуку та керування медіаплеєром"
 
 #: src/sound-menu.vala:55 src/sound-menu.vala:59
 msgid "Mute"
