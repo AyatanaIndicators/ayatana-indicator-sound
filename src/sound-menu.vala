@@ -68,8 +68,8 @@ public class SoundMenu: Object
         }
 
         volume_section.append_item (this.create_slider_menu_item (_("Volume"), "indicator.volume(0)", 0.0, 1.0, 0.01,
-                                                                  "audio-volume-low-zero-panel",
-                                                                  "audio-volume-high-panel", true));
+                                                                  "audio-volume-low-zero",
+                                                                  "audio-volume-high", true));
 
         this.menu = new Menu ();
         this.menu.append_section (null, volume_section);
@@ -134,8 +134,8 @@ public class SoundMenu: Object
         set {
             if (value && !this.mic_volume_shown) {
                 var slider = this.create_slider_menu_item (_("Microphone Volume"), "indicator.mic-volume", 0.0, 1.0, 0.01,
-                                                           "audio-input-microphone-low-zero-panel",
-                                                           "audio-input-microphone-high-panel", false);
+                                                           "audio-input-microphone-low-zero",
+                                                           "audio-input-microphone-high", false);
                 volume_section.append_item (slider);
                 this.mic_volume_shown = true;
             }
@@ -289,8 +289,8 @@ public class SoundMenu: Object
             }
             this.volume_section.remove (index);
             this.volume_section.insert_item (index, this.create_slider_menu_item (_(label), "indicator.volume(0)", 0.0, 1.0, 0.01,
-                                                                  "audio-volume-low-zero-panel",
-                                                                  "audio-volume-high-panel", true));
+                                                                  "audio-volume-low-zero",
+                                                                  "audio-volume-high", true));
         }
     }
 
