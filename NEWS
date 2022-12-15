@@ -1,3 +1,9 @@
+Overview of changes in ayatana-indicator-sound 22.9.1
+
+  - src/sound-menu.vala: Do not force panel icons in the sound menu.
+  - po/*.po{,t}: Translation strings update (esp. source file references).
+  - Translation updates.
+
 Overview of changes in ayatana-indicator-sound 22.9.0
 
   - Add tooltip support.
