@@ -259,7 +259,7 @@ TEST_F(NotificationsTest, VolumeChanges) {
     EXPECT_EQ("ayatana-indicator-sound", notev[0].app_name);
     EXPECT_EQ("Volume", notev[0].summary);
     EXPECT_EQ(0, notev[0].actions.size());
-    EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-private-synchronous"]);
+    EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-lomiri-private-synchronous"]);
     EXPECT_GVARIANT_EQ("@i 50", notev[0].hints["value"]);
 
     /* Set a different volume */
@@ -513,7 +513,7 @@ TEST_F(NotificationsTest, DISABLED_ExtendendVolumeNotification) {
     EXPECT_EQ("ayatana-indicator-sound", notev[0].app_name);
     EXPECT_EQ("Volume", notev[0].summary);
     EXPECT_EQ(0, notev[0].actions.size());
-    EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-private-synchronous"]);
+    EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-lomiri-private-synchronous"]);
     EXPECT_GVARIANT_EQ("@i 50", notev[0].hints["value"]);
 
     /* Allow an amplified volume */
@@ -629,13 +629,13 @@ TEST_F(NotificationsTest, DISABLED_TriggerWarning) {
             EXPECT_TRUE(volume_warning_get_active(volumeWarning.get()));
             ASSERT_EQ(1, notev.size());
             EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-lomiri-snap-decisions"]);
-            EXPECT_GVARIANT_EQ(nullptr, notev[0].hints["x-canonical-private-synchronous"]);
+            EXPECT_GVARIANT_EQ(nullptr, notev[0].hints["x-lomiri-private-synchronous"]);
         }
         else {
             EXPECT_FALSE(volume_warning_get_active(volumeWarning.get()));
             ASSERT_EQ(1, notev.size());
             EXPECT_GVARIANT_EQ(nullptr, notev[0].hints["x-lomiri-snap-decisions"]);
-            EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-canonical-private-synchronous"]);
+            EXPECT_GVARIANT_EQ("@s 'true'", notev[0].hints["x-lomiri-private-synchronous"]);
         }
 
     } // multimedia_active
