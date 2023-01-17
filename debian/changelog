@@ -1,3 +1,10 @@
+ayatana-indicator-sound (22.9.2-0) unstable; urgency=medium
+
+  * Upstream-provided Debian package for ayatana-indicator-sound.
+    See upstream ChangeLog for recent changes.
+
+ -- Mike Gabriel <mike.gabriel@das-netzwerkteam.de>  Tue, 17 Jan 2023 15:16:08 +0100
+
 ayatana-indicator-sound (22.9.1-0) unstable; urgency=medium
 
   * Upstream-provided Debian package for ayatana-indicator-sound.

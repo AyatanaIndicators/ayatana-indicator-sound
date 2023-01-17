@@ -1,6 +1,27 @@
+2023-01-17 Mike Gabriel
+
+        * release 22.9.2 (HEAD -> main, tag: 22.9.2)
+        * Merge branch
+          'ubports-personal/peat-psuwit/upstream_-_volume-notification-lomiri'
+          (69fe621)
+
+2023-01-17 Ratchanan Srirattanamet
+
+        * src/, tests/: update references to renamed notification hints
+          (456cbf2)
+
+2023-01-06 Andy Chiang
+
+        * Translated using Weblate (Chinese (Simplified) (zh_LATN@pinyin))
+          (e9b738b)
+
+2022-12-30 Milo Ivir
+
+        * Translated using Weblate (Croatian) (b89e2c0)
+
 2022-12-15 Mike Gabriel
 
-        * release 22.9.1 (HEAD -> main, tag: 22.9.1)
+        * release 22.9.1 (46276c8) (tag: 22.9.1)
 
 2022-10-25 Mike Gabriel
 
