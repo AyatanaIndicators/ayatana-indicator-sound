@@ -46,7 +46,7 @@ Package: ayatana-indicator-sound
 Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         pulseaudio,
+         pulseaudio | pipewire-pulse,
          ayatana-indicator-common,
          libglib2.0-bin,
 Recommends: unity-control-center | gnome-control-center | pavucontrol | mate-media,
