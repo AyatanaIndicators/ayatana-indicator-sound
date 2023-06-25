@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-09-14 08:55+0200\n"
-"PO-Revision-Date: 2023-04-07 16:53+0000\n"
+"PO-Revision-Date: 2023-06-26 04:41+0000\n"
 "Last-Translator: ssantos <ssantos@web.de>\n"
 "Language-Team: Portuguese <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/pt/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 4.17-dev\n"
+"X-Generator: Weblate 4.18.1\n"
 
 #: data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
@@ -215,11 +215,11 @@ msgstr "Volume"
 
 #: src/info-notification.vala:57
 msgid "Speakers"
-msgstr "Colunas"
+msgstr "Alto-falantes"
 
 #: src/info-notification.vala:59
 msgid "Headphones"
-msgstr "Auscultadores"
+msgstr "Fones de ouvido"
 
 #: src/info-notification.vala:61
 msgid "Bluetooth headphones"
