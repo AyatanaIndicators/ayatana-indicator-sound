@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-09-14 08:55+0200\n"
-"PO-Revision-Date: 2020-12-31 10:29+0000\n"
-"Last-Translator: J. Lavoie <j.lavoie@net-c.ca>\n"
+"PO-Revision-Date: 2023-09-07 05:05+0000\n"
+"Last-Translator: Kieran W <alarmcuddly@outlook.com>\n"
 "Language-Team: English (United Kingdom) <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/en_GB/>\n"
 "Language: en_GB\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.4.1-dev\n"
+"X-Generator: Weblate 5.0.1-dev\n"
 
 #: data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
@@ -155,7 +155,6 @@ msgid "Normal output volume."
 msgstr "Normal output volume."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:20
-#, fuzzy
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is disabled.\n"
@@ -166,7 +165,7 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
-"The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
+"The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is disabled.\n"
 "\n"
 "To conform with EU standard EN 60950-1/Al2, this value should never be set "
@@ -176,16 +175,14 @@ msgstr ""
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:25
-#, fuzzy
 msgid ""
 "Output volume to use when com.lomiri.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
-"Output volume to use when com.ubuntu.sound's 'allow-amplified-volume' "
+"Output volume to use when com.lomiri.sound's 'allow-amplified-volume' "
 "setting is enabled."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:26
-#, fuzzy
 msgid ""
 "The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is enabled.\n"
@@ -196,7 +193,7 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
-"The maximum volume when com.ubuntu.sound's 'allow-amplified-volume' setting "
+"The maximum volume when com.lomiri.sound's 'allow-amplified-volume' setting "
 "is enabled.\n"
 "\n"
 "To conform with EU standard EN 60950-1/Al2, this value should never be set "
@@ -245,12 +242,12 @@ msgstr "HDMI headphones"
 
 #: src/service.vala:266
 msgid "Missing application"
-msgstr ""
+msgstr "Missing application"
 
 #: src/service.vala:266
 #, c-format
 msgid "Could not find the '%s' application - please make sure it is installed."
-msgstr ""
+msgstr "Could not find the '%s' application - please make sure it is installed."
 
 #: src/service.vala:291
 msgid "Volume (muted)"
@@ -266,7 +263,7 @@ msgstr "Sound"
 
 #: src/service.vala:303
 msgid "Sound settings & media player controls"
-msgstr ""
+msgstr "Sound settings & media player controls"
 
 #: src/sound-menu.vala:55 src/sound-menu.vala:59
 msgid "Mute"
@@ -322,11 +319,12 @@ msgid "Choose Playlist"
 msgstr "Choose Playlist"
 
 #: src/warn-notification.vala:32
-#, fuzzy
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
-msgstr "High volume can damage your hearing."
+msgstr ""
+"Allow volume above safe level?\n"
+"High volume can damage your hearing."
 
 #: src/warn-notification.vala:49
 msgid "OK"
