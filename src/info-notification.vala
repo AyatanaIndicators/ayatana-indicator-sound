@@ -1,6 +1,6 @@
 /*
  * Copyright 2015 Canonical Ltd.
- * Copyright 2021 Robert Tari
+ * Copyright 2021-2023 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,17 +30,24 @@ public class IndicatorSound.InfoNotification: Notification
     public void show (VolumeControl.ActiveOutput active_output,
                       double volume,
                       bool is_high_volume) {
-        if (!notify_server_supports ("x-lomiri-private-synchronous"))
-            return;
 
         /* Determine Label */
-            unowned string volume_label = get_notification_label (active_output);
+        string volume_label = get_notification_label (active_output);
 
         /* Choose an icon */
         unowned string icon = get_volume_notification_icon (active_output, volume, is_high_volume);
 
         /* Reset the notification */
         var n = _notification;
+
+        uint nChars = ((int32)((volume * 20) + 0.5)).clamp(0, 20);
+        volume_label += "\n";
+
+        for (uint nChar = 0; nChar < nChars; nChar++)
+        {
+            volume_label += "◼";
+        }
+
         n.update (_("Volume"), volume_label, icon);
         n.clear_hints();
         n.set_hint ("x-lomiri-non-shaped-icon", "true");
