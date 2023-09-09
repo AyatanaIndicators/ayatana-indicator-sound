@@ -1,5 +1,5 @@
-project(ayatana-indicator-sound C CXX)
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required (VERSION 3.13)
+project (ayatana-indicator-sound VERSION 22.9.2 LANGUAGES C CXX)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     SET(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "..." FORCE)
@@ -7,8 +7,6 @@ endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" "${CMAKE_MODULE_PATH}")
 
-set(PACKAGE ${CMAKE_PROJECT_NAME})
-set(PROJECT_VERSION 22.9.2)
 find_package(PkgConfig REQUIRED)
 include(GNUInstallDirs)
 include(UseVala)

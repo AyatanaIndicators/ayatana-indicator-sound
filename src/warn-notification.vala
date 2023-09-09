@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Canonical Ltd.
+ * Copyright 2021-2023 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,7 @@
  *
  * Authors:
  *      Charles Kerr <charles.kerr@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 
 public class IndicatorSound.WarnNotification: Notification
@@ -31,9 +33,6 @@ public class IndicatorSound.WarnNotification: Notification
             _("Volume"),
             _("Allow volume above safe level?\nHigh volume can damage your hearing."),
             "audio-volume-high");
-        n.set_hint ("x-lomiri-non-shaped-icon", "true");
-        n.set_hint ("x-lomiri-snap-decisions", "true");
-        n.set_hint ("x-lomiri-private-affirmative-tint", "true");
         n.closed.connect ((n) => {
             n.clear_actions ();
         });
