@@ -50,9 +50,6 @@ public class IndicatorSound.InfoNotification: Notification
 
         n.update (_("Volume"), volume_label, icon);
         n.clear_hints();
-        n.set_hint ("x-lomiri-non-shaped-icon", "true");
-        n.set_hint ("x-lomiri-private-synchronous", "true");
-        n.set_hint ("x-lomiri-value-bar-tint", is_high_volume ? "true" : "false");
         n.set_hint ("value", ((int32)((volume * 100.0) + 0.5)).clamp(0, 100));
         show_notification ();
     }

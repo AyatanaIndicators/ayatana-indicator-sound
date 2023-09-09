@@ -1,6 +1,6 @@
 /*
  * Copyright 2015 Canonical Ltd.
- * Copyright 2021 Robert Tari
+ * Copyright 2021-2023 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ class NotificationsMock
         DbusTestDbusMockObject * baseobj = nullptr;
 
     public:
-        NotificationsMock (const std::vector<std::string>& capabilities = {"actions", "body", "body-markup", "icon-static", "image/svg+xml", "x-lomiri-private-synchronous", "x-canonical-append", "x-lomiri-private-icon-only", "x-lomiri-truncation", "x-canonical-truncation", "private-synchronous", "append", "private-icon-only", "truncation"}) {
+        NotificationsMock (const std::vector<std::string>& capabilities = {"actions", "body", "body-markup", "icon-static", "image/svg+xml", "private-synchronous", "append", "private-icon-only", "truncation"}) {
             mock = dbus_test_dbus_mock_new("org.freedesktop.Notifications");
             dbus_test_task_set_bus(DBUS_TEST_TASK(mock), DBUS_TEST_SERVICE_BUS_SESSION);
             dbus_test_task_set_name(DBUS_TEST_TASK(mock), "Notify");
