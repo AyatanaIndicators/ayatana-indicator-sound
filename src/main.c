@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Canonical Ltd.
+ * Copyright 2023 Robert Tari <robert@tari.in>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,8 @@
  */
 
 #include <glib.h>
+#include <glib/gi18n.h>
+#include <glib-unix.h>
 #include <locale.h>
 #include <libnotify/notify.h>
 
