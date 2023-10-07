@@ -39,18 +39,36 @@ public class IndicatorSound.InfoNotification: Notification
 
         /* Reset the notification */
         var n = _notification;
-
-        uint nChars = ((int32)((volume * 20) + 0.5)).clamp(0, 20);
         volume_label += "\n";
+        int32 nValue = ((int32)((volume * 100.0) + 0.5)).clamp(0, 100);
+        SettingsSchemaSource pSource = SettingsSchemaSource.get_default ();
+        SettingsSchema pSchema = pSource.lookup ("org.gnome.desktop.a11y.applications", false);
+        bool bOrcaActive = false;
 
-        for (uint nChar = 0; nChar < nChars; nChar++)
+        if (pSchema != null)
         {
-            volume_label += "◼";
+            Settings pSettings = new Settings ("org.gnome.desktop.a11y.applications");
+            bOrcaActive = pSettings.get_boolean ("screen-reader-enabled");
+        }
+
+        if (bOrcaActive)
+        {
+            string sValue = nValue.to_string ();
+            volume_label += sValue + "%";
+        }
+        else
+        {
+            uint nChars = ((int32)((volume * 20) + 0.5)).clamp(0, 20);
+
+            for (uint nChar = 0; nChar < nChars; nChar++)
+            {
+                volume_label += "◼";
+            }
         }
 
         n.update (_("Volume"), volume_label, icon);
         n.clear_hints();
-        n.set_hint ("value", ((int32)((volume * 100.0) + 0.5)).clamp(0, 100));
+        n.set_hint ("value", nValue);
         show_notification ();
     }
 
