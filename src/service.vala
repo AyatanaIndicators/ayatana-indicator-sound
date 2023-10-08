@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Canonical Ltd.
- * Copyright 2021-2022 Robert Tari
+ * Copyright 2021-2023 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -213,7 +213,7 @@ public class IndicatorSound.Service: Object {
     private IndicatorSound.InfoNotification _info_notification = new IndicatorSound.InfoNotification();
     private AccountsServiceAccess _accounts_service_access;
 
-    const double volume_step_percentage = 0.06;
+    const double volume_step_percentage = 0.02;
 
     private void activate_scroll_action (SimpleAction action, Variant? param) {
         int direction = param.get_int32(); // positive for up, negative for down
