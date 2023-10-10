@@ -92,3 +92,7 @@ DESTINATION "${POLKIT_DATA_DIR}/actions"
 install(FILES 50-org.ayatana.indicator.sound.AccountsService.pkla
 DESTINATION "${POLKIT_LIB_DIR}/localauthority/10-vendor.d"
 )
+
+# 50-org.ayatana.indicator.sound.AccountsService.rules
+
+install (FILES 50-org.ayatana.indicator.sound.AccountsService.rules DESTINATION "${CMAKE_INSTALL_FULL_DATADIR}/polkit-1/rules.d")
