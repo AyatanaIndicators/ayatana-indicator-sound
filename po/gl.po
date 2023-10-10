@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-14 08:55+0200\n"
+"POT-Creation-Date: 2023-10-11 00:03+0200\n"
 "PO-Revision-Date: 20.9.00-24 18:29+0000\n"
 "Last-Translator: Iván Seoane <ivanrsm1997@gmail.com>\n"
 "Language-Team: Galician <https://hosted.weblate.org/projects/ayatana-"
@@ -174,8 +174,8 @@ msgstr ""
 "axustarse a uns dB que fagan da saída do son de auriculares superior a 100 "
 "dBA, nin a potencia eléctrica superior a 150 mV.\n"
 "\n"
-"O valor predeterminado (0) correspóndese con PA_VOLUME_NORM do \"PulseAudio"
-"\"."
+"O valor predeterminado (0) correspóndese con PA_VOLUME_NORM do "
+"\"PulseAudio\"."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:25
 #, fuzzy
@@ -207,41 +207,41 @@ msgstr ""
 "\n"
 "O valor predeterminado (11) corresponde ó PA_VOLUME_UI_MAX do \"PulseAudio\"."
 
-#: src/info-notification.vala:27 src/info-notification.vala:44
+#: src/info-notification.vala:27 src/info-notification.vala:69
 #: src/service.vala:294 src/service.vala:297 src/sound-menu.vala:70
-#: src/sound-menu.vala:264 src/warn-notification.vala:31
+#: src/sound-menu.vala:264 src/warn-notification.vala:33
 msgid "Volume"
 msgstr "Volume"
 
-#: src/info-notification.vala:57
+#: src/info-notification.vala:79
 msgid "Speakers"
 msgstr "Altavoces"
 
-#: src/info-notification.vala:59
+#: src/info-notification.vala:81
 msgid "Headphones"
 msgstr "Auriculares"
 
-#: src/info-notification.vala:61
+#: src/info-notification.vala:83
 msgid "Bluetooth headphones"
 msgstr "Auriculares Bluetooth"
 
-#: src/info-notification.vala:63
+#: src/info-notification.vala:85
 msgid "Bluetooth speaker"
 msgstr "Altavoz Bluetooth"
 
-#: src/info-notification.vala:65
+#: src/info-notification.vala:87
 msgid "Usb speaker"
 msgstr "Altavoz USB"
 
-#: src/info-notification.vala:67
+#: src/info-notification.vala:89
 msgid "Usb headphones"
 msgstr "Auriculares USB"
 
-#: src/info-notification.vala:69
+#: src/info-notification.vala:91
 msgid "HDMI speaker"
 msgstr "Altavoz HDMI"
 
-#: src/info-notification.vala:71
+#: src/info-notification.vala:93
 msgid "HDMI headphones"
 msgstr "Auriculares HDMI"
 
@@ -323,17 +323,17 @@ msgstr "Volume (Auriculares HDMI)"
 msgid "Choose Playlist"
 msgstr "Escoller listaxe de reprodución"
 
-#: src/warn-notification.vala:32
+#: src/warn-notification.vala:34
 #, fuzzy
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
 msgstr "O volume alto pode facer dano á súa audición."
 
-#: src/warn-notification.vala:49
+#: src/warn-notification.vala:48
 msgid "OK"
 msgstr "Feito"
 
-#: src/warn-notification.vala:52
+#: src/warn-notification.vala:51
 msgid "Cancel"
 msgstr "Desbotar"
