@@ -7,11 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-14 08:55+0200\n"
+"POT-Creation-Date: 2023-10-11 00:03+0200\n"
 "PO-Revision-Date: 2023-06-26 04:41+0000\n"
 "Last-Translator: ssantos <ssantos@web.de>\n"
-"Language-Team: Portuguese <https://hosted.weblate.org/projects/"
-"ayatana-indicators/sound-applet/pt/>\n"
+"Language-Team: Portuguese <https://hosted.weblate.org/projects/ayatana-"
+"indicators/sound-applet/pt/>\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -170,8 +170,8 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
-"O volume máximo quando a configuração \"allow-amplified-volume\" do "
-"com.lomiri.sound está desativada.\n"
+"O volume máximo quando a configuração \"allow-amplified-volume\" do com."
+"lomiri.sound está desativada.\n"
 "\n"
 "Para manter conformidade com a norma europeia EN 60950-1/Al2, este valor "
 "nunca deve ser definido para um dB que faça com que a saída de som dos "
@@ -207,41 +207,41 @@ msgstr ""
 "\n"
 "O valor padrão (11) corresponde ao PA_VOLUME_UI_MAX do PulseAudio."
 
-#: src/info-notification.vala:27 src/info-notification.vala:44
+#: src/info-notification.vala:27 src/info-notification.vala:69
 #: src/service.vala:294 src/service.vala:297 src/sound-menu.vala:70
-#: src/sound-menu.vala:264 src/warn-notification.vala:31
+#: src/sound-menu.vala:264 src/warn-notification.vala:33
 msgid "Volume"
 msgstr "Volume"
 
-#: src/info-notification.vala:57
+#: src/info-notification.vala:79
 msgid "Speakers"
 msgstr "Alto-falantes"
 
-#: src/info-notification.vala:59
+#: src/info-notification.vala:81
 msgid "Headphones"
 msgstr "Fones de ouvido"
 
-#: src/info-notification.vala:61
+#: src/info-notification.vala:83
 msgid "Bluetooth headphones"
 msgstr "Auscultadores Bluetooth"
 
-#: src/info-notification.vala:63
+#: src/info-notification.vala:85
 msgid "Bluetooth speaker"
 msgstr "Coluna Bluetooth"
 
-#: src/info-notification.vala:65
+#: src/info-notification.vala:87
 msgid "Usb speaker"
 msgstr "Coluna USB"
 
-#: src/info-notification.vala:67
+#: src/info-notification.vala:89
 msgid "Usb headphones"
 msgstr "Auscultadores USB"
 
-#: src/info-notification.vala:69
+#: src/info-notification.vala:91
 msgid "HDMI speaker"
 msgstr "Coluna HDMI"
 
-#: src/info-notification.vala:71
+#: src/info-notification.vala:93
 msgid "HDMI headphones"
 msgstr "Auscultadores HDMI"
 
@@ -325,7 +325,7 @@ msgstr "Volume (Auscultadores HDMI)"
 msgid "Choose Playlist"
 msgstr "Escolher Lista de Reprodução"
 
-#: src/warn-notification.vala:32
+#: src/warn-notification.vala:34
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
@@ -333,10 +333,10 @@ msgstr ""
 "Permitir volume acima do nível seguro?\n"
 "O volume elevado pode danificar a sua audição."
 
-#: src/warn-notification.vala:49
+#: src/warn-notification.vala:48
 msgid "OK"
 msgstr "OK"
 
-#: src/warn-notification.vala:52
+#: src/warn-notification.vala:51
 msgid "Cancel"
 msgstr "Cancelar"

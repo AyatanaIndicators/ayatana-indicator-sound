@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-14 08:55+0200\n"
+"POT-Creation-Date: 2023-10-11 00:03+0200\n"
 "PO-Revision-Date: 2022-08-24 06:16+0000\n"
 "Last-Translator: Hugel <qihu@nfschina.com>\n"
 "Language-Team: Chinese (Simplified) <https://hosted.weblate.org/projects/"
@@ -165,41 +165,41 @@ msgid ""
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
 
-#: src/info-notification.vala:27 src/info-notification.vala:44
+#: src/info-notification.vala:27 src/info-notification.vala:69
 #: src/service.vala:294 src/service.vala:297 src/sound-menu.vala:70
-#: src/sound-menu.vala:264 src/warn-notification.vala:31
+#: src/sound-menu.vala:264 src/warn-notification.vala:33
 msgid "Volume"
 msgstr "音量"
 
-#: src/info-notification.vala:57
+#: src/info-notification.vala:79
 msgid "Speakers"
 msgstr "扬声器"
 
-#: src/info-notification.vala:59
+#: src/info-notification.vala:81
 msgid "Headphones"
 msgstr "耳机"
 
-#: src/info-notification.vala:61
+#: src/info-notification.vala:83
 msgid "Bluetooth headphones"
 msgstr "蓝牙耳机"
 
-#: src/info-notification.vala:63
+#: src/info-notification.vala:85
 msgid "Bluetooth speaker"
 msgstr "蓝牙扬声器"
 
-#: src/info-notification.vala:65
+#: src/info-notification.vala:87
 msgid "Usb speaker"
 msgstr "USB 扬声器"
 
-#: src/info-notification.vala:67
+#: src/info-notification.vala:89
 msgid "Usb headphones"
 msgstr "USB 耳机"
 
-#: src/info-notification.vala:69
+#: src/info-notification.vala:91
 msgid "HDMI speaker"
 msgstr "HDMI 扬声器"
 
-#: src/info-notification.vala:71
+#: src/info-notification.vala:93
 msgid "HDMI headphones"
 msgstr "HDMI 耳机"
 
@@ -281,7 +281,7 @@ msgstr "音量（HDMI 耳机）"
 msgid "Choose Playlist"
 msgstr "选择播放列表"
 
-#: src/warn-notification.vala:32
+#: src/warn-notification.vala:34
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
@@ -289,10 +289,10 @@ msgstr ""
 "要允许使用高于安全等级的音量吗？\n"
 "过高的音量可能会损伤听力。"
 
-#: src/warn-notification.vala:49
+#: src/warn-notification.vala:48
 msgid "OK"
 msgstr "好的"
 
-#: src/warn-notification.vala:52
+#: src/warn-notification.vala:51
 msgid "Cancel"
 msgstr "取消"

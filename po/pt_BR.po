@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-14 08:55+0200\n"
+"POT-Creation-Date: 2023-10-11 00:03+0200\n"
 "PO-Revision-Date: 2022-09-07 03:22+0000\n"
 "Last-Translator: Wellington Terumi Uemura <wellingtonuemura@gmail.com>\n"
 "Language-Team: Portuguese (Brazil) <https://hosted.weblate.org/projects/"
@@ -209,41 +209,41 @@ msgstr ""
 "\n"
 "O valor padrão (11) corresponde ao PA_VOLUME_UI_MAX do PulseAudio."
 
-#: src/info-notification.vala:27 src/info-notification.vala:44
+#: src/info-notification.vala:27 src/info-notification.vala:69
 #: src/service.vala:294 src/service.vala:297 src/sound-menu.vala:70
-#: src/sound-menu.vala:264 src/warn-notification.vala:31
+#: src/sound-menu.vala:264 src/warn-notification.vala:33
 msgid "Volume"
 msgstr "Volume"
 
-#: src/info-notification.vala:57
+#: src/info-notification.vala:79
 msgid "Speakers"
 msgstr "Alto-falantes"
 
-#: src/info-notification.vala:59
+#: src/info-notification.vala:81
 msgid "Headphones"
 msgstr "Fones de ouvido"
 
-#: src/info-notification.vala:61
+#: src/info-notification.vala:83
 msgid "Bluetooth headphones"
 msgstr "Fones de ouvido Bluetooth"
 
-#: src/info-notification.vala:63
+#: src/info-notification.vala:85
 msgid "Bluetooth speaker"
 msgstr "Alto-falante Bluetooth"
 
-#: src/info-notification.vala:65
+#: src/info-notification.vala:87
 msgid "Usb speaker"
 msgstr "Alto-falante USB"
 
-#: src/info-notification.vala:67
+#: src/info-notification.vala:89
 msgid "Usb headphones"
 msgstr "Fones de ouvido Usb"
 
-#: src/info-notification.vala:69
+#: src/info-notification.vala:91
 msgid "HDMI speaker"
 msgstr "Alto-falante HDMI"
 
-#: src/info-notification.vala:71
+#: src/info-notification.vala:93
 msgid "HDMI headphones"
 msgstr "Fones de ouvido HDMI"
 
@@ -327,7 +327,7 @@ msgstr "Volume (fones de ouvido HDMI)"
 msgid "Choose Playlist"
 msgstr "Escolha uma Lista de Reprodução"
 
-#: src/warn-notification.vala:32
+#: src/warn-notification.vala:34
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
@@ -335,10 +335,10 @@ msgstr ""
 "Permitir volume acima do nível seguro?\n"
 "O volume elevado pode danificar a sua audição."
 
-#: src/warn-notification.vala:49
+#: src/warn-notification.vala:48
 msgid "OK"
 msgstr "OK"
 
-#: src/warn-notification.vala:52
+#: src/warn-notification.vala:51
 msgid "Cancel"
 msgstr "Cancelar"

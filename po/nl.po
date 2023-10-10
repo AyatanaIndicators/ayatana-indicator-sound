@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-14 08:55+0200\n"
+"POT-Creation-Date: 2023-10-11 00:03+0200\n"
 "PO-Revision-Date: 2023-03-24 13:41+0000\n"
 "Last-Translator: Heimen Stoffels <vistausss@fastmail.com>\n"
 "Language-Team: Dutch <https://hosted.weblate.org/projects/ayatana-indicators/"
@@ -48,8 +48,8 @@ msgid ""
 "sound menu."
 msgstr ""
 "Elke mediaspeler die zich aan de MPRIS2-specificaties houdt, zal automatisch "
-"in het menu worden getoond. Deze reeks dient de .desktop-bestandsnamen ("
-"zonder de .desktop-extensie) te bevatten van programma's die niet in het "
+"in het menu worden getoond. Deze reeks dient de .desktop-bestandsnamen "
+"(zonder de .desktop-extensie) te bevatten van programma's die niet in het "
 "geluidsmenu moeten worden getoond."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:3
@@ -66,8 +66,8 @@ msgid ""
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
 "Elke mediaspeler die zich aan de MPRIS2-specificaties houdt, zal automatisch "
-"in het menu worden getoond. Deze reeks dient de .desktop-bestandsnamen ("
-"zonder de .desktop-extensie) te bevatten van programma's die bij het "
+"in het menu worden getoond. Deze reeks dient de .desktop-bestandsnamen "
+"(zonder de .desktop-extensie) te bevatten van programma's die bij het "
 "geluidsmenu bekend zijn - zo kan het menu ze onthouden."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:5
@@ -196,41 +196,41 @@ msgstr ""
 "\n"
 "De standaardwaarde (11) is gelijk aan PulseAudio's PA_VOLUME_UI_MAX."
 
-#: src/info-notification.vala:27 src/info-notification.vala:44
+#: src/info-notification.vala:27 src/info-notification.vala:69
 #: src/service.vala:294 src/service.vala:297 src/sound-menu.vala:70
-#: src/sound-menu.vala:264 src/warn-notification.vala:31
+#: src/sound-menu.vala:264 src/warn-notification.vala:33
 msgid "Volume"
 msgstr "Volumeniveau"
 
-#: src/info-notification.vala:57
+#: src/info-notification.vala:79
 msgid "Speakers"
 msgstr "Luidsprekers"
 
-#: src/info-notification.vala:59
+#: src/info-notification.vala:81
 msgid "Headphones"
 msgstr "Koptelefoon"
 
-#: src/info-notification.vala:61
+#: src/info-notification.vala:83
 msgid "Bluetooth headphones"
 msgstr "Bluetoothkoptelefoon"
 
-#: src/info-notification.vala:63
+#: src/info-notification.vala:85
 msgid "Bluetooth speaker"
 msgstr "Bluetoothluidspreker"
 
-#: src/info-notification.vala:65
+#: src/info-notification.vala:87
 msgid "Usb speaker"
 msgstr "Usb-luidspreker"
 
-#: src/info-notification.vala:67
+#: src/info-notification.vala:89
 msgid "Usb headphones"
 msgstr "Usb-koptelefoon"
 
-#: src/info-notification.vala:69
+#: src/info-notification.vala:91
 msgid "HDMI speaker"
 msgstr "Hdmi-luidspreker"
 
-#: src/info-notification.vala:71
+#: src/info-notification.vala:93
 msgid "HDMI headphones"
 msgstr "Hdmi-koptelefoon"
 
@@ -313,7 +313,7 @@ msgstr "Volumeniveau (hdmi-koptelefoon)"
 msgid "Choose Playlist"
 msgstr "Kies een afspeellijst"
 
-#: src/warn-notification.vala:32
+#: src/warn-notification.vala:34
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
@@ -321,10 +321,10 @@ msgstr ""
 "Wil je het volumeniveau verder verhogen?\n"
 "Een hoog niveau kan je gehoor beschadigen."
 
-#: src/warn-notification.vala:49
+#: src/warn-notification.vala:48
 msgid "OK"
 msgstr "Oké"
 
-#: src/warn-notification.vala:52
+#: src/warn-notification.vala:51
 msgid "Cancel"
 msgstr "Annuleren"

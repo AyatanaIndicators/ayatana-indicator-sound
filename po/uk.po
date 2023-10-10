@@ -7,17 +7,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-14 08:55+0200\n"
+"POT-Creation-Date: 2023-10-11 00:03+0200\n"
 "PO-Revision-Date: 2022-09-15 23:17+0000\n"
 "Last-Translator: Sergii Horichenko <m@sgg.im>\n"
-"Language-Team: Ukrainian <https://hosted.weblate.org/projects/"
-"ayatana-indicators/sound-applet/uk/>\n"
+"Language-Team: Ukrainian <https://hosted.weblate.org/projects/ayatana-"
+"indicators/sound-applet/uk/>\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 4.14.1-dev\n"
 
 #: data/org.ayatana.indicator.sound.AccountsService.policy:5
@@ -172,8 +172,8 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
-"Максимальна гучність, коли параметр \"allow-amplified-volume\" у "
-"com.lomiri.sound вимкнений.\n"
+"Максимальна гучність, коли параметр \"allow-amplified-volume\" у com.lomiri."
+"sound вимкнений.\n"
 "\n"
 "Щоб відповідати стандарту ЄС EN 60950-1/Al2, це значення у дБ повинно бути "
 "таким, що ніколи не перевищувати потужність навушників у 100 дБА, або "
@@ -200,8 +200,8 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
-"Максимальна гучність, коли у com.lomiri.sound увімкнений параметр \"allow"
-"-amplified-volume\".\n"
+"Максимальна гучність, коли у com.lomiri.sound увімкнений параметр \"allow-"
+"amplified-volume\".\n"
 "\n"
 "Щоб відповідати стандарту ЄС EN 60950-1/Al2, це значення у дБ повинно бути "
 "таким, щоб ніколи не перевищувати потужність навушників у 100 дБА, або "
@@ -209,41 +209,41 @@ msgstr ""
 "\n"
 "Типове значення (11) відповідає PulseAudio's PA_VOLUME_UI_MAX."
 
-#: src/info-notification.vala:27 src/info-notification.vala:44
+#: src/info-notification.vala:27 src/info-notification.vala:69
 #: src/service.vala:294 src/service.vala:297 src/sound-menu.vala:70
-#: src/sound-menu.vala:264 src/warn-notification.vala:31
+#: src/sound-menu.vala:264 src/warn-notification.vala:33
 msgid "Volume"
 msgstr "Гучність"
 
-#: src/info-notification.vala:57
+#: src/info-notification.vala:79
 msgid "Speakers"
 msgstr "Колонки"
 
-#: src/info-notification.vala:59
+#: src/info-notification.vala:81
 msgid "Headphones"
 msgstr "Навушники"
 
-#: src/info-notification.vala:61
+#: src/info-notification.vala:83
 msgid "Bluetooth headphones"
 msgstr "Bluetooth навушники"
 
-#: src/info-notification.vala:63
+#: src/info-notification.vala:85
 msgid "Bluetooth speaker"
 msgstr "Колонки Bluetooth"
 
-#: src/info-notification.vala:65
+#: src/info-notification.vala:87
 msgid "Usb speaker"
 msgstr "USB динамік"
 
-#: src/info-notification.vala:67
+#: src/info-notification.vala:89
 msgid "Usb headphones"
 msgstr "USB-навушники"
 
-#: src/info-notification.vala:69
+#: src/info-notification.vala:91
 msgid "HDMI speaker"
 msgstr "Динамік HDMI"
 
-#: src/info-notification.vala:71
+#: src/info-notification.vala:93
 msgid "HDMI headphones"
 msgstr "Навушники HDMI"
 
@@ -326,7 +326,7 @@ msgstr "Гучність (навушники HDMI)"
 msgid "Choose Playlist"
 msgstr "Вибрати список відтворення"
 
-#: src/warn-notification.vala:32
+#: src/warn-notification.vala:34
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
@@ -334,10 +334,10 @@ msgstr ""
 "Дозволити гучність вище безпечного рівня?\n"
 "Висока гучність може пошкодити ваш слух."
 
-#: src/warn-notification.vala:49
+#: src/warn-notification.vala:48
 msgid "OK"
 msgstr "OK"
 
-#: src/warn-notification.vala:52
+#: src/warn-notification.vala:51
 msgid "Cancel"
 msgstr "Скасувати"

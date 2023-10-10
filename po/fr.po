@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-14 08:55+0200\n"
+"POT-Creation-Date: 2023-10-11 00:03+0200\n"
 "PO-Revision-Date: 2022-01-30 14:53+0000\n"
 "Last-Translator: MonsieurBibo <biboselim1308@gmail.com>\n"
 "Language-Team: French <https://hosted.weblate.org/projects/ayatana-"
@@ -211,41 +211,41 @@ msgstr ""
 "\n"
 "La valeur par défaut (11) correspond à PA_VOLUME_UI_MAX de PulseAudio."
 
-#: src/info-notification.vala:27 src/info-notification.vala:44
+#: src/info-notification.vala:27 src/info-notification.vala:69
 #: src/service.vala:294 src/service.vala:297 src/sound-menu.vala:70
-#: src/sound-menu.vala:264 src/warn-notification.vala:31
+#: src/sound-menu.vala:264 src/warn-notification.vala:33
 msgid "Volume"
 msgstr "Volume"
 
-#: src/info-notification.vala:57
+#: src/info-notification.vala:79
 msgid "Speakers"
 msgstr "Haut-parleurs"
 
-#: src/info-notification.vala:59
+#: src/info-notification.vala:81
 msgid "Headphones"
 msgstr "Casque audio"
 
-#: src/info-notification.vala:61
+#: src/info-notification.vala:83
 msgid "Bluetooth headphones"
 msgstr "Casque audio Bluetooth"
 
-#: src/info-notification.vala:63
+#: src/info-notification.vala:85
 msgid "Bluetooth speaker"
 msgstr "Haut-parleur Bluetooth"
 
-#: src/info-notification.vala:65
+#: src/info-notification.vala:87
 msgid "Usb speaker"
 msgstr "Haut-parleur USB"
 
-#: src/info-notification.vala:67
+#: src/info-notification.vala:89
 msgid "Usb headphones"
 msgstr "Casque audio USB"
 
-#: src/info-notification.vala:69
+#: src/info-notification.vala:91
 msgid "HDMI speaker"
 msgstr "Haut-parleur HDMI"
 
-#: src/info-notification.vala:71
+#: src/info-notification.vala:93
 msgid "HDMI headphones"
 msgstr "Casque audio HDMI"
 
@@ -327,17 +327,17 @@ msgstr "Volume (Casque audio HDMI)"
 msgid "Choose Playlist"
 msgstr "Choisir une liste de lecture"
 
-#: src/warn-notification.vala:32
+#: src/warn-notification.vala:34
 #, fuzzy
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
 msgstr "Un volume élevé peut endommager votre audition."
 
-#: src/warn-notification.vala:49
+#: src/warn-notification.vala:48
 msgid "OK"
 msgstr "OK"
 
-#: src/warn-notification.vala:52
+#: src/warn-notification.vala:51
 msgid "Cancel"
 msgstr "Annuler"
