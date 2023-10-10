@@ -44,6 +44,14 @@ vala_init(ayatana-indicator-sound-service
     ${VALA_DEFINE_LOMIRI_FEATURES_ENABLED}
 )
 
+set_source_files_properties (warn-notification.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-function-pointer-types")
+set_source_files_properties (service.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-function-pointer-types")
+set_source_files_properties (volume-control-pulse.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-function-pointer-types")
+set_source_files_properties (volume-warning-pulse.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-function-pointer-types")
+set_source_files_properties (media-player-user.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-function-pointer-types")
+set_source_files_properties (media-player-mpris.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-function-pointer-types")
+set_source_files_properties (media-player-list-mpris.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-function-pointer-types")
+
 vala_add(ayatana-indicator-sound-service
   notification.vala
 )
