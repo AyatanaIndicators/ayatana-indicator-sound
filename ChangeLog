@@ -1,6 +1,122 @@
+2023-10-13 Mike Gabriel
+
+        * release 23.10.0 (HEAD -> main, tag: 23.10.0)
+
+2023-10-12 Serhii Horichenko
+
+        * Translated using Weblate (Ukrainian) (88e4c06)
+
+2023-10-12 Mike Gabriel
+
+        * Merge branch 'tari01-pr/polkit-rules' (9193f09)
+
+2023-10-11 Mike Gabriel
+
+        * po/: Update translation files. (be8cfac)
+
+2023-10-11 Robert Tari
+
+        * Add PolicyKit .rules file (76e513e)
+
+2023-10-11 Mike Gabriel
+
+        * po/: Update translation files. (8d45008)
+
+2023-10-10 Mike Gabriel
+
+        * Merge branch 'tari01-pr/volume-scroll-step' (23e51ae)
+
+2023-10-09 Robert Tari
+
+        * src/service.vala: Change volume by 2% when scrolling over the
+          indicator (da7398e)
+
+2023-10-10 Mike Gabriel
+
+        * Merge branch 'tari01-pr/notification-orca' (baac68d)
+
+2023-10-07 Robert Tari
+
+        * src/main.c: Add missing headers (b7af662)
+        * src/CMakeLists.txt: Silence false errors created by Vala (91165c0)
+        * src/info-notification.vala: Display percentage when Orca is enabled
+          (c77a05c)
+
+2023-09-09 Mike Gabriel
+
+        * Merge branch 'tari01-pr/fix-notification' (ff70460)
+
+2023-09-09 Robert Tari
+
+        * Drop custom notification hints (cf943b8)
+        * src/info-notification.vala: Drop hint check and create a level
+          indicator (8dbb8ab)
+        * CMakeLists.txt: Fix build warnings (5fc752f)
+
+2023-09-06 Kieran W
+
+        * Translated using Weblate (English (United Kingdom)) (38dc2dd)
+
+2023-06-27 Sylke Vicious
+
+        * Translated using Weblate (Italian) (4a851bf)
+
+2023-06-25 ssantos
+
+        * Translated using Weblate (Portuguese) (9727f47)
+
+2023-06-22 Joan CiberSheep
+
+        * Translated using Weblate (Catalan) (a8ce07f)
+
+2023-06-09 Yaron Shahrabani
+
+        * Translated using Weblate (Hebrew) (78ad2d0)
+
+2023-05-22 Mike Gabriel
+
+        * d/control: Tolerate running on top of Pipewire's pulseaudio compat
+          layer. (647e41b)
+
+2023-05-20 Milo Ivir
+
+        * Translated using Weblate (Croatian) (1be9ab3)
+
+2023-04-13 Mike Gabriel
+
+        * CMakeLists.txt: Fix version number. (4c536f8)
+
+2023-04-11 Temuri Doghonadze
+
+        * Translated using Weblate (Georgian) (bf95c4c)
+
+2023-04-06 ssantos
+
+        * Translated using Weblate (Portuguese) (ecf563c)
+
+2023-03-23 Heimen Stoffels
+
+        * Translated using Weblate (Dutch) (bc27416)
+
+2023-03-21 Heimen Stoffels
+
+        * Translated using Weblate (Dutch) (ba8b6c6)
+
+2023-03-16 Heimen Stoffels
+
+        * Translated using Weblate (Dutch) (7ddcf1a)
+
+2023-03-03 gallegonovato
+
+        * Translated using Weblate (Spanish) (102e002)
+
+2023-02-10 Luna Jernberg
+
+        * Translated using Weblate (Swedish) (e00dad7)
+
 2023-01-17 Mike Gabriel
 
-        * release 22.9.2 (HEAD -> main, tag: 22.9.2)
+        * release 22.9.2 (04c7493) (tag: 22.9.2)
         * Merge branch
           'ubports-personal/peat-psuwit/upstream_-_volume-notification-lomiri'
           (69fe621)

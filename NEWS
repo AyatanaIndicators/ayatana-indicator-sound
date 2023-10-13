@@ -1,3 +1,12 @@
+Overview of changes in ayatana-indicator-sound 23.10.0
+
+  - Drop hint check and create a level indicator.
+  - Drop custom notification hints.
+  - Display percentage when Orca is enabled.
+  - Change volume by 2% when scrolling over the indicator.
+  - Add PolicyKit .rules file.
+  - Translation updates.
+
 Overview of changes in ayatana-indicator-sound 22.9.2
 
   - src/, tests/: update references to renamed (Lomiri) notification
