@@ -8,16 +8,16 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-11 00:03+0200\n"
-"PO-Revision-Date: 2022-09-08 18:17+0000\n"
+"PO-Revision-Date: 2023-10-16 04:19+0000\n"
 "Last-Translator: Quentin PAGÈS <quentinantonin@free.fr>\n"
-"Language-Team: Occitan <https://hosted.weblate.org/projects/ayatana-"
-"indicators/sound-applet/oc/>\n"
+"Language-Team: Occitan <https://hosted.weblate.org/projects/"
+"ayatana-indicators/sound-applet/oc/>\n"
 "Language: oc\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 4.14.1-dev\n"
+"X-Generator: Weblate 5.1-dev\n"
 
 #: data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
@@ -215,11 +215,11 @@ msgstr "Volum"
 
 #: src/info-notification.vala:79
 msgid "Speakers"
-msgstr "Naut-parlaires"
+msgstr "Nauts parlaires"
 
 #: src/info-notification.vala:81
 msgid "Headphones"
-msgstr "Casc àudio"
+msgstr "Escotadors"
 
 #: src/info-notification.vala:83
 msgid "Bluetooth headphones"
