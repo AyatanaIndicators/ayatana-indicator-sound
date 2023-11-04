@@ -23,7 +23,19 @@ using Notify;
 
 public class IndicatorSound.InfoNotification: Notification
 {
-    protected override Notify.Notification create_notification () {
+    private string sReaderSchema = "org.gnome.desktop.a11y.applications";
+    private string sReaderKey = "screen-reader-enabled";
+
+    protected override Notify.Notification create_notification ()
+    {
+        string sUser = GLib.Environment.get_user_name ();
+
+        if (sUser == "lightdm")
+        {
+            this.sReaderSchema = "org.ArcticaProject.arctica-greeter";
+            this.sReaderKey = "screen-reader";
+        }
+
         return new Notify.Notification (_("Volume"), "", "audio-volume-muted");
     }
 
@@ -40,15 +52,16 @@ public class IndicatorSound.InfoNotification: Notification
         /* Reset the notification */
         var n = _notification;
         volume_label += "\n";
+
         int32 nValue = ((int32)((volume * 100.0) + 0.5)).clamp(0, 100);
         SettingsSchemaSource pSource = SettingsSchemaSource.get_default ();
-        SettingsSchema pSchema = pSource.lookup ("org.gnome.desktop.a11y.applications", false);
+        SettingsSchema pSchema = pSource.lookup (this.sReaderSchema, false);
         bool bOrcaActive = false;
 
         if (pSchema != null)
         {
-            Settings pSettings = new Settings ("org.gnome.desktop.a11y.applications");
-            bOrcaActive = pSettings.get_boolean ("screen-reader-enabled");
+            Settings pSettings = new Settings (this.sReaderSchema);
+            bOrcaActive = pSettings.get_boolean (this.sReaderKey);
         }
 
         if (bOrcaActive)
