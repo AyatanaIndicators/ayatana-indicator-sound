@@ -1,3 +1,9 @@
+Overview of changes in ayatana-indicator-sound 23.10.1
+
+  - src/info-notification.vala: Display percentage in the greeter when
+    Orca is enabled.
+  - Translation updates.
+
 Overview of changes in ayatana-indicator-sound 23.10.0
 
   - Drop hint check and create a level indicator.

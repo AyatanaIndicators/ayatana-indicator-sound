@@ -1,6 +1,31 @@
+2023-11-06 Mike Gabriel
+
+        * release 23.10.1 (HEAD -> main, tag: 23.10.1)
+
+2023-11-04 Mike Gabriel
+
+        * Merge branch 'tari01-pr/notification-orca-greeter' (1fb9372)
+
+2023-11-04 Robert Tari
+
+        * src/info-notification.vala: Display percentage in the greeter when
+          Orca is enabled (2b3531f)
+
+2023-10-22 Hosted Weblate
+
+        * Update translation files (82e4581)
+
+2023-10-22 Weblate
+
+        * Added translation using Weblate (Kurdish) (434aff4)
+
+2023-10-14 Quentin PAGÈS
+
+        * Translated using Weblate (Occitan) (06de571)
+
 2023-10-13 Mike Gabriel
 
-        * release 23.10.0 (HEAD -> main, tag: 23.10.0)
+        * release 23.10.0 (32d51fa) (tag: 23.10.0)
 
 2023-10-12 Serhii Horichenko
 
