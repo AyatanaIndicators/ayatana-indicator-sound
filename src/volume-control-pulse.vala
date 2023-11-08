@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Canonical Ltd.
- * Copyright 2021 Robert Tari
+ * Copyright 2021-2023 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,6 +78,16 @@ public class VolumeControlPulse : VolumeControl
                 start_account_service_volume_timer();
             }
         });
+
+        this._accounts_service_access.notify["mute"].connect(() => {
+
+            if (_mute != this._accounts_service_access.mute)
+            {
+                set_mute_internal (this._accounts_service_access.mute);
+                start_account_service_volume_timer();
+            }
+        });
+
         this.reconnect_to_pulse ();
     }
 

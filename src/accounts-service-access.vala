@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Canonical Ltd.
- * Copyright 2021 Robert Tari
+ * Copyright 2021-2023 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,17 +23,17 @@ using PulseAudio;
 using Notify;
 using Gee;
 
-[DBus (name="org.ayatana.Greeter.List")]
-interface GreeterListInterfaceAccess : Object
+[DBus (name="org.ayatana.greeter")]
+interface GreeterInterfaceAccess : Object
 {
-    public abstract async string get_active_entry () throws GLib.DBusError, GLib.IOError;
-    public signal void entry_selected (string entry_name);
+    public abstract async string GetUser () throws GLib.DBusError, GLib.IOError;
+    public signal void UserChanged (string user);
 }
 
 public class AccountsServiceAccess : Object
 {
     private DBusProxy _user_proxy;
-    private GreeterListInterfaceAccess _greeter_proxy;
+    private GreeterInterfaceAccess _greeter_proxy;
     private double _volume = 0.0;
     private string _last_running_player = "";
     private bool _mute = false;
@@ -129,7 +129,7 @@ public class AccountsServiceAccess : Object
         {
             try
             {
-                username = yield _greeter_proxy.get_active_entry ();
+                username = yield _greeter_proxy.GetUser ();
 
                 if (username == "" || username == null)
                 {
@@ -167,9 +167,16 @@ public class AccountsServiceAccess : Object
             if (user_path_variant.check_format_string ("(o)", true))
             {
                 user_path_variant.get ("(o)", out user_path);
-#if LOMIRI_FEATURES_ENABLED
-                _user_proxy = yield new DBusProxy.for_bus (BusType.SYSTEM, DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, "org.freedesktop.Accounts", user_path, "com.lomiri.AccountsService.Sound");
-#endif
+                bool bLomiri = AyatanaCommon.utils_is_lomiri ();
+
+                if (bLomiri)
+                {
+                    _user_proxy = yield new DBusProxy.for_bus (BusType.SYSTEM, DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, "org.freedesktop.Accounts", user_path, "com.lomiri.AccountsService.Sound");
+                }
+                else
+                {
+                    _user_proxy = yield new DBusProxy.for_bus (BusType.SYSTEM, DBusProxyFlags.GET_INVALIDATED_PROPERTIES, null, "org.freedesktop.Accounts", user_path, "org.ayatana.indicator.sound.AccountsService");
+                }
             }
             else
             {
@@ -223,7 +230,7 @@ public class AccountsServiceAccess : Object
         {
             try
             {
-                _greeter_proxy = yield Bus.get_proxy (BusType.SESSION, "org.ayatana.Greeter", "/list");
+                _greeter_proxy = yield Bus.get_proxy (BusType.SESSION, "org.ayatana.greeter", "/org/ayatana/greeter");
             }
             catch (GLib.Error e)
             {
@@ -232,7 +239,7 @@ public class AccountsServiceAccess : Object
                 return;
             }
 
-            _greeter_proxy.entry_selected.connect (greeter_user_changed);
+            _greeter_proxy.UserChanged.connect (greeter_user_changed);
             yield setup_user_proxy ();
         }
         else

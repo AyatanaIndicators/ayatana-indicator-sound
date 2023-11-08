@@ -1,5 +1,6 @@
 /*
  * Copyright 2014 Canonical Ltd.
+ * Copyright 2023 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,7 @@
  *
  * Authors:
  *      Ted Gould <ted@canonical.com>
+ *      Robert Tari <robert@tari.in>
  */
 
 [DBus (name = "org.ayatana.indicator.sound.AccountsService")]
@@ -29,4 +31,6 @@ public interface AccountsServiceSoundSettings : Object {
     public abstract string artist {owned get; set;}
     public abstract string album {owned get; set;}
     public abstract string art_url {owned get; set;}
+    public abstract double volume {owned get; set;}
+    public abstract bool mute {owned get; set;}
 }

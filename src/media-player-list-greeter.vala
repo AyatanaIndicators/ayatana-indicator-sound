@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 Canonical Ltd.
- * Copyright 2021 Robert Tari
+ * Copyright 2021-2023 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,10 @@
  *      Robert Tari <robert@tari.in>
  */
 
-[DBus (name="org.ayatana.Greeter.List")]
+[DBus (name="org.ayatana.greeter")]
 public interface AyatanaGreeterList : Object {
-    public abstract async string get_active_entry () throws GLib.DBusError, GLib.IOError;
-    public signal void entry_selected (string entry_name);
+    public abstract async string GetUser () throws GLib.DBusError, GLib.IOError;
+    public signal void UserChanged (string user);
 }
 
 public class MediaPlayerListGreeter : MediaPlayerList {
@@ -33,8 +33,8 @@ public class MediaPlayerListGreeter : MediaPlayerList {
     public MediaPlayerListGreeter () {
         Bus.get_proxy.begin<AyatanaGreeterList> (
             BusType.SESSION,
-            "org.ayatana.Greeter",
-            "/list",
+            "org.ayatana.greeter",
+            "/org/ayatana/greeter",
             DBusProxyFlags.NONE,
             null,
             new_proxy);
@@ -44,14 +44,14 @@ public class MediaPlayerListGreeter : MediaPlayerList {
         try {
             this.proxy = Bus.get_proxy.end(res);
 
-            this.proxy.entry_selected.connect(active_user_changed);
-            this.proxy.get_active_entry.begin ((obj, res) => {
+            this.proxy.UserChanged.connect(active_user_changed);
+            this.proxy.GetUser.begin ((obj, res) => {
                 try {
                     var list = (obj as AyatanaGreeterList);
 
                     if (list != null)
                     {
-                        var value = list.get_active_entry.end(res);
+                        var value = list.GetUser.end(res);
                         active_user_changed(value);
                     }
                 } catch (Error e) {
