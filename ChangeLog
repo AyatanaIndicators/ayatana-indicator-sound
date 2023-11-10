@@ -1,6 +1,23 @@
+2023-11-10 Mike Gabriel
+
+        * release 23.10.2 (HEAD -> main, tag: 23.10.2)
+        * Merge branch 'tari01-pr/fix-accountsservice' (048b945)
+
+2023-11-08 Robert Tari
+
+        * Fix AccountsService integration (bd14f03)
+        * data/org.ayatana.indicator.sound.AccountsService.xml: Add Volume
+          and Muted properties (c4825f9)
+
+2023-11-10 Robert Tari
+
+        * src/accounts-service-sound-settings.vala: Whitespace fix (ef9ca48)
+        * src/accounts-service-access.vala: Refactor code for easier
+          debugging (45b41bc)
+
 2023-11-06 Mike Gabriel
 
-        * release 23.10.1 (HEAD -> main, tag: 23.10.1)
+        * release 23.10.1 (76499b4) (tag: 23.10.1)
 
 2023-11-04 Mike Gabriel
 
