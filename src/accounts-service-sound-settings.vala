@@ -19,14 +19,14 @@
 
 [DBus (name = "org.ayatana.indicator.sound.AccountsService")]
 public interface AccountsServiceSoundSettings : Object {
-	// properties
-	public abstract uint64 timestamp {owned get; set;}
-	public abstract string player_name {owned get; set;}
-	public abstract Variant player_icon {owned get; set;}
-	public abstract bool running {owned get; set;}
-	public abstract string state {owned get; set;}
-	public abstract string title {owned get; set;}
-	public abstract string artist {owned get; set;}
-	public abstract string album {owned get; set;}
-	public abstract string art_url {owned get; set;}
+    // properties
+    public abstract uint64 timestamp {owned get; set;}
+    public abstract string player_name {owned get; set;}
+    public abstract Variant player_icon {owned get; set;}
+    public abstract bool running {owned get; set;}
+    public abstract string state {owned get; set;}
+    public abstract string title {owned get; set;}
+    public abstract string artist {owned get; set;}
+    public abstract string album {owned get; set;}
+    public abstract string art_url {owned get; set;}
 }
