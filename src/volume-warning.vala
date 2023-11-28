@@ -44,7 +44,7 @@ public abstract class VolumeWarning : Object
         }
     }
 
-    internal VolumeWarning (IndicatorSound.Options options) {
+    protected VolumeWarning (IndicatorSound.Options options) {
 
         _options = options;
 

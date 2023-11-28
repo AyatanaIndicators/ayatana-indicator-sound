@@ -54,7 +54,7 @@ public abstract class VolumeControl : Object
 
 	protected IndicatorSound.Options _options = null;
 
-	internal VolumeControl(IndicatorSound.Options options) {
+	protected VolumeControl(IndicatorSound.Options options) {
 		_options = options;
 	}
 
