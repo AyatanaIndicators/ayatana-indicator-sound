@@ -83,8 +83,8 @@ vala_init(vala-mocks
 set_source_files_properties(media-player-mock.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-unknown-warning-option -Wno-incompatible-pointer-types -Wno-discarded-qualifiers")
 set_source_files_properties(media-player-list-mock.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-pointer-types -Wno-unused-variable")
 set_source_files_properties(options-mock.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-pointer-types -Wno-unused-variable")
-set_source_files_properties(volume-control-mock.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-pointer-types -Wno-int-to-pointer-cast -Wno-implicit-function-declaration")
-set_source_files_properties(volume-warning-mock.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-pointer-types -Wno-unused-variable -Wno-int-to-pointer-cast -Wno-implicit-function-declaration")
+set_source_files_properties(volume-control-mock.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-pointer-types")
+set_source_files_properties(volume-warning-mock.c PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-pointer-types -Wno-unused-variable")
 
 vala_add(vala-mocks
     media-player-mock.vala
