@@ -33,6 +33,11 @@ public class IndicatorSound.WarnNotification: Notification
             _("Volume"),
             _("Allow volume above safe level?\nHigh volume can damage your hearing."),
             "audio-volume-high");
+
+        n.set_hint ("x-lomiri-non-shaped-icon", "true");
+        n.set_hint ("x-lomiri-snap-decisions", "true");
+        n.set_hint ("x-lomiri-private-affirmative-tint", "true");
+
         n.closed.connect ((n) => {
             n.clear_actions ();
         });

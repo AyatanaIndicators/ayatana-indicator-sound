@@ -25,10 +25,12 @@ public class IndicatorSound.InfoNotification: Notification
 {
     private string sReaderSchema = "org.gnome.desktop.a11y.applications";
     private string sReaderKey = "screen-reader-enabled";
+    private bool bHints = false;
 
     protected override Notify.Notification create_notification ()
     {
         string sUser = GLib.Environment.get_user_name ();
+        this.bHints = notify_server_supports ("x-lomiri-private-synchronous");
 
         if (sUser == "lightdm")
         {
@@ -38,6 +40,7 @@ public class IndicatorSound.InfoNotification: Notification
 
         return new Notify.Notification (_("Volume"), "", "audio-volume-muted");
     }
+
 
     public void show (VolumeControl.ActiveOutput active_output,
                       double volume,
@@ -51,37 +54,45 @@ public class IndicatorSound.InfoNotification: Notification
 
         /* Reset the notification */
         var n = _notification;
-        volume_label += "\n";
 
         int32 nValue = ((int32)((volume * 100.0) + 0.5)).clamp(0, 100);
-        SettingsSchemaSource pSource = SettingsSchemaSource.get_default ();
-        SettingsSchema pSchema = pSource.lookup (this.sReaderSchema, false);
-        bool bOrcaActive = false;
 
-        if (pSchema != null)
+        if (!this.bHints)
         {
-            Settings pSettings = new Settings (this.sReaderSchema);
-            bOrcaActive = pSettings.get_boolean (this.sReaderKey);
-        }
+            volume_label += "\n";
+            SettingsSchemaSource pSource = SettingsSchemaSource.get_default ();
+            SettingsSchema pSchema = pSource.lookup (this.sReaderSchema, false);
+            bool bOrcaActive = false;
 
-        if (bOrcaActive)
-        {
-            string sValue = nValue.to_string ();
-            volume_label += sValue + "%";
-        }
-        else
-        {
-            uint nChars = ((int32)((volume * 20) + 0.5)).clamp(0, 20);
-
-            for (uint nChar = 0; nChar < nChars; nChar++)
+            if (pSchema != null)
             {
-                volume_label += "◼";
+                Settings pSettings = new Settings (this.sReaderSchema);
+                bOrcaActive = pSettings.get_boolean (this.sReaderKey);
+            }
+
+            if (bOrcaActive)
+            {
+                string sValue = nValue.to_string ();
+                volume_label += sValue + "%";
+            }
+            else
+            {
+                uint nChars = ((int32)((volume * 20) + 0.5)).clamp(0, 20);
+
+                for (uint nChar = 0; nChar < nChars; nChar++)
+                {
+                    volume_label += "◼";
+                }
             }
         }
 
         n.update (_("Volume"), volume_label, icon);
         n.clear_hints();
+        n.set_hint ("x-lomiri-non-shaped-icon", "true");
+        n.set_hint ("x-lomiri-private-synchronous", "true");
+        n.set_hint ("x-lomiri-value-bar-tint", is_high_volume ? "true" : "false");
         n.set_hint ("value", nValue);
+
         show_notification ();
     }
 

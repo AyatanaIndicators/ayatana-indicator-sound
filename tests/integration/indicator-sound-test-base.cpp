@@ -72,7 +72,7 @@ void IndicatorSoundTestBase::SetUp()
                             "GetCapabilities",
                             "",
                             "as",
-                            "ret = ['actions', 'body', 'body-markup', 'icon-static', 'image/svg+xml', 'private-synchronous', 'append', 'private-icon-only', 'truncation']"
+                            "ret = ['actions', 'body', 'body-markup', 'icon-static', 'image/svg+xml', 'x-lomiri-private-synchronous', 'x-lomiri-private-icon-only', 'x-lomiri-truncation', 'private-synchronous', 'append', 'private-icon-only', 'truncation']"
                          ).waitForFinished();
 
     int waitedTime = 0;
@@ -647,8 +647,14 @@ void IndicatorSoundTestBase::checkVolumeNotification(double volume, QString cons
     QVariantMap hints;
     ASSERT_TRUE(qDBusArgumentToMap(args.at(6), hints));
     ASSERT_TRUE(hints.contains("value"));
+    ASSERT_TRUE (hints.contains ("x-lomiri-non-shaped-icon"));
+    ASSERT_TRUE (hints.contains ("x-lomiri-value-bar-tint"));
+    ASSERT_TRUE (hints.contains ("x-lomiri-private-synchronous"));
 
     EXPECT_EQ(volume*100, hints["value"]);
+    EXPECT_EQ (true, hints["x-lomiri-non-shaped-icon"]);
+    EXPECT_EQ (isLoud, hints["x-lomiri-value-bar-tint"]);
+    EXPECT_EQ (true, hints["x-lomiri-private-synchronous"]);
 }
 
 void IndicatorSoundTestBase::checkHighVolumeNotification(QVariantList call)
