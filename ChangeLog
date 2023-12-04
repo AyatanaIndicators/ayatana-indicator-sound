@@ -1,6 +1,24 @@
+2023-12-04 Mike Gabriel
+
+        * release 23.10.3 (HEAD -> main, tag: 23.10.3)
+        * Merge branch 'tari01-pr/lomiri-notifications' (7a5e31f)
+
+2023-11-22 Robert Tari
+
+        * Use different code path for Lomiri notifications (a87ed3b)
+
+2023-11-28 Robert Tari
+
+        * Merge branch 'protected-superclass' (3e8aab9)
+
+2023-11-29 Ratchanan Srirattanamet
+
+        * src, tests: fix -Wint-to-pointer-cast and a chance of test crash
+          (41c2b5c)
+
 2023-11-10 Mike Gabriel
 
-        * release 23.10.2 (HEAD -> main, tag: 23.10.2)
+        * release 23.10.2 (b153ce4) (tag: 23.10.2)
         * Merge branch 'tari01-pr/fix-accountsservice' (048b945)
 
 2023-11-08 Robert Tari
