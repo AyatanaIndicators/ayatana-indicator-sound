@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-11 00:03+0200\n"
-"PO-Revision-Date: 2024-04-01 02:24+0000\n"
+"PO-Revision-Date: 2024-04-01 22:37+0000\n"
 "Last-Translator: 复予 <clonewith@qq.com>\n"
 "Language-Team: Chinese (Simplified) <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/zh_Hans/>\n"
@@ -173,11 +173,11 @@ msgstr "音量"
 
 #: src/info-notification.vala:79
 msgid "Speakers"
-msgstr "扬声器"
+msgstr "音响"
 
 #: src/info-notification.vala:81
 msgid "Headphones"
-msgstr "耳机"
+msgstr "头戴耳机"
 
 #: src/info-notification.vala:83
 msgid "Bluetooth headphones"
