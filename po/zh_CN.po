@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-11 00:03+0200\n"
-"PO-Revision-Date: 2022-08-24 06:16+0000\n"
-"Last-Translator: Hugel <qihu@nfschina.com>\n"
+"PO-Revision-Date: 2024-04-01 02:24+0000\n"
+"Last-Translator: 复予 <clonewith@qq.com>\n"
 "Language-Team: Chinese (Simplified) <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/zh_Hans/>\n"
 "Language: zh_CN\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 4.14-dev\n"
+"X-Generator: Weblate 5.5-dev\n"
 
 #: data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
@@ -109,7 +109,7 @@ msgstr ""
 
 #: data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
-msgstr ""
+msgstr "记住用户批准音量警告的秒数。"
 
 #: data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
@@ -123,7 +123,7 @@ msgstr ""
 
 #: data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "触发高音量警告的音量大小。"
 
 #: data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
@@ -226,7 +226,7 @@ msgstr "声音"
 
 #: src/service.vala:303
 msgid "Sound settings & media player controls"
-msgstr ""
+msgstr "声音设置 & 媒体播放器控制"
 
 #: src/sound-menu.vala:55 src/sound-menu.vala:59
 msgid "Mute"
