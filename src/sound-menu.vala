@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Canonical Ltd.
- * Copyright 2021-2022 Robert Tari
+ * Copyright 2021-2024 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -478,6 +478,14 @@ public class SoundMenu: Object
         slider.set_attribute ("min-value", "d", min);
         slider.set_attribute ("max-value", "d", max);
         slider.set_attribute ("step", "d", step);
+
+        bool bLomiri = AyatanaCommon.utils_is_lomiri ();
+
+        if (!bLomiri)
+        {
+            slider.set_attribute ("digits", "y", 2);
+        }
+
         if (sync_action) {
             slider.set_attribute ("x-ayatana-sync-action", "s", "indicator.volume-sync");
         }
