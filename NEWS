@@ -1,3 +1,12 @@
+Overview of changes in ayatana-indicator-sound 24.4.0
+
+  - data/org.ayatana.indicator.sound.AccountsService.policy: Fix policy
+    message text.
+  - data/ayatana-indicator-sound.service.in: Add pipewire-pulse.service
+    to After= key.
+  - src/sound-menu.vala: Fix slider precision.
+  - Translation updates.
+
 Overview of changes in ayatana-indicator-sound 23.10.3
 
   - src, tests: fix -Wint-to-pointer-cast and a chance of test crash.
