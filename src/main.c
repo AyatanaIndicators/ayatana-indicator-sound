@@ -1,6 +1,6 @@
 /*
  * Copyright 2015 Canonical Ltd.
- * Copyright 2023 Robert Tari <robert@tari.in>
+ * Copyright 2023-2024 Robert Tari <robert@tari.in>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,12 +65,12 @@ on_bus_acquired(GDBusConnection *connection,
     }
 
     pgloop = pa_glib_mainloop_new(NULL);
-    options = indicator_sound_options_gsettings_new();
+    options = INDICATOR_SOUND_OPTIONS (indicator_sound_options_gsettings_new ());
     accounts_service_access = accounts_service_access_new();
     volume = volume_control_pulse_new(options, pgloop, accounts_service_access);
-    warning = volume_warning_pulse_new(options, pgloop);
+    warning = VOLUME_WARNING (volume_warning_pulse_new (options, pgloop));
 
-    service = indicator_sound_service_new (playerlist, volume, accounts, options, warning, accounts_service_access);
+    service = indicator_sound_service_new (playerlist, VOLUME_CONTROL (volume), accounts, options, warning, accounts_service_access);
 
     g_clear_object(&playerlist);
     g_clear_object(&options);
