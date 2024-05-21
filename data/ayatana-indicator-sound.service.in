@@ -1,7 +1,7 @@
 [Unit]
 Description=Ayatana Indicator Sound Service
 PartOf=graphical-session.target
-PartOf=ayatana-indicators.target
+PartOf=ayatana-indicators.target lomiri-indicators.target
 After=pipewire-pulse.service pulseaudio.service
 
 [Service]
@@ -9,4 +9,4 @@ ExecStart=@CMAKE_INSTALL_FULL_LIBEXECDIR@/ayatana-indicator-sound/ayatana-indica
 Restart=on-failure
 
 [Install]
-WantedBy=ayatana-indicators.target
+WantedBy=ayatana-indicators.target lomiri-indicators.target
