@@ -1,3 +1,9 @@
+Overview of changes in ayatana-indicator-sound 24.4.1
+
+  - src/main.c: Fix type casts. (Fixes building with gcc 14).
+  - tests/CMakeLists.txt: Silence some more Vala warnings.
+  - Translation updates.
+
 Overview of changes in ayatana-indicator-sound 24.4.0
 
   - data/org.ayatana.indicator.sound.AccountsService.policy: Fix policy

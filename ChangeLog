@@ -1,6 +1,20 @@
+2024-05-21 Mike Gabriel
+
+        * release 24.4.1 (HEAD -> main, tag: 24.4.1)
+        * Merge branch 'tari01-pr/fix-gcc14-build' (c462d2b6)
+
+2024-05-19 Robert Tari
+
+        * tests/CMakeLists.txt: Silence some more Vala warnings (695faa48)
+        * src/main.c: Fix type casts (202b468a)
+
+2024-04-18 复予
+
+        * Translated using Weblate (Chinese (Simplified)) (f62a9101)
+
 2024-04-08 Mike Gabriel
 
-        * release 24.4.0 (HEAD -> main, tag: 24.4.0)
+        * release 24.4.0 (340e20d6) (tag: 24.4.0)
         * Merge branch 'tari01-pr/slider-precision' (161487ac)
 
 2024-04-05 Robert Tari
