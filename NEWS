@@ -1,3 +1,8 @@
+Overview of changes in ayatana-indicator-sound 24.5.0
+
+  - data/ayatana-indicator-sound.service.in: Become part of
+    lomiri-indicators.target.
+
 Overview of changes in ayatana-indicator-sound 24.4.1
 
   - src/main.c: Fix type casts. (Fixes building with gcc 14).

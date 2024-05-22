@@ -1,6 +1,16 @@
+2024-05-22 Mike Gabriel
+
+        * release 24.5.0 (HEAD -> main, tag: 24.5.0)
+
+2024-05-21 Robert Tari
+
+        * Merge branch 'sunweaver-pr/lomiri-indicators-target' (1420362b)
+
 2024-05-21 Mike Gabriel
 
-        * release 24.4.1 (HEAD -> main, tag: 24.4.1)
+        * data/ayatana-indicator-sound.service.in: Become part of
+          lomiri-indicators.target. (2118fd1d)
+        * release 24.4.1 (13aa8c50) (tag: 24.4.1)
         * Merge branch 'tari01-pr/fix-gcc14-build' (c462d2b6)
 
 2024-05-19 Robert Tari
