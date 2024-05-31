@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-11 00:03+0200\n"
-"PO-Revision-Date: 2024-05-29 04:09+0000\n"
+"PO-Revision-Date: 2024-05-31 17:48+0000\n"
 "Last-Translator: hugoalh <hugoalh@users.noreply.hosted.weblate.org>\n"
 "Language-Team: Chinese (Traditional) <https://hosted.weblate.org/projects/"
 "ayatana-indicators/sound-applet/zh_Hant/>\n"
@@ -258,7 +258,7 @@ msgstr "靜音模式"
 
 #: src/sound-menu.vala:79
 msgid "Sound Settings…"
-msgstr "聲音設置…"
+msgstr "聲音設定…"
 
 #: src/sound-menu.vala:136
 msgid "Microphone Volume"
