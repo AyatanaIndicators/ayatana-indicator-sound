@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Canonical Ltd.
- * Copyright 2021-2023 Robert Tari
+ * Copyright 2021-2024 Robert Tari
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -142,6 +142,13 @@ public class AccountsServiceAccess : Object
 
                 return;
             }
+        }
+
+        bool bPrefix = username.has_prefix ("*");
+
+        if (bPrefix)
+        {
+            return;
         }
 
         // Get master AccountsService object
