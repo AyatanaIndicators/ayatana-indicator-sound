@@ -8,38 +8,42 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-11 00:03+0200\n"
-"PO-Revision-Date: 2020-03-30 15:09+0000\n"
-"Last-Translator: Alexie Brindusescu <alexiedb@yahoo.com>\n"
-"Language-Team: Romanian <https://hosted.weblate.org/projects/ayatana-"
-"indicators/sound-applet/ro/>\n"
+"PO-Revision-Date: 2024-09-29 00:16+0000\n"
+"Last-Translator: Remus-Gabriel Chelu <remusgabriel.chelu@disroot.org>\n"
+"Language-Team: Romanian <https://hosted.weblate.org/projects/"
+"ayatana-indicators/sound-applet/ro/>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2;\n"
-"X-Generator: Weblate 4.0-dev\n"
+"X-Generator: Weblate 5.8-dev\n"
 
 #: data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
-msgstr ""
+msgstr "Definiți proprietățile pentru propriul cont de utilizator"
 
 #: data/org.ayatana.indicator.sound.AccountsService.policy:6
 msgid "Authentication is required to set one's own indicator sound properties."
 msgstr ""
+"Autentificarea este necesară pentru a configura propriile proprietăți ale "
+"indicatorului de sunet."
 
 #: data/org.ayatana.indicator.sound.AccountsService.policy:15
 msgid "Set properties of any user"
-msgstr ""
+msgstr "Definiți proprietățile pentru orice utilizator"
 
 #: data/org.ayatana.indicator.sound.AccountsService.policy:16
 msgid ""
 "Authentication is required to set another user's indicator sound properties."
 msgstr ""
+"Autentificarea este necesară pentru a configura proprietățile indicatorului "
+"de sunet pentru alt utilizator."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:1
 msgid "A list of applications blacklisted from the sound menu"
-msgstr "Lista aplicatiilor ce nu pot fi afisate in meniul de sunet"
+msgstr "O listă a aplicațiilor din lista neagră a meniului de sunet"
 
 #: data/org.ayatana.indicator.sound.gschema.xml:2
 msgid ""
@@ -48,17 +52,18 @@ msgid ""
 "desktop suffix) of applications which do not want to be included in the "
 "sound menu."
 msgstr ""
-"Fiecare player media ce respecta specificatiile MPRIS2 va aparea automat in "
-"meniu. Acesta lista ar trebui sa contina numele fisierelor desktop (fara "
-"extensia .desktop) ce nu vor fi incluse in meniul de sunet."
+"Fiecare reproducător media care respectă specificațiile MPRIS2 va apărea "
+"automat în meniu. Această matrice ar trebui să conțină numele fișierelor de "
+"birou (fără sufixul .desktop) ale aplicațiilor care nu se dorește a fi "
+"incluse în meniul de sunet."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:3
 msgid ""
 "A list of applications which at some point have registered with the sound "
 "menu"
 msgstr ""
-"O lista a aplicatiilor ce au fost inregistrate in meniul de sunet la un "
-"moment dat"
+"O listă a aplicațiilor care au fost înregistrate la un moment dat în meniul "
+"de sunet"
 
 #: data/org.ayatana.indicator.sound.gschema.xml:4
 msgid ""
@@ -67,32 +72,41 @@ msgid ""
 "desktop suffix) of applications which have at some point appeared in the "
 "menu. This allows the menu remember and display offlined applications."
 msgstr ""
+"Fiecare reproducător media care respectă specificațiile MPRIS2 va apărea "
+"automat în meniu. Această matrice ar trebui să conțină numele fișierelor de "
+"birou (fără sufixul .desktop) ale aplicațiilor care au apărut la un moment "
+"dat în meniu. Acest lucru permite meniului să memoreze și să afișeze "
+"aplicațiile care nu sunt disponibile."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:5
 msgid ""
 "A list of applications that will have player controls visible all the time"
 msgstr ""
+"O listă de aplicații care vor avea controalele reproducătorului vizibile tot "
+"timpul"
 
 #: data/org.ayatana.indicator.sound.gschema.xml:6
 msgid "Initial setting for global mute (mute all) on the menu"
 msgstr ""
+"Ajustarea inițială pentru dezactivarea globală a sunetului („toate "
+"dezactivate”) în meniu"
 
 #: data/org.ayatana.indicator.sound.gschema.xml:7
 msgid "On start up volume should not be muted."
-msgstr ""
+msgstr "La pornire, volumul nu ar trebui să fie dezactivat."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:9
 #, no-c-format
 msgid "Whether the volume slider allows setting the volume above 100%"
-msgstr ""
+msgstr "Dacă cursorul de volum permite ajustarea volumului peste 100%"
 
 #: data/org.ayatana.indicator.sound.gschema.xml:10
 msgid "Whether or not to show the sound indicator in the menu bar."
-msgstr ""
+msgstr "Dacă să se afișeze sau nu indicatorul de sunet în bara de meniu."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:11
 msgid "Whether or not to show high volume warnings."
-msgstr ""
+msgstr "Dacă se afișează sau nu avertismente de volum ridicat."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:12
 msgid ""
@@ -103,10 +117,19 @@ msgid ""
 "volume-decibels AND (d) the user has not indicated approval in the last "
 "warning-volume-approval-ttl seconds."
 msgstr ""
+"Dacă este activată pe un dispozitiv, utilizatorului i se va prezenta o "
+"fereastră de dialog de confirmare dacă (a) ceva este conectat la mufa pentru "
+"căști (de exemplu, nu există avertismente pentru volumele difuzoarelor) ȘI "
+"(b) se redă conținut media (de exemplu, nu există avertismente pentru "
+"volumele tonurilor de apel) ȘI (c) utilizatorul încearcă să ajusteze volumul "
+"mai mult decât warning-volume-decibels ȘI (d) utilizatorul nu a indicat "
+"aprobarea în ultimele warning-volume-approval-ttl secunde."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:13
 msgid "How many seconds a user's warning-volume approval should be remembered."
 msgstr ""
+"Câte secunde ar trebui să fie reținută aprobarea de depășire al nivelului "
+"volumului dată de un utilizator."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:14
 msgid ""
@@ -117,20 +140,28 @@ msgid ""
 "EU standard EN 60950-1/Al2: “The acknowledgement does not need to be "
 "repeated more than once every 20 h of cumulative listening time.”"
 msgstr ""
+"Cât timp să se memoreze aprobarea de către utilizator a dialogului de "
+"confirmare discutat în descrierea „warning-volume-enabled”.\n"
+"\n"
+"Valoarea implicită (72.000 secunde) corespunde celor 20 de ore sugerate de "
+"standardul UE EN 60950-1/Al2: „Confirmarea nu trebuie repetată mai mult de o "
+"dată la fiecare 20 h de timp de ascultare cumulat”."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:17
 msgid "Volume level that triggers a high volume warning."
-msgstr ""
+msgstr "Nivelul de volum care declanșează o avertizare de volum ridicat."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:18
 msgid ""
 "Volume level that triggers a high volume warning. See warning-volume-enabled "
 "for details."
 msgstr ""
+"Nivelul de volum care declanșează o avertizare de volum ridicat. Consultați "
+"warning-volume-enabled pentru detalii."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:19
 msgid "Normal output volume."
-msgstr ""
+msgstr "Volum de ieșire normal."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:20
 msgid ""
@@ -143,12 +174,23 @@ msgid ""
 "\n"
 "The default value (0) corresponds to PulseAudio's PA_VOLUME_NORM."
 msgstr ""
+"Volumul maxim atunci când parametrul „allow-amplified-volume” al "
+"com.lomiri.sound este dezactivat.\n"
+"\n"
+"Pentru a fi în conformitate cu standardul UE EN 60950-1/Al2, această valoare "
+"nu trebuie stabilită niciodată la un nivel de dB care face ca ieșirea sonoră "
+"a căștilor să depășească 100 dBA, nici ieșirea electrică să depășească 150 "
+"mV.\n"
+"\n"
+"Valoarea implicită (0) corespunde valorii PA_VOLUME_NORM de la PulseAudio."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:25
 msgid ""
 "Output volume to use when com.lomiri.sound's 'allow-amplified-volume' "
 "setting is enabled."
 msgstr ""
+"Volumul de ieșire care se utilizează atunci când opțiunea „allow-amplified-"
+"volume” a com.lomiri.sound este activată."
 
 #: data/org.ayatana.indicator.sound.gschema.xml:26
 msgid ""
@@ -161,133 +203,145 @@ msgid ""
 "\n"
 "The default value (11) corresponds to PulseAudio's PA_VOLUME_UI_MAX."
 msgstr ""
+"Volumul maxim atunci când opțiunea „allow-amplified-volume” din "
+"com.lomiri.sound este activată.\n"
+"\n"
+"Pentru a fi în conformitate cu standardul UE EN 60950-1/Al2, această valoare "
+"nu trebuie stabilită niciodată la un nivel de dB care face ca ieșirea sonoră "
+"a căștilor să depășească 100 dBA, nici ieșirea electrică să depășească 150 "
+"mV.\n"
+"\n"
+"Valoarea implicită (11) corespunde valorii PA_VOLUME_UI_MAX a PulseAudio."
 
 #: src/info-notification.vala:27 src/info-notification.vala:69
 #: src/service.vala:294 src/service.vala:297 src/sound-menu.vala:70
 #: src/sound-menu.vala:264 src/warn-notification.vala:33
 msgid "Volume"
-msgstr ""
+msgstr "Volum"
 
 #: src/info-notification.vala:79
 msgid "Speakers"
-msgstr ""
+msgstr "Difuzoare"
 
 #: src/info-notification.vala:81
 msgid "Headphones"
-msgstr ""
+msgstr "Căști auriculare"
 
 #: src/info-notification.vala:83
 msgid "Bluetooth headphones"
-msgstr ""
+msgstr "Căști auriculare Bluetooth"
 
 #: src/info-notification.vala:85
 msgid "Bluetooth speaker"
-msgstr ""
+msgstr "Difuzoare Bluetooth"
 
 #: src/info-notification.vala:87
 msgid "Usb speaker"
-msgstr ""
+msgstr "Difuzoare USB"
 
 #: src/info-notification.vala:89
 msgid "Usb headphones"
-msgstr ""
+msgstr "Căști auriculare USB"
 
 #: src/info-notification.vala:91
 msgid "HDMI speaker"
-msgstr ""
+msgstr "Difuzoare HDMI"
 
 #: src/info-notification.vala:93
 msgid "HDMI headphones"
-msgstr ""
+msgstr "Căști auriculare HDMI"
 
 #: src/service.vala:266
 msgid "Missing application"
-msgstr ""
+msgstr "Lipsește aplicația"
 
 #: src/service.vala:266
 #, c-format
 msgid "Could not find the '%s' application - please make sure it is installed."
 msgstr ""
+"Nu a putut fi găsită aplicația „%s” - asigurați-vă că aceasta este instalată."
 
 #: src/service.vala:291
 msgid "Volume (muted)"
-msgstr ""
+msgstr "Volum (dezactivat)"
 
 #: src/service.vala:294
 msgid "silent"
-msgstr ""
+msgstr "fără sunet"
 
 #: src/service.vala:302
 msgid "Sound"
-msgstr ""
+msgstr "Sunet"
 
 #: src/service.vala:303
 msgid "Sound settings & media player controls"
-msgstr ""
+msgstr "Configurări de sunet și comenzi pentru reproducătorul media"
 
 #: src/sound-menu.vala:55 src/sound-menu.vala:59
 msgid "Mute"
-msgstr ""
+msgstr "Dezactivare sunet"
 
 #: src/sound-menu.vala:65
 msgid "Silent Mode"
-msgstr ""
+msgstr "Modul silențios"
 
 #: src/sound-menu.vala:79
 msgid "Sound Settings…"
-msgstr ""
+msgstr "Configurări sunet…"
 
 #: src/sound-menu.vala:136
 msgid "Microphone Volume"
-msgstr ""
+msgstr "Volum microfon"
 
 #. NOTE: Action doesn't really exist, just used to find below when removing
 #: src/sound-menu.vala:159
 msgid "High volume can damage your hearing."
-msgstr ""
+msgstr "Volumul ridicat vă poate deteriora auzul."
 
 #: src/sound-menu.vala:267
 msgid "Volume (Headphones)"
-msgstr ""
+msgstr "Volum (căști auriculare)"
 
 #: src/sound-menu.vala:270
 msgid "Volume (Bluetooth)"
-msgstr ""
+msgstr "Volum (Bluetooth)"
 
 #: src/sound-menu.vala:273
 msgid "Volume (Usb)"
-msgstr ""
+msgstr "Volum (USB)"
 
 #: src/sound-menu.vala:276
 msgid "Volume (HDMI)"
-msgstr ""
+msgstr "Volum (HDMI)"
 
 #: src/sound-menu.vala:279
 msgid "Volume (Bluetooth headphones)"
-msgstr ""
+msgstr "Volum (căști auriculare Bluetooth)"
 
 #: src/sound-menu.vala:282
 msgid "Volume (Usb headphones)"
-msgstr ""
+msgstr "Volum (căști auriculare USB)"
 
 #: src/sound-menu.vala:285
 msgid "Volume (HDMI headphones)"
-msgstr ""
+msgstr "Volum (căști auriculare HDMI)"
 
 #: src/sound-menu.vala:460
 msgid "Choose Playlist"
-msgstr ""
+msgstr "Alegeți lista de redare"
 
 #: src/warn-notification.vala:34
 msgid ""
 "Allow volume above safe level?\n"
 "High volume can damage your hearing."
 msgstr ""
+"Permiteți volumul peste nivelul de siguranță?\n"
+"Volumul ridicat vă poate vătăma auzul."
 
 #: src/warn-notification.vala:48
 msgid "OK"
-msgstr ""
+msgstr "Ok"
 
 #: src/warn-notification.vala:51
 msgid "Cancel"
-msgstr ""
+msgstr "Renunță"
