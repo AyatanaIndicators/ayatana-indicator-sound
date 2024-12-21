@@ -1,6 +1,58 @@
+2024-12-21 Mike Gabriel
+
+        * release 24.5.1 (HEAD -> main, tag: 24.5.1)
+
+2024-12-21 Marius Gripsgard
+
+        * info-notification: Check for server caps continuously (6f2625bd)
+
+2024-12-21 Mike Gabriel
+
+        * Merge branch 'tari01-pr/volume-change-unmute' (33117625)
+
+2024-12-03 Robert Tari
+
+        * src/service.vala: Allow volume change to unmute pulseaudio
+          (9ff7a900)
+
+2024-11-08 தமிழ்நேரம்
+
+        * Translated using Weblate (Tamil) (4b2675d7)
+
+2024-10-30 hugoalh
+
+        * Translated using Weblate (Chinese (Traditional Han script))
+          (e03d5549)
+
+2024-09-27 Remus-Gabriel Chelu
+
+        * Translated using Weblate (Romanian) (dd13ffcd)
+
+2024-08-22 Mike Gabriel
+
+        * Merge branch 'tari01-pr/prefixed-users' (5802ec88)
+
+2024-08-06 Robert Tari
+
+        * src/accounts-service-access.vala: Filter out prefixed users
+          (042dc016)
+
+2024-07-24 Ricky From Hong Kong
+
+        * Translated using Weblate (Chinese (Traditional, Hong Kong))
+          (50faef7e)
+
+2024-05-31 hugoalh
+
+        * Translated using Weblate (Chinese (Traditional)) (1a3a0c97)
+
+2024-05-28 hugoalh
+
+        * Translated using Weblate (Chinese (Traditional)) (37004dd8)
+
 2024-05-22 Mike Gabriel
 
-        * release 24.5.0 (HEAD -> main, tag: 24.5.0)
+        * release 24.5.0 (2db08d3b) (tag: 24.5.0)
 
 2024-05-21 Robert Tari
 

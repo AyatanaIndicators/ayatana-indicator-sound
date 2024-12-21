@@ -1,3 +1,10 @@
+Overview of changes in ayatana-indicator-sound 24.5.1
+
+  - src/accounts-service-access.vala: Filter out prefixed users.
+  - src/service.vala: Allow volume change to unmute pulseaudio.
+  - info-notification: Check for server caps continuously.
+  - Translation updates.
+
 Overview of changes in ayatana-indicator-sound 24.5.0
 
   - data/ayatana-indicator-sound.service.in: Become part of
