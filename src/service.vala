@@ -226,6 +226,12 @@ public class IndicatorSound.Service: Object {
         } else {
             double delta = volume_step_percentage * direction;
             double v = volume_control.volume.volume + delta;
+
+            if (v > 0.0 && volume_control.mute == true)
+            {
+                volume_control.set_mute (false);
+            }
+
             volume_control.set_volume_clamp (v, VolumeControl.VolumeReasons.USER_KEYPRESS);
         }
     }
@@ -438,6 +444,12 @@ public class IndicatorSound.Service: Object {
 
         volume_action.change_state.connect ( (action, val) => {
             double v = val.get_double () * _options.max_volume;
+
+            if (v > 0.0 && volume_control.mute == true)
+            {
+                volume_control.set_mute (false);
+            }
+
             volume_control.set_volume_clamp (v, VolumeControl.VolumeReasons.USER_KEYPRESS);
         });
 
