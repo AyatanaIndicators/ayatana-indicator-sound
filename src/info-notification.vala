@@ -25,12 +25,10 @@ public class IndicatorSound.InfoNotification: Notification
 {
     private string sReaderSchema = "org.gnome.desktop.a11y.applications";
     private string sReaderKey = "screen-reader-enabled";
-    private bool bHints = false;
 
     protected override Notify.Notification create_notification ()
     {
         string sUser = GLib.Environment.get_user_name ();
-        this.bHints = notify_server_supports ("x-lomiri-private-synchronous");
 
         if (sUser == "lightdm")
         {
@@ -57,7 +55,7 @@ public class IndicatorSound.InfoNotification: Notification
 
         int32 nValue = ((int32)((volume * 100.0) + 0.5)).clamp(0, 100);
 
-        if (!this.bHints)
+        if (!notify_server_supports ("x-lomiri-private-synchronous"))
         {
             volume_label += "\n";
             SettingsSchemaSource pSource = SettingsSchemaSource.get_default ();
