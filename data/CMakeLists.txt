@@ -69,8 +69,6 @@ add_schema ("org.ayatana.indicator.sound.gschema.xml")
 # Accounts Service Iface: Sound Indicator
 #########################################
 
-
-set(POLKIT_LIB_DIR "${CMAKE_INSTALL_FULL_LOCALSTATEDIR}/lib/polkit-1")
 set(POLKIT_DATA_DIR "${CMAKE_INSTALL_FULL_DATADIR}/polkit-1")
 set(DBUS_IFACE_DIR "${CMAKE_INSTALL_FULL_DATADIR}/dbus-1/interfaces")
 set(ACCOUNTS_IFACE_DIR "${CMAKE_INSTALL_FULL_DATADIR}/accountsservice/interfaces")
@@ -87,10 +85,6 @@ install(CODE "
 
 install(FILES org.ayatana.indicator.sound.AccountsService.policy
 DESTINATION "${POLKIT_DATA_DIR}/actions"
-)
-
-install(FILES 50-org.ayatana.indicator.sound.AccountsService.pkla
-DESTINATION "${POLKIT_LIB_DIR}/localauthority/10-vendor.d"
 )
 
 # 50-org.ayatana.indicator.sound.AccountsService.rules
