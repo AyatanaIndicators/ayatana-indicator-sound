@@ -1,3 +1,8 @@
+Overview of changes in ayatana-indicator-sound 24.5.2
+
+  - Drop the deprecated PolicyKit *.pkla file
+  - Translation updates.
+
 Overview of changes in ayatana-indicator-sound 24.5.1
 
   - src/accounts-service-access.vala: Filter out prefixed users.
