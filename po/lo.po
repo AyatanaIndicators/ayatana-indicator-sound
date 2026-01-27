@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-11 00:03+0200\n"
-"PO-Revision-Date: 2025-11-15 04:51+0000\n"
+"PO-Revision-Date: 2026-01-28 00:35+0000\n"
 "Last-Translator: BoneNI <bounkirdni@gmail.com>\n"
 "Language-Team: Lao <https://hosted.weblate.org/projects/ayatana-indicators/"
 "sound-applet/lo/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.15-dev\n"
+"X-Generator: Weblate 5.16-dev\n"
 
 #: data/org.ayatana.indicator.sound.AccountsService.policy:5
 msgid "Set properties of own user"
@@ -266,7 +266,7 @@ msgstr "ໂໝດງຽບ"
 
 #: src/sound-menu.vala:79
 msgid "Sound Settings…"
-msgstr "ຕັ້ງຄ່າສຽງ…"
+msgstr "ການຕັ້ງຄ່າສຽງ…"
 
 #: src/sound-menu.vala:136
 msgid "Microphone Volume"
