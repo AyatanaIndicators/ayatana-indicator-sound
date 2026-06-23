@@ -6,17 +6,18 @@ if(ENABLE_LOMIRI_FEATURES)
     include_directories(${GMENUHARNESS_INCLUDE_DIRS})
 endif()
 
-pkg_check_modules(QTDBUSTEST REQUIRED libqtdbustest-1 REQUIRED)
+set(QTDBUSTEST_SUFFIX "1")
+set(QTDBUSMOCK_SUFFIX "1")
+if(ENABLE_QT6_FOR_TESTS)
+  set(QTDBUSTEST_SUFFIX "qt6")
+  set(QTDBUSMOCK_SUFFIX "qt6-1")
+endif()
+
+pkg_check_modules(QTDBUSTEST REQUIRED libqtdbustest-${QTDBUSTEST_SUFFIX} REQUIRED)
 include_directories(${QTDBUSTEST_INCLUDE_DIRS})
 
-pkg_check_modules(QTDBUSMOCK REQUIRED libqtdbusmock-1 REQUIRED)
+pkg_check_modules(QTDBUSMOCK REQUIRED libqtdbusmock-${QTDBUSMOCK_SUFFIX} REQUIRED)
 include_directories(${QTDBUSMOCK_INCLUDE_DIRS})
-
-find_package(Qt5Test REQUIRED)
-include_directories(${Qt5Test_INCLUDE_DIRS})
-
-find_package(Qt5DBus REQUIRED)
-include_directories(${Qt5DBus_INCLUDE_DIRS})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${GMOCK_INCLUDE_DIRS})
@@ -67,9 +68,9 @@ add_dependencies(
 
 target_link_libraries(
     integration-tests
-    Qt5::Core
-    Qt5::DBus
-    Qt5::Test
+    Qt::Core
+    Qt::DBus
+    Qt::Test
 )
 
 target_link_options (integration-tests PRIVATE -no-pie)
@@ -122,16 +123,16 @@ add_dependencies(
 
 target_link_libraries(
     set-volume
-    Qt5::Core
-    Qt5::DBus
-    Qt5::Test
+    Qt::Core
+    Qt::DBus
+    Qt::Test
 )
 
 target_link_libraries(
     get-volume
-    Qt5::Core
-    Qt5::DBus
-    Qt5::Test
+    Qt::Core
+    Qt::DBus
+    Qt::Test
 )
 
 target_link_libraries(
