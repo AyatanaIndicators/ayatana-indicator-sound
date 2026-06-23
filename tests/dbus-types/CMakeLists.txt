@@ -1,9 +1,6 @@
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt5DBus REQUIRED)
-include_directories(${Qt5DBus_INCLUDE_DIRS})
-
 add_definitions(-DQT_NO_KEYWORDS=1)
 
 set(dbusinterface_streamrestore_xml "org.PulseAudio.Ext.StreamRestore1.xml")
@@ -34,16 +31,16 @@ set(dbusinterface_notifications_xml "org.freedesktop.Notifications.xml")
 set_source_files_properties(${dbusinterface_notifications_xml} PROPERTIES
   CLASSNAME NotificationsInterface)
 
-qt5_add_dbus_interface(interface_files ${dbusinterface_streamrestore_xml} stream_restore_interface)
-qt5_add_dbus_interface(interface_files ${dbusinterface_properties_xml} dbus_properties_interface)
-qt5_add_dbus_interface(interface_files ${dbusinterface_accounts_xml} dbus_accounts_interface)
+qt_add_dbus_interface(interface_files ${dbusinterface_streamrestore_xml} stream_restore_interface)
+qt_add_dbus_interface(interface_files ${dbusinterface_properties_xml} dbus_properties_interface)
+qt_add_dbus_interface(interface_files ${dbusinterface_accounts_xml} dbus_accounts_interface)
 
 if(ENABLE_LOMIRI_FEATURES)
-    qt5_add_dbus_interface(interface_files "com.lomiri.AccountsService.Sound.xml" dbus_accountssound_interface)
+    qt_add_dbus_interface(interface_files "com.lomiri.AccountsService.Sound.xml" dbus_accountssound_interface)
 endif()
 
-qt5_add_dbus_interface(interface_files ${dbusinterface_actions_xml} dbus_menus_interface)
-qt5_add_dbus_interface(interface_files ${dbusinterface_notifications_xml} dbus_notifications_interface)
+qt_add_dbus_interface(interface_files ${dbusinterface_actions_xml} dbus_menus_interface)
+qt_add_dbus_interface(interface_files ${dbusinterface_notifications_xml} dbus_notifications_interface)
 
 add_library(
   sound-indicator-dbus-interfaces
@@ -55,6 +52,6 @@ add_library(
 
 target_link_libraries(
     sound-indicator-dbus-interfaces
-    Qt5::Core
-    Qt5::DBus
+    Qt::Core
+    Qt::DBus
 )

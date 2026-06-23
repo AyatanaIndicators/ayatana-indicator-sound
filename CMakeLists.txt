@@ -13,6 +13,7 @@ include(UseVala)
 
 # Options
 option(ENABLE_TESTS "Enable all tests and checks" OFF)
+option(ENABLE_QT6_FOR_TESTS "Use Qt6 versions of libraries for tests" OFF)
 option(ENABLE_COVERAGE "Enable coverage reports (includes enabling all tests and checks)" OFF)
 option(ENABLE_WERROR "Treat all build warnings as errors" OFF)
 option(ENABLE_LOMIRI_FEATURES "Build with Lomiri-specific libraries, schemas and media" OFF)
