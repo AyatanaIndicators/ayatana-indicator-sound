@@ -2,6 +2,14 @@ find_package(GMock)
 include_directories(${GMOCK_INCLUDE_DIRS})
 include_directories("${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/libdbustest-1")
 
+set(QT_VERSION_MAJOR "5")
+if(ENABLE_QT6_FOR_TESTS)
+  set(QT_VERSION_MAJOR "6")
+endif()
+
+find_package(QT NAMES Qt${QT_VERSION_MAJOR} REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core DBus Test)
+
 ###########################
 # GSettings Schema
 ###########################

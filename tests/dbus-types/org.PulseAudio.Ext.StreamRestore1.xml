@@ -3,5 +3,6 @@
     <method name="GetEntryByName">
       <arg direction="in" type="s" name="entry" />
       <arg direction="out" type="o" name="value" />
+    </method>
   </interface>
 </node>

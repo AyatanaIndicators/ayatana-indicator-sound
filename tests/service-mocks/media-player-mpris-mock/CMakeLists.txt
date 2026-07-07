@@ -3,9 +3,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_definitions("-fPIC")
 
-find_package(Qt5DBus REQUIRED)
-include_directories(${Qt5DBus_INCLUDE_DIRS}
-                    "${CMAKE_SOURCE_DIR}/tests/service-mocks")
+include_directories("${CMAKE_SOURCE_DIR}/tests/service-mocks")
 
 add_definitions(-DQT_NO_KEYWORDS=1)
 
@@ -13,15 +11,15 @@ set(dbusinterface_mediaplayermpris_xml "org.mpris.MediaPlayer2.Player.xml")
 set_source_files_properties(${dbusinterface_mediaplayermpris_xml} PROPERTIES
   CLASSNAME MediaPlayerMprisMockInterface)
 
-qt5_add_dbus_interface(interface_files ${dbusinterface_mediaplayermpris_xml} MediaPlayerMprisMockInterface)
+qt_add_dbus_interface(interface_files ${dbusinterface_mediaplayermpris_xml} MediaPlayerMprisMockInterface)
 
-qt5_add_dbus_adaptor(adaptor_files
+qt_add_dbus_adaptor(adaptor_files
     org.mpris.MediaPlayer2.Player.xml
     MediaPlayerMprisMock.h
     ayatana::indicators::testing::MediaPlayerMprisMock
     MediaPlayerMprisMockAdaptor)
 
-qt5_add_dbus_adaptor(adaptor_files
+qt_add_dbus_adaptor(adaptor_files
     org.mpris.MediaPlayer2.xml
     MediaPlayerMprisMock.h
     ayatana::indicators::testing::MediaPlayerMprisMock
@@ -45,14 +43,14 @@ add_executable(
 
 target_link_libraries(
     media-player-mpris-mock
-    Qt5::Core
-    Qt5::DBus
+    Qt::Core
+    Qt::DBus
 )
 
 target_link_libraries(
     media-player-mpris-mock-update
-    Qt5::Core
-    Qt5::DBus
+    Qt::Core
+    Qt::DBus
 )
 
 # test players desktop files
