@@ -214,6 +214,7 @@ public class IndicatorSound.Service: Object {
     private AccountsServiceAccess _accounts_service_access;
 
     const double volume_step_percentage = 0.02;
+    const double phone_volume_step_percentage = 1.0 / 6;
 
     private void activate_scroll_action (SimpleAction action, Variant? param) {
         int direction = param.get_int32(); // positive for up, negative for down
@@ -224,7 +225,10 @@ public class IndicatorSound.Service: Object {
                 ? VolumeWarning.Key.VOLUME_UP
                 : VolumeWarning.Key.VOLUME_DOWN);
         } else {
-            double delta = volume_step_percentage * direction;
+            double step = volume_control.active_stream == VolumeControl.Stream.PHONE
+                ? phone_volume_step_percentage
+                : volume_step_percentage;
+            double delta = step * direction;
             double v = volume_control.volume.volume + delta;
 
             if (v > 0.0 && volume_control.mute == true)
