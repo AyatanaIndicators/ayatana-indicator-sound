@@ -1,57 +1,70 @@
 Source: ayatana-indicator-sound
-Section: sound
-Priority: optional
-Maintainer: Mike Gabriel <mike.gabriel@das-netzwerkteam.de>
-Build-Depends: debhelper (>= 10),
-               dh-systemd | hello,
-               cmake,
-               cmake-extras (>= 0.10),
-               dbus,
-               dbus-test-runner (>> 14.04.0+14.04.20150120.1),
-               gcovr,
-               gir1.2-accountsservice-1.0,
-               googletest | google-mock (>= 1.6.0+svn437),
-               intltool,
-               autotools-dev,
-               valac (>= 0.20),
-               lcov,
-               libaccountsservice-dev,
-               libayatana-common-dev (>= 0.9.3),
-               libdbustest1-dev (>= 15.04.0),
-               libgirepository1.0-dev,
-               libglib2.0-dev (>= 2.32.0),
-               libgtest-dev,
-               libqtdbusmock1-dev (>= 0.3),
-               libqtdbustest1-dev,
-               liblomiri-api-dev (>= 0.1.1) | hello,
-               libgmenuharness-dev | hello,
-               libpulse-dev (>= 5.0),
-               libpulse-mainloop-glib0 (>= 0.9.18),
-               libnotify-dev,
-               libgee-0.8-dev,
-               libxml2-dev,
-               pulseaudio,
-               python3-dbusmock,
-               qtbase5-dev,
-               qtbase5-dev-tools,
-               qtdeclarative5-dev,
-               qtdeclarative5-dev-tools,
-               systemd [linux-any],
-Standards-Version: 4.1.1
-Homepage: https://github.com/ArcticaProject/ayatana-indicator-sound
-Vcs-Git: git://cgit.arctica-project.org/ayatana/ayatana-indicator-sound.git
-Vcs-Browser: https://cgit.arctica-project.org/ayatana/ayatana-indicator-sound.git/
+Standards-Version: 4.7.4
+Maintainer: Ayatana Packagers <pkg-ayatana-devel@lists.alioth.debian.org>
+Uploaders:
+ Mike Gabriel <sunweaver@debian.org>,
+ Debian UBports Team <team+ubports@tracker.debian.org>,
+Section: misc
+Build-Depends:
+ debhelper-compat (= 13),
+ cmake,
+ cmake-extras,
+ dbus-daemon <!nocheck>,
+ dbus-test-runner <!nocheck>,
+ googletest <!nocheck>,
+ intltool,
+ libaccountsservice-dev,
+ libayatana-common-dev,
+ libdbustest1-dev <!nocheck>,
+ libgee-0.8-dev,
+ libglib2.0-dev,
+ libgmenuharness-dev <!nocheck>,
+ libgtest-dev <!nocheck>,
+ liblomiri-api-dev,
+ libnotify-dev,
+ libpulse-dev,
+ libpulse-mainloop-glib0,
+ libqtdbusmock1-dev <!nocheck>,
+ libqtdbustest1-dev <!nocheck>,
+ libxml2-dev,
+ lomiri-schemas,
+ lomiri-sounds,
+ pulseaudio,
+ python3-dbusmock <!nocheck>,
+ qtbase5-dev,
+ qtbase5-dev-tools,
+ qtdeclarative5-dev,
+ qtdeclarative5-dev-tools,
+ systemd-dev [linux-any],
+ valac,
+Vcs-Git: https://github.com/AyatanaIndicators/ayatana-indicator-sound.git
+Vcs-Browser: https://github.com/AyatanaIndicators/ayatana-indicator-sound
+Homepage: https://github.com/AyatanaIndicators/ayatana-indicator-sound
 
 Package: ayatana-indicator-sound
 Architecture: any
-Depends: ${shlibs:Depends},
-         ${misc:Depends},
-         pulseaudio | pipewire-pulse,
-         ayatana-indicator-common,
-         libglib2.0-bin,
-Recommends: unity-control-center | gnome-control-center | pavucontrol | mate-media,
-            accountsservice,
-Suggests: ayatana-greeter-session-broadcast,
+Depends:
+ ayatana-indicator-common,
+ libglib2.0-bin,
+ pipewire-pulse | pulseaudio,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Suggests:
+ accountsservice,
+ lomiri-greeter-session-broadcast,
+ unity-control-center | gnome-control-center | pavucontrol | mate-media | lomiri-system-settings,
+Breaks:
+ indicator-sound,
+Replaces:
+ indicator-sound,
 Description: Ayatana Indicator for managing system sound
- Ayatana Indicator Sound that provides easy control of the PulseAudio
- sound daemon.
+ This Ayatana Indicator is designed to be placed on the right side of a
+ panel and give the user easy control over the system's sound settings.
+ .
+ Ayatana Indicator Sound provides easy control of the PulseAudio sound
+ daemon, and integrates well with media players that support the Mpris
+ protocol.
+ .
+ Ayatana Indicators are only available on desktop environments that
+ provide a renderer for system indicators (such as MATE, Xfce, Lomiri,
+ etc.).
