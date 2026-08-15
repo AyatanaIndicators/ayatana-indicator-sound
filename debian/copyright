@@ -1,128 +1,18 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: ayatana-indicator-sound
-Upstream-Contact: Mike Gabriel <mike.gabriel@das-netzwerkteam.de>
 Source: https://github.com/AyatanaIndicators/ayatana-indicator-sound/
+Upstream-Name: ayatana-indicator-sound
 
-Files: config.h.in
- src/accounts-service-access.vala
- src/bus-watch-namespace.c
- src/bus-watch-namespace.h
- src/freedesktop-interfaces.vala
- src/info-notification.vala
- src/main.c
- src/media-player-list-greeter.vala
- src/media-player-list-mpris.vala
- src/media-player-list.vala
- src/media-player-mpris.vala
- src/media-player-user.vala
- src/media-player.vala
- src/mpris2-interfaces.vala
- src/notification.vala
- src/options-gsettings.vala
- src/options.vala
- src/service.vala
- src/sound-menu.vala
- src/voip-input-menu-item.h
- src/volume-control-pulse.vala
- src/volume-control.vala
- src/volume-warning-pulse.vala
- src/volume-warning.vala
- src/warn-notification.vala
- tests/accounts-service-mock.h
- tests/accounts-service-user.cc
- tests/greeter-list.cc
- tests/gtest-gvariant.h
- tests/indicator-fixture.h
- tests/indicator-test.cc
- tests/media-player-list-mock.vala
- tests/media-player-mock.vala
- tests/media-player-user.cc
- tests/name-watch-test.cc
- tests/notifications-mock.h
- tests/notifications-test.cc
- tests/options-mock.vala
- tests/pa-mock.cpp
- tests/sound-menu.cc
- tests/volume-control-mock.vala
- tests/volume-control-test.cc
- tests/volume-warning-mock.vala
- vapi/bus-watcher.vapi
-Copyright: 2010, Canonical Ltd.
-  2010-2015, Canonical Ltd.
-  2011, Canonical Ltd.
-  2013, Canonical Ltd.
-  2014, Canonical Ltd.
-  2015, Canonical Ltd.
-  2015-2016, Canonical Ltd.
-  2016, Canonical Ltd.
-License: GPL-3
-
-Files: tests/dbus-types/dbus-action-result.cpp
- tests/dbus-types/dbus-action-result.h
- tests/dbus-types/dbus-types.h
- tests/dbus-types/pulseaudio-volume.cpp
- tests/dbus-types/pulseaudio-volume.h
- tests/integration/indicator-sound-test-base.cpp
- tests/integration/indicator-sound-test-base.h
- tests/integration/test-indicator.cpp
- tests/integration/utils/dbus-pulse-volume.cpp
- tests/integration/utils/dbus-pulse-volume.h
- tests/integration/utils/get-volume.cpp
- tests/integration/utils/set-volume.cpp
- tests/service-mocks/DBusPropertiesNotifier.cpp
- tests/service-mocks/DBusPropertiesNotifier.h
- tests/service-mocks/accounts-mock/AccountsDefs.h
- tests/service-mocks/accounts-mock/AccountsMock.cpp
- tests/service-mocks/accounts-mock/AccountsMock.h
- tests/service-mocks/accounts-mock/AccountsServiceSoundMock.cpp
- tests/service-mocks/accounts-mock/AccountsServiceSoundMock.h
- tests/service-mocks/accounts-mock/main.cpp
- tests/service-mocks/media-player-mpris-mock/MediaPlayerMprisDefs.h
- tests/service-mocks/media-player-mpris-mock/MediaPlayerMprisMock.cpp
- tests/service-mocks/media-player-mpris-mock/MediaPlayerMprisMock.h
- tests/service-mocks/media-player-mpris-mock/main.cpp
- tests/service-mocks/media-player-mpris-mock/player-update.cpp
-Copyright: 2015, Canonical Ltd.
-License: GPL-3
-
-Files: tests/integration/main.cpp
-Copyright: 2014, Canonical Ltd.
-License: LGPL-3
-
-Files: src/accounts-service-privacy-settings.vala
- src/accounts-service-sound-settings.vala
- src/accounts-service-system-sound-settings.vala
- src/accounts-service-user.vala
- src/greeter-broadcast.vala
-Copyright: 2014, Canonical Ltd.
-License: GPL-3
-
-Files: cmake/FindGObjectIntrospection.cmake
- cmake/UseGObjectIntrospection.cmake
-Copyright: 2010, Pino Toscano, <pino@kde.org>
-License: BSD-3-clause
-
-Files:cmake/FindVala.cmake
-      cmake/UseVala.cmake
-Copyright: 2011, Přemysl Janouch
-License: BSD-2-clause
-
-Files: update-po.sh
-       update-pot.sh
-Copyright: 2017, Mike Gabriel <mike.gabriel@das-netzwerkteam.de>
-License: GPL-3
-
-Files: po/ayatana-indicator-sound.pot
-       po/*.po
-Copyright: 2017, THE PACKAGE'S COPYRIGHT HOLDER
-License: GPL-3
-
-Files: AUTHORS
- CMakeLists.txt
+Files: .build.yml
+ .travis.yml
+ AUTHORS
  ChangeLog
+ CMakeLists.txt
+ INSTALL.md
  NEWS
+ NEWS.Canonical
  README
- data/50-org.ayatana.indicator.sound.AccountsService.pkla
+ README.md
+ data/50-org.ayatana.indicator.sound.AccountsService.rules
  data/CMakeLists.txt
  data/ayatana-indicator-sound.desktop.in
  data/ayatana-indicator-sound.service.in
@@ -130,8 +20,6 @@ Files: AUTHORS
  data/org.ayatana.indicator.sound.AccountsService.policy
  data/org.ayatana.indicator.sound.AccountsService.xml
  data/org.ayatana.indicator.sound.gschema.xml
- include/CMakeLists.txt
- include/lomiri/CMakeLists.txt
  po/CMakeLists.txt
  po/LINGUAS
  po/POTFILES.in
@@ -146,8 +34,6 @@ Files: AUTHORS
  tests/dbus-types/org.freedesktop.Notifications.xml
  tests/dbus-types/org.gtk.Actions.xml
  tests/integration/CMakeLists.txt
- tests/integration/test-sound.wav
- tests/integration/Copy*of*test-sound.wav
  tests/integration/touch-stream-restore.table
  tests/manual
  tests/service-mocks/CMakeLists.txt
@@ -161,48 +47,146 @@ Files: AUTHORS
  tests/service-mocks/media-player-mpris-mock/org.mpris.MediaPlayer2.Player.xml
  tests/service-mocks/media-player-mpris-mock/org.mpris.MediaPlayer2.xml
  vapi/config.vapi
-Copyright: 2010-2016, Canonical Ltd.
+Copyright: 2011-2015, Canonical Ltd.
+  2021-2022, Robert Tari
 License: GPL-3
 Comment:
- Assuming copyright holdership and license from the other code files.
+ Assuming same license and copyright holdership as found in the
+ project files containing a license header.
+
+Files: config.h.in
+ src/accounts-service-privacy-settings.vala
+ src/bus-watch-namespace.c
+ src/bus-watch-namespace.h
+ src/main.c
+ src/media-player-list.vala
+ src/media-player.vala
+ src/notification.vala
+ src/options.vala
+ src/voip-input-menu-item.h
+ src/volume-control.vala
+ tests/dbus-types/dbus-action-result.cpp
+ tests/dbus-types/dbus-types.h
+ tests/dbus-types/pulseaudio-volume.cpp
+ tests/dbus-types/pulseaudio-volume.h
+ tests/greeter-list.cc
+ tests/gtest-gvariant.h
+ tests/indicator-test.cc
+ tests/integration/indicator-sound-test-base.h
+ tests/integration/utils/dbus-pulse-volume.h
+ tests/integration/utils/get-volume.cpp
+ tests/integration/utils/set-volume.cpp
+ tests/media-player-list-mock.vala
+ tests/options-mock.vala
+ tests/service-mocks/DBusPropertiesNotifier.cpp
+ tests/service-mocks/DBusPropertiesNotifier.h
+ tests/service-mocks/accounts-mock/AccountsMock.cpp
+ tests/service-mocks/accounts-mock/AccountsMock.h
+ tests/service-mocks/accounts-mock/AccountsServiceSoundMock.cpp
+ tests/service-mocks/accounts-mock/AccountsServiceSoundMock.h
+ tests/service-mocks/accounts-mock/main.cpp
+ tests/service-mocks/media-player-mpris-mock/MediaPlayerMprisMock.cpp
+ tests/service-mocks/media-player-mpris-mock/main.cpp
+ tests/service-mocks/media-player-mpris-mock/player-update.cpp
+ tests/sound-menu.cc
+ tests/volume-control-mock.vala
+ tests/volume-warning-mock.vala
+ vapi/bus-watcher.vapi
+Copyright: 2011, Canonical Ltd.
+  2013, Canonical Ltd.
+  2014, Canonical Ltd.
+  2015, Canonical Ltd.
+License: GPL-3
+
+Files: src/accounts-service-access.vala
+ src/accounts-service-sound-settings.vala
+ src/accounts-service-system-sound-settings.vala
+ src/accounts-service-user.vala
+ src/freedesktop-interfaces.vala
+ src/greeter-broadcast.vala
+ src/info-notification.vala
+ src/media-player-list-greeter.vala
+ src/media-player-list-mpris.vala
+ src/media-player-mpris.vala
+ src/media-player-user.vala
+ src/mpris2-interfaces.vala
+ src/options-gsettings.vala
+ src/service.vala
+ src/sound-menu.vala
+ src/volume-control-pulse.vala
+ src/volume-warning-pulse.vala
+ src/volume-warning.vala
+ src/warn-notification.vala
+ tests/accounts-service-mock.h
+ tests/accounts-service-user.cc
+ tests/dbus-types/dbus-action-result.h
+ tests/indicator-fixture.h
+ tests/integration/indicator-sound-test-base.cpp
+ tests/integration/test-indicator.cpp
+ tests/integration/utils/dbus-pulse-volume.cpp
+ tests/media-player-mock.vala
+ tests/media-player-user.cc
+ tests/name-watch-test.cc
+ tests/notifications-mock.h
+ tests/notifications-test.cc
+ tests/pa-mock.cpp
+ tests/service-mocks/accounts-mock/AccountsDefs.h
+ tests/service-mocks/media-player-mpris-mock/MediaPlayerMprisDefs.h
+ tests/service-mocks/media-player-mpris-mock/MediaPlayerMprisMock.h
+ tests/volume-control-test.cc
+Copyright: 2010, Canonical Ltd.
+  2010-2015, Canonical Ltd.
+  2013, Canonical Ltd.
+  2014, Canonical Ltd.
+  2015, Canonical Ltd.
+  2015-2016, Canonical Ltd.
+  2016, Canonical Ltd.
+  2021, Robert Tari
+  2021-2022, Robert Tari
+  2021-2023, Robert Tari
+  2021-2024, Robert Tari
+  2022, Robert Tari
+  2023-2024, Robert Tari <robert@tari.in>
+License: GPL-3
+
+Files: po/ayatana-indicator-sound.pot
+ po/*.po
+Copyright: 2017, THE PACKAGE'S COPYRIGHT HOLDER
+  YEAR, Canonical Ltd.
+  YEAR, THE PACKAGE'S COPYRIGHT HOLDER
+License: GPL-3
+
+Files: cmake/FindVala.cmake
+ cmake/UseVala.cmake
+Copyright: 2011, Přemysl Janouch
+License: BSD-2-clause
+
+Files: update-po.sh
+ update-pot.sh
+Copyright: 2017, Mike Gabriel <mike.gabriel@das-netzwerkteam.de>
+License: GPL-3
+
+Files: cmake/FindGObjectIntrospection.cmake
+ cmake/UseGObjectIntrospection.cmake
+Copyright: 2010, Pino Toscano <pino@kde.org>
+License: BSD-3-clause
+
+Files: tests/integration/main.cpp
+Copyright: 2014, Canonical Ltd.
+License: LGPL-3
+
+Files: tests/integration/test-sound.wav
+Copyright: 2011-2015, Canonical Ltd.
+License: GPL-3
+Comment:
+ Assuming same license and copyright holdership as found in the project
+ files containing a license header. (This file comes from Canonical Ltd.,
+ so omitting Robert Tari as copyright holder).
 
 Files: debian/*
 Copyright: 2010-2013, Canonical Ltd.
-           2020, Mike Gabriel <mike.gabriel@das-netzwerkteam.de>
+           2020-2026, Mike Gabriel <mike.gabriel@das-netzwerkteam.de>
 License: GPL-3 or LGPL-3 or BSD-2-clause or BSD-3-clause
-
-License: GPL-3
- This package is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; version 3 of the License.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>
- .
- On Debian systems, the complete text of the GNU General
- Public License version 3 can be found in "/usr/share/common-licenses/GPL-3".
-
-License: LGPL-3
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Library General Public
- License as published by the Free Software Foundation; version 3
- of the License.
- .
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Library General Public License for more details.
- .
- You should have received a copy of the GNU Library General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- .
- See /usr/share/common-licenses/LGPL-3 for the full license text.
 
 License: BSD-2-clause
  Redistribution and use in source and binary forms, with or without
@@ -249,3 +233,32 @@ License: BSD-3-clause
  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+License: GPL-3
+ This package is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; version 3 of the License.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <http://www.gnu.org/licenses/>
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License version 3 can be found in "/usr/share/common-licenses/GPL-3".
+
+License: LGPL-3
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Library General Public
+ License as published by the Free Software Foundation; version 3
+ of the License.
+ .
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Library General Public License for more details.
+ .
+ See /usr/share/common-licenses/LGPL-3 for the full license text.
